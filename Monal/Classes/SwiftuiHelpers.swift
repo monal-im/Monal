@@ -680,8 +680,8 @@ class SwiftuiInterface : NSObject {
                 host.rootView = AnyView(ChatPlaceholder())
             case "GeneralSettings" :
                 host.rootView = AnyView(UIKitWorkaround(GeneralSettings()))
-            case "ActiveChatsPrivacySettings":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: PrivacySettings()))
+            case "ActiveChatsGeneralSettings":
+                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: GeneralSettings()))
             case "ActiveChatsNotificationSettings":
                 host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings()))
             case "OnboardingView":

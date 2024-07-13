@@ -6,7 +6,7 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
+import FrameUp
 
 class OnboardingState: ObservableObject {
     @defaultsDB("hasCompletedOnboarding")
@@ -23,17 +23,20 @@ struct OnboardingCard: Identifiable {
 }
 
 struct OnboardingView: View {
-    @ObservedObject var onboardingState = OnboardingState()
     var delegate: SheetDismisserProtocol
     let cards: [OnboardingCard]
-    
+    @ObservedObject var onboardingState = OnboardingState()
     @State private var currentIndex = 0
     
     var body: some View {
-        VStack {
+        ZStack {
+            Color.background
+                .edgesIgnoringSafeArea(.all)
             TabView(selection: $currentIndex) {
                 ForEach(cards.indices, id: \.self) { index in
+                    //SmartScrollView(.vertical, showsIndicators: true, optionalScrolling: true, shrinkToFit: false) {
                     ScrollView {
+                    Group {
                         VStack(alignment: .leading, spacing: 16) {
                             
                             HStack {
@@ -47,15 +50,13 @@ struct OnboardingView: View {
                                 }
                             }
                             
-                            if let imageName = cards[index].imageName {
-                                HStack {
+                            HStack {
+                                if let imageName = cards[index].imageName {
                                     Image(systemName: imageName)
                                         .font(.custom("MarkerFelt-Wide", size: 80))
                                         .foregroundColor(.blue)
+                                    
                                 }
-                            }
-                            
-                            VStack {
                                 if let title = cards[index].title {
                                     title
                                         .font(.title)
@@ -63,14 +64,14 @@ struct OnboardingView: View {
                                         .foregroundColor(.primary)
                                         .padding(.bottom, 4)
                                 }
-                                
-                                if let description = cards[index].description {
-                                    description
-                                        .font(.custom("HelveticaNeue-Medium", size: 20))
-                                        .foregroundColor(.primary)
-                                        .multilineTextAlignment(.leading)
-                                    Divider()
-                                }
+                            }
+                            
+                            if let description = cards[index].description {
+                                description
+                                    .font(.custom("HelveticaNeue-Medium", size: 20))
+                                    .foregroundColor(.primary)
+                                    .multilineTextAlignment(.leading)
+                                Divider()
                             }
                             
                             if let articleText = cards[index].articleText {
@@ -82,8 +83,9 @@ struct OnboardingView: View {
                             
                             if let view = cards[index].customView {
                                 view
-                                    .frame(minWidth: 350, maxWidth: .infinity, minHeight: 600, maxHeight: .infinity)
                             }
+                            
+                            Spacer()
                             
                             HStack {
                                 Spacer()
@@ -98,16 +100,10 @@ struct OnboardingView: View {
                                         }
                                         .foregroundColor(.blue)
                                     }
-                                }
-                                Spacer()
-                            }
-                            
-                            HStack {
-                                Spacer()
-                                if index == cards.count - 1 {
+                                } else {
                                     Button(action: {
-                                        delegate.dismiss()
                                         onboardingState.hasCompletedOnboarding = true
+                                        delegate.dismiss()
                                     }) {
                                         Text("Close")
                                             .fontWeight(.bold)
@@ -117,24 +113,24 @@ struct OnboardingView: View {
                                             .cornerRadius(10)
                                     }
                                 }
-                                Spacer()
                             }
+                            
+                            Spacer().frame(height: 16)
                         }
                         .padding()
+                        .frame(maxHeight: .infinity)
+                        .background(Color.green)
+                        //.edgesIgnoringSafeArea([.bottom, .leading, .trailing])
                     }
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(10)
-                    .shadow(color: Color.gray.opacity(0.3), radius: 10)
-                    .padding(.horizontal, 3)
-                    .padding(.vertical, 5)
+                    .background(Color.red)
+                    .edgesIgnoringSafeArea([.bottom, .leading, .trailing])
+                    }
+                    //.background(Color(UIColor.systemBackground))
+                    .background(Color.yellow)
+                    .edgesIgnoringSafeArea([.bottom, .leading, .trailing])
                 }
             }
-            .tabViewStyle(PageTabViewStyle())
-            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-            .frame(width: 350, height: 770)
-            .padding()
         }
-        .background(Color.clear)
     }
 }
 
@@ -167,13 +163,54 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
         ),
         OnboardingCard(
             title: Text("Settings"),
-            description: Text("These are important privacy settings you may want to review !"),
+            description: Text("These are important privacy settings you may want to review!"),
             imageName: nil,
             articleText: nil,
-            customView: AnyView(PrivacySettingsOnboarding(onboardingActive: true))
-        )
+            customView: AnyView(PrivacySettingsSubview(onboardingPart:0))
+        ),
+        OnboardingCard(
+            title: Text("Settings"),
+            description: Text("These are important privacy settings you may want to review!"),
+            imageName: nil,
+            articleText: nil,
+            customView: AnyView(PrivacySettingsSubview(onboardingPart:1))
+        ),
+        OnboardingCard(
+            title: Text("Even more to customize!"),
+            description: Text("You can customize even more, just use the button below to open the settings."),
+            imageName: "hand.wave",
+            articleText: nil,
+            customView: AnyView(TakeMeToSettingsView(delegate:delegate))
+        ),
     ]
     OnboardingView(delegate: delegate, cards: cards)
+}
+
+struct TakeMeToSettingsView: View {
+    @ObservedObject var onboardingState = OnboardingState()
+    var delegate: SheetDismisserProtocol
+    
+    var body: some View {
+        HStack {
+            Spacer()
+            Button(action: {
+                let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+                if let activeChats = appDelegate.activeChats {
+                    activeChats.enqueueGeneralSettings = true
+                }
+                onboardingState.hasCompletedOnboarding = true
+                delegate.dismiss()
+            }) {
+                Text("Take me to settings")
+                    .fontWeight(.bold)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            Spacer()
+        }
+    }
 }
 
 struct OnboardingView_Previews: PreviewProvider {

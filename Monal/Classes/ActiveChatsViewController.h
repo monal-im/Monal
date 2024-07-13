@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class chatViewController;
 @class MLCall;
 
-@interface ActiveChatsViewController : UITableViewController  <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
+@interface ActiveChatsViewController : UITableViewController  <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate, UIAdaptivePresentationControllerDelegate>
 
 @property (nonatomic, strong) UITableView* chatListTable;
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* settingsButton;
@@ -25,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* composeButton;
 @property (nonatomic, strong) chatViewController* currentChatViewController;
 @property (nonatomic, strong) UIActivityIndicatorView* spinner;
+@property (nonatomic) BOOL enqueueGeneralSettings;
 
 -(void) showCallContactNotFoundAlert:(NSString*) jid;
 -(void) callContact:(MLContact*) contact withUIKitSender:(_Nullable id) sender;
@@ -38,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) showContacts;
 -(void) deleteConversation;
 -(void) showSettings;
--(void) showPrivacySettings;
+-(void) showGeneralSettings;
 -(void) showOnboarding;
 -(void) showNotificationSettings;
 -(void) showDetails;

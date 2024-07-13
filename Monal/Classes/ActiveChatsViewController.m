@@ -380,6 +380,8 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     DDLogDebug(@"active chats view will appear");
     [super viewWillAppear:animated];
+    
+    [self openConversationPlaceholder:nil];
 }
 
 -(void) viewWillDisappear:(BOOL) animated

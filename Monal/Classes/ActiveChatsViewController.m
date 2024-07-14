@@ -39,6 +39,7 @@
     int _startedOrientation;
     double _portraitTop;
     double _landscapeTop;
+    BOOL _loginAutodisplayedAlready;
 }
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
@@ -67,6 +68,7 @@ static NSMutableSet* _pushWarningDisplayed;
 -(id) initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    _loginAutodisplayedAlready = NO;
     return self;
 }
 
@@ -398,17 +400,8 @@ static NSMutableSet* _pushWarningDisplayed;
     [self refresh];
 }
 
--(void) presentationControllerDidDismiss:(UIPresentationController*) presentationController
+-(void) sheetDismissed
 {
-    DDLogError(@"DID DISMISS!");
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self refresh];
-    });
-}
-
--(void) presentationControllerWillDismiss:(UIPresentationController*) presentationController
-{
-    DDLogError(@"WILL DISMISS!");
     dispatch_async(dispatch_get_main_queue(), ^{
         [self refresh];
     });
@@ -416,7 +409,6 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) refresh
 {
-    DDLogError(@"REFRESH!");
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
         [self refreshDisplay];      // load contacts
     [self segueToIntroScreensIfNeeded];
@@ -436,7 +428,9 @@ static NSMutableSet* _pushWarningDisplayed;
                     [self presentChatWithContact:newContact];
                 });
             }];
-            addContactMenuView.presentationController.delegate = self;
+            addContactMenuView.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
             [self presentViewController:addContactMenuView animated:NO completion:^{}];
         }];
     });
@@ -449,7 +443,9 @@ static NSMutableSet* _pushWarningDisplayed;
     if(needingMigration.count > 0)
     {
         UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
-        passwordMigration.presentationController.delegate = self;
+        passwordMigration.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:passwordMigration animated:YES completion:^{}];
         return;
     }
@@ -468,10 +464,13 @@ static NSMutableSet* _pushWarningDisplayed;
     }
     
     // display quick start if the user never seen it or if there are 0 enabled accounts
-    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !_loginAutodisplayedAlready)
     {
         UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
-        loginViewController.presentationController.delegate = self;
+        loginViewController.ml_disposeCallback = ^{
+            self->_loginAutodisplayedAlready = YES;
+            [self sheetDismissed];
+        };
         [self presentViewController:loginViewController animated:YES completion:^{}];
         return;
     }
@@ -549,7 +548,9 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
         UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsNotificationSettings"];
-        view.presentationController.delegate = self;
+        view.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:view animated:YES completion:^{}];
     }];
 }
@@ -558,7 +559,9 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
         UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsGeneralSettings"];
-        view.presentationController.delegate = self;
+        view.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:view animated:YES completion:^{}];
     }];
 }
@@ -568,8 +571,6 @@ static NSMutableSet* _pushWarningDisplayed;
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
         UIViewController* callViewController = [[SwiftuiInterface new] makeViewWithName:@"OnboardingView"];
         callViewController.modalPresentationStyle = UIModalPresentationFullScreen;
-        //viewDidAppear (which in turn will call segueToIntroScreensIfNeeded) already called because of fullscreen presentation style above
-        //view.presentationController.delegate = self;
         [self presentViewController:callViewController animated:NO completion:^{}];
     }];
 }
@@ -634,7 +635,9 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
         UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts andCallType:callType];
-        accountPickerController.presentationController.delegate = self;
+        accountPickerController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:accountPickerController animated:YES completion:^{}];
     }];
 }
@@ -644,8 +647,6 @@ static NSMutableSet* _pushWarningDisplayed;
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
         UIViewController* callViewController = [[SwiftuiInterface new] makeCallScreenForCall:call];
         callViewController.modalPresentationStyle = UIModalPresentationFullScreen;
-        //viewDidAppear (which in turn will call segueToIntroScreensIfNeeded) already called because of fullscreen presentation style above
-        //callViewController.presentationController.delegate = self;
         [self presentViewController:callViewController animated:NO completion:^{}];
     }];
 }
@@ -751,7 +752,9 @@ static NSMutableSet* _pushWarningDisplayed;
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
-        detailsViewController.presentationController.delegate = self;
+        detailsViewController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
@@ -896,7 +899,9 @@ static NSMutableSet* _pushWarningDisplayed;
         selected = self.unpinnedContacts[indexPath.row];
     }
     UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:selected];
-    detailsViewController.presentationController.delegate = self;
+    detailsViewController.ml_disposeCallback = ^{
+        [self sheetDismissed];
+    };
     [self presentViewController:detailsViewController animated:YES completion:^{}];
 }
 
@@ -1073,7 +1078,9 @@ static NSMutableSet* _pushWarningDisplayed;
                 DDLogWarn(@"Dummy reg completion called for accountNo: %@", accountNo);
             })),
         }];
-        registerViewController.presentationController.delegate = self;
+        registerViewController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:registerViewController animated:YES completion:^{}];
     }];
 }
@@ -1083,7 +1090,9 @@ static NSMutableSet* _pushWarningDisplayed;
     if([MLNotificationManager sharedInstance].currentContact != nil)
     {
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:[MLNotificationManager sharedInstance].currentContact];
-        detailsViewController.presentationController.delegate = self;
+        detailsViewController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
 }

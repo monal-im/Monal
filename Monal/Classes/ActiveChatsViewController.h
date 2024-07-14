@@ -14,10 +14,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class UIHostingControllerWorkaround;
 @class chatViewController;
 @class MLCall;
 
-@interface ActiveChatsViewController : UITableViewController  <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate, UIAdaptivePresentationControllerDelegate>
+@interface ActiveChatsViewController : UITableViewController  <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 
 @property (nonatomic, strong) UITableView* chatListTable;
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* settingsButton;

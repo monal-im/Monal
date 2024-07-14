@@ -574,6 +574,41 @@ extension View {
     }
 }
 
+public extension UIViewController {
+    private struct AssociatedKeys {
+        static var DisposeCallbackKey = "ml_disposeCallbackKey"
+    }
+    
+    private class DisposeCallback : NSObject {
+        let callback: monal_void_block_t
+        
+        init(withCallback callback: @escaping monal_void_block_t) {
+            self.callback = callback
+        }
+        
+        deinit {
+            self.callback()
+        }
+    }
+    
+    @objc
+    var ml_disposeCallback: monal_void_block_t {
+        get {
+            return withUnsafePointer(to: &AssociatedKeys.DisposeCallbackKey) { pointer in
+                if let callback = (objc_getAssociatedObject(self, pointer) as? DisposeCallback)?.callback {
+                    return callback
+                }
+                unreachable("You can't get what you did not set!")
+            }
+        }
+        set {
+            withUnsafePointer(to: &AssociatedKeys.DisposeCallbackKey) { pointer in
+                objc_setAssociatedObject(self, pointer, DisposeCallback(withCallback: newValue), .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            }
+        }
+    }
+}
+
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {
@@ -663,33 +698,34 @@ class SwiftuiInterface : NSObject {
     @objc
     func makeView(name: String) -> UIViewController {
         let delegate = SheetDismisserProtocol()
-        let host = UIHostingController(rootView:AnyView(EmptyView()))
-        delegate.host = host
+        var host: UIHostingController<AnyView>? = nil
+        //let host = UIHostingController(rootView:AnyView(EmptyView()))
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
             case "DebugView":
-                host.rootView = AnyView(UIKitWorkaround(DebugView()))
+                host = UIHostingController(rootView:AnyView(UIKitWorkaround(DebugView())))
             case "WelcomeLogIn":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate)))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate))))
             case "LogIn":
-                host.rootView = AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate)))
+                host = UIHostingController(rootView:AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate))))
             case "ContactRequests":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactRequestsMenu()))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactRequestsMenu())))
             case "CreateGroup":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate)))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate))))
             case "ChatPlaceholder":
-                host.rootView = AnyView(ChatPlaceholder())
+                host = UIHostingController(rootView:AnyView(ChatPlaceholder()))
             case "GeneralSettings" :
-                host.rootView = AnyView(UIKitWorkaround(GeneralSettings()))
+                host = UIHostingController(rootView:AnyView(UIKitWorkaround(GeneralSettings())))
             case "ActiveChatsGeneralSettings":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: GeneralSettings()))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: GeneralSettings())))
             case "ActiveChatsNotificationSettings":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings()))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings())))
             case "OnboardingView":
-                host.rootView = AnyView(createOnboardingView(delegate:delegate))
+                host = UIHostingController(rootView:AnyView(createOnboardingView(delegate:delegate)))
             
             default:
                 unreachable()
         }
-        return host
+        delegate.host = host!
+        return host!
     }
 }

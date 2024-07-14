@@ -497,7 +497,6 @@ static NSMutableSet* _pushWarningDisplayed;
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                         [_mamWarningDisplayed addObject:accountNo];
                     }]];
-                    messageAlert.presentationController.delegate = self;
                     [self presentViewController:messageAlert animated:YES completion:nil];
                 }
                 else
@@ -512,7 +511,6 @@ static NSMutableSet* _pushWarningDisplayed;
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                         [_smacksWarningDisplayed addObject:accountNo];
                     }]];
-                    messageAlert.presentationController.delegate = self;
                     [self presentViewController:messageAlert animated:YES completion:nil];
                 }
                 else
@@ -527,7 +525,6 @@ static NSMutableSet* _pushWarningDisplayed;
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                         [_pushWarningDisplayed addObject:accountNo];
                     }]];
-                    messageAlert.presentationController.delegate = self;
                     [self presentViewController:messageAlert animated:YES completion:nil];
                 }
                 else
@@ -586,7 +583,6 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Contact not found", @"") message:[NSString stringWithFormat:NSLocalizedString(@"You tried to call contact '%@' but this contact could not be found in your contact list.", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {}]];
-    messageAlert.presentationController.delegate = self;
     [self presentViewController:messageAlert animated:YES completion:nil];
 }
 
@@ -630,7 +626,6 @@ static NSMutableSet* _pushWarningDisplayed;
         }
         else
             popPresenter.sourceView = self.view;
-        alert.presentationController.delegate = self;
         [self presentViewController:alert animated:YES completion:nil];
     }
 }
@@ -724,7 +719,6 @@ static NSMutableSet* _pushWarningDisplayed;
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
-        alert.presentationController.delegate = self;
         [self presentViewController:alert animated:YES completion:nil];
         return YES;
     }

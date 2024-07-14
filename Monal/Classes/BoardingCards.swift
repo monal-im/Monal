@@ -47,6 +47,7 @@ struct OnboardingView: View {
                                         Label("Back", systemImage: "chevron.left")
                                             .labelStyle(.iconOnly)
                                             .foregroundColor(.blue)
+                                            .padding()
                                     }
                                 }
                                 
@@ -55,6 +56,7 @@ struct OnboardingView: View {
                                         Image(systemName: imageName)
                                             .font(.custom("MarkerFelt-Wide", size: 80))
                                             .foregroundColor(.blue)
+                                            .accessibilityHidden(true)
                                         
                                     }
                                     
@@ -64,6 +66,8 @@ struct OnboardingView: View {
                                         .foregroundColor(.primary)
                                         .padding(.bottom, 4)
                                 }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityAddTraits(.isHeader)
                                 
                                 if let description = card.description {
                                     description
@@ -118,6 +122,7 @@ struct OnboardingView: View {
                             .frame(minHeight: proxy.size.height, maxHeight: .infinity)
                         }
                     }
+                    .accessibilityAddTraits(.isModal)
                 }
             }
         }

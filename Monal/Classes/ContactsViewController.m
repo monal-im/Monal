@@ -68,7 +68,8 @@
         hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
         withTapHandler:requestsTapRecoginzer];
     [self.navigationItem.rightBarButtonItems[1] setIsAccessibilityElement:YES];
-    [self.navigationItem.rightBarButtonItems[1] setAccessibilityLabel:NSLocalizedString(@"Open list of pending contact requests", @"")];
+    [self.navigationItem.rightBarButtonItems[1] setAccessibilityLabel:NSLocalizedString(@"Pending contact requests", @"")];
+    [self.navigationItem.rightBarButtonItems[1] setAccessibilityTraits:UIAccessibilityTraitButton];
 
 }
 
@@ -106,11 +107,13 @@
 
     UIBarButtonItem* addContact = [UIBarButtonItem new];
     addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
+    addContact.accessibilityLabel = @"Add contact";
     [addContact setAction:@selector(openAddContacts:)];
     [addContact setTarget:self];
 
     UIBarButtonItem* createGroup = [[UIBarButtonItem alloc] init];
     createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
+    createGroup.accessibilityLabel = @"Create contact group";
     [createGroup setAction:@selector(openCreateGroup:)];
     [createGroup setTarget:self];
     self.navigationItem.rightBarButtonItems = @[addContact, [[UIBarButtonItem alloc] init], createGroup];

@@ -569,9 +569,14 @@ static NSMutableSet* _pushWarningDisplayed;
 -(void) showOnboarding
 {
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
-        UIViewController* callViewController = [[SwiftuiInterface new] makeViewWithName:@"OnboardingView"];
-        callViewController.modalPresentationStyle = UIModalPresentationFullScreen;
-        [self presentViewController:callViewController animated:NO completion:^{}];
+        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"OnboardingView"];
+        if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
+            view.modalPresentationStyle = UIModalPresentationFullScreen;
+        else
+            view.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+        [self presentViewController:view animated:NO completion:^{}];
     }];
 }
 

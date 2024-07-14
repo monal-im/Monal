@@ -126,6 +126,11 @@ struct OnboardingView: View {
                 }
             }
         }
+        .onAppear {
+            //force portrait mode and lock ui there
+            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+            (UIApplication.shared.delegate as! MonalAppDelegate).orientationLock = .portrait
+        }
     }
 }
 
@@ -134,10 +139,10 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
     let cards = [
         OnboardingCard(
             title: Text("Welcome to Monal !"),
-            description: Text("Privacy like its 1999 🔒"),
+            description: Text("Become part of a worldwide decentralized chat network!"),
             imageName: "hand.wave",
             articleText: Text("""
-            Modern iOS and MacOS XMPP chat client.
+            Modern iOS and macOS XMPP chat client.\n\nXMPP is a federated network: Just like email, you can register your account on many servers and still talk to anyone, even if they signed up on a different server.
             """),
             customView: nil
         ),

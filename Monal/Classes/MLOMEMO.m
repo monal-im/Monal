@@ -101,6 +101,13 @@ static const int KEY_SIZE = 16;
     return [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:addressName]];
 }
 
+-(void) notifyKnownDevicesUpdated:(NSString*) jid
+{
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalOmemoStateUpdated object:self.account userInfo:@{
+        @"jid": jid
+    }];
+}
+
 -(BOOL) createLocalIdentiyKeyPairIfNeeded
 {
     if(self.monalSignalStore.deviceid == 0)
@@ -120,6 +127,7 @@ static const int KEY_SIZE = 16;
         //do everything done in MLSignalStore init not already mimicked above
         [self.monalSignalStore cleanupKeys];
         [self.monalSignalStore reloadCachedPrekeys];
+        [self notifyKnownDevicesUpdated:address.name];
         //we generated a new identity
         DDLogWarn(@"Created new omemo identity with deviceid: %@", @(self.monalSignalStore.deviceid));
         //don't alert on new deviceids we could never see before because this is our first connection (otherwise, we'd already have our own deviceid)
@@ -470,6 +478,8 @@ $$
     //handle our own devicelist
     if([self.account.connectionProperties.identity.jid isEqualToString:source])
         [self handleOwnDevicelistUpdate:receivedDevices];
+    else
+        [self notifyKnownDevicesUpdated:source];
 }
 
 -(void) handleOwnDevicelistUpdate:(NSSet<NSNumber*>*) receivedDevices
@@ -519,6 +529,8 @@ $$
         //publish own devicelist directly after publishing our bundle
         [self publishOwnDeviceList];
     }
+
+    [self notifyKnownDevicesUpdated:self.account.connectionProperties.identity.jid];
 }
 
 -(void) publishOwnDeviceList
@@ -758,6 +770,8 @@ $$
 
         //found and imported a working key --> try to (re)build a new session proactively (or repair a broken one)
         [self sendKeyTransportElement:jid forRids:[NSSet setWithArray:@[rid]]];      //this will remove the queuedSessionRepairs entry, if any
+
+        [self notifyKnownDevicesUpdated:jid];
 
         return;
     } while(++processedKeys < preKeyIds.count);
@@ -1307,6 +1321,7 @@ $$
     else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)
         [danglingJids addObject:buddyJid];
 
+    [self notifyKnownDevicesUpdated:buddyJid];
     DDLogVerbose(@"Unsubscribing from dangling jids: %@", danglingJids);
     for(NSString* jid in danglingJids)
         [self.account.pubsub unsubscribeFromNode:@"eu.siacs.conversations.axolotl.devicelist" forJid:jid withHandler:$newHandler(self, handleDevicelistUnsubscribe)];
@@ -1328,6 +1343,7 @@ $$
 -(void) addIdentityManually:(SignalAddress*) address identityKey:(NSData* _Nonnull) identityKey
 {
     [self.monalSignalStore saveIdentity:address identityKey:identityKey];
+    [self notifyKnownDevicesUpdated:address.name];
 }
 
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address
@@ -1370,6 +1386,7 @@ $$
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid.unsignedIntValue];
     [self.monalSignalStore deleteDeviceforAddress:address];
     [self.monalSignalStore deleteSessionRecordForAddress:address];
+    [self notifyKnownDevicesUpdated:address.name];
 }
 
 //debug button in contactdetails ui

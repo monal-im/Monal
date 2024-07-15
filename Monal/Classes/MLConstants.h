@@ -164,6 +164,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMLResourceBoundNotice @"kMLResourceBoundNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
 #define kMonalFinishedOmemoBundleFetch @"kMonalFinishedOmemoBundleFetch"
+#define kMonalOmemoStateUpdated @"kMonalOmemoStateUpdated"
 #define kMonalUpdateBundleFetchStatus @"kMonalUpdateBundleFetchStatus"
 #define kMonalIdle @"kMonalIdle"
 #define kMonalFiletransfersIdle @"kMonalFiletransfersIdle"

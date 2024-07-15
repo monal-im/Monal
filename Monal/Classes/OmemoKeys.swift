@@ -134,8 +134,7 @@ struct OmemoKeysEntry: View {
         let trustLevelBinding = Binding<Bool>.init(get: {
             return (self.trustLevel.int32Value != MLOmemoNotTrusted)
         }, set: { keyEnabled in
-            self.account.omemo.updateTrust(keyEnabled, for: self.address)
-            self.trustLevel = self.account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
+            setTrustLevel(keyEnabled)
         })
 
         let fingerprintString = HelperTools.signalHexKeyWithSpaces(with: fingerprint)

@@ -219,6 +219,10 @@ struct OmemoKeysForContact: View {
         return OrderedSet(account.omemo.knownDevices(forAddressName: jid).sorted { return $0.intValue < $1.intValue })
     }
 
+    private func refreshKnownDevices() -> Void {
+        self.deviceIds = OmemoKeysForContact.knownDevices(account: self.account, jid: self.contactJid)
+    }
+
     func deleteButton(deviceId: NSNumber) -> some View {
         Button(action: {
             selectedDeviceForDeletion = deviceId // SwiftUI does not like to have deviceID nested in multiple functions, so safe this in the struct...
@@ -237,7 +241,6 @@ struct OmemoKeysForContact: View {
                         return // should be unreachable
                     }
                     account.omemo.deleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion)
-                    self.deviceIds.remove(self.selectedDeviceForDeletion)
                 },
                 secondaryButton: .cancel(Text("Abort"))
             )
@@ -254,6 +257,13 @@ struct OmemoKeysForContact: View {
                             deleteButton(deviceId: deviceId)
                         }
                     }
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalOmemoStateUpdated")).receive(on: RunLoop.main)) { notification in
+            if notification.userInfo?["jid"] as? String == self.contactJid {
+                withAnimation() {
+                    refreshKnownDevices()
                 }
             }
         }

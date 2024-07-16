@@ -221,6 +221,42 @@ struct RuntimeError: LocalizedError {
     }
 }
 
+extension AnyPromise {
+    public func toGuarantee<T>() -> Guarantee<T> {
+        return Guarantee<T> { seal in
+            self.done { value in
+                if let value = value as? T {
+                    seal(value)
+                } else {
+                    HelperTools.throwException(withName:"AnyPromiseConversionError", reason:"Could not cast value to type \(String(describing: T.self))", userInfo:[
+                        "type": "\(String(describing: T.self))",
+                        "promise": "\(String(describing: self))",
+                    ])
+                }
+            }.catch { error in
+                HelperTools.throwException(withName:"AnyPromiseConversionError", reason:"Uncatched promise error: \(error)", userInfo:[
+                    "error": "\(String(describing:error))",
+                    "promise": "\(String(describing: self))",
+                ])
+            }
+        }
+    }
+
+    public func toPromise<T>() -> Promise<T> {
+        return Promise<T> { seal in
+            self.done { value in
+                if let value = value as? T {
+                    seal.fulfill(value)
+                } else {
+                    seal.reject(PMKError.invalidCallingConvention)
+                }
+            }.catch { error in
+                seal.reject(error)
+            }
+        }
+    }
+}
+
 //see https://www.avanderlee.com/swift/property-wrappers/
 //and https://fatbobman.com/en/posts/adding-published-ability-to-custom-property-wrapper-types/
 @propertyWrapper

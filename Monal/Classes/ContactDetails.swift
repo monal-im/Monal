@@ -149,8 +149,10 @@ struct ContactDetails: View {
                                         .destructive(
                                             Text("Yes"),
                                             action: {
-                                                performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Removing avatar..."), descriptionView:Text("")) {
-                                                    self.account.mucProcessor.publishAvatar(nil, forMuc: contact.contactJid)
+                                                showPromisingLoadingOverlay(overlay, headlineView:Text("Removing avatar..."), descriptionView:Text("")) {
+                                                    promisifyMucAction(account:account, mucJid:contact.contactJid) {
+                                                        self.account.mucProcessor.publishAvatar(nil, forMuc: contact.contactJid)
+                                                    }
                                                 }.catch { error in
                                                     errorAlert(title: Text("Error removing avatar!"), message: Text("\(String(describing:error))"))
                                                     hideLoadingOverlay(overlay)
@@ -542,8 +544,10 @@ struct ContactDetails: View {
                                     .destructive(
                                         Text("Yes"),
                                         action: {
-                                            performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:contact.mucType == "group" ? Text("Destroying group...") : Text("Destroying channel..."), descriptionView:Text("")) {
-                                                self.account.mucProcessor.destroyRoom(contact.contactJid as String)
+                                            showPromisingLoadingOverlay(overlay, headlineView:contact.mucType == "group" ? Text("Destroying group...") : Text("Destroying channel..."), descriptionView:Text("")) {
+                                                promisifyMucAction(account:account, mucJid:contact.contactJid) {
+                                                    self.account.mucProcessor.destroyRoom(contact.contactJid as String)
+                                                }
                                             }.done { callback in
                                                 if let callback = callback {
                                                     self.successCallback = callback
@@ -551,8 +555,6 @@ struct ContactDetails: View {
                                                 successAlert(title: Text("Success"), message: contact.mucType == "group" ? Text("Successfully destroyed group.") : Text("Successfully destroyed channel."))
                                             }.catch { error in
                                                 errorAlert(title: Text("Error destroying group!"), message: Text("\(String(describing:error))"))
-                                            }.finally {
-                                                hideLoadingOverlay(overlay)
                                             }
                                         }
                                     )
@@ -655,8 +657,10 @@ struct ContactDetails: View {
             }, onCanceled: {
                 inputImage = nil
             }) { (image, cropRect, angle) in
-                performMucAction(account:account, mucJid:contact.contactJid, overlay:overlay, headlineView:Text("Uploading avatar..."), descriptionView:Text("")) {
-                    self.account.mucProcessor.publishAvatar(image, forMuc: contact.contactJid)
+                showPromisingLoadingOverlay(overlay, headlineView:Text("Uploading avatar..."), descriptionView:Text("")) {
+                    promisifyMucAction(account:account, mucJid:contact.contactJid) {
+                        self.account.mucProcessor.publishAvatar(image, forMuc: contact.contactJid)
+                    }
                 }.catch { error in
                     errorAlert(title: Text("Error changing avatar!"), message: Text("\(String(describing:error))"))
                     hideLoadingOverlay(overlay)

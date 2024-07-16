@@ -134,10 +134,11 @@ struct AddContactMenu: View {
             }
             return
         }
-        showLoadingOverlay(overlay, headline: NSLocalizedString("Adding...", comment: ""))
-        account.checkJidType(jid, withCompletion: { type, errorMsg in
+        showPromisingLoadingOverlay(overlay, headline:NSLocalizedString("Adding...", comment: ""), description:"") {
+            account.checkJidType(jid)
+        }.done { type in
+            let type = type as! String
             if type == "account" {
-                hideLoadingOverlay(overlay)
                 let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                 self.newContact = contact
                 MLXMPPManager.sharedInstance().add(contact, withPreauthToken:preauthToken)
@@ -145,21 +146,20 @@ struct AddContactMenu: View {
                 trustFingerprints(self.importScannedFingerprints ? self.scannedFingerprints : [:], for:jid, on:account)
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
             } else if type == "muc" {
-                performMucAction(account:account, mucJid:jid, overlay:overlay, headlineView:Text("Adding Group/Channel..."), descriptionView:Text("")) {
-                    account.joinMuc(jid)
+                showPromisingLoadingOverlay(overlay, headlineView:Text("Adding Group/Channel..."), descriptionView:Text("")) {
+                    promisifyMucAction(account:account, mucJid:jid) {
+                        account.joinMuc(jid)
+                    }
                 }.done { _ in
                     self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                     successAlert(title: Text("Success!"), message: Text("Successfully joined group/channel \(jid)!"))
                 }.catch { error in
                     errorAlert(title: Text("Error entering group/channel!"), message: Text("\(String(describing:error))"))
-                }.finally {
-                    hideLoadingOverlay(overlay)
                 }
-            } else {
-                hideLoadingOverlay(overlay)
-                errorAlert(title: Text("Error"), message: Text(errorMsg ?? "Undefined error"))
             }
-        })
+        }.catch { error in
+            errorAlert(title: Text("Error"), message: Text(error.localizedDescription))
+        }
     }
 
     var body: some View {

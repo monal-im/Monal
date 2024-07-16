@@ -83,8 +83,8 @@ struct MemberList: View {
         }
     }
     
-    func performAction(headlineView: some View, descriptionView: some View, action: @escaping ()->Void) -> Promise<monal_void_block_t?> {
-        return performMucAction(account:self.account, mucJid:self.muc.contactJid, overlay:self.overlay, headlineView:headlineView, descriptionView:descriptionView, action:action)
+    func promisifyAction(action: @escaping ()->Void) -> Promise<monal_void_block_t?> {
+        return promisifyMucAction(account:self.account, mucJid:self.muc.contactJid, action:action)
     }
 
     func showAlert(title: Text, description: Text) {
@@ -172,46 +172,45 @@ struct MemberList: View {
                     navigationActive = contact
                 } else if newAffiliation == "reinvite" {
                     //first remove potential ban, then reinvite
-                    (affiliations[contact] == "outcast" ?
-                        performAction(headlineView: Text("Unblocking user"), descriptionView: Text("Unblocking user for this group/channel: \(contact.contactJid as String)")) {
-                            account.mucProcessor.setAffiliation(self.muc.mucType == "group" ? "member" : "none", ofUser:contact.contactJid, inMuc:self.muc.contactJid)
-                        } :
-                        Promise.value(nil)
-                    ).then { _ in
-                        return performAction(headlineView: Text("Inviting user"), descriptionView: Text("Inviting user to this group/channel: \(contact.contactJid as String)")) {
-                            DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 1.0) {
-                                account.mucProcessor.inviteUser(contact.contactJid, inMuc: self.muc.contactJid)
+                    var outcastResolution: Promise<monal_void_block_t?> = Promise.value(nil)
+                    if affiliations[contact] == "outcast" {
+                        outcastResolution = showPromisingLoadingOverlay(self.overlay, headlineView: Text("Unblocking user"), descriptionView: Text("Unblocking user for this group/channel: \(contact.contactJid as String)")) {
+                            promisifyAction {
+                                account.mucProcessor.setAffiliation(self.muc.mucType == "group" ? "member" : "none", ofUser:contact.contactJid, inMuc:self.muc.contactJid)
                             }
                         }
-                        .recover { error in
+                    }
+                    outcastResolution.then { _ in
+                        showPromisingLoadingOverlay(self.overlay, headlineView: Text("Inviting user"), descriptionView: Text("Inviting user to this group/channel: \(contact.contactJid as String)")) {
+                            promisifyAction {
+                                account.mucProcessor.inviteUser(contact.contactJid, inMuc: self.muc.contactJid)
+                            }
+                        }.catch { error in
                             showAlert(title:Text("Error inviting user!"), description:Text("\(String(describing:error))"))
-                            return Guarantee.value(nil as monal_void_block_t?)
                         }
+                        return Guarantee.value(())
                     }.catch { error in
                         showAlert(title:Text("Error unblocking user!"), description:Text("\(String(describing:error))"))
-                    }.finally {
-                        hideLoadingOverlay(overlay)
                     }
                 } else if newAffiliation == "outcast" {
                     showActionSheet(title: Text("Block user?"), description: Text("Do you want to block this user from entering this group/channel?")) {
                         DDLogVerbose("Changing affiliation of \(String(describing:contact)) to: \(String(describing:newAffiliation))...")
-                        performAction(headlineView: Text("Blocking member"), descriptionView: Text("Blocking \(contact.contactJid as String)")) {
-                            account.mucProcessor.setAffiliation(newAffiliation, ofUser:contact.contactJid, inMuc:self.muc.contactJid)
+                        showPromisingLoadingOverlay(self.overlay, headlineView: Text("Blocking member"), descriptionView: Text("Blocking \(contact.contactJid as String)")) {
+                            promisifyAction {
+                                account.mucProcessor.setAffiliation(newAffiliation, ofUser:contact.contactJid, inMuc:self.muc.contactJid)
+                            }
                         }.catch { error in
                             showAlert(title:Text("Error blocking user!"), description:Text("\(String(describing:error))"))
-                        }.finally {
-                            hideLoadingOverlay(overlay)
                         }
                     }
                 } else {
                     DDLogVerbose("Changing affiliation of \(String(describing:contact)) to: \(String(describing:newAffiliation))...")
-                    performAction(headlineView: Text("Changing affiliation"), descriptionView: 
-                        Text("Changing affiliation to \(mucAffiliationToString(affiliations[contact])): \(contact.contactJid as String)")) {
-                        account.mucProcessor.setAffiliation(newAffiliation, ofUser:contact.contactJid, inMuc:self.muc.contactJid)
+                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Changing affiliation"), descriptionView: Text("Changing affiliation to \(mucAffiliationToString(affiliations[contact])): \(contact.contactJid as String)")) {
+                        promisifyAction {
+                            account.mucProcessor.setAffiliation(newAffiliation, ofUser:contact.contactJid, inMuc:self.muc.contactJid)
+                        }
                     }.catch { error in
                         showAlert(title:Text("Error changing affiliation!"), description:Text("\(String(describing:error))"))
-                    }.finally {
-                        hideLoadingOverlay(overlay)
                     }
                 }
             }
@@ -230,27 +229,28 @@ struct MemberList: View {
                         for member in newMemberList {
                             if !memberList.contains(member) {
                                 if self.muc.mucType == "group" {
-                                    performAction(headlineView: Text("Adding new member"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
-                                        account.mucProcessor.setAffiliation("member", ofUser:member.contactJid, inMuc:self.muc.contactJid)
-                                    }.then { _ in
-                                        return performAction(headlineView: Text("Inviting new member"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
-                                            account.mucProcessor.inviteUser(member.contactJid, inMuc: self.muc.contactJid)
-                                        }.recover { error in
+                                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Adding new member"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
+                                        promisifyAction {
+                                            account.mucProcessor.setAffiliation("member", ofUser:member.contactJid, inMuc:self.muc.contactJid)
+                                        }
+                                    }.done { _ in
+                                        showPromisingLoadingOverlay(self.overlay, headlineView: Text("Inviting new member"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
+                                            promisifyAction {
+                                                account.mucProcessor.inviteUser(member.contactJid, inMuc: self.muc.contactJid)
+                                            }
+                                        }.catch { error in
                                             showAlert(title:Text("Error inviting new member!"), description:Text("\(String(describing:error))"))
-                                            return Guarantee.value(nil as monal_void_block_t?)
                                         }
                                     }.catch { error in
                                         showAlert(title:Text("Error adding new member!"), description:Text("\(String(describing:error))"))
-                                    }.finally {
-                                        hideLoadingOverlay(overlay)
                                     }
                                 } else {
-                                    performAction(headlineView: Text("Inviting new participant"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
-                                        account.mucProcessor.inviteUser(member.contactJid, inMuc: self.muc.contactJid)
+                                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Inviting new participant"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
+                                        promisifyAction {
+                                            account.mucProcessor.inviteUser(member.contactJid, inMuc: self.muc.contactJid)
+                                        }
                                     }.catch { error in
                                         showAlert(title:Text("Error inviting new participant!"), description:Text("\(String(describing:error))"))
-                                    }.finally {
-                                        hideLoadingOverlay(overlay)
                                     }
                                 }
                             }
@@ -301,12 +301,12 @@ struct MemberList: View {
                 .onDelete(perform: { memberIdx in
                     let member = memberList[memberIdx.first!]
                     showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[member]))?"), description: self.muc.mucType == "group" ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
-                        performAction(headlineView: Text("Removing \(mucAffiliationToString(affiliations[member]))"), descriptionView: Text("Removing \(member.contactJid as String)...")) {
-                            account.mucProcessor.setAffiliation("none", ofUser: member.contactJid, inMuc: self.muc.contactJid)
+                        showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[member]))"), descriptionView: Text("Removing \(member.contactJid as String)...")) {
+                            promisifyAction {
+                                account.mucProcessor.setAffiliation("none", ofUser: member.contactJid, inMuc: self.muc.contactJid)
+                            }
                         }.catch { error in
                             showAlert(title:Text("Error removing user!"), description:Text("\(String(describing:error))"))
-                        }.finally {
-                            hideLoadingOverlay(overlay)
                         }
                     }
                 })

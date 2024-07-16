@@ -177,8 +177,8 @@ struct CrashTestingView: View {
 }
 
 struct DebugView: View {
-    @State private var isReconnecting: Bool = false
     @StateObject private var overlay = LoadingOverlayState()
+    
     var body: some View {
         TabView {
             LogFilesView()
@@ -200,18 +200,10 @@ struct DebugView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
         .addLoadingOverlay(overlay)
-        .onChange(of: isReconnecting) { _ in
-            if isReconnecting{
-                showLoadingOverlay(overlay, headline: "Reconnecting", description: "Will log out and reconnect all (connected) accounts.")
-            } else {
-                hideLoadingOverlay(overlay)
-            }
-        }
         .navigationBarItems(trailing:Button("Reconnect All") {
-            isReconnecting = true
-            MLXMPPManager.sharedInstance().reconnectAll()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                isReconnecting = false
+            showLoadingOverlay(overlay, headline: "Reconnecting", description: "Will log out and reconnect all (connected) accounts.") {
+                MLXMPPManager.sharedInstance().reconnectAll()
+                return after(seconds:3.0)
             }
         })
     }

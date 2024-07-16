@@ -52,8 +52,8 @@ extension View {
     }
 }
 
-func showLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2) {
-    DispatchQueue.main.async {
+func showPromisingLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2) -> Guarantee<Void> {
+    return HelperTools.wait(atLeastSeconds:1.0, for:AnyPromise(DispatchQueue.main.async(.promise) {
         overlay.headline = AnyView(headline)
         overlay.description = AnyView(description)
         overlay.enabled = true
@@ -63,21 +63,68 @@ func showLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayState, headli
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.250) {
             overlay.objectWillChange.send()
         }
+    })).toGuarantee()
+}
+
+func showPromisingLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") -> Guarantee<Void> {
+    return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description))
+}
+
+func showPromisingLoadingOverlay<T1:View, T2:View, U: Thenable>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2, firstlyClosure: @escaping () -> U) -> Promise<U.T> {
+    return Promise { seal in
+        showPromisingLoadingOverlay(overlay, headlineView: headline, descriptionView: description).done {
+            let _ = firstlyClosure().done { value in
+                hideLoadingOverlay(overlay)
+                seal.fulfill(value)
+            }.catch { error in
+                hideLoadingOverlay(overlay)
+                seal.reject(error)
+            }
+        }
     }
 }
 
-func showLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") {
-    DispatchQueue.main.async {
-        overlay.headline = AnyView(Text(headline))
-        overlay.description = AnyView(Text(description))
-        overlay.enabled = true
-        //only rerender ui once (not sure if this optimization is really needed, if this is missing, use @Published for member vars of state class)
-        overlay.objectWillChange.send()
-        //make sure to really draw the overlay on race conditions
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.250) {
-            overlay.objectWillChange.send()
+func showPromisingLoadingOverlay<T1:View, T2:View, U: PMKFinalizer>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2, firstlyClosure: @escaping () -> U) -> Guarantee<Void> {
+    return Guarantee { seal in
+        showPromisingLoadingOverlay(overlay, headlineView: headline, descriptionView: description).done {
+            let _ = firstlyClosure().finally {
+                hideLoadingOverlay(overlay)
+                seal(())
+            }
         }
     }
+}
+
+func showPromisingLoadingOverlay<T:StringProtocol, U: Thenable>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) -> Promise<U.T> {
+    return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
+}
+
+func showPromisingLoadingOverlay<T:StringProtocol, U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) -> Guarantee<Void> {
+    return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
+}
+
+func showLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2) {
+    let _ = showPromisingLoadingOverlay(overlay, headlineView:headline, descriptionView:description)
+}
+
+func showLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") {
+    let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description)
+}
+
+func showLoadingOverlay<T1:View, T2:View, U: Thenable>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2, firstlyClosure: @escaping () -> U) {
+    let _ = showPromisingLoadingOverlay(overlay, headlineView:headline, descriptionView:description, firstlyClosure:firstlyClosure)
+}
+
+func showLoadingOverlay<T1:View, T2:View, U: PMKFinalizer>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2, firstlyClosure: @escaping () -> U) {
+    let _ = showPromisingLoadingOverlay(overlay, headlineView:headline, descriptionView:description, firstlyClosure:firstlyClosure)
+}
+
+func showLoadingOverlay<T:StringProtocol, U: Thenable>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) {
+    let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
+}
+
+func showLoadingOverlay<T:StringProtocol, U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) {
+    let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
 }
 
 func hideLoadingOverlay(_ overlay: LoadingOverlayState) {

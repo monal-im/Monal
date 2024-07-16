@@ -264,13 +264,11 @@ struct WelcomeLogIn: View {
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if(notificationAccountNo.intValue == newAccountNo.intValue) {
                     isLoadingOmemoBundles = true
-                    DispatchQueue.main.async {
-                        showLoadingOverlay(
-                            overlay, 
-                            headline:NSLocalizedString("Loading omemo bundles", comment: ""),
-                            description:String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all)
-                        )
-                    }
+                    showLoadingOverlay(
+                        overlay, 
+                        headline:NSLocalizedString("Loading omemo bundles", comment: ""),
+                        description:String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all)
+                    )
                 }
             }
         }

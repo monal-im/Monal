@@ -88,10 +88,9 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     }
 }
 
-func performMucAction(account: xmpp, mucJid: String, overlay: LoadingOverlayState, headlineView: Optional<some View>, descriptionView: Optional<some View>, action: @escaping ()->Void) -> Promise<monal_void_block_t?> {
-    showLoadingOverlay(overlay, headlineView:headlineView, descriptionView:descriptionView)
+func promisifyMucAction(account: xmpp, mucJid: String, action: @escaping () throws -> Void) -> Promise<monal_void_block_t?> {
     return Promise<monal_void_block_t?> { seal in
-        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.global(qos: .background).async {
             account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
                 let success : Bool = data["success"] as! Bool;
                 if !success {
@@ -104,7 +103,12 @@ func performMucAction(account: xmpp, mucJid: String, overlay: LoadingOverlayStat
                     }
                 }
             }, forMuc:mucJid)
-            action()
+            do {
+                try action()
+            } catch {
+                seal.reject(error)
+            }
+            
         }
     }
 }

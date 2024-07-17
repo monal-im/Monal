@@ -2309,6 +2309,13 @@ void swizzle(Class c, SEL orig, SEL new)
     };
 }
 
++(AnyPromise*) waitAtLeastSeconds:(NSTimeInterval) seconds forPromise:(AnyPromise*) promise
+{
+    return PMKWhen(@[promise, PMKAfter(seconds)]).then(^{
+        return promise;
+    });
+}
+
 +(NSString*) encodeRandomResource
 {
     u_int32_t i=arc4random();

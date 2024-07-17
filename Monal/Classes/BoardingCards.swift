@@ -76,8 +76,12 @@ struct OnboardingView: View {
                                         .multilineTextAlignment(.leading)
                                         /// This ensures text doesn't get truncated which sometimes happens in ScrollView
                                         .fixedSize(horizontal: false, vertical: true)
-                                    
+                                }
+                                
+                                if card.imageName != nil || card.description != nil || card.imageName != nil {
+                                    Spacer().frame(height: 1)
                                     Divider()
+                                    Spacer().frame(height: 1)
                                 }
                                 
                                 card.articleText?
@@ -148,16 +152,20 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
         ),
         OnboardingCard(
             title: Text("Features"),
-            description: Text("Here's a quick look at what you can expect:"),
+            description: nil,
             imageName: "sparkles",
             articleText: Text("""
-            • 🔐 OMEMO Encryption : Secure multi-end messaging using the OMEMO protocol.
+            🛜 Decentralized Network :
+            Leverages the decentralized nature of XMPP, avoiding central servers.
             
-            • 🛜 Decentralized Network : Leverages the decentralized nature of XMPP, avoiding central servers.
+            🌐 Data privacy :
+            We do not sell or track information for external parties (nor for anyone else).
             
-            • 🌐 Data privacy : We do not sell or track information for external parties (nor for anyone else).
+            🔐 End-to-end encryption :
+            Secure multi-end messaging using the OMEMO protocol.
             
-            • 👨‍💻 Open Source : The app's source code is publicly available for audit and contribution.
+            👨‍💻 Open Source :
+            The app's source code is publicly available for audit and contribution.
             """),
             customView: nil
         ),

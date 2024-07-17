@@ -361,11 +361,11 @@ struct PrivacySettingsSubview: View {
         if onboardingPart == -1 || onboardingPart == 0 {
             Section(header: Text("Activity indications")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendReceivedMarkers) {
-                    Text("Send message received")
+                    Text("Send message receipts")
                     Text("Let your contacts know if you received a message.")
                 }
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendDisplayedMarkers) {
-                    Text("Send message displayed state")
+                    Text("Send read receipts")
                     Text("Let your contacts know if you read a message.")
                 }
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendLastChatState) {
@@ -515,6 +515,6 @@ struct AttachmentSettings: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        PrivacySettings()
+        GeneralSettings()
     }
 }

@@ -39,7 +39,7 @@
     int _startedOrientation;
     double _portraitTop;
     double _landscapeTop;
-    BOOL _loginAutodisplayedAlready;
+    BOOL _loginAlreadyAutodisplayed;
 }
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
@@ -59,18 +59,13 @@ static NSMutableSet* _pushWarningDisplayed;
 
 +(void) initialize
 {
+    DDLogDebug(@"initializing active chats class");
     _mamWarningDisplayed = [NSMutableSet new];
     _smacksWarningDisplayed = [NSMutableSet new];
     _pushWarningDisplayed = [NSMutableSet new];
 }
 
 #pragma mark view lifecycle
--(id) initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    _loginAutodisplayedAlready = NO;
-    return self;
-}
 
 -(void) configureComposeButton
 {
@@ -89,8 +84,10 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) viewDidLoad
 {
+    DDLogDebug(@"active chats view did load");
     [super viewDidLoad];
     
+    _loginAlreadyAutodisplayed = NO;
     _startedOrientation = 0;
     
     self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
@@ -136,6 +133,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) dealloc
 {
+    DDLogDebug(@"active chats dealloc");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -402,16 +400,16 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) sheetDismissed
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self refresh];
-    });
+    [self refresh];
 }
 
 -(void) refresh
 {
-    if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
-        [self refreshDisplay];      // load contacts
-    [self segueToIntroScreensIfNeeded];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
+            [self refreshDisplay];      // load contacts
+        [self segueToIntroScreensIfNeeded];
+    });
 }
 
 -(void) didReceiveMemoryWarning
@@ -464,11 +462,11 @@ static NSMutableSet* _pushWarningDisplayed;
     }
     
     // display quick start if the user never seen it or if there are 0 enabled accounts
-    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !_loginAutodisplayedAlready)
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !_loginAlreadyAutodisplayed)
     {
         UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
         loginViewController.ml_disposeCallback = ^{
-            self->_loginAutodisplayedAlready = YES;
+            self->_loginAlreadyAutodisplayed = YES;
             [self sheetDismissed];
         };
         [self presentViewController:loginViewController animated:YES completion:^{}];

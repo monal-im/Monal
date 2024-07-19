@@ -131,9 +131,11 @@ struct OnboardingView: View {
             }
         }
         .onAppear {
-            //force portrait mode and lock ui there
-            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-            (UIApplication.shared.delegate as! MonalAppDelegate).orientationLock = .portrait
+            if UIDevice.current.userInterfaceIdiom != .pad {
+                //force portrait mode and lock ui there
+                UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+                (UIApplication.shared.delegate as! MonalAppDelegate).orientationLock = .portrait
+            }
         }
     }
 }

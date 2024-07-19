@@ -66,26 +66,22 @@ struct ContactRequestsMenu: View {
     @State private var pendingRequests: [MLContact]
 
     var body: some View {
-        Form {
-            List {
-                Section(header: Text("Allowing someone to add you as a contact lets them see your profile picture and when you are online.")) {
-                    if(pendingRequests.isEmpty) {
-                        Text("No pending requests")
-                            .foregroundColor(.secondary)
-                    }
-                    ForEach(pendingRequests.indices, id: \.self) { idx in
-                        ContactRequestsMenuEntry(
-                            contact: pendingRequests[idx],
-                            doDelete: {
-                                self.pendingRequests.remove(at: idx)
-                            }
-                        )
-                    }
+        List {
+            Section(header: Text("Allowing someone to add you as a contact lets them see your profile picture and when you are online.")) {
+                if(pendingRequests.isEmpty) {
+                    Text("No pending constact requests")
+                        .foregroundColor(.secondary)
+                }
+                ForEach(pendingRequests.indices, id: \.self) { idx in
+                    ContactRequestsMenuEntry(
+                        contact: pendingRequests[idx],
+                        doDelete: {
+                            self.pendingRequests.remove(at: idx)
+                        }
+                    )
                 }
             }
         }
-        .navigationBarTitle(Text("Contact Requests"), displayMode: .inline)
-        .navigationViewStyle(.stack)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh")).receive(on: RunLoop.main)) { notification in
             self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
         }

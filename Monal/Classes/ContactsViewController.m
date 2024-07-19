@@ -53,24 +53,20 @@
     [self presentViewController:createGroupView animated:YES completion:^{}];
 }
 
--(void) openContactRequests:(id) sender
+-(void) configureAddContactImage
 {
-    UIViewController* contactRequestsView = [[SwiftuiInterface new] makeViewWithName:@"ContactRequests"];
-    [self presentViewController:contactRequestsView animated:YES completion:^{}];
-}
-
--(void) configureContactRequestsImage
-{
-    UIImage* requestsImage = [[UIImage systemImageNamed:@"person.crop.circle.fill.badge.questionmark"] imageWithTintColor:UIColor.monalGreen];
-    UITapGestureRecognizer* requestsTapRecoginzer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openContactRequests:)];
-    self.navigationItem.rightBarButtonItems[1].customView = [HelperTools
-        buttonWithNotificationBadgeForImage:requestsImage
+    UIImage* image = [[UIImage systemImageNamed:@"person.fill.badge.plus"] imageWithTintColor:UIColor.monalGreen];
+    UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openAddContacts:)];
+    self.navigationItem.rightBarButtonItems[0].customView = [HelperTools
+        buttonWithNotificationBadgeForImage:image
         hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
-        withTapHandler:requestsTapRecoginzer];
-    [self.navigationItem.rightBarButtonItems[1] setIsAccessibilityElement:YES];
-    [self.navigationItem.rightBarButtonItems[1] setAccessibilityLabel:NSLocalizedString(@"Pending contact requests", @"")];
-    [self.navigationItem.rightBarButtonItems[1] setAccessibilityTraits:UIAccessibilityTraitButton];
-
+        withTapHandler:tapRecognizer];
+    [self.navigationItem.rightBarButtonItems[0] setIsAccessibilityElement:YES];
+    if([[DataLayer sharedInstance] allContactRequests].count > 0)
+        [self.navigationItem.rightBarButtonItems[0] setAccessibilityLabel:NSLocalizedString(@"Add contact (contact requests pending)", @"")];
+    else
+        [self.navigationItem.rightBarButtonItems[0] setAccessibilityLabel:NSLocalizedString(@"Add contact", @"")];
+    [self.navigationItem.rightBarButtonItems[0] setAccessibilityTraits:UIAccessibilityTraitButton];
 }
 
 #pragma mark view life cycle
@@ -105,20 +101,15 @@
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
 
-    UIBarButtonItem* addContact = [UIBarButtonItem new];
-    addContact.image = [UIImage systemImageNamed:@"person.fill.badge.plus"];
-    addContact.accessibilityLabel = @"Add contact";
-    [addContact setAction:@selector(openAddContacts:)];
-    [addContact setTarget:self];
-
     UIBarButtonItem* createGroup = [[UIBarButtonItem alloc] init];
     createGroup.image = [UIImage systemImageNamed:@"person.3.fill"];
     createGroup.accessibilityLabel = @"Create contact group";
     [createGroup setAction:@selector(openCreateGroup:)];
     [createGroup setTarget:self];
-    self.navigationItem.rightBarButtonItems = @[addContact, [[UIBarButtonItem alloc] init], createGroup];
+    
+    self.navigationItem.rightBarButtonItems = @[[[UIBarButtonItem alloc] init], createGroup];
 
-    [self configureContactRequestsImage];
+    [self configureAddContactImage];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRemoved object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactUpdate) name:kMonalContactRefresh object:nil];
@@ -194,7 +185,7 @@
 
 -(void) reloadTable
 {
-    [self configureContactRequestsImage];
+    [self configureAddContactImage];
     if(self.contactsTable.hasUncommittedUpdates)
         return;
     [self.contactsTable reloadData];

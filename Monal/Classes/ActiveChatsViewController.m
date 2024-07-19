@@ -69,17 +69,18 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) configureComposeButton
 {
-    UIImage* composeImage = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];    
+    UIImage* image = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];
+    UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
+    self.composeButton.customView = [HelperTools
+        buttonWithNotificationBadgeForImage:image
+        hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
+        withTapHandler:tapRecognizer];
+    [self.composeButton setIsAccessibilityElement:YES];
     if([[DataLayer sharedInstance] allContactRequests].count > 0)
-    {
-        self.composeButton.image = [HelperTools imageWithNotificationBadgeForImage:composeImage];
-    }
+        [self.composeButton setAccessibilityLabel:NSLocalizedString(@"Open contact list (contact requests pending)", @"")];
     else
-    {
-        self.composeButton.image = composeImage;
-    }
-    [self.composeButton setAccessibilityLabel:@"Open contacts list"];
-    [self.composeButton setAccessibilityHint:NSLocalizedString(@"Open contact list", @"")];
+        [self.composeButton setAccessibilityLabel:NSLocalizedString(@"Open contact list", @"")];
+    [self.composeButton setAccessibilityTraits:UIAccessibilityTraitButton];
 }
 
 -(void) viewDidLoad

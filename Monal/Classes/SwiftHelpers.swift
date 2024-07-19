@@ -280,7 +280,15 @@ public struct defaultsDB<Value> {
             }
         }
         set {
-            container.set(newValue, forKey: key)
+            if let optional = newValue as? OptionalProtocol {
+                if optional.isSome() {
+                    container.set(newValue, forKey: key)
+                } else {
+                    container.removeObject(forKey:key)
+                }
+            } else {
+                container.set(newValue, forKey: key)
+            }
             container.synchronize()
         }
     }
@@ -302,6 +310,27 @@ public struct defaultsDB<Value> {
     }
 }
 
+//see https://stackoverflow.com/a/32780793
+protocol OptionalProtocol {
+    func isSome() -> Bool
+    func unwrap() -> Any
+}
+extension Optional : OptionalProtocol {
+    func isSome() -> Bool {
+        switch self {
+            case .none: return false
+            case .some: return true
+        }
+    }
+
+    func unwrap() -> Any {
+        switch self {
+            // If a nil is unwrapped it will crash!
+            case .none: preconditionFailure("nil unwrap!")
+            case .some(let unwrapped): return unwrapped
+        }
+    }
+}
 
 @objcMembers
 public class SwiftHelpers: NSObject {

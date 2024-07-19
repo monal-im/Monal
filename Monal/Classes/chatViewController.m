@@ -594,7 +594,9 @@ enum msgSentState {
 -(void) observeValueForKeyPath:(NSString*) keyPath ofObject:(id) object change:(NSDictionary *) change context:(void*) context
 {
     if([keyPath isEqualToString:@"isEncrypted"] && object == self.contact)
-        [self displayEncryptionStateInUI];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self displayEncryptionStateInUI];
+        });
 }
 
 -(void) displayEncryptionStateInUI
@@ -2923,7 +2925,7 @@ enum msgSentState {
 // Open search ViewController
 -(void) commandFPressed:(UIKeyCommand*)keyCommand
 {
-    [self showSeachButtonAction];
+    //[self showSeachButtonAction];
 }
 
 // List of custom hardware key commands

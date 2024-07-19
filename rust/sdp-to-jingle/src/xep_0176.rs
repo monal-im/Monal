@@ -174,12 +174,6 @@ impl JingleTransportCandidate {
             protocol: match candidate.transport {
                 SdpAttributeCandidateTransport::Udp => "udp".to_string(),
                 SdpAttributeCandidateTransport::Tcp => "tcp".to_string(), //not specced in xep-0176
-                _ => {
-                    return Err(SdpParserInternalError::Generic(
-                        "Encountered some candidate transport (like tcp) not specced in XEP-0176!"
-                            .to_string(),
-                    ));
-                }
             },
             raddr: candidate.raddr.as_ref().map(|addr| format!("{}", addr)),
             rport: candidate.rport,

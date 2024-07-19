@@ -28,6 +28,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class AnyPromise;
 @class MLXMLNode;
 @class xmpp;
 @class XMPPStanza;
@@ -179,6 +180,8 @@ void swizzle(Class c, SEL orig, SEL new);
 
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title;
 +(CIImage*) createQRCodeFromString:(NSString*) input;
+
++(AnyPromise*) waitAtLeastSeconds:(NSTimeInterval) seconds forPromise:(AnyPromise*) promise;
 
 //don't use these four directly, but via createTimer() makro
 +(MLDelayableTimer*) startDelayableQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue;

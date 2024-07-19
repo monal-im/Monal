@@ -221,6 +221,42 @@ struct RuntimeError: LocalizedError {
     }
 }
 
+extension AnyPromise {
+    public func toGuarantee<T>() -> Guarantee<T> {
+        return Guarantee<T> { seal in
+            self.done { value in
+                if let value = value as? T {
+                    seal(value)
+                } else {
+                    HelperTools.throwException(withName:"AnyPromiseConversionError", reason:"Could not cast value to type \(String(describing: T.self))", userInfo:[
+                        "type": "\(String(describing: T.self))",
+                        "promise": "\(String(describing: self))",
+                    ])
+                }
+            }.catch { error in
+                HelperTools.throwException(withName:"AnyPromiseConversionError", reason:"Uncatched promise error: \(error)", userInfo:[
+                    "error": "\(String(describing:error))",
+                    "promise": "\(String(describing: self))",
+                ])
+            }
+        }
+    }
+
+    public func toPromise<T>() -> Promise<T> {
+        return Promise<T> { seal in
+            self.done { value in
+                if let value = value as? T {
+                    seal.fulfill(value)
+                } else {
+                    seal.reject(PMKError.invalidCallingConvention)
+                }
+            }.catch { error in
+                seal.reject(error)
+            }
+        }
+    }
+}
+
 //see https://www.avanderlee.com/swift/property-wrappers/
 //and https://fatbobman.com/en/posts/adding-published-ability-to-custom-property-wrapper-types/
 @propertyWrapper
@@ -244,7 +280,15 @@ public struct defaultsDB<Value> {
             }
         }
         set {
-            container.set(newValue, forKey: key)
+            if let optional = newValue as? OptionalProtocol {
+                if optional.isSome() {
+                    container.set(newValue, forKey: key)
+                } else {
+                    container.removeObject(forKey:key)
+                }
+            } else {
+                container.set(newValue, forKey: key)
+            }
             container.synchronize()
         }
     }
@@ -266,6 +310,27 @@ public struct defaultsDB<Value> {
     }
 }
 
+//see https://stackoverflow.com/a/32780793
+protocol OptionalProtocol {
+    func isSome() -> Bool
+    func unwrap() -> Any
+}
+extension Optional : OptionalProtocol {
+    func isSome() -> Bool {
+        switch self {
+            case .none: return false
+            case .some: return true
+        }
+    }
+
+    func unwrap() -> Any {
+        switch self {
+            // If a nil is unwrapped it will crash!
+            case .none: preconditionFailure("nil unwrap!")
+            case .some(let unwrapped): return unwrapped
+        }
+    }
+}
 
 @objcMembers
 public class SwiftHelpers: NSObject {

@@ -164,6 +164,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMLResourceBoundNotice @"kMLResourceBoundNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
 #define kMonalFinishedOmemoBundleFetch @"kMonalFinishedOmemoBundleFetch"
+#define kMonalOmemoStateUpdated @"kMonalOmemoStateUpdated"
 #define kMonalUpdateBundleFetchStatus @"kMonalUpdateBundleFetchStatus"
 #define kMonalIdle @"kMonalIdle"
 #define kMonalFiletransfersIdle @"kMonalFiletransfersIdle"
@@ -217,4 +218,4 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 //build MLXMLNode query statistics (will only optimize MLXMLNode queries if *not* defined)
 //#define QueryStatistics 1
 
-#define geoPattern  @"^geo:(-?(?:90|[1-8][0-9]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)(;.*)?$"
+#define geoPattern  @"^geo:(-?(?:90|[1-8][0-9]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)(;.*)?([?].*)?$"

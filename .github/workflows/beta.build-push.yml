@@ -18,7 +18,7 @@ jobs:
     outputs:
       release-tag: ${{ steps.releasenotes.outputs.tag }}
       release-name: ${{ steps.releasenotes.outputs.name }}
-      release-changelog: ${{ steps.releasenotes.outputs.notes }}
+      release-notes: ${{ steps.releasenotes.outputs.notes }}
     env:
       APP_NAME: "Monal"
       APP_DIR: "Monal.app"
@@ -59,21 +59,40 @@ jobs:
         run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: Push beta tag to repo
         run: |
-          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           git push origin Build_iOS_$buildNumber
       - name: Extract version number and changelog from newest merge commit
         id: releasenotes
         run: |
           buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
-          echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "name=Monal Beta $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "notes<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "$(git log -n 1 --merges --pretty=format:%b)" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          mkdir -p /Users/ci/releases
+          OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
+          touch "$OUTPUT_FILE"
+          echo "OUTPUT_FILE=$OUTPUT_FILE" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          
+          echo "buildNumber=$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "version=$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "name=Monal Beta $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "notes<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "notes_ios<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | grep -v '^[\t\n ]*MACOS_ONLY.*$' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "notes_macos<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | grep -v '^[\t\n ]*IOS_ONLY.*$' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          cat "$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
-          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes }}
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
         run: |
           fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Notarize catalyst
@@ -90,7 +109,7 @@ jobs:
       - name: Publish catalyst to appstore connect
         #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
         env:
-          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes }}
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_macos }}
         run: |
           fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - uses: actions/upload-artifact@v4
@@ -172,5 +191,5 @@ jobs:
           recipient_is_room: true
           bot_alias: "Monal Release Bot"
           message: |
-            New Betarelease: ${{ needs.buildAndPublishBeta.outputs.release-name }}
-            ${{ needs.buildAndPublishBeta.outputs.release-changelog }}
+            ${{ needs.buildAndPublishBeta.outputs.release-name }} was released
+            ${{ needs.buildAndPublishBeta.outputs.release-notes }}

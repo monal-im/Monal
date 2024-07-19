@@ -63,7 +63,6 @@ struct ContactRequestsMenuEntry: View {
 }
 
 struct ContactRequestsMenu: View {
-    var delegate: SheetDismisserProtocol
     @State private var pendingRequests: [MLContact]
 
     var body: some View {
@@ -95,15 +94,13 @@ struct ContactRequestsMenu: View {
         }
     }
 
-    init(delegate: SheetDismisserProtocol) {
-        self.delegate = delegate
+    init() {
         self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
     }
 }
 
 struct ContactRequestsMenu_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        ContactRequestsMenu(delegate: delegate)
+        ContactRequestsMenu()
     }
 }

@@ -39,6 +39,7 @@
     int _startedOrientation;
     double _portraitTop;
     double _landscapeTop;
+    BOOL _loginAlreadyAutodisplayed;
 }
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
@@ -58,17 +59,13 @@ static NSMutableSet* _pushWarningDisplayed;
 
 +(void) initialize
 {
+    DDLogDebug(@"initializing active chats class");
     _mamWarningDisplayed = [NSMutableSet new];
     _smacksWarningDisplayed = [NSMutableSet new];
     _pushWarningDisplayed = [NSMutableSet new];
 }
 
 #pragma mark view lifecycle
--(id) initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    return self;
-}
 
 -(void) configureComposeButton
 {
@@ -87,8 +84,10 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) viewDidLoad
 {
+    DDLogDebug(@"active chats view did load");
     [super viewDidLoad];
     
+    _loginAlreadyAutodisplayed = NO;
     _startedOrientation = 0;
     
     self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
@@ -134,6 +133,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) dealloc
 {
+    DDLogDebug(@"active chats dealloc");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -380,9 +380,8 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     DDLogDebug(@"active chats view will appear");
     [super viewWillAppear:animated];
-    if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
-        [self refreshDisplay];      // load contacts
-    [self segueToIntroScreensIfNeeded];
+    
+    [self openConversationPlaceholder:nil];
 }
 
 -(void) viewWillDisappear:(BOOL) animated
@@ -395,6 +394,22 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     DDLogDebug(@"active chats view did appear");
     [super viewDidAppear:animated];
+    
+    [self refresh];
+}
+
+-(void) sheetDismissed
+{
+    [self refresh];
+}
+
+-(void) refresh
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
+            [self refreshDisplay];      // load contacts
+        [self segueToIntroScreensIfNeeded];
+    });
 }
 
 -(void) didReceiveMemoryWarning
@@ -411,6 +426,9 @@ static NSMutableSet* _pushWarningDisplayed;
                     [self presentChatWithContact:newContact];
                 });
             }];
+            addContactMenuView.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
             [self presentViewController:addContactMenuView animated:NO completion:^{}];
         }];
     });
@@ -423,19 +441,35 @@ static NSMutableSet* _pushWarningDisplayed;
     if(needingMigration.count > 0)
     {
         UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
+        passwordMigration.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:passwordMigration animated:YES completion:^{}];
         return;
     }
-    // display quick start if the user never seen it or if there are 0 enabled accounts
-    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+    
+    if(![[HelperTools defaultsDB] boolForKey:@"hasCompletedOnboarding"])
     {
-        UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
-        [self presentViewController:loginViewController animated:YES completion:^{}];
+        [self showOnboarding];
         return;
     }
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"])
+    
+    if(self.enqueueGeneralSettings)
     {
-        [self showPrivacySettings];
+        self.enqueueGeneralSettings = NO;
+        [self showGeneralSettings];
+        return;
+    }
+    
+    // display quick start if the user never seen it or if there are 0 enabled accounts
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !_loginAlreadyAutodisplayed)
+    {
+        UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
+        loginViewController.ml_disposeCallback = ^{
+            self->_loginAlreadyAutodisplayed = YES;
+            [self sheetDismissed];
+        };
+        [self presentViewController:loginViewController animated:YES completion:^{}];
         return;
     }
     
@@ -510,14 +544,38 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) showNotificationSettings
 {
-    UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsNotificatioSettings"];
-    [self presentViewController:view animated:YES completion:^{}];
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsNotificationSettings"];
+        view.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
+        [self presentViewController:view animated:YES completion:^{}];
+    }];
 }
 
--(void) showPrivacySettings
+-(void) showGeneralSettings
 {
-    UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsPrivacySettings"];
-    [self presentViewController:view animated:YES completion:^{}];
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsGeneralSettings"];
+        view.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
+        [self presentViewController:view animated:YES completion:^{}];
+    }];
+}
+
+-(void) showOnboarding
+{
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"OnboardingView"];
+        if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
+            view.modalPresentationStyle = UIModalPresentationFullScreen;
+        else
+            view.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+        [self presentViewController:view animated:NO completion:^{}];
+    }];
 }
 
 -(void) showSettings
@@ -580,6 +638,9 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
         UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts andCallType:callType];
+        accountPickerController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:accountPickerController animated:YES completion:^{}];
     }];
 }
@@ -694,6 +755,9 @@ static NSMutableSet* _pushWarningDisplayed;
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
+        detailsViewController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
@@ -838,6 +902,9 @@ static NSMutableSet* _pushWarningDisplayed;
         selected = self.unpinnedContacts[indexPath.row];
     }
     UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:selected];
+    detailsViewController.ml_disposeCallback = ^{
+        [self sheetDismissed];
+    };
     [self presentViewController:detailsViewController animated:YES completion:^{}];
 }
 
@@ -947,7 +1014,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(NSAttributedString*) titleForEmptyDataSet:(UIScrollView*) scrollView
 {
-    NSString* text = NSLocalizedString(@"No one is here", @"");
+    NSString* text = NSLocalizedString(@"No active conversations", @"");
     
     NSDictionary* attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: (self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark ? [UIColor whiteColor] : [UIColor blackColor])};
@@ -957,7 +1024,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 - (NSAttributedString*)descriptionForEmptyDataSet:(UIScrollView*) scrollView
 {
-    NSString* text = NSLocalizedString(@"When you start talking to someone,\n they will show up here.", @"");
+    NSString* text = NSLocalizedString(@"When you start a conversation\nwith someone, they will\nshow up here.", @"");
     
     NSMutableParagraphStyle* paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;
@@ -1014,6 +1081,9 @@ static NSMutableSet* _pushWarningDisplayed;
                 DDLogWarn(@"Dummy reg completion called for accountNo: %@", accountNo);
             })),
         }];
+        registerViewController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:registerViewController animated:YES completion:^{}];
     }];
 }
@@ -1023,6 +1093,9 @@ static NSMutableSet* _pushWarningDisplayed;
     if([MLNotificationManager sharedInstance].currentContact != nil)
     {
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:[MLNotificationManager sharedInstance].currentContact];
+        detailsViewController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
 }

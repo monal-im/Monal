@@ -4441,28 +4441,30 @@ NSString* const kStanza = @"stanza";
     [self.mucProcessor leave:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
 }
 
--(void) checkJidType:(NSString*) jid withCompletion:(void (^)(NSString* type, NSString* _Nullable errorMessage)) completion
+-(AnyPromise*) checkJidType:(NSString*) jid
 {
-    XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoInfo setiqTo:jid];
-    [discoInfo setDiscoInfoNode];
-    [self sendIq:discoInfo withResponseHandler:^(XMPPIQ* response) {
-        NSSet* features = [NSSet setWithArray:[response find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
-        //check if this is a muc or account
-        if([features containsObject:@"http://jabber.org/protocol/muc"])
-            return completion(@"muc", nil);
-        else
-            return completion(@"account", nil);
-    } andErrorHandler:^(XMPPIQ* error) {
-        //this means the jid is an account which can not be queried if not subscribed
-        if([error check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}service-unavailable"])
-            return completion(@"account", nil);
-        else if([error check:@"/<type=error>/error<type=auth>/{urn:ietf:params:xml:ns:xmpp-stanzas}subscription-required"])
-            return completion(@"account", nil);
-        //any other error probably means the remote server is not reachable or (even more likely) the jid is incorrect
-        NSString* errorDescription = [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Unexpected error while checking type of jid:", @"")];
-        DDLogError(@"checkJidType got an error, informing user: %@", errorDescription);
-        return completion(@"error", error == nil ? NSLocalizedString(@"Unexpected error while checking type of jid, please try again", @"") : errorDescription);
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+        [discoInfo setiqTo:jid];
+        [discoInfo setDiscoInfoNode];
+        [self sendIq:discoInfo withResponseHandler:^(XMPPIQ* response) {
+            NSSet* features = [NSSet setWithArray:[response find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
+            //check if this is a muc or account
+            if([features containsObject:@"http://jabber.org/protocol/muc"])
+                return resolve(@"muc");
+            else
+                return resolve(@"account");
+        } andErrorHandler:^(XMPPIQ* error) {
+            //this means the jid is an account which can not be queried if not subscribed
+            if([error check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}service-unavailable"])
+                return resolve(@"account");
+            else if([error check:@"/<type=error>/error<type=auth>/{urn:ietf:params:xml:ns:xmpp-stanzas}subscription-required"])
+                return resolve(@"account");
+            //any other error probably means the remote server is not reachable or (even more likely) the jid is incorrect
+            NSString* errorDescription = [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Unexpected error while checking type of jid:", @"")];
+            DDLogError(@"checkJidType got an error, informing user: %@", errorDescription);
+            resolve([NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: error == nil ? NSLocalizedString(@"Unexpected error while checking type of jid, please try again", @"") : errorDescription}]);
+        }];
     }];
 }
 

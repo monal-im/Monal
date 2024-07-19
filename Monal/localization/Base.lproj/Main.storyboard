@@ -79,29 +79,7 @@
         <!--Placeholder View Controller-->
         <scene sceneID="ian-aI-Nym">
             <objects>
-                <viewController id="iM6-Fx-aHL" customClass="MLPlaceholderViewController" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="Kkf-cA-1XK">
-                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mSj-cI-xo2">
-                                <rect key="frame" x="-20" y="29" width="744" height="937.5"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                            </imageView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="hDP-Qt-VUN"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="mSj-cI-xo2" firstAttribute="leading" secondItem="hDP-Qt-VUN" secondAttribute="leading" constant="-20" id="DbE-MV-Gco"/>
-                            <constraint firstItem="mSj-cI-xo2" firstAttribute="top" secondItem="Kkf-cA-1XK" secondAttribute="top" constant="29" id="LN0-ep-dyg"/>
-                            <constraint firstItem="hDP-Qt-VUN" firstAttribute="trailing" secondItem="mSj-cI-xo2" secondAttribute="trailing" constant="-20" id="SZl-rm-jau"/>
-                            <constraint firstAttribute="bottom" secondItem="mSj-cI-xo2" secondAttribute="bottom" constant="29" id="tMp-Od-ics"/>
-                        </constraints>
-                    </view>
-                    <connections>
-                        <outlet property="backgroundImageView" destination="mSj-cI-xo2" id="Sk3-4F-Rao"/>
-                    </connections>
-                </viewController>
+                <viewController id="iM6-Fx-aHL" sceneMemberID="viewController" customClass="MLPlaceholderViewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="N6F-F8-vjp" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-3678.2608695652175" y="267.85714285714283"/>

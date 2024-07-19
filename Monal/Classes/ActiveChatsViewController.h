@@ -14,6 +14,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class UIHostingControllerWorkaround;
 @class chatViewController;
 @class MLCall;
 
@@ -25,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* composeButton;
 @property (nonatomic, strong) chatViewController* currentChatViewController;
 @property (nonatomic, strong) UIActivityIndicatorView* spinner;
+@property (nonatomic) BOOL enqueueGeneralSettings;
 
 -(void) showCallContactNotFoundAlert:(NSString*) jid;
 -(void) callContact:(MLContact*) contact withUIKitSender:(_Nullable id) sender;
@@ -38,7 +40,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) showContacts;
 -(void) deleteConversation;
 -(void) showSettings;
--(void) showPrivacySettings;
+-(void) showGeneralSettings;
+-(void) showOnboarding;
 -(void) showNotificationSettings;
 -(void) showDetails;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString* _Nullable) token usingCompletion:(monal_id_block_t _Nullable) callback;

@@ -98,9 +98,6 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     @defaultsDB("allowCallsFromNonRosterContacts")
     var allowCallsFromNonRosterContacts: Bool
     
-    @defaultsDB("HasSeenPrivacySettings")
-    var hasSeenPrivacySettings: Bool
-    
     @defaultsDB("AutodownloadFiletransfers")
     var autodownloadFiletransfers : Bool
     
@@ -192,9 +189,6 @@ struct GeneralSettings: View {
             }
         }
         .navigationBarTitle(Text("General Settings"))
-        .onAppear {
-            generalSettingsDefaultsDB.hasSeenPrivacySettings = true
-        }
     }
 }
 
@@ -354,13 +348,24 @@ struct PrivacySettings: View {
     
     var body: some View {
         Form {
+            PrivacySettingsSubview(onboardingPart:-1)
+        }
+        .navigationBarTitle(Text("Privacy"), displayMode: .inline)
+    }
+}
+struct PrivacySettingsSubview: View {
+    @ObservedObject var generalSettingsDefaultsDB = GeneralSettingsDefaultsDB()
+    var onboardingPart: Int
+    
+    var body: some View {
+        if onboardingPart == -1 || onboardingPart == 0 {
             Section(header: Text("Activity indications")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendReceivedMarkers) {
-                    Text("Send message received")
+                    Text("Send message receipts")
                     Text("Let your contacts know if you received a message.")
                 }
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendDisplayedMarkers) {
-                    Text("Send message displayed state")
+                    Text("Send read receipts")
                     Text("Let your contacts know if you read a message.")
                 }
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendLastChatState) {
@@ -372,7 +377,8 @@ struct PrivacySettings: View {
                     Text("Let your contacts know when you last opened the app.")
                 }
             }
-            
+        }
+        if onboardingPart == -1 || onboardingPart == 1 {
             Section(header: Text("Interactions")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.allowNonRosterContacts) {
                     Text("Accept incoming messages from strangers")
@@ -386,7 +392,8 @@ struct PrivacySettings: View {
                     Text("Allow contacts not in your contact list to call you.")
                 }.disabled(!generalSettingsDefaultsDB.allowNonRosterContacts)
             }
-            
+        }
+        if onboardingPart == -1 || onboardingPart == 2 {
             Section(header: Text("Misc")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.allowVersionIQ) {
                     Text("Publish version")
@@ -398,7 +405,6 @@ struct PrivacySettings: View {
                 }
             }
         }
-        .navigationBarTitle(Text("Privacy"), displayMode: .inline)
     }
 }
 
@@ -509,6 +515,6 @@ struct AttachmentSettings: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        PrivacySettings()
+        GeneralSettings()
     }
 }

@@ -76,6 +76,14 @@
             </objects>
             <point key="canvasLocation" x="-2099" y="-2608"/>
         </scene>
+        <!--Placeholder View Controller-->
+        <scene sceneID="ian-aI-Nym">
+            <objects>
+                <viewController id="iM6-Fx-aHL" sceneMemberID="viewController" customClass="MLPlaceholderViewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="N6F-F8-vjp" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-3678.2608695652175" y="267.85714285714283"/>
+        </scene>
         <!--Navigation Controller-->
         <scene sceneID="f58-D2-BRy">
             <objects>
@@ -139,6 +147,7 @@
                         <outlet property="spinnerButton" destination="lQZ-nm-6qt" id="WvB-bZ-0y0"/>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="RLU-kt-b8r"/>
                         <segue destination="cmS-oG-cv9" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot9"/>
+                        <segue destination="iM6-Fx-aHL" kind="showDetail" identifier="showConversationPlaceholder" id="xp1-3q-JGG"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ENC-uh-UXW" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -169,6 +178,7 @@
                     <connections>
                         <outlet property="delegate" destination="ncC-uM-uuw" id="L3K-5f-uMh"/>
                         <segue destination="rFS-eK-Dxd" kind="relationship" relationship="masterViewController" id="O9T-Gg-eaS"/>
+                        <segue destination="iM6-Fx-aHL" kind="relationship" relationship="detailViewController" id="D1Q-JS-32d"/>
                     </connections>
                 </splitViewController>
                 <customObject id="ncC-uM-uuw" customClass="MLSplitViewDelegate"/>
@@ -2497,6 +2507,9 @@
             <point key="canvasLocation" x="590" y="-2482"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="xp1-3q-JGG"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <image name="744-locked-received" width="21" height="28"/>
         <image name="744-locked-selected" width="21" height="28"/>

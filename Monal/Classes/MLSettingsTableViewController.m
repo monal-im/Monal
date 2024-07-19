@@ -13,6 +13,8 @@
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
 #import "XMPPEdit.h"
+#import "MonalAppDelegate.h"
+#import "ActiveChatsViewController.h"
 #import <Monal-Swift.h>
 
 @import SafariServices;
@@ -104,6 +106,12 @@ enum DummySettingsRows {
 
     _tappedVersionInfo = 0;
     self.selected = nil;
+}
+
+-(void) viewWillDisappear:(BOOL) animated
+{
+    [super viewWillDisappear:animated];
+    [((MonalAppDelegate*)UIApplication.sharedApplication.delegate).activeChats sheetDismissed];
 }
 
 #pragma mark - key commands

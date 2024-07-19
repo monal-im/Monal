@@ -15,6 +15,10 @@ jobs:
   buildAndPublishAlpha:
     # The type of runner that the job will run on
     runs-on: ['ARM64', 'self-hosted']
+    outputs:
+      id: ${{ steps.changelog.outputs.id }}
+      timestamp: ${{ steps.changelog.outputs.timestamp }}
+      message: ${{ steps.changelog.outputs.message }}
     env:
       APP_NAME: "Monal.alpha"
       APP_DIR: "Monal.alpha.app"
@@ -52,6 +56,7 @@ jobs:
           tar -cf "../$APP_NAME.tar" "$APP_DIR"
           cd ../../../..
       - name: save changelog
+        id: changelog
         env:
           ID: ${{github.event.head_commit.id}}
           TIMESTAMP: ${{github.event.head_commit.timestamp}}
@@ -60,6 +65,12 @@ jobs:
           echo "ID: $ID" > changes.txt
           echo "Timestamp: $TIMESTAMP" >> changes.txt
           echo "$MESSAGE" >> changes.txt
+          
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "timestamp=$TIMESTAMP" >> "$GITHUB_OUTPUT"
+          echo "message<<__EOF__" >> "$GITHUB_OUTPUT"
+          echo "$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "__EOF__" >> "$GITHUB_OUTPUT"
       - name: Uploading to alpha site
         run: ./scripts/uploadAlpha.sh
       - name: Notarize catalyst
@@ -91,3 +102,24 @@ jobs:
       #     chmod +x ./scripts/updateLocalization.sh
       #     chmod +x ./scripts/xliff_extractor.py
       #     ./scripts/updateLocalization.sh NOCOMMIT
+  notifyMuc:
+    name: Notify support MUC about new Alpharelease
+    runs-on: ubuntu-latest
+    needs: [buildAndPublishAlpha]
+    steps:
+      - name: Notify
+        uses: monal-im/xmpp-notifier@master
+        with: # Set the secrets as inputs
+          jid: ${{ secrets.BOT_JID }}
+          password: ${{ secrets.BOT_PASSWORD }}
+          server_host: ${{ secrets.BOT_SERVER }}
+          recipient: monal-alpha@chat.yax.im
+          recipient_is_room: true
+          bot_alias: "Monal Release Bot"
+          message: |
+            New alpha build based on the following commit:
+            ${{ needs.buildAndPublishAlpha.outputs.id }}
+            ${{ needs.buildAndPublishAlpha.outputs.timestamp }}
+            ${{ needs.buildAndPublishAlpha.outputs.message }}
+            
+            Download page: https://downloads.monal-im.org/monal-im/alpha/

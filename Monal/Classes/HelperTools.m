@@ -2219,6 +2219,15 @@ void swizzle(Class c, SEL orig, SEL new)
     }
 }
 
++(NSString*) stringFromTimeInterval:(NSUInteger) interval
+{
+    NSUInteger hours = interval / 3600;
+    NSUInteger minutes = (interval % 3600) / 60;
+    NSUInteger seconds = interval % 60;
+
+    return [NSString stringWithFormat:@"%luh %lumin and %lusec", hours, minutes, seconds];
+}
+
 +(NSDate*) parseDateTimeString:(NSString*) datetime
 {
     static NSDateFormatter* rfc3339DateFormatter;

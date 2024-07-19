@@ -147,6 +147,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSSet*) getOwnFeatureSet;
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features andForms:(NSArray*) forms;
 +(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction;
++(NSString*) stringFromTimeInterval:(NSUInteger) interval;
 +(NSDate*) parseDateTimeString:(NSString*) datetime;
 +(NSString*) generateDateTimeString:(NSDate*) datetime;
 +(NSString*) encodeRandomResource;

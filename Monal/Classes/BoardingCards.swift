@@ -20,6 +20,7 @@ struct OnboardingCard: Identifiable {
     let imageName: String?
     let articleText: Text?
     let customView: AnyView?
+    let nextText: String?
 }
 
 struct OnboardingView: View {
@@ -99,7 +100,7 @@ struct OnboardingView: View {
                                             currentIndex += 1
                                         } label: {
                                             HStack {
-                                                Text("Next")
+                                                Text(card.nextText ?? NSLocalizedString("Next", comment:"onboarding"))
                                                     .fontWeight(.bold)
                                                 Image(systemName: "chevron.right")
                                             }
@@ -107,9 +108,9 @@ struct OnboardingView: View {
                                     } else {
                                         Button {
                                             onboardingState.hasCompletedOnboarding = true
-                                            delegate.dismiss()
+                                            delegate.dismissWithoutAnimation()
                                         } label: {
-                                            Text("Close")
+                                            Text(card.nextText ?? NSLocalizedString("Close", comment:"onboarding"))
                                                 .fontWeight(.bold)
                                                 .padding()
                                                 .background(Color.blue)
@@ -150,7 +151,8 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             articleText: Text("""
             Modern iOS and macOS XMPP chat client.\n\nXMPP is a federated network: Just like email, you can register your account on many servers and still talk to anyone, even if they signed up on a different server.
             """),
-            customView: nil
+            customView: nil,
+            nextText: nil
         ),
         OnboardingCard(
             title: Text("Features"),
@@ -169,28 +171,32 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             👨‍💻 Open Source :
             The app's source code is publicly available for audit and contribution.
             """),
-            customView: nil
+            customView: nil,
+            nextText: nil
         ),
         OnboardingCard(
             title: Text("Settings"),
             description: Text("These are important privacy settings you may want to review!"),
             imageName: nil,
             articleText: nil,
-            customView: AnyView(PrivacySettingsSubview(onboardingPart:0))
+            customView: AnyView(PrivacySettingsSubview(onboardingPart:0)),
+            nextText: nil
         ),
         OnboardingCard(
             title: Text("Settings"),
             description: Text("These are important privacy settings you may want to review!"),
             imageName: nil,
             articleText: nil,
-            customView: AnyView(PrivacySettingsSubview(onboardingPart:1))
+            customView: AnyView(PrivacySettingsSubview(onboardingPart:1)),
+            nextText: nil
         ),
         OnboardingCard(
             title: Text("Even more to customize!"),
             description: Text("You can customize even more, just use the button below to open the settings."),
             imageName: "hand.wave",
             articleText: nil,
-            customView: AnyView(TakeMeToSettingsView(delegate:delegate))
+            customView: AnyView(TakeMeToSettingsView(delegate:delegate)),
+            nextText: nil
         ),
     ]
     OnboardingView(delegate: delegate, cards: cards)

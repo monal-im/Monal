@@ -147,10 +147,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     [self upgradeBoolUserSettingsIfUnset:@"hasCompletedOnboarding" toDefault:NO];
     
-//always show onboarding on simulator for now
-#if TARGET_OS_SIMULATOR
-    [[HelperTools defaultsDB] setBool:NO forKey:@"hasCompletedOnboarding"];
-#endif
+// //always show onboarding on simulator for now
+// #if TARGET_OS_SIMULATOR
+//     [[HelperTools defaultsDB] setBool:NO forKey:@"hasCompletedOnboarding"];
+// #endif
 }
 
 -(void) upgradeFloatUserSettingsToInteger:(NSString*) settingsName

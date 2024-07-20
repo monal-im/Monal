@@ -685,7 +685,7 @@ class SwiftuiInterface : NSObject {
         return host
     }
     
-    @objc
+    @objc(makeAddContactViewWithDismisser:)
     func makeAddContactView(dismisser: @escaping (MLContact) -> ()) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))

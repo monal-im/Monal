@@ -438,6 +438,23 @@ static NSMutableSet* _pushWarningDisplayed;
     });
 }
 
+-(void) showAddContact
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self presentChatWithContact:newContact];
+                });
+            }];
+            addContactMenuView.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+            [self presentViewController:addContactMenuView animated:NO completion:^{}];
+        }];
+    });
+}
+
 -(void) segueToIntroScreensIfNeeded
 {
     //open password migration if needed

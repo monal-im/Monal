@@ -1000,7 +1000,13 @@ $$
             [[MLXMPPManager sharedInstance] removeContact:fromContact];
         }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
-            [self openChatOfContact:fromContact];
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+                while(self.activeChats == nil)
+                    usleep(100000);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [(ActiveChatsViewController*)self.activeChats showAddContact];
+                });
+            });
     }
     else
     {

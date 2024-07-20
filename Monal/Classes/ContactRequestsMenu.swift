@@ -28,7 +28,7 @@ struct ContactRequestsMenuEntry: View {
                     appDelegate.openChat(of:contact)
                 } label: {
                     Image(systemName: "text.bubble")
-                        .accentColor(.black)
+                        .accentColor(.primary)
                 }
                 //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
                 .buttonStyle(BorderlessButtonStyle())

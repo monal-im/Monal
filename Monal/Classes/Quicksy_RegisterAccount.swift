@@ -45,6 +45,9 @@ func sendRegisterRequest(number:String, pin:String, password:String) -> Promise<
 class Quicksy_State: ObservableObject {
     @defaultsDB("Quicksy_phoneNumber")
     var phoneNumber: String?
+    
+    @defaultsDB("Quicksy_countryCode")
+    var countryCode: String?
 }
 
 struct Quicksy_Country: Identifiable, Hashable {
@@ -108,6 +111,7 @@ struct Quicksy_RegisterAccount: View {
     }
     
     private func createAccount() {
+        state.countryCode = selectedCountry!.code       //used to add a country code to phonebook entries not having any
         let password = HelperTools.generateRandomPassword()
         if let number = state.phoneNumber {
             showPromisingLoadingOverlay(overlay, headline:NSLocalizedString("Registering account...", comment: ""), description: "") {
@@ -124,7 +128,6 @@ struct Quicksy_RegisterAccount: View {
                     showLoginErrorAlert(errorMessage:NSLocalizedString("Account already configured!", comment: ""))
                     self.newAccountNo = nil
                 }
-                
             }.catch { error in
                 DDLogError("Catched sendRegisterRequest error: \(String(describing:error))")
                 if let response = error as? PMKHTTPError {
@@ -153,7 +156,7 @@ struct Quicksy_RegisterAccount: View {
     private func showSuccessAlert() {
         hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Success!")
-        alertPrompt.message = Text("You are set up and connected.")
+        alertPrompt.message = Text("Quicksy is now set up and connected.")
         showAlert = true
     }
 

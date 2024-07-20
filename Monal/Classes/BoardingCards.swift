@@ -195,7 +195,7 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
         OnboardingCard(
             title: Text("Settings"),
             description: Text("These are important privacy settings you may want to review!"),
-            imageName: nil,
+            imageName: "gear",
             articleText: nil,
             customView: AnyView(PrivacySettingsSubview(onboardingPart:0)),
             nextText: nil
@@ -203,7 +203,7 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
         OnboardingCard(
             title: Text("Settings"),
             description: Text("These are important privacy settings you may want to review!"),
-            imageName: nil,
+            imageName: "gear",
             articleText: nil,
             customView: AnyView(PrivacySettingsSubview(onboardingPart:1)),
             nextText: nil

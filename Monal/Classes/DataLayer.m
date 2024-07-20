@@ -947,6 +947,7 @@ static NSDateFormatter* dbFormatter;
         BOOL encrypt = NO;
 #ifndef DISABLE_OMEMO
         // omemo for non group MUCs is disabled once the type of the muc is set
+        // (for channel type mucs this will be disabled while creating the muc shortly after this function is called)
         encrypt = [[HelperTools defaultsDB] boolForKey:@"OMEMODefaultOn"];
 #endif// DISABLE_OMEMO
         

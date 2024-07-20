@@ -8,7 +8,7 @@
 
 class DebugDefaultDB: ObservableObject {
     @defaultsDB("udpLoggerEnabled")
-    var udpLoggerEnabled:Bool
+    var udpLoggerEnabled: Bool
     
     @defaultsDB("udpLoggerPort")
     var udpLoggerPort: String
@@ -18,6 +18,9 @@ class DebugDefaultDB: ObservableObject {
     
     @defaultsDB("udpLoggerKey")
     var udpLoggerKey: String
+    
+    @defaultsDB("hasCompletedOnboarding")
+    var hasCompletedOnboarding: Bool
 }
 
 struct LogFilesView: View {
@@ -133,9 +136,17 @@ struct UDPConfigView: View {
 }
 
 struct CrashTestingView: View {
+    @ObservedObject var defaultDB = DebugDefaultDB()
+    
     var body: some View {
             VStack(alignment:.leading, spacing: 25) {
-                Text("This allows you to forcefully crash the app using several different methods to test the crash handling.")
+                Section(header: Text("Some debug settings.")) {
+                    Toggle(isOn: $defaultDB.hasCompletedOnboarding) {
+                        Text("Don't show onboarding")
+                    }
+                }
+                
+                Text("The following buttons allow you to forcefully crash the app using several different methods to test the crash handling.")
                 
                 Group {
                     Button("Try to call unknown handler method") {

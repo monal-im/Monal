@@ -235,7 +235,7 @@ struct AddContactMenu: View {
                             scannedFingerprints == nil ? Text("Add") : Text("Add scanned contact")
                         }
                         //.fontWeight(.bold)
-                        .padding()
+                        .padding(10)
                         .background(toAddEmpty || toAddInvalid ? Color.gray : Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)

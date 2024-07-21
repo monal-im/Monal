@@ -48,7 +48,7 @@ struct OnboardingView: View {
                                         Label("Back", systemImage: "chevron.left")
                                             .labelStyle(.iconOnly)
                                             .foregroundColor(.blue)
-                                            .padding()
+                                            .padding(10)
                                     }
                                 }
                                 
@@ -114,7 +114,7 @@ struct OnboardingView: View {
                                         } label: {
                                             Text(card.nextText ?? NSLocalizedString("Close", comment:"onboarding"))
                                                 .fontWeight(.bold)
-                                                .padding()
+                                                .padding(10)
                                                 .background(Color.blue)
                                                 .foregroundColor(.white)
                                                 .cornerRadius(10)
@@ -240,7 +240,7 @@ struct TakeMeToSettingsView: View {
             }) {
                 Text("Take me to settings")
                     .fontWeight(.bold)
-                    .padding()
+                    .padding(10)
                     .background(Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(10)

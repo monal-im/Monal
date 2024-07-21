@@ -238,7 +238,7 @@ struct Quicksy_RegisterAccount: View {
                             }) {
                                 Text("Next")
                                     .fontWeight(.bold)
-                                    .padding()
+                                    .padding(10)
                                     .background(!isValidNumber ? Color(UIColor.lightGray) : Color.blue)
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
@@ -258,7 +258,7 @@ struct Quicksy_RegisterAccount: View {
                         }) {
                             Text("Change it")
                                 .fontWeight(.bold)
-                                .padding()
+                                .padding(10)
                                 .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
@@ -271,7 +271,7 @@ struct Quicksy_RegisterAccount: View {
                         }) {
                             Text("OK")
                                 .fontWeight(.bold)
-                                .padding()
+                                .padding(10)
                                 .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
@@ -325,7 +325,7 @@ struct Quicksy_RegisterAccount: View {
                         }) {
                             Text("Previous")
                                 .fontWeight(.bold)
-                                .padding()
+                                .padding(10)
                                 .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
@@ -338,7 +338,7 @@ struct Quicksy_RegisterAccount: View {
                         }) {
                             Text("Next")
                                 .fontWeight(.bold)
-                                .padding()
+                                .padding(10)
                                 .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
@@ -356,7 +356,7 @@ struct Quicksy_RegisterAccount: View {
                         }) {
                             Text("No")
                                 .fontWeight(.bold)
-                                .padding()
+                                .padding(10)
                                 .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
@@ -370,7 +370,7 @@ struct Quicksy_RegisterAccount: View {
                         }) {
                             Text("Yes")
                                 .fontWeight(.bold)
-                                .padding()
+                                .padding(10)
                                 .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
@@ -432,7 +432,7 @@ struct Quicksy_RegisterAccount: View {
                 }) {
                     Text("OK")
                         .fontWeight(.bold)
-                        .padding()
+                        .padding(10)
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)

@@ -66,6 +66,8 @@ struct OnboardingView: View {
                                         .fontWeight(.bold)
                                         .foregroundColor(.primary)
                                         .padding(.bottom, 4)
+                                        //needed for ios < 16, see https://stackoverflow.com/a/59684944
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                                 .accessibilityElement(children: .combine)
                                 .accessibilityAddTraits(.isHeader)

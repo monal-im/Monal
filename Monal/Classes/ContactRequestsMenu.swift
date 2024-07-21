@@ -57,22 +57,23 @@ struct ContactRequestsMenuEntry: View {
 
 struct ContactRequestsMenu: View {
     @State var pendingRequests: [xmpp:[MLContact]] = [:]
+    @State var connectedAccounts: [Int:xmpp] = [:]
     
     func updateRequests() {
         let requests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
-        var connectedAccounts: [Int:xmpp] = [:]
+        connectedAccounts.removeAll()
         for account in MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp] {
             connectedAccounts[account.accountNo.intValue] = account
         }
-        self.pendingRequests.removeAll()
+        pendingRequests.removeAll()
         for contact in requests {
             //add only requests having an enabled (dubbed connected) account
             //(should be a noop because allContactRequests() returns only enabled accounts)
             if let account = connectedAccounts[contact.accountId.intValue] {
-                if self.pendingRequests[account] == nil {
-                    self.pendingRequests[account] = []
+                if pendingRequests[account] == nil {
+                    pendingRequests[account] = []
                 }
-                self.pendingRequests[account]!.append(contact)
+                pendingRequests[account]!.append(contact)
             }
         }
     }
@@ -84,10 +85,16 @@ struct ContactRequestsMenu: View {
                     .foregroundColor(.secondary)
             } else {
                 List {
-                    ForEach(self.pendingRequests.sorted(by:{ $0.0.connectionProperties.identity.jid < $1.0.connectionProperties.identity.jid }), id: \.key) { account, requests in
-                        Section(header: Text("Account: \(account.connectionProperties.identity.jid)")) {
+                    ForEach(pendingRequests.sorted(by:{ $0.0.connectionProperties.identity.jid < $1.0.connectionProperties.identity.jid }), id: \.key) { account, requests in
+                        if connectedAccounts.count == 1 {
                             ForEach(requests.indices, id: \.self) { idx in
                                 ContactRequestsMenuEntry(contact: requests[idx])
+                            }
+                        } else {
+                            Section(header: Text("Account: \(account.connectionProperties.identity.jid)")) {
+                                ForEach(requests.indices, id: \.self) { idx in
+                                    ContactRequestsMenuEntry(contact: requests[idx])
+                                }
                             }
                         }
                     }

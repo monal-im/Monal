@@ -8,20 +8,15 @@
 
 struct ContactRequestsMenuEntry: View {
     let contact : MLContact
-    let doDelete: () -> ()
     @State private var isDeleted = false
     
-    private func delete() {
-        if(isDeleted == false) {
-            isDeleted = true
-            doDelete()
-        }
-    }
-
     var body: some View {
         HStack {
             Text(contact.contactJid)
+                .foregroundColor(.secondary)
+            
             Spacer()
+            
             Group {
                 Button {
                     let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
@@ -35,7 +30,6 @@ struct ContactRequestsMenuEntry: View {
                 
                 Button {
                     // deny request
-                    self.delete()       //update ui first because the array index can change afterwards
                     MLXMPPManager.sharedInstance().remove(contact)
                 } label: {
                     Image(systemName: "trash.circle")
@@ -46,7 +40,6 @@ struct ContactRequestsMenuEntry: View {
                 
                 Button {
                     // accept request
-                    self.delete()       //update ui first because the array index can change afterwards
                     MLXMPPManager.sharedInstance().add(contact)
                     let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                     appDelegate.openChat(of:contact)
@@ -63,35 +56,53 @@ struct ContactRequestsMenuEntry: View {
 }
 
 struct ContactRequestsMenu: View {
-    @State private var pendingRequests: [MLContact]
-
-    var body: some View {
-        List {
-            Section(header: Text("Allowing someone to add you as a contact lets them see your profile picture and when you are online.")) {
-                if(pendingRequests.isEmpty) {
-                    Text("No pending constact requests")
-                        .foregroundColor(.secondary)
+    @State var pendingRequests: [xmpp:[MLContact]] = [:]
+    
+    func updateRequests() {
+        let requests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+        var connectedAccounts: [Int:xmpp] = [:]
+        for account in MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp] {
+            connectedAccounts[account.accountNo.intValue] = account
+        }
+        self.pendingRequests.removeAll()
+        for contact in requests {
+            //add only requests having an enabled (dubbed connected) account
+            //(should be a noop because allContactRequests() returns only enabled accounts)
+            if let account = connectedAccounts[contact.accountId.intValue] {
+                if self.pendingRequests[account] == nil {
+                    self.pendingRequests[account] = []
                 }
-                ForEach(pendingRequests.indices, id: \.self) { idx in
-                    ContactRequestsMenuEntry(
-                        contact: pendingRequests[idx],
-                        doDelete: {
-                            self.pendingRequests.remove(at: idx)
+                self.pendingRequests[account]!.append(contact)
+            }
+        }
+    }
+    
+    var body: some View {
+        Section(header: Text("Allowing someone to add you as a contact lets them see your profile picture and when you are online.")) {
+            if(pendingRequests.isEmpty) {
+                Text("No pending constact requests")
+                    .foregroundColor(.secondary)
+            } else {
+                List {
+                    ForEach(self.pendingRequests.sorted(by:{ $0.0.connectionProperties.identity.jid < $1.0.connectionProperties.identity.jid }), id: \.key) { account, requests in
+                        Section(header: Text("Account: \(account.connectionProperties.identity.jid)")) {
+                            ForEach(requests.indices, id: \.self) { idx in
+                                ContactRequestsMenuEntry(contact: requests[idx])
+                            }
                         }
-                    )
+                    }
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh")).receive(on: RunLoop.main)) { notification in
-            self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+            updateRequests()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRemoved")).receive(on: RunLoop.main)) { notification in
-            self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+            updateRequests()
         }
-    }
-
-    init() {
-        self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+        .onAppear {
+            updateRequests()
+        }
     }
 }
 

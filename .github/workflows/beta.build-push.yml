@@ -21,6 +21,7 @@ jobs:
       release-notes: ${{ steps.releasenotes.outputs.notes }}
     env:
       APP_NAME: "Monal"
+      BUILD_SCHEME: "Monal"
       APP_DIR: "Monal.app"
       BUILD_TYPE: "Beta"
       EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"

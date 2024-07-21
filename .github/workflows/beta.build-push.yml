@@ -77,15 +77,15 @@ jobs:
           echo "name=Monal Beta $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           echo "notes<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "$(git log -n 1 --merges --pretty=format:%b)" | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1/g' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n\([^-]\)/ \1/g' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1/g' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           echo "notes_ios<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "$(git log -n 1 --merges --pretty=format:%b)" | grep -v '^[\t\n ]*MACOS_ONLY.*$' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n\([^-]\)/ \1/g' | grep -v '^[\t\n ]*MACOS_ONLY.*$' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           echo "notes_macos<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "$(git log -n 1 --merges --pretty=format:%b)" | grep -v '^[\t\n ]*IOS_ONLY.*$' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n\([^-]\)/ \1/g' | grep -v '^[\t\n ]*IOS_ONLY.*$' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           cat "$OUTPUT_FILE" >> "$GITHUB_OUTPUT"

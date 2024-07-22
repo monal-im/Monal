@@ -43,7 +43,7 @@ jobs:
         id: releasenotes
         run: |
           function repairNotes {
-              awk '{
+              sed 's/\r//g' | awk '{
                   if (NR == 1) {
                       printf("%s", $0)
                   } else {

@@ -105,6 +105,21 @@ jobs:
         run: chmod +x ./scripts/build.sh
       - name: Run build
         run: ./scripts/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-ios
+          path: Monal/build/ipa/Monal.ipa
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-catalyst-dsym
+          path: Monal/build/macos_Monal.xcarchive/dSYMs
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-ios-dsym
+          path: Monal/build/ios_Monal.xcarchive/dSYMs
+          if-no-files-found: error
       - name: validate ios app
         run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: Push beta tag to repo
@@ -126,14 +141,6 @@ jobs:
           stapler validate "$APP_DIR"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
           cd ../../../..
-      - name: Upload new catalyst beta to monal-im.org
-        run: ./scripts/uploadNonAlpha.sh beta
-      - name: Publish catalyst to appstore connect
-        #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
-        env:
-          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_macos }}
-        run: |
-          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - uses: actions/upload-artifact@v4
         with:
           name: monal-catalyst-zip
@@ -144,21 +151,14 @@ jobs:
           name: monal-catalyst-pkg
           path: Monal/build/app/Monal.pkg
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        with:
-          name: monal-ios
-          path: Monal/build/ipa/Monal.ipa
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        with:
-          name: monal-catalyst-dsym
-          path: Monal/build/macos_Monal.xcarchive/dSYMs
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        with:
-          name: monal-ios-dsym
-          path: Monal/build/ios_Monal.xcarchive/dSYMs
-          if-no-files-found: error
+      - name: Upload new catalyst beta to monal-im.org
+        run: ./scripts/uploadNonAlpha.sh beta
+      - name: Publish catalyst to appstore connect
+        #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
+        env:
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_macos }}
+        run: |
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Release
         uses: softprops/action-gh-release@v2
         with:

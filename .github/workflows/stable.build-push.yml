@@ -99,9 +99,23 @@ jobs:
           fi
       - name: Make our build scripts executable
         run: chmod +x ./scripts/build.sh
-      - run: chmod +x ./scripts/push_xmpp.org.sh
       - name: Run build
         run: ./scripts/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-ios
+          path: Monal/build/ipa/Monal.ipa
+          if-no-files-found: error
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: monal-catalyst-dsym
+      #     path: Monal/build/macos_Monal.xcarchive/dSYMs
+      #     if-no-files-found: error
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: monal-ios-dsym
+      #     path: Monal/build/ios_Monal.xcarchive/dSYMs
+      #     if-no-files-found: error
       - name: validate ios app
         run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: push tag to stable repo
@@ -131,6 +145,16 @@ jobs:
           stapler validate "$APP_DIR"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
           cd ../../../..
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-catalyst-zip
+          path: Monal/build/app/Monal.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-catalyst-pkg
+          path: Monal/build/app/Monal.pkg
+          if-no-files-found: error
       - name: Upload new catalyst stable to monal-im.org
         run: ./scripts/uploadNonAlpha.sh stable
       - name: Publish catalyst to appstore connect
@@ -144,31 +168,6 @@ jobs:
       - name: Remove fastlane metadata directory
         run: |
           rm -rf "${{ steps.metadata.outputs.path }}"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: monal-catalyst-zip
-          path: Monal/build/app/Monal.zip
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        with:
-          name: monal-catalyst-pkg
-          path: Monal/build/app/Monal.pkg
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        with:
-          name: monal-ios
-          path: Monal/build/ipa/Monal.ipa
-          if-no-files-found: error
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: monal-catalyst-dsym
-      #     path: Monal/build/macos_Monal.xcarchive/dSYMs
-      #     if-no-files-found: error
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: monal-ios-dsym
-      #     path: Monal/build/ios_Monal.xcarchive/dSYMs
-      #     if-no-files-found: error
       - name: Create Draft Release
         id: draftrelease
         uses: softprops/action-gh-release@v2

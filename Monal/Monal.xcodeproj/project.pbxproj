@@ -750,7 +750,7 @@
 		C1E856A828DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/iosShare.strings; sourceTree = "<group>"; };
 		C1E856A928DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1E8A7F62B8E47C300760220 /* EditGroupSubject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditGroupSubject.swift; sourceTree = "<group>"; };
-		C1F0AD15288BCE6F00BB0182 /* Alpha.Monal.ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Alpha.Monal.ios.entitlements; sourceTree = "<group>"; };
+		C1F0AD15288BCE6F00BB0182 /* Monal.Alpha.ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Monal.Alpha.ios.entitlements; sourceTree = "<group>"; };
 		C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactSoftwareVersionInfo.h; sourceTree = "<group>"; };
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
 		C1F5C7AB2777621B0001F295 /* ContactResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactResources.swift; sourceTree = "<group>"; };
@@ -1277,7 +1277,7 @@
 			isa = PBXGroup;
 			children = (
 				8414ADF92A7ABAC900EFFCCC /* Packages */,
-				C1F0AD15288BCE6F00BB0182 /* Alpha.Monal.ios.entitlements */,
+				C1F0AD15288BCE6F00BB0182 /* Monal.Alpha.ios.entitlements */,
 				C1567E3628255C64006E9637 /* Monal.ios.entitlements */,
 				C1567E3528255C64006E9637 /* Monal.macos.entitlements */,
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
@@ -2680,7 +2680,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -3047,7 +3047,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -3209,7 +3209,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				ONLY_ACTIVE_ARCH = YES;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
@@ -3485,7 +3485,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -3838,7 +3838,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -4252,7 +4252,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = NO;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -4288,9 +4288,9 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES_ERROR;
 				CLANG_WARN_VEXING_PARSE = YES_ERROR;
 				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
-				CODE_SIGN_ENTITLEMENTS = Alpha.Monal.ios.entitlements;
-				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Alpha.Monal.ios.entitlements;
-				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Alpha.Monal.macos.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Monal.Alpha.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.Alpha.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.Alpha.macos.entitlements;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
@@ -4314,7 +4314,7 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_PEDANTIC = NO;
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
-				INFOPLIST_FILE = "Alpha.Monal-Info.plist";
+				INFOPLIST_FILE = "Monal.Alpha-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Monal.alpha;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,

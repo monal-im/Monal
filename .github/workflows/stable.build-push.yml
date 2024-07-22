@@ -54,7 +54,7 @@ jobs:
           echo "buildNumber=$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "version=$version" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "buildVersion="$(echo "$version" | grep -oE '^[0-9]+(\.[0-9]+){0,2}')" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "buildVersion=$(echo "$version" | grep -oE '^[0-9]+(\.[0-9]+){0,2}')" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           echo "name=Monal Beta $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
           

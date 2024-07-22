@@ -42,7 +42,8 @@ jobs:
       - name: Extract version number and changelog from newest merge commit
         id: releasenotes
         run: |
-          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          buildNumber="$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')"
+          version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
           mkdir -p /Users/ci/releases
           OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
           touch "$OUTPUT_FILE"
@@ -50,9 +51,10 @@ jobs:
           
           echo "buildNumber=$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "version=$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "version=$version" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "buildVersion=$(echo "$version" | grep -oE '^[0-9]+(\.[0-9]+){0,2}')" | tee /dev/stderr >> "$OUTPUT_FILE"
           
-          echo "name=Monal $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "name=Quicksy $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           echo "notes<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "$(git log -n 1 --merges --pretty=format:%b)" | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n\([^-]\)/ \1/g' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]*(.*)$/\1/g' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]*(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"

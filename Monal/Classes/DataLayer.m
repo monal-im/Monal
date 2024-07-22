@@ -947,6 +947,7 @@ static NSDateFormatter* dbFormatter;
         BOOL encrypt = NO;
 #ifndef DISABLE_OMEMO
         // omemo for non group MUCs is disabled once the type of the muc is set
+        // (for channel type mucs this will be disabled while creating the muc shortly after this function is called)
         encrypt = [[HelperTools defaultsDB] boolForKey:@"OMEMODefaultOn"];
 #endif// DISABLE_OMEMO
         
@@ -1260,7 +1261,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     
     return [self.db idWriteTransaction:^{
-        if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound andJid:buddyName onAccount:accountNo] == nil)
+        if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound occupantId:occupantId andJid:buddyName onAccount:accountNo] == nil)
         {
             //this is always from a contact
             NSDateFormatter* formatter = [NSDateFormatter new];
@@ -1317,7 +1318,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound andJid:(NSString*) jid onAccount:(NSNumber*) accountNo
+-(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound occupantId:(NSString* _Nullable) occupantId andJid:(NSString*) jid onAccount:(NSNumber*) accountNo
 {
     if(accountNo == nil)
         return (NSNumber*)nil;
@@ -1346,11 +1347,17 @@ static NSDateFormatter* dbFormatter;
             if(historyId != nil)
             {
                 DDLogVerbose(@"found by origin-id or messageid");
-                if(stanzaId)
+                if(stanzaId!=nil)
                 {
                     DDLogDebug(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, inbound=%d)...", historyId, stanzaId, accountNo, messageId, inbound);
                     //this entry needs an update of its stanzaid
                     [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
+                }
+                if(occupantId!=nil)
+                {
+                    DDLogDebug(@"Updating occupant_id of message_history_id %@ to %@ for (account=%@, messageid=%@, inbound=%d)...", historyId, occupantId, accountNo, messageId, inbound);
+                    //only update occupant id if not set yet
+                    [self.db executeNonQuery:@"UPDATE message_history SET occupant_id=? WHERE occupant_id IS NULL AND message_history_id=?" andArguments:@[nilWrapper(occupantId), historyId]];
                 }
                 return historyId;
             }

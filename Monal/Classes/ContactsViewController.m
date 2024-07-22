@@ -235,9 +235,14 @@
         {
             if(!contact.isSelfChat)
                 onlySelfChats = NO;
-            //ignore all contacts not at least in subscribedTo or asking state
-            if(contact.isInRoster)
+#ifdef IS_QUICKSY
+            [contactsToDisplay addObject:contact];
+#else
+            //ignore all contacts not at least in any roster state: e.g. subscribedTo or asking state
+            //OR is subscribedFrom (e.g. we approved them already, bit they don't approve us)
+            if((contact.isSubscribedTo || contact.hasOutgoingContactRequest) || contact.isSubscribedFrom)
                 [contactsToDisplay addObject:contact];
+#endif
         }
         if(!onlySelfChats)
             self.contacts = contactsToDisplay;

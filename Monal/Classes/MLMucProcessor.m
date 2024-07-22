@@ -1451,14 +1451,19 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         }
         //make public channels "mention only" on first join
         if([@"channel" isEqualToString:mucType])
+        {
+            DDLogDebug(@"Configuring new muc %@ to be mention-only...", iqNode.fromUser);
             [[DataLayer sharedInstance] setMucAlertOnMentionOnly:iqNode.fromUser onAccount:_account.accountNo];
+        }
     }
     
     if(![mucType isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:_account.accountNo]])
     {
-        DDLogInfo(@"Configuring muc %@ to type '%@'...", iqNode.fromUser, mucType);
+        DDLogInfo(@"Configuring muc %@ to be of type '%@'...", iqNode.fromUser, mucType);
         [[DataLayer sharedInstance] updateMucTypeTo:mucType forRoom:iqNode.fromUser andAccount:_account.accountNo];
     }
+    else
+        DDLogDebug(@"Muc %@ is already configured to be of type '%@' ('%@')...", iqNode.fromUser, mucType, [[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:_account.accountNo]);
     
     if(!mucName || ![mucName length])
         mucName = @"";

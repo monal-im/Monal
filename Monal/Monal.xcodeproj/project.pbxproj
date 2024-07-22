@@ -144,6 +144,7 @@
 		844921EA2C29F9A000B99A9C /* MLDelayableTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 844921E92C29F9A000B99A9C /* MLDelayableTimer.m */; };
 		844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */; };
 		844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
+		845836BA2C49F36300B11EC5 /* Quicksy Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */; };
 		845D636B2AD4AEDA0066EFFB /* ImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845D636A2AD4AEDA0066EFFB /* ImageViewer.swift */; };
 		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
@@ -159,6 +160,7 @@
 		849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */; };
 		849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF402BACF0360009BCD7 /* CocoaLumberjackSwift */; };
 		849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF422BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend */; };
+		84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */; };
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
 		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; };
@@ -580,6 +582,7 @@
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
 		844921E92C29F9A000B99A9C /* MLDelayableTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDelayableTimer.m; sourceTree = "<group>"; };
 		844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDelayableTimer.h; sourceTree = "<group>"; };
+		845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Quicksy Launch Screen.storyboard"; path = "Monal-iOS/Quicksy Launch Screen.storyboard"; sourceTree = "<group>"; };
 		845D636A2AD4AEDA0066EFFB /* ImageViewer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageViewer.swift; sourceTree = "<group>"; };
 		846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPlaceholder.swift; sourceTree = "<group>"; };
 		848227902C4A6194003CCA33 /* MLPlaceholderViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPlaceholderViewController.m; sourceTree = "<group>"; };
@@ -591,6 +594,7 @@
 		849248482AD4CEC400986C1A /* ZoomableContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoomableContainer.swift; sourceTree = "<group>"; };
 		849A53E3287135B2007E941A /* MLVoIPProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLVoIPProcessor.m; path = Classes/MLVoIPProcessor.m; sourceTree = SOURCE_ROOT; };
 		849A53E5287135D7007E941A /* MLVoIPProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLVoIPProcessor.h; path = Classes/MLVoIPProcessor.h; sourceTree = SOURCE_ROOT; };
+		84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quicksy_RegisterAccount.swift; sourceTree = "<group>"; };
 		84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftHelpers.swift; sourceTree = "<group>"; };
 		84C1CD512A8F617F007076ED /* MLStreamRedirect.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLStreamRedirect.m; sourceTree = "<group>"; };
 		84C1CD532A8F6196007076ED /* MLStreamRedirect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLStreamRedirect.h; sourceTree = "<group>"; };
@@ -746,7 +750,7 @@
 		C1E856A828DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/iosShare.strings; sourceTree = "<group>"; };
 		C1E856A928DECF5F00B104E9 /* eu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = eu; path = external/eu.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1E8A7F62B8E47C300760220 /* EditGroupSubject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditGroupSubject.swift; sourceTree = "<group>"; };
-		C1F0AD15288BCE6F00BB0182 /* Alpha.Monal.ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Alpha.Monal.ios.entitlements; sourceTree = "<group>"; };
+		C1F0AD15288BCE6F00BB0182 /* Monal.Alpha.ios.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Monal.Alpha.ios.entitlements; sourceTree = "<group>"; };
 		C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactSoftwareVersionInfo.h; sourceTree = "<group>"; };
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
 		C1F5C7AB2777621B0001F295 /* ContactResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactResources.swift; sourceTree = "<group>"; };
@@ -1128,6 +1132,7 @@
 		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */,
 				841EE42E2A426F0900D3AF14 /* tools */,
 				84D31CDA28653AA9006D7926 /* WebRTC */,
 				C1E4654424EE515200CA5AAF /* localization */,
@@ -1227,6 +1232,7 @@
 				C12436122434AB5D00B8F074 /* MLAttributedLabel.h */,
 				C12436132434AB5D00B8F074 /* MLAttributedLabel.m */,
 				20D3611B2C10E12500E46587 /* BoardingCards.swift */,
+				84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */,
 			);
 			name = OnBoard;
 			sourceTree = "<group>";
@@ -1271,7 +1277,7 @@
 			isa = PBXGroup;
 			children = (
 				8414ADF92A7ABAC900EFFCCC /* Packages */,
-				C1F0AD15288BCE6F00BB0182 /* Alpha.Monal.ios.entitlements */,
+				C1F0AD15288BCE6F00BB0182 /* Monal.Alpha.ios.entitlements */,
 				C1567E3628255C64006E9637 /* Monal.ios.entitlements */,
 				C1567E3528255C64006E9637 /* Monal.macos.entitlements */,
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
@@ -1778,6 +1784,7 @@
 				848C73E02BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */,
 				26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */,
 				842790852A32D16D005C18CC /* CallSounds in Resources */,
+				845836BA2C49F36300B11EC5 /* Quicksy Launch Screen.storyboard in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				26E8462824EABAED00ECE419 /* Main.storyboard in Resources */,
@@ -2064,6 +2071,7 @@
 				3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */,
 				E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */,
 				E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */,
+				84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
@@ -2672,7 +2680,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -3039,7 +3047,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -3201,7 +3209,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				ONLY_ACTIVE_ARCH = YES;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
@@ -3477,7 +3485,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -3830,7 +3838,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -4244,7 +4252,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LLVM_LTO = NO;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 6.4.1;
+				MARKETING_VERSION = 0.0.1;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -4280,9 +4288,9 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES_ERROR;
 				CLANG_WARN_VEXING_PARSE = YES_ERROR;
 				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
-				CODE_SIGN_ENTITLEMENTS = Alpha.Monal.ios.entitlements;
-				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Alpha.Monal.ios.entitlements;
-				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Alpha.Monal.macos.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Monal.Alpha.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.Alpha.ios.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.Alpha.macos.entitlements;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
@@ -4306,7 +4314,7 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_PEDANTIC = NO;
 				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
-				INFOPLIST_FILE = "Alpha.Monal-Info.plist";
+				INFOPLIST_FILE = "Monal.Alpha-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Monal.alpha;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,

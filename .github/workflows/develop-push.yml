@@ -20,7 +20,8 @@ jobs:
       timestamp: ${{ steps.changelog.outputs.timestamp }}
       message: ${{ steps.changelog.outputs.message }}
     env:
-      APP_NAME: "Monal.alpha"
+      APP_NAME: "Monal.Alpha"
+      BUILD_SCHEME: "Monal Alpha"
       APP_DIR: "Monal.alpha.app"
       BUILD_TYPE: "Alpha"
       ALPHA_UPLOAD_SECRET: ${{ secrets.ALPHA_UPLOAD_SECRET }}

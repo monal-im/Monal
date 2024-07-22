@@ -150,6 +150,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSString*) stringFromTimeInterval:(NSUInteger) interval;
 +(NSDate*) parseDateTimeString:(NSString*) datetime;
 +(NSString*) generateDateTimeString:(NSDate*) datetime;
++(NSString*) generateRandomPassword;
 +(NSString*) encodeRandomResource;
 
 +(NSData* _Nullable) sha1:(NSData* _Nullable) data;

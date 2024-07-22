@@ -182,7 +182,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSNumber*) getSmallestHistoryId;
 -(NSNumber*) getBiggestHistoryId;
 
--(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound andJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
+-(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound occupantId:(NSString* _Nullable) occupantId andJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
 
 /*
  adds a specified message to the database

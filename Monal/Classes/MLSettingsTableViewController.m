@@ -28,8 +28,10 @@ enum kSettingSection {
 };
 
 enum SettingsAccountRows {
+#ifndef IS_QUICKSY
     QuickSettingsRow,
     AdvancedSettingsRow,
+#endif
     SettingsAccountRowsCnt
 };
 
@@ -60,6 +62,10 @@ enum SettingsAboutRows {
 
 //this will hold all disabled rows of all enums (this is needed because the code below still references these rows)
 enum DummySettingsRows {
+#ifdef IS_QUICKSY
+    QuickSettingsRow,
+    AdvancedSettingsRow,
+#endif
     DummySettingsRowsBegin = 100,
 };
 
@@ -137,7 +143,11 @@ enum DummySettingsRows {
 {
     switch(section)
     {
+#ifdef IS_QUICKSY
         case kSettingSectionAccounts: return [self getAccountNum] + SettingsAccountRowsCnt;
+#else
+        case kSettingSectionAccounts: return [self getAccountNum] + SettingsAccountRowsCnt;
+#endif
         case kSettingSectionApp: return SettingsAppRowsCnt;
         case kSettingSectionSupport: return SettingsSupportRowCnt;
 #ifndef DEBUG
@@ -214,7 +224,9 @@ enum DummySettingsRows {
             }
             else
             {
-                MLAssert(indexPath.row - [self getAccountNum] < SettingsAccountRowsCnt, @"Tried to tap onto a row ment to be for a concrete account, not for quick or advanced settings");
+#ifndef IS_QUICKSY
+                MLAssert(indexPath.row - [self getAccountNum] < SettingsAccountRowsCnt, @"Tried to tap onto a row meant to be for a concrete account, not for quick or advanced settings");
+                
                 // User selected one of the 'add account' promts
                 switch(indexPath.row - [self getAccountNum]) {
                     case QuickSettingsRow:
@@ -226,6 +238,7 @@ enum DummySettingsRows {
                     default:
                         unreachable();
                 }
+#endif
             }
             break;
         }

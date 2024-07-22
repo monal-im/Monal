@@ -6,6 +6,7 @@
 //
 //
 
+#import <Contacts/Contacts.h>
 #import "ActiveChatsViewController.h"
 #import "DataLayer.h"
 #import "xmpp.h"
@@ -19,6 +20,8 @@
 #import "MLSettingsAboutViewController.h"
 #import "MLVoIPProcessor.h"
 #import "MLCall.h"      //for MLCallType
+#import "XMPPIQ.h"
+#import "MLIQProcessor.h"
 #import "UIColor+Theme.h"
 #import <Monal-Swift.h>
 
@@ -435,6 +438,23 @@ static NSMutableSet* _pushWarningDisplayed;
     });
 }
 
+-(void) showAddContact
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self presentChatWithContact:newContact];
+                });
+            }];
+            addContactMenuView.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+            [self presentViewController:addContactMenuView animated:NO completion:^{}];
+        }];
+    });
+}
+
 -(void) segueToIntroScreensIfNeeded
 {
     //open password migration if needed
@@ -462,6 +482,20 @@ static NSMutableSet* _pushWarningDisplayed;
         return;
     }
     
+#ifdef IS_QUICKSY
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+    {
+        UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:@{}];
+        if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
+            view.modalPresentationStyle = UIModalPresentationFullScreen;
+        else
+            view.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+        [self presentViewController:view animated:NO completion:^{}];
+        return;
+    }
+#else
     // display quick start if the user never seen it or if there are 0 enabled accounts
     if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !_loginAlreadyAutodisplayed)
     {
@@ -473,9 +507,68 @@ static NSMutableSet* _pushWarningDisplayed;
         [self presentViewController:loginViewController animated:YES completion:^{}];
         return;
     }
+#endif
     
     [self showWarningsIfNeeded];
+    
+#ifdef IS_QUICKSY
+    [self syncContacts];
+#endif
 }
+
+#ifdef IS_QUICKSY
+-(void) syncContacts
+{
+    CNContactStore* store = [[CNContactStore alloc] init];
+    [store requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError* _Nullable error) {
+        if(granted)
+        {
+            NSString* countryCode = @"+49"; //[[HelperTools defaultsDB] objectForKey:@"Quicksy_countryCode"];
+            NSCharacterSet* allowedCharacters = [[NSCharacterSet characterSetWithCharactersInString:@"+0123456789"] invertedSet];
+            NSMutableDictionary* numbers = [NSMutableDictionary new];
+            
+            CNContactFetchRequest* request = [[CNContactFetchRequest alloc] initWithKeysToFetch:@[CNContactPhoneNumbersKey, CNContactNicknameKey, CNContactGivenNameKey, CNContactFamilyNameKey]];
+            NSError* error;
+            [store enumerateContactsWithFetchRequest:request error:&error usingBlock:^(CNContact* _Nonnull contact, BOOL* _Nonnull stop) {
+                if(!error)
+                {
+                    NSString* name = [[NSString stringWithFormat:@"%@ %@", contact.givenName, contact.familyName] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                    for(CNLabeledValue<CNPhoneNumber*>* phone in contact.phoneNumbers)
+                    {
+                        //add country code if missing
+                        NSString* number = [[phone.value.stringValue componentsSeparatedByCharactersInSet:allowedCharacters] componentsJoinedByString:@""];
+                        if(countryCode != nil && ![number hasPrefix:@"+"] && ![number hasPrefix:@"00"])
+                        {
+                            DDLogVerbose(@"Adding country code '%@' to number: %@", countryCode, number);
+                            number = [NSString stringWithFormat:@"%@%@", countryCode, number];
+                        }
+                        numbers[number] = name;
+                    }
+                }
+                else
+                    DDLogWarn(@"Error fetching contacts: %@", error);
+            }];
+            
+            DDLogDebug(@"Got list of contact phone numbers: %@", numbers);
+            
+            NSArray<xmpp*>* connectedAccounts = [MLXMPPManager sharedInstance].connectedXMPP;
+            if(connectedAccounts.count == 0)
+            {
+                DDLogError(@"No connected account while trying to send quicksy phonebook!");
+                return;
+            }
+            else if(connectedAccounts.count > 1)
+                DDLogWarn(@"More than 1 connected account while trying to send quicksy phonebook, using first one!");
+            
+            XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqGetType to:@"api.quicksy.im"];
+            [iqNode setQuicksyPhoneBook:numbers.allKeys];
+            [connectedAccounts[0] sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleQuicksyPhoneBook, $ID(numbers))];
+        }
+        else
+            DDLogError(@"Access to contacts not granted!");
+    }];
+}
+#endif
 
 -(void) showWarningsIfNeeded
 {

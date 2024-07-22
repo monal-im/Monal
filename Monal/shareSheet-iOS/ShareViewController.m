@@ -55,10 +55,14 @@
     [self.navigationController.navigationBar setBackgroundColor:[UIColor monaldarkGreen]];
     self.navigationController.navigationItem.title = NSLocalizedString(@"Monal", @"");
     
+    DDLogInfo(@"Extension context: %@", self.extensionContext);
+    DDLogDebug(@"Raw extension context intent: %@", self.extensionContext.intent);
     if(self.extensionContext.intent != nil && [self.extensionContext.intent isKindOfClass:[INSendMessageIntent class]])
     {
         INSendMessageIntent* intent = (INSendMessageIntent*)self.extensionContext.intent;
+        DDLogDebug(@"Got usable intent: %@", intent);
         self.intentContact = [HelperTools unserializeData:[intent.conversationIdentifier dataUsingEncoding:NSISOLatin1StringEncoding]];
+        DDLogInfo(@"Extracted intent contact: %@", self.intentContact);
         [self.intentContact refresh];       //make sure we are up to date
     }
 }
@@ -73,6 +77,7 @@
 
     if(self.intentContact != nil)
     {
+        DDLogInfo(@"Intent contact given: %@", self.intentContact);
         //check if intentContact is in enabled account list
         for(NSDictionary* accountToCheck in self.accounts)
         {
@@ -89,6 +94,7 @@
     //no intent given or intent contact not found --> select initial recipient (contact with most recent interaction)
     if(!self.account || !self.recipient)
     {
+        DDLogInfo(@"No recipient given, selecting the one with the most recent interaction...");
         BOOL recipientFound = NO;
         for(MLContact* recipient in self.recipients)
         {

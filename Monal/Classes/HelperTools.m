@@ -2325,6 +2325,12 @@ void swizzle(Class c, SEL orig, SEL new)
     });
 }
 
++(NSString*) generateRandomPassword
+{
+    u_int32_t i=arc4random();
+    return [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
+}
+
 +(NSString*) encodeRandomResource
 {
     u_int32_t i=arc4random();

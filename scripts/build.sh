@@ -42,53 +42,55 @@ echo "*     Installing macOS & iOS Pods     *"
 echo "***************************************"
 pod install --repo-update
 
-echo ""
-echo "***************************"
-echo "*     Archiving macOS     *"
-echo "***************************"
-xcrun xcodebuild \
-    -workspace "Monal.xcworkspace" \
-    -scheme "Monal" \
-    -sdk macosx \
-    -configuration $BUILD_TYPE \
-    -destination 'generic/platform=macOS,variant=Mac Catalyst,name=Any Mac' \
-    -archivePath "build/macos_$APP_NAME.xcarchive" \
-    -allowProvisioningUpdates \
-    archive \
-    BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
-    SUPPORTS_MACCATALYST=YES
-
-echo ""
-echo "****************************"
-echo "*     Exporting macOS      *"
-echo "****************************"
-# see: https://gist.github.com/cocoaNib/502900f24846eb17bb29
-# and: https://forums.developer.apple.com/thread/100065
-# and: for developer-id distribution (distribution *outside* of appstore) an developer-id certificate must be used for building
-if [ ! -z ${EXPORT_OPTIONS_CATALYST_APPSTORE} ]; then
-    echo "***************************************"
-    echo "*    Exporting AppStore macOS         *"
-    echo "***************************************"
-    exportMacOS "$EXPORT_OPTIONS_CATALYST_APPSTORE" "$BUILD_TYPE"
-fi
-
-if [ ! -z ${EXPORT_OPTIONS_CATALYST_APP_EXPORT} ]; then
-    echo "***********************************"
-    echo "*    Exporting app macOS          *"
-    echo "***********************************"
-    exportMacOS "$EXPORT_OPTIONS_CATALYST_APP_EXPORT" "$BUILD_TYPE"
+if [ "$BUILD_SCHEME" != "Quicksy" ]; then
+    echo ""
+    echo "***************************"
+    echo "*     Archiving macOS     *"
+    echo "***************************"
+    xcrun xcodebuild \
+        -workspace "Monal.xcworkspace" \
+        -scheme "$BUILD_SCHEME" \
+        -sdk macosx \
+        -configuration $BUILD_TYPE \
+        -destination 'generic/platform=macOS,variant=Mac Catalyst,name=Any Mac' \
+        -archivePath "build/macos_$APP_NAME.xcarchive" \
+        -allowProvisioningUpdates \
+        archive \
+        BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
+        SUPPORTS_MACCATALYST=YES
 
     echo ""
-    echo "**************************"
-    echo "*     Packing macOS zip  *"
-    echo "**************************"
-    cd build/app
-    mkdir tar_release
-    mv "$APP_NAME.app" "tar_release/$APP_DIR"
-    cd tar_release
-    /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME".zip
-    cd ../../..
-    ls -l build/app
+    echo "****************************"
+    echo "*     Exporting macOS      *"
+    echo "****************************"
+    # see: https://gist.github.com/cocoaNib/502900f24846eb17bb29
+    # and: https://forums.developer.apple.com/thread/100065
+    # and: for developer-id distribution (distribution *outside* of appstore) an developer-id certificate must be used for building
+    if [ ! -z ${EXPORT_OPTIONS_CATALYST_APPSTORE} ]; then
+        echo "***************************************"
+        echo "*    Exporting AppStore macOS         *"
+        echo "***************************************"
+        exportMacOS "$EXPORT_OPTIONS_CATALYST_APPSTORE" "$BUILD_TYPE"
+    fi
+
+    if [ ! -z ${EXPORT_OPTIONS_CATALYST_APP_EXPORT} ]; then
+        echo "***********************************"
+        echo "*    Exporting app macOS          *"
+        echo "***********************************"
+        exportMacOS "$EXPORT_OPTIONS_CATALYST_APP_EXPORT" "$BUILD_TYPE"
+
+        echo ""
+        echo "**************************"
+        echo "*     Packing macOS zip  *"
+        echo "**************************"
+        cd build/app
+        mkdir tar_release
+        mv "$APP_NAME.app" "tar_release/$APP_DIR"
+        cd tar_release
+        /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME".zip
+        cd ../../..
+        ls -l build/app
+    fi
 fi
 
 echo ""
@@ -97,7 +99,7 @@ echo "*     Archiving iOS     *"
 echo "*************************"
 xcrun xcodebuild \
     -workspace "Monal.xcworkspace" \
-    -scheme "Monal" \
+    -scheme "$BUILD_SCHEME" \
     -sdk iphoneos \
     -configuration $BUILD_TYPE \
     -archivePath "build/ios_$APP_NAME.xcarchive" \

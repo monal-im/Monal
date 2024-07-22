@@ -8,34 +8,28 @@
 
 struct ContactRequestsMenuEntry: View {
     let contact : MLContact
-    let doDelete: () -> ()
     @State private var isDeleted = false
     
-    private func delete() {
-        if(isDeleted == false) {
-            isDeleted = true
-            doDelete()
-        }
-    }
-
     var body: some View {
         HStack {
             Text(contact.contactJid)
+                .foregroundColor(.secondary)
+            
             Spacer()
+            
             Group {
                 Button {
                     let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                     appDelegate.openChat(of:contact)
                 } label: {
                     Image(systemName: "text.bubble")
-                        .accentColor(.black)
+                        .accentColor(.primary)
                 }
                 //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
                 .buttonStyle(BorderlessButtonStyle())
                 
                 Button {
                     // deny request
-                    self.delete()       //update ui first because the array index can change afterwards
                     MLXMPPManager.sharedInstance().remove(contact)
                 } label: {
                     Image(systemName: "trash.circle")
@@ -46,7 +40,6 @@ struct ContactRequestsMenuEntry: View {
                 
                 Button {
                     // accept request
-                    self.delete()       //update ui first because the array index can change afterwards
                     MLXMPPManager.sharedInstance().add(contact)
                     let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                     appDelegate.openChat(of:contact)
@@ -63,35 +56,60 @@ struct ContactRequestsMenuEntry: View {
 }
 
 struct ContactRequestsMenu: View {
-    @State private var pendingRequests: [MLContact]
-
-    var body: some View {
-        List {
-            Section(header: Text("Allowing someone to add you as a contact lets them see your profile picture and when you are online.")) {
-                if(pendingRequests.isEmpty) {
-                    Text("No pending constact requests")
-                        .foregroundColor(.secondary)
+    @State var pendingRequests: [xmpp:[MLContact]] = [:]
+    @State var connectedAccounts: [Int:xmpp] = [:]
+    
+    func updateRequests() {
+        let requests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+        connectedAccounts.removeAll()
+        for account in MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp] {
+            connectedAccounts[account.accountNo.intValue] = account
+        }
+        pendingRequests.removeAll()
+        for contact in requests {
+            //add only requests having an enabled (dubbed connected) account
+            //(should be a noop because allContactRequests() returns only enabled accounts)
+            if let account = connectedAccounts[contact.accountId.intValue] {
+                if pendingRequests[account] == nil {
+                    pendingRequests[account] = []
                 }
-                ForEach(pendingRequests.indices, id: \.self) { idx in
-                    ContactRequestsMenuEntry(
-                        contact: pendingRequests[idx],
-                        doDelete: {
-                            self.pendingRequests.remove(at: idx)
+                pendingRequests[account]!.append(contact)
+            }
+        }
+    }
+    
+    var body: some View {
+        Section(header: Text("Allowing someone to add you as a contact lets them see your profile picture and when you are online.")) {
+            if(pendingRequests.isEmpty) {
+                Text("No pending constact requests")
+                    .foregroundColor(.secondary)
+            } else {
+                List {
+                    ForEach(pendingRequests.sorted(by:{ $0.0.connectionProperties.identity.jid < $1.0.connectionProperties.identity.jid }), id: \.key) { account, requests in
+                        if connectedAccounts.count == 1 {
+                            ForEach(requests.indices, id: \.self) { idx in
+                                ContactRequestsMenuEntry(contact: requests[idx])
+                            }
+                        } else {
+                            Section(header: Text("Account: \(account.connectionProperties.identity.jid)")) {
+                                ForEach(requests.indices, id: \.self) { idx in
+                                    ContactRequestsMenuEntry(contact: requests[idx])
+                                }
+                            }
                         }
-                    )
+                    }
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh")).receive(on: RunLoop.main)) { notification in
-            self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+            updateRequests()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRemoved")).receive(on: RunLoop.main)) { notification in
-            self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+            updateRequests()
         }
-    }
-
-    init() {
-        self.pendingRequests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
+        .onAppear {
+            updateRequests()
+        }
     }
 }
 

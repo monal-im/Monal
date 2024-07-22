@@ -267,10 +267,8 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     // filter notifcations from within this class
     if([notification.object isKindOfClass:[ActiveChatsViewController class]])
-    {
         return;
-    }
-    [self refreshDisplay];
+    [self refresh];
 }
 
 -(void) handleContactRemoved:(NSNotification*) notification
@@ -410,8 +408,7 @@ static NSMutableSet* _pushWarningDisplayed;
 -(void) refresh
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
-            [self refreshDisplay];      // load contacts
+        [self refreshDisplay];      // load contacts
         [self segueToIntroScreensIfNeeded];
     });
 }

@@ -520,7 +520,7 @@ static NSMutableSet* _pushWarningDisplayed;
     [store requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError* _Nullable error) {
         if(granted)
         {
-            NSString* countryCode = @"+49"; //[[HelperTools defaultsDB] objectForKey:@"Quicksy_countryCode"];
+            NSString* countryCode = [[HelperTools defaultsDB] objectForKey:@"Quicksy_countryCode"];
             NSCharacterSet* allowedCharacters = [[NSCharacterSet characterSetWithCharactersInString:@"+0123456789"] invertedSet];
             NSMutableDictionary* numbers = [NSMutableDictionary new];
             
@@ -537,7 +537,7 @@ static NSMutableSet* _pushWarningDisplayed;
                         if(countryCode != nil && ![number hasPrefix:@"+"] && ![number hasPrefix:@"00"])
                         {
                             DDLogVerbose(@"Adding country code '%@' to number: %@", countryCode, number);
-                            number = [NSString stringWithFormat:@"%@%@", countryCode, number];
+                            number = [NSString stringWithFormat:@"%@%@", countryCode, [number hasPrefix:@"0"] ? [number substringFromIndex:1] : number];
                         }
                         numbers[number] = name;
                     }

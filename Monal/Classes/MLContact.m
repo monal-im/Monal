@@ -508,10 +508,10 @@ static NSMutableDictionary* _singletonCache;
 
 -(BOOL) isInRoster
 {
-    // mucs have a subscription of both (ensured by the datalayer)
-    return [self.subscription isEqualToString:kSubBoth]
-        || [self.subscription isEqualToString:kSubTo]
-        || [self.ask isEqualToString:kAskSubscribe];
+    //either we already allowed each other or we allow this contact and asked them to allow us
+    //--> if isInRoster is true this is displayed as "remove contact" in contact details, otherwise it will be displayed as "add contact"
+    //(mucs have a subscription of 'both', ensured by the datalayer)
+    return [self.subscription isEqualToString:kSubBoth] || ([self.subscription isEqualToString:kSubFrom] && [self.ask isEqualToString:kAskSubscribe]);
 }
 
 +(NSSet*) keyPathsForValuesAffectingIsInRoster

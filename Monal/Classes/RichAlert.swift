@@ -103,6 +103,11 @@ extension View {
     func richAlert<T>(isPresented: Binding<T?>, title: @autoclosure @escaping () -> some View, @ViewBuilder body: @escaping (_ data: T) -> some View, @ViewBuilder buttons: @escaping (_ data: T) -> some View) -> some View {
         modifier(RichAlertView(isPresented:isPresented, alertTitle:{ _ in title() }, alertBody:body, alertButtons:buttons))
     }
+    //apparently this is sometimes somehow needed to not confuse the compiler into using some of the other functions instead of this
+    //(it tries to use the title(), body(), buttons(X) variant in Quicksy_RegisterAccount)
+    func richAlertX<T>(isPresented: Binding<T?>, title: @autoclosure @escaping () -> some View, @ViewBuilder body: @escaping (_ data: T) -> some View, @ViewBuilder buttons: @escaping (_ data: T) -> some View) -> some View {
+        modifier(RichAlertView(isPresented:isPresented, alertTitle:{ _ in title() }, alertBody:body, alertButtons:buttons))
+    }
     //title(), body(X), buttons(X)
     func richAlert<T>(isPresented: Binding<T?>, @ViewBuilder title: @escaping () -> some View, @ViewBuilder body: @escaping (_ data: T) -> some View, @ViewBuilder buttons: @escaping (_ data: T) -> some View) -> some View {
         modifier(RichAlertView(isPresented:isPresented, alertTitle:{ _ in title() }, alertBody:body, alertButtons:buttons))

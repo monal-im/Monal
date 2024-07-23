@@ -94,9 +94,9 @@ NSString* const kStanza = @"stanza";
     NSDate* _lastInteractionDate;
     
     //internal handlers and flags
-    monal_void_block_t _cancelLoginTimer;
-    monal_void_block_t _cancelPingTimer;
-    monal_void_block_t _cancelReconnectTimer;
+    MLDelayableTimer* _loginTimer;
+    MLDelayableTimer* _pingTimer;
+    MLDelayableTimer* _reconnectTimer;
     NSMutableArray* _timersToCancelOnDisconnect;
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
@@ -220,10 +220,6 @@ NSString* const kStanza = @"stanza";
     
     //we support mds
     [self.pubsub registerForNode:@"urn:xmpp:mds:displayed:0" withHandler:$newHandler(MLPubSubProcessor, mdsHandler)];
-    
-    //autodelete messages old enough (first invocation)
-    if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
-        [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
     
     return self;
 }
@@ -498,7 +494,7 @@ NSString* const kStanza = @"stanza";
         ) || (
             //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
             _catchupDone &&
-            _cancelPingTimer == nil &&
+            _pingTimer == nil &&
             !unackedCount &&
             ![_parseQueue operationCount] &&        //if something blocks the parse queue it is either an incoming stanza currently processed or waiting to be processed
             //[_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
@@ -512,7 +508,7 @@ NSString* const kStanza = @"stanza";
             "\t_accountState < kStateReconnecting = %@\n"
             "\t_reconnectInProgress = %@\n"
             "\t_catchupDone = %@\n"
-            "\t_cancelPingTimer = %@\n"
+            "\t_pingTimer = %@\n"
             "\t[self.unAckedStanzas count] = %lu\n"
             "\t[_parseQueue operationCount] = %lu\n"
             //"\t[_receiveQueue operationCount] = %lu\n"
@@ -523,7 +519,7 @@ NSString* const kStanza = @"stanza";
         bool2str(_accountState < kStateReconnecting),
         bool2str(_reconnectInProgress),
         bool2str(_catchupDone),
-        _cancelPingTimer == nil ? @"none" : @"running timer",
+        _pingTimer == nil ? @"none" : @"running timer",
         unackedCount,
         (unsigned long)[_parseQueue operationCount],
         //(unsigned long)[_receiveQueue operationCount],
@@ -721,33 +717,47 @@ NSString* const kStanza = @"stanza";
 
 -(void) freezeParseQueue
 {
-    //don't do this in a block on the parse queue because the parse queue could potentially have a significant amount of blocks waiting
-    //to be synchronously dispatched to the receive queue and processed and we don't want to wait for all these stanzas to be processed
-    //and rather freeze the parse queue as soon as possible
-    _parseQueue.suspended = YES;
-    
-    //apparently setting _parseQueue.suspended = YES does return before the queue is actually suspended
-    //--> busy wait for _parseQueue.suspended == YES
-    [HelperTools busyWaitForOperationQueue:_parseQueue];
-    MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
-    
-    //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue
-    //into the receive queue once we leave this method
-    //--> wait for all blocks put into the receive queue by the parse queue right before it was frozen
-    [self dispatchOnReceiveQueue: ^{
-        [HelperTools busyWaitForOperationQueue:self->_parseQueue];
-        MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES (in receive queue)!");
-        DDLogInfo(@"Parse queue is frozen now!");
-    }];
+    @synchronized(_parseQueue) {
+        //pause all timers before freezing the parse queue to not trigger timers that can not be handeld properly while frozen
+        [_loginTimer pause];
+        [_pingTimer pause];
+        [_reconnectTimer pause];
+        
+        //don't do this in a block on the parse queue because the parse queue could potentially have a significant amount of blocks waiting
+        //to be synchronously dispatched to the receive queue and processed and we don't want to wait for all these stanzas to be processed
+        //and rather freeze the parse queue as soon as possible
+        _parseQueue.suspended = YES;
+        
+        //apparently setting _parseQueue.suspended = YES does return before the queue is actually suspended
+        //--> busy wait for _parseQueue.suspended == YES
+        [HelperTools busyWaitForOperationQueue:_parseQueue];
+        MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES!");
+        
+        //this has to be synchronous because we want to be sure no further stanzas are leaking from the parse queue
+        //into the receive queue once we leave this method
+        //--> wait for all blocks put into the receive queue by the parse queue right before it was frozen
+        [self dispatchOnReceiveQueue: ^{
+            [HelperTools busyWaitForOperationQueue:self->_parseQueue];
+            MLAssert([self parseQueueFrozen] == YES, @"Parse queue not frozen after setting suspended to YES (in receive queue)!");
+            DDLogInfo(@"Parse queue is frozen now!");
+        }];
+    }
 }
 
 -(void) unfreezeParseQueue
 {
-    //this has to be synchronous because we want to be sure the parse queue is operating again once we leave this method
-    [self dispatchOnReceiveQueue: ^{
-        self->_parseQueue.suspended = NO;
-        DDLogInfo(@"Parse queue is UNfrozen now!");
-    }];
+    @synchronized(_parseQueue) {
+        //this has to be synchronous because we want to be sure the parse queue is operating again once we leave this method
+        [self dispatchOnReceiveQueue: ^{
+            self->_parseQueue.suspended = NO;
+            DDLogInfo(@"Parse queue is UNfrozen now!");
+        }];
+        
+        //resume all timers paused when freezing the parse queue
+        [_loginTimer resume];
+        [_pingTimer resume];
+        [_reconnectTimer resume];
+    }
 }
 
 -(void) freezeSendQueue
@@ -847,12 +857,12 @@ NSString* const kStanza = @"stanza";
         return;
     
     //cancel old timer if existing and...
-    if(self->_cancelLoginTimer != nil)
-        self->_cancelLoginTimer();
+    if(self->_loginTimer != nil)
+        [self->_loginTimer cancel];
     //...replace it with new timer
-    self->_cancelLoginTimer = createTimer(CONNECT_TIMEOUT, (^{
+    self->_loginTimer = createDelayableTimer(CONNECT_TIMEOUT, (^{
+        self->_loginTimer = nil;
         [self dispatchAsyncOnReceiveQueue: ^{
-            self->_cancelLoginTimer = nil;
             DDLogInfo(@"Login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
             [self reconnect];
         }];
@@ -861,17 +871,19 @@ NSString* const kStanza = @"stanza";
 
 -(void) connect
 {
-    //autodelete messages old enough (second invocation)
-    if([[HelperTools defaultsDB] boolForKey:@"AutodeleteAllMessagesAfter3Days"])
-        [[DataLayer sharedInstance] autodeleteAllMessagesAfter3Days];
-    
-    if(_parseQueue.suspended)
+    if([self parseQueueFrozen])
     {
         DDLogWarn(@"Not trying to connect: parse queue frozen!");
         return;
     }
     
     [self dispatchAsyncOnReceiveQueue: ^{
+        if([self parseQueueFrozen])
+        {
+            DDLogWarn(@"Not trying to connect: parse queue frozen!");
+            return;
+        }
+        
         [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
         [self unfreezeParseQueue];                        //make sure the parse queue is operational again
         //we don't want to loose outgoing messages by throwing away their receiveQueue operation adding them to the smacks queue etc.
@@ -961,15 +973,15 @@ NSString* const kStanza = @"stanza";
     //this has to be synchronous because we want to wait for the disconnect to complete before continuingand unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
         DDLogInfo(@"stopping running timers");
-        if(self->_cancelLoginTimer)
-            self->_cancelLoginTimer();        //cancel running login timer
-        self->_cancelLoginTimer = nil;
-        if(self->_cancelPingTimer)
-            self->_cancelPingTimer();         //cancel running ping timer
-        self->_cancelPingTimer = nil;
-        if(self->_cancelReconnectTimer)
-            self->_cancelReconnectTimer();
-        self->_cancelReconnectTimer = nil;
+        if(self->_loginTimer)
+            [self->_loginTimer cancel];     //cancel running login timer
+        self->_loginTimer = nil;
+        if(self->_pingTimer)
+            [self->_pingTimer cancel];      //cancel running ping timer
+        self->_pingTimer = nil;
+        if(self->_reconnectTimer)
+            [self->_reconnectTimer cancel]; //cancel running reconnect timer
+        self->_reconnectTimer = nil;
         @synchronized(self->_timersToCancelOnDisconnect) {
             for(monal_void_block_t timer in self->_timersToCancelOnDisconnect)
                 timer();
@@ -1248,8 +1260,8 @@ NSString* const kStanza = @"stanza";
         [self disconnectWithStreamError:streamError andExplicitLogout:NO];
 
         DDLogInfo(@"Trying to connect again in %G seconds...", wait);
-        self->_cancelReconnectTimer = createTimer(wait, (^{
-            self->_cancelReconnectTimer = nil;
+        self->_reconnectTimer = createDelayableTimer(wait, (^{
+            self->_reconnectTimer = nil;
             [self dispatchAsyncOnReceiveQueue: ^{
                 //there may be another connect/login operation in progress triggered from reachability or another timer
                 if(self.accountState<kStateReconnecting)
@@ -1258,7 +1270,7 @@ NSString* const kStanza = @"stanza";
             }];
         }), (^{
             DDLogInfo(@"Reconnect got aborted: %@", self);
-            self->_cancelReconnectTimer = nil;
+            self->_reconnectTimer = nil;
             [self dispatchAsyncOnReceiveQueue: ^{
                 self->_reconnectInProgress = NO;
             }];
@@ -1475,16 +1487,16 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"ping attempted before logged in and bound, ignoring ping.");
             return;
         }
-        else if(self->_cancelPingTimer)
+        else if(self->_pingTimer)
         {
             DDLogInfo(@"ping already sent, ignoring second ping request.");
             return;
         }
         else if([self->_parseQueue operationCount] > 4)
         {
-            DDLogWarn(@"parseQueue overflow, delaying ping by 10 seconds.");
+            DDLogWarn(@"parseQueue overflow, delaying ping by 4 seconds.");
             @synchronized(self->_timersToCancelOnDisconnect) {
-                [self->_timersToCancelOnDisconnect addObject:createTimer(10.0, (^{
+                [self->_timersToCancelOnDisconnect addObject:createTimer(4.0, (^{
                     DDLogDebug(@"ping delay expired, retrying ping.");
                     [self sendPing:timeout];
                 }))];
@@ -1493,9 +1505,9 @@ NSString* const kStanza = @"stanza";
         else
         {
             //start ping timer
-            self->_cancelPingTimer = createTimer(timeout, (^{
+            self->_pingTimer = createDelayableTimer(timeout, (^{
+                self->_pingTimer = nil;
                 [self dispatchAsyncOnReceiveQueue: ^{
-                    self->_cancelPingTimer = nil;
                     //check if someone already called reconnect or disconnect while we were waiting for the ping
                     //(which was called while we still were >= kStateBound)
                     if(self.accountState<kStateBound)
@@ -1509,10 +1521,10 @@ NSString* const kStanza = @"stanza";
             }));
             monal_void_block_t handler = ^{
                 DDLogInfo(@"ping response received, all seems to be well");
-                if(self->_cancelPingTimer)
+                if(self->_pingTimer)
                 {
-                    self->_cancelPingTimer();      //cancel timer (ping was successful)
-                    self->_cancelPingTimer = nil;
+                    [self->_pingTimer cancel];      //cancel timer (ping was successful)
+                    self->_pingTimer = nil;
                 }
             };
             
@@ -1534,8 +1546,7 @@ NSString* const kStanza = @"stanza";
                 [self sendIq:ping withResponseHandler:^(XMPPIQ* result __unused) {
                     handler();
                 } andErrorHandler:^(XMPPIQ* error) {
-                    if(error != nil)
-                        handler();
+                    handler();
                 }];
             }
         }
@@ -1781,7 +1792,7 @@ NSString* const kStanza = @"stanza";
     self->_catchupStanzaCounter++;
     
     //restart logintimer for every incoming stanza when not logged in (don't do anything without a running timer)
-    if(!delayedReplay && _cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
+    if(!delayedReplay && _loginTimer != nil && self->_accountState < kStateLoggedIn)
         [self reinitLoginTimer];
     
     //only process most stanzas/nonzas after having a secure context
@@ -2450,10 +2461,10 @@ NSString* const kStanza = @"stanza";
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
             
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
-            if(_cancelLoginTimer)
+            if(_loginTimer)
             {
-                _cancelLoginTimer();        //we are now logged in --> cancel running login timer
-                _cancelLoginTimer = nil;
+                [self->_loginTimer cancel];     //we are now logged in --> cancel running login timer
+                _loginTimer = nil;
             }
             self->_loggedInOnce = YES;
             
@@ -2661,10 +2672,10 @@ NSString* const kStanza = @"stanza";
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
             self->_accountState = kStateLoggedIn;
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
-            if(_cancelLoginTimer)
+            if(_loginTimer)
             {
-                _cancelLoginTimer();        //we are now logged in --> cancel running login timer
-                _cancelLoginTimer = nil;
+                [self->_loginTimer cancel];     //we are now logged in --> cancel running login timer
+                _loginTimer = nil;
             }
             self->_loggedInOnce = YES;
             
@@ -3208,6 +3219,17 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark stanza handling
 
+// -(AnyPromise*) sendIq:(XMPPIQ*) iq
+// {
+//     return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+//         [self sendIq:iq withResponseHandler:^(XMPPIQ* response) {
+//             resolve(response);
+//         } andErrorHandler:^(XMPPIQ* error) {
+//             resolve(error);
+//         }];
+//     }];
+// }
+
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
 {
     if(resultHandler || errorHandler)
@@ -3219,14 +3241,19 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendIq:(XMPPIQ*) iq withHandler:(MLHandler*) handler
 {
-    if(handler)
-    {
-        DDLogVerbose(@"Adding %@ to iqHandlers...", handler);
-        @synchronized(_iqHandlers) {
-            _iqHandlers[iq.id] = [@{@"iq":iq, @"timeout":@(IQ_TIMEOUT), @"handler":handler} mutableCopy];
+    //serialize this state update with other receive queue updates
+    //not doing this will make it race with a readState call in the receive queue before the write of this update can happen,
+    //which will remove this entry from state and the iq answer received later on be discarded
+    [self dispatchAsyncOnReceiveQueue:^{
+        if(handler)
+        {
+            DDLogVerbose(@"Adding %@ to iqHandlers...", handler);
+            @synchronized(self->_iqHandlers) {
+                self->_iqHandlers[iq.id] = [@{@"iq":iq, @"timeout":@(IQ_TIMEOUT), @"handler":handler} mutableCopy];
+            }
         }
-    }
-    [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
+        [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
+    }];
 }
 
 -(void) send:(MLXMLNode*) stanza
@@ -3310,7 +3337,7 @@ NSString* const kStanza = @"stanza";
 -(void) retractMessage:(MLMessage*) msg
 {
     MLAssert([msg.accountId isEqual:self.accountNo], @"Can not retract message from one account on another account!", (@{@"self.accountNo": self.accountNo, @"msg": msg}));
-    XMPPMessage* messageNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:msg.buddyName];
+    XMPPMessage* messageNode = [[XMPPMessage alloc] initWithType:msg.isMuc ? kMessageGroupChatType : kMessageChatType to:msg.buddyName];
     
     DDLogVerbose(@"Retracting message: %@", msg);
     //retraction
@@ -4026,6 +4053,7 @@ NSString* const kStanza = @"stanza";
     [self queryDisco];
     [self queryServerVersion];
     [self purgeOfflineStorage];
+    [self setMAMPrefs:@"always"];   //make sure we are able to do proper catchups
     [self sendPresence];            //this will trigger a replay of offline stanzas on prosody (no XEP-0013 support anymore 😡)
     //the offline messages will come in *after* we initialized the mam query, because the disco result comes in first
     //(and this is what triggers mam catchup)
@@ -4418,28 +4446,30 @@ NSString* const kStanza = @"stanza";
     [self.mucProcessor leave:room withBookmarksUpdate:YES keepBuddylistEntry:NO];
 }
 
--(void) checkJidType:(NSString*) jid withCompletion:(void (^)(NSString* type, NSString* _Nullable errorMessage)) completion
+-(AnyPromise*) checkJidType:(NSString*) jid
 {
-    XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoInfo setiqTo:jid];
-    [discoInfo setDiscoInfoNode];
-    [self sendIq:discoInfo withResponseHandler:^(XMPPIQ* response) {
-        NSSet* features = [NSSet setWithArray:[response find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
-        //check if this is a muc or account
-        if([features containsObject:@"http://jabber.org/protocol/muc"])
-            return completion(@"muc", nil);
-        else
-            return completion(@"account", nil);
-    } andErrorHandler:^(XMPPIQ* error) {
-        //this means the jid is an account which can not be queried if not subscribed
-        if([error check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}service-unavailable"])
-            return completion(@"account", nil);
-        else if([error check:@"/<type=error>/error<type=auth>/{urn:ietf:params:xml:ns:xmpp-stanzas}subscription-required"])
-            return completion(@"account", nil);
-        //any other error probably means the remote server is not reachable or (even more likely) the jid is incorrect
-        NSString* errorDescription = [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Unexpected error while checking type of jid:", @"")];
-        DDLogError(@"checkJidType got an error, informing user: %@", errorDescription);
-        return completion(@"error", error == nil ? NSLocalizedString(@"Unexpected error while checking type of jid, please try again", @"") : errorDescription);
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+        [discoInfo setiqTo:jid];
+        [discoInfo setDiscoInfoNode];
+        [self sendIq:discoInfo withResponseHandler:^(XMPPIQ* response) {
+            NSSet* features = [NSSet setWithArray:[response find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
+            //check if this is a muc or account
+            if([features containsObject:@"http://jabber.org/protocol/muc"])
+                return resolve(@"muc");
+            else
+                return resolve(@"account");
+        } andErrorHandler:^(XMPPIQ* error) {
+            //this means the jid is an account which can not be queried if not subscribed
+            if([error check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}service-unavailable"])
+                return resolve(@"account");
+            else if([error check:@"/<type=error>/error<type=auth>/{urn:ietf:params:xml:ns:xmpp-stanzas}subscription-required"])
+                return resolve(@"account");
+            //any other error probably means the remote server is not reachable or (even more likely) the jid is incorrect
+            NSString* errorDescription = [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Unexpected error while checking type of jid:", @"")];
+            DDLogError(@"checkJidType got an error, informing user: %@", errorDescription);
+            resolve([NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: error == nil ? NSLocalizedString(@"Unexpected error while checking type of jid, please try again", @"") : errorDescription}]);
+        }];
     }];
 }
 
@@ -4683,7 +4713,7 @@ NSString* const kStanza = @"stanza";
                 self->_streamHasSpace = NO;
                 
                 //restart logintimer when our output stream becomes readable (don't do anything without a running timer)
-                if(_cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
+                if(_loginTimer != nil && self->_accountState < kStateLoggedIn)
                     [self reinitLoginTimer];
                 
                 //we want this to be sync instead of async to make sure we are in kStateConnected before sending anything
@@ -4873,7 +4903,7 @@ NSString* const kStanza = @"stanza";
     }
     
     //restart logintimer for new write to our stream while not logged in (don't do anything without a running timer)
-    if(_cancelLoginTimer != nil && self->_accountState < kStateLoggedIn)
+    if(_loginTimer != nil && self->_accountState < kStateLoggedIn)
         [self reinitLoginTimer];
 
     if(requestAck)

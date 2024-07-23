@@ -6,6 +6,7 @@
 //
 //
 
+#import <Contacts/Contacts.h>
 #import "ActiveChatsViewController.h"
 #import "DataLayer.h"
 #import "xmpp.h"
@@ -19,6 +20,8 @@
 #import "MLSettingsAboutViewController.h"
 #import "MLVoIPProcessor.h"
 #import "MLCall.h"      //for MLCallType
+#import "XMPPIQ.h"
+#import "MLIQProcessor.h"
 #import "UIColor+Theme.h"
 #import <Monal-Swift.h>
 
@@ -39,6 +42,7 @@
     int _startedOrientation;
     double _portraitTop;
     double _landscapeTop;
+    BOOL _loginAlreadyAutodisplayed;
 }
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
@@ -58,37 +62,36 @@ static NSMutableSet* _pushWarningDisplayed;
 
 +(void) initialize
 {
+    DDLogDebug(@"initializing active chats class");
     _mamWarningDisplayed = [NSMutableSet new];
     _smacksWarningDisplayed = [NSMutableSet new];
     _pushWarningDisplayed = [NSMutableSet new];
 }
 
 #pragma mark view lifecycle
--(id) initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    return self;
-}
 
 -(void) configureComposeButton
 {
-    UIImage* composeImage = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];    
+    UIImage* image = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];
+    UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
+    self.composeButton.customView = [HelperTools
+        buttonWithNotificationBadgeForImage:image
+        hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
+        withTapHandler:tapRecognizer];
+    [self.composeButton setIsAccessibilityElement:YES];
     if([[DataLayer sharedInstance] allContactRequests].count > 0)
-    {
-        self.composeButton.image = [HelperTools imageWithNotificationBadgeForImage:composeImage];
-    }
+        [self.composeButton setAccessibilityLabel:NSLocalizedString(@"Open contact list (contact requests pending)", @"")];
     else
-    {
-        self.composeButton.image = composeImage;
-    }
-    [self.composeButton setAccessibilityLabel:@"Open contacts list"];
-    [self.composeButton setAccessibilityHint:NSLocalizedString(@"Open contact list", @"")];
+        [self.composeButton setAccessibilityLabel:NSLocalizedString(@"Open contact list", @"")];
+    [self.composeButton setAccessibilityTraits:UIAccessibilityTraitButton];
 }
 
 -(void) viewDidLoad
 {
+    DDLogDebug(@"active chats view did load");
     [super viewDidLoad];
     
+    _loginAlreadyAutodisplayed = NO;
     _startedOrientation = 0;
     
     self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
@@ -134,6 +137,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) dealloc
 {
+    DDLogDebug(@"active chats dealloc");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -263,10 +267,8 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     // filter notifcations from within this class
     if([notification.object isKindOfClass:[ActiveChatsViewController class]])
-    {
         return;
-    }
-    [self refreshDisplay];
+    [self refresh];
 }
 
 -(void) handleContactRemoved:(NSNotification*) notification
@@ -380,9 +382,8 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     DDLogDebug(@"active chats view will appear");
     [super viewWillAppear:animated];
-    if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
-        [self refreshDisplay];      // load contacts
-    [self segueToIntroScreensIfNeeded];
+    
+    [self openConversationPlaceholder:nil];
 }
 
 -(void) viewWillDisappear:(BOOL) animated
@@ -395,6 +396,21 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     DDLogDebug(@"active chats view did appear");
     [super viewDidAppear:animated];
+    
+    [self refresh];
+}
+
+-(void) sheetDismissed
+{
+    [self refresh];
+}
+
+-(void) refresh
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self refreshDisplay];      // load contacts
+        [self segueToIntroScreensIfNeeded];
+    });
 }
 
 -(void) didReceiveMemoryWarning
@@ -411,6 +427,26 @@ static NSMutableSet* _pushWarningDisplayed;
                     [self presentChatWithContact:newContact];
                 });
             }];
+            addContactMenuView.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+            [self presentViewController:addContactMenuView animated:NO completion:^{}];
+        }];
+    });
+}
+
+-(void) showAddContact
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self presentChatWithContact:newContact];
+                });
+            }];
+            addContactMenuView.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
             [self presentViewController:addContactMenuView animated:NO completion:^{}];
         }];
     });
@@ -423,24 +459,113 @@ static NSMutableSet* _pushWarningDisplayed;
     if(needingMigration.count > 0)
     {
         UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
+        passwordMigration.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:passwordMigration animated:YES completion:^{}];
         return;
     }
-    // display quick start if the user never seen it or if there are 0 enabled accounts
-    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+    
+    if(![[HelperTools defaultsDB] boolForKey:@"hasCompletedOnboarding"])
     {
-        UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
-        [self presentViewController:loginViewController animated:YES completion:^{}];
-        return;
-    }
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"])
-    {
-        [self showPrivacySettings];
+        [self showOnboarding];
         return;
     }
     
+    if(self.enqueueGeneralSettings)
+    {
+        self.enqueueGeneralSettings = NO;
+        [self showGeneralSettings];
+        return;
+    }
+    
+#ifdef IS_QUICKSY
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+    {
+        UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:@{}];
+        if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
+            view.modalPresentationStyle = UIModalPresentationFullScreen;
+        else
+            view.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+        [self presentViewController:view animated:NO completion:^{}];
+        return;
+    }
+#else
+    // display quick start if the user never seen it or if there are 0 enabled accounts
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !_loginAlreadyAutodisplayed)
+    {
+        UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
+        loginViewController.ml_disposeCallback = ^{
+            self->_loginAlreadyAutodisplayed = YES;
+            [self sheetDismissed];
+        };
+        [self presentViewController:loginViewController animated:YES completion:^{}];
+        return;
+    }
+#endif
+    
     [self showWarningsIfNeeded];
+    
+#ifdef IS_QUICKSY
+    [self syncContacts];
+#endif
 }
+
+#ifdef IS_QUICKSY
+-(void) syncContacts
+{
+    CNContactStore* store = [[CNContactStore alloc] init];
+    [store requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError* _Nullable error) {
+        if(granted)
+        {
+            NSString* countryCode = [[HelperTools defaultsDB] objectForKey:@"Quicksy_countryCode"];
+            NSCharacterSet* allowedCharacters = [[NSCharacterSet characterSetWithCharactersInString:@"+0123456789"] invertedSet];
+            NSMutableDictionary* numbers = [NSMutableDictionary new];
+            
+            CNContactFetchRequest* request = [[CNContactFetchRequest alloc] initWithKeysToFetch:@[CNContactPhoneNumbersKey, CNContactNicknameKey, CNContactGivenNameKey, CNContactFamilyNameKey]];
+            NSError* error;
+            [store enumerateContactsWithFetchRequest:request error:&error usingBlock:^(CNContact* _Nonnull contact, BOOL* _Nonnull stop) {
+                if(!error)
+                {
+                    NSString* name = [[NSString stringWithFormat:@"%@ %@", contact.givenName, contact.familyName] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                    for(CNLabeledValue<CNPhoneNumber*>* phone in contact.phoneNumbers)
+                    {
+                        //add country code if missing
+                        NSString* number = [[phone.value.stringValue componentsSeparatedByCharactersInSet:allowedCharacters] componentsJoinedByString:@""];
+                        if(countryCode != nil && ![number hasPrefix:@"+"] && ![number hasPrefix:@"00"])
+                        {
+                            DDLogVerbose(@"Adding country code '%@' to number: %@", countryCode, number);
+                            number = [NSString stringWithFormat:@"%@%@", countryCode, [number hasPrefix:@"0"] ? [number substringFromIndex:1] : number];
+                        }
+                        numbers[number] = name;
+                    }
+                }
+                else
+                    DDLogWarn(@"Error fetching contacts: %@", error);
+            }];
+            
+            DDLogDebug(@"Got list of contact phone numbers: %@", numbers);
+            
+            NSArray<xmpp*>* connectedAccounts = [MLXMPPManager sharedInstance].connectedXMPP;
+            if(connectedAccounts.count == 0)
+            {
+                DDLogError(@"No connected account while trying to send quicksy phonebook!");
+                return;
+            }
+            else if(connectedAccounts.count > 1)
+                DDLogWarn(@"More than 1 connected account while trying to send quicksy phonebook, using first one!");
+            
+            XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqGetType to:@"api.quicksy.im"];
+            [iqNode setQuicksyPhoneBook:numbers.allKeys];
+            [connectedAccounts[0] sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleQuicksyPhoneBook, $ID(numbers))];
+        }
+        else
+            DDLogError(@"Access to contacts not granted!");
+    }];
+}
+#endif
 
 -(void) showWarningsIfNeeded
 {
@@ -510,14 +635,38 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) showNotificationSettings
 {
-    UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsNotificatioSettings"];
-    [self presentViewController:view animated:YES completion:^{}];
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsNotificationSettings"];
+        view.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
+        [self presentViewController:view animated:YES completion:^{}];
+    }];
 }
 
--(void) showPrivacySettings
+-(void) showGeneralSettings
 {
-    UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsPrivacySettings"];
-    [self presentViewController:view animated:YES completion:^{}];
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsGeneralSettings"];
+        view.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
+        [self presentViewController:view animated:YES completion:^{}];
+    }];
+}
+
+-(void) showOnboarding
+{
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"OnboardingView"];
+        if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
+            view.modalPresentationStyle = UIModalPresentationFullScreen;
+        else
+            view.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+        [self presentViewController:view animated:NO completion:^{}];
+    }];
 }
 
 -(void) showSettings
@@ -580,6 +729,9 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
         UIViewController* accountPickerController = [[SwiftuiInterface new] makeAccountPickerForContacts:contacts andCallType:callType];
+        accountPickerController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:accountPickerController animated:YES completion:^{}];
     }];
 }
@@ -694,6 +846,9 @@ static NSMutableSet* _pushWarningDisplayed;
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
+        detailsViewController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
@@ -838,6 +993,9 @@ static NSMutableSet* _pushWarningDisplayed;
         selected = self.unpinnedContacts[indexPath.row];
     }
     UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:selected];
+    detailsViewController.ml_disposeCallback = ^{
+        [self sheetDismissed];
+    };
     [self presentViewController:detailsViewController animated:YES completion:^{}];
 }
 
@@ -947,7 +1105,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(NSAttributedString*) titleForEmptyDataSet:(UIScrollView*) scrollView
 {
-    NSString* text = NSLocalizedString(@"No one is here", @"");
+    NSString* text = NSLocalizedString(@"No active conversations", @"");
     
     NSDictionary* attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: (self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark ? [UIColor whiteColor] : [UIColor blackColor])};
@@ -957,7 +1115,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 - (NSAttributedString*)descriptionForEmptyDataSet:(UIScrollView*) scrollView
 {
-    NSString* text = NSLocalizedString(@"When you start talking to someone,\n they will show up here.", @"");
+    NSString* text = NSLocalizedString(@"When you start a conversation\nwith someone, they will\nshow up here.", @"");
     
     NSMutableParagraphStyle* paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;
@@ -1014,6 +1172,9 @@ static NSMutableSet* _pushWarningDisplayed;
                 DDLogWarn(@"Dummy reg completion called for accountNo: %@", accountNo);
             })),
         }];
+        registerViewController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:registerViewController animated:YES completion:^{}];
     }];
 }
@@ -1023,6 +1184,9 @@ static NSMutableSet* _pushWarningDisplayed;
     if([MLNotificationManager sharedInstance].currentContact != nil)
     {
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:[MLNotificationManager sharedInstance].currentContact];
+        detailsViewController.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
         [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
 }

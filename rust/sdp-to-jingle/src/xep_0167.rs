@@ -285,10 +285,10 @@ impl JingleRtpSessionsPayloadType {
                     //TODO: implement this for quickxml deserialization, too!
                     if any::type_name::<T>() == any::type_name::<bool>() {
                         match param.value.to_lowercase().as_str() {
-                            "false" => value = "false".to_string().clone(),
-                            "0" => value = "false".to_string().clone(),
-                            "true" => value = "true".to_string().clone(),
-                            "1" => value = "true".to_string().clone(),
+                            "false" => value.clone_from(&"false".to_string()),
+                            "0" => value.clone_from(&"false".to_string()),
+                            "true" => value.clone_from(&"true".to_string()),
+                            "1" => value.clone_from(&"true".to_string()),
                             _ => {
                                 panic!("unallowed truth value: {}", value)
                             }
@@ -663,7 +663,7 @@ impl JingleRtpSessions {
                     SdpAttribute::MaxMessageSize(_) => {}
                     SdpAttribute::MaxPtime(_) => {}
                     SdpAttribute::Mid(name) => {
-                        content.name = name.clone();
+                        content.name.clone_from(name);
                     }
                     SdpAttribute::Msid(_) => {}
                     SdpAttribute::MsidSemantic(_) => {}
@@ -736,6 +736,7 @@ impl JingleRtpSessions {
                     SdpAttribute::SsrcGroup(semantics, ssrcs) => {
                         jingle.add_ssrc_group(JingleSsrcGroup::new_from_sdp(semantics, ssrcs));
                     }
+                    SdpAttribute::FrameRate(_) => {}
                 }
             }
             if fingerprint.is_set() {

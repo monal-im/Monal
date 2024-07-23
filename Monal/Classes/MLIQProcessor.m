@@ -649,8 +649,7 @@ $$
 $$class_handler(handleSetMamPrefs, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
-        DDLogError(@"Setting MAM prefs returned an error: %@", [iqNode findFirst:@"error"]);
-        [HelperTools postError:NSLocalizedString(@"XMPP mam preferences error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        DDLogError(@"Setting MAM prefs returned an error, ignoring: %@", [iqNode findFirst:@"error"]);
         return;
     }
 $$
@@ -746,7 +745,7 @@ $$class_handler(handleModerationResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iq
     }
     
     DDLogInfo(@"Successfully moderated message in muc: %@", msg);
-    [[DataLayer sharedInstance] deleteMessageHistory:msg.messageDBId];
+    [[DataLayer sharedInstance] retractMessageHistory:msg.messageDBId];
     
     //update ui
     DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", msg.messageDBId);
@@ -762,6 +761,32 @@ $$class_handler(handleModerationResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iq
         @"contact": msg.contact,
     }];
 $$
+
+#ifdef IS_QUICKSY
+$$class_handler(handleQuicksyPhoneBook, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSDictionary*, numbers))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Quicksy phonebook synchronize returned an error: %@", [iqNode findFirst:@"error"]);
+        [HelperTools postError:NSLocalizedString(@"Failed to synchronize phonebook", @"") withNode:iqNode andAccount:account andIsSevere:NO];
+        return;
+    }
+    
+    for(MLXMLNode* entry in [iqNode find:@"{im.quicksy.synchronization:0}phone-book/entry"])
+    {
+        NSString* nick = numbers[[entry findFirst:@"/@number"]];
+        for(NSString* jid in [entry find:@"jid#"])
+        {
+            DDLogDebug(@"Adding '%@' with nick '%@' to local roster...", jid, nick);
+            [[DataLayer sharedInstance] addContact:jid forAccount:account.accountNo nickname:nick];
+#ifndef DISABLE_OMEMO
+            // Request omemo devicelist
+            [account.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:jid];
+#endif// DISABLE_OMEMO
+
+        }
+    }
+$$
+#endif
 
 +(void) respondWithErrorTo:(XMPPIQ*) iqNode onAccount:(xmpp*) account
 {

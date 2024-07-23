@@ -59,8 +59,8 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     @defaultsDB("OMEMODefaultOn") 
     var omemoDefaultOn:Bool
     
-    @defaultsDB("AutodeleteAllMessagesAfter3Days")
-    var autodeleteAllMessagesAfter3Days: Bool
+    @defaultsDB("AutodeleteInterval")
+    var AutodeleteInterval: Int
     
     @defaultsDB("SendLastUserInteraction")
     var sendLastUserInteraction: Bool
@@ -97,9 +97,6 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     
     @defaultsDB("allowCallsFromNonRosterContacts")
     var allowCallsFromNonRosterContacts: Bool
-    
-    @defaultsDB("HasSeenPrivacySettings")
-    var hasSeenPrivacySettings: Bool
     
     @defaultsDB("AutodownloadFiletransfers")
     var autodownloadFiletransfers : Bool
@@ -192,9 +189,6 @@ struct GeneralSettings: View {
             }
         }
         .navigationBarTitle(Text("General Settings"))
-        .onAppear {
-            generalSettingsDefaultsDB.hasSeenPrivacySettings = true
-        }
     }
 }
 
@@ -243,6 +237,44 @@ struct UserInterfaceSettings: View {
 
 struct SecuritySettings: View {
     @ObservedObject var generalSettingsDefaultsDB = GeneralSettingsDefaultsDB()
+    @State var autodeleteInterval: Int = 0
+    @State var autodeleteIntervalSelection: Int = 0
+    var autodeleteOptions = [
+              0: NSLocalizedString("Off", comment:"Message autdelete time"),
+             30: NSLocalizedString("30 seconds", comment:"Message autdelete time"),
+             60: NSLocalizedString("1 minute", comment:"Message autdelete time"),
+            300: NSLocalizedString("5 minutes", comment:"Message autdelete time"),
+            900: NSLocalizedString("15 minutes", comment:"Message autdelete time"),
+           1800: NSLocalizedString("30 minutes", comment:"Message autdelete time"),
+           3600: NSLocalizedString("1 hour", comment:"Message autdelete time"),
+          43200: NSLocalizedString("12 hours", comment:"Message autdelete time"),
+          86400: NSLocalizedString("1 day", comment:"Message autdelete time"),
+         259200: NSLocalizedString("3 days", comment:"Message autdelete time"),
+         604800: NSLocalizedString("1 week", comment:"Message autdelete time"),
+        2419200: NSLocalizedString("4 weeks", comment:"Message autdelete time"),
+        5184000: NSLocalizedString("2 month", comment:"Message autdelete time"),        //based on 30 days per month
+        7776000: NSLocalizedString("3 month", comment:"Message autdelete time"),        //based on 30 days per month
+    ]
+    
+    init() {
+        _autodeleteInterval = State(wrappedValue:generalSettingsDefaultsDB.AutodeleteInterval)
+        _autodeleteIntervalSelection = State(wrappedValue:generalSettingsDefaultsDB.AutodeleteInterval)
+        if #available(iOS 15, *) {
+            //only activate custom values on ios >= 15
+            autodeleteOptions[-1] = NSLocalizedString("Custom", comment:"Message autdelete time")
+            //check if we have a custom value and change picker value accordingly
+            if autodeleteOptions[autodeleteInterval] == nil {
+                _autodeleteIntervalSelection = State(wrappedValue:-1)
+            }
+        } else {
+            //check if we have a custom value, this should never happen because custom values should only be settable in ios >= 15
+            if autodeleteOptions[autodeleteInterval] == nil {
+                //turn autodelete off int his case (sane value)
+                _autodeleteIntervalSelection = State(wrappedValue:0)
+                _autodeleteInterval = State(wrappedValue:0)
+            }
+        }
+    }
     
     var body: some View {
         Form {
@@ -273,12 +305,41 @@ like hotel wifi, ugly mobile carriers etc.
             }
             
             Section(header: Text("On this device")) {
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.autodeleteAllMessagesAfter3Days) {
-                    Text("Autodelete all messages after 3 days")
+                VStack(alignment: .leading, spacing: 0) {
+                    Picker("Autodelete all messages older than", selection: $autodeleteIntervalSelection) {
+                        ForEach(autodeleteOptions.keys.sorted(), id: \.self) { key in
+                            Text(autodeleteOptions[key]!).tag(key)
+                        }
+                    }
+                    if #available(iOS 15, *) {
+                        //custom interval requested explicitly
+                        if autodeleteIntervalSelection == -1 {
+                            HStack {
+                                Text("Custom Time: ")
+                                Stepper(String(format:NSLocalizedString("%@ hours", comment:""), String(describing:(max(1, autodeleteInterval / 3600)).formatted())), value: Binding<Int>(
+                                    get: { max(1, autodeleteInterval / 3600) /*clamp to 1 ... .max*/ },
+                                    set: { autodeleteInterval = $0 * 3600 }
+                                ), in: 1 ... .max)
+                            }
+                        }
+                    }
+                    Text("Be warned: Message will only be deleted on incoming pushes or if you open the app! This is especially true for shorter time intervals!").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
+                    Text("Also beware: You won't be able to load older history from your server, Monal will immediately delete it after fetching it!").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
                 }
             }
         }
         .navigationBarTitle(Text("Security"), displayMode: .inline)
+        //save only when closing view to not delete messages while the user is selecting a (custom) value
+        .onDisappear {
+            if autodeleteIntervalSelection == -1 {
+                //make sure our custom value is stored clamped, too
+                autodeleteInterval = max(1, autodeleteInterval / 3600)
+            } else {
+                //copy over picker value if not set to custom
+                autodeleteInterval = autodeleteIntervalSelection
+            }
+            generalSettingsDefaultsDB.AutodeleteInterval = autodeleteInterval
+        }
     }
 }
 
@@ -287,13 +348,24 @@ struct PrivacySettings: View {
     
     var body: some View {
         Form {
+            PrivacySettingsSubview(onboardingPart:-1)
+        }
+        .navigationBarTitle(Text("Privacy"), displayMode: .inline)
+    }
+}
+struct PrivacySettingsSubview: View {
+    @ObservedObject var generalSettingsDefaultsDB = GeneralSettingsDefaultsDB()
+    var onboardingPart: Int
+    
+    var body: some View {
+        if onboardingPart == -1 || onboardingPart == 0 {
             Section(header: Text("Activity indications")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendReceivedMarkers) {
-                    Text("Send message received")
+                    Text("Send message receipts")
                     Text("Let your contacts know if you received a message.")
                 }
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendDisplayedMarkers) {
-                    Text("Send message displayed state")
+                    Text("Send read receipts")
                     Text("Let your contacts know if you read a message.")
                 }
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.sendLastChatState) {
@@ -305,18 +377,23 @@ struct PrivacySettings: View {
                     Text("Let your contacts know when you last opened the app.")
                 }
             }
-            
+        }
+        if onboardingPart == -1 || onboardingPart == 1 {
             Section(header: Text("Interactions")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.allowNonRosterContacts) {
                     Text("Accept incoming messages from strangers")
                     Text("Allow contacts not in your contact list to contact you.")
                 }
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.allowCallsFromNonRosterContacts) {
+                SettingsToggle(isOn: Binding<Bool>(
+                    get: { generalSettingsDefaultsDB.allowCallsFromNonRosterContacts && generalSettingsDefaultsDB.allowNonRosterContacts },
+                    set: { generalSettingsDefaultsDB.allowCallsFromNonRosterContacts = $0 }
+                )) {
                     Text("Accept incoming calls from strangers")
                     Text("Allow contacts not in your contact list to call you.")
                 }.disabled(!generalSettingsDefaultsDB.allowNonRosterContacts)
             }
-            
+        }
+        if onboardingPart == -1 || onboardingPart == 2 {
             Section(header: Text("Misc")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.allowVersionIQ) {
                     Text("Publish version")
@@ -328,7 +405,6 @@ struct PrivacySettings: View {
                 }
             }
         }
-        .navigationBarTitle(Text("Privacy"), displayMode: .inline)
     }
 }
 
@@ -396,7 +472,7 @@ struct AttachmentSettings: View {
                         Text("Load over wifi")
                     }
                 )
-                Text("Load over WiFi up to: \(UInt(generalSettingsDefaultsDB.autodownloadFiletransfersWifiMaxSize/(1024*1024))) MiB")
+                Text("Load over WiFi up to: \(String(describing:UInt(generalSettingsDefaultsDB.autodownloadFiletransfersWifiMaxSize/(1024*1024)))) MiB")
             }
             
             Section {
@@ -413,7 +489,7 @@ struct AttachmentSettings: View {
                         Text("Load over Cellular")
                     }
                 )
-                Text("Load over cellular up to: \(Int(generalSettingsDefaultsDB.autodownloadFiletransfersMobileMaxSize/(1024*1024))) MiB")
+                Text("Load over cellular up to: \(String(describing:UInt(generalSettingsDefaultsDB.autodownloadFiletransfersMobileMaxSize/(1024*1024)))) MiB")
             }
             
             Section(header: Text("Upload Settings")) {
@@ -439,6 +515,6 @@ struct AttachmentSettings: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        PrivacySettings()
+        GeneralSettings()
     }
 }

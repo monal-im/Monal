@@ -110,16 +110,6 @@ struct WelcomeLogIn: View {
             }
         }
     }
-    
-    private func dismissAndShowPrivacySettings() {
-        self.delegate.dismiss()
-        if !HelperTools.defaultsDB().bool(forKey:"HasSeenPrivacySettings") {
-            let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
-            if let activeChats = appDelegate.activeChats {
-                activeChats.showPrivacySettings()
-            }
-        }
-    }
 
     var body: some View {
         ScrollView {
@@ -186,7 +176,7 @@ struct WelcomeLogIn: View {
                         .alert(isPresented: $showAlert) {
                             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                                 if(self.loginComplete == true) {
-                                    dismissAndShowPrivacySettings()
+                                    self.delegate.dismiss()
                                 }
                             }))
                         }
@@ -225,7 +215,7 @@ struct WelcomeLogIn: View {
                     
                     if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
                         Button(action: {
-                            dismissAndShowPrivacySettings()
+                            self.delegate.dismiss()
                         }){
                             Text("Set up account later")
                                 .frame(maxWidth: .infinity)
@@ -274,13 +264,11 @@ struct WelcomeLogIn: View {
             if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
                 if(notificationAccountNo.intValue == newAccountNo.intValue) {
                     isLoadingOmemoBundles = true
-                    DispatchQueue.main.async {
-                        showLoadingOverlay(
-                            overlay, 
-                            headline:NSLocalizedString("Loading omemo bundles", comment: ""),
-                            description:String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all)
-                        )
-                    }
+                    showLoadingOverlay(
+                        overlay, 
+                        headline:NSLocalizedString("Loading omemo bundles", comment: ""),
+                        description:String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all)
+                    )
                 }
             }
         }

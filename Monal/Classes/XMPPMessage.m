@@ -108,11 +108,6 @@ NSString* const kMessageHeadlineType = @"headline";
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"received" andNamespace:@"urn:xmpp:receipts" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
 }
 
--(void) setChatmarkerReceipt:(NSString*) messageId
-{
-    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"received" andNamespace:@"urn:xmpp:chat-markers:0" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
-}
-
 -(void) setDisplayed:(NSString*) messageId
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"displayed" andNamespace:@"urn:xmpp:chat-markers:0" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];

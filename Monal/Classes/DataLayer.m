@@ -157,6 +157,11 @@ static NSDateFormatter* dbFormatter;
     [self.db voidWriteTransaction:block];
 }
 
+-(void) vacuum
+{
+    return [self.db vacuum];
+}
+
 #pragma mark account commands
 
 -(NSArray*) accountList
@@ -933,11 +938,16 @@ static NSDateFormatter* dbFormatter;
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
         MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
-        [self cleanupMembersAndParticipantsListFor:room forAccountId:accountNo];
+        for(NSString* type in @[@"member", @"admin", @"owner"])
+        {
+            [self cleanupParticipantsListFor:room andType:type onAccountId:accountNo];
+            [self cleanupMembersListFor:room andType:type onAccountId:accountNo];
+        }
         
         BOOL encrypt = NO;
 #ifndef DISABLE_OMEMO
         // omemo for non group MUCs is disabled once the type of the muc is set
+        // (for channel type mucs this will be disabled while creating the muc shortly after this function is called)
         encrypt = [[HelperTools defaultsDB] boolForKey:@"OMEMODefaultOn"];
 #endif// DISABLE_OMEMO
         
@@ -945,11 +955,16 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) cleanupMembersAndParticipantsListFor:(NSString*) room forAccountId:(NSNumber*) accountNo
+-(void) cleanupParticipantsListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo
 {
     //clean up old muc data (will be refilled by incoming presences and/or disco queries)
-    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
-    [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
+    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=? AND affiliation=?;" andArguments:@[accountNo, room, type]];
+}
+
+-(void) cleanupMembersListFor:(NSString*) room andType:(NSString*) type onAccountId:(NSNumber*) accountNo
+{
+    //clean up old muc data (will be refilled by incoming presences and/or disco queries)
+    [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND affiliation=?;" andArguments:@[accountNo, room, type]];
 }
 
 -(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSNumber*) accountNo
@@ -959,7 +974,7 @@ static NSDateFormatter* dbFormatter;
     
     [self.db voidWriteTransaction:^{
         //create entry if not already existing
-        [self.db executeNonQuery:@"INSERT OR IGNORE INTO muc_participants ('account_id', 'room', 'room_nick') VALUES(?, ?, ?);" andArguments:@[accountNo, room, participant[@"nick"]]];
+        [self.db executeNonQuery:@"INSERT OR IGNORE INTO muc_participants ('account_id', 'room', 'room_nick', 'occupant_id') VALUES(?, ?, ?, ?);" andArguments:@[accountNo, room, participant[@"nick"], nilWrapper(participant[@"occupant_id"])]];
         
         //update entry with optional fields (the first two fields are for members that are not just participants)
         if(participant[@"jid"])
@@ -1007,12 +1022,22 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSString*) accountNo
+-(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSNumber*) accountNo
 {
     if(!nick || !room || accountNo == nil)
         return nil;
     return [self.db idReadTransaction:^{
         NSArray* result = [self.db executeReader:@"SELECT * FROM muc_participants WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountNo, room, nick]];
+        return result.count > 0 ? result[0] : nil;
+    }];
+}
+
+-(NSDictionary* _Nullable) getParticipantForOccupant:(NSString*) occupant inRoom:(NSString*) room forAccountId:(NSNumber*) accountNo
+{
+    if(!occupant || !occupant || accountNo == nil)
+        return nil;
+    return [self.db idReadTransaction:^{
+        NSArray* result = [self.db executeReader:@"SELECT * FROM muc_participants WHERE account_id=? AND room=? AND occupant_id=?;" andArguments:@[accountNo, room, occupant]];
         return result.count > 0 ? result[0] : nil;
     }];
 }
@@ -1230,13 +1255,13 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSNumber*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates
+-(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSNumber*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom occupantId:(NSString* _Nullable) occupantId participantJid:(NSString*_Nullable) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId checkForDuplicates:(BOOL) checkForDuplicates;
 {
     if(!buddyName || !message)
         return nil;
     
     return [self.db idWriteTransaction:^{
-        if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound andJid:buddyName onAccount:accountNo] == nil)
+        if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound occupantId:occupantId andJid:buddyName onAccount:accountNo] == nil)
         {
             //this is always from a contact
             NSDateFormatter* formatter = [NSDateFormatter new];
@@ -1268,14 +1293,14 @@ static NSDateFormatter* dbFormatter;
             if(historyId != nil)
             {
                 DDLogVerbose(@"Inserting backwards with history id %@", historyId);
-                query = @"insert into message_history (message_history_id, account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid, participant_jid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                params = @[historyId, accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@"", participantJid != nil ? participantJid : [NSNull null]];
+                query = @"insert into message_history (message_history_id, account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid, participant_jid, occupant_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                params = @[historyId, accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@"", nilWrapper(participantJid), nilWrapper(occupantId)];
             }
             else
             {
                 //we use autoincrement here instead of MAX(message_history_id) + 1 to be a little bit faster (but at the cost of "duplicated code")
-                query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid, participant_jid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                params = @[accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@"", participantJid != nil ? participantJid : [NSNull null]];
+                query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid, participant_jid, occupant_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                params = @[accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@"", nilWrapper(participantJid), nilWrapper(occupantId)];
             }
             DDLogVerbose(@"%@ params:%@", query, params);
             BOOL success = [self.db executeNonQuery:query andArguments:params];
@@ -1293,7 +1318,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound andJid:(NSString*) jid onAccount:(NSNumber*) accountNo
+-(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound occupantId:(NSString* _Nullable) occupantId andJid:(NSString*) jid onAccount:(NSNumber*) accountNo
 {
     if(accountNo == nil)
         return (NSNumber*)nil;
@@ -1322,11 +1347,17 @@ static NSDateFormatter* dbFormatter;
             if(historyId != nil)
             {
                 DDLogVerbose(@"found by origin-id or messageid");
-                if(stanzaId)
+                if(stanzaId!=nil)
                 {
                     DDLogDebug(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, inbound=%d)...", historyId, stanzaId, accountNo, messageId, inbound);
                     //this entry needs an update of its stanzaid
                     [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
+                }
+                if(occupantId!=nil)
+                {
+                    DDLogDebug(@"Updating occupant_id of message_history_id %@ to %@ for (account=%@, messageid=%@, inbound=%d)...", historyId, occupantId, accountNo, messageId, inbound);
+                    //only update occupant id if not set yet
+                    [self.db executeNonQuery:@"UPDATE message_history SET occupant_id=? WHERE occupant_id IS NULL AND message_history_id=?" andArguments:@[nilWrapper(occupantId), historyId]];
                 }
                 return historyId;
             }
@@ -1455,28 +1486,34 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
-
--(void) autodeleteAllMessagesAfter3Days
+-(NSNumber*) autoDeleteMessagesAfterInterval:(NSTimeInterval) interval
 {
-    [self.db voidWriteTransaction:^{
+    return [self.db idWriteTransaction:^{
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
-        //3 days before now
-        NSString* pastDate = [dbFormatter stringFromDate:[[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:-3 toDate:[NSDate date] options:0]];
-        //delete all transferred files old enough
-        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND timestamp<?;" andArguments:@[kMessageTypeFiletransfer, pastDate]];
+        //interval before now
+        NSDate* pastDate = [NSDate dateWithTimeIntervalSinceNow: -interval];
+        NSString* pastDateString = [dbFormatter stringFromDate:pastDate];
+
+        //select message history IDs of inbound read messages or outgoing messages being old enough
+        //if they are filetransfers and delete those files
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<? AND messageType=?;" andArguments:@[pastDateString, kMessageTypeFiletransfer]];
         for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
-        //delete all messages in history old enough
-        [self.db executeNonQuery:@"DELETE FROM message_history WHERE timestamp<?;" andArguments:@[pastDate]];
+
+        //delete inbound read messages or outgoing messages being old enough
+        NSNumber* deletionCount = [self.db executeScalar:@"SELECT COUNT(*) FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<?;" andArguments:@[pastDateString]];
+        [self.db executeNonQuery:@"DELETE FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<?;" andArguments:@[pastDateString]];
+
         //delete all chats with empty history from active chats list
-        [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT account_id FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
+        [self.db executeNonQuery:@"DELETE FROM activechats AS AC WHERE NOT EXISTS (SELECT 1 FROM message_history AS MH WHERE MH.account_id=AC.account_id AND MH.buddy_name=AC.buddy_name);"];
+
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
+        
+        return deletionCount;
     }];
-    //vacuum db after delete (must be done outside of transactions)
-    [self.db vacuum];
 }
 
--(void) deleteMessageHistory:(NSNumber*) messageNo
+-(void) retractMessageHistory:(NSNumber*) messageNo
 {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
@@ -1507,30 +1544,32 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber* _Nullable) getLMCHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
+-(NSNumber* _Nullable) getLMCHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from occupantId:(NSString* _Nullable) occupantId participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id WHERE messageid=? AND M.account_id=? AND (\
             (B.Muc=0 AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0))) OR \
-            (\
-                B.Muc=1 AND M.buddy_name=? AND M.actual_from=? AND (\
-                    M.participant_jid=? OR M.participant_jid IS NULL \
+            (B.Muc=1 AND M.buddy_name=? AND (\
+                    (M.occupant_id=? AND M.occupant_id IS NOT NULL) OR \
+                    (M.participant_jid=? AND M.participant_jid IS NOT NULL) \
                 ) AND ( \
                     (M.actual_from=B.muc_nick AND M.inbound=0) OR \
                     (M.actual_from!=B.muc_nick AND M.inbound=1) \
                 ) \
             ) \
-        );" andArguments:@[messageid, accountNo, from, from, from, nilWrapper(actualFrom), nilWrapper(participantJid)]];
+        );" andArguments:@[messageid, accountNo, from, from, from, nilWrapper(occupantId), nilWrapper(participantJid)]];
     }];
 }
 
--(NSNumber* _Nullable) getRetractionHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from actualFrom:(NSString* _Nullable) actualFrom participantJid:(NSString* _Nullable) participantJid andAccount:(NSNumber*) accountNo
+-(NSNumber* _Nullable) getRetractionHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from participantJid:(NSString* _Nullable) participantJid occupantId:(NSString* _Nullable) occupantId andAccount:(NSNumber*) accountNo
 {
     return [self.db idReadTransaction:^{
         return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN account AS A ON M.account_id=A.account_id INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id WHERE M.account_id=? AND ( \
             (B.Muc=0 AND M.messageid=? AND ((M.buddy_name=? AND M.inbound=1) OR ((A.username || '@' || A.domain)=? AND M.inbound=0))) OR \
-            (B.Muc=1 AND M.stanzaid=? AND M.buddy_name=? AND (M.participant_jid=? OR (M.participant_jid IS NULL AND M.actual_from=?))) \
-        );" andArguments:@[accountNo, messageid, from, from, messageid, from, nilWrapper(participantJid), nilWrapper(actualFrom)]];
+            (B.Muc=1 AND M.stanzaid=? AND M.buddy_name=? AND ( \
+                (M.participant_jid=? AND M.participant_jid IS NOT NULL) OR (M.occupant_id=? AND M.occupant_id IS NOT NULL)) \
+            ) \
+        );" andArguments:@[accountNo, messageid, from, from, messageid, from, nilWrapper(participantJid), nilWrapper(occupantId)]];
     }];
 }
 
@@ -1580,7 +1619,7 @@ static NSDateFormatter* dbFormatter;
         if(msg == nil)
             return NO;
         
-        //use the oldest 3 messages, if we are processing a MLhistory mam fetch, and the newest 3, if we are going forward in time
+        //only allow LMC if the correction message has the same encryption or better state as the original message
         if(historyBaseID != nil)
         {
             //only allow LMC for the 3 newest messages of this contact (or of us)
@@ -1591,14 +1630,14 @@ static NSDateFormatter* dbFormatter;
                         ELSE 0 \
                     END \
                 FROM \
-                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? AND message_history_id<? ORDER BY message_history_id ASC LIMIT 3) \
+                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? AND message_history_id<? ORDER BY message_history_id ASC) \
                 WHERE \
-                    message_history_id=?; \
-                " andArguments:@[[NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:encrypted], msg.accountId, msg.buddyName, historyBaseID, historyID]];
+                    message_history_id=? LIMIT 1; \
+                " andArguments:@[@(encrypted), @(encrypted), msg.accountId, msg.buddyName, historyBaseID, historyID]];
         }
         else
         {
-            //only allow LMC for the 3 newest messages of this contact (or of us)
+            //only allow LMC if the correction message has the same encryption or better state as the original message
             editAllowed = (NSNumber*)[self.db executeScalar:@"\
                 SELECT \
                     CASE \
@@ -1606,10 +1645,10 @@ static NSDateFormatter* dbFormatter;
                         ELSE 0 \
                     END \
                 FROM \
-                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY message_history_id DESC LIMIT 3) \
+                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY message_history_id DESC) \
                 WHERE \
-                    message_history_id=?; \
-                " andArguments:@[[NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:encrypted], msg.accountId, msg.buddyName, historyID]];
+                    message_history_id=? LIMIT 1; \
+                " andArguments:@[@(encrypted), @(encrypted), msg.accountId, msg.buddyName, historyID]];
         }
         BOOL eligible = YES;
         eligible &= editAllowed.intValue == 1;

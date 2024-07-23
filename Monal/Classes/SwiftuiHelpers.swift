@@ -17,6 +17,7 @@ import PhotosUI
 import Combine
 import FLAnimatedImage
 import OrderedCollections
+import CropViewController
 
 extension MLContact : Identifiable {}       //make MLContact be usable in swiftui ForEach clauses
 
@@ -87,10 +88,9 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
     }
 }
 
-func performMucAction(account: xmpp, mucJid: String, overlay: LoadingOverlayState, headlineView: Optional<some View>, descriptionView: Optional<some View>, action: @escaping ()->Void) -> Promise<monal_void_block_t?> {
-    showLoadingOverlay(overlay, headlineView:headlineView, descriptionView:descriptionView)
+func promisifyMucAction(account: xmpp, mucJid: String, action: @escaping () throws -> Void) -> Promise<monal_void_block_t?> {
     return Promise<monal_void_block_t?> { seal in
-        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.global(qos: .background).async {
             account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
                 let success : Bool = data["success"] as! Bool;
                 if !success {
@@ -103,7 +103,12 @@ func performMucAction(account: xmpp, mucJid: String, overlay: LoadingOverlayStat
                     }
                 }
             }, forMuc:mucJid)
-            action()
+            do {
+                try action()
+            } catch {
+                seal.reject(error)
+            }
+            
         }
     }
 }
@@ -221,6 +226,68 @@ func buildNotificationStateLabel(_ description: Text, isWorking: Bool) -> some V
     }
 }
 
+//see https://github.com/CH3COOH/TOCropViewController/blob/issue/421/Swift/CropViewControllerSwiftUIExample/ImageCropView.swift
+public struct ImageCropView: UIViewControllerRepresentable {
+    private let configureBlock: (CropViewController) -> Void
+    private let originalImage: UIImage
+    private let onCanceled: () -> Void
+    private let onImageCropped: (UIImage,CGRect,Int) -> Void
+    
+    @Environment(\.presentationMode) private var presentationMode
+
+    public init(originalImage: UIImage, configureBlock: @escaping (CropViewController) -> Void, onCanceled: @escaping () -> Void, success onImageCropped: @escaping (UIImage,CGRect,Int) -> Void) {
+        self.originalImage = originalImage
+        self.configureBlock = configureBlock
+        self.onCanceled = onCanceled
+        self.onImageCropped = onImageCropped
+    }
+
+    public func makeUIViewController(context: Context) -> CropViewController {
+        let cropController = CropViewController(image: originalImage)
+        cropController.delegate = context.coordinator
+        configureBlock(cropController)
+        return cropController
+    }
+
+    public func updateUIViewController(_ uiViewController: CropViewController, context: Context) {
+    }
+
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(
+            onDismiss: { self.presentationMode.wrappedValue.dismiss() },
+            onCanceled: self.onCanceled,
+            onImageCropped: self.onImageCropped
+        )
+    }
+
+    final public class Coordinator: NSObject, CropViewControllerDelegate {
+        private let onDismiss: () -> Void
+        private let onImageCropped: (UIImage,CGRect,Int) -> Void
+        private let onCanceled: () -> Void
+
+        init(onDismiss: @escaping () -> Void, onCanceled: @escaping () -> Void, onImageCropped: @escaping (UIImage,CGRect,Int) -> Void) {
+            self.onDismiss = onDismiss
+            self.onImageCropped = onImageCropped
+            self.onCanceled = onCanceled
+        }
+
+        public func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+            self.onImageCropped(image, cropRect, angle)
+            self.onDismiss()
+        }
+        
+        public func cropViewController(_ cropViewController: CropViewController, didCropToCircularImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+            self.onImageCropped(image, cropRect, angle)
+            self.onDismiss()
+        }
+        
+        public func cropViewController(_ cropViewController: CropViewController, didFinishCancelled cancelled: Bool) {
+            self.onCanceled()
+            self.onDismiss()
+        }
+    }
+}
+
 //see here for some ideas used herein: https://blog.logrocket.com/adding-gifs-ios-app-flanimatedimage-swiftui/#using-flanimatedimage-with-swift
 struct GIFViewer: UIViewRepresentable {
     typealias UIViewType = FLAnimatedImageView
@@ -230,16 +297,6 @@ struct GIFViewer: UIViewRepresentable {
         let imageView = FLAnimatedImageView(frame:.zero)
         let animatedImage = FLAnimatedImage(animatedGIFData:data)
         imageView.animatedImage = animatedImage
-        //imageView.translatesAutoresizingMaskIntoConstraints = false
-        //imageView.contentMode = .scaleAspectFit
-        //imageView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-        
-//         imageView.translatesAutoresizingMaskIntoConstraints = false
-//         imageView.layer.cornerRadius = 24
-//         imageView.layer.masksToBounds = true
-//         imageView.setContentHuggingPriority(.required, for: .vertical)
-//         imageView.setContentHuggingPriority(.required, for: .horizontal)
-        
         return imageView
     }
 
@@ -460,10 +517,6 @@ struct AddTopLevelNavigation<Content: View>: View {
         self.build = build
         self.delegate = delegate
     }
-    init(withDelegate delegate: SheetDismisserProtocol, andClosure build: @escaping () -> Content) {
-        self.build = build
-        self.delegate = delegate
-    }
     var body: some View {
         NavigationView {
             build()
@@ -525,6 +578,41 @@ extension View {
     }
 }
 
+public extension UIViewController {
+    private struct AssociatedKeys {
+        static var DisposeCallbackKey = "ml_disposeCallbackKey"
+    }
+    
+    private class DisposeCallback : NSObject {
+        let callback: monal_void_block_t
+        
+        init(withCallback callback: @escaping monal_void_block_t) {
+            self.callback = callback
+        }
+        
+        deinit {
+            self.callback()
+        }
+    }
+    
+    @objc
+    var ml_disposeCallback: monal_void_block_t {
+        get {
+            return withUnsafePointer(to: &AssociatedKeys.DisposeCallbackKey) { pointer in
+                if let callback = (objc_getAssociatedObject(self, pointer) as? DisposeCallback)?.callback {
+                    return callback
+                }
+                unreachable("You can't get what you did not set!")
+            }
+        }
+        set {
+            withUnsafePointer(to: &AssociatedKeys.DisposeCallbackKey) { pointer in
+                objc_setAssociatedObject(self, pointer, DisposeCallback(withCallback: newValue), .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            }
+        }
+    }
+}
+
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {
@@ -533,7 +621,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(delegate:delegate, contacts:contacts, callType:MLCallType(rawValue: callType)!)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(contacts:contacts, callType:MLCallType(rawValue: callType)!)))
         return host
     }
     
@@ -566,9 +654,7 @@ class SwiftuiInterface : NSObject {
     
     @objc
     func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
-        let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        delegate.host = host
         if(ownContact == nil) {
             host.rootView = AnyView(OmemoKeys(contact: nil))
         } else {
@@ -582,7 +668,11 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
+#if IS_QUICKSY
+        host.rootView = AnyView(Quicksy_RegisterAccount(delegate:delegate))
+#else
         host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:RegisterAccount(delegate:delegate, registerData:registerData)))
+#endif
         return host
     }
     
@@ -595,7 +685,7 @@ class SwiftuiInterface : NSObject {
         return host
     }
     
-    @objc
+    @objc(makeAddContactViewWithDismisser:)
     func makeAddContactView(dismisser: @escaping (MLContact) -> ()) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
@@ -616,30 +706,32 @@ class SwiftuiInterface : NSObject {
     @objc
     func makeView(name: String) -> UIViewController {
         let delegate = SheetDismisserProtocol()
-        let host = UIHostingController(rootView:AnyView(EmptyView()))
-        delegate.host = host
+        var host: UIHostingController<AnyView>? = nil
+        //let host = UIHostingController(rootView:AnyView(EmptyView()))
         switch(name) { // TODO names are currently taken from the segue identifier, an enum would be nice once everything is ported to SwiftUI
             case "DebugView":
-                host.rootView = AnyView(UIKitWorkaround(DebugView()))
+                host = UIHostingController(rootView:AnyView(UIKitWorkaround(DebugView())))
             case "WelcomeLogIn":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate)))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate))))
             case "LogIn":
-                host.rootView = AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate)))
-            case "ContactRequests":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactRequestsMenu(delegate: delegate)))
+                host = UIHostingController(rootView:AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate))))
             case "CreateGroup":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate)))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate))))
             case "ChatPlaceholder":
-                host.rootView = AnyView(ChatPlaceholder())
+                host = UIHostingController(rootView:AnyView(ChatPlaceholder()))
             case "GeneralSettings" :
-                host.rootView = AnyView(UIKitWorkaround(GeneralSettings()))
-            case "ActiveChatsPrivacySettings":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: PrivacySettings()))
-            case "ActiveChatsNotificatioSettings":
-                host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings()))
+                host = UIHostingController(rootView:AnyView(UIKitWorkaround(GeneralSettings())))
+            case "ActiveChatsGeneralSettings":
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: GeneralSettings())))
+            case "ActiveChatsNotificationSettings":
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings())))
+            case "OnboardingView":
+                host = UIHostingController(rootView:AnyView(createOnboardingView(delegate:delegate)))
+            
             default:
                 unreachable()
         }
-        return host
+        delegate.host = host!
+        return host!
     }
 }

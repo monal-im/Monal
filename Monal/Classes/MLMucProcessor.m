@@ -189,7 +189,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     XMPPMessage* msg = notification.userInfo[@"message"];
     NSString* callUiHandlerFor = nil;
     
-    //check if this is a direct invite (direct invites always follow indirect ones, so we don't have to check for indirect ones)
+    //check if this is a direct invite
     if([msg check:@"/{jabber:client}message<type=normal>/{jabber:x:conference}x@jid"])
         callUiHandlerFor = [msg findFirst:@"/{jabber:client}message<type=normal>/{jabber:x:conference}x@jid"];
     
@@ -361,6 +361,8 @@ static NSDictionary* _optionalGroupConfigOptions;
             if(item[@"jid"])
                 item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
             item[@"nick"] = presenceNode.fromResource;
+            if([_roomFeatures[presenceNode.fromUser] containsObject:@"urn:xmpp:occupant-id:0"])
+                item[@"occupant_id"] = [presenceNode findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
             
             //handle participant updates
             if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
@@ -420,7 +422,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         }
         MLContact* inviteFrom = [MLContact createContactFromJid:invitedMucJid andAccountNo:_account.accountNo];
         DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
-        if(!inviteFrom.isSubscribedFrom)
+        if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !inviteFrom.isSubscribedFrom)
         {
             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
             return YES;     //don't process this further
@@ -439,7 +441,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         
         MLContact* inviteFrom = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:_account.accountNo];
         DDLogInfo(@"Got direct muc invite from %@ for %@ --> joining...", inviteFrom, [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
-        if(!inviteFrom.isSubscribedFrom)
+        if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !inviteFrom.isSubscribedFrom)
         {
             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
             return YES;     //don't process this further
@@ -622,14 +624,15 @@ $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, acc
         @"roomJid": [NSString stringWithFormat:@"%@", roomJid],
     }));
     
-    [self callSuccessUIHandlerForMuc:iqNode.fromUser];
-    
+    //don't call success handler if we are only "half-joined" (see comments below for what that means)
     if(joinOnSuccess)
     {
         //group is now properly configured and we are joined, but all the code handling a proper join was not run
         //--> join again to make sure everything is sane
         [self join:roomJid];
     }
+    else
+        [self callSuccessUIHandlerForMuc:iqNode.fromUser];
 $$
 
 -(void) handleStatusCodes:(XMPPStanza*) node
@@ -1233,22 +1236,13 @@ $$
 
 -(void) inviteUser:(NSString*) jid inMuc:(NSString*) roomJid
 {
-    DDLogInfo(@"Inviting user '%@' to '%@' directly & indirectly", jid, roomJid);
-    
-    XMPPMessage* indirectInviteMsg = [[XMPPMessage alloc] initWithType:kMessageNormalType to:roomJid];
-    [indirectInviteMsg addChildNode:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"http://jabber.org/protocol/muc#user" withAttributes:@{} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"invite" withAttributes:@{
-            @"to": jid
-        } andChildren:@[] andData:nil]
-    ] andData:nil]];
-    [self->_account send:indirectInviteMsg];
-    
+    DDLogInfo(@"Directly inviting user '%@' to '%@'...", jid, roomJid);
     XMPPMessage* directInviteMsg = [[XMPPMessage alloc] initWithType:kMessageNormalType to:jid];
     [directInviteMsg addChildNode:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:conference" withAttributes:@{
         @"jid": roomJid
     } andChildren:@[] andData:nil]];
+    [directInviteMsg setStoreHint];
     [self->_account send:directInviteMsg];
-
 }
 
 -(void) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inMuc:(NSString*) roomJid
@@ -1457,14 +1451,19 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         }
         //make public channels "mention only" on first join
         if([@"channel" isEqualToString:mucType])
+        {
+            DDLogDebug(@"Configuring new muc %@ to be mention-only...", iqNode.fromUser);
             [[DataLayer sharedInstance] setMucAlertOnMentionOnly:iqNode.fromUser onAccount:_account.accountNo];
+        }
     }
     
     if(![mucType isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:_account.accountNo]])
     {
-        DDLogInfo(@"Configuring muc %@ to type '%@'...", iqNode.fromUser, mucType);
+        DDLogInfo(@"Configuring muc %@ to be of type '%@'...", iqNode.fromUser, mucType);
         [[DataLayer sharedInstance] updateMucTypeTo:mucType forRoom:iqNode.fromUser andAccount:_account.accountNo];
     }
+    else
+        DDLogDebug(@"Muc %@ is already configured to be of type '%@' ('%@')...", iqNode.fromUser, mucType, [[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:_account.accountNo]);
     
     if(!mucName || ![mucName length])
         mucName = @"";
@@ -1491,9 +1490,12 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     
     if(join)
     {
-        DDLogInfo(@"Clearing muc participants and members tables for %@", iqNode.fromUser);
-        [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser forAccountId:_account.accountNo];
-    
+        for(NSString* type in @[@"member", @"admin", @"owner"])
+        {
+            DDLogInfo(@"Clearing muc participants table for type %@: %@", type, iqNode.fromUser);
+            [[DataLayer sharedInstance] cleanupParticipantsListFor:iqNode.fromUser andType:type onAccountId:_account.accountNo];
+        }
+        
         //now try to join this room if requested
         [self sendJoinPresenceFor:iqNode.fromUser];
     }
@@ -1525,6 +1527,8 @@ $$
 
 $$instance_handler(handleMembersList, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
+    DDLogInfo(@"Clearing muc members table for type %@: %@", type, iqNode.fromUser);
+    [[DataLayer sharedInstance] cleanupMembersListFor:iqNode.fromUser andType:type onAccountId:_account.accountNo];
     [self handleMembersListUpdate:[iqNode find:@"{http://jabber.org/protocol/muc#admin}query/item@@"] forMuc:iqNode.fromUser];
     [self logMembersOfMuc:iqNode.fromUser];
 $$

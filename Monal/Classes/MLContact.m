@@ -237,8 +237,9 @@ static NSMutableDictionary* _singletonCache;
     @synchronized(_singletonCache) {
         if(_singletonCache[cacheKey] != nil)
         {
-            if(((WeakContainer*)_singletonCache[cacheKey]).obj != nil)
-                return ((WeakContainer*)_singletonCache[cacheKey]).obj;
+            MLContact* obj = ((WeakContainer*)_singletonCache[cacheKey]).obj;
+            if(obj != nil)
+                return obj;
             else
                 [_singletonCache removeObjectForKey:cacheKey];
         }
@@ -344,7 +345,7 @@ static NSMutableDictionary* _singletonCache;
     
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName andSelfnotesPrefix:(BOOL) hasSelfnotesPrefix
 {
-    DDLogVerbose(@"Calculating contact display name...");
+    //DDLogVerbose(@"Calculating contact display name...");
     NSString* displayName;
     if(!self.isSelfChat)
     {
@@ -359,17 +360,17 @@ static NSMutableDictionary* _singletonCache;
         
         if(self.nickName && self.nickName.length > 0)
         {
-            DDLogVerbose(@"Using nickName: %@", self.nickName);
+            //DDLogVerbose(@"Using nickName: %@", self.nickName);
             displayName = self.nickName;
         }
         else if(self.fullName && self.fullName.length > 0)
         {
-            DDLogVerbose(@"Using fullName: %@", self.fullName);
+            //DDLogVerbose(@"Using fullName: %@", self.fullName);
             displayName = self.fullName;
         }
         else
         {
-            DDLogVerbose(@"Using fallback: %@", fallbackName);
+            //DDLogVerbose(@"Using fallback: %@", fallbackName);
             displayName = fallbackName;
         }
     }
@@ -507,10 +508,10 @@ static NSMutableDictionary* _singletonCache;
 
 -(BOOL) isInRoster
 {
-    // mucs have a subscription of both (ensured by the datalayer)
-    return [self.subscription isEqualToString:kSubBoth]
-        || [self.subscription isEqualToString:kSubTo]
-        || [self.ask isEqualToString:kAskSubscribe];
+    //either we already allowed each other or we allow this contact and asked them to allow us
+    //--> if isInRoster is true this is displayed as "remove contact" in contact details, otherwise it will be displayed as "add contact"
+    //(mucs have a subscription of 'both', ensured by the datalayer)
+    return [self.subscription isEqualToString:kSubBoth] || ([self.subscription isEqualToString:kSubFrom] && [self.ask isEqualToString:kAskSubscribe]);
 }
 
 +(NSSet*) keyPathsForValuesAffectingIsInRoster

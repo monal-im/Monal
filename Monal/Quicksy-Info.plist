@@ -88,6 +88,8 @@
 	<string>Quicksy allows users to save photos received in conversations.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Quicksy allows users to upload photos to recipients in a conversation</string>
+    <key>NSContactsUsageDescription</key>
+    <string>Quicksy syncs your contact list in regular intervals to make suggestions about possible contacts, who are already using the app.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>INSendMessageIntent</string>
@@ -108,7 +110,7 @@
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
-	<string>Launch Screen</string>
+	<string>Quicksy Launch Screen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIPrerenderedIcon</key>

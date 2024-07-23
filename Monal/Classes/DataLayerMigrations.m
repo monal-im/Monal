@@ -1053,6 +1053,33 @@
             [db executeNonQuery:@"UPDATE account SET plain_activated=true, supports_sasl2=false WHERE NOT enabled AND supports_sasl2;"];
         }];
         
+        //add occupant-id (XEP-0421) support
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.401 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE muc_participants ADD COLUMN occupant_id VARCHAR(128) NULL DEFAULT NULL;"];
+            [db executeNonQuery:@"ALTER TABLE muc_members ADD COLUMN occupant_id VARCHAR(128) NULL DEFAULT NULL;"];
+            [db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN occupant_id VARCHAR(128) NULL DEFAULT NULL;"];
+        }];
+        
+        //fix last update
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.402 withBlock:^{
+            [db executeNonQuery:@"CREATE UNIQUE INDEX unique_occupant ON muc_participants('room', 'account_id', 'occupant_id');"];
+            [db executeNonQuery:@"ALTER TABLE muc_members DROP COLUMN occupant_id;"];
+        }];
+        
+        //make new mucs not have a default type instead of 'channel'
+        //(that means that the default encryption gets turned off when entering a channel and kept on when entering a group)
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.403 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE buddylist RENAME COLUMN 'muc_type' to 'muc_type_old';"];
+            [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN 'muc_type' VARCHAR(10) DEFAULT NULL;"];
+            [db executeNonQuery:@"UPDATE buddylist SET muc_type=muc_type_old;"];
+            [db executeNonQuery:@"ALTER TABLE buddylist DROP COLUMN 'muc_type_old';"];
+        }];
+        
+        //make sure all existing mucs get their type and encryption state correctly updated, too
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.404 withBlock:^{
+            [db executeNonQuery:@"UPDATE buddylist SET muc_type=NULL;"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

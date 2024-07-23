@@ -449,4 +449,18 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
+#ifdef IS_QUICKSY
+-(void) setQuicksyPhoneBook:(NSArray*) numbers
+{
+    MLXMLNode* envelope = [[MLXMLNode alloc] initWithElement:@"phone-book" andNamespace:@"im.quicksy.synchronization:0"];
+    for(NSString* number in numbers)
+    {
+        [envelope addChildNode:[[MLXMLNode alloc] initWithElement:@"entry" withAttributes:@{
+            @"number": number,
+        } andChildren:@[] andData:nil]];
+    }
+    [self addChildNode:envelope];
+}
+#endif
+
 @end

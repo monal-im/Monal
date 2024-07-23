@@ -351,7 +351,7 @@ $$
     DDLogInfo(@"Updating unread called");
     //make sure unread badge matches application badge
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
-    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
+    [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         NSInteger unread = 0;
         if(unreadMsgCnt != nil)
             unread = [unreadMsgCnt integerValue];
@@ -1000,7 +1000,13 @@ $$
             [[MLXMPPManager sharedInstance] removeContact:fromContact];
         }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
-            [self openChatOfContact:fromContact];
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+                while(self.activeChats == nil)
+                    usleep(100000);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [(ActiveChatsViewController*)self.activeChats showAddContact];
+                });
+            });
     }
     else
     {
@@ -1235,15 +1241,11 @@ $$
         _shutdownPending = YES;
         DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
         [HelperTools scheduleBackgroundTask:YES];        //make sure delivery will be attempted, if needed (force as soon as possible)
-        DDLogInfo(@"|~~| 20%% |~~|");
-        [self updateUnread];
-        DDLogInfo(@"|~~| 40%% |~~|");
-        [[HelperTools defaultsDB] synchronize];
-        DDLogInfo(@"|~~| 60%% |~~|");
+        DDLogInfo(@"|~~| 33%% |~~|");
         [[MLXMPPManager sharedInstance] nowBackgrounded];
-        DDLogInfo(@"|~~| 80%% |~~|");
+        DDLogInfo(@"|~~| 66%% |~~|");
         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
-        DDLogInfo(@"|~~| 100%% |~~|");
+        DDLogInfo(@"|~~| 99%% |~~|");
         [[MLXMPPManager sharedInstance] disconnectAll];
         DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
         [DDLog flushLog];
@@ -1615,9 +1617,10 @@ $$
     }
     
     if(![[MLXMPPManager sharedInstance] hasConnectivity])
-    {
         DDLogError(@"BGTASK has *no* connectivity? That's strange!");
-    }
+    
+    //we are a bg processing task potentially having minutes of background time --> vacuum database
+    [[DataLayer sharedInstance] vacuum];
     
     [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
     @synchronized(self) {

@@ -15,8 +15,13 @@ jobs:
   buildAndPublishBeta:
     name: "Build and Publish Beta Release"
     runs-on: self-hosted
+    outputs:
+      release-tag: ${{ steps.releasenotes.outputs.tag }}
+      release-name: ${{ steps.releasenotes.outputs.name }}
+      release-notes: ${{ steps.releasenotes.outputs.notes }}
     env:
       APP_NAME: "Monal"
+      BUILD_SCHEME: "Monal"
       APP_DIR: "Monal.app"
       BUILD_TYPE: "Beta"
       EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
@@ -28,8 +33,10 @@ jobs:
         with:
           clean: true
           submodules: true
-      - name: Fetch tags
-        run: git fetch --tags
+          fetch-depth: 100
+          fetch-tags: true
+          show-progress: true
+          lfs: true
       - name: Checkout submodules
         run: git submodule update -f --init --remote
       - name: Get last build tag and increment it
@@ -38,7 +45,56 @@ jobs:
           buildNumber=$(expr $oldBuildNumber + 1)
           echo "New buildNumber is $buildNumber"
           git tag Build_iOS_$buildNumber
-      - name: Insert buildNumber into plists
+      - name: Extract version number and changelog from newest merge commit
+        id: releasenotes
+        run: |
+          function repairNotes {
+              sed 's/\r//g' | awk '{
+                  if (NR == 1) {
+                      printf("%s", $0)
+                  } else {
+                      if ($0 ~ /^[\t ]*(-|IOS_ONLY[\t ]*-|MACOS_ONLY[\t ]*-).*$/) {
+                          printf("\n%s", $0)
+                      } else {
+                          printf(" %s", $0)
+                      }
+                  }
+              }
+              END {
+                  printf("\n")
+              }'
+          }
+          buildNumber="$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')"
+          version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
+          mkdir -p /Users/ci/releases
+          OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
+          touch "$OUTPUT_FILE"
+          echo "OUTPUT_FILE=$OUTPUT_FILE" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          
+          echo "buildNumber=$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "version=$version" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "buildVersion=$(echo "$version" | grep -oE '^[0-9]+(\.[0-9]+){0,2}')" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "name=Monal Beta $(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1 (Build '$buildNumber', PR \2)/g')" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "notes<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | repairNotes | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]?(.*)$/\1/g' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]?(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "notes_ios<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | repairNotes | grep -v '^[\t\n ]*MACOS_ONLY.*$' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]?(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "notes_macos<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | repairNotes | grep -v '^[\t\n ]*IOS_ONLY.*$' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]?(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          cat "$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
+      - name: Insert buildNumber and version into plists
+        env:
+          buildNumber: ${{ steps.releasenotes.outputs.buildNumber }}
+          buildVersion: ${{ steps.releasenotes.outputs.buildVersion }}
         run: sh ./scripts/set_version_number.sh
       - name: Import TURN secrets
         run: |
@@ -49,32 +105,6 @@ jobs:
         run: chmod +x ./scripts/build.sh
       - name: Run build
         run: ./scripts/build.sh
-      - name: validate ios app
-        run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
-      - name: push tag to beta repo
-        run: |
-          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
-          git push origin Build_iOS_$buildNumber
-      - name: Publish ios to appstore connect
-        run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
-      - name: Notarize catalyst
-        run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
-      - name: staple
-        run: |
-          cd Monal/build/app/tar_release/
-          xcrun stapler staple "$APP_DIR"
-          stapler validate "$APP_DIR"
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
-          cd ../../../..
-      - name: upload new catalyst beta to monal-im.org
-        run: ./scripts/uploadNonAlpha.sh beta
-      - name: Publish catalyst to appstore connect
-        run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
-      - uses: actions/upload-artifact@v4
-        with:
-          name: monal-catalyst
-          path: Monal/build/app/Monal.zip
-          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: monal-ios
@@ -90,6 +120,61 @@ jobs:
           name: monal-ios-dsym
           path: Monal/build/ios_Monal.xcarchive/dSYMs
           if-no-files-found: error
+      - name: validate ios app
+        run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+      - name: Push beta tag to repo
+        run: |
+          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          git push origin Build_iOS_$buildNumber
+      - name: Publish ios to appstore connect
+        #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+        env:
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
+        run: |
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
+      - name: Notarize catalyst
+        run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
+      - name: staple
+        run: |
+          cd Monal/build/app/tar_release/
+          xcrun stapler staple "$APP_DIR"
+          stapler validate "$APP_DIR"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
+          cd ../../../..
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-catalyst-zip
+          path: Monal/build/app/Monal.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-catalyst-pkg
+          path: Monal/build/app/Monal.pkg
+          if-no-files-found: error
+      - name: Upload new catalyst beta to monal-im.org
+        run: ./scripts/uploadNonAlpha.sh beta
+      - name: Publish catalyst to appstore connect
+        #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
+        env:
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_macos }}
+        run: |
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "${{ steps.releasenotes.outputs.name }}"
+          tag_name: "${{ steps.releasenotes.outputs.tag }}"
+          target_commitish: beta
+          generate_release_notes: false
+          body: "${{ steps.releasenotes.outputs.notes }}"
+          files: |
+            ./Monal/build/ipa/Monal.ipa
+            ./Monal/build/app/Monal.pkg
+            ./Monal/build/app/Monal.zip
+          fail_on_unmatched_files: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: true
   
   updateTranslations:
     name: Update Translations using Beta-Branch
@@ -112,3 +197,21 @@ jobs:
           chmod +x ./scripts/updateLocalization.sh
           chmod +x ./scripts/xliff_extractor.py
           ./scripts/updateLocalization.sh BUILDSERVER
+  
+  notifyMuc:
+    name: Notify support MUC about new Betarelease
+    runs-on: ubuntu-latest
+    needs: [buildAndPublishBeta]
+    steps:
+      - name: Notify
+        uses: monal-im/xmpp-notifier@master
+        with: # Set the secrets as inputs
+          jid: ${{ secrets.BOT_JID }}
+          password: ${{ secrets.BOT_PASSWORD }}
+          server_host: ${{ secrets.BOT_SERVER }}
+          recipient: monal@chat.yax.im
+          recipient_is_room: true
+          bot_alias: "Monal Release Bot"
+          message: |
+            ${{ needs.buildAndPublishBeta.outputs.release-name }} was released
+            ${{ needs.buildAndPublishBeta.outputs.release-notes }}

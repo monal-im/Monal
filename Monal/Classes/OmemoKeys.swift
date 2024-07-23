@@ -134,8 +134,7 @@ struct OmemoKeysEntry: View {
         let trustLevelBinding = Binding<Bool>.init(get: {
             return (self.trustLevel.int32Value != MLOmemoNotTrusted)
         }, set: { keyEnabled in
-            self.account.omemo.updateTrust(keyEnabled, for: self.address)
-            self.trustLevel = self.account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
+            setTrustLevel(keyEnabled)
         })
 
         let fingerprintString = HelperTools.signalHexKeyWithSpaces(with: fingerprint)
@@ -211,10 +210,18 @@ struct OmemoKeysForContact: View {
         self.contactJid = contact.obj.contactJid
         self.account = account
         self.deviceId = account.omemo.getDeviceId()
-        self.deviceIds = OrderedSet(self.account.omemo.knownDevices(forAddressName: self.contactJid))
+        self.deviceIds = OmemoKeysForContact.knownDevices(account: self.account, jid: self.contactJid)
         self.selectedDeviceForDeletion = -1
     }
     
+    private static func knownDevices(account: xmpp, jid: String) -> OrderedSet<NSNumber> {
+        return OrderedSet(account.omemo.knownDevices(forAddressName: jid).sorted { return $0.intValue < $1.intValue })
+    }
+
+    private func refreshKnownDevices() -> Void {
+        self.deviceIds = OmemoKeysForContact.knownDevices(account: self.account, jid: self.contactJid)
+    }
+
     func deleteButton(deviceId: NSNumber) -> some View {
         Button(action: {
             selectedDeviceForDeletion = deviceId // SwiftUI does not like to have deviceID nested in multiple functions, so safe this in the struct...
@@ -233,7 +240,6 @@ struct OmemoKeysForContact: View {
                         return // should be unreachable
                     }
                     account.omemo.deleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion)
-                    self.deviceIds.remove(self.selectedDeviceForDeletion)
                 },
                 secondaryButton: .cancel(Text("Abort"))
             )
@@ -250,6 +256,13 @@ struct OmemoKeysForContact: View {
                             deleteButton(deviceId: deviceId)
                         }
                     }
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalOmemoStateUpdated")).receive(on: RunLoop.main)) { notification in
+            if notification.userInfo?["jid"] as? String == self.contactJid {
+                withAnimation() {
+                    refreshKnownDevices()
                 }
             }
         }

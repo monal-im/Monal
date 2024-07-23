@@ -365,13 +365,16 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
     
     //return results from cache if possible
+    NSArray* cacheObj = nil;
     WeakContainer* cacheEntryContainer = [self.cache objectForKey:cacheKey];
-    if(cacheEntryContainer != nil && cacheEntryContainer.obj != nil)
+    if(cacheEntryContainer != nil)
+        cacheObj = cacheEntryContainer.obj;
+    if(cacheObj != nil)
     {
 #ifdef DEBUG_XMLQueryLanguage
-        DDLogVerbose(@"Returning cached result: %@", (NSArray*)cacheEntryContainer.obj);
+        DDLogVerbose(@"Returning cached result: %@", cacheObj);
 #endif
-        return (NSArray*)cacheEntryContainer.obj;
+        return cacheObj;
     }
     
 #ifdef QueryStatistics

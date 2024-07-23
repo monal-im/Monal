@@ -134,10 +134,11 @@ struct AddContactMenu: View {
             }
             return
         }
-        showLoadingOverlay(overlay, headline: NSLocalizedString("Adding...", comment: ""))
-        account.checkJidType(jid, withCompletion: { type, errorMsg in
+        showPromisingLoadingOverlay(overlay, headline:NSLocalizedString("Adding...", comment: ""), description:"") {
+            account.checkJidType(jid)
+        }.done { type in
+            let type = type as! String
             if type == "account" {
-                hideLoadingOverlay(overlay)
                 let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                 self.newContact = contact
                 MLXMPPManager.sharedInstance().add(contact, withPreauthToken:preauthToken)
@@ -145,21 +146,20 @@ struct AddContactMenu: View {
                 trustFingerprints(self.importScannedFingerprints ? self.scannedFingerprints : [:], for:jid, on:account)
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
             } else if type == "muc" {
-                performMucAction(account:account, mucJid:jid, overlay:overlay, headlineView:Text("Adding Group/Channel..."), descriptionView:Text("")) {
-                    account.joinMuc(jid)
+                showPromisingLoadingOverlay(overlay, headlineView:Text("Adding Group/Channel..."), descriptionView:Text("")) {
+                    promisifyMucAction(account:account, mucJid:jid) {
+                        account.joinMuc(jid)
+                    }
                 }.done { _ in
                     self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                     successAlert(title: Text("Success!"), message: Text("Successfully joined group/channel \(jid)!"))
                 }.catch { error in
                     errorAlert(title: Text("Error entering group/channel!"), message: Text("\(String(describing:error))"))
-                }.finally {
-                    hideLoadingOverlay(overlay)
                 }
-            } else {
-                hideLoadingOverlay(overlay)
-                errorAlert(title: Text("Error"), message: Text(errorMsg ?? "Undefined error"))
             }
-        })
+        }.catch { error in
+            errorAlert(title: Text("Error"), message: Text(error.localizedDescription))
+        }
     }
 
     var body: some View {
@@ -172,6 +172,10 @@ struct AddContactMenu: View {
             }
             else
             {
+                if DataLayer.sharedInstance().allContactRequests().count > 0 {
+                    ContactRequestsMenu()
+                }
+                
                 Section(header:Text("Contact and Group/Channel Jids are usually in the format: name@domain.tld")) {
                     if connectedAccounts.count > 1 {
                         Picker("Use account", selection: $selectedAccount) {
@@ -190,18 +194,16 @@ struct AddContactMenu: View {
                         .addClearButton(isEditing: isEditingJid, text:$toAdd)
                         .disabled(scannedFingerprints != nil)
                         .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
-                        .onChange(of: toAdd) { _ in
-                            toAdd = toAdd.replacingOccurrences(of: " ", with: "")
-                        }
-                }
-                if scannedFingerprints != nil && scannedFingerprints!.count > 0 {
-                    Section(header: Text("A contact was scanned through the QR code scanner")) {
-                        Toggle(isOn: $importScannedFingerprints) {
-                            Text("Import and trust OMEMO fingerprints from QR code")
+                        .onChange(of: toAdd) { _ in toAdd = toAdd.replacingOccurrences(of: " ", with: "") }
+                    
+                    if scannedFingerprints != nil && scannedFingerprints!.count > 0 {
+                        Section(header: Text("A contact was scanned through the QR code scanner")) {
+                            Toggle(isOn: $importScannedFingerprints) {
+                                Text("Import and trust OMEMO fingerprints from QR code")
+                            }
                         }
                     }
-                }
-                Section {
+                    
                     if scannedFingerprints != nil {
                         Button(action: {
                             toAdd = ""
@@ -212,26 +214,43 @@ struct AddContactMenu: View {
                                 .foregroundColor(.red)
                         })
                     }
-                    Button(action: {
-                        showAlert = toAddEmptyAlert || toAddInvalidAlert
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            showAlert = toAddEmptyAlert || toAddInvalidAlert
 
-                        if !showAlert {
-                            let jidComponents = HelperTools.splitJid(toAdd)
-                            if jidComponents["host"] == nil || jidComponents["host"]!.isEmpty {
-                                errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing your input..."))
-                                showAlert = true
-                                return
+                            if !showAlert {
+                                let jidComponents = HelperTools.splitJid(toAdd)
+                                if jidComponents["host"] == nil || jidComponents["host"]!.isEmpty {
+                                    errorAlert(title: Text("Error"), message: Text("Something went wrong while parsing your input..."))
+                                    showAlert = true
+                                    return
+                                }
+                                // use the canonized jid from now on (lowercased, resource removed etc.)
+                                addJid(jid: jidComponents["user"]!)
                             }
-                            // use the canonized jid from now on (lowercased, resource removed etc.)
-                            addJid(jid: jidComponents["user"]!)
+                        }) {
+                            scannedFingerprints == nil ? Text("Add") : Text("Add scanned contact")
                         }
-                    }, label: {
-                        scannedFingerprints == nil ? Text("Add Group/Channel or Contact") : Text("Add scanned Group/Channel or Contact")
-                    })
-                    .disabled(toAddEmpty || toAddInvalid)
+                        //.fontWeight(.bold)
+                        .padding(10)
+                        .background(toAddEmpty || toAddInvalid ? Color.gray : Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .disabled(toAddEmpty || toAddInvalid)
+                    }
+                }
+                
+                if DataLayer.sharedInstance().allContactRequests().count == 0 {
+                    Section {
+                        ContactRequestsMenu()
+                    }
                 }
             }
         }
+        .padding()
         .alert(isPresented: $showAlert) {
             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton:.default(Text("Close"), action: {
                 showAlert = false

@@ -45,12 +45,14 @@ struct CreateGroupMenu: View {
             else
             {
                 Section() {
-                    Picker(selection: $selectedAccount, label: Text("Use account")) {
-                        ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
-                            Text(account.connectionProperties.identity.jid).tag(account as xmpp?)
+                    if connectedAccounts.count > 1 {
+                        Picker(selection: $selectedAccount, label: Text("Use account")) {
+                            ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
+                                Text(account.connectionProperties.identity.jid).tag(account as xmpp?)
+                            }
                         }
+                        .pickerStyle(.menu)
                     }
-                    .pickerStyle(.menu)
                     
                     TextField(NSLocalizedString("Group Name (optional)", comment: "placeholder when creating new group"), text: $groupName, onEditingChanged: { isEditingGroupName = $0 })
                         .autocorrectionDisabled()
@@ -77,6 +79,7 @@ struct CreateGroupMenu: View {
                         self.selectedAccount!.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
                             let success : Bool = data["success"] as! Bool;
                             if success {
+                                DataLayer.sharedInstance().setFullName(self.groupName, forContact:roomJid, andAccount:self.selectedAccount!.accountNo)
                                 self.selectedAccount!.mucProcessor.changeName(ofMuc: roomJid, to: self.groupName)
                                 for user in self.selectedContacts {
                                     self.selectedAccount!.mucProcessor.setAffiliation("member", ofUser: user.contactJid, inMuc: roomJid)

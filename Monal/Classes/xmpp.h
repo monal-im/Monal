@@ -46,6 +46,7 @@ FOUNDATION_EXPORT NSString* const kFileName;
 FOUNDATION_EXPORT NSString* const kContentType;
 FOUNDATION_EXPORT NSString* const kData;
 
+@class AnyPromise;
 @class MLPubSub;
 @class MLXMLNode;
 @class XMPPDataForm;
@@ -159,7 +160,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(void) updateRosterItem:(MLContact*) contact withName:(NSString*) name;
 
--(void) checkJidType:(NSString*) jid withCompletion:(void (^)(NSString* type, NSString* _Nullable errorMessage)) completion;
+-(AnyPromise*) checkJidType:(NSString*) jid;
 
 /**
  join a room on the conference server

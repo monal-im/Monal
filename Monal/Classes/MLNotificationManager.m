@@ -24,6 +24,12 @@
 @import AVFoundation;
 @import UniformTypeIdentifiers;
 
+typedef NS_ENUM(NSUInteger, MLNotificationState) {
+    MLNotificationStateNone,
+    MLNotificationStatePending,
+    MLNotificationStateDelivered,
+};
+
 @interface MLNotificationManager ()
 @property (nonatomic, readonly) NotificationPrivacySettingOption notificationPrivacySetting;
 @end
@@ -167,28 +173,70 @@
 
 #pragma mark message signals
 
+-(AnyPromise*) notificationStateForMessage:(MLMessage*) message
+{
+    NSString* idval = [self identifierWithMessage:message];
+    NSMutableArray* promises = [NSMutableArray new];
+    
+    [promises addObject:[AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        DDLogVerbose(@"Checking for 'pending' notification state for '%@'...", idval);
+        [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
+            for(UNNotificationRequest* request in requests)
+                if([request.identifier isEqualToString:idval])
+                {
+                    DDLogDebug(@"Notification state 'pending' for: %@", idval);
+                    resolve(@(MLNotificationStatePending));
+                    return;
+                }
+                resolve(@(MLNotificationStateNone));
+        }];
+    }]];
+    
+    [promises addObject:[AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        DDLogVerbose(@"Checking for 'delivered' notification state for '%@'...", idval);
+        [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
+            for(UNNotification* notification in notifications)
+                if([notification.request.identifier isEqualToString:idval])
+                {
+                    DDLogDebug(@"Notification state 'delivered' for: %@", idval);
+                    resolve(@(MLNotificationStateDelivered));
+                    return;
+                }
+                resolve(@(MLNotificationStateNone));
+        }];
+    }]];
+    
+    
+    return PMKWhen(promises).then(^(NSArray* results) {
+        DDLogVerbose(@"Notification state check for '%@' completed...", idval);
+        for(NSNumber* entry in results)
+            if(entry.integerValue != MLNotificationStateNone)
+                return entry;
+        return @(MLNotificationStateNone);
+    });
+}
+
 -(void) handleFiletransferUpdate:(NSNotification*) notification
 {
     xmpp* xmppAccount = notification.object;
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     NSString* idval = [self identifierWithMessage:message];
-    
-    [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
-        for(UNNotificationRequest* request in requests)
-            if([request.identifier isEqualToString:idval])
-            {
-                DDLogDebug(@"Already pending notification '%@', updating it...", idval);
-                [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:YES];
-            }
-    }];
-    [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
-        for(UNNotification* notification in notifications)
-            if([notification.request.identifier isEqualToString:idval])
-            {
-                DDLogDebug(@"Already displayed notification '%@', updating it...", idval);
-                [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:NO];
-            }
-    }];
+    //do this asynchronous on a background thread
+    [self notificationStateForMessage:message].thenInBackground(^(NSNumber* _state) {
+        MLNotificationState state = _state.integerValue;
+        if(state == MLNotificationStatePending || state == MLNotificationStateNone)
+        {
+            DDLogDebug(@"Already pending or unknown notification '%@', updating/posting it...", idval);
+            [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:YES andLMCReplaced:NO];
+        }
+        else if(state == MLNotificationStateDelivered)
+        {
+            DDLogDebug(@"Already displayed notification '%@', updating it...", idval);
+            [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:NO andLMCReplaced:NO];
+        }
+        else
+            unreachable(@"Unknown MLNotificationState!", @{@"state": @(state)});
+    });
 }
 
 -(void) handleNewMessage:(NSNotification*) notification
@@ -196,10 +244,11 @@
     xmpp* xmppAccount = notification.object;
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     BOOL showAlert = notification.userInfo[@"showAlert"] ? [notification.userInfo[@"showAlert"] boolValue] : NO;
-    [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:showAlert andSound:YES];
+    BOOL LMCReplaced = notification.userInfo[@"LMCReplaced"] ? [notification.userInfo[@"LMCReplaced"] boolValue] : NO;
+    [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:showAlert andSound:YES andLMCReplaced:LMCReplaced];
 }
 
--(void) internalMessageHandlerWithMessage:(MLMessage*) message andAccount:(xmpp*) xmppAccount showAlert:(BOOL) showAlert andSound:(BOOL) sound
+-(void) internalMessageHandlerWithMessage:(MLMessage*) message andAccount:(xmpp*) xmppAccount showAlert:(BOOL) showAlert andSound:(BOOL) sound andLMCReplaced:(BOOL) LMCReplaced
 {
     if([message.messageType isEqualToString:kMessageTypeStatus])
         return;
@@ -229,6 +278,20 @@
     {
         DDLogDebug(@"not showing notification: this contact got muted");
         return;
+    }
+    
+    //check if we need to replace the still displayed notification or ignore this LMC
+    if(LMCReplaced)
+    {
+        NSString* idval = [self identifierWithMessage:message];
+        //wait synchronous for completion (needed for appex)
+        MLNotificationState state = PMKHangEnum([self notificationStateForMessage:message]);
+        DDLogVerbose(@"Notification state for '%@': %@", idval, @(state));
+        if(state == MLNotificationStateNone)
+        {
+            DDLogDebug(@"not showing notification for LMC: this notification was already removed earlier");
+            return;
+        }
     }
     
     if([HelperTools isNotInFocus])

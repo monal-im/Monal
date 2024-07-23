@@ -50,23 +50,9 @@ class Quicksy_State: ObservableObject {
     var countryCode: String?
 }
 
-struct Quicksy_Country: Identifiable, Hashable {
-    let id = UUID()
-    let name: String
-    let code: String
-    let mobilePattern: String
-}
-
 struct Quicksy_RegisterAccount: View {
     var delegate: SheetDismisserProtocol
-    let countries: [Quicksy_Country] = [
-        Quicksy_Country(name: NSLocalizedString("Germany", comment:"quicksy country"), code: "+49", mobilePattern: "^1\\d{10}$") ,
-        Quicksy_Country(name: NSLocalizedString("United States", comment:"quicksy country"), code: "+1", mobilePattern: "^\\d{10}$"),
-        Quicksy_Country(name: NSLocalizedString("Canada", comment:"quicksy country"), code: "+1", mobilePattern: "^\\d{10}$"),
-        Quicksy_Country(name: NSLocalizedString("United Kingdom", comment:"quicksy country"), code: "+44", mobilePattern: "^7\\d{9}$"),
-        Quicksy_Country(name: NSLocalizedString("Australia", comment:"quicksy country"), code: "+61", mobilePattern: "^4\\d{8}$"),
-        Quicksy_Country(name: NSLocalizedString("India", comment:"quicksy country"), code: "+91", mobilePattern: "^[789]\\d{9}$"),
-    ]
+    let countries: [Quicksy_Country] = COUNTRY_CODES
     @StateObject private var overlay = LoadingOverlayState()
     @ObservedObject var state = Quicksy_State()
     @State private var currentIndex = 0
@@ -141,7 +127,7 @@ struct Quicksy_RegisterAccount: View {
         guard let selectedCountry = selectedCountry else {
             return false
         }
-        let phonePredicate = NSPredicate(format: "SELF MATCHES %@", selectedCountry.mobilePattern)
+        let phonePredicate = NSPredicate(format: "SELF MATCHES %@", selectedCountry.pattern)
         return phoneNumber.allSatisfy { $0.isNumber } && phoneNumber.count > 0 && phonePredicate.evaluate(with: phoneNumber)
     }
     

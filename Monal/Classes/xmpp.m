@@ -3241,14 +3241,19 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendIq:(XMPPIQ*) iq withHandler:(MLHandler*) handler
 {
-    if(handler)
-    {
-        DDLogVerbose(@"Adding %@ to iqHandlers...", handler);
-        @synchronized(_iqHandlers) {
-            _iqHandlers[iq.id] = [@{@"iq":iq, @"timeout":@(IQ_TIMEOUT), @"handler":handler} mutableCopy];
+    //serialize this state update with other receive queue updates
+    //not doing this will make it race with a readState call in the receive queue before the write of this update can happen,
+    //which will remove this entry from state and the iq answer received later on be discarded
+    [self dispatchAsyncOnReceiveQueue:^{
+        if(handler)
+        {
+            DDLogVerbose(@"Adding %@ to iqHandlers...", handler);
+            @synchronized(self->_iqHandlers) {
+                self->_iqHandlers[iq.id] = [@{@"iq":iq, @"timeout":@(IQ_TIMEOUT), @"handler":handler} mutableCopy];
+            }
         }
-    }
-    [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
+        [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
+    }];
 }
 
 -(void) send:(MLXMLNode*) stanza

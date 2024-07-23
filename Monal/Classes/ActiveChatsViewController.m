@@ -267,10 +267,8 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     // filter notifcations from within this class
     if([notification.object isKindOfClass:[ActiveChatsViewController class]])
-    {
         return;
-    }
-    [self refreshDisplay];
+    [self refresh];
 }
 
 -(void) handleContactRemoved:(NSNotification*) notification
@@ -410,8 +408,7 @@ static NSMutableSet* _pushWarningDisplayed;
 -(void) refresh
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
-            [self refreshDisplay];      // load contacts
+        [self refreshDisplay];      // load contacts
         [self segueToIntroScreensIfNeeded];
     });
 }
@@ -523,7 +520,7 @@ static NSMutableSet* _pushWarningDisplayed;
     [store requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError* _Nullable error) {
         if(granted)
         {
-            NSString* countryCode = @"+49"; //[[HelperTools defaultsDB] objectForKey:@"Quicksy_countryCode"];
+            NSString* countryCode = [[HelperTools defaultsDB] objectForKey:@"Quicksy_countryCode"];
             NSCharacterSet* allowedCharacters = [[NSCharacterSet characterSetWithCharactersInString:@"+0123456789"] invertedSet];
             NSMutableDictionary* numbers = [NSMutableDictionary new];
             
@@ -540,7 +537,7 @@ static NSMutableSet* _pushWarningDisplayed;
                         if(countryCode != nil && ![number hasPrefix:@"+"] && ![number hasPrefix:@"00"])
                         {
                             DDLogVerbose(@"Adding country code '%@' to number: %@", countryCode, number);
-                            number = [NSString stringWithFormat:@"%@%@", countryCode, number];
+                            number = [NSString stringWithFormat:@"%@%@", countryCode, [number hasPrefix:@"0"] ? [number substringFromIndex:1] : number];
                         }
                         numbers[number] = name;
                     }

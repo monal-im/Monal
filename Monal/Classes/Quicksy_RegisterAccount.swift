@@ -266,6 +266,13 @@ struct Quicksy_RegisterAccount: View {
                 })
                 .onAppear {
                     selectedCountry = countries[0]
+                    print("######## \(String(describing:Locale.current.regionCode))")
+                    print("######## \(String(describing:Locale(identifier: "en_US").localizedString(forRegionCode:Locale.current.regionCode ?? "en")))")
+                    for country in countries {
+                        if country.name == Locale.current.localizedString(forRegionCode:Locale.current.regionCode ?? "en") || country.name == Locale(identifier: "en_US").localizedString(forRegionCode:Locale.current.regionCode ?? "en") {
+                            selectedCountry = country
+                        }
+                    }
                     //ios>=15
                     //phoneNumberFocused = true
                 }

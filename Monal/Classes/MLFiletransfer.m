@@ -623,8 +623,17 @@ $$
     NSString* tempname = [NSString stringWithFormat:@"tmp.%@", [[NSUUID UUID] UUIDString]];
     NSError* error;
     NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
-    DDLogDebug(@"Tempstoring jpeg encoded file having quality %f at %@", imageQuality, file);
-    NSData* imageData = UIImageJPEGRepresentation(image, imageQuality);
+    NSData* imageData = nil;
+    if(imageQuality == 1.0)
+    {
+        DDLogDebug(@"Image upload quality was set to 100%, tempstoring png encoded file at %@", file);
+        imageData = UIImagePNGRepresentation(image);
+    }
+    else
+    {
+        DDLogDebug(@"Tempstoring jpeg encoded file having quality %f at %@", imageQuality, file);
+        imageData = UIImageJPEGRepresentation(image, imageQuality);
+    }
     [imageData writeToFile:file options:NSDataWritingAtomic error:&error];
     if(error)
     {

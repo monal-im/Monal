@@ -85,7 +85,6 @@ jobs:
         with:
           access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
           url: ${{ secrets.MASTODON_URL }}
-
           message: "${{ needs.extractChangelog.outputs.release-name }} released.\n\n${{ steps.changelog.outputs.notes }}\n\n#Monal #ios #macos #xmpp #im #chat #messaging"
           visibility: "public"
           language: "en"

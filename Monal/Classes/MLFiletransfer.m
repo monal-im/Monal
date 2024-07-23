@@ -626,7 +626,7 @@ $$
     NSData* imageData = nil;
     if(imageQuality == 1.0)
     {
-        DDLogDebug(@"Image upload quality was set to 100%, tempstoring png encoded file at %@", file);
+        DDLogDebug(@"Image upload quality was set to 100%%, tempstoring png encoded file at %@", file);
         imageData = UIImagePNGRepresentation(image);
     }
     else

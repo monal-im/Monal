@@ -6,6 +6,7 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
+let DEFAULT_REGION_CODE = "en";
 let QUICKSY_BASE_URL = "https://api.quicksy.im";
 
 func sendSMSRequest(to number:String) -> Promise<(data: Data, response: URLResponse)> {
@@ -265,11 +266,12 @@ struct Quicksy_RegisterAccount: View {
                     }
                 })
                 .onAppear {
+                    let regionCode = Locale.current.regionCode ?? DEFAULT_REGION_CODE
                     selectedCountry = countries[0]
-                    print("######## \(String(describing:Locale.current.regionCode))")
-                    print("######## \(String(describing:Locale(identifier: "en_US").localizedString(forRegionCode:Locale.current.regionCode ?? "en")))")
+                    print("######## \(String(describing:regionCode))")
+                    print("######## \(String(describing:Locale(identifier: "en_US").localizedString(forRegionCode:regionCode)))")
                     for country in countries {
-                        if country.name == Locale.current.localizedString(forRegionCode:Locale.current.regionCode ?? "en") || country.name == Locale(identifier: "en_US").localizedString(forRegionCode:Locale.current.regionCode ?? "en") {
+                        if country.name == Locale.current.localizedString(forRegionCode:regionCode) || country.name == Locale(identifier: "en_US").localizedString(forRegionCode:regionCode) {
                             selectedCountry = country
                         }
                     }

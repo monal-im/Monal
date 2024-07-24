@@ -273,6 +273,12 @@ struct RegisterAccount: View {
         }
     }
 
+    private func termsSiteForCurrentLanguage() -> URL {
+        let languageCode = Locale.current.languageCode
+        let chosenServer = RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]
+        return URL(string: (chosenServer["TermsSite_\(languageCode ?? "default")"] ?? chosenServer["TermsSite_default"])!)!
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
@@ -409,7 +415,7 @@ struct RegisterAccount: View {
                         .frame(maxWidth: .infinity)
                         .sheet(isPresented: $showWebView) {
                             NavigationView {
-                                WebView(url: URL(string: (RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_\(Locale.current.languageCode ?? "default")"] ?? RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["TermsSite_default"])!)!)
+                                WebView(url: termsSiteForCurrentLanguage())
                                     .navigationBarTitle(Text("Terms of \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)"), displayMode: .inline)
                                     .toolbar(content: {
                                         ToolbarItem(placement: .bottomBar) {

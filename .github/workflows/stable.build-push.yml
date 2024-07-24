@@ -166,7 +166,7 @@ jobs:
         env:
           DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path_macos }}
         run: |
-          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:true skip_screenshots:true
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:true skip_screenshots:true precheck:true precheck_include_in_app_purchases:false
       # - name: Update xmpp.org client list with new timestamp
       #   run: ./scripts/push_xmpp.org.sh
       - name: Remove fastlane metadata directory

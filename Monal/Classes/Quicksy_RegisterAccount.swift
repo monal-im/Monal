@@ -266,7 +266,7 @@ struct Quicksy_RegisterAccount: View {
                     }
                 })
                 .onAppear {
-                    let regionCode = Locale.current.regionCode ?? DEFAULT_REGION_CODE
+                    let regionCode = Locale.current.region?.identifier ?? DEFAULT_REGION_CODE
                     selectedCountry = countries[0]
                     print("######## \(String(describing:regionCode))")
                     print("######## \(String(describing:Locale(identifier: "en_US").localizedString(forRegionCode:regionCode)))")

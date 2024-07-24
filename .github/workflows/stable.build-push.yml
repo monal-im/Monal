@@ -131,13 +131,21 @@ jobs:
           path_ios="$(mktemp -d)"
           cp -av ./appstore_metadata/* "$path_ios"
           echo -n "$(date +%Y) Thilo Molitor" > "$path_ios/copyright.txt"
-          echo -n "$CHANGELOG_IOS" > "$path_ios/en-US/release_notes.txt"
+          for dir in */; do
+            if [[ -d "$dir" && "$dir" == *-* ]]; then
+              echo -n "$CHANGELOG_IOS" > "$path_ios/${dir%/}/release_notes.txt"
+            fi
+          done
           echo "path_ios=$path_ios" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           
           path_macos="$(mktemp -d)"
           cp -av ./appstore_metadata/* "$path_macos"
           echo -n "$(date +%Y) Thilo Molitor" > "$path_macos/copyright.txt"
-          echo -n "$CHANGELOG_MACOS" > "$path_macos/en-US/release_notes.txt"
+          for dir in */; do
+            if [[ -d "$dir" && "$dir" == *-* ]]; then
+              echo -n "$CHANGELOG_MACOS" > "$path_macos/${dir%/}/release_notes.txt"
+            fi
+          done
           echo "path_macos=$path_macos" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"

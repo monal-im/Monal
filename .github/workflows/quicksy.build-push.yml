@@ -120,15 +120,21 @@ jobs:
         env:
           CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
         run: |
-          path="$(mktemp -d)"
-          echo -n "$CHANGELOG" > "$path/release_notes.txt"
-          echo "path=$path" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          path_ios="$(mktemp -d)"
+          cp -av ./appstore_metadata/* "$path_ios"
+          echo -n "$(date +%Y) Thilo Molitor" > "$path_ios/copyright.txt"
+          for dir in */; do
+            if [[ -d "$dir" && "$dir" == *-* ]]; then
+              echo -n "$CHANGELOG_IOS" > "$path_ios/${dir%/}/release_notes.txt"
+            fi
+          done
+          echo "path_ios=$path_ios" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
-          DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path }}
+          DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path_ios }}
         run: |
-          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:false automatic_release:false skip_metadata: true skip_screenshots: true
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
       - name: Remove fastlane metadata directory
         run: |
           rm -rf "${{ steps.metadata.outputs.path }}"

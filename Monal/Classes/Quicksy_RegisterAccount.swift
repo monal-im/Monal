@@ -11,7 +11,7 @@ let QUICKSY_BASE_URL = "https://api.quicksy.im";
 func sendSMSRequest(to number:String) -> Promise<(data: Data, response: URLResponse)> {
     var rq = URLRequest(url: URL(string: "\(QUICKSY_BASE_URL)/authentication/\(number)")!)
     rq.httpMethod = "GET"
-    rq.addValue(Locale.current.languageCode ?? "en", forHTTPHeaderField: "Accept-Language")
+    rq.addValue(Locale.current.language.languageCode?.identifier ?? "en", forHTTPHeaderField: "Accept-Language")
     rq.addValue(UIDevice.current.identifierForVendor?.uuidString.lowercased() ?? UUID().uuidString.lowercased(), forHTTPHeaderField: "Installation-Id")
     rq.addValue("Quicksy/2.10.0", forHTTPHeaderField: "User-Agent")
     DDLogDebug("Request: \(String(describing:rq))")

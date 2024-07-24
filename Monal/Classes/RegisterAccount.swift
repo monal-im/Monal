@@ -274,7 +274,7 @@ struct RegisterAccount: View {
     }
 
     private func termsSiteForCurrentLanguage() -> URL {
-        let languageCode = Locale.current.languageCode
+        let languageCode = Locale.current.language.languageCode?.identifier
         let chosenServer = RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]
         return URL(string: (chosenServer["TermsSite_\(languageCode ?? "default")"] ?? chosenServer["TermsSite_default"])!)!
     }

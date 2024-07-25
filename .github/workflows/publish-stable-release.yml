@@ -1,7 +1,7 @@
 name: Publish release
 on:
   repository_dispatch:
-    types: [distribution]
+    types: [monal_release]
 jobs:
   extractChangelog:
     runs-on: self-hosted
@@ -13,6 +13,7 @@ jobs:
       release-notes: ${{ steps.releasenotes.outputs.notes }}
       release-notes_ios: ${{ steps.releasenotes.outputs.notes_ios }}
       release-notes_macos: ${{ steps.releasenotes.outputs.notes_macos }}
+      release-id: ${{ steps.releasenotes.outputs.releaseID }}
     # create release only if the ios app made it to the appstore and ignore the macos appstore state
     if: github.event.client_payload.Platform == 'iOS'
     steps:
@@ -36,60 +37,60 @@ jobs:
     steps:
       - name: Promote draft release to live release
         run: |
-          echo "ID: ${{ steps.releasenotes.outputs.releaseID }}"
+          echo "ID: ${{ needs.extractChangelog.outputs.release-id }}"
           curl -L \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/${{ steps.draftrelease.outputs.id }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.extractChangelog.outputs.release-id }}" \
             -d '{"draft": false, "prerelease": false, "make_latest": true}'
 
-  notifyMuc:
-    name: Notify support MUC about new stable release
-    runs-on: ubuntu-latest
-    needs: [extractChangelog]
-    steps:
-      - name: Notify support MUC
-        uses: monal-im/xmpp-notifier@master
-        with: # Set the secrets as inputs
-          jid: ${{ secrets.BOT_JID }}
-          password: ${{ secrets.BOT_PASSWORD }}
-          server_host: ${{ secrets.BOT_SERVER }}
-          recipient: monal@chat.yax.im
-          recipient_is_room: true
-          bot_alias: "Monal Release Bot"
-          message: |
-            ${{ needs.extractChangelog.outputs.release-name }} was released:
-            ${{ needs.extractChangelog.outputs.release-notes }}
-
-  notifyMastodon:
-    name: Post release info on mastodon
-    runs-on: ubuntu-latest
-    needs: [extractChangelog]
-    steps:
-      - name: Patch changelog length
-        id: changelog
-        env:
-          NOTES: ${{ needs.extractChangelog.outputs.release-notes }}
-        run: |
-          if [ "${#NOTES}" -gt 400 ]; then
-            NOTES="To see the complete list of bugfixes and improvements, check our releases page: https://github.com/monal-im/Monal/releases/tag/${{ needs.extractChangelog.outputs.release-tag }}"
-          fi
-          echo "notes<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "$NOTES" >> "$GITHUB_OUTPUT"
-          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-      - name: Post release info on mastodon
-        id: toot
-        uses: cbrgm/mastodon-github-action@v2.1.3
-        with:
-          access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-          url: ${{ secrets.MASTODON_URL }}
-          message: "${{ needs.extractChangelog.outputs.release-name }} released.\n\n${{ steps.changelog.outputs.notes }}\n\n#Monal #ios #macos #xmpp #im #chat #messaging"
-          visibility: "public"
-          language: "en"
-      - name: Get toot information
-        run: |
-          echo "Toot ID: ${{ steps.toot.outputs.id }}"
-          echo "Toot URL: ${{ steps.toot.outputs.url }}"
-          echo "Scheduled at: ${{ steps.toot.outputs.scheduled_at }}"
+  # notifyMuc:
+  #   name: Notify support MUC about new stable release
+  #   runs-on: ubuntu-latest
+  #   needs: [extractChangelog]
+  #   steps:
+  #     - name: Notify support MUC
+  #       uses: monal-im/xmpp-notifier@master
+  #       with: # Set the secrets as inputs
+  #         jid: ${{ secrets.BOT_JID }}
+  #         password: ${{ secrets.BOT_PASSWORD }}
+  #         server_host: ${{ secrets.BOT_SERVER }}
+  #         recipient: monal@chat.yax.im
+  #         recipient_is_room: true
+  #         bot_alias: "Monal Release Bot"
+  #         message: |
+  #           ${{ needs.extractChangelog.outputs.release-name }} was released:
+  #           ${{ needs.extractChangelog.outputs.release-notes }}
+  # 
+  # notifyMastodon:
+  #   name: Post release info on mastodon
+  #   runs-on: ubuntu-latest
+  #   needs: [extractChangelog]
+  #   steps:
+  #     - name: Patch changelog length
+  #       id: changelog
+  #       env:
+  #         NOTES: ${{ needs.extractChangelog.outputs.release-notes }}
+  #       run: |
+  #         if [ "${#NOTES}" -gt 400 ]; then
+  #           NOTES="To see the complete list of bugfixes and improvements, check our releases page: https://github.com/monal-im/Monal/releases/tag/${{ needs.extractChangelog.outputs.release-tag }}"
+  #         fi
+  #         echo "notes<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+  #         echo "$NOTES" >> "$GITHUB_OUTPUT"
+  #         echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+  #     - name: Post release info on mastodon
+  #       id: toot
+  #       uses: cbrgm/mastodon-github-action@v2.1.3
+  #       with:
+  #         access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+  #         url: ${{ secrets.MASTODON_URL }}
+  #         message: "${{ needs.extractChangelog.outputs.release-name }} released.\n\n${{ steps.changelog.outputs.notes }}\n\n#Monal #ios #macos #xmpp #im #chat #messaging"
+  #         visibility: "public"
+  #         language: "en"
+  #     - name: Get toot information
+  #       run: |
+  #         echo "Toot ID: ${{ steps.toot.outputs.id }}"
+  #         echo "Toot URL: ${{ steps.toot.outputs.url }}"
+  #         echo "Scheduled at: ${{ steps.toot.outputs.scheduled_at }}"

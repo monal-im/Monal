@@ -9,8 +9,8 @@
 struct WelcomeLogIn: View {
     static private let credFaultyPattern = "^.+@.+\\..{2,}$"
     
-    var delegate: SheetDismisserProtocol
-    
+    @Environment(\.dismiss) private var dismiss
+
     @State private var isEditingJid: Bool = false
     @State private var jid: String = ""
     @State private var isEditingPassword: Bool = false
@@ -176,7 +176,7 @@ struct WelcomeLogIn: View {
                         .alert(isPresented: $showAlert) {
                             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                                 if(self.loginComplete == true) {
-                                    self.delegate.dismiss()
+                                    dismiss()
                                 }
                             }))
                         }
@@ -215,7 +215,7 @@ struct WelcomeLogIn: View {
                     
                     if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
                         Button(action: {
-                            self.delegate.dismiss()
+                            dismiss()
                         }){
                             Text("Set up account later")
                                 .frame(maxWidth: .infinity)
@@ -296,8 +296,7 @@ struct WelcomeLogIn: View {
 }
 
 struct WelcomeLogIn_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        WelcomeLogIn(delegate:delegate)
+        WelcomeLogIn()
     }
 }

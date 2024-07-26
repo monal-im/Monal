@@ -59,12 +59,10 @@ struct Quicksy_RegisterAccount: View {
     @State private var currentIndex = 0
     @State var selectedCountry: Quicksy_Country?
     @State var phoneNumber: String = ""
-    //ios>=15
-    //@FocusState var phoneNumberFocused: Bool = false
+    @FocusState var phoneNumberFocused: Bool
     @State var showPhoneNumberCheckAlert: String?
     @State var pin: String = ""
-    //ios>=15
-    //@FocusState var pinFocused: Bool = false
+    @FocusState var pinFocused: Bool
     @State var showErrorAlert: PMKHTTPError?
     @State var showBackAlert: Bool?
     
@@ -201,8 +199,7 @@ struct Quicksy_RegisterAccount: View {
                             Text(selectedCountry.code)
                         }
                         TextField("Phone Number", text: $phoneNumber)
-                            //ios>=15
-                            //.focused($phoneNumberFocused)
+                            .focused($phoneNumberFocused)
                             .keyboardType(.numberPad)
                             .onChange(of: phoneNumber) { newValue in
                                 let filtered = newValue.filter { "0123456789".contains($0) }
@@ -242,6 +239,7 @@ struct Quicksy_RegisterAccount: View {
                     HStack {
                         Button(action: {
                             showPhoneNumberCheckAlert = nil
+                            phoneNumberFocused = true
                         }) {
                             Text("Change it")
                                 .fontWeight(.bold)
@@ -276,8 +274,7 @@ struct Quicksy_RegisterAccount: View {
                             selectedCountry = country
                         }
                     }
-                    //ios>=15
-                    //phoneNumberFocused = true
+                    phoneNumberFocused = true
                 }
             } else if let number = state.phoneNumber {
                 VStack(alignment: .leading) {
@@ -291,8 +288,7 @@ struct Quicksy_RegisterAccount: View {
                     Text("Please enter the six-digit pin below")
                     HStack {
                         TextField("Pin", text: $pin)
-                            //ios>=15
-                            //.focused($phoneNumberFocused)
+                            .focused($phoneNumberFocused)
                             .keyboardType(.numberPad)
                             .onChange(of: pin) { newValue in
                                 let filtered = newValue.filter { "0123456789".contains($0) }
@@ -374,8 +370,7 @@ struct Quicksy_RegisterAccount: View {
                     }
                 }
                 .onAppear {
-                    //ios>=15
-                    //pinFocused = true
+                    pinFocused = true
                 }
             }
         }

@@ -259,20 +259,10 @@ struct SecuritySettings: View {
     init() {
         _autodeleteInterval = State(wrappedValue:generalSettingsDefaultsDB.AutodeleteInterval)
         _autodeleteIntervalSelection = State(wrappedValue:generalSettingsDefaultsDB.AutodeleteInterval)
-        if #available(iOS 15, *) {
-            //only activate custom values on ios >= 15
-            autodeleteOptions[-1] = NSLocalizedString("Custom", comment:"Message autdelete time")
-            //check if we have a custom value and change picker value accordingly
-            if autodeleteOptions[autodeleteInterval] == nil {
-                _autodeleteIntervalSelection = State(wrappedValue:-1)
-            }
-        } else {
-            //check if we have a custom value, this should never happen because custom values should only be settable in ios >= 15
-            if autodeleteOptions[autodeleteInterval] == nil {
-                //turn autodelete off int his case (sane value)
-                _autodeleteIntervalSelection = State(wrappedValue:0)
-                _autodeleteInterval = State(wrappedValue:0)
-            }
+        autodeleteOptions[-1] = NSLocalizedString("Custom", comment:"Message autdelete time")
+        //check if we have a custom value and change picker value accordingly
+        if autodeleteOptions[autodeleteInterval] == nil {
+            _autodeleteIntervalSelection = State(wrappedValue:-1)
         }
     }
     
@@ -284,18 +274,16 @@ struct SecuritySettings: View {
                     Text("Every new contact will have encryption enabled, but already known contacts will preserve their encryption settings.")
                 }
                 
-                if #available(iOS 16.0, macCatalyst 16.0, *) {
-                    SettingsToggle(isOn: $generalSettingsDefaultsDB.useDnssecForAllConnections) {
-                        Text("Use DNSSEC validation for all connections")
-                        Text(
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.useDnssecForAllConnections) {
+                    Text("Use DNSSEC validation for all connections")
+                    Text(
 """
 Use DNSSEC to validate all DNS query responses before connecting to the IP address designated \
 in the DNS response.\n\
 While being more secure, this can lead to connection problems in certain networks \
 like hotel wifi, ugly mobile carriers etc.
 """
-                        )
-                    }
+                    )
                 }
                 
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcAllowP2P) {
@@ -311,16 +299,14 @@ like hotel wifi, ugly mobile carriers etc.
                             Text(autodeleteOptions[key]!).tag(key)
                         }
                     }
-                    if #available(iOS 15, *) {
-                        //custom interval requested explicitly
-                        if autodeleteIntervalSelection == -1 {
-                            HStack {
-                                Text("Custom Time: ")
-                                Stepper(String(format:NSLocalizedString("%@ hours", comment:""), String(describing:(max(1, autodeleteInterval / 3600)).formatted())), value: Binding<Int>(
-                                    get: { max(1, autodeleteInterval / 3600) /*clamp to 1 ... .max*/ },
-                                    set: { autodeleteInterval = $0 * 3600 }
-                                ), in: 1 ... .max)
-                            }
+                    //custom interval requested explicitly
+                    if autodeleteIntervalSelection == -1 {
+                        HStack {
+                            Text("Custom Time: ")
+                            Stepper(String(format:NSLocalizedString("%@ hours", comment:""), String(describing:(max(1, autodeleteInterval / 3600)).formatted())), value: Binding<Int>(
+                                get: { max(1, autodeleteInterval / 3600) /*clamp to 1 ... .max*/ },
+                                set: { autodeleteInterval = $0 * 3600 }
+                            ), in: 1 ... .max)
                         }
                     }
                     Text("Be warned: Message will only be deleted on incoming pushes or if you open the app! This is especially true for shorter time intervals!").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)

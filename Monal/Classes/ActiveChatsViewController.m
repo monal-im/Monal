@@ -713,12 +713,7 @@ static NSMutableSet* _pushWarningDisplayed;
         }]];
         UIPopoverPresentationController* popPresenter = [alert popoverPresentationController];
         if(sender != nil)
-        {
-            if(@available(iOS 16.0, macCatalyst 16.0, *))
-                popPresenter.sourceItem = sender;
-            else
-                popPresenter.barButtonItem = sender;
-        }
+            popPresenter.sourceItem = sender;
         else
             popPresenter.sourceView = self.view;
         [self presentViewController:alert animated:YES completion:nil];

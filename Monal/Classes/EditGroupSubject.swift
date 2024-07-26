@@ -29,13 +29,7 @@ struct EditGroupSubject: View {
                     Section(header: Text("Group Description (optional)")) {
                         TextEditor(text: $subject)
                             .multilineTextAlignment(.leading)
-                            .applyClosure { view in
-                                if #available(iOS 16.0, *) {
-                                    view.lineLimit(10...50)
-                                } else {
-                                    view
-                                }
-                            }
+                            .lineLimit(10...50)
                     }
                 }
             }

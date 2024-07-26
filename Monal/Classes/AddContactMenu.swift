@@ -187,7 +187,7 @@ struct AddContactMenu: View {
                     }
 
                     TextField(NSLocalizedString("Contact or Group/Channel Jid", comment: "placeholder when adding jid"), text: $toAdd, onEditingChanged: { isEditingJid = $0 })
-                        //ios15: .textInputAutocapitalization(.never)
+                        .textInputAutocapitalization(.never)
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
                         .keyboardType(.emailAddress)
@@ -272,13 +272,7 @@ struct AddContactMenu: View {
                     .aspectRatio(1, contentMode: .fit)
 
                 if let expires = data["expires"] as? Date {
-                    HStack {
-                        if #available(iOS 15, *) {
-                            Text("This invitation will expire on \(expires.formatted(date:.numeric, time:.shortened))")
-                        } else {
-                            Text("This invitation will expire on \(expires)")
-                        }
-                    }
+                    Text("This invitation will expire on \(expires.formatted(date:.numeric, time:.shortened))")
                     .font(.footnote)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -289,12 +283,7 @@ struct AddContactMenu: View {
                 UIPasteboard.general.setValue(data["landing"] as! String, forPasteboardType:UTType.utf8PlainText.identifier as String)
                 invitationResult = nil
             }) {
-                if #available(iOS 16, *) {
-                    ShareLink("Share invitation link", item: URL(string: data["landing"] as! String)!)
-                } else {
-                    Text("Copy invitation link to clipboard")
-                        .frame(maxWidth: .infinity)
-                }
+                ShareLink("Share invitation link", item: URL(string: data["landing"] as! String)!)
             }
             Button(action: {
                 invitationResult = nil

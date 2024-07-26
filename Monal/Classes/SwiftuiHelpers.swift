@@ -305,7 +305,6 @@ struct GIFViewer: UIViewRepresentable {
         imageView.animatedImage = animatedImage
     }
     
-    @available(iOS 16.0, macCatalyst 16.0, *)
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: UITextField, context: Context) -> CGSize? {
         guard
             let width = proposal.width,

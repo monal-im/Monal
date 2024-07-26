@@ -9,7 +9,6 @@
 import UniformTypeIdentifiers
 import SVGView
 
-@available(iOS 16, *)
 struct GifRepresentation: Transferable {
     let getData: () -> Data
     
@@ -22,7 +21,6 @@ struct GifRepresentation: Transferable {
     }
 }
 
-@available(iOS 16, *)
 struct JpegRepresentation: Transferable {
     let getData: () -> Data
     
@@ -35,7 +33,6 @@ struct JpegRepresentation: Transferable {
     }
 }
 
-@available(iOS 16, *)
 struct SVGRepresentation: Transferable {
     let getData: () -> Data
     
@@ -94,17 +91,11 @@ struct ImageViewer: View {
                     Spacer()
                     Text("Invalid image file!")
                     Spacer().frame(height: 24)
-                    if #available(iOS 15, *) {
-                        Image(systemName: "xmark.square.fill")
-                            .resizable()
-                            .frame(width: 128.0, height: 128.0)
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(.white, .red)
-                    } else {
-                        Image(systemName: "xmark.square.fill")
-                            .resizable()
-                            .frame(width: 128.0, height: 128.0)
-                    }
+                    Image(systemName: "xmark.square.fill")
+                        .resizable()
+                        .frame(width: 128.0, height: 128.0)
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.white, .red)
                     Spacer()
                 }
             }
@@ -118,39 +109,39 @@ struct ImageViewer: View {
                                 Spacer().frame(width:20)
                                 Text(info["filename"] as! String).foregroundColor(.primary)
                                 Spacer()
-                                if #available(iOS 16, *) {
-                                    if (info["mimeType"] as! String).hasPrefix("image/svg"), let image = HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info["cacheFile"] as! String)) {
+                                
+                                if (info["mimeType"] as! String).hasPrefix("image/svg"), let image = HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info["cacheFile"] as! String)) {
+                                    ShareLink(
+                                        item: SVGRepresentation(getData: {
+                                            try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
+                                        }), preview: SharePreview("Share image", image: Image(uiImage: image))
+                                    )
+                                        .labelStyle(.iconOnly)
+                                        .foregroundColor(.primary)
+                                    Spacer().frame(width:20)
+                                } else if let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
+                                    if (info["mimeType"] as! String).hasPrefix("image/gif") {
                                         ShareLink(
-                                            item: SVGRepresentation(getData: {
+                                            item: GifRepresentation(getData: {
                                                 try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
                                             }), preview: SharePreview("Share image", image: Image(uiImage: image))
                                         )
                                             .labelStyle(.iconOnly)
                                             .foregroundColor(.primary)
-                                        Spacer().frame(width:20)
-                                    } else if let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
-                                        if (info["mimeType"] as! String).hasPrefix("image/gif") {
-                                            ShareLink(
-                                                item: GifRepresentation(getData: {
-                                                    try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
-                                                }), preview: SharePreview("Share image", image: Image(uiImage: image))
-                                            )
-                                                .labelStyle(.iconOnly)
-                                                .foregroundColor(.primary)
-                                        } else {
-                                            // even share non-gif images as Data instead of Image, because this leads to fewer crashes of other apps
-                                            // see https://medium.com/@timonus/reduce-share-extension-crashes-from-your-app-with-this-one-weird-trick-6b86211bb175
-                                            ShareLink(
-                                                item: JpegRepresentation(getData: {
-                                                    try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
-                                                }), preview: SharePreview("Share image", image: Image(uiImage: image))
-                                            )
-                                                .labelStyle(.iconOnly)
-                                                .foregroundColor(.primary)
-                                        }
-                                        Spacer().frame(width:20)
+                                    } else {
+                                        // even share non-gif images as Data instead of Image, because this leads to fewer crashes of other apps
+                                        // see https://medium.com/@timonus/reduce-share-extension-crashes-from-your-app-with-this-one-weird-trick-6b86211bb175
+                                        ShareLink(
+                                            item: JpegRepresentation(getData: {
+                                                try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
+                                            }), preview: SharePreview("Share image", image: Image(uiImage: image))
+                                        )
+                                            .labelStyle(.iconOnly)
+                                            .foregroundColor(.primary)
                                     }
+                                    Spacer().frame(width:20)
                                 }
+                                
                                 Button(action: {
                                     self.delegate.dismiss()
                                 }, label: {

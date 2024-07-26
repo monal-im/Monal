@@ -666,9 +666,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
         [[MLNotificationQueue currentQueue] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
         
-        //create and donate interaction to allow for ios 15 suggestions
-        if(@available(iOS 15.0, macCatalyst 15.0, *))
-            [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
+        //create and donate interaction to allow for share suggestions
+        [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
     }
     else
     {

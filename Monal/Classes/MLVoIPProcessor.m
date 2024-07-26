@@ -405,9 +405,8 @@ static NSMutableDictionary* _pendingCalls;
         
         // request turn credentials
         NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"/api/v1/challenge/new" relativeToURL:[HelperTools getFailoverTurnApiServer]]];
-        if(@available(iOS 16.1, macCatalyst 16.1, *))
-            if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
-                urlRequest.requiresDNSSECValidation = YES;
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            urlRequest.requiresDNSSECValidation = YES;
         [urlRequest setTimeoutInterval:3.0];
         NSURLSession* challengeSession = [HelperTools createEphemeralURLSession];
         [[challengeSession dataTaskWithRequest:urlRequest completionHandler:^(NSData* data, NSURLResponse* response, NSError* error) {
@@ -446,9 +445,8 @@ static NSMutableDictionary* _pendingCalls;
                 return;
             }
             NSMutableURLRequest* responseRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"/api/v1/challenge/validate" relativeToURL:[HelperTools getFailoverTurnApiServer]]];
-            if(@available(iOS 16.1, macCatalyst 16.1, *))
-                if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
-                    responseRequest.requiresDNSSECValidation = YES;
+            if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+                responseRequest.requiresDNSSECValidation = YES;
 
             [responseRequest setHTTPMethod:@"POST"];
             [responseRequest setValue:@"application/json" forHTTPHeaderField:@"Accept"];

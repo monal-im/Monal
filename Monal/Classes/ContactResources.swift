@@ -51,11 +51,7 @@ struct ContactResources: View {
                             if lastInteraction.timeIntervalSince1970 == 0 {
                                 resourceRowElement("Last Interaction:", Text("Currently Online"))
                             } else {
-                                if #available(iOS 15, *) {
-                                    resourceRowElement("Last Interaction:", Text(lastInteraction.formatted(date:.numeric, time:.standard)))
-                                } else {
-                                    resourceRowElement("Last Interaction:", Text("\(String(describing:lastInteraction))"))
-                                }
+                                resourceRowElement("Last Interaction:", Text(lastInteraction.formatted(date:.numeric, time:.standard)))
                             }
                         } else {
                             resourceRowElement("Last Interaction:", Text("unsupported"))

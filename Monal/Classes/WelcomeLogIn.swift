@@ -138,7 +138,7 @@ struct WelcomeLogIn: View {
                         get: { self.jid },
                         set: { string in self.jid = string.lowercased().replacingOccurrences(of: " ", with: "") }), onEditingChanged: { isEditingJid = $0 }
                     )
-                    //ios15: .textInputAutocapitalization(.never)
+                    .textInputAutocapitalization(.never)
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
                     .keyboardType(.emailAddress)

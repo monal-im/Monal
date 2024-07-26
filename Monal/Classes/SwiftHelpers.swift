@@ -345,7 +345,6 @@ public class SwiftHelpers: NSObject {
     
     //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
     //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
-    @available(iOS 16.0, macCatalyst 16.0, *)
     @objc(_renderUIImageFromSVGURL:)
     public static func _renderUIImageFromSVG(url: URL?) -> UIImage? {
         guard let url = url else {
@@ -369,7 +368,6 @@ public class SwiftHelpers: NSObject {
     
     //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
     //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
-    @available(iOS 16.0, macCatalyst 16.0, *)
     @objc(_renderUIImageFromSVGData:)
     public static func _renderUIImageFromSVG(data: Data?) -> UIImage? {
         guard let data = data else {

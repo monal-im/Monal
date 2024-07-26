@@ -1979,8 +1979,7 @@ void swizzle(Class c, SEL orig, SEL new)
     handler.onCrash = crash_callback;
     //this can trigger crashes on macos < 13 (e.g. mac catalyst < 16) (and possibly ios < 16)
 #if !TARGET_OS_MACCATALYST
-    if(@available(iOS 16.0, *))
-        [handler enableSwapOfCxaThrow];
+    [handler enableSwapOfCxaThrow];
 #endif
     handler.searchQueueNames = NO;      //this is not async safe and can crash :(
     handler.introspectMemory = YES;
@@ -2828,9 +2827,8 @@ a=%@\r\n", mid, candidate];
 +(NSURLSession*) createEphemeralURLSession
 {
     NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration ephemeralSessionConfiguration];
-    if(@available(iOS 16.1, macCatalyst 16.1, *))
-        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
-            sessionConfig.requiresDNSSECValidation = YES;
+    if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+        sessionConfig.requiresDNSSECValidation = YES;
     return [NSURLSession sessionWithConfiguration:sessionConfig];
 }
 

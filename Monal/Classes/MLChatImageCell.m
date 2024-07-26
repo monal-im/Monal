@@ -92,15 +92,7 @@
             // uses cached file if the file was already downloaded
             UIImage* image = nil;
             if([info[@"mimeType"] hasPrefix:@"image/svg"])
-            {
-                if(@available(iOS 16.0, macCatalyst 16.0, *))
-                    image = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
-                else
-                {
-                    DDLogWarn(@"Using photo placeholder for SVG on ios < 16...");
-                    image = [UIImage systemImageNamed:@"photo.fill"];
-                }
-            }
+                image = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
             else
                 image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
             if(!image)

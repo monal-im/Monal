@@ -531,9 +531,8 @@
     //needed to activate tcp fast open with apple's internal tls framer
     nw_parameters_set_fast_open_enabled(parameters, YES);
     //use dnssec if configured
-    if(@available(iOS 16.0, macCatalyst 16.0, *))
-        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
-            nw_parameters_set_requires_dnssec_validation(parameters, YES);
+    if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+        nw_parameters_set_requires_dnssec_validation(parameters, YES);
     
     //create and configure connection object
     nw_endpoint_t endpoint = nw_endpoint_create_host([host cStringUsingEncoding:NSUTF8StringEncoding], [[port stringValue] cStringUsingEncoding:NSUTF8StringEncoding]);

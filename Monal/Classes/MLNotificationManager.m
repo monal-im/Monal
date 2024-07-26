@@ -431,13 +431,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     if(self.notificationPrivacySetting > NotificationPrivacySettingOptionDisplayOnlyName)
         return [self showLegacyNotificationForMessage:message withSound:sound];
     
-    // use modern communication notifications on ios >= 15.0 and legacy ones otherwise
-    if(@available(iOS 15.0, macCatalyst 15.0, *))
-    {
-        DDLogDebug(@"Using communication notifications");
-        return [self showModernNotificationForMessage:message withSound:sound andAccount:account];
-    }
-    return [self showLegacyNotificationForMessage:message withSound:sound];
+    return [self showModernNotificationForMessage:message withSound:sound andAccount:account];
 }
 
 -(void) showModernNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
@@ -885,11 +879,8 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     if([info[@"mimeType"] hasPrefix:@"image/svg"])
     {
         NSString* pngAttachment = [attachmentDir stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtensionForType:UTTypePNG]];
-        if(@available(iOS 16.0, macCatalyst 16.0, *))
-        {
-            DDLogVerbose(@"Preparing for notification attachment(%@): converting downloaded file from svg at '%@' to png at '%@'...", typeHint, info[@"cacheFile"], pngAttachment);
-            image = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
-        }
+        DDLogVerbose(@"Preparing for notification attachment(%@): converting downloaded file from svg at '%@' to png at '%@'...", typeHint, info[@"cacheFile"], pngAttachment);
+        image = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
         if(image != nil)
         {
             [UIImagePNGRepresentation(image) writeToFile:pngAttachment atomically:YES];

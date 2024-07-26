@@ -54,9 +54,8 @@
     else
     {
         NSMutableURLRequest* nsrequest = [NSMutableURLRequest requestWithURL: self.urltoLoad];
-        if(@available(iOS 16.1, macCatalyst 16.1, *))
-            if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
-                nsrequest.requiresDNSSECValidation = YES;
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            nsrequest.requiresDNSSECValidation = YES;
         [self.webview loadRequest:nsrequest];
     }
     self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;

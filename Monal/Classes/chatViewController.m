@@ -547,10 +547,7 @@ enum msgSentState {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
         UIPopoverPresentationController* popPresenter = [alert popoverPresentationController];
-        if(@available(iOS 16.0, macCatalyst 16.0, *))
-            popPresenter.sourceItem = sender;
-        else
-            popPresenter.barButtonItem = sender;
+        popPresenter.sourceItem = sender;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else
@@ -578,10 +575,7 @@ enum msgSentState {
             [self dismissViewControllerAnimated:YES completion:nil];
         }]];
         UIPopoverPresentationController* popPresenter = [alert popoverPresentationController];
-        if(@available(iOS 16.0, macCatalyst 16.0, *))
-            popPresenter.sourceItem = sender;
-        else
-            popPresenter.barButtonItem = sender;
+        popPresenter.sourceItem = sender;
         [self presentViewController:alert animated:YES completion:nil];
     }
     else
@@ -1722,9 +1716,8 @@ enum msgSentState {
             _firstmsg = NO;
         }
         
-        //create and donate interaction to allow for ios 15 suggestions
-        if(@available(iOS 15.0, macCatalyst 15.0, *))
-            [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
+        //create and donate interaction to allow for share suggestions
+        [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
         
         return messageObj;
     }
@@ -2937,10 +2930,8 @@ enum msgSentState {
     UIKeyCommand* escapeKey = [UIKeyCommand
                                keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(closePhotos)];
     // prefer our key commands over the system defaults
-    if (@available(iOS 15.0, macCatalyst 15.0, *)) {
-        shiftEnterKey.wantsPriorityOverSystemBehavior = true;
-        enterKey.wantsPriorityOverSystemBehavior = true;
-    }
+    shiftEnterKey.wantsPriorityOverSystemBehavior = true;
+    enterKey.wantsPriorityOverSystemBehavior = true;
     return @[
             shiftEnterKey,
             enterKey,
@@ -3036,9 +3027,8 @@ enum msgSentState {
     {
         DDLogVerbose(@"Fetching HTTP HEAD for %@...", row.url);
         NSMutableURLRequest* headRequest = [[NSMutableURLRequest alloc] initWithURL:row.url];
-        if(@available(iOS 16.1, macCatalyst 16.1, *))
-            if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
-                headRequest.requiresDNSSECValidation = YES;
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            headRequest.requiresDNSSECValidation = YES;
         headRequest.HTTPMethod = @"HEAD";
         headRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
         NSURLSession* session = [HelperTools createEphemeralURLSession];
@@ -3112,9 +3102,8 @@ enum msgSentState {
      */
     DDLogVerbose(@"Fetching HTTP GET for %@...", row.url);
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:row.url];
-    if(@available(iOS 16.1, macCatalyst 16.1, *))
-        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
-            request.requiresDNSSECValidation = YES;
+    if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+        request.requiresDNSSECValidation = YES;
     [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
     if(useByterange)
         [request setValue:@"bytes=0-524288" forHTTPHeaderField:@"Range"];

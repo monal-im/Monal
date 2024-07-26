@@ -40,9 +40,7 @@ struct LogFilesView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            if #available(iOS 15, *) {
-                Text("This can be used to export logfiles.\n[Learn how to read them](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#view-the-log).")
-            }
+            Text("This can be used to export logfiles.\n[Learn how to read them](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#view-the-log).")
             List {
                 Section(header: Text("Logfiles")) {
                     ForEach(sortedLogFileInfos, id: \.self) { logFileInfo in
@@ -68,18 +66,10 @@ struct LogFilesView: View {
                     }.foregroundColor(monalDarkGreen)
                 }
             }
-            .applyClosure { view in
-                if #available(iOS 15, *) {
-                    view.listStyle(.grouped)
-                }
-            }
+            .listStyle(.grouped)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .applyClosure { view in
-            if #available(iOS 15, *) {
-                view.background(.interpolatedWindowBackground)
-            }
-        }
+        .background(.interpolatedWindowBackground)
         .alert(isPresented: $showingDBExportFailedAlert) {
             Alert(title: Text("Database Export Failed"), message: Text("Failed to export the database, please check the logfile for errors and try again."), dismissButton: .default(Text("Close")))
         }
@@ -99,39 +89,28 @@ struct UDPConfigView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            if #available(iOS 16, *) {
-                Text("The UDP logger allows you to livestream the log to the configured IP. Please use a secure key when streaming over the internet!\n[Learn how to receive the log stream](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#stream-the-log).")
-                Form {
-                    Section(header: Text("UDP Logger Configuration")) {
-                        Toggle(isOn: $defaultDB.udpLoggerEnabled) {
-                            Text("Enable")
-                        }
-                        LabeledContent("Logserver IP:") {
-                            TextField("Logserver IP", text: $defaultDB.udpLoggerHostname, prompt: Text("Required"))
-                        }
-                        LabeledContent("Logserver Port:") {
-                            TextField("Logserver Port", text: $defaultDB.udpLoggerPort, prompt: Text("Required"))
-                        }.keyboardType(.numberPad)
-                        LabeledContent("AES Encryption Key:") {
-                            TextField("AES Encryption Key", text: $defaultDB.udpLoggerKey, prompt: Text("Required"))
-                        }
+            Text("The UDP logger allows you to livestream the log to the configured IP. Please use a secure key when streaming over the internet!\n[Learn how to receive the log stream](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#stream-the-log).")
+            Form {
+                Section(header: Text("UDP Logger Configuration")) {
+                    Toggle(isOn: $defaultDB.udpLoggerEnabled) {
+                        Text("Enable")
+                    }
+                    LabeledContent("Logserver IP:") {
+                        TextField("Logserver IP", text: $defaultDB.udpLoggerHostname, prompt: Text("Required"))
+                    }
+                    LabeledContent("Logserver Port:") {
+                        TextField("Logserver Port", text: $defaultDB.udpLoggerPort, prompt: Text("Required"))
+                    }.keyboardType(.numberPad)
+                    LabeledContent("AES Encryption Key:") {
+                        TextField("AES Encryption Key", text: $defaultDB.udpLoggerKey, prompt: Text("Required"))
                     }
                 }
-                .padding(0)
-                .textFieldStyle(.roundedBorder)
-            } else {
-                Text("The UDP logger allows you to livestream the log to the configured IP.")
-                Link("Learn more", destination: URL(string: "https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#stream-the-log")!)
-                Spacer().frame(height: 32)
-                Text("UDP Logging UI not supported on iOS < 16").foregroundColor(.red)
             }
+            .padding(0)
+            .textFieldStyle(.roundedBorder)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .applyClosure { view in
-            if #available(iOS 15, *) {
-                view.background(.interpolatedWindowBackground)
-            }
-        }
+        .background(.interpolatedWindowBackground)
     }
 }
 
@@ -179,11 +158,7 @@ struct CrashTestingView: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .applyClosure { view in
-                if #available(iOS 15, *) {
-                    view.background(.interpolatedWindowBackground)
-                }
-            }
+            .background(.interpolatedWindowBackground)
     }
 }
 

@@ -71,15 +71,8 @@ struct BackgroundSettings: View {
                                             .resizable()
                                             .frame(width: 32.0, height: 32.0)
                                             .accessibilityLabel(Text("Remove Background Image"))
-                                            .applyClosure { view in
-                                                if #available(iOS 15, *) {
-                                                    view
-                                                        .symbolRenderingMode(.palette)
-                                                        .foregroundStyle(.white, .red)
-                                                } else {
-                                                    view.foregroundColor(.red)
-                                                }
-                                            }
+                                            .symbolRenderingMode(.palette)
+                                            .foregroundStyle(.white, .red)
                                     })
                                     .buttonStyle(.borderless)
                                     .offset(x: 12, y: -12)

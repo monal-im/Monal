@@ -106,15 +106,8 @@ struct ContactDetails: View {
                                                             .resizable()
                                                             .frame(width: 24.0, height: 24.0)
                                                             .accessibilityLabel((contact.mucType == "group") ? Text("Remove Group Avatar") : Text("Remove Channel Avatar"))
-                                                            .applyClosure { view in
-                                                                if #available(iOS 15, *) {
-                                                                    view
-                                                                        .symbolRenderingMode(.palette)
-                                                                        .foregroundStyle(.white, .red)
-                                                                } else {
-                                                                    view.foregroundColor(.red)
-                                                                }
-                                                            }
+                                                            .symbolRenderingMode(.palette)
+                                                            .foregroundStyle(.white, .red)
                                                     })
                                                     .buttonStyle(.borderless)
                                                     .offset(x: 8, y: -8)

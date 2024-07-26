@@ -411,26 +411,12 @@ struct AVCallUI: View {
                                     activeChats.call(contact.obj, with:MLCallType(rawValue:call.callType)!)
                                 }                            
                             }) {
-                                if #available(iOS 15, *) {
-                                    Image(systemName: "arrow.clockwise.circle.fill")
-                                        .resizable()
-                                        .frame(width: 64.0, height: 64.0)
-                                        .symbolRenderingMode(.palette)
-                                        .foregroundStyle(.white, .green)
-                                        .shadow(radius: 7)
-                                } else {
-                                    ZStack {
-                                        Image(systemName: "circle.fill")
-                                            .resizable()
-                                            .frame(width: 64.0, height: 64.0)
-                                            .accentColor(.white)
-                                        Image(systemName: "arrow.clockwise.circle.fill")
-                                            .resizable()
-                                            .frame(width: 64.0, height: 64.0)
-                                            .accentColor(.green)
-                                            .shadow(radius: 7)
-                                    }
-                                }
+                                Image(systemName: "arrow.clockwise.circle.fill")
+                                    .resizable()
+                                    .frame(width: 64.0, height: 64.0)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .green)
+                                    .shadow(radius: 7)
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             
@@ -439,26 +425,12 @@ struct AVCallUI: View {
                             Button(action: {
                                 delegate.dismissWithoutAnimation()
                             }) {
-                                if #available(iOS 15, *) {
-                                    Image(systemName: "x.circle.fill")
-                                        .resizable()
-                                        .frame(width: 64.0, height: 64.0)
-                                        .symbolRenderingMode(.palette)
-                                        .foregroundStyle(.white, .red)
-                                        .shadow(radius: 7)
-                                } else {
-                                    ZStack {
-                                        Image(systemName: "circle.fill")
-                                            .resizable()
-                                            .frame(width: 64.0, height: 64.0)
-                                            .accentColor(.white)
-                                        Image(systemName: "x.circle.fill")
-                                            .resizable()
-                                            .frame(width: 64.0, height: 64.0)
-                                            .accentColor(.red)
-                                            .shadow(radius: 7)
-                                    }
-                                }
+                                Image(systemName: "x.circle.fill")
+                                    .resizable()
+                                    .frame(width: 64.0, height: 64.0)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .red)
+                                    .shadow(radius: 7)
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             
@@ -472,26 +444,12 @@ struct AVCallUI: View {
                                 Button(action: {
                                     call.muted = !call.muted
                                 }) {
-                                    if #available(iOS 15, *) {
-                                        Image(systemName: "mic.slash.circle.fill")
-                                            .resizable()
-                                            .frame(width: 64.0, height: 64.0)
-                                            .symbolRenderingMode(.palette)
-                                            .foregroundStyle(call.muted ? .black : .white, call.muted ? .white : .black)
-                                            .shadow(radius: 7)
-                                    } else {
-                                        ZStack {
-                                            Image(systemName: "circle.fill")
-                                                .resizable()
-                                                .frame(width: 64.0, height: 64.0)
-                                                .accentColor(call.muted ? .black : .white)
-                                            Image(systemName: "mic.circle.fill")
-                                                .resizable()
-                                                .frame(width: 64.0, height: 64.0)
-                                                .accentColor(call.muted ? .white : .black)
-                                                .shadow(radius: 7)
-                                        }
-                                    }
+                                    Image(systemName: "mic.slash.circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .symbolRenderingMode(.palette)
+                                        .foregroundStyle(call.muted ? .black : .white, call.muted ? .white : .black)
+                                        .shadow(radius: 7)
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
                                 
@@ -502,46 +460,28 @@ struct AVCallUI: View {
                                 call.obj.end()
                                 self.delegate.dismissWithoutAnimation()
                             }) {
-                                if #available(iOS 15, *) {
-                                    Image(systemName: "phone.down.circle.fill")
-                                        .resizable()
-                                        .frame(width: 64.0, height: 64.0)
-                                        .symbolRenderingMode(.palette)
-                                        .foregroundStyle(.white, .red)
-                                        .shadow(radius: 7)
-                                } else {
-                                    ZStack(alignment: .center) {
-                                        Image(systemName: "circle.fill")
-                                            .resizable()
-                                            .frame(width: 64.0, height: 64.0)
-                                            .accentColor(.white)
-                                        Image(systemName: "phone.down.circle.fill")
-                                            .resizable()
-                                            .frame(width: 64.0, height: 64.0)
-                                            .accentColor(.red)
-                                            .shadow(radius: 7)
-                                    }
-                                }
+                                Image(systemName: "phone.down.circle.fill")
+                                    .resizable()
+                                    .frame(width: 64.0, height: 64.0)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .red)
+                                    .shadow(radius: 7)
                             }
                             .buttonStyle(BorderlessButtonStyle())
                             
-                            //the button somehow does not work in iOS 15 and we don't know how to fix that
-                            //--> don't show the button on iOS 14 and 15
-                            if #available(iOS 16, *) {
-                                if MLCallState(rawValue:call.state) == .connected || MLCallState(rawValue:call.state) == .reconnecting {
-                                    Spacer().frame(width: 32)
-                                    Button(action: {
-                                        call.speaker = !call.speaker
-                                    }) {
-                                        Image(systemName: "speaker.wave.2.circle.fill")
-                                            .resizable()
-                                            .frame(width: 64.0, height: 64.0)
-                                            .symbolRenderingMode(.palette)
-                                            .foregroundStyle(call.speaker ? .black : .white, call.speaker ? .white : .black)
-                                            .shadow(radius: 7)
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
+                            if MLCallState(rawValue:call.state) == .connected || MLCallState(rawValue:call.state) == .reconnecting {
+                                Spacer().frame(width: 32)
+                                Button(action: {
+                                    call.speaker = !call.speaker
+                                }) {
+                                    Image(systemName: "speaker.wave.2.circle.fill")
+                                        .resizable()
+                                        .frame(width: 64.0, height: 64.0)
+                                        .symbolRenderingMode(.palette)
+                                        .foregroundStyle(call.speaker ? .black : .white, call.speaker ? .white : .black)
+                                        .shadow(radius: 7)
                                 }
+                                .buttonStyle(BorderlessButtonStyle())
                             }
                             
                             Spacer()

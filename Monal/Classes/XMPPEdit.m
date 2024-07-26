@@ -485,11 +485,8 @@ enum DummySettingsRows {
     [questionAlert addAction:yesAction];
     
     UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
-    if(@available(iOS 16.0, macCatalyst 16.0, *))
-        popPresenter.sourceItem = sender;
-    else
-        popPresenter.barButtonItem = sender;
-
+    popPresenter.sourceItem = sender;
+    
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
 
@@ -547,11 +544,8 @@ enum DummySettingsRows {
     [questionAlert addAction:yesAction];
     
     UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
-    if(@available(iOS 16.0, macCatalyst 16.0, *))
-        popPresenter.sourceItem = sender;
-    else
-        popPresenter.barButtonItem = sender;
-
+    popPresenter.sourceItem = sender;
+    
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
 
@@ -582,11 +576,8 @@ enum DummySettingsRows {
     [questionAlert addAction:yesAction];
     
     UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
-    if(@available(iOS 16.0, macCatalyst 16.0, *))
-        popPresenter.sourceItem = sender;
-    else
-        popPresenter.barButtonItem = sender;
-
+    popPresenter.sourceItem = sender;
+    
     [self presentViewController:questionAlert animated:YES completion:nil];
 
 }

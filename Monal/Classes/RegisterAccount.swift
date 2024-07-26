@@ -18,7 +18,7 @@ struct WebView: UIViewRepresentable {
  
     func updateUIView(_ webView: WKWebView, context: Context) {
         var request = URLRequest(url: url)
-        if #available(iOS 16.1, macCatalyst 16.1, *), HelperTools.defaultsDB().bool(forKey:"useDnssecForAllConnections") {
+        if HelperTools.defaultsDB().bool(forKey:"useDnssecForAllConnections") {
             request.requiresDNSSECValidation = true;
         }
         webView.load(request)
@@ -333,7 +333,7 @@ struct RegisterAccount: View {
                                 get: { self.providedServer },
                                 set: { string in self.providedServer = string.lowercased().replacingOccurrences(of: " ", with: "") }
                             ))
-                            //ios15: .textInputAutocapitalization(.never)
+                            .textInputAutocapitalization(.never)
                             .autocapitalization(.none)
                             .autocorrectionDisabled()
                             .foregroundColor(self.registerToken != nil ? .secondary : .primary)
@@ -344,7 +344,7 @@ struct RegisterAccount: View {
                             get: { self.username },
                             set: { string in self.username = string.lowercased().replacingOccurrences(of: " ", with: "") }
                         ))
-                        //ios15: .textInputAutocapitalization(.never)
+                        .textInputAutocapitalization(.never)
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
                     
@@ -364,7 +364,7 @@ struct RegisterAccount: View {
                             .buttonStyle(.borderless)
                         }
                         TextField(NSLocalizedString("Captcha", comment: "placeholder when creating account"), text: $captchaText)
-                            //ios15: .textInputAutocapitalization(.never)
+                            .textInputAutocapitalization(.never)
                             .autocapitalization(.none)
                             .autocorrectionDisabled()
                     }

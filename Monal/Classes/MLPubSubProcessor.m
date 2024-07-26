@@ -143,10 +143,7 @@ $$class_handler(handleAvatarFetchResult, $$ID(xmpp*, account), $$ID(NSString*, j
         NSData* avatarData = [data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"];
         UIImage* image = nil;
         if([[metadata findFirst:@"/@type"] hasPrefix:@"image/svg"])
-        {
-            if(@available(iOS 16.0, macCatalyst 16.0, *))
-                image = [HelperTools renderUIImageFromSVGData:avatarData];
-        }
+            image = [HelperTools renderUIImageFromSVGData:avatarData];
         else
             image = [UIImage imageWithData:avatarData];
         if(image == nil)

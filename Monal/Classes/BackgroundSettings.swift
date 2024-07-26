@@ -67,15 +67,17 @@ struct BackgroundSettings: View {
                         }
                         .accessibilityLabel(Text("Change Background Image"))
                         .onChange(of:selectedItem) { newItem in
-                            Task {
-                                // Retrive selected asset in the form of Data
-                                if let data = try? await newItem?.loadTransferable(type:Data.self) {
-                                    if let loadedImage = UIImage(data: data) {
-                                        self.inputImage = loadedImage
-                                    } else {
-                                        self.inputImage = nil
-                                    }
+                            // Retrive selected asset in the form of Data
+                            newItem?.loadTransferable(type:Data.self) { result in
+                                guard let data = try? result.get() else {
+                                    self.inputImage = nil
+                                    return
                                 }
+                                guard let loadedImage = UIImage(data: data) else {
+                                    self.inputImage = nil
+                                    return
+                                }
+                                self.inputImage = loadedImage
                             }
                         }
                         

@@ -533,13 +533,13 @@ void swizzle(Class c, SEL orig, SEL new)
 }
 
 //this wrapper is needed, because MLChatImageCell can't import our monalxmpp-Swift bridging header, but importing HelperTools is okay
-+(UIImage* _Nullable) renderUIImageFromSVGURL:(NSURL* _Nullable) url    API_AVAILABLE(ios(16.0), macosx(13.0))  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
++(AnyPromise*) renderUIImageFromSVGURL:(NSURL* _Nullable) url
 {
     return [SwiftHelpers _renderUIImageFromSVGURL:url];
 }
 
 //this wrapper is needed, because MLChatImageCell can't import our monalxmpp-Swift bridging header, but importing HelperTools is okay
-+(UIImage* _Nullable) renderUIImageFromSVGData:(NSData* _Nullable) data    API_AVAILABLE(ios(16.0), macosx(13.0))  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
++(AnyPromise*) renderUIImageFromSVGData:(NSData* _Nullable) data
 {
     return [SwiftHelpers _renderUIImageFromSVGData:data];
 }

@@ -143,7 +143,7 @@ $$class_handler(handleAvatarFetchResult, $$ID(xmpp*, account), $$ID(NSString*, j
         NSData* avatarData = [data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"];
         UIImage* image = nil;
         if([[metadata findFirst:@"/@type"] hasPrefix:@"image/svg"])
-            image = [HelperTools renderUIImageFromSVGData:avatarData];
+            image = (UIImage*)nilExtractor(PMKHang([HelperTools renderUIImageFromSVGData:avatarData]));
         else
             image = [UIImage imageWithData:avatarData];
         if(image == nil)

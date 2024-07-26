@@ -221,7 +221,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     xmpp* xmppAccount = notification.object;
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     NSString* idval = [self identifierWithMessage:message];
-    //do this asynchronous on a background thread
+    //do this asynchronously on a background thread
     [self notificationStateForMessage:message].thenInBackground(^(NSNumber* _state) {
         MLNotificationState state = _state.integerValue;
         if(state == MLNotificationStatePending || state == MLNotificationStateNone)
@@ -880,7 +880,11 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     {
         NSString* pngAttachment = [attachmentDir stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtensionForType:UTTypePNG]];
         DDLogVerbose(@"Preparing for notification attachment(%@): converting downloaded file from svg at '%@' to png at '%@'...", typeHint, info[@"cacheFile"], pngAttachment);
-        image = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
+        //we want our code to run synchronously --> use PMKHang
+        //this code should never run in the main queue to not provoke a deadlock
+        if([NSThread isMainThread])
+            @throw [NSException exceptionWithName:@"InvalidThread" reason:@"PMKHang on renderUIImageFromSVGURL must never be called on the main thread!" userInfo:nil]; 
+        image = (UIImage*)nilExtractor(PMKHang([HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]]));
         if(image != nil)
         {
             [UIImagePNGRepresentation(image) writeToFile:pngAttachment atomically:YES];

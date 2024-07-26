@@ -258,6 +258,31 @@ extension AnyPromise {
     }
 }
 
+//since we can not be generic over actors, any new actor we create has to be added here, if we want to use it in conjunction with promises
+//see https://forums.swift.org/t/generic-over-global-actor/67304/2
+public extension Promise {
+    @MainActor
+    func asyncOnMainActor() async throws -> T {
+        try await withCheckedThrowingContinuation { continuation in
+            done { value in
+                continuation.resume(returning: value)
+            }.catch(policy: .allErrors) { error in
+                continuation.resume(throwing: error)
+            }
+        }
+    }
+}
+public extension Guarantee {
+    @MainActor
+    func asyncOnMainActor() async -> T {
+        await withCheckedContinuation { continuation in
+            done { value in
+                continuation.resume(returning: value)
+            }
+        }
+    }
+}
+
 //see https://www.avanderlee.com/swift/property-wrappers/
 //and https://fatbobman.com/en/posts/adding-published-ability-to-custom-property-wrapper-types/
 @propertyWrapper
@@ -344,51 +369,47 @@ public class SwiftHelpers: NSObject {
         });
     }
     
-    //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
-    //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
-    @objc(_renderUIImageFromSVGURL:)
-    public static func _renderUIImageFromSVG(url: URL?) -> UIImage? {
-        guard let url = url else {
-            return nil
-        }
-        guard let svgView = SVGParser.parse(contentsOf: url)?.toSwiftUI() else {
-            return nil
-        }
+    //we use the main actor here, because ImageRenderer needs to run in the main actor
+    //(and we don't want to overcomplicate things here by using a Task and returning a Promise)
+    @MainActor
+    private static func _renderSVG<T: View>(_ svgView: T) -> UIImage? {
         var image: UIImage? = nil
-        HelperTools.dispatchAsync(false, reentrantOn: DispatchQueue.main) {
-            if HelperTools.isAppExtension() {
-                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
-                DDLogDebug("We are in appex: mirroring SVG image on Y axis...");
-                image = HelperTools.mirrorImage(onXAxis:image)
-            } else {
-                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 1280, height: 960)).uiImage
-            }
+        if HelperTools.isAppExtension() {
+            image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
+            DDLogDebug("We are in appex: mirroring SVG image on Y axis...");
+            image = HelperTools.mirrorImage(onXAxis:image)
+        } else {
+            image = ImageRenderer(content:svgView.scaledToFit().frame(width: 1280, height: 960)).uiImage
         }
         return image
     }
     
     //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
     //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
-    @objc(_renderUIImageFromSVGData:)
-    public static func _renderUIImageFromSVG(data: Data?) -> UIImage? {
-        guard let data = data else {
-            return nil
-        }
-        guard let svgView = SVGParser.parse(data: data)?.toSwiftUI() else {
-            return nil
-        }
-        var image: UIImage? = nil
-        HelperTools.dispatchAsync(false, reentrantOn: DispatchQueue.main) {
-            //the uiimage is somehow mirrored at the X-axis when received by appex --> mirror it back
-            if HelperTools.isAppExtension() {
-                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
-                DDLogDebug("We are in appex: mirroring SVG image on Y axis...");
-                image = HelperTools.mirrorImage(onXAxis:image)
-            } else {
-                image = ImageRenderer(content:svgView.scaledToFit().frame(width: 1280, height: 960)).uiImage
+    @objc(_renderUIImageFromSVGURL:)
+    public static func _renderUIImageFromSVG(url: URL?) -> AnyPromise {
+        return AnyPromise(Promise<UIImage?> { seal in
+            guard let url = url, let svgView = SVGParser.parse(contentsOf: url)?.toSwiftUI() else {
+                return seal.fulfill(nil)
             }
-        }
-        return image
+            Task {
+                return seal.fulfill(await self._renderSVG(svgView))
+            }
+        })
+    }
+    
+    //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
+    //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
+    @objc(_renderUIImageFromSVGData:)
+    public static func _renderUIImageFromSVG(data: Data?) -> AnyPromise {
+        return AnyPromise(Promise<UIImage?> { seal in
+            guard let data = data, let svgView = SVGParser.parse(data: data)?.toSwiftUI() else {
+                return seal.fulfill(nil)
+            }
+            Task {
+                return seal.fulfill(await self._renderSVG(svgView))
+            }
+        })
     }
 }
 

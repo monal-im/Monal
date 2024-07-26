@@ -89,28 +89,32 @@
         else if(info && [info[@"mimeType"] hasPrefix:@"image/"])
         {
             self.link = msg.messageText;
-            // uses cached file if the file was already downloaded
-            UIImage* image = nil;
+            AnyPromise* imagePromise = nil;
+            // this code already runs in the main queue --> we can't use PMKHang
             if([info[@"mimeType"] hasPrefix:@"image/svg"])
-                image = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
+                imagePromise = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
             else
-                image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
-            if(!image)
-                return;
-            DDLogVerbose(@"image %@\n--> %fx%f", info, image.size.height, image.size.width);
-            CGFloat wi = image.size.width;
-            CGFloat hi = image.size.height;
-            CGFloat ws = 225.0;
-            CGFloat hs = 200.0;
-            CGFloat ri = wi / hi;
-            CGFloat rs = ws / hs;
-            if(rs > ri)
-                self.thumbnailImage.frame = CGRectMake(0.0, 0.0, wi * hs/hi, hs);
-            else
-                self.thumbnailImage.frame = CGRectMake(0.0, 0.0, ws, hi * ws/wi);
-            self.imageWidth.constant = self.thumbnailImage.frame.size.width;
-            self.imageHeight.constant = self.thumbnailImage.frame.size.height;
-            [self.thumbnailImage setImage:image];
+                imagePromise = [AnyPromise promiseWithValue:[[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]]];
+            imagePromise.then(^(UIImage* image) {
+                if(!nilExtractor(image))
+                    return;
+                DDLogVerbose(@"image %@\n--> %fx%f", info, image.size.height, image.size.width);
+                CGFloat wi = image.size.width;
+                CGFloat hi = image.size.height;
+                CGFloat ws = 225.0;
+                CGFloat hs = 200.0;
+                CGFloat ri = wi / hi;
+                CGFloat rs = ws / hs;
+                if(rs > ri)
+                    self.thumbnailImage.frame = CGRectMake(0.0, 0.0, wi * hs/hi, hs);
+                else
+                    self.thumbnailImage.frame = CGRectMake(0.0, 0.0, ws, hi * ws/wi);
+                self.imageWidth.constant = self.thumbnailImage.frame.size.width;
+                self.imageHeight.constant = self.thumbnailImage.frame.size.height;
+                [self.thumbnailImage setImage:image];
+            }).catch(^(NSError* error) {
+                DDLogWarn(@"Image promise returned an error: %@", error);
+            });
         }
         else
             unreachable();

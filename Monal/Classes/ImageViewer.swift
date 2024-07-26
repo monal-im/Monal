@@ -48,19 +48,13 @@ struct SVGRepresentation: Transferable {
 struct ImageViewer: View {
     var delegate: SheetDismisserProtocol
     let info: [String:AnyObject]
+    @State private var previewImage: UIImage?
     @State private var controlsVisible = false
     
     init(delegate: SheetDismisserProtocol, info:[String:AnyObject]) throws {
         self.delegate = delegate
         self.info = info
     }
-    
-//     var body: some View {
-//         if (info["mimeType"] as! String).hasPrefix("image/gif") {
-//             GIFViewer(data:Binding(get: { try NSData(contentsOfFile:info["cacheFile"] as! String) as Data }, set: { _ in }))
-//             .frame(width: 100, height: 200, alignment: .center)
-//         }
-//     }
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -110,7 +104,7 @@ struct ImageViewer: View {
                                 Text(info["filename"] as! String).foregroundColor(.primary)
                                 Spacer()
                                 
-                                if (info["mimeType"] as! String).hasPrefix("image/svg"), let image = HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info["cacheFile"] as! String)) {
+                                if (info["mimeType"] as! String).hasPrefix("image/svg"), let image = previewImage {
                                     ShareLink(
                                         item: SVGRepresentation(getData: {
                                             try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data
@@ -119,7 +113,7 @@ struct ImageViewer: View {
                                         .labelStyle(.iconOnly)
                                         .foregroundColor(.primary)
                                     Spacer().frame(width:20)
-                                } else if let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
+                                } else if let image = previewImage {
                                     if (info["mimeType"] as! String).hasPrefix("image/gif") {
                                         ShareLink(
                                             item: GifRepresentation(getData: {
@@ -156,6 +150,12 @@ struct ImageViewer: View {
             }
         }.onTapGesture(count: 1) {
             controlsVisible = !controlsVisible
+        }.task {
+            if (info["mimeType"] as! String).hasPrefix("image/svg") {
+                previewImage = await HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info["cacheFile"] as! String)).toGuarantee().asyncOnMainActor()
+            } else {
+                previewImage = UIImage(contentsOfFile:info["cacheFile"] as! String)
+            }
         }
     }
 }

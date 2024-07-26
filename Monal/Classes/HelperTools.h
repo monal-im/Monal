@@ -99,8 +99,8 @@ void swizzle(Class c, SEL orig, SEL new);
 +(MLXMLNode* _Nullable) candidate2xml:(NSString*) candidate withMid:(NSString*) mid pwd:(NSString* _Nullable) pwd ufrag:(NSString* _Nullable) ufrag andInitiator:(BOOL) initiator;
 +(NSString* _Nullable) xml2candidate:(MLXMLNode*) xml withInitiator:(BOOL) initiator;
 
-+(UIImage* _Nullable) renderUIImageFromSVGURL:(NSURL* _Nullable) url    API_AVAILABLE(ios(16.0), macosx(13.0));  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
-+(UIImage* _Nullable) renderUIImageFromSVGData:(NSData* _Nullable) data    API_AVAILABLE(ios(16.0), macosx(13.0));  //means: API_AVAILABLE(ios(16.0), maccatalyst(16.0))
++(AnyPromise*) renderUIImageFromSVGURL:(NSURL* _Nullable) url;
++(AnyPromise*) renderUIImageFromSVGData:(NSData* _Nullable) data;
 +(void) busyWaitForOperationQueue:(NSOperationQueue*) queue;
 +(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier;
 +(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier;

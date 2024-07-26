@@ -434,7 +434,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     return [self showModernNotificationForMessage:message withSound:sound andAccount:account];
 }
 
--(void) showModernNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(void) showModernNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound andAccount:(xmpp*) account
 {
     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
     NSString* idval = [self identifierWithMessage:message];
@@ -573,7 +573,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     }];
 }
 
--(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId
 {
     MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:messageDBId];
     INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:@"dummyText" andAudioAttachment:nil direction:INInteractionDirectionOutgoing];
@@ -586,7 +586,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     }];
 }
 
--(INSendMessageIntent*) makeIntentForMessage:(MLMessage*) message usingText:(NSString*) msgText andAudioAttachment:(INSendMessageAttachment*) audioAttachment direction:(INInteractionDirection) direction   API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(INSendMessageIntent*) makeIntentForMessage:(MLMessage*) message usingText:(NSString*) msgText andAudioAttachment:(INSendMessageAttachment*) audioAttachment direction:(INInteractionDirection) direction
 {
     // some docu:
     // - https://developer.apple.com/documentation/usernotifications/implementing_communication_notifications?language=objc
@@ -699,7 +699,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     */
 }
 
--(INPerson*) makeINPersonForOwnAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(INPerson*) makeINPersonForOwnAccount:(xmpp*) account
 {
     DDLogDebug(@"Building INPerson for self contact...");
     INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:account.connectionProperties.identity.jid type:INPersonHandleTypeUnknown label:@"Monal IM"];
@@ -726,7 +726,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     return person;
 }
 
--(INPerson*) makeINPersonWithContact:(MLContact*) contact andDisplayName:(NSString* _Nullable) displayName andAccount:(xmpp*) account    API_AVAILABLE(ios(15.0), macosx(12.0))  //means: API_AVAILABLE(ios(15.0), maccatalyst(15.0))
+-(INPerson*) makeINPersonWithContact:(MLContact*) contact andDisplayName:(NSString* _Nullable) displayName andAccount:(xmpp*) account
 {
     DDLogDebug(@"Building INPerson for contact: %@ using display name: %@", contact, displayName);
     if(displayName == nil)

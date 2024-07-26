@@ -2637,8 +2637,6 @@ enum msgSentState {
 
 -(MLBaseCell*) fileTransferCellCheckerWithInfo:(NSDictionary*)info direction:(BOOL)inDirection tableView:(UITableView*)tableView andMsg:(MLMessage*)row{
     MLBaseCell* cell = nil;
-    //svg to UIImage conversion is only supported on ios >= 16
-    //--> this shows just a "picture.fill" placeholder for SVGs on ios < 16
     if(cell == nil && [info[@"mimeType"] hasPrefix:@"image/"])
     {
         MLChatImageCell* imageCell = (MLChatImageCell*)[self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];

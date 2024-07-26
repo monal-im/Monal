@@ -10,7 +10,6 @@ import MobileCoreServices
 import UniformTypeIdentifiers
 
 struct AddContactMenu: View {
-    var delegate: SheetDismisserProtocol
     static private let jidFaultyPattern = "^([^@]+@)?.+(\\..{2,})?$"
 
     @State private var connectedAccounts: [xmpp]
@@ -33,11 +32,12 @@ struct AddContactMenu: View {
 
     @State private var isEditingJid = false
 
+    @Environment(\.dismiss) private var dismiss
+
     private let dismissWithNewContact: (MLContact) -> ()
     private let preauthToken: String?
 
-    init(delegate: SheetDismisserProtocol, dismissWithNewContact: @escaping (MLContact) -> (), prefillJid: String = "", preauthToken:String? = nil, prefillAccount:xmpp? = nil, omemoFingerprints: [NSNumber:Data]? = nil) {
-        self.delegate = delegate
+    init(dismissWithNewContact: @escaping (MLContact) -> (), prefillJid: String = "", preauthToken:String? = nil, prefillAccount:xmpp? = nil, omemoFingerprints: [NSNumber:Data]? = nil) {
         self.dismissWithNewContact = dismissWithNewContact
         //self.toAdd = State(wrappedValue: prefillJid)
         self.toAdd = prefillJid
@@ -258,7 +258,7 @@ struct AddContactMenu: View {
                     if self.newContact != nil {
                         self.dismissWithNewContact(newContact!)
                     } else {
-                        self.delegate.dismiss()
+                        dismiss()
                     }
                 }
             }))
@@ -347,9 +347,8 @@ struct AddContactMenu: View {
 }
 
 struct AddContactMenu_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        AddContactMenu(delegate: delegate, dismissWithNewContact: { c in
+        AddContactMenu(dismissWithNewContact: { c in
         })
     }
 }

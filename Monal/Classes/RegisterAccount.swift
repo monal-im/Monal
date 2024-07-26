@@ -26,8 +26,6 @@ struct WebView: UIViewRepresentable {
 }
 
 struct RegisterAccount: View {
-    var delegate: SheetDismisserProtocol
-
     static let XMPPServer: [Dictionary<String, String>] = [
         ["XMPPServer": "Input", "TermsSite_default": ""],
         ["XMPPServer": "conversations.im", "TermsSite_default": "https://account.conversations.im/privacy/"],
@@ -64,8 +62,10 @@ struct RegisterAccount: View {
     @State private var showWebView = false
     @State private var errorObserverEnabled = false
 
-    init(delegate:SheetDismisserProtocol, registerData:[String:AnyObject]? = nil) {
-        self.delegate = delegate
+    @Environment(\.dismiss) private var dismiss
+
+    init(registerData:[String:AnyObject]? = nil) {
+
         if let registerData = registerData {
             DDLogDebug("RegisterAccount created with data: \(registerData)");
             //for State stuff see https://forums.swift.org/t/assignment-to-state-var-in-init-doesnt-do-anything-but-the-compiler-gened-one-works/35235
@@ -392,7 +392,7 @@ struct RegisterAccount: View {
                     .alert(isPresented: $showAlert) {
                         Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                             if(self.registerComplete == true) {
-                                self.delegate.dismiss()
+                                dismiss()
                                 
                                 if let completion = self.completionHandler {
                                     DDLogVerbose("Calling reg completion handler...")
@@ -476,8 +476,7 @@ struct RegisterAccount: View {
 }
 
 struct RegisterAccount_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        RegisterAccount(delegate:delegate)
+        RegisterAccount()
     }
 }

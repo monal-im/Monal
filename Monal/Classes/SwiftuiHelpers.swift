@@ -643,10 +643,8 @@ class SwiftuiInterface : NSObject {
     
     @objc(makeImageViewerForInfo:)
     func makeImageViewerFor(info:[String:AnyObject]) -> UIViewController {
-        let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        delegate.host = host
-        host.rootView = AnyView(try! ImageViewer(delegate:delegate, info:info))
+        host.rootView = AnyView(try! ImageViewer(info:info))
         return host
     }
     

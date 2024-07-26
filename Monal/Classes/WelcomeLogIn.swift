@@ -112,126 +112,138 @@ struct WelcomeLogIn: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading) {
-                HStack () {
-                    Image(decorative: appLogoId)
-                        .resizable()
-                        .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .padding()
-                    
-                    Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
-                        .padding()
-                        .padding(.leading, -16.0)
-                    
-                }
-                .frame(maxWidth: .infinity)
-                .background(Color(UIColor.systemBackground))
+        ZStack {
+            /// Ensure the ZStack takes the entire area
+            Color.clear
+            
+            GeometryReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading) {
+                        VStack {
+                            HStack () {
+                                Image(decorative: appLogoId)
+                                    .resizable()
+                                    .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                    .padding()
+                                
+                                Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
+                                    .padding()
+                                    .padding(.leading, -16.0)
+                                
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .background(Color(UIColor.systemBackground))
 
-                Form {
-                    Text("I already have an account:")
-                    //for ios >= 15.0
-                    //.listRowSeparator(.hidden)
-                    
-                    TextField(NSLocalizedString("user@domain.tld", comment: "placeholder when adding account"), text: Binding(
-                        get: { self.jid },
-                        set: { string in self.jid = string.lowercased().replacingOccurrences(of: " ", with: "") }), onEditingChanged: { isEditingJid = $0 }
-                    )
-                    .textInputAutocapitalization(.never)
-                    .autocapitalization(.none)
-                    .autocorrectionDisabled()
-                    .keyboardType(.emailAddress)
-                    .addClearButton(isEditing: isEditingJid, text: $jid)
-                    
-                    SecureField(NSLocalizedString("Password", comment: "placeholder when adding account"), text: $password)
-                        .addClearButton(isEditing:  password.count > 0
-                                        , text: $password)
-                    
-                    HStack() {
-                        Button(action: {
-                            showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
+                        Form {
+                            Text("I already have an account:")
+                                .listRowSeparator(.hidden)
+                            
+                            TextField(NSLocalizedString("user@domain.tld", comment: "placeholder when adding account"), text: Binding(
+                                get: { self.jid },
+                                set: { string in self.jid = string.lowercased().replacingOccurrences(of: " ", with: "") }), onEditingChanged: { isEditingJid = $0 }
+                            )
+                            .textInputAutocapitalization(.never)
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                            .keyboardType(.emailAddress)
+                            .addClearButton(isEditing: isEditingJid, text: $jid)
+                            .listRowSeparator(.hidden)
+                            
+                            SecureField(NSLocalizedString("Password", comment: "placeholder when adding account"), text: $password)
+                                .addClearButton(isEditing:  password.count > 0, text: $password)
+                                .listRowSeparator(.hidden)
+                            
+                            HStack() {
+                                Button(action: {
+                                    showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
 
-                            if (!showAlert) {
-                                startLoginTimeout()
-                                showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
-                                self.errorObserverEnabled = true
-                                self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
-                                if(self.newAccountNo == nil) {
-                                    currentTimeout = nil // <- disable timeout on error
-                                    errorObserverEnabled = false
-                                    showLoginErrorAlert(errorMessage:NSLocalizedString("Account already configured in Monal!", comment: ""))
-                                    self.newAccountNo = nil
+                                    if (!showAlert) {
+                                        startLoginTimeout()
+                                        showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
+                                        self.errorObserverEnabled = true
+                                        self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
+                                        if(self.newAccountNo == nil) {
+                                            currentTimeout = nil // <- disable timeout on error
+                                            errorObserverEnabled = false
+                                            showLoginErrorAlert(errorMessage:NSLocalizedString("Account already configured in Monal!", comment: ""))
+                                            self.newAccountNo = nil
+                                        }
+                                    }
+                                }){
+                                    Text("Login")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(9.0)
+                                        .background(Color(UIColor.tertiarySystemFill))
+                                        .foregroundColor(buttonColor)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                                .alert(isPresented: $showAlert) {
+                                    Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
+                                        if(self.loginComplete == true) {
+                                            dismiss()
+                                        }
+                                    }))
+                                }
+
+                                // Just sets the credential in jid and password variables and shows them in the input fields
+                                // so user can control what they scanned and if o.k. login via the "Login" button.
+                                Button(action: {
+                                    showQRCodeScanner = true
+                                }){
+                                    Image(systemName: "qrcode")
+                                        .frame(maxHeight: .infinity)
+                                        .padding(9.0)
+                                        .background(Color(UIColor.tertiarySystemFill))
+                                        .foregroundColor(.black)
+                                        .clipShape(Circle())
+                                }
+                                .buttonStyle(BorderlessButtonStyle())
+                                .sheet(isPresented: $showQRCodeScanner) {
+                                    Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
+                                    // Get existing credentials from QR and put values in jid and password
+                                    MLQRCodeScanner(
+                                        handleLogin: { jid, password in
+                                            self.jid = jid
+                                            self.password = password
+                                        }, handleClose: {
+                                            self.showQRCodeScanner = false
+                                        }
+                                    )
                                 }
                             }
-                        }){
-                            Text("Login")
-                                .frame(maxWidth: .infinity)
-                                .padding(9.0)
-                                .background(Color(UIColor.tertiarySystemFill))
-                                .foregroundColor(buttonColor)
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        }
-                        .buttonStyle(BorderlessButtonStyle())
-                        .alert(isPresented: $showAlert) {
-                            Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
-                                if(self.loginComplete == true) {
+                            
+                            NavigationLink(destination: LazyClosureView(RegisterAccount())) {
+                                Text("Register a new account")
+                                .foregroundColor(monalDarkGreen)
+                            }
+                            
+                            if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
+                                Button(action: {
                                     dismiss()
+                                }){
+                                    Text("Set up account later")
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.top, 10.0)
+                                        .padding(.bottom, 9.0)
+                                        .foregroundColor(Color(UIColor.systemGray))
                                 }
-                            }))
+                            }
                         }
-
-                        // Just sets the credential in jid and password variables and shows them in the input fields
-                        // so user can control what they scanned and if o.k. login via the "Login" button.
-                        Button(action: {
-                            showQRCodeScanner = true
-                        }){
-                            Image(systemName: "qrcode")
-                                .frame(maxHeight: .infinity)
-                                .padding(9.0)
-                                .background(Color(UIColor.tertiarySystemFill))
-                                .foregroundColor(.black)
-                                .clipShape(Circle())
-                        }
-                        .buttonStyle(BorderlessButtonStyle())
-                        .sheet(isPresented: $showQRCodeScanner) {
-                            Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
-                            // Get existing credentials from QR and put values in jid and password
-                            MLQRCodeScanner(
-                                handleLogin: { jid, password in
-                                    self.jid = jid
-                                    self.password = password
-                                }, handleClose: {
-                                    self.showQRCodeScanner = false
-                                }
-                            )
+                        .textFieldStyle(.roundedBorder)
+                        .onAppear {
+                            UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 30))
                         }
                     }
-                    
-                    NavigationLink(destination: LazyClosureView(RegisterAccount())) {
-                        Text("Register a new account")
-                        .foregroundColor(monalDarkGreen)
-                    }
-                    
-                    if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
-                        Button(action: {
-                            dismiss()
-                        }){
-                            Text("Set up account later")
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 10.0)
-                                .padding(.bottom, 9.0)
-                                .foregroundColor(Color(UIColor.systemGray))
-                        }
-                    }
+                    /// Sets the minimum frame height to the available height of the scrollview and the maxHeight to infinity
+                    .frame(minHeight: proxy.size.height, maxHeight: .infinity)
                 }
-                .frame(minHeight: 310)
-                .textFieldStyle(.roundedBorder)
-                .onAppear {UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 30))}
             }
         }
         .addLoadingOverlay(overlay)
-        .navigationBarTitle(Text("Welcome"))
+        .navigationBarTitle(Text("Welcome"), displayMode:.large)
         .onDisappear {UITableView.appearance().tableHeaderView = nil}       //why that??
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
             if(self.errorObserverEnabled == false) {

@@ -8,6 +8,7 @@
 
 import SafariServices
 import WebKit
+import FrameUp
 
 struct WebView: UIViewRepresentable {
     var url: URL
@@ -26,16 +27,13 @@ struct WebView: UIViewRepresentable {
 }
 
 struct RegisterAccount: View {
-    static let XMPPServer: [Dictionary<String, String>] = [
+    static private let xmppFaultyPattern = ".+\\..{2,}$"
+    static private let credFaultyPattern = ".*@.*"
+    static private let XMPPServer: [Dictionary<String, String>] = [
         ["XMPPServer": "Input", "TermsSite_default": ""],
         ["XMPPServer": "conversations.im", "TermsSite_default": "https://account.conversations.im/privacy/"],
         ["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"]
     ]
-
-    private let xmppServerInputSelectLabel = Text("Manual input")
-    
-    static private let xmppFaultyPattern = ".+\\..{2,}$"
-    static private let credFaultyPattern = ".*@.*"
 
     @State private var username: String = ""
     @State private var password: String = ""
@@ -65,7 +63,6 @@ struct RegisterAccount: View {
     @Environment(\.dismiss) private var dismiss
 
     init(registerData:[String:AnyObject]? = nil) {
-
         if let registerData = registerData {
             DDLogDebug("RegisterAccount created with data: \(registerData)");
             //for State stuff see https://forums.swift.org/t/assignment-to-state-var-in-init-doesnt-do-anything-but-the-compiler-gened-one-works/35235
@@ -280,162 +277,182 @@ struct RegisterAccount: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading) {
-                VStack(alignment: .leading) {
-                    Text("Like email, you can register your account on many sites and talk to anyone. You can use this page to register an account with a selected or provided XMPP server. You also have to choose a username and a password.")
-                        .padding()
-                }
-                .background(Color(UIColor.systemBackground))
-
-                Form {
-                    Text("I need an account:")
-                    
-                    Menu {
-                        Picker("", selection: $selectedServerIndex) {
-                            ForEach (RegisterAccount.XMPPServer.indices, id: \.self) {
-                                if($0 == 0) {
-                                    xmppServerInputSelectLabel.tag(0)
-                                }
-                                else {
-                                    Text(RegisterAccount.XMPPServer[$0]["XMPPServer"] ?? "").tag($0)
-                                }
-                            }
+        ZStack {
+            /// Ensure the ZStack takes the entire area
+            Color.clear
+            
+            GeometryReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading) {
+                        VStack(alignment: .leading) {
+                            Text("Like email, you can register your account on many sites and talk to anyone. You can use this page to register an account with a selected or provided XMPP server. You also have to choose a username and a password.")
+                                .padding()
                         }
-                        .onChange(of: selectedServerIndex, perform: { (_) in
-                            self.captchaImg = nil
-                            self.captchaText = ""
-                            self.xmppAccount = nil
-                            self.registerToken = nil
-                        })
-                        .labelsHidden()
-                        .pickerStyle(.inline)
-                    }
-                    label: {
-                        HStack {
-                            if(selectedServerIndex != 0) {
-                                Text(RegisterAccount.XMPPServer[selectedServerIndex]["XMPPServer"]!).font(.system(size: 17)).frame(maxWidth: .infinity)
-                                Image(systemName: "checkmark")
-                            }
-                            else {
-                                xmppServerInputSelectLabel.font(.system(size: 17)).frame(maxWidth: .infinity)
-                            }
-                        }
-                        .padding(9.0)
-                        .background(Color(UIColor.tertiarySystemFill))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    }
-                    .disabled(self.registerToken != nil)
+                        .background(Color(UIColor.systemBackground))
 
-                    Group {
-                        if(selectedServerIndex == 0) {
-                            TextField(NSLocalizedString("Provide XMPP-Server", comment: "placeholder when creating account"), text: Binding(
-                                get: { self.providedServer },
-                                set: { string in self.providedServer = string.lowercased().replacingOccurrences(of: " ", with: "") }
-                            ))
-                            .textInputAutocapitalization(.never)
-                            .autocapitalization(.none)
-                            .autocorrectionDisabled()
-                            .foregroundColor(self.registerToken != nil ? .secondary : .primary)
-                            .disabled(self.registerToken != nil)
-                        }
-
-                        TextField(NSLocalizedString("Username", comment: "placeholder when creating account"), text: Binding(
-                            get: { self.username },
-                            set: { string in self.username = string.lowercased().replacingOccurrences(of: " ", with: "") }
-                        ))
-                        .textInputAutocapitalization(.never)
-                        .autocapitalization(.none)
-                        .autocorrectionDisabled()
-                    
-                        SecureField(NSLocalizedString("Password", comment: "placeholder when creating account"), text: $password)
-                        SecureField(NSLocalizedString("Password (repeated)", comment: "placeholder when creating account"), text: $repeatedPassword)
-                    }
-                    
-                    if(self.captchaImg != nil) {
-                        HStack {
-                            self.captchaImg
-                            Spacer()
-                            Button(action: {
-                                fetchRequestForm()
-                            }, label: {
-                                Image(systemName: "arrow.clockwise")
-                            })
-                            .buttonStyle(.borderless)
-                        }
-                        TextField(NSLocalizedString("Captcha", comment: "placeholder when creating account"), text: $captchaText)
-                            .textInputAutocapitalization(.never)
-                            .autocapitalization(.none)
-                            .autocorrectionDisabled()
-                    }
-
-                    Button(action: {
-                        showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || !passwordsMatchAlert || credentialsFaultyAlert || credentialsExistAlert)
-
-                        if(!showAlert) {
-                            self.errorObserverEnabled = true
-                            if(self.captchaImg == nil) {
-                                fetchRequestForm()
-                            } else {
-                                register()
-                            }
-                        }
-                    }){
-                        Text("Register with \(actualServer)")
-                            .frame(maxWidth: .infinity)
-                            .padding(9.0)
-                            .background(Color(UIColor.tertiarySystemFill))
-                            .foregroundColor(buttonColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
-                    .alert(isPresented: $showAlert) {
-                        Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
-                            if(self.registerComplete == true) {
-                                dismiss()
-                                
-                                if let completion = self.completionHandler {
-                                    DDLogVerbose("Calling reg completion handler...")
-                                    completion(self.registeredAccountNo as NSNumber)
-                                }
-                            }
-                        }))
-                    }
-                    Text("The selectable XMPP servers are public servers which are not affiliated to Monal. This registration page is provided for convenience only.")
-                    .font(.system(size: 10))
-                    .padding(.vertical, 8)
-
-                    if(selectedServerIndex != 0) {
-                        Button (action: {
-                            showWebView.toggle()
-                        }){
-                            Text("Terms of use for \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)")
-                                .font(.system(size: 10))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .sheet(isPresented: $showWebView) {
-                            NavigationView {
-                                WebView(url: termsSiteForCurrentLanguage())
-                                    .navigationBarTitle(Text("Terms of \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)"), displayMode: .inline)
-                                    .toolbar(content: {
-                                        ToolbarItem(placement: .bottomBar) {
-                                            Button (action: {
-                                                showWebView.toggle()
-                                            }){
-                                                Text("Close")
-                                            }
+                        Form {
+                            Text("I need an account:")
+                                .listRowSeparator(.hidden)
+                            
+                            Menu {
+                                Picker("", selection: $selectedServerIndex) {
+                                    ForEach (RegisterAccount.XMPPServer.indices, id: \.self) {
+                                        if($0 == 0) {
+                                            Text("Manual input").tag(0)
                                         }
+                                        else {
+                                            Text(RegisterAccount.XMPPServer[$0]["XMPPServer"] ?? "").tag($0)
+                                        }
+                                    }
+                                }
+                                .onChange(of: selectedServerIndex, perform: { (_) in
+                                    self.captchaImg = nil
+                                    self.captchaText = ""
+                                    self.xmppAccount = nil
+                                    self.registerToken = nil
+                                })
+                                .labelsHidden()
+                                .pickerStyle(.inline)
+                            }
+                            label: {
+                                HStack {
+                                    if(selectedServerIndex != 0) {
+                                        Text(RegisterAccount.XMPPServer[selectedServerIndex]["XMPPServer"]!).font(.system(size: 17)).frame(maxWidth: .infinity)
+                                        Image(systemName: "checkmark")
+                                    }
+                                    else {
+                                        Text("Manual input")
+                                            .font(.system(size: 17))
+                                            .frame(maxWidth: .infinity)
+                                    }
+                                }
+                                .padding(9.0)
+                                .background(Color(UIColor.tertiarySystemFill))
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+                            .disabled(self.registerToken != nil)
+                            .listRowSeparator(.hidden)
+
+                            Group {
+                                if(selectedServerIndex == 0) {
+                                    TextField(NSLocalizedString("Provide XMPP-Server", comment: "placeholder when creating account"), text: Binding(
+                                        get: { self.providedServer },
+                                        set: { string in self.providedServer = string.lowercased().replacingOccurrences(of: " ", with: "") }
+                                    ))
+                                    .textInputAutocapitalization(.never)
+                                    .autocapitalization(.none)
+                                    .autocorrectionDisabled()
+                                    .foregroundColor(self.registerToken != nil ? .secondary : .primary)
+                                    .disabled(self.registerToken != nil)
+                                    .listRowSeparator(.hidden)
+                                }
+
+                                TextField(NSLocalizedString("Username", comment: "placeholder when creating account"), text: Binding(
+                                    get: { self.username },
+                                    set: { string in self.username = string.lowercased().replacingOccurrences(of: " ", with: "") }
+                                ))
+                                .textInputAutocapitalization(.never)
+                                .autocapitalization(.none)
+                                .autocorrectionDisabled()
+                                .listRowSeparator(.hidden)
+                            
+                                SecureField(NSLocalizedString("Password", comment: "placeholder when creating account"), text: $password)
+                                    .listRowSeparator(.hidden)
+                                SecureField(NSLocalizedString("Password (repeated)", comment: "placeholder when creating account"), text: $repeatedPassword)
+                                    .listRowSeparator(.hidden)
+                            }
+                            
+                            if(self.captchaImg != nil) {
+                                HStack {
+                                    self.captchaImg
+                                    Spacer()
+                                    Button(action: {
+                                        fetchRequestForm()
+                                    }, label: {
+                                        Image(systemName: "arrow.clockwise")
                                     })
+                                    .buttonStyle(.borderless)
+                                }
+                                .listRowSeparator(.hidden)
+                                
+                                TextField(NSLocalizedString("Captcha", comment: "placeholder when creating account"), text: $captchaText)
+                                    .textInputAutocapitalization(.never)
+                                    .autocapitalization(.none)
+                                    .autocorrectionDisabled()
+                                    .listRowSeparator(.hidden)
+                            }
+
+                            Button(action: {
+                                showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || !passwordsMatchAlert || credentialsFaultyAlert || credentialsExistAlert)
+
+                                if(!showAlert) {
+                                    self.errorObserverEnabled = true
+                                    if(self.captchaImg == nil) {
+                                        fetchRequestForm()
+                                    } else {
+                                        register()
+                                    }
+                                }
+                            }){
+                                Text("Register with \(actualServer)")
+                                    .frame(maxWidth: .infinity)
+                                    .padding(9.0)
+                                    .background(Color(UIColor.tertiarySystemFill))
+                                    .foregroundColor(buttonColor)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+                            .buttonStyle(BorderlessButtonStyle())
+                            .listRowSeparator(.hidden)
+                            .alert(isPresented: $showAlert) {
+                                Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
+                                    if(self.registerComplete == true) {
+                                        dismiss()
+                                        
+                                        if let completion = self.completionHandler {
+                                            DDLogVerbose("Calling reg completion handler...")
+                                            completion(self.registeredAccountNo as NSNumber)
+                                        }
+                                    }
+                                }))
+                            }
+                            Text("The selectable XMPP servers are public servers which are not affiliated to Monal. This registration page is provided for convenience only.")
+                            .font(.system(size: 10))
+                            .padding(.vertical, 8)
+
+                            if(selectedServerIndex != 0) {
+                                Button (action: {
+                                    showWebView.toggle()
+                                }){
+                                    Text("Terms of use for \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)")
+                                        .font(.system(size: 10))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .sheet(isPresented: $showWebView) {
+                                    NavigationView {
+                                        WebView(url: termsSiteForCurrentLanguage())
+                                            .navigationBarTitle(Text("Terms of \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)"), displayMode: .inline)
+                                            .toolbar(content: {
+                                                ToolbarItem(placement: .bottomBar) {
+                                                    Button (action: {
+                                                        showWebView.toggle()
+                                                    }){
+                                                        Text("Close")
+                                                    }
+                                                }
+                                            })
+                                    }
+                                }
                             }
                         }
+                        .textFieldStyle(.roundedBorder)
                     }
+                    /// Sets the minimum frame height to the available height of the scrollview and the maxHeight to infinity
+                    .frame(minHeight: proxy.size.height, maxHeight: .infinity)
                 }
-                .frame(height: 370)
-                .textFieldStyle(.roundedBorder)
             }
         }
         .addLoadingOverlay(overlay)
-        .navigationTitle("Register")
+        .navigationBarTitle(Text("Register"), displayMode:.large)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
             DDLogDebug("Got xmpp error")
             if(self.errorObserverEnabled == false) {

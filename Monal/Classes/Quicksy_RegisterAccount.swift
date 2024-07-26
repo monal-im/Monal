@@ -12,7 +12,7 @@ let QUICKSY_BASE_URL = "https://api.quicksy.im";
 func sendSMSRequest(to number:String) -> Promise<(data: Data, response: URLResponse)> {
     var rq = URLRequest(url: URL(string: "\(QUICKSY_BASE_URL)/authentication/\(number)")!)
     rq.httpMethod = "GET"
-    rq.addValue(Locale.current.language.languageCode?.identifier ?? "en", forHTTPHeaderField: "Accept-Language")
+    rq.addValue(Locale.current.language.languageCode?.identifier ?? DEFAULT_REGION_CODE, forHTTPHeaderField: "Accept-Language")
     rq.addValue(UIDevice.current.identifierForVendor?.uuidString.lowercased() ?? UUID().uuidString.lowercased(), forHTTPHeaderField: "Installation-Id")
     rq.addValue("Quicksy/2.10.0", forHTTPHeaderField: "User-Agent")
     DDLogDebug("Request: \(String(describing:rq))")
@@ -268,8 +268,9 @@ struct Quicksy_RegisterAccount: View {
                 .onAppear {
                     let regionCode = Locale.current.region?.identifier ?? DEFAULT_REGION_CODE
                     selectedCountry = countries[0]
-                    print("######## \(String(describing:regionCode))")
-                    print("######## \(String(describing:Locale(identifier: "en_US").localizedString(forRegionCode:regionCode)))")
+                    DDLogInfo("Localization: using regionCode: \(String(describing:regionCode))")
+                    DDLogInfo("Localization: current locale localized string for regionCode: \(String(describing:Locale.current.localizedString(forRegionCode:regionCode)))")
+                    DDLogInfo("Localization: en_US localized string for regionCode: \(String(describing:Locale(identifier: "en_US").localizedString(forRegionCode:regionCode)))")
                     for country in countries {
                         if country.name == Locale.current.localizedString(forRegionCode:regionCode) || country.name == Locale(identifier: "en_US").localizedString(forRegionCode:regionCode) {
                             selectedCountry = country

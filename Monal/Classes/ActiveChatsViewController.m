@@ -383,7 +383,7 @@ static NSMutableSet* _pushWarningDisplayed;
     DDLogDebug(@"active chats view will appear");
     [super viewWillAppear:animated];
     
-    [self openConversationPlaceholder:nil];
+    [self presentSplitPlaceholder];
 }
 
 -(void) viewWillDisappear:(BOOL) animated
@@ -622,10 +622,10 @@ static NSMutableSet* _pushWarningDisplayed;
     });
 }
 
--(void) openConversationPlaceholder:(MLContact*) contact
+-(void) presentSplitPlaceholder
 {
     // only show placeholder if we use a split view
-    if([HelperTools deviceUsesSplitView] == YES)
+    if(!self.splitViewController.collapsed)
     {
         DDLogVerbose(@"Presenting Chat Placeholder...");
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeViewWithName:@"ChatPlaceholder"];
@@ -762,13 +762,13 @@ static NSMutableSet* _pushWarningDisplayed;
             }
             
             // clear old chat before opening a new one (but not for splitView == YES)
-            if([HelperTools deviceUsesSplitView] == NO)
+            if(self.splitViewController.collapsed)
                 [self.navigationController popViewControllerAnimated:NO];
             
             // show placeholder if contact is nil, open chat otherwise
             if(contact == nil)
             {
-                [self openConversationPlaceholder:nil];
+                [self presentSplitPlaceholder];
                 if(completion != nil)
                     completion(@NO);
                 return;

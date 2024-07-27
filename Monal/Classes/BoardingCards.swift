@@ -169,7 +169,7 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             description: Text("Become part of a worldwide decentralized chat network!"),
             imageName: "hand.wave",
             articleText: Text("""
-            Modern iOS and macOS XMPP chat client.\n\nXMPP is a federated network: Just like email, you can register your account on many servers and still talk to anyone, even if they signed up on a different server.
+            Modern iOS and macOS XMPP chat client.\n\nXMPP is a federated network: Just like email, you can register your account on many servers and still talk to anyone, even if they signed up on a different server.\n\nUsing Monal instead of a centralized chat app therefore increases your digital sovereignty.
             """),
             customView: nil,
             nextText: nil
@@ -180,7 +180,7 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             imageName: "sparkles",
             articleText: Text("""
             🛜 Decentralized Network :
-            Leverages the decentralized nature of XMPP, avoiding central servers.
+            Leverages the decentralized nature of XMPP, avoiding central servers and increasing your digital sovereignty.
             
             🌐 Data privacy :
             We do not sell or track information for external parties (nor for anyone else).

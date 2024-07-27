@@ -349,10 +349,14 @@ enum MLServerDetailsSections {
             NSString* serverName = nilDefault(self.serverVersion.appName, NSLocalizedString(@"<unknown server>", @"server details"));
             NSString* serverVersion = nilDefault(self.serverVersion.appVersion, NSLocalizedString(@"<unknown version>", @"server details"));
             NSString* serverPlatform = self.serverVersion.platformOs != nil ? [NSString stringWithFormat:NSLocalizedString(@" running on %@", @"server details"), self.serverVersion.platformOs] : @"";
+            NSString* description = [NSString stringWithFormat:NSLocalizedString(@"version %@%@", @"server details"), serverVersion, serverPlatform];
+            NSString* linkText = NSLocalizedString(@"Considerations for Server Administrators", @"server details");
+            NSMutableAttributedString* attributedDescription = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n\n%@", description, linkText]];
+            [attributedDescription addAttribute:NSLinkAttributeName value:@"https://github.com/monal-im/Monal/wiki/Considerations-for-XMPP-server-admins" range:NSMakeRange(description.length+2, linkText.length)];
             dic = @{
                 @"Color": SERVER_DETAILS_COLOR_NONE, 
                 @"Title": serverName,
-                @"Description": [NSString stringWithFormat:NSLocalizedString(@"version %@%@", @"server details"), serverVersion, serverPlatform],
+                @"Description": attributedDescription,
             };
         }
     }
@@ -371,8 +375,25 @@ enum MLServerDetailsSections {
     else if(indexPath.section == CB_SECTION)
         dic = [self.channelBindingTypes objectAtIndex:(NSUInteger)indexPath.row];
 
-    cell.textLabel.text = nilExtractor([dic objectForKey:@"Title"]);
-    cell.detailTextLabel.text = nilExtractor([dic objectForKey:@"Description"]);
+    if([[dic objectForKey:@"Title"] isKindOfClass:NSClassFromString(@"NSMutableAttributedString")])
+    {
+        cell.textLabel.attributedText = nilExtractor([dic objectForKey:@"Title"]);
+        UITapGestureRecognizer* tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapOnLabel:)];
+        [cell.textLabel addGestureRecognizer:tapGesture];
+        cell.textLabel.userInteractionEnabled = YES;
+    }
+    else
+        cell.textLabel.text = nilExtractor([dic objectForKey:@"Title"]);
+    
+    if([[dic objectForKey:@"Description"] isKindOfClass:NSClassFromString(@"NSMutableAttributedString")])
+    {
+        cell.detailTextLabel.attributedText = nilExtractor([dic objectForKey:@"Description"]);
+        UITapGestureRecognizer* tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapOnLabel:)];
+        [cell.detailTextLabel addGestureRecognizer:tapGesture];
+        cell.detailTextLabel.userInteractionEnabled = YES;
+    }
+    else
+        cell.detailTextLabel.text = nilExtractor([dic objectForKey:@"Description"]);
 
     // Add background color to selected cells
     if([dic objectForKey:@"Color"])
@@ -407,6 +428,29 @@ enum MLServerDetailsSections {
             [cell setBackgroundColor:nil];
     }
     return cell;
+}
+
+-(void) handleTapOnLabel:(UITapGestureRecognizer*) recognizer
+{
+    UILabel* label = (UILabel*) recognizer.view;
+    CGPoint location = [recognizer locationInView:label];
+    NSAttributedString* attributedText = label.attributedText;
+
+    NSTextStorage* textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedText];
+    NSLayoutManager* layoutManager = [[NSLayoutManager alloc] init];
+    NSTextContainer* textContainer = [[NSTextContainer alloc] initWithSize:label.bounds.size];
+    textContainer.lineFragmentPadding = 0;
+    [layoutManager addTextContainer:textContainer];
+    [textStorage addLayoutManager:layoutManager];
+
+    NSUInteger characterIndex = [layoutManager characterIndexForPoint:location inTextContainer:textContainer fractionOfDistanceBetweenInsertionPoints:nil];
+
+    if(characterIndex < attributedText.length)
+    {
+        NSString* url = [attributedText attribute:NSLinkAttributeName atIndex:characterIndex effectiveRange:nil];
+        if(url)
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url] options:@{} completionHandler:nil];
+    }
 }
 
 -(NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section

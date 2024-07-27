@@ -44,6 +44,7 @@ enum SettingsAppRows {
 enum SettingsSupportRow {
     EmailRow,
     SubmitABugRow,
+    OpenFAQRow,
     SettingsSupportRowCnt
 };
 
@@ -194,6 +195,13 @@ enum DummySettingsRows {
 
         [web initViewWithUrl:[NSURL URLWithString:@"https://github.com/monal-im/Monal/issues"]];
     }
+    else if([segue.identifier isEqualToString:@"showFAQ"])
+    {
+        UINavigationController* nav = (UINavigationController*) segue.destinationViewController;
+        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
+
+        [web initViewWithUrl:[NSURL URLWithString:@"https://github.com/monal-im/Monal/wiki/FAQ---Frequently-Asked-Questions"]];
+    }
     else if([segue.identifier isEqualToString:@"editXMPP"])
     {
         XMPPEdit* editor = (XMPPEdit*) segue.destinationViewController.childViewControllers.firstObject; // segue.destinationViewController;
@@ -262,6 +270,9 @@ enum DummySettingsRows {
                     break;
                 case SubmitABugRow:
                     [cell initTapCell:NSLocalizedString(@"Submit A Bug", @"")];
+                    break;
+                case OpenFAQRow:
+                    [cell initTapCell:NSLocalizedString(@"Frequently Asked Questions", @"")];
                     break;
                 default:
                     unreachable();
@@ -376,6 +387,9 @@ enum DummySettingsRows {
                     break;
                 case SubmitABugRow:
                     [self performSegueWithIdentifier:@"showBug" sender:self];
+                    break;
+                case OpenFAQRow:
+                    [self performSegueWithIdentifier:@"showFAQ" sender:self];
                     break;
                 default:
                     unreachable();

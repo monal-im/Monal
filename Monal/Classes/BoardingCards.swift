@@ -236,10 +236,10 @@ struct TakeMeToSettingsView: View {
             Button(action: {
                 let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                 if let activeChats = appDelegate.activeChats {
-                    activeChats.enqueueGeneralSettings = true
+                    activeChats.prependGeneralSettings()
                 }
                 onboardingState.hasCompletedOnboarding = true
-                delegate.dismiss()
+                delegate.dismissWithoutAnimation()
             }) {
                 Text("Take me to settings")
                     .fontWeight(.bold)

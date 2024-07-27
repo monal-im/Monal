@@ -1595,9 +1595,6 @@ $$
     if(![[MLXMPPManager sharedInstance] hasConnectivity])
         DDLogError(@"BGTASK has *no* connectivity? That's strange!");
     
-    //we are a bg processing task potentially having minutes of background time --> vacuum database
-    [[DataLayer sharedInstance] vacuum];
-    
     [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
     @synchronized(self) {
         DDLogVerbose(@"Setting _shutdownPending to NO...");

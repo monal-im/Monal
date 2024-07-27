@@ -338,10 +338,7 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id) userInfo andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func
 {
-    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
-    NSArray* filePathComponents = [fileStr pathComponents];
-    if([filePathComponents count]>1)
-        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    NSString* fileStr = [self sanitizeFilePath:file];
     DDLogError(@"Assertion triggered at %@:%d in %s", fileStr, line, func);
     @throw [NSException exceptionWithName:[NSString stringWithFormat:@"MLAssert triggered at %@:%d in %s with reason '%@' and userInfo: %@", fileStr, line, func, text, userInfo] reason:text userInfo:userInfo];
 }
@@ -396,10 +393,7 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) showErrorOnAlpha:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp* _Nullable) account andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
-    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
-    NSArray* filePathComponents = [fileStr pathComponents];
-    if([filePathComponents count]>1)
-        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    NSString* fileStr = [self sanitizeFilePath:file];
     NSString* message = description;
     if(node)
         message = [self extractXMPPError:node withDescription:description];
@@ -2269,16 +2263,20 @@ void swizzle(Class c, SEL orig, SEL new)
     return [rfc3339DateFormatter stringFromDate:datetime];
 }
 
++(NSString*) sanitizeFilePath:(const char* const) file
+{
+    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
+    NSArray* filePathComponents = [fileStr pathComponents];
+    if([filePathComponents count]>1)
+        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    return fileStr;
+}
+
 //don't use this directly, but via createDelayableTimer() makros
 +(MLDelayableTimer*) startDelayableQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue
 {
     if(queue == nil)
         queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    
-    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
-    NSArray* filePathComponents = [fileStr pathComponents];
-    if([filePathComponents count]>1)
-        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
     
     MLDelayableTimer* timer = [[MLDelayableTimer alloc] initWithHandler:^(MLDelayableTimer* timer){
         if(handler)
@@ -2292,7 +2290,7 @@ void swizzle(Class c, SEL orig, SEL new)
                 DDLogDebug(@"calling cancel block for timer: %@", timer);
                 cancelHandler();
             });
-    } timeout:timeout tolerance:0.1 andDescription:[NSString stringWithFormat:@"created at %@:%d in %s", fileStr, line, func]];
+    } timeout:timeout tolerance:0.1 andDescription:[NSString stringWithFormat:@"created at %@:%d in %s", [self sanitizeFilePath:file], line, func]];
     
     if(timeout < 0.001)
     {

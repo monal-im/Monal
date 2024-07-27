@@ -204,11 +204,7 @@ NSString* type_to_classname(NSString* type)
 
 +(void) throwDynamicExceptionForType:(NSString*) type andVar:(NSString*) varName andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
-    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
-    NSArray* filePathComponents = [fileStr pathComponents];
-    if([filePathComponents count]>1)
-        fileStr = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
-    NSString* text = [NSString stringWithFormat:@"Dynamic unpacking exception triggered for '%@' var '%@' at %@:%d in %s", type, varName, fileStr, line, func];
+    NSString* text = [NSString stringWithFormat:@"Dynamic unpacking exception triggered for '%@' var '%@' at %@:%d in %s", type, varName, [HelperTools sanitizeFilePath:file], line, func];
     DDLogError(@"%@", text);
     @throw [NSException exceptionWithName:text reason:text userInfo:userInfo];
 }

@@ -35,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) presentCall:(MLCall*) call;
 -(void) presentChatWithContact:(MLContact* _Nullable) contact;
 -(void) presentChatWithContact:(MLContact* _Nullable) contact andCompletion:(monal_id_block_t _Nullable) completion;
+-(void) presentSplitPlaceholder;
 -(void) refreshDisplay;
 
 -(void) showContacts;

@@ -2729,24 +2729,6 @@ a=%@\r\n", mid, candidate];
     return qrCode.outputImage;
 }
 
-+(BOOL) deviceUsesSplitView
-{
-#if TARGET_OS_MACCATALYST
-    return YES;
-#else
-    switch ([[UIDevice currentDevice] userInterfaceIdiom]) {
-        case UIUserInterfaceIdiomPad:
-            return YES;
-            break;
-        case UIUserInterfaceIdiomPhone:
-            return NO;
-        default:
-            unreachable();
-            return NO;
-    }
-#endif
-}
-
 //taken from: https://stackoverflow.com/a/30932216/3528174
 +(NSArray*) splitString:(NSString*) string withSeparator:(NSString*) separator andMaxSize:(NSUInteger)size
 {

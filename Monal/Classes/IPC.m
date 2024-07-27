@@ -136,7 +136,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
     _serverThreadCondition = [NSCondition new];
     
     static dispatch_once_t once;
-    static const int VERSION = 2;
+    static const int VERSION = 3;
     dispatch_once(&once, ^{
         BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:_dbFile];
         //first command creates initial database if file does not exist
@@ -144,7 +144,13 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
         //this will create the database file and open the database because it is the first MLSQlite call done for this file
         //turning on WAL mode has to be done *outside* of any transactions
         [self.db enableWAL];
-        [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
+    
+        //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+        [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        
+        NSNumber* version = [self.db idWriteTransaction:^{
             if(!fileExists)
             {
                 [self.db executeNonQuery:@"CREATE TABLE ipc(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), source VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
@@ -156,9 +162,12 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
             NSNumber* version = (NSNumber*)[self.db executeScalar:@"SELECT version FROM versions WHERE name='db';"];
             DDLogInfo(@"IPC db version: %@", version);
             if([version integerValue] < 2)
-            {
                 [self.db executeNonQuery:@"ALTER TABLE ipc ADD COLUMN response_to INTEGER NOT NULL DEFAULT 0;"];
-            }
+            
+            //do a vacuum and from now on do it on every db upgrade
+            if([version integerValue] < 3)
+                ;
+            
             //any upgrade done --> update version table and delete all old ipc messages
             if([version integerValue] < VERSION)
             {
@@ -167,7 +176,15 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
                 [self.db executeNonQuery:@"UPDATE versions SET version=? WHERE name='db';" andArguments:@[[NSNumber numberWithInt:VERSION]]];
                 DDLogInfo(@"IPC db upgraded to version: %d", VERSION);
             }
+            return version;
         }];
+        if([version integerValue] < VERSION)
+            [self.db vacuum];
+        
+        //turn foreign keys on again
+        //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+        [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
     });
     
     //use a dedicated and very high priority thread to make sure this always runs

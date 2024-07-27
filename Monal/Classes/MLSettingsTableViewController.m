@@ -113,12 +113,25 @@ enum DummySettingsRows {
 
     _tappedVersionInfo = 0;
     self.selected = nil;
+    
+    [self presentSplitPlaceholder];
 }
 
 -(void) viewWillDisappear:(BOOL) animated
 {
     [super viewWillDisappear:animated];
     [((MonalAppDelegate*)UIApplication.sharedApplication.delegate).activeChats sheetDismissed];
+}
+
+-(void) presentSplitPlaceholder
+{
+    // only show placeholder if we use a split view
+    if(!self.splitViewController.collapsed)
+    {
+        DDLogVerbose(@"Presenting Settings Placeholder...");
+        UIViewController* detailsViewController = [[SwiftuiInterface new] makeViewWithName:@"ChatPlaceholder"];
+        [self showDetailViewController:detailsViewController sender:self];
+    }
 }
 
 #pragma mark - key commands

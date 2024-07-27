@@ -191,8 +191,6 @@ void swizzle(Class c, SEL orig, SEL new);
 
 +(NSString*) appBuildVersionInfoFor:(MLVersionType) type;
 
-+(BOOL) deviceUsesSplitView;
-
 +(NSNumber*) currentTimestampInSeconds;
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date;
 

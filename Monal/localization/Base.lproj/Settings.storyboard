@@ -238,6 +238,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="view" destination="6bQ-Oj-ELG" id="bdT-f4-vDY"/>
+                        <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showFAQ" id="AaA-Ru-YBK"/>
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showBug" id="RUx-Ru-YBK"/>
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showAbout" id="XYR-kq-hQQ"/>
                         <segue destination="zlL-d1-5e0" kind="showDetail" identifier="showOpenSource" id="pZO-HH-rUP"/>

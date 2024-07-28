@@ -398,7 +398,7 @@ void swizzle(Class c, SEL orig, SEL new)
     if(node)
         message = [self extractXMPPError:node withDescription:description];
 #ifdef IS_ALPHA
-    DDLogError(@"Notifying alpha user about error at %@:%d in %s: %@", fileStr, line, func, message);
+    DDLogError(@"Notifying alpha user about error on account %@ at %@:%d in %s: %@", account, fileStr, line, func, message);
     if(account != nil)
         [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@YES}];
     else

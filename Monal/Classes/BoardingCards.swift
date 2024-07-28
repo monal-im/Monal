@@ -50,6 +50,9 @@ struct OnboardingView: View {
                                             .foregroundColor(.blue)
                                             .padding(10)
                                     }
+                                } else {
+                                    //make sure the space the "back" label will take, is already reserved to not have "jumps" when pressing next
+                                    Text("").padding(10)
                                 }
                                 
                                 HStack {

@@ -592,6 +592,21 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) showAddContactWithJid:(NSString*) jid preauthToken:(NSString* _Nullable) preauthToken prefillAccount:(xmpp* _Nullable) account andOmemoFingerprints:(NSDictionary* _Nullable) fingerprints
 {
+    //check if contact is already known in any of our accounts and open a chat with the first contact we can find
+    for(xmpp* checkAccount in [MLXMPPManager sharedInstance].connectedXMPP)
+    {
+        MLContact* checkContact = [MLContact createContactFromJid:jid andAccountNo:checkAccount.accountNo];
+        if(checkContact.isInRoster)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
+                    [self presentChatWithContact:checkContact];
+                }];
+            });
+            return;
+        }
+    }
+    
     appendToViewQueue((^(PMKResolver resolve) {
         UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewForJid:jid preauthToken:preauthToken prefillAccount:account andOmemoFingerprints:fingerprints withDismisser:^(MLContact* _Nonnull newContact) {
             dispatch_async(dispatch_get_main_queue(), ^{

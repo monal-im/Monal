@@ -127,8 +127,10 @@ struct AddContactMenu: View {
             //only alert of already known contact if we did not import the omemo fingerprints
             if !self.importScannedFingerprints || self.scannedFingerprints?.count ?? 0 == 0 {
                 if self.connectedAccounts.count > 1 {
+                    self.success = true
                     successAlert(title: Text("Already present"), message: Text("This contact is already in the contact list of the selected account"))
                 } else {
+                    self.success = true
                     successAlert(title: Text("Already present"), message: Text("This contact is already in your contact list"))
                 }
             }

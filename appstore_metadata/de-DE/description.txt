@@ -1,0 +1,20 @@
+Es gab noch nie einen besseren Zeitpunkt, um in XMPP einzusteigen, ein kostenloses öffentliches Chat-Netzwerk, das niemand kontrolliert oder besitzt. Monal ist ein schneller und benutzerfreundlicher Weg zur Nutzung von XMPP. Lade einfach die App herunter, melde dich an oder registriere dich, und schon kannst du in wenigen Minuten chatten.
+
+Wesentliche Merkmale:
+- Open Source
+- Keine Werbung! Starker Fokus auf Privatsphäre. Ruft nicht zu Hause an und hat keine "Messdaten"-Software.
+- Liest keine persönlichen Informationen aus.
+- Mit einer direkten Verbindung zu deinem Server, werden dein Passwort und alle anderen Informationen niemals an Dritte gesendet.
+- OMEMO verschlüsselter Chat
+- Funktioniert mit XMPP-Servern von Unternehmen, die VPN erfordern
+- Mehrbenutzer-Chats in Gruppen oder Channels
+- Audio/Video-Anrufe
+
+Implementiert bestimmte XMPP-Erweiterungen, um die mobile Kommunikation zu verbessern.
+- XEP-0357: Push-Benachrichtigungen
+- XEP-0280: Nachrichtenkopien halten Nachrichten zwischen Clients synchron
+- XEP-0198: Stream-Management zum schnellen Wiederverbinden
+- XEP-0199: XMPP-Ping zur Aufrechterhaltung von Verbindungen
+- XEP-0313: Nachrichtenarchivverwaltung zum Herunterladen des Chatverlaufs
+- XEP-0352: Client-Statusanzeige zur drastischen Reduzierung des Stromverbrauchs
+- XEP-0363: HTTP-Dateitransfer zum Senden von Bildern in Unterhaltungen

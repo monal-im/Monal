@@ -48,7 +48,7 @@
     @synchronized(self) {
         if(!_wrappedTimer.valid)
         {
-            unreachable(@"Could not start already fired timer!", @{@"timer": self});
+            showErrorOnAlpha(nil, @"Could not start already fired timer: %@", self);
             return;
         }
         DDLogDebug(@"Starting timer: %@", self);
@@ -61,7 +61,7 @@
     @synchronized(self) {
         if(!_wrappedTimer.valid)
         {
-            unreachable(@"Could not trigger already fired timer!", @{@"timer": self});
+            showErrorOnAlpha(nil, @"Could not trigger already fired timer: %@", self);
             return;
         }
         DDLogDebug(@"Triggering timer: %@", self);
@@ -116,7 +116,7 @@
     @synchronized(self) {
         if(!_wrappedTimer.valid)
         {
-            unreachable(@"Could not invalidate already invalid timer!", @{@"timer": self});
+            DDLogWarn(@"Could not invalidate already invalid timer: %@", self);
             return;
         }
         //DDLogVerbose(@"Invalidating timer: %@", self);

@@ -152,10 +152,10 @@ jobs:
         env:
           DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path_ios }}
         run: |
-          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" platform:ios reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
       - name: Notarize catalyst
         run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
-      - name: staple
+      - name: Staple notarisation
         run: |
           cd Monal/build/app/tar_release/
           xcrun stapler staple "$APP_DIR"
@@ -179,7 +179,7 @@ jobs:
         env:
           DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path_macos }}
         run: |
-          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" app_version:"${{ steps.releasenotes.outputs.version }}" platform:mac reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
       # - name: Update xmpp.org client list with new timestamp
       #   run: ./scripts/push_xmpp.org.sh
       - name: Remove fastlane metadata directory

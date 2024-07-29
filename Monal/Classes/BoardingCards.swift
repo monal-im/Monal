@@ -50,6 +50,9 @@ struct OnboardingView: View {
                                             .foregroundColor(.blue)
                                             .padding(10)
                                     }
+                                } else {
+                                    //make sure the space the "back" label will take, is already reserved to not have "jumps" when pressing next
+                                    Text("").padding(10)
                                 }
                                 
                                 HStack {
@@ -169,7 +172,7 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             description: Text("Become part of a worldwide decentralized chat network!"),
             imageName: "hand.wave",
             articleText: Text("""
-            Modern iOS and macOS XMPP chat client.\n\nXMPP is a federated network: Just like email, you can register your account on many servers and still talk to anyone, even if they signed up on a different server.
+            Modern iOS and macOS XMPP chat client.\n\nXMPP is a federated network: Just like email, you can register your account on many servers and still talk to anyone, even if they signed up on a different server.\n\nUsing Monal instead of a centralized chat app therefore increases your digital sovereignty.
             """),
             customView: nil,
             nextText: nil
@@ -180,7 +183,7 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             imageName: "sparkles",
             articleText: Text("""
             🛜 Decentralized Network :
-            Leverages the decentralized nature of XMPP, avoiding central servers.
+            Leverages the decentralized nature of XMPP, avoiding central servers and increasing your digital sovereignty.
             
             🌐 Data privacy :
             We do not sell or track information for external parties (nor for anyone else).
@@ -233,10 +236,10 @@ struct TakeMeToSettingsView: View {
             Button(action: {
                 let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                 if let activeChats = appDelegate.activeChats {
-                    activeChats.enqueueGeneralSettings = true
+                    activeChats.prependGeneralSettings()
                 }
                 onboardingState.hasCompletedOnboarding = true
-                delegate.dismiss()
+                delegate.dismissWithoutAnimation()
             }) {
                 Text("Take me to settings")
                     .fontWeight(.bold)

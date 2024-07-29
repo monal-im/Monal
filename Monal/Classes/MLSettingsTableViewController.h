@@ -15,5 +15,6 @@
 @interface MLSettingsTableViewController : AccountListController <MFMailComposeViewControllerDelegate, SKStoreProductViewControllerDelegate>
 
 - (IBAction)close:(id) sender;
+-(void) presentSplitPlaceholder;
 
 @end

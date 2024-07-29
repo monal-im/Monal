@@ -1,7 +1,7 @@
 name: Publish release
 on:
   repository_dispatch:
-    types: [distribution]
+    types: [monal_release]
 jobs:
   extractChangelog:
     runs-on: self-hosted
@@ -13,6 +13,7 @@ jobs:
       release-notes: ${{ steps.releasenotes.outputs.notes }}
       release-notes_ios: ${{ steps.releasenotes.outputs.notes_ios }}
       release-notes_macos: ${{ steps.releasenotes.outputs.notes_macos }}
+      release-id: ${{ steps.releasenotes.outputs.releaseID }}
     # create release only if the ios app made it to the appstore and ignore the macos appstore state
     if: github.event.client_payload.Platform == 'iOS'
     steps:
@@ -36,13 +37,13 @@ jobs:
     steps:
       - name: Promote draft release to live release
         run: |
-          echo "ID: ${{ steps.releasenotes.outputs.releaseID }}"
+          echo "ID: ${{ needs.extractChangelog.outputs.release-id }}"
           curl -L \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/${{ steps.draftrelease.outputs.id }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.extractChangelog.outputs.release-id }}" \
             -d '{"draft": false, "prerelease": false, "make_latest": true}'
 
   notifyMuc:

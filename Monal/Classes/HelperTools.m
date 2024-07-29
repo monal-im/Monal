@@ -1040,8 +1040,13 @@ void swizzle(Class c, SEL orig, SEL new)
                     }
                     DDLogInfo(@"Got memory image item: %@", item);
                     payload[@"type"] = @"image";
-                    //use prepareUIImageUpload to resize the image to the configured quality
-                    payload[@"data"] = [MLFiletransfer prepareUIImageUpload:item];
+                    if(![[HelperTools defaultsDB] boolForKey:@"uploadImagesOriginal"])
+                    {
+                        //use prepareUIImageUpload to resize the image to the configured quality
+                        payload[@"data"] = [MLFiletransfer prepareUIImageUpload:item];
+                    }
+                    else
+                        payload[@"data"] = [MLFiletransfer prepareDataUpload:UIImagePNGRepresentation(item) withFileExtension:@"png"];
                     payload[@"preview"] = item;
                     return completion(payload);
                 }];
@@ -1050,16 +1055,21 @@ void swizzle(Class c, SEL orig, SEL new)
             {
                 DDLogInfo(@"Got image item: %@", item);
                 payload[@"type"] = @"image";
-                [item startAccessingSecurityScopedResource];
-                [[NSFileCoordinator new] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
-                    DDLogDebug(@"NSFileCoordinator called accessor for image: %@", newURL);
-                    UIImage* image = [UIImage imageWithContentsOfFile:[newURL path]];
-                    DDLogDebug(@"Created UIImage: %@", image);
-                    //use prepareUIImageUpload to resize the image to the configured quality (instead of just uploading the raw image file)
-                    payload[@"data"] = [MLFiletransfer prepareUIImageUpload:image];
-                    //we can not use newURL here, because it will fall out of scope while the preview is rendered in another thread
-                    return [HelperTools addUploadItemPreviewForItem:item provider:provider andPayload:payload withCompletionHandler:completion];
-                }];
+                if(![[HelperTools defaultsDB] boolForKey:@"uploadImagesOriginal"])
+                {
+                    [item startAccessingSecurityScopedResource];
+                    [[NSFileCoordinator new] coordinateReadingItemAtURL:item options:NSFileCoordinatorReadingForUploading error:&error byAccessor:^(NSURL* _Nonnull newURL) {
+                        DDLogDebug(@"NSFileCoordinator called accessor for image: %@", newURL);
+                        UIImage* image = [UIImage imageWithContentsOfFile:[newURL path]];
+                        DDLogDebug(@"Created UIImage: %@", image);
+                        //use prepareUIImageUpload to resize the image to the configured quality (instead of just uploading the raw image file)
+                        payload[@"data"] = [MLFiletransfer prepareUIImageUpload:image];
+                        //we can not use newURL here, because it will fall out of scope while the preview is rendered in another thread
+                        return [HelperTools addUploadItemPreviewForItem:item provider:provider andPayload:payload withCompletionHandler:completion];
+                    }];
+                }
+                else
+                    return prepareFile(item);
                 if(error != nil)
                 {
                     DDLogError(@"Error preparing file coordinator: %@", error);

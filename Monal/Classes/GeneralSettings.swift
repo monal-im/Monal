@@ -115,6 +115,9 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     
     @defaultsDB("useDnssecForAllConnections")
     var useDnssecForAllConnections: Bool
+    
+    @defaultsDB("uploadImagesOriginal")
+    var uploadImagesOriginal: Bool
 }
 
 
@@ -479,20 +482,25 @@ struct AttachmentSettings: View {
             }
             
             Section(header: Text("Upload Settings")) {
-                Text("Adjust the quality of images uploaded")
-                    .foregroundColor(.secondary)
-                    .font(.footnote)
-                Slider(
-                    value: $generalSettingsDefaultsDB.imageUploadQuality,
-                    in: 0.33...1.0,
-                    step: 0.01,
-                    minimumValueLabel: Text("33%"),
-                    maximumValueLabel: Text("100%"),
-                    label: {
-                        Text("Upload Settings")
-                    }
-                )
-                Text("Image Upload Quality: \(String(format: "%.0f%%", generalSettingsDefaultsDB.imageUploadQuality*100))")
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.uploadImagesOriginal) {
+                    Text("Upload Original Images")
+                }
+                if !generalSettingsDefaultsDB.uploadImagesOriginal {
+                    Text("Adjust the quality of images uploaded")
+                        .foregroundColor(.secondary)
+                        .font(.footnote)
+                    Slider(
+                        value: $generalSettingsDefaultsDB.imageUploadQuality,
+                        in: 0.33...1.0,
+                        step: 0.01,
+                        minimumValueLabel: Text("33%"),
+                        maximumValueLabel: Text("100%"),
+                        label: {
+                            Text("Upload Settings")
+                        }
+                    )
+                    Text("Image Upload JPEG-Quality: \(String(format: "%.0f%%", generalSettingsDefaultsDB.imageUploadQuality*100))")
+                }
             }
         }
     }

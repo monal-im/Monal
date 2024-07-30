@@ -121,10 +121,11 @@ jobs:
           CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
         run: |
           path_ios="$(mktemp -d)"
-          cp -av ./appstore_metadata/* "$path_ios"
+          cp -av ./appstore_quicksy_metadata/* "$path_ios"
           echo -n "$(date +%Y) Thilo Molitor" > "$path_ios/copyright.txt"
-          for dir in */; do
-            if [[ -d "$dir" && "$dir" == *-* ]]; then
+          for dir in ./appstore_quicksy_metadata/*/; do
+            dir="$(basename "$dir")"
+            if [[ -d "./appstore_quicksy_metadata/$dir" && "$dir" == *-* ]]; then
               echo -n "$CHANGELOG_IOS" > "$path_ios/${dir%/}/release_notes.txt"
             fi
           done

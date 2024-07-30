@@ -8,7 +8,7 @@
 
 struct PasswordMigration: View {
     @Environment(\.dismiss) private var dismiss
-    @State var needingMigration: [Int:[String:NSObject]]
+    @State var needingMigration: [Int:[String:NSObject]] = [:]
 #if IS_ALPHA
     let appLogoId = "AlphaAppLogo"
 #elseif IS_QUICKSY

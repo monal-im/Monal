@@ -12,8 +12,8 @@ import UniformTypeIdentifiers
 struct AddContactMenu: View {
     static private let jidFaultyPattern = "^([^@]+@)?.+(\\..{2,})?$"
 
-    @State private var connectedAccounts: [xmpp]
-    @State private var selectedAccount: Int
+    @State private var connectedAccounts: [xmpp] = []
+    @State private var selectedAccount: Int = 0
     @State private var scannedFingerprints: [NSNumber:Data]? = nil
     @State private var importScannedFingerprints: Bool = false
     @State private var toAdd: String = ""
@@ -35,7 +35,7 @@ struct AddContactMenu: View {
     @Environment(\.dismiss) private var dismiss
 
     private let dismissWithNewContact: (MLContact) -> ()
-    private let preauthToken: String?
+    private var preauthToken: String? = ""
 
     init(dismissWithNewContact: @escaping (MLContact) -> (), prefillJid: String = "", preauthToken:String? = nil, prefillAccount:xmpp? = nil, omemoFingerprints: [NSNumber:Data]? = nil) {
         self.dismissWithNewContact = dismissWithNewContact

@@ -188,8 +188,9 @@ struct DebugView: View {
         .addLoadingOverlay(overlay)
         .navigationBarItems(trailing:Button("Reconnect All") {
             showLoadingOverlay(overlay, headline: "Reconnecting", description: "Will log out and reconnect all (connected) accounts.") {
-                MLXMPPManager.sharedInstance().reconnectAll()
-                return after(seconds:3.0)
+                return reconnectAll().then {_ in
+                    after(seconds: 3)
+                }
             }
         })
     }
@@ -198,5 +199,17 @@ struct DebugView: View {
 #Preview {
     NavigationView {
         DebugView()
+    }
+}
+
+func reconnectAll() -> Promise<Void> {
+    return Promise { seal in
+        // Call the Objective-C method
+        MLXMPPManager.sharedInstance().reconnectAll()
+        
+        // Fulfill the promise after a delay to ensure the reconnect process starts
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            seal.fulfill(())
+        }
     }
 }

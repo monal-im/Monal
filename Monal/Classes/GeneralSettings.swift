@@ -297,7 +297,7 @@ like hotel wifi, ugly mobile carriers etc.
             
             Section(header: Text("On this device")) {
                 VStack(alignment: .leading, spacing: 0) {
-                    Picker("Autodelete all messages older than", selection: $autodeleteIntervalSelection) {
+                    Picker(selection: $autodeleteIntervalSelection, label: Text("Autodelete all messages older than")) {
                         ForEach(autodeleteOptions.keys.sorted(), id: \.self) { key in
                             Text(autodeleteOptions[key]!).tag(key)
                         }

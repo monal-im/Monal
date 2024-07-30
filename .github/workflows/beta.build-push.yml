@@ -126,10 +126,35 @@ jobs:
         run: |
           buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           git push origin Build_iOS_$buildNumber
+      - name: Create fastlane whatsNew hash in environment
+        id: buildinfo
+        env:
+          CHANGELOG_IOS: ${{ steps.releasenotes.outputs.notes_ios }}
+          CHANGELOG_MACOS: ${{ steps.releasenotes.outputs.notes_macos }}
+        run: |
+          get_changelog() {
+            local escaped=$(printf '%s\n' "$1" | jq -sRr @json)
+            local json="{\"default\":{\"whats_new\":$escaped},"
+            for dir in ./appstore_metadata/*/; do
+              dir="$(basename "$dir")"
+              if [[ -d "./appstore_metadata/$dir" && "$dir" == *-* ]]; then
+                json="$json\"${dir%/}\":{\"whats_new\":$escaped},"
+              fi
+            done
+            json="${json%,}}"
+            echo "$json"
+          }
+          echo "buildinfo_ios<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(get_changelog "$CHANGELOG_IOS")" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          
+          echo "buildinfo_macos<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(get_changelog "$CHANGELOG_MACOS")" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
-          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
+          PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_ios }}
         run: |
           fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Notarize catalyst
@@ -156,7 +181,7 @@ jobs:
       - name: Publish catalyst to appstore connect
         #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
         env:
-          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_macos }}
+          PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_macos }}
         run: |
           fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Release

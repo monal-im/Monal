@@ -118,6 +118,9 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     
     @defaultsDB("uploadImagesOriginal")
     var uploadImagesOriginal: Bool
+    
+    @defaultsDB("hardlinkFiletransfersIntoDocuments")
+    var hardlinkFiletransfersIntoDocuments: Bool
 }
 
 
@@ -457,7 +460,10 @@ struct AttachmentSettings: View {
         Form {
             Section(header: Text("General File Transfer Settings")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.autodownloadFiletransfers) {
-                    Text("Auto-Download Media")
+                    Text("Auto-Download Media and Files")
+                }
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.hardlinkFiletransfersIntoDocuments) {
+                    Text("Make transfered Media and Files accessible in Files App")
                 }
             }
             

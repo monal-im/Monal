@@ -110,11 +110,11 @@ jobs:
           name: monal-ios
           path: Monal/build/ipa/Monal.ipa
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        with:
-          name: monal-catalyst-dsym
-          path: Monal/build/macos_Monal.xcarchive/dSYMs
-          if-no-files-found: error
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: monal-catalyst-dsym
+      #     path: Monal/build/macos_Monal.xcarchive/dSYMs
+      #     if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: monal-ios-dsym

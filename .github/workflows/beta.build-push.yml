@@ -144,13 +144,13 @@ jobs:
             json="${json%,}}"
             echo "$json"
           }
-          echo "buildinfo_ios<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "$(get_changelog "$CHANGELOG_IOS")" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "buildinfo_ios<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$(get_changelog "$CHANGELOG_IOS")" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           
-          echo "buildinfo_macos<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "$(get_changelog "$CHANGELOG_MACOS")" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "buildinfo_macos<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$(get_changelog "$CHANGELOG_MACOS")" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:

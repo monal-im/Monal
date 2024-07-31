@@ -149,6 +149,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     [self upgradeBoolUserSettingsIfUnset:@"uploadImagesOriginal" toDefault:NO];
     
+    [self upgradeBoolUserSettingsIfUnset:@"hardlinkFiletransfersIntoDocuments" toDefault:YES];
+    
 // //always show onboarding on simulator for now
 // #if TARGET_OS_SIMULATOR
 //     [[HelperTools defaultsDB] setBool:NO forKey:@"hasCompletedOnboarding"];

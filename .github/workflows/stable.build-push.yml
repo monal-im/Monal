@@ -37,7 +37,7 @@ jobs:
         run: git submodule update -f --init --remote
       - name: Get last build tag and increment it
         run: |
-          oldBuildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          oldBuildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | grep -v "Quicksy_Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           buildNumber=$(expr $oldBuildNumber + 1)
           echo "New buildNumber is $buildNumber"
           git tag Build_iOS_$buildNumber
@@ -60,7 +60,7 @@ jobs:
                   printf("\n")
               }'
           }
-          buildNumber="$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')"
+          buildNumber="$(git tag --sort="v:refname" | grep "Build_iOS" | grep -v "Quicksy_Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')"
           version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
           mkdir -p /Users/ci/releases
           OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
@@ -120,7 +120,7 @@ jobs:
         run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: push tag to stable repo
         run: |
-          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | grep -v "Quicksy_Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           git push origin Build_iOS_$buildNumber
       - name: Create fastlane metadata directory
         id: metadata

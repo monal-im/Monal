@@ -52,9 +52,9 @@ PODS:
   - PromiseKit/UIKit (8.1.1):
     - PromiseKit/CorePromise
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.19.2):
-    - SDWebImage/Core (= 5.19.2)
-  - SDWebImage/Core (5.19.2)
+  - SDWebImage (5.19.4):
+    - SDWebImage/Core (= 5.19.4)
+  - SDWebImage/Core (5.19.4)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
@@ -62,7 +62,7 @@ PODS:
   - "sqlite3/common (3.46.0+1)"
   - "sqlite3/perf-threadsafe (3.46.0+1)":
     - sqlite3/common
-  - WebRTC-lib (123.0.0)
+  - WebRTC-lib (126.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -82,7 +82,7 @@ DEPENDENCIES:
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
   - sqlite3/perf-threadsafe
-  - WebRTC-lib (~> 123.0)
+  - WebRTC-lib
 
 SPEC REPOS:
   trunk:
@@ -128,13 +128,13 @@ SPEC CHECKSUMS:
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
   PromiseKit: d1be44b474e5acfa16adf007a1f49f104e10fead
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: dfe95b2466a9823cf9f0c6d01217c06550d7b29a
+  SDWebImage: 066c47b573f408f18caa467d71deace7c0f8280d
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   sqlite3: 292c3e1bfe89f64e51ea7fc7dab9182a017c8630
-  WebRTC-lib: bb973dd47acf5bc48d8a935a92ae836b70599bc1
+  WebRTC-lib: 7e2e15d90ebca6e08a1eb5d4afc365d70e4b95b0
 
-PODFILE CHECKSUM: f766ee234cce3182eaa8a645d3fa1e41666094d2
+PODFILE CHECKSUM: e66b7bd410467c69adaa2ca9b0fca4fb025d8aa4
 
 COCOAPODS: 1.15.2

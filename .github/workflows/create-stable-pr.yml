@@ -1,0 +1,122 @@
+name: Create Pull Request from Beta to Stable
+
+on:
+  push:
+    branches: [ beta ]
+  workflow_dispatch:
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Beta Branch
+        uses: actions/checkout@v4
+        with:
+          clean: true
+          submodules: true
+          fetch-depth: 100
+          fetch-tags: true
+          show-progress: true
+          lfs: true
+          ref: beta
+      - name: Checkout Stable Branch
+        run: |
+          git fetch --all
+          git checkout stable
+          git branch
+      - name: Get Merge Commits from Beta not in Stable
+        id: get_commits
+        run: |
+          function repairNotes {
+              sed 's/\r//g' | awk '{
+                  if (NR == 1) {
+                      printf("%s", $0)
+                  } else {
+                      if ($0 ~ /^[\t ]*(-|IOS_ONLY[\t ]*-|MACOS_ONLY[\t ]*-).*$/) {
+                          printf("\n%s", $0)
+                      } else {
+                          printf(" %s", $0)
+                      }
+                  }
+              }
+              END {
+                  printf("\n")
+              }'
+          }
+          echo "Extracting merge commit texts..."
+          version="$(git log beta -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
+          echo "version=$version" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "buildVersion=$(echo "$version" | grep -oE '^[0-9]+(\.[0-9]+){0,2}')" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "description<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$(git log stable..beta --merges --pretty=format:%b)" | repairNotes | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+      - name: Find Existing Pull Request
+        id: find_pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+              head: 'beta',
+              base: 'stable'
+            });
+            const existingPR = pullRequests.find(pr => pr.labels.some(label => label.name === 'automated-pr'));
+            console.log(`Existing PR: `, existingPR);
+            if(existingPR)
+              return existingPR.number;
+            else
+              return null;
+      - name: Create or Update Pull Request
+        id: create_or_update_pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+            const prNumber = ${{ steps.find_pr.outputs.result }};
+            let pullRequest;
+            if(prNumber)
+            {
+              console.log(`Updating old PR #${prNumber}...`);
+              pullRequest = await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: prNumber,
+                title: `${{ steps.get_commits.outputs.buildVersion }}`,
+                body: `${{ steps.get_commits.outputs.description }}`,
+              });
+              console.log(`Updated pull request #${prNumber}`);
+            }
+            else
+            {
+              console.log(`Creating new PR...`);
+              pullRequest = await github.rest.pulls.create({
+                owner,
+                repo,
+                head: 'beta',
+                base: 'stable',
+                draft: true,
+                title: `${{ steps.get_commits.outputs.buildVersion }}`,
+                body: `${{ steps.get_commits.outputs.description }}`,
+              });
+              console.log(`Created pull request #${pullRequest.data.number}`);
+            }
+            return pullRequest.data.number;
+      - name: Add Label to Pull Request
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+            const pullNumber = ${{ steps.create_or_update_pr.outputs.result }};
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: pullNumber,
+              labels: ['automated-pr']
+            });
+            console.log(`Added label to pull request #${pullNumber}`);

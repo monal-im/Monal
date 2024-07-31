@@ -155,6 +155,7 @@ jobs:
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
           PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_ios }}
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
         run: |
           fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Notarize catalyst
@@ -182,6 +183,7 @@ jobs:
         #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
         env:
           PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_macos }}
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_macos }}
         run: |
           fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Release

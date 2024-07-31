@@ -37,7 +37,7 @@ jobs:
         run: git submodule update -f --init --remote
       - name: Get last build tag and increment it
         run: |
-          oldBuildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          oldBuildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           buildNumber=$(expr $oldBuildNumber + 1)
           echo "New buildNumber is $buildNumber"
           git tag Build_iOS_$buildNumber

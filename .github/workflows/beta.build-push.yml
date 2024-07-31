@@ -41,7 +41,7 @@ jobs:
         run: git submodule update -f --init --remote
       - name: Get last build tag and increment it
         run: |
-          oldBuildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          oldBuildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | grep -v "Quicksy_Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           buildNumber=$(expr $oldBuildNumber + 1)
           echo "New buildNumber is $buildNumber"
           git tag Build_iOS_$buildNumber
@@ -64,7 +64,7 @@ jobs:
                   printf("\n")
               }'
           }
-          buildNumber="$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')"
+          buildNumber="$(git tag --sort="v:refname" | grep "Build_iOS" | grep -v "Quicksy_Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')"
           version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
           mkdir -p /Users/ci/releases
           OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
@@ -124,39 +124,64 @@ jobs:
         run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: Push beta tag to repo
         run: |
-          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+          buildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | grep -v "Quicksy_Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
           git push origin Build_iOS_$buildNumber
-      - name: Create fastlane whatsNew hash in environment
-        id: buildinfo
-        env:
-          CHANGELOG_IOS: ${{ steps.releasenotes.outputs.notes_ios }}
-          CHANGELOG_MACOS: ${{ steps.releasenotes.outputs.notes_macos }}
+#       - name: Create fastlane whatsNew hash in environment
+#         id: buildinfo
+#         env:
+#           CHANGELOG_IOS: ${{ steps.releasenotes.outputs.notes_ios }}
+#           CHANGELOG_MACOS: ${{ steps.releasenotes.outputs.notes_macos }}
+#         run: |
+#           get_changelog() {
+#             local escaped=$(printf '%s\n' "$1" | jq -sRr @json)
+#             local json="{\"default\": {\"whats_new\": $escaped},"
+#             # for dir in ./appstore_metadata/*/; do
+#             #   dir="$(basename "$dir")"
+#             #   if [[ -d "./appstore_metadata/$dir" && "$dir" == *-* ]]; then
+#             #     json="$json\"${dir%/}\": {\"whats_new\": $escaped},"
+#             #   fi
+#             # done
+#             json="${json%,}}"
+#             echo "$json"
+#           }
+#           echo "buildinfo_ios<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+#           echo "$(get_changelog "$CHANGELOG_IOS")" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+#           echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+#           
+#           echo "buildinfo_macos<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+#           echo "$(get_changelog "$CHANGELOG_MACOS")" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+#           echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+      - name: Create fastlane localized_app_info hash in environment
+        id: appinfo
         run: |
-          get_changelog() {
-            local escaped=$(printf '%s\n' "$1" | jq -sRr @json)
-            local json="{\"default\":{\"whats_new\":$escaped},"
-            for dir in ./appstore_metadata/*/; do
-              dir="$(basename "$dir")"
-              if [[ -d "./appstore_metadata/$dir" && "$dir" == *-* ]]; then
-                json="$json\"${dir%/}\":{\"whats_new\":$escaped},"
-              fi
-            done
-            json="${json%,}}"
+          build_appinfo_entry() {
+            local escaped_marketing_url=$(cat ./appstore_metadata/en-US/marketing_url.txt | jq -sRr @json)
+            local escaped_privacy_policy_url=$(cat ./appstore_metadata/en-US/privacy_url.txt | jq -sRr @json)
+            local json="{\"feedback_email\": \"info@monal-im.org\", \"marketing_url\": $escaped_marketing_url, \"privacy_policy_url\": $escaped_privacy_policy_url, \"description\": \"\"}"
             echo "$json"
           }
-          echo "buildinfo_ios<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "$(get_changelog "$CHANGELOG_IOS")" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           
-          echo "buildinfo_macos<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "$(get_changelog "$CHANGELOG_MACOS")" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          json="{"
+          json="$json\"default\": $(build_appinfo_entry),"
+          for dir in ./appstore_metadata/*/; do
+            dir="$(basename "$dir")"
+            if [[ -d "./appstore_metadata/$dir" && "$dir" == *-* ]]; then
+              json="$json\"${dir%/}\": $(build_appinfo_entry),"
+            fi
+          done
+          json="${json%,}}"
+          
+          echo "appinfo<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$json" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
-          PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_ios }}
+          #PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_ios }}
+          PILOT_LOCALIZED_APP_INFO: ${{ steps.appinfo.outputs.appinfo }}
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
         run: |
-          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true notify_external_testers:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Notarize catalyst
         run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
       - name: staple
@@ -181,9 +206,11 @@ jobs:
       - name: Publish catalyst to appstore connect
         #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
         env:
-          PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_macos }}
+          #PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_macos }}
+          PILOT_LOCALIZED_APP_INFO: ${{ steps.appinfo.outputs.appinfo }}
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_macos }}
         run: |
-          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true notify_external_testers:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
       - name: Release
         uses: softprops/action-gh-release@v2
         with:

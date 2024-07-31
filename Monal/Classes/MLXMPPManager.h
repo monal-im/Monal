@@ -94,6 +94,7 @@ NS_ASSUME_NONNULL_BEGIN
  update the password in the keychan and update memory cache
  */
 -(BOOL) isValidPassword:(NSString*) password forAccount:(NSNumber*) accountNo;
+-(NSString*) getPasswordForAccount:(NSNumber*) accountNo;
 -(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountNo;
 
 /**

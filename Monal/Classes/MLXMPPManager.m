@@ -635,6 +635,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     return [password isEqualToString:[SAMKeychain passwordForService:kMonalKeychainName account:accountNo.stringValue]];
 }
 
+//this is only used by quicksy
+-(NSString*) getPasswordForAccount:(NSNumber*) accountNo
+{
+    return [SAMKeychain passwordForService:kMonalKeychainName account:accountNo.stringValue];
+}
+
 #pragma mark -  XMPP commands
 -(void) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {

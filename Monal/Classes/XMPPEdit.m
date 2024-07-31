@@ -636,7 +636,11 @@ enum DummySettingsRows {
         switch (indexPath.row)
         {
             case SettingsChangePasswordRow: {
+#ifdef IS_QUICKSY
+                [thecell initTapCell:NSLocalizedString(@"Change/View Password", @"")];
+#else
                 [thecell initTapCell:NSLocalizedString(@"Change Password", @"")];
+#endif
                 thecell.cellLabel.text = NSLocalizedString(@"Change Password", @"");
                 break;
             }

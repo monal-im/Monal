@@ -14,7 +14,7 @@ func sendSMSRequest(to number:String) -> Promise<(data: Data, response: URLRespo
     rq.httpMethod = "GET"
     rq.addValue(Locale.current.language.languageCode?.identifier ?? DEFAULT_REGION_CODE, forHTTPHeaderField: "Accept-Language")
     rq.addValue(UIDevice.current.identifierForVendor?.uuidString.lowercased() ?? UUID().uuidString.lowercased(), forHTTPHeaderField: "Installation-Id")
-    rq.addValue("Quicksy/2.10.0", forHTTPHeaderField: "User-Agent")
+    rq.addValue("Quicksy-iOS/\(Bundle.main.infoDictionary!["CFBundleShortVersionString"])", forHTTPHeaderField: "User-Agent")
     DDLogDebug("Request: \(String(describing:rq))")
     if let headers = rq.allHTTPHeaderFields {
         for (key, value) in headers {
@@ -30,7 +30,7 @@ func sendRegisterRequest(number:String, pin:String, password:String) -> Promise<
     var rq = URLRequest(url: URL(string: "\(QUICKSY_BASE_URL)/password")!)
     rq.httpMethod = "POST"
     rq.addValue(HelperTools.encodeBase64(with:"\(number)\0\(pin)"), forHTTPHeaderField: "Authorization")
-    rq.addValue("Quicksy/2.10.0", forHTTPHeaderField: "User-Agent")
+    rq.addValue("Quicksy-iOS/\(Bundle.main.infoDictionary!["CFBundleShortVersionString"])", forHTTPHeaderField: "User-Agent")
     rq.httpBody = password.data(using:.utf8)
     DDLogDebug("Request: \(String(describing:rq))")
     if let headers = rq.allHTTPHeaderFields {

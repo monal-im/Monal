@@ -166,7 +166,11 @@
         MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
         if(indexPath.row == 0)
         {
-            [textCell initPasswordCell:nil andPlaceholder:NSLocalizedString(@"Current Password", @"") andDelegate:self];
+#ifdef IS_QUICKSY
+            [textCell initTextCell:[[MLXMPPManager sharedInstance] getPasswordForAccount:self.xmppAccount.accountNo] andPlaceholder:NSLocalizedString(@"Current Password", @"") andDelegate:self];
+#else
+            [textCell initPasswordCell:[[MLXMPPManager sharedInstance] getPasswordForAccount:self.xmppAccount.accountNo] andPlaceholder:NSLocalizedString(@"Current Password", @"") andDelegate:self];
+#endif
             self.passwordOld = textCell;
         }
         else if(indexPath.row == 1)

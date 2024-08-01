@@ -126,7 +126,7 @@ jobs:
           echo -n "$(date +%Y) Thilo Molitor" > "$path_ios/copyright.txt"
           for dir in ./appstore_quicksy_metadata/*/; do
             dir="$(basename "$dir")"
-            if [[ -d "./appstore_quicksy_metadata/$dir" && "$dir" == *-* ]]; then
+            if [[ -d "./appstore_quicksy_metadata/$dir" ]]; then
               echo -n "$CHANGELOG_IOS" > "$path_ios/${dir%/}/release_notes.txt"
             fi
           done

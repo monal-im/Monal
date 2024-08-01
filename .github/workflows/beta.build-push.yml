@@ -151,10 +151,18 @@ jobs:
           echo "buildinfo_macos<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           echo "$(get_changelog "$CHANGELOG_MACOS")" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          
+          echo "changelog_ios<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$(printf 'CHANGELOG: %s\n' "$CHANGELOG_IOS" | jq -sRr @json)" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          
+          echo "changelog_macos<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "$(printf '%s\n' "$CHANGELOG_MACOS" | jq -sRr @json)" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
-          PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_ios }}
+          # PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_ios }}
           PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
           #fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
         run: |

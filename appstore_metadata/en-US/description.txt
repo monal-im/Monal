@@ -10,7 +10,7 @@ Notable features:
 - Multi user chat (MUC) support for group chats
 - Audio/Video calls
 
-Implements XMPP certain extensions intended to improve mobile communication:
+Implements certain XMPP extensions intended to improve mobile communication:
 - XEP-0357: Push Notifications
 - XEP-0280: Message Carbons keep messages in synch between clients
 - XEP-0198: Stream Management to quickly reconnect

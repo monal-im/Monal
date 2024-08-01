@@ -161,12 +161,12 @@ jobs:
           echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
-        # env:
-        #   PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_ios }}
-        #   PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
+        env:
+          # PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_ios }}
+          PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
           #fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
         run: |
-          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true notify_external_testers:true groups:"Internal Pre-Beta Testers" reject_build_waiting_for_review:true submit_beta_review:true changelog:"${{ steps.buildinfo.outputs.changelog_ios }}" --verbose
+          fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true notify_external_testers:true groups:"Internal Pre-Beta Testers" reject_build_waiting_for_review:true submit_beta_review:true --verbose
       # - name: Notarize catalyst
       #   run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
       # - name: staple

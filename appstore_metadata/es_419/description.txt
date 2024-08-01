@@ -1,6 +1,6 @@
 Nunca hubo un mejor momento para empezar a usar XMPP, una red de pública de chat que no se encuentra bajo el control ni la propiedad de nadie. Monal es la vía rápida y amigable para usar XMPP. Solo descargue la app, ingrese o regístrese y estará listo para chatear en minutos. Se ve y se usa de la misma manera que las otras apps, así que no existe necesidad de “aprender XMPP” o preocuparse por lo que es.
 
-Caractrísticas más notables:
+Características más notables:
 - Código abierto
 - Sin publicidad! Fuerte foco en la privacidad. No envía información de uso ni "métricas" 
 - No recaba ningín tipo de información personal

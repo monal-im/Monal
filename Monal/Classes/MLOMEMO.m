@@ -425,6 +425,23 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
         [self retriggerKeyTransportElementsForJid:jid];     //retrigger queued key transport elements for this jid (if any)
 $$
 
+-(void) postOMEMOMessageForUser:(NSString*) jid withMessage:(NSString*) omemoMessage
+{
+    if(![[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo]) {
+        [[DataLayer sharedInstance] addContact:jid forAccount:self.account.accountNo nickname:nil];
+    }
+    NSString* newMessageID = [[NSUUID UUID] UUIDString];
+    NSNumber* historyId = [[DataLayer sharedInstance] addMessageHistoryTo:jid forAccount:self.account.accountNo withMessage:omemoMessage actuallyFrom:jid withId:newMessageID encrypted:NO messageType:kMessageTypeStatus mimeType:nil size:nil];
+
+    MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+    MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:self.account.accountNo];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:self.account userInfo:@{
+        @"message": message,
+        @"showAlert": @(NO),
+        @"contact": contact,
+    }];
+}
+
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source
 {
     DDLogVerbose(@"Processing omemo devices from %@: %@", source, receivedDevices);
@@ -459,6 +476,7 @@ $$
         if(![source isEqualToString:self.account.connectionProperties.identity.jid] || deviceId.unsignedIntValue != self.monalSignalStore.deviceid)
         {
             DDLogDebug(@"Removing device %@", deviceId);
+            [self postOMEMOMessageForUser:source withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Device %@ is now inactive, because it is no longer advertised by your contact", @"OMEMO warning shown inside chat view"), deviceId]];
             SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:deviceId.unsignedIntValue];
             [self.monalSignalStore markDeviceAsDeleted:address];
         }
@@ -614,6 +632,8 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     }
     else
     {
+        [self postOMEMOMessageForUser:jid withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new device with id: %@", @"OMEMO warning shown inside chat view"), rid]];
+
         //check that a corresponding buddy exists -> prevent foreign key errors
         MLXMLNode* receivedKeys = data[@"current"];
         if(receivedKeys == nil && data.count == 1)

@@ -62,7 +62,7 @@ PODS:
   - "sqlite3/common (3.46.0+1)"
   - "sqlite3/perf-threadsafe (3.46.0+1)":
     - sqlite3/common
-  - WebRTC-lib (126.0.0)
+  - WebRTC-lib (127.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -133,7 +133,7 @@ SPEC CHECKSUMS:
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   sqlite3: 292c3e1bfe89f64e51ea7fc7dab9182a017c8630
-  WebRTC-lib: 7e2e15d90ebca6e08a1eb5d4afc365d70e4b95b0
+  WebRTC-lib: 3e56b5c5fe21b0d6b682e543c39f68c81ccc8f26
 
 PODFILE CHECKSUM: e66b7bd410467c69adaa2ca9b0fca4fb025d8aa4
 

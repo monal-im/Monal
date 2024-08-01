@@ -2,19 +2,19 @@ There has never been a better time to get into XMPP, a free public chat network 
 
 Notable features:
 - Open Source
-- No Ads! Strong focus on privacy. Does not phone home and does not have "metrics" software 
-- Does not read any personal information. 
-- With a direct connection to your server, your password  and all other info is never sent to a third party.
+- No Ads! Strong focus on privacy. Does not phone home and does not have software "metrics" 
+- Does not read any personal information
+- With a direct connection to your server, your password and all other info are never sent to a third-party
 - OMEMO encrypted chat
 - Will work with corporate XMPP servers that require VPN
-- MUC multi user chat
+- Multi user chat (MUC) support for group chats
 - Audio/Video calls
 
-Implements XMPP certain extensions intended to improve mobile communication.
+Implements certain XMPP extensions intended to improve mobile communication:
 - XEP-0357: Push Notifications
-- XEP-0280: Message Carbons keep messages in synch between clients.
-- XEP-0198: Stream Management to quickly reconnect.
-- XEP-0199: XMPP Ping to maintain connections.
-- XEP-0313: Message Archive Management to download chat history.
-- XEP-0352: Client State Indication for dramatic reduction on power use.
-- XEP-0363: HTTP File Upload to send images in conversations.
+- XEP-0280: Message Carbons keep messages in synch between clients
+- XEP-0198: Stream Management to quickly reconnect
+- XEP-0199: XMPP Ping to maintain connections
+- XEP-0313: Message Archive Management to download chat history
+- XEP-0352: Client State Indication for dramatic reduction on power use
+- XEP-0363: HTTP File Upload to send images in conversations

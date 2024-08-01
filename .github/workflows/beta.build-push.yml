@@ -163,7 +163,7 @@ jobs:
           }
           
           json="{"
-          json="$json\"default\": $(build_appinfo_entry),"
+          json="$json\"default\": $(build_appinfo_entry "en-US"),"
           for dir in ./appstore_metadata/*/; do
             dir="$(basename "$dir")"
             if [[ -d "./appstore_metadata/$dir" ]]; then

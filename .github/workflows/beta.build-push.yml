@@ -167,15 +167,15 @@ jobs:
           #fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
         run: |
           fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true notify_external_testers:true groups:"Internal Pre-Beta Testers" reject_build_waiting_for_review:true submit_beta_review:true --verbose
-      # - name: Notarize catalyst
-      #   run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
-      # - name: staple
-      #   run: |
-      #     cd Monal/build/app/tar_release/
-      #     xcrun stapler staple "$APP_DIR"
-      #     stapler validate "$APP_DIR"
-      #     /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
-      #     cd ../../../..
+      - name: Notarize catalyst
+        run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
+      - name: staple
+        run: |
+          cd Monal/build/app/tar_release/
+          xcrun stapler staple "$APP_DIR"
+          stapler validate "$APP_DIR"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
+          cd ../../../..
       # - uses: actions/upload-artifact@v4
       #   with:
       #     name: monal-catalyst-zip

@@ -3,7 +3,7 @@ Nunca hubo un mejor momento para empezar a usar XMPP, una red de pública de cha
 Características más notables:
 - Código abierto
 - Sin publicidad! Fuerte foco en la privacidad. No envía información de uso ni "métricas" 
-- No recaba ningín tipo de información personal
+- No recaba ningún tipo de información personal
 - Con conexión directa al servidor, su contraseña y el resto de la información nunca se envían a terceros
 - Chat encriptado con OMEMO
 - Funciona con servidores corporativos de XMPP que requieren una VPN

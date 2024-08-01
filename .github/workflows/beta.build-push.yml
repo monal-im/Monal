@@ -137,7 +137,7 @@ jobs:
 #             local json="{\"default\": {\"whats_new\": $escaped},"
 #             # for dir in ./appstore_metadata/*/; do
 #             #   dir="$(basename "$dir")"
-#             #   if [[ -d "./appstore_metadata/$dir" && "$dir" == *-* ]]; then
+#             #   if [[ -d "./appstore_metadata/$dir" ]]; then
 #             #     json="$json\"${dir%/}\": {\"whats_new\": $escaped},"
 #             #   fi
 #             # done
@@ -166,7 +166,7 @@ jobs:
           json="$json\"default\": $(build_appinfo_entry),"
           for dir in ./appstore_metadata/*/; do
             dir="$(basename "$dir")"
-            if [[ -d "./appstore_metadata/$dir" && "$dir" == *-* ]]; then
+            if [[ -d "./appstore_metadata/$dir" ]]; then
               json="$json\"${dir%/}\": $(build_appinfo_entry "${dir%/}"),"
             fi
           done

@@ -115,6 +115,12 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     
     @defaultsDB("useDnssecForAllConnections")
     var useDnssecForAllConnections: Bool
+    
+    @defaultsDB("uploadImagesOriginal")
+    var uploadImagesOriginal: Bool
+    
+    @defaultsDB("hardlinkFiletransfersIntoDocuments")
+    var hardlinkFiletransfersIntoDocuments: Bool
 }
 
 
@@ -306,7 +312,7 @@ like hotel wifi, ugly mobile carriers etc.
             
             Section(header: Text("On this device")) {
                 VStack(alignment: .leading, spacing: 0) {
-                    Picker("Autodelete all messages older than", selection: $autodeleteIntervalSelection) {
+                    Picker(selection: $autodeleteIntervalSelection, label: Text("Autodelete all messages older than")) {
                         ForEach(autodeleteOptions.keys.sorted(), id: \.self) { key in
                             Text(autodeleteOptions[key]!).tag(key)
                         }
@@ -454,7 +460,10 @@ struct AttachmentSettings: View {
         Form {
             Section(header: Text("General File Transfer Settings")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.autodownloadFiletransfers) {
-                    Text("Auto-Download Media")
+                    Text("Auto-Download Media and Files")
+                }
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.hardlinkFiletransfersIntoDocuments) {
+                    Text("Make transfered Media and Files accessible in Files App")
                 }
             }
             
@@ -493,20 +502,25 @@ struct AttachmentSettings: View {
             }
             
             Section(header: Text("Upload Settings")) {
-                Text("Adjust the quality of images uploaded")
-                    .foregroundColor(.secondary)
-                    .font(.footnote)
-                Slider(
-                    value: $generalSettingsDefaultsDB.imageUploadQuality,
-                    in: 0.33...1.0,
-                    step: 0.01,
-                    minimumValueLabel: Text("33%"),
-                    maximumValueLabel: Text("100%"),
-                    label: {
-                        Text("Upload Settings")
-                    }
-                )
-                Text("Image Upload Quality: \(String(format: "%.0f%%", generalSettingsDefaultsDB.imageUploadQuality*100))")
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.uploadImagesOriginal) {
+                    Text("Upload Original Images")
+                }
+                if !generalSettingsDefaultsDB.uploadImagesOriginal {
+                    Text("Adjust the quality of images uploaded")
+                        .foregroundColor(.secondary)
+                        .font(.footnote)
+                    Slider(
+                        value: $generalSettingsDefaultsDB.imageUploadQuality,
+                        in: 0.33...1.0,
+                        step: 0.01,
+                        minimumValueLabel: Text("33%"),
+                        maximumValueLabel: Text("100%"),
+                        label: {
+                            Text("Upload Settings")
+                        }
+                    )
+                    Text("Image Upload JPEG-Quality: \(String(format: "%.0f%%", generalSettingsDefaultsDB.imageUploadQuality*100))")
+                }
             }
         }
     }

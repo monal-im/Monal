@@ -6,6 +6,8 @@
 //
 //
 
+#include "metamacros.h"
+
 #import <Contacts/Contacts.h>
 #import "ActiveChatsViewController.h"
 #import "DataLayer.h"
@@ -25,6 +27,16 @@
 #import "UIColor+Theme.h"
 #import <Monal-Swift.h>
 
+#define prependToViewQueue(firstArg, ...)                           metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self prependToViewQueue:firstArg withId:MLViewIDUnspecified andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_prependToViewQueue(firstArg, __VA_ARGS__))
+#define _prependToViewQueue(ownId, block)                           [self prependToViewQueue:block withId:ownId andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
+#define appendToViewQueue(firstArg, ...)                            metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self appendToViewQueue:firstArg withId:MLViewIDUnspecified andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_appendToViewQueue(firstArg, __VA_ARGS__))
+#define _appendToViewQueue(ownId, block)                            [self prependToViewQueue:block withId:ownId andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
+#define appendingReplaceOnViewQueue(firstArg, secondArg, ...)       metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self replaceIdOnViewQueue:firstArg withBlock:secondArg havingId:MLViewIDUnspecified andAppendOnUnknown:YES withFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_appendingReplaceOnViewQueue(firstArg, secondArg, __VA_ARGS__))
+#define prependingReplaceOnViewQueue(firstArg, secondArg, ...)      metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self replaceIdOnViewQueue:firstArg withBlock:secondArg havingId:MLViewIDUnspecified andAppendOnUnknown:NO withFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_prependingReplaceOnViewQueue(firstArg, secondArg, __VA_ARGS__))
+#define _appendingReplaceOnViewQueue(replaceId, ownId, block)       [self replaceIdOnViewQueue:replaceId withBlock:block havingId:ownId andAppendOnUnknown:YES withFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
+#define _prependingReplaceOnViewQueue(replaceId, ownId, block)      [self replaceIdOnViewQueue:replaceId withBlock:block havingId:ownId andAppendOnUnknown:NO withFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
+typedef void (^view_queue_block_t)(PMKResolver _Nonnull);
+
 @import QuartzCore.CATransaction;
 
 @interface DZNEmptyDataSetView
@@ -43,6 +55,8 @@
     double _portraitTop;
     double _landscapeTop;
     BOOL _loginAlreadyAutodisplayed;
+    NSMutableArray* _blockQueue;
+    dispatch_semaphore_t _blockQueueSemaphore;
 }
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
@@ -56,6 +70,12 @@ enum activeChatsControllerSections {
     activeChatsViewControllerSectionCnt
 };
 
+typedef NS_ENUM(NSUInteger, MLViewID) {
+    MLViewIDUnspecified,
+    MLViewIDRegisterView,
+    MLViewIDWelcomeLoginView,
+};
+
 static NSMutableSet* _mamWarningDisplayed;
 static NSMutableSet* _smacksWarningDisplayed;
 static NSMutableSet* _pushWarningDisplayed;
@@ -66,6 +86,154 @@ static NSMutableSet* _pushWarningDisplayed;
     _mamWarningDisplayed = [NSMutableSet new];
     _smacksWarningDisplayed = [NSMutableSet new];
     _pushWarningDisplayed = [NSMutableSet new];
+}
+
+-(instancetype)initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    [self commonInit];
+    return self;
+}
+
+-(instancetype) initWithStyle:(UITableViewStyle) style
+{
+    self = [super initWithStyle:style];
+    [self commonInit];
+    return self;
+}
+
+-(instancetype) initWithCoder:(NSCoder*) coder
+{
+    self = [super initWithCoder:coder];
+    [self commonInit];
+    return self;
+}
+
+-(void) commonInit
+{
+    _blockQueue = [NSMutableArray new];
+    _blockQueueSemaphore = dispatch_semaphore_create(1);
+}
+
+-(void) prependToViewQueue:(view_queue_block_t) block withId:(MLViewID) viewId andFile:(char*) file andLine:(int) line andFunc:(char*) func
+{
+    @synchronized(_blockQueue) {
+        DDLogDebug(@"Prepending block with id %lu defined in %s at %@:%d to queue...", (unsigned long)viewId, func, [HelperTools sanitizeFilePath:file], line);
+        [_blockQueue insertObject:@{@"id":@(viewId), @"block":^(PMKResolver resolve) {
+            DDLogDebug(@"Calling block with id %lu defined in %s at %@:%d...", (unsigned long)viewId, func, [HelperTools sanitizeFilePath:file], line);
+            block(resolve);
+            DDLogDebug(@"Block with id %lu defined in %s at %@:%d finished...", (unsigned long)viewId, func, [HelperTools sanitizeFilePath:file], line);
+        }} atIndex:0];
+    }
+    [self processViewQueue];
+}
+
+-(void) appendToViewQueue:(view_queue_block_t) block withId:(MLViewID) viewId andFile:(char*) file andLine:(int) line andFunc:(char*) func
+{
+    @synchronized(_blockQueue) {
+        DDLogDebug(@"Appending block with id %lu defined in %s at %@:%d to queue...", (unsigned long)viewId, func, [HelperTools sanitizeFilePath:file], line);
+        [_blockQueue addObject:@{@"id":@(viewId), @"block":^(PMKResolver resolve) {
+            DDLogDebug(@"Calling block with id %lu defined in %s at %@:%d...", (unsigned long)viewId, func, [HelperTools sanitizeFilePath:file], line);
+            block(resolve);
+            DDLogDebug(@"Block with id %lu defined in %s at %@:%d finished...", (unsigned long)viewId, func, [HelperTools sanitizeFilePath:file], line);
+        }}];
+    }
+    [self processViewQueue];
+}
+
+-(void) replaceIdOnViewQueue:(MLViewID) previousId withBlock:(view_queue_block_t) block havingId:(MLViewID) viewId andAppendOnUnknown:(BOOL) appendOnUnknown withFile:(char*) file andLine:(int) line andFunc:(char*) func
+{
+    @synchronized(_blockQueue) {
+        DDLogDebug(@"Replacing block with id %lu with new block having id %lu defined in %s at %@:%d to queue...", (unsigned long)previousId, (unsigned long)viewId, func, [HelperTools sanitizeFilePath:file], line);
+        
+        //search for old block to replace and remove it
+        NSInteger index = -1;
+        for(NSDictionary* blockInfo in _blockQueue)
+        {
+            index++;
+            if(((NSNumber*)blockInfo[@"id"]).unsignedIntegerValue == previousId)
+            {
+                DDLogDebug(@"Found blockInfo at index %d: %@", (int)index, blockInfo);
+                [self->_blockQueue removeObjectAtIndex:index];
+                break;
+            }
+        }
+        if(index == -1)
+        {
+            if(appendOnUnknown)
+            {
+                DDLogDebug(@"Did not find block with id %lu on queue, appending block instead...", (unsigned long)previousId);
+                [self appendToViewQueue:block withId:viewId andFile:file andLine:line andFunc:func];
+            }
+            else
+            {
+                DDLogDebug(@"Did not find block with id %lu on queue, prepending block instead...", (unsigned long)previousId);
+                [self prependToViewQueue:block withId:viewId andFile:file andLine:line andFunc:func];
+            }
+            return;
+        }
+        
+        //add replaement block at right position
+        [_blockQueue insertObject:@{@"id":@(viewId), @"block":^(PMKResolver resolve) {
+            DDLogDebug(@"Calling block with id %lu defined in %s at %@:%d...", (unsigned long)viewId, func, [HelperTools sanitizeFilePath:file], line);
+            block(resolve);
+            DDLogDebug(@"Block with id %lu defined in %s at %@:%d finished...", (unsigned long)viewId, func, [HelperTools sanitizeFilePath:file], line);
+        }} atIndex:index];
+    }
+    [self processViewQueue];
+}
+
+-(void) processViewQueue
+{
+    //we are using uikit api all over the place: make sure we always run in the main queue
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
+        NSMutableArray* viewControllerHierarchy = [self getCurrentViewControllerHierarchy];
+        
+        //don't show the next entry if there is still the previous one
+        //if(self.splitViewController.collapsed)
+        if([viewControllerHierarchy count] > 0)
+        {
+            DDLogDebug(@"Ignoring call to processViewQueue, already showing: %@", viewControllerHierarchy);
+            return;
+        }
+        
+        //don't run the next block if the previous one did not yet complete
+        if(dispatch_semaphore_wait(self->_blockQueueSemaphore, DISPATCH_TIME_NOW) != 0)
+        {
+            DDLogDebug(@"Ignoring call to processViewQueue, block still running, showing: %@", viewControllerHierarchy);
+            return;
+        }
+        
+        NSDictionary* blockInfo = nil;
+        @synchronized(self->_blockQueue) {
+            if(self->_blockQueue.count > 0)
+            {
+                blockInfo = [self->_blockQueue objectAtIndex:0];
+                [self->_blockQueue removeObjectAtIndex:0];
+            }
+            else
+                DDLogDebug(@"Queue is empty...");
+        }
+        if(blockInfo)
+        {
+            //DDLogDebug(@"Calling next block, stacktrace: %@", [NSThread callStackSymbols]);
+            monal_void_block_t looper = ^{
+                dispatch_semaphore_signal(self->_blockQueueSemaphore);
+                DDLogDebug(@"Looping to next block...");
+                [self processViewQueue];
+            };
+            [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+                ((view_queue_block_t)blockInfo[@"block"])(resolve);
+            }].ensure(^{
+                looper();
+            });
+        }
+        else
+        {
+            DDLogDebug(@"Not calling next block: there is none...");
+            dispatch_semaphore_signal(self->_blockQueueSemaphore);
+        }
+    }];
 }
 
 #pragma mark view lifecycle
@@ -133,6 +301,10 @@ static NSMutableSet* _pushWarningDisplayed;
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
+    
+    //has to be done here to not always prepend intro screens onto our view queue
+    //once a fullscreen view is dismissed (or the app is switched to foreground)
+    [self segueToIntroScreensIfNeeded];
 }
 
 -(void) dealloc
@@ -383,7 +555,7 @@ static NSMutableSet* _pushWarningDisplayed;
     DDLogDebug(@"active chats view will appear");
     [super viewWillAppear:animated];
     
-    [self openConversationPlaceholder:nil];
+    [self presentSplitPlaceholder];
 }
 
 -(void) viewWillDisappear:(BOOL) animated
@@ -409,7 +581,7 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self refreshDisplay];      // load contacts
-        [self segueToIntroScreensIfNeeded];
+        [self processViewQueue];
     });
 }
 
@@ -420,97 +592,149 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) showAddContactWithJid:(NSString*) jid preauthToken:(NSString* _Nullable) preauthToken prefillAccount:(xmpp* _Nullable) account andOmemoFingerprints:(NSDictionary* _Nullable) fingerprints
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
-            UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewForJid:jid preauthToken:preauthToken prefillAccount:account andOmemoFingerprints:fingerprints withDismisser:^(MLContact* _Nonnull newContact) {
-                dispatch_async(dispatch_get_main_queue(), ^{
+    //check if contact is already known in any of our accounts and open a chat with the first contact we can find
+    for(xmpp* checkAccount in [MLXMPPManager sharedInstance].connectedXMPP)
+    {
+        MLContact* checkContact = [MLContact createContactFromJid:jid andAccountNo:checkAccount.accountNo];
+        if(checkContact.isInRoster)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
+                    [self presentChatWithContact:checkContact];
+                }];
+            });
+            return;
+        }
+    }
+    
+    appendToViewQueue((^(PMKResolver resolve) {
+        UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewForJid:jid preauthToken:preauthToken prefillAccount:account andOmemoFingerprints:fingerprints withDismisser:^(MLContact* _Nonnull newContact) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
                     [self presentChatWithContact:newContact];
-                });
-            }];
-            addContactMenuView.ml_disposeCallback = ^{
-                [self sheetDismissed];
-            };
-            [self presentViewController:addContactMenuView animated:NO completion:^{}];
+                }];
+            });
         }];
-    });
+        addContactMenuView.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            [self presentViewController:addContactMenuView animated:NO completion:^{resolve(nil);}];
+        }];
+    }));
 }
 
 -(void) showAddContact
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
-            UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
-                dispatch_async(dispatch_get_main_queue(), ^{
+    appendToViewQueue((^(PMKResolver resolve) {
+        UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
                     [self presentChatWithContact:newContact];
-                });
-            }];
-            addContactMenuView.ml_disposeCallback = ^{
-                [self sheetDismissed];
-            };
-            [self presentViewController:addContactMenuView animated:NO completion:^{}];
+                }];
+            });
         }];
-    });
+        addContactMenuView.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            [self presentViewController:addContactMenuView animated:NO completion:^{resolve(nil);}];
+        }];
+    }));
 }
 
 -(void) segueToIntroScreensIfNeeded
 {
-    //open password migration if needed
-    NSArray* needingMigration = [[DataLayer sharedInstance] accountListNeedingPasswordMigration];
-    if(needingMigration.count > 0)
-    {
-        UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
-        passwordMigration.ml_disposeCallback = ^{
-            [self sheetDismissed];
-        };
-        [self presentViewController:passwordMigration animated:YES completion:^{}];
-        return;
-    }
-    
-    if(![[HelperTools defaultsDB] boolForKey:@"hasCompletedOnboarding"])
-    {
-        [self showOnboarding];
-        return;
-    }
-    
-    if(self.enqueueGeneralSettings)
-    {
-        self.enqueueGeneralSettings = NO;
-        [self showGeneralSettings];
-        return;
-    }
-    
+    DDLogDebug(@"segueToIntroScreensIfNeeded got called...");
+    //prepend in a prepend block to make sure we have prepended everything in order before showing the first view
+    //(if we would not do this, the first view prepended would be shown regardless of other views prepended after it)
+    //every entry in here is flipped, because we want to prepend all intro screens to our queue
+    prependToViewQueue((^(PMKResolver resolve) {
 #ifdef IS_QUICKSY
-    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
-    {
-        UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:@{}];
-        if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
-            view.modalPresentationStyle = UIModalPresentationFullScreen;
-        else
-            view.ml_disposeCallback = ^{
-                [self sheetDismissed];
-            };
-        [self presentViewController:view animated:NO completion:^{}];
-        return;
-    }
+        prependToViewQueue((^(PMKResolver resolve) {
+            [self syncContacts];
+            resolve(nil);
+        }));
 #else
-    // display quick start if the user never seen it or if there are 0 enabled accounts
-    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !_loginAlreadyAutodisplayed)
-    {
-        UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
-        loginViewController.ml_disposeCallback = ^{
-            self->_loginAlreadyAutodisplayed = YES;
-            [self sheetDismissed];
-        };
-        [self presentViewController:loginViewController animated:YES completion:^{}];
-        return;
-    }
+        [self showWarningsIfNeeded];
 #endif
-    
-    [self showWarningsIfNeeded];
-    
+        
+        prependToViewQueue(MLViewIDWelcomeLoginView, (^(PMKResolver resolve) {
 #ifdef IS_QUICKSY
-    [self syncContacts];
+            if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+            {
+                DDLogDebug(@"Showing account registration view...");
+                UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:@{}];
+                if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
+                    view.modalPresentationStyle = UIModalPresentationFullScreen;
+                else
+                    view.ml_disposeCallback = ^{
+                        [self sheetDismissed];
+                    };
+                [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                    [self presentViewController:view animated:NO completion:^{resolve(nil);}];
+                }];
+            }
+            else
+                resolve(nil);
+#else
+            // display quick start if the user never seen it or if there are 0 enabled accounts
+            if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !self->_loginAlreadyAutodisplayed)
+            {
+                DDLogDebug(@"Showing WelcomeLogIn view...");
+                UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];
+                loginViewController.ml_disposeCallback = ^{
+                    self->_loginAlreadyAutodisplayed = YES;
+                    [self sheetDismissed];
+                };
+                [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                    [self presentViewController:loginViewController animated:YES completion:^{resolve(nil);}];
+                }];
+            }
+            else
+                resolve(nil);
 #endif
+        }));
+    
+        prependToViewQueue((^(PMKResolver resolve) {
+            if(![[HelperTools defaultsDB] boolForKey:@"hasCompletedOnboarding"])
+            {
+                DDLogDebug(@"Showing onboarding view...");
+                UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"OnboardingView"];
+                if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
+                    view.modalPresentationStyle = UIModalPresentationFullScreen;
+                else
+                    view.ml_disposeCallback = ^{
+                        [self sheetDismissed];
+                    };
+                [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                    [self presentViewController:view animated:NO completion:^{resolve(nil);}];
+                }];
+            }
+            else
+                resolve(nil);
+        }));
+        
+        prependToViewQueue((^(PMKResolver resolve) {
+            //open password migration if needed
+            NSArray* needingMigration = [[DataLayer sharedInstance] accountListNeedingPasswordMigration];
+            if(needingMigration.count > 0)
+            {
+                DDLogDebug(@"Showing password migration view...");
+                UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
+                passwordMigration.ml_disposeCallback = ^{
+                    [self sheetDismissed];
+                };
+                [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                    [self presentViewController:passwordMigration animated:YES completion:^{resolve(nil);}];
+                }];
+            }
+            else
+                resolve(nil);
+        }));
+        
+        resolve(nil);
+    }));
 }
 
 #ifdef IS_QUICKSY
@@ -569,63 +793,94 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) showWarningsIfNeeded
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
-        {
-            NSNumber* accountNo = accountDict[kAccountID];
-            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
-            if(!account)
-                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
-            
+    for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
+    {
+        NSNumber* accountNo = accountDict[kAccountID];
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+        if(!account)
+            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
+        
+        prependToViewQueue((^(PMKResolver resolve) {
             if(![_mamWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
             {
                 if(![account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:mam:2"])
                 {
+                    DDLogDebug(@"Showing MAM not supported warning...");
                     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support MAM (XEP-0313). That means you could frequently miss incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                         [_mamWarningDisplayed addObject:accountNo];
+                        resolve(nil);
                     }]];
-                    [self presentViewController:messageAlert animated:YES completion:nil];
+                    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                        [self presentViewController:messageAlert animated:YES completion:nil];
+                    }];
                 }
                 else
+                {
                     [_mamWarningDisplayed addObject:accountNo];
+                    resolve(nil);
+                }
             }
-            
+            else
+                resolve(nil);
+        }));
+        
+        prependToViewQueue((^(PMKResolver resolve) {
             if(![_smacksWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound)
             {
                 if(!account.connectionProperties.supportsSM3)
                 {
+                    DDLogDebug(@"Showing smacks not supported warning...");
                     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support Stream Management (XEP-0198). That means your outgoing messages can get lost frequently!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                         [_smacksWarningDisplayed addObject:accountNo];
+                        resolve(nil);
                     }]];
-                    [self presentViewController:messageAlert animated:YES completion:nil];
+                    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                        [self presentViewController:messageAlert animated:YES completion:nil];
+                    }];
                 }
                 else
+                {
                     [_smacksWarningDisplayed addObject:accountNo];
+                    resolve(nil);
+                }
             }
-            
+            else
+                resolve(nil);
+        }));
+        
+        prependToViewQueue((^(PMKResolver resolve) {
             if(![_pushWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
             {
                 if(![account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
                 {
+                    DDLogDebug(@"Showing push not supported warning...");
                     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support PUSH (XEP-0357). That means you have to manually open the app to retrieve new incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                         [_pushWarningDisplayed addObject:accountNo];
+                        resolve(nil);
                     }]];
-                    [self presentViewController:messageAlert animated:YES completion:nil];
+                    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                        [self presentViewController:messageAlert animated:YES completion:nil];
+                    }];
                 }
                 else
+                {
                     [_pushWarningDisplayed addObject:accountNo];
+                    resolve(nil);
+                }
             }
-        }
-    });
+            else
+                resolve(nil);
+        }));
+    }
 }
 
--(void) openConversationPlaceholder:(MLContact*) contact
+-(void) presentSplitPlaceholder
 {
     // only show placeholder if we use a split view
-    if([HelperTools deviceUsesSplitView] == YES)
+    if(!self.splitViewController.collapsed)
     {
         DDLogVerbose(@"Presenting Chat Placeholder...");
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeViewWithName:@"ChatPlaceholder"];
@@ -640,45 +895,51 @@ static NSMutableSet* _pushWarningDisplayed;
         view.ml_disposeCallback = ^{
             [self sheetDismissed];
         };
-        [self presentViewController:view animated:YES completion:^{}];
+        [self presentViewController:view animated:YES completion:nil];
     }];
 }
 
--(void) showGeneralSettings
+-(void) prependGeneralSettings
 {
-    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+    prependToViewQueue((^(PMKResolver resolve) {
         UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsGeneralSettings"];
         view.ml_disposeCallback = ^{
             [self sheetDismissed];
         };
-        [self presentViewController:view animated:YES completion:^{}];
-    }];
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            [self presentViewController:view animated:YES completion:^{resolve(nil);}];
+        }];
+    }));
 }
 
--(void) showOnboarding
+-(void) showGeneralSettings
 {
-    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
-        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"OnboardingView"];
-        if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
-            view.modalPresentationStyle = UIModalPresentationFullScreen;
-        else
-            view.ml_disposeCallback = ^{
-                [self sheetDismissed];
-            };
-        [self presentViewController:view animated:NO completion:^{}];
-    }];
+    appendToViewQueue((^(PMKResolver resolve) {
+        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsGeneralSettings"];
+        view.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            [self presentViewController:view animated:YES completion:^{resolve(nil);}];
+        }];
+    }));
 }
 
 -(void) showSettings
 {
-   [self performSegueWithIdentifier:@"showSettings" sender:self];
+    appendToViewQueue((^(PMKResolver resolve) {
+        [self performSegueWithIdentifier:@"showSettings" sender:self];
+        resolve(nil);
+    }));
 }
 
 -(void) showCallContactNotFoundAlert:(NSString*) jid
 {
     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Contact not found", @"") message:[NSString stringWithFormat:NSLocalizedString(@"You tried to call contact '%@' but this contact could not be found in your contact list.", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {}]];
-    [self presentViewController:messageAlert animated:YES completion:nil];
+    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+        [self presentViewController:messageAlert animated:NO completion:nil];
+    }];
 }
 
 -(void) callContact:(MLContact*) contact withCallType:(MLCallType) callType
@@ -754,51 +1015,48 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     DDLogVerbose(@"presenting chat with contact: %@, stacktrace: %@", contact, [NSThread callStackSymbols]);
     dispatch_async(dispatch_get_main_queue(), ^{
-        DDLogVerbose(@"presenting chat with contact: %@", contact);
-        [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
-            // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
-            if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
-            {
-                // make sure the already open chat is reloaded and return
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-                if(completion != nil)
-                    completion(@YES);
-                return;
-            }
-            
-            // clear old chat before opening a new one (but not for splitView == YES)
-            if([HelperTools deviceUsesSplitView] == NO)
-                [self.navigationController popViewControllerAnimated:NO];
-            
-            // show placeholder if contact is nil, open chat otherwise
-            if(contact == nil)
-            {
-                [self openConversationPlaceholder:nil];
-                if(completion != nil)
-                    completion(@NO);
-                return;
-            }
+        // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
+        if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
+        {
+            // make sure the already open chat is reloaded and return
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+            if(completion != nil)
+                completion(@YES);
+            return;
+        }
+        
+        // clear old chat before opening a new one (but not for splitView == YES)
+        if(self.splitViewController.collapsed)
+            [self.navigationController popViewControllerAnimated:NO];
+        
+        // show placeholder if contact is nil, open chat otherwise
+        if(contact == nil)
+        {
+            [self presentSplitPlaceholder];
+            if(completion != nil)
+                completion(@NO);
+            return;
+        }
 
-            //open chat (make sure we have an active buddy for it and add it to our ui, if needed)
-            //but don't animate this if the contact is already present in our list
-            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
-            if([[self getChatArrayForSection:pinnedChats] containsObject:contact] || [[self getChatArrayForSection:unpinnedChats] containsObject:contact])
-            {
+        //open chat (make sure we have an active buddy for it and add it to our ui, if needed)
+        //but don't animate this if the contact is already present in our list
+        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+        if([[self getChatArrayForSection:pinnedChats] containsObject:contact] || [[self getChatArrayForSection:unpinnedChats] containsObject:contact])
+        {
+            [self scrollToContact:contact];
+            [self performSegueWithIdentifier:@"showConversation" sender:contact];
+            if(completion != nil)
+                completion(@YES);
+        }
+        else
+        {
+            [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
                 [self scrollToContact:contact];
                 [self performSegueWithIdentifier:@"showConversation" sender:contact];
                 if(completion != nil)
                     completion(@YES);
-            }
-            else
-            {
-                [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
-                    [self scrollToContact:contact];
-                    [self performSegueWithIdentifier:@"showConversation" sender:contact];
-                    if(completion != nil)
-                        completion(@YES);
-                }];
-            }
-        }];
+            }];
+        }
     });
 }
 
@@ -861,8 +1119,12 @@ static NSMutableSet* _pushWarningDisplayed;
         UINavigationController* nav = segue.destinationViewController;
         ContactsViewController* contacts = (ContactsViewController*)nav.topViewController;
         contacts.selectContact = ^(MLContact* selectedContact) {
-            DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
-            [self presentChatWithContact:selectedContact];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
+                [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
+                    [self presentChatWithContact:selectedContact];
+                }];
+            });
         };
     }
 }
@@ -1152,10 +1414,12 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) showContacts
 {
-    // Only segue if at least one account is enabled
-    if([self showAccountNumberWarningIfNeeded])
-        return;
-    [self performSegueWithIdentifier:@"showContacts" sender:self];
+    appendToViewQueue((^(PMKResolver resolve) {
+        // Only segue if at least one account is enabled
+        if(![self showAccountNumberWarningIfNeeded]);
+            [self performSegueWithIdentifier:@"showContacts" sender:self];
+        resolve(nil);
+    }));
 }
 
 //we can not call this var "completion" because then some dumb comiler check kicks in and tells us "completion handler is never called"
@@ -1163,7 +1427,7 @@ static NSMutableSet* _pushWarningDisplayed;
 //so this makes it compile again
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString*) token usingCompletion:(monal_id_block_t) callback
 {
-    [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
+    prependingReplaceOnViewQueue(MLViewIDWelcomeLoginView, MLViewIDRegisterView, (^(PMKResolver resolve) {
         UIViewController* registerViewController = [[SwiftuiInterface new] makeAccountRegistration:@{
             @"host": nilWrapper(host),
             @"username": nilWrapper(username),
@@ -1175,20 +1439,28 @@ static NSMutableSet* _pushWarningDisplayed;
         registerViewController.ml_disposeCallback = ^{
             [self sheetDismissed];
         };
-        [self presentViewController:registerViewController animated:YES completion:^{}];
-    }];
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            [self presentViewController:registerViewController animated:YES completion:^{resolve(nil);}];
+        }];
+    }));
 }
 
 -(void) showDetails
 {
-    if([MLNotificationManager sharedInstance].currentContact != nil)
-    {
-        UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:[MLNotificationManager sharedInstance].currentContact];
-        detailsViewController.ml_disposeCallback = ^{
-            [self sheetDismissed];
-        };
-        [self presentViewController:detailsViewController animated:YES completion:^{}];
-    }
+    appendToViewQueue((^(PMKResolver resolve) {
+        if([MLNotificationManager sharedInstance].currentContact != nil)
+        {
+            UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:[MLNotificationManager sharedInstance].currentContact];
+            detailsViewController.ml_disposeCallback = ^{
+                [self sheetDismissed];
+            };
+            [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                [self presentViewController:detailsViewController animated:YES completion:^{resolve(nil);}];
+            }];
+        }
+        else
+            resolve(nil);
+    }));
 }
 
 -(void) deleteConversation
@@ -1212,7 +1484,7 @@ static NSMutableSet* _pushWarningDisplayed;
     }
 }
 
--(void) dismissCompleteViewChainWithAnimation:(BOOL) animation andCompletion:(monal_void_block_t _Nullable) completion
+-(NSMutableArray*) getCurrentViewControllerHierarchy
 {
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     UIViewController* rootViewController = appDelegate.window.rootViewController;
@@ -1222,8 +1494,12 @@ static NSMutableSet* _pushWarningDisplayed;
         [viewControllers addObject:rootViewController.presentedViewController];
         rootViewController = rootViewController.presentedViewController;
     }
-    viewControllers = [[[viewControllers reverseObjectEnumerator] allObjects] mutableCopy];
-    
+    return [[[viewControllers reverseObjectEnumerator] allObjects] mutableCopy];
+}
+
+-(void) dismissCompleteViewChainWithAnimation:(BOOL) animation andCompletion:(monal_void_block_t _Nullable) completion
+{
+    NSMutableArray* viewControllers = [self getCurrentViewControllerHierarchy];
     DDLogVerbose(@"Dismissing view controller hierarchy: %@", viewControllers);
     [self dismissRecursorWithViewControllers:viewControllers animation:animation andCompletion:completion];
 }

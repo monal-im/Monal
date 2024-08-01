@@ -35,7 +35,7 @@ jobs:
         run: git submodule update -f --init --remote
       - name: Get last build tag and increment it
         run: |
-          oldBuildNumber=$(git tag --sort="v:refname" |grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')
+          oldBuildNumber=$(git tag --sort="v:refname" | grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')
           buildNumber=$(expr $oldBuildNumber + 1)
           echo "New buildNumber is $buildNumber"
           git tag Quicksy_Build_iOS_$buildNumber
@@ -58,15 +58,16 @@ jobs:
                   printf("\n")
               }'
           }
-          buildNumber="$(git tag --sort="v:refname" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')"
+          buildNumber="$(git tag --sort="v:refname" | grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')"
           version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
+          version="6.4.2"
           mkdir -p /Users/ci/releases
           OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
           touch "$OUTPUT_FILE"
           echo "OUTPUT_FILE=$OUTPUT_FILE" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           
           echo "buildNumber=$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "tag=Build_iOS_$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "tag=Quicksy_Build_iOS_$buildNumber" | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "version=$version" | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "buildVersion=$(echo "$version" | grep -oE '^[0-9]+(\.[0-9]+){0,2}')" | tee /dev/stderr >> "$OUTPUT_FILE"
           
@@ -114,21 +115,28 @@ jobs:
       - name: push tag to stable repo
         run: |
           buildNumber=$(git tag --sort="v:refname" | grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')
-          git push origin Build_iOS_$buildNumber
+          git push origin Quicksy_Build_iOS_$buildNumber
       - name: Create fastlane metadata directory
         id: metadata
         env:
           CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
         run: |
-          path="$(mktemp -d)"
-          echo -n "$CHANGELOG" > "$path/release_notes.txt"
-          echo "path=$path" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          path_ios="$(mktemp -d)"
+          cp -av ./appstore_quicksy_metadata/* "$path_ios"
+          echo -n "$(date +%Y) Thilo Molitor" > "$path_ios/copyright.txt"
+          for dir in ./appstore_quicksy_metadata/*/; do
+            dir="$(basename "$dir")"
+            if [[ -d "./appstore_quicksy_metadata/$dir" ]]; then
+              echo -n "$CHANGELOG_IOS" > "$path_ios/${dir%/}/release_notes.txt"
+            fi
+          done
+          echo "path_ios=$path_ios" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
-          DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path }}
+          DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path_ios }}
         run: |
-          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:false automatic_release:false skip_metadata: true skip_screenshots: true
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" platform:ios reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
       - name: Remove fastlane metadata directory
         run: |
           rm -rf "${{ steps.metadata.outputs.path }}"

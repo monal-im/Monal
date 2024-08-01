@@ -98,11 +98,11 @@ static NSDateFormatter* dbFormatter;
     //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
     //this is a special case because it can not be done while in a transaction!!!
     [self.db enableWAL];
-
+    [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
+    
     //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
-    [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
 
     //do db upgrades and vacuum db afterwards
     if([DataLayerMigrations migrateDB:self.db withDataLayer:self])

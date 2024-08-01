@@ -76,6 +76,8 @@ typedef void (^contactCompletion)(MLContact* _Nonnull selectedContact) NS_SWIFT_
 typedef void (^accountCompletion)(NSInteger accountRow) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 typedef void (^monal_void_block_t)(void) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 typedef void (^monal_id_block_t)(id _Nonnull) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
+typedef id _Nullable (^monal_id_returning_block_t)(id _Nonnull) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
+typedef id _Nullable (^monal_id_returning_id_block_t)(id _Nonnull) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 typedef void (^monal_upload_completion_t)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 
 typedef NS_ENUM(NSUInteger, MLAudioState) {
@@ -89,6 +91,10 @@ typedef NS_ENUM(NSUInteger, MLAudioState) {
 #define nilWrapper(var)                     (var == nil ? (id)[NSNull null] : (id)var)
 #define nilExtractor(var)                   ((id)var == [NSNull null] ? nil : var)
 #define nilDefault(var, def)                (var == nil || (id)var == [NSNull null] ? def : var)
+#define nilDefaultEnum(var, def)            (((NSNumber*)nilDefault(var, def)).integerValue)
+#define nilDefaultBool(var, def)            (((NSNumber*)nilDefault(var, def)).boolValue)
+#define nilDefaultInt(var, def)             (((NSNumber*)nilDefault(var, def)).intValue)
+#define nilDefaultDouble(var, def)          (((NSNumber*)nilDefault(var, def)).doubleValue)
 #define emptyDefault(var, eq, def)          (var == nil || (id)var == [NSNull null] || [var isEqual:eq] ? def : var)
 #define updateIfIdNotEqual(a, b)            if(a != b && ![a isEqual:b]) a = b
 #define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b

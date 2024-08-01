@@ -26,7 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet UIBarButtonItem* composeButton;
 @property (nonatomic, strong) chatViewController* currentChatViewController;
 @property (nonatomic, strong) UIActivityIndicatorView* spinner;
-@property (nonatomic) BOOL enqueueGeneralSettings;
 
 -(void) showCallContactNotFoundAlert:(NSString*) jid;
 -(void) callContact:(MLContact*) contact withUIKitSender:(_Nullable id) sender;
@@ -35,13 +34,14 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) presentCall:(MLCall*) call;
 -(void) presentChatWithContact:(MLContact* _Nullable) contact;
 -(void) presentChatWithContact:(MLContact* _Nullable) contact andCompletion:(monal_id_block_t _Nullable) completion;
+-(void) presentSplitPlaceholder;
 -(void) refreshDisplay;
 
 -(void) showContacts;
 -(void) deleteConversation;
 -(void) showSettings;
 -(void) showGeneralSettings;
--(void) showOnboarding;
+-(void) prependGeneralSettings;
 -(void) showNotificationSettings;
 -(void) showDetails;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString* _Nullable) token usingCompletion:(monal_id_block_t _Nullable) callback;

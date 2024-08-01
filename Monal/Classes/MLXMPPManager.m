@@ -92,7 +92,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersWifiMaxSize" toDefault:32*1024*1024];     // 32 MiB
 
     // upgrade default image quality
-    [self upgradeFloatUserSettingsIfUnset:@"ImageUploadQuality" toDefault:0.75];
+    [self upgradeFloatUserSettingsIfUnset:@"ImageUploadQuality" toDefault:0.50];
 
     // remove old settings from shareSheet outbox
     [self removeObjectUserSettingsIfSet:@"lastRecipient"];
@@ -146,6 +146,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [self upgradeBoolUserSettingsIfUnset:@"useInlineSafari" toDefault:YES];
     
     [self upgradeBoolUserSettingsIfUnset:@"hasCompletedOnboarding" toDefault:NO];
+    
+    [self upgradeBoolUserSettingsIfUnset:@"uploadImagesOriginal" toDefault:NO];
+    
+    [self upgradeBoolUserSettingsIfUnset:@"hardlinkFiletransfersIntoDocuments" toDefault:YES];
     
 // //always show onboarding on simulator for now
 // #if TARGET_OS_SIMULATOR

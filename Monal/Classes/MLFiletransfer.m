@@ -358,12 +358,12 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
             if(error)
             {
                 DDLogError(@"Could not copy cache file to tmp file: %@", error);
-    #ifdef DEBUG
+#ifdef DEBUG
                 @throw [NSException exceptionWithName:@"ERROR_WHILE_COPYING_CACHEFILE" reason:@"Could not copy cacheFile!" userInfo:@{
                     @"cacheFile": cacheFile,
                     @"cacheFileTMP": cacheFileTMP
                 }];
-    #endif
+#endif
                 return;
             }
             
@@ -371,11 +371,11 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
             if(error)
             {
                 DDLogError(@"Could not delete original cache file: %@", error);
-    #ifdef DEBUG
+#ifdef DEBUG
                 @throw [NSException exceptionWithName:@"ERROR_WHILE_DELETING_CACHEFILE" reason:@"Could not delete cacheFile!" userInfo:@{
                     @"cacheFile": cacheFile
                 }];
-    #endif
+#endif
                 return;
             }
             
@@ -383,42 +383,45 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
             if(error)
             {
                 DDLogError(@"Could not rename tmp file to cache file: %@", error);
-    #ifdef DEBUG
+#ifdef DEBUG
                 @throw [NSException exceptionWithName:@"ERROR_WHILE_RENAMING_CACHEFILE" reason:@"Could not rename cacheFileTMP to cacheFile!" userInfo:@{
                     @"cacheFile": cacheFile,
                     @"cacheFileTMP": cacheFileTMP
                 }];
-    #endif
+#endif
                 return;
             }
         }
         
-        NSURL* hardLink = [[_fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
-        for(NSString* pathComponent in hardlinkPathComponents)
-            hardLink = [hardLink URLByAppendingPathComponent:pathComponent];
-        
-        DDLogInfo(@"Hardlinking cache file at '%@' into documents directory at '%@'...", cacheFile, hardLink);
-        if(![_fileManager fileExistsAtPath:[hardLink.URLByDeletingLastPathComponent path]])
+        if([[HelperTools defaultsDB] boolForKey:@"hardlinkFiletransfersIntoDocuments"])
         {
-            DDLogVerbose(@"Creating hardlinking dir struct at '%@'...", hardLink.URLByDeletingLastPathComponent); 
-            [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} error:&error];
-            if(error)
-                DDLogWarn(@"Ignoring error creating hardlinking dir struct at '%@': %@", hardLink, error);
-            else
-                [HelperTools configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:[hardLink path]];
-        }
-        
-        //don't throw any error if the file aready exists, because it could be a rare collision (we only use 16 bit random numbers to keep the file prefix short)
-        if([_fileManager fileExistsAtPath:[hardLink path]])
-            DDLogWarn(@"Not hardlinking file '%@' to '%@': file already exists (maybe a rare collision?)...", cacheFile, hardLink);
-        else
-        {
-            DDLogVerbose(@"Hardlinking cache file '%@' to '%@'...", cacheFile, hardLink);
-            error = [HelperTools hardLinkOrCopyFile:cacheFile to:[hardLink path]];
-            if(error)
+            NSURL* hardLink = [[_fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+            for(NSString* pathComponent in hardlinkPathComponents)
+                hardLink = [hardLink URLByAppendingPathComponent:pathComponent];
+            
+            DDLogInfo(@"Hardlinking cache file at '%@' into documents directory at '%@'...", cacheFile, hardLink);
+            if(![_fileManager fileExistsAtPath:[hardLink.URLByDeletingLastPathComponent path]])
             {
-                DDLogError(@"Error creating hardlink: %@", error);
-                @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+                DDLogVerbose(@"Creating hardlinking dir struct at '%@'...", hardLink.URLByDeletingLastPathComponent); 
+                [_fileManager createDirectoryAtURL:hardLink.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} error:&error];
+                if(error)
+                    DDLogWarn(@"Ignoring error creating hardlinking dir struct at '%@': %@", hardLink, error);
+                else
+                    [HelperTools configureFileProtection:NSFileProtectionCompleteUntilFirstUserAuthentication forFile:[hardLink path]];
+            }
+            
+            //don't throw any error if the file aready exists, because it could be a rare collision (we only use 16 bit random numbers to keep the file prefix short)
+            if([_fileManager fileExistsAtPath:[hardLink path]])
+                DDLogWarn(@"Not hardlinking file '%@' to '%@': file already exists (maybe a rare collision?)...", cacheFile, hardLink);
+            else
+            {
+                DDLogVerbose(@"Hardlinking cache file '%@' to '%@'...", cacheFile, hardLink);
+                error = [HelperTools hardLinkOrCopyFile:cacheFile to:[hardLink path]];
+                if(error)
+                {
+                    DDLogError(@"Error creating hardlink: %@", error);
+                    @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+                }
             }
         }
     }
@@ -623,17 +626,8 @@ $$
     NSString* tempname = [NSString stringWithFormat:@"tmp.%@", [[NSUUID UUID] UUIDString]];
     NSError* error;
     NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
-    NSData* imageData = nil;
-    if(imageQuality == 1.0)
-    {
-        DDLogDebug(@"Image upload quality was set to 100%%, tempstoring png encoded file at %@", file);
-        imageData = UIImagePNGRepresentation(image);
-    }
-    else
-    {
-        DDLogDebug(@"Tempstoring jpeg encoded file having quality %f at %@", imageQuality, file);
-        imageData = UIImageJPEGRepresentation(image, imageQuality);
-    }
+    DDLogDebug(@"Tempstoring jpeg encoded file having quality %f at %@", imageQuality, file);
+    NSData* imageData = UIImageJPEGRepresentation(image, imageQuality);
     [imageData writeToFile:file options:NSDataWritingAtomic error:&error];
     if(error)
     {

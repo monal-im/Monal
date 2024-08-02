@@ -122,4 +122,4 @@ xcodebuild \
     -allowProvisioningDeviceRegistration
 
 echo "build dir:"
-ls -l "build"
+find build

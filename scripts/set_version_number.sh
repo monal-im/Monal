@@ -9,6 +9,7 @@ echo ""
 echo "***************************************************"
 echo "* Setting buildNumber to $buildNumber and version to $buildVersion *"
 echo "***************************************************"
+sleep 1
 
 set -x
 

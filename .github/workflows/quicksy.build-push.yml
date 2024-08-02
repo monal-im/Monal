@@ -18,8 +18,7 @@ jobs:
     env:
       APP_NAME: "Quicksy"
       BUILD_SCHEME: "Quicksy"
-      APP_DIR: "Monal.app"
-      BUILD_TYPE: "AppStore"
+      BUILD_TYPE: "AppStore-Quicksy"
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Quicksy_Stable_iOS_ExportOptions.plist"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -60,7 +59,9 @@ jobs:
           }
           buildNumber="$(git tag --sort="v:refname" | grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')"
           version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
-          version="6.4.2"
+          if [ "${{ github.ref }}" != "refs/heads/stable" ]; then
+            version="1.$buildNumber"
+          fi
           mkdir -p /Users/ci/releases
           OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
           touch "$OUTPUT_FILE"
@@ -103,7 +104,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: monal-ios
-          path: Monal/build/ipa/Monal.ipa
+          path: Monal/build/ipa/Quicksy.ipa
           if-no-files-found: error
       # - uses: actions/upload-artifact@v4
       #   with:
@@ -111,7 +112,7 @@ jobs:
       #     path: Monal/build/ios_Monal.xcarchive/dSYMs
       #     if-no-files-found: error
       - name: validate ios app
-        run: xcrun altool --validate-app --file ./Monal/build/ipa/Monal.ipa --type ios -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+        run: xcrun altool --validate-app --file ./Monal/build/ipa/Quicksy.ipa --type ios -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: push tag to stable repo
         run: |
           buildNumber=$(git tag --sort="v:refname" | grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')
@@ -132,11 +133,11 @@ jobs:
           done
           echo "path_ios=$path_ios" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Publish ios to appstore connect
-        #run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
+        #run: xcrun altool --upload-app --file ./Monal/build/ipa/Quicksy.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
           DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path_ios }}
         run: |
-          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" platform:ios reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Quicksy.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" platform:ios reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
       - name: Remove fastlane metadata directory
         run: |
           rm -rf "${{ steps.metadata.outputs.path }}"

@@ -47,6 +47,7 @@
 #import "AESGcm.h"
 
 @import AVFoundation;
+@import SAMKeychain;
 
 #define STATE_VERSION 18
 #define CONNECT_TIMEOUT 7.0
@@ -4634,24 +4635,22 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
--(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion
+-(AnyPromise*) changePassword:(NSString*) newPass
 {
-    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [iq setiqTo:self.connectionProperties.identity.domain];
-    [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
-    [self sendIq:iq withResponseHandler:^(XMPPIQ* response __unused) {
-        //dispatch completion handler outside of the receiveQueue
-        if(completion)
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                completion(YES, @"");
-            });
-    } andErrorHandler:^(XMPPIQ* error) {
-        //dispatch completion handler outside of the receiveQueue
-        if(completion)
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                completion(NO, error ? [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Could not change password", @"")] : NSLocalizedString(@"Could not change password: your account is currently not connected", @""));
-            });
-    }];
+    MLPromise* promise = [MLPromise new];
+    XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [iqNode setiqTo:self.connectionProperties.identity.domain];
+    [iqNode changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
+
+    //temporarily store the new password in the keychain.
+    //this way, we don't store the password in the db if the app is put
+    //in the background while awaiting the iq result.
+    NSString* uuid = [[NSUUID UUID] UUIDString];
+    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+    [SAMKeychain setPassword:newPass forService:uuid account:self.connectionProperties.identity.jid];
+
+    [self sendIq:iqNode withHandler:$newHandlerWithInvalidation(MLIQProcessor, handlePasswordChange,handlePasswordChangeInvalidation, $ID(uuid), $ID(promise))];
+    return [promise toAnyPromise];
 }
 
 -(void) requestRegFormWithToken:(NSString* _Nullable) token andCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion

@@ -2679,6 +2679,11 @@ NSString* const kStanza = @"stanza";
             }
             self->_loggedInOnce = YES;
             
+            //pin sasl2 support for this account (this is done only after successful auth to prevent DOS MITM attacks simulating SASL2 support)
+            //downgrading to SASL1 would mean PLAIN instead of SCRAM and no protocol agility for channel-bindings,
+            //if XEP-0440 is not supported by server
+            [[DataLayer sharedInstance] pinSasl2ForAccount:self.accountNo];
+            
             //NOTE: we don't have any stream restart when using SASL2
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
             _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
@@ -3015,11 +3020,6 @@ NSString* const kStanza = @"stanza";
             //could not find any matching SASL2 mechanism (we do NOT support PLAIN)
             noAuthSupported();
         };
-        
-        //pin sasl2 support for this account
-        //downgrading to SASL1 would mean PLAIN instead of SCRAM and no protocol agility for channel-bindings
-        //if XEP-0440 is not supported by server
-        [[DataLayer sharedInstance] pinSasl2ForAccount:self.accountNo];
         
         //extract menchanisms presented
         _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];

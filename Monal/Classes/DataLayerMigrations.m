@@ -1086,6 +1086,11 @@
             [db executeNonQuery:@"UPDATE account SET plain_activated=true, supports_sasl2=false;"];
         }];
         
+        //streamlined code with only plain_activated column
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.406 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE account DROP COLUMN 'supports_sasl2';"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

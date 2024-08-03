@@ -1080,6 +1080,12 @@
             [db executeNonQuery:@"UPDATE buddylist SET muc_type=NULL;"];
         }];
         
+        //reactivate PLAIN auth on all accounts to allow proper upgrades to servers only supporting PLAIN even with SASL2
+        //this should fix issue #1186
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.405 withBlock:^{
+            [db executeNonQuery:@"UPDATE account SET plain_activated=true, supports_sasl2=false;"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

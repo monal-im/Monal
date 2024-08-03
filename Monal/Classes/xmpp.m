@@ -2679,6 +2679,11 @@ NSString* const kStanza = @"stanza";
             }
             self->_loggedInOnce = YES;
             
+            //pin sasl2 support for this account (this is done only after successful auth to prevent DOS MITM attacks simulating SASL2 support)
+            //downgrading to SASL1 would mean PLAIN instead of SCRAM and no protocol agility for channel-bindings,
+            //if XEP-0440 is not supported by server
+            [[DataLayer sharedInstance] deactivatePlainForAccount:self.accountNo];
+            
             //NOTE: we don't have any stream restart when using SASL2
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
             _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
@@ -2892,6 +2897,21 @@ NSString* const kStanza = @"stanza";
 
 -(void) handleFeaturesBeforeAuth:(MLXMLNode*) parsedStanza
 {
+    return [self handleFeaturesBeforeAuth:parsedStanza withForceSasl2:NO];
+}
+
+-(void) handleFeaturesBeforeAuth:(MLXMLNode*) parsedStanza withForceSasl2:(BOOL) forceSasl2
+{
+    monal_id_returning_void_block_t checkProperSasl2Support = ^{
+        //check if we SASL2 is supported with something better than PLAIN and, if so, switch off plain_activated
+        NSSet* supportedSasl2Mechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
+        for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:YES])
+            if([supportedSasl2Mechanisms containsObject:mechanism])
+            {
+                return @YES;
+            }
+        return @NO;
+    };
     monal_id_block_t clearPipelineCacheOrReportSevereError = ^(NSString* msg) {
         DDLogWarn(@"Clearing auth pipeline due to error...");
         
@@ -2920,22 +2940,21 @@ NSString* const kStanza = @"stanza";
         //display scary warning message if sasl2 is pinned and login was successful at least once
         //or display a message pointing to the advanced account creation menu if sasl2 is pinned and login was NOT successful at least once
         //(e.g. we are trying to create this account just now)
-        if([[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo])
+        if(![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo])
         {
             if(self->_loggedInOnce)
             {
                 clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Server suddenly lacks support for SASL2-SCRAM, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""));
+                return;
             }
             else if([self->_supportedSaslMechanisms containsObject:@"PLAIN"])
             {
                 clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Server only supports authentication methods not safe against man-in-the-middle attacks! Use the advanced account creation menu if you absolutely must use this server.", @""));
+                return;
             }
         }
-        else
-            clearPipelineCacheOrReportSevereError(NSLocalizedString(@"No supported auth mechanism found, disabling account!", @""));
+        clearPipelineCacheOrReportSevereError(NSLocalizedString(@"No supported auth mechanism found, disabling account!", @""));
     };
-    
-    MLAssert(!([[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo] && [[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo]), @"SASL2 pinned AND plain auth enabled, that should never happen!", @{@"account": self});
     
     if(![parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
         DDLogWarn(@"Server NOT supporting Pre-Authenticated IBR");
@@ -2958,7 +2977,7 @@ NSString* const kStanza = @"stanza";
         [self submitRegForm];
     }
     //prefer SASL2 over SASL1
-    else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && ![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo])
+    else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && (![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo] || forceSasl2))
     {
         weakify(self);
         _blockToCallOnTCPOpen = ^{
@@ -3016,11 +3035,6 @@ NSString* const kStanza = @"stanza";
             noAuthSupported();
         };
         
-        //pin sasl2 support for this account
-        //downgrading to SASL1 would mean PLAIN instead of SCRAM and no protocol agility for channel-bindings
-        //if XEP-0440 is not supported by server
-        [[DataLayer sharedInstance] pinSasl2ForAccount:self.accountNo];
-        
         //extract menchanisms presented
         _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
         
@@ -3050,19 +3064,17 @@ NSString* const kStanza = @"stanza";
         else
             DDLogWarn(@"Waiting until TLS stream is connected before pipelining the auth element due to channel binding...");
     }
-    //SASL1 is fallback only if SASL2 isn't supported with something better than PLAIN
-    else if([parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"] && ![[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo])
+    //check if the server activated SASL2 after previously only upporting SASL1
+    else if([[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo] && ((NSNumber*)checkProperSasl2Support()).boolValue)
     {
-        //check if we SASL2 is supported with something better than PLAIN and, if so, switch off plain_activated
-        NSSet* supportedSasl2Mechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
-        for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:YES])
-            if([supportedSasl2Mechanisms containsObject:mechanism])
-            {
-                DDLogInfo(@"We detected SASL2 SCRAM support, deactivating forced SASL1 PLAIN fallback and retrying using SASL2...");
-                [[DataLayer sharedInstance] deactivatePlainForAccount:self.accountNo];
-                //try again, this time using sasl2
-                return [self handleFeaturesBeforeAuth:parsedStanza];
-            }
+        DDLogInfo(@"We detected SASL2 SCRAM support, deactivating forced SASL1 PLAIN fallback and retrying using SASL2...");
+        [[DataLayer sharedInstance] deactivatePlainForAccount:self.accountNo];
+        //try again, this time using sasl2
+        return [self handleFeaturesBeforeAuth:parsedStanza withForceSasl2:YES];
+    }
+    //SASL1 is fallback only if SASL2 isn't supported with something better than PLAIN
+    else if([parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"] && [[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo])
+    {
         
         //extract menchanisms presented
         NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
@@ -3104,15 +3116,10 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        //this is not a downgrade but something weird going on, report it as "no supported auth"
+        //this is not a downgrade but something weird going on, log it as such
         if(![parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && ![parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"])
-        {
-            noAuthSupported();
-            return;
-        }
-        
-        //if the above case didn't trigger, this is a downgrade attack downgrading from SASL2 to SASL1, report is as such
-        clearPipelineCacheOrReportSevereError(NSLocalizedString(@"SASL2 to SASL1 downgrade attack detected, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""));
+            DDLogError(@"Something weird happened: neither SASL1 nor SASL2 auth supported by this server!");
+        noAuthSupported();
     }
 }
 

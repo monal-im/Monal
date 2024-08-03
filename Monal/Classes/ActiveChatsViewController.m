@@ -186,7 +186,7 @@ static NSMutableSet* _pushWarningDisplayed;
 -(void) processViewQueue
 {
     //we are using uikit api all over the place: make sure we always run in the main queue
-    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
+    [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         NSMutableArray* viewControllerHierarchy = [self getCurrentViewControllerHierarchy];
         
         //don't show the next entry if there is still the previous one

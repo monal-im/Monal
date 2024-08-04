@@ -1083,7 +1083,7 @@
         //reactivate PLAIN auth on all accounts to allow proper upgrades to servers only supporting PLAIN even with SASL2
         //this should fix issue #1186
         [self updateDB:db withDataLayer:dataLayer toVersion:6.405 withBlock:^{
-            [db executeNonQuery:@"UPDATE account SET plain_activated=true, supports_sasl2=false;"];
+            [db executeNonQuery:@"UPDATE account SET plain_activated=true WHERE supports_sasl2=false;"];
         }];
         
         //streamlined code with only plain_activated column

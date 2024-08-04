@@ -175,7 +175,10 @@ jobs:
           path: Monal/build/app/Monal.pkg
           if-no-files-found: error
       - name: Upload new catalyst stable to monal-im.org
-        run: ./scripts/uploadNonAlpha.sh stable
+        env:
+          UPLOAD_TYPE: stable
+          buildNumber: ${{ steps.releasenotes.outputs.buildNumber }}
+        run: ./scripts/uploadNonAlpha.sh
       - name: Publish catalyst to appstore connect
         #run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
         env:

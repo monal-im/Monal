@@ -2934,7 +2934,7 @@ NSString* const kStanza = @"stanza";
     };
     //called below, if neither SASL1 nor SASL2 could be used to negotiate a valid SASL mechanism
     monal_void_block_t noAuthSupported = ^{
-        DDLogWarn(@"No supported auth mechanism!");
+        DDLogWarn(@"No supported auth mechanism: %@", self->_supportedSaslMechanisms);
         
         //sasl2 will be pinned if we saw sasl2 support and PLAIN was NOT allowed by creating this account using the  advanced account creation menu
         //display scary warning message if sasl2 is pinned and login was successful at least once
@@ -2942,14 +2942,16 @@ NSString* const kStanza = @"stanza";
         //(e.g. we are trying to create this account just now)
         if(![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo])
         {
+            DDLogDebug(@"Plain is not activated for this account...");
             if(self->_loggedInOnce)
             {
                 clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Server suddenly lacks support for SASL2-SCRAM, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""));
                 return;
             }
-            else if([self->_supportedSaslMechanisms containsObject:@"PLAIN"])
+            //_supportedSaslMechanisms==nil indicates SASL1 support only
+            else if([self->_supportedSaslMechanisms containsObject:@"PLAIN"] || self->_supportedSaslMechanisms == nil)
             {
-                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Server only supports authentication methods not safe against man-in-the-middle attacks! Use the advanced account creation menu if you absolutely must use this server.", @""));
+                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"This server isn't additionally hardened against man-in-the-middle attacks on the TLS encryption layer by using authentication methods that are secure against such attacks! This indicates an ongoing attack if the server is supposed to support SASL2 and SCRAM and is harmless otherwise. Use the advanced account creation menu and turn on the PLAIN switch there if you still want to log in to this server.", @""));
                 return;
             }
         }
@@ -2979,6 +2981,8 @@ NSString* const kStanza = @"stanza";
     //prefer SASL2 over SASL1
     else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && (![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo] || forceSasl2))
     {
+        DDLogDebug(@"Trying SASL2...");
+        
         weakify(self);
         _blockToCallOnTCPOpen = ^{
             strongify(self);
@@ -3075,6 +3079,7 @@ NSString* const kStanza = @"stanza";
     //SASL1 is fallback only if SASL2 isn't supported with something better than PLAIN
     else if([parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"] && [[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo])
     {
+        DDLogDebug(@"Trying SASL1...");
         
         //extract menchanisms presented
         NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
@@ -3116,6 +3121,8 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
+        DDLogDebug(@"Neither SASL2 nor SASL1 worked...");
+        
         //this is not a downgrade but something weird going on, log it as such
         if(![parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && ![parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"])
             DDLogError(@"Something weird happened: neither SASL1 nor SASL2 auth supported by this server!");

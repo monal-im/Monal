@@ -700,9 +700,9 @@ class SwiftuiInterface : NSObject {
             case "DebugView":
                 host = UIHostingController(rootView:AnyView(UIKitWorkaround(DebugView())))
             case "WelcomeLogIn":
-                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(to:WelcomeLogIn())))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(to:WelcomeLogIn(delegate:delegate))))
             case "LogIn":
-                host = UIHostingController(rootView:AnyView(UIKitWorkaround(WelcomeLogIn())))
+                host = UIHostingController(rootView:AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate))))
             case "CreateGroup":
                 host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(to: CreateGroupMenu(delegate: delegate))))
             case "ChatPlaceholder":

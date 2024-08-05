@@ -34,7 +34,7 @@ struct ContactDetails: View {
 
     init(contact: ObservableKVOWrapper<MLContact>) {
         _contact = StateObject(wrappedValue: contact)
-        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)!
+        self.account = contact.obj.account!
     }
 
     private func updateRoleAndAffiliation() {

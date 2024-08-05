@@ -377,7 +377,7 @@ static NSMutableDictionary* _singletonCache;
     }
     else
     {
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+        xmpp* account = self.account;
         if(hasSelfnotesPrefix)
         {
             //add "Note to self: " prefix for selfchats
@@ -436,7 +436,7 @@ static NSMutableDictionary* _singletonCache;
         _cancelNickChange();
     // delay changes because we don't want to update the roster on our server too often while typing
     _cancelNickChange = createTimer(2.0, (^{
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+        xmpp* account = self.account;
         [account updateRosterItem:self withName:self.nickName];
     }));
 }
@@ -457,7 +457,7 @@ static NSMutableDictionary* _singletonCache;
     if([self.fullName isEqualToString:name] || name == nil)
         return;             //no change at all
     self.fullName = name;
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    xmpp* account = self.account;
     [[DataLayer sharedInstance] setFullName:self.fullName forContact:self.contactJid andAccount:account.accountNo];
     // abort old change timer and start a new one
     if(_cancelFullNameChange)
@@ -498,7 +498,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(BOOL) isSelfChat
 {
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    xmpp* account = self.account;
     return [self.contactJid isEqualToString:account.connectionProperties.identity.jid];
 }
 
@@ -625,7 +625,7 @@ static NSMutableDictionary* _singletonCache;
 #ifdef DISABLE_OMEMO
     return NO;
 #else
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    xmpp* account = self.account;
     if(account == nil || account.omemo == nil)
         return NO;
     if(self.isGroup == NO)
@@ -664,7 +664,7 @@ static NSMutableDictionary* _singletonCache;
         [[DataLayer sharedInstance] unPinChat:self.accountId andBuddyJid:self.contactJid];
     self.isPinned = pinned;
     // update active chats
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    xmpp* account = self.account;
     if(account == nil)
         return;
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact":self, @"pinningChanged": @YES}];
@@ -674,7 +674,7 @@ static NSMutableDictionary* _singletonCache;
 {
     if(self.isBlocked == block)
         return YES;
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    xmpp* account = self.account;
     if(account == nil)
         return NO;
     if(![account.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])

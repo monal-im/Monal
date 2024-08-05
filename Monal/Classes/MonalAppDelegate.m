@@ -879,7 +879,7 @@ $$
         MLAssert(fromContact, @"fromContact should not be nil");
         NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
         MLAssert(messageId, @"messageId should not be nil");
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
+        xmpp* account = fromContact.account;
         //this can happen if that account got disabled
         if(account == nil)
         {
@@ -954,7 +954,7 @@ $$
         DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
         MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
         MLAssert(fromContact, @"fromContact should not be nil");
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
+        xmpp* account = fromContact.account;
         //this can happen if that account got disabled
         if(account == nil)
         {

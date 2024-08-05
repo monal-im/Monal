@@ -647,7 +647,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     NSString* msgid = [[NSUUID UUID] UUIDString];
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
 
     MLAssert(message != nil, @"Message should not be nil");
     MLAssert(account != nil, @"Account should not be nil");
@@ -689,7 +689,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     BOOL success = NO;
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     if(account)
     {
         success = YES;
@@ -701,7 +701,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) sendChatState:(BOOL) isTyping toContact:(MLContact*) contact
 {
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     if(account)
         [account sendChatState:isTyping toContact:contact];
 }
@@ -796,7 +796,7 @@ $$class_handler(handleRemoveContact, $$ID(MLContact*, contact))
 $$
 -(void) removeContact:(MLContact*) contact
 {
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     if(account)
     {
         //queue remove contact for execution once bound (e.g. on catchup done)
@@ -833,7 +833,7 @@ $$class_handler(handleAddContact, $$ID(MLContact*, contact), $_ID(NSString*, pre
 $$
 -(void) addContact:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken
 {
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     if(account)
     {
         //queue add contact for execution once bound (e.g. on catchup done)
@@ -864,7 +864,7 @@ $$
 
 -(void) getEntitySoftWareVersionForContact:(MLContact*) contact andResource:(NSString*) resource
 {
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     
     NSString* xmppId = @"";
     if ((resource == nil) || ([resource length] == 0)) {
@@ -879,7 +879,7 @@ $$
 -(void) block:(BOOL) isBlocked contact:(MLContact*) contact
 {
     DDLogVerbose(@"Blocking %@: %@", contact, bool2str(isBlocked));
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     [account setBlocked:isBlocked forJid:contact.contactJid];
 }
 

@@ -803,7 +803,7 @@ enum msgSentState {
     self.viewIsScrolling = YES;
     //stop editing (if there is some)
     [self stopEditing];
-    self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    self.xmppAccount = self.contact.account;
     if(!self.xmppAccount) DDLogDebug(@"Disabled account detected");
 
     [MLNotificationManager sharedInstance].currentContact = self.contact;

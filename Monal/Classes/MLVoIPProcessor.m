@@ -165,7 +165,7 @@ static NSMutableDictionary* _pendingCalls;
 
 -(MLCall*) initiateCallWithType:(MLCallType) callType toContact:(MLContact*) contact
 {
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     MLAssert(account != nil, @"account is nil in initiateCallWithType:ToContact:!", (@{@"contact": contact}));
     
     NSUUID* uuid = [NSUUID UUID];

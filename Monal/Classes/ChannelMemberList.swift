@@ -15,7 +15,7 @@ struct ChannelMemberList: View {
     @State private var participants: OrderedDictionary<String, String>
 
     init(mucContact: ObservableKVOWrapper<MLContact>) {
-        account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact.accountId)! as xmpp
+        account = mucContact.obj.account! as xmpp
         _channel = StateObject(wrappedValue:mucContact)
         _ownAffiliation = State(wrappedValue:"none")
         _participants = State(wrappedValue:OrderedDictionary<String, String>())

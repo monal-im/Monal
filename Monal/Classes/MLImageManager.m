@@ -181,7 +181,7 @@
 
     if(contact.isSelfChat)
     {
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
+        xmpp* account = contact.account;
         contactLetter = [[[MLContact ownDisplayNameForAccount:account] substringToIndex:1] uppercaseString];
     }
     else

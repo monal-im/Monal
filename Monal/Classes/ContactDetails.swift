@@ -35,7 +35,7 @@ struct ContactDetails: View {
     init(delegate: SheetDismisserProtocol, contact: ObservableKVOWrapper<MLContact>) {
         self.delegate = delegate
         _contact = StateObject(wrappedValue: contact)
-        self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)!
+        self.account = contact.obj.account!
     }
 
     private func updateRoleAndAffiliation() {

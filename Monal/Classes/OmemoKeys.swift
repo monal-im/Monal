@@ -292,7 +292,7 @@ struct OmemoKeys: View {
         self.viewContact = contact
 
         if let contact = contact {
-            if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId) {
+            if let account = contact.obj.account {
                 self.account = account
             }
         }

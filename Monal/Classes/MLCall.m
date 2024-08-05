@@ -288,7 +288,7 @@
 -(xmpp*) account
 {
     @synchronized(self) {
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+        xmpp* account = self.contact.account;
         MLAssert(account != nil, @"Account of call must be listed in MLXMPPManager connected accounts!", (@{
             @"contact": nilWrapper(self.contact),
             @"call": nilWrapper(self),
@@ -1274,7 +1274,7 @@
     if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
         return;
     //don't use self.account because that asserts on nil
-    if([[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] == nil)
+    if(self.contact.account == nil)
         return;
     
     XMPPIQ* iqNode = userInfo[@"iqNode"];
@@ -1413,7 +1413,7 @@
     if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
         return;
     //don't use self.account because that asserts on nil
-    if([[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] == nil)
+    if(self.contact.account == nil)
         return;
     XMPPIQ* iqNode = userInfo[@"iqNode"];
     

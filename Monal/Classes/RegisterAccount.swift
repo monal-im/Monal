@@ -60,9 +60,10 @@ struct RegisterAccount: View {
     @State private var showWebView = false
     @State private var errorObserverEnabled = false
 
-    @Environment(\.dismiss) private var dismiss
+    var delegate: SheetDismisserProtocol
 
-    init(registerData:[String:AnyObject]? = nil) {
+    init(delegate: SheetDismisserProtocol, registerData:[String:AnyObject]? = nil) {
+        self.delegate = delegate
         if let registerData = registerData {
             DDLogDebug("RegisterAccount created with data: \(registerData)");
             //for State stuff see https://forums.swift.org/t/assignment-to-state-var-in-init-doesnt-do-anything-but-the-compiler-gened-one-works/35235
@@ -413,7 +414,7 @@ struct RegisterAccount: View {
                             .alert(isPresented: $showAlert) {
                                 Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                                     if(self.registerComplete == true) {
-                                        dismiss()
+                                        self.delegate.dismiss()
                                         
                                         if let completion = self.completionHandler {
                                             DDLogVerbose("Calling reg completion handler...")
@@ -500,7 +501,8 @@ struct RegisterAccount: View {
 }
 
 struct RegisterAccount_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        RegisterAccount()
+        RegisterAccount(delegate:delegate)
     }
 }

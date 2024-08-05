@@ -47,6 +47,7 @@ static NSMutableDictionary* _singletonCache;
 @property (nonatomic, strong) NSString* contactJid;
 @property (nonatomic, strong) NSString* fullName;
 @property (nonatomic, strong) NSString* nickName;
+@property (nonatomic, strong) xmpp* account;
 
 @property (nonatomic, strong) NSDate* _Nullable lastInteractionTime;
 
@@ -569,6 +570,16 @@ static NSMutableDictionary* _singletonCache;
 +(NSSet*) keyPathsForValuesAffectingHasOutgoingContactRequest
 {
     return [NSSet setWithObjects:@"isGroup", @"ask", nil];
+}
+
+-(xmpp* _Nullable) account
+{
+    return [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+}
+
++(NSSet*) keyPathsForValuesAffectingAccount
+{
+    return [NSSet setWithObject:@"accountId"];
 }
 
 // this will cache the unread count on first access

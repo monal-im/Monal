@@ -270,7 +270,6 @@ struct OmemoKeysForContact: View {
 }
 
 struct OmemoKeys: View {
-    private var ownKeys: Bool
     private var viewContact: ObservableKVOWrapper<MLContact>? // store initial contact with which the view was initialized for refreshs...
     private var account: xmpp?
 
@@ -288,7 +287,6 @@ struct OmemoKeys: View {
 
     init(contact: ObservableKVOWrapper<MLContact>?) {
         self.account = nil
-        self.ownKeys = false
         self.selectedContact = nil
         self.contacts = getContactList(viewContact: contact)
         self.viewContact = contact
@@ -296,9 +294,15 @@ struct OmemoKeys: View {
         if let contact = contact {
             if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId) {
                 self.account = account
-                self.ownKeys = (!(contact.isGroup && contact.mucType == "group") && self.account!.connectionProperties.identity.jid == contact.contactJid)
             }
         }
+    }
+
+    private func isOwnKeys() -> Bool {
+        if let contact = self.viewContact, let account = self.account {
+            return (!(contact.isGroup && contact.mucType == "group") && self.account!.connectionProperties.identity.jid == contact.contactJid)
+        }
+        return false
     }
 
     func resetTrustFromQR(scannedJid : String, scannedFingerprints : Dictionary<NSInteger, String>) {
@@ -338,7 +342,7 @@ struct OmemoKeys: View {
 //             )), isActive: $navigateToQRCodeScanner){}.hidden().disabled(true)
         }
         List {
-            let helpDescription = (self.ownKeys == true) ?
+            let helpDescription = isOwnKeys() ?
             Text("These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it. Double tap onto a fingerprint to copy to clipboard.") :
             Text("You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen. Double tap onto a fingerprint to copy to clipboard.")
 
@@ -393,7 +397,7 @@ struct OmemoKeys: View {
             }
         }
         .accentColor(monalGreen)
-        .navigationBarTitle((self.ownKeys == true) ? Text("My Encryption Keys") : Text("Encryption Keys"), displayMode: .inline)
+        .navigationBarTitle(isOwnKeys() ? Text("My Encryption Keys") : Text("Encryption Keys"), displayMode: .inline)
         .onAppear(perform: {
             self.selectedContact = self.contacts.first // needs to be done here as first is nil in init
         })

@@ -7,7 +7,7 @@
 //
 
 struct PasswordMigration: View {
-    @Environment(\.dismiss) private var dismiss
+    let delegate: SheetDismisserProtocol
     @State var needingMigration: [Int:[String:NSObject]]
 #if IS_ALPHA
     let appLogoId = "AlphaAppLogo"
@@ -17,7 +17,8 @@ struct PasswordMigration: View {
     let appLogoId = "AppLogo"
 #endif
     
-    init(needingMigration:[[String:NSObject]]) {
+    init(delegate:SheetDismisserProtocol, needingMigration:[[String:NSObject]]) {
+        self.delegate = delegate
         var tmpState = [Int:[String:NSObject]]()
         for entry in needingMigration {
             let id = (entry["account_id"] as! NSNumber).intValue
@@ -112,7 +113,7 @@ struct PasswordMigration: View {
                             }
                         }
                         NotificationCenter.default.post(name:Notification.Name("kMonalRefresh"), object:nil);
-                        dismiss()
+                        self.delegate.dismiss()
                     }, label: {
                         Text("Done")
                     })
@@ -143,7 +144,8 @@ func previewMock() -> [[String:NSObject]] {
 }
 
 struct PasswordMigration_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        PasswordMigration(needingMigration:previewMock())
+        PasswordMigration(delegate:delegate, needingMigration:previewMock())
     }
 }

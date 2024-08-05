@@ -683,15 +683,19 @@ class SwiftuiInterface : NSObject {
     
     @objc(makeAddContactViewWithDismisser:)
     func makeAddContactView(dismisser: @escaping (MLContact) -> ()) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        host.rootView = AnyView(AddTopLevelNavigation(to: AddContactMenu(dismissWithNewContact: dismisser)))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser)))
         return host
     }
     
     @objc
     func makeAddContactView(forJid jid:String, preauthToken: String?, prefillAccount: xmpp?, andOmemoFingerprints omemoFingerprints: [NSNumber:Data]?, withDismisser dismisser: @escaping (MLContact) -> ()) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        host.rootView = AnyView(AddTopLevelNavigation(to: AddContactMenu(dismissWithNewContact: dismisser, prefillJid: jid, preauthToken: preauthToken, prefillAccount: prefillAccount, omemoFingerprints: omemoFingerprints)))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser, prefillJid: jid, preauthToken: preauthToken, prefillAccount: prefillAccount, omemoFingerprints: omemoFingerprints)))
         return host
     }
 

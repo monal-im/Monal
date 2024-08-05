@@ -674,8 +674,10 @@ class SwiftuiInterface : NSObject {
     
     @objc
     func makePasswordMigration(_ needingMigration: [[String:NSObject]]) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        host.rootView = AnyView(AddTopLevelNavigation(to:PasswordMigration(needingMigration:needingMigration)))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(to:PasswordMigration(delegate:delegate, needingMigration:needingMigration)))
         return host
     }
     

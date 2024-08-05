@@ -215,7 +215,7 @@ struct WelcomeLogIn: View {
                                 }
                             }
                             
-                            NavigationLink(destination: LazyClosureView(RegisterAccount())) {
+                            NavigationLink(destination: LazyClosureView(RegisterAccount(delegate: self.delegate))) {
                                 Text("Register a new account")
                                 .foregroundColor(monalDarkGreen)
                             }

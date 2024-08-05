@@ -616,7 +616,9 @@ public extension UIViewController {
 class SwiftuiInterface : NSObject {
     @objc(makeAccountPickerForContacts:andCallType:)
     func makeAccountPicker(for contacts: [MLContact], and callType: UInt) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
         host.rootView = AnyView(AddTopLevelNavigation(to:AccountPicker(contacts:contacts, callType:MLCallType(rawValue: callType)!)))
         return host
     }

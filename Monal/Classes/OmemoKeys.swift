@@ -300,7 +300,9 @@ struct OmemoKeys: View {
 
     private func isOwnKeys() -> Bool {
         if let contact = self.viewContact, let account = self.account {
-            return (!(contact.isGroup && contact.mucType == "group") && self.account!.connectionProperties.identity.jid == contact.contactJid)
+            let isGroup = contact.isGroup && contact.mucType == "group"
+            let isOwnJid = account.connectionProperties.identity.jid == contact.contactJid
+            return !isGroup && isOwnJid
         }
         return false
     }

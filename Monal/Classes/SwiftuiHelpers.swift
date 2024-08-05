@@ -634,8 +634,10 @@ class SwiftuiInterface : NSObject {
     
     @objc
     func makeContactDetails(_ contact: MLContact) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        host.rootView = AnyView(AddTopLevelNavigation(to:ContactDetails(contact:ObservableKVOWrapper<MLContact>(contact))))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(to:ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))))
         return host
     }
     

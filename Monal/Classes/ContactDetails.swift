@@ -7,7 +7,7 @@
 //
 
 struct ContactDetails: View {
-    @Environment(\.dismiss) private var dismiss
+    var delegate: SheetDismisserProtocol
     private var account: xmpp
     @State private var ownRole = "participant"
     @State private var ownAffiliation = "none"
@@ -32,7 +32,8 @@ struct ContactDetails: View {
     @State private var successCallback: monal_void_block_t?
     @StateObject private var overlay = LoadingOverlayState()
 
-    init(contact: ObservableKVOWrapper<MLContact>) {
+    init(delegate: SheetDismisserProtocol, contact: ObservableKVOWrapper<MLContact>) {
+        self.delegate = delegate
         _contact = StateObject(wrappedValue: contact)
         self.account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.accountId)!
     }
@@ -476,8 +477,8 @@ struct ContactDetails: View {
                                             action: {
                                                 contact.obj.removeFromRoster()      //this will dismiss the chatview via kMonalContactRemoved notification
                                                 //this will do nothing for contact details opened through group members list (which is fine!)
-                                                //NOTE: this holds for all dismiss() calls
-                                                dismiss()
+                                                //NOTE: this holds for all delegate.dismiss() calls
+                                                self.delegate.dismiss()
                                             }
                                         )
                                     ]
@@ -677,11 +678,12 @@ struct ContactDetails: View {
 }
 
 struct ContactDetails_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        ContactDetails(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
-        ContactDetails(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(1)))
-        ContactDetails(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(2)))
-        ContactDetails(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(3)))
-        ContactDetails(contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(4)))
+        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
+        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(1)))
+        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(2)))
+        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(3)))
+        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(4)))
     }
 }

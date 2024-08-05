@@ -706,16 +706,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 //this will NOT set plain_activated to YES, only using the advanced account creation ui can do this
 -(NSNumber*) login:(NSString*) jid password:(NSString*) password
 {
-    //if it is a JID
+    //check if it is a JID
     NSArray* elements = [jid componentsSeparatedByString:@"@"];
     MLAssert([elements count] > 1, @"Got invalid jid", (@{@"jid": nilWrapper(jid), @"elements": elements}));
 
     NSString* domain;
     NSString* user;
-    user = [elements objectAtIndex:0];
-    domain = [elements objectAtIndex:1];
+    user = ((NSString*)[elements objectAtIndex:0]).lowercaseString;
+    domain = ((NSString*)[elements objectAtIndex:1]).lowercaseString;
 
-    if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString])
+    if([[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain])
     {
         [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:nil userInfo:@{
             @"title": NSLocalizedString(@"Duplicate Account", @""),
@@ -725,11 +725,19 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     }
 
     NSMutableDictionary* dic  = [NSMutableDictionary new];
-    [dic setObject:domain.lowercaseString forKey:kDomain];
-    [dic setObject:user.lowercaseString forKey:kUsername];
+    [dic setObject:domain forKey:kDomain];
+    [dic setObject:user forKey:kUsername];
     [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kDirectTLS];
+    //we don't want to set kPlainActivated (not even according to our preload list) and default to plain_activated=false,
+    //because the error message will warn the user and direct them to the advanced account creation menu to activate PLAIN
+    //if they still want to connect to this server
+    //only exception: yax.im --> we don't want to suggest a server during account creation that has a scary warning
+    //when logging in using another device afterwards
+    //TODO: to be removed once yax.im supports SASL2 and SSDP!!
+    //TODO: use preload list and allow PLAIN for all others once enough domains are on this list
+    [dic setObject:([domain isEqualToString:@"yax.im"] ? @YES : @NO) forKey:kPlainActivated];
 
     NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
     if(accountNo == nil)

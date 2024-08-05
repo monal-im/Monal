@@ -511,9 +511,10 @@ struct LazyClosureView<Content: View>: View {
 // use this to wrap a view into NavigationView, if it should be the outermost swiftui view of a new view stack
 struct AddTopLevelNavigation<Content: View>: View {
     let build: () -> Content
-    @Environment(\.dismiss) private var dismiss
-    init(to build: @autoclosure @escaping () -> Content) {
+    let delegate: SheetDismisserProtocol
+    init(withDelegate delegate: SheetDismisserProtocol, to build: @autoclosure @escaping () -> Content) {
         self.build = build
+        self.delegate = delegate
     }
     var body: some View {
         NavigationView {
@@ -521,7 +522,7 @@ struct AddTopLevelNavigation<Content: View>: View {
             .navigationBarTitleDisplayMode(.automatic)
             .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
             .navigationBarItems(leading: Button(action : {
-                dismiss()
+                self.delegate.dismiss()
             }){
                 Image(systemName: "arrow.backward")
             }.keyboardShortcut(.escape, modifiers: []))
@@ -619,7 +620,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(to:AccountPicker(contacts:contacts, callType:MLCallType(rawValue: callType)!)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:AccountPicker(contacts:contacts, callType:MLCallType(rawValue: callType)!)))
         return host
     }
     
@@ -637,7 +638,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(to:ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(contact))))
         return host
     }
     
@@ -671,7 +672,7 @@ class SwiftuiInterface : NSObject {
         delegate.host = host
         host.rootView = AnyView(Quicksy_RegisterAccount(delegate:delegate))
 #else
-        host.rootView = AnyView(AddTopLevelNavigation(to:RegisterAccount(delegate:delegate, registerData:registerData)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:RegisterAccount(delegate:delegate, registerData:registerData)))
 #endif
         return host
     }
@@ -681,7 +682,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(to:PasswordMigration(delegate:delegate, needingMigration:needingMigration)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:PasswordMigration(delegate:delegate, needingMigration:needingMigration)))
         return host
     }
     
@@ -690,7 +691,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser)))
         return host
     }
     
@@ -699,7 +700,7 @@ class SwiftuiInterface : NSObject {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(AddTopLevelNavigation(to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser, prefillJid: jid, preauthToken: preauthToken, prefillAccount: prefillAccount, omemoFingerprints: omemoFingerprints)))
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser, prefillJid: jid, preauthToken: preauthToken, prefillAccount: prefillAccount, omemoFingerprints: omemoFingerprints)))
         return host
     }
 
@@ -712,19 +713,19 @@ class SwiftuiInterface : NSObject {
             case "DebugView":
                 host = UIHostingController(rootView:AnyView(UIKitWorkaround(DebugView())))
             case "WelcomeLogIn":
-                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(to:WelcomeLogIn(delegate:delegate))))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate))))
             case "LogIn":
                 host = UIHostingController(rootView:AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate))))
             case "CreateGroup":
-                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(to: CreateGroupMenu(delegate: delegate))))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: CreateGroupMenu(delegate: delegate))))
             case "ChatPlaceholder":
                 host = UIHostingController(rootView:AnyView(ChatPlaceholder()))
             case "GeneralSettings" :
                 host = UIHostingController(rootView:AnyView(UIKitWorkaround(GeneralSettings())))
             case "ActiveChatsGeneralSettings":
-                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(to: GeneralSettings())))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: GeneralSettings())))
             case "ActiveChatsNotificationSettings":
-                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(to: NotificationSettings())))
+                host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings())))
             case "OnboardingView":
                 host = UIHostingController(rootView:AnyView(createOnboardingView(delegate:delegate)))
             

@@ -381,7 +381,7 @@ struct ContactDetails: View {
                     }
                 }
                 
-                let accountJid = MLXMPPManager.sharedInstance().getConnectedAccount(forID:contact.accountId)!.connectionProperties.identity.jid
+                let accountJid = account.connectionProperties.identity.jid
                 let displayName = contact.contactDisplayName as String
                 let sharedUrl = HelperTools.getSharedDocumentsURL(forPathComponents:[accountJid, displayName])
                 if UIApplication.shared.canOpenURL(sharedUrl) && FileManager.default.fileExists(atPath:sharedUrl.path) {

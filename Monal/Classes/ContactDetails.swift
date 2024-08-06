@@ -35,7 +35,7 @@ struct ContactDetails: View {
     init(delegate: SheetDismisserProtocol, contact: ObservableKVOWrapper<MLContact>) {
         self.delegate = delegate
         _contact = StateObject(wrappedValue: contact)
-        self.account = contact.obj.account!
+        self.account = (contact.account as xmpp?)!
     }
 
     private func updateRoleAndAffiliation() {

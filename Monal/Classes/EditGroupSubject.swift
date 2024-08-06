@@ -19,7 +19,7 @@ struct EditGroupSubject: View {
         
         _subject = State(wrappedValue: contact.obj.groupSubject)
         _contact = StateObject(wrappedValue: contact)
-        self.account = contact.obj.account! as xmpp
+        self.account = (contact.account as xmpp?)!
     }
 
     var body: some View {

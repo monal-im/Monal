@@ -269,7 +269,7 @@ struct OmemoKeysForContact: View {
     }
 }
 
-struct OmemoKeys: View {
+struct OmemoKeysForChat: View {
     private var viewContact: ObservableKVOWrapper<MLContact>? // store initial contact with which the view was initialized for refreshs...
     private var account: xmpp?
 
@@ -349,11 +349,7 @@ struct OmemoKeys: View {
             Text("You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen. Double tap onto a fingerprint to copy to clipboard.")
 
             Section(header:helpDescription) {
-                if(self.contacts.count == 0) {
-                    Text("Error: No contacts to display keys for!").foregroundColor(.red).font(.headline)
-                } else if(self.account == nil) {
-                    Text("Error: Account disabled, can not display keys!").foregroundColor(.red).font(.headline)
-                } else if (self.contacts.count == 1) {
+                if (self.contacts.count == 1) {
                     ForEach(self.contacts, id: \.self.obj) { contact in
                         OmemoKeysForContact(contact: contact, account: self.account!)
                     }
@@ -414,6 +410,28 @@ struct OmemoKeys: View {
                     self.scannedFingerprints = [:]
                     self.contacts = getContactList(viewContact: self.viewContact) // refresh all contacts because trust may have changed
             }))
+        }
+    }
+}
+
+struct OmemoKeys: View {
+    private var viewContact: ObservableKVOWrapper<MLContact>?
+    private var account: xmpp?
+    @State private var contacts: OrderedSet<ObservableKVOWrapper<MLContact>>
+
+    init(contact: ObservableKVOWrapper<MLContact>?) {
+        self.viewContact = contact
+        self.account = contact?.account
+        self.contacts = getContactList(viewContact: contact)
+    }
+
+    var body: some View {
+        if self.account != nil && !self.contacts.isEmpty {
+            OmemoKeysForChat(contact: viewContact)
+        } else if self.contacts.isEmpty {
+            ContentUnavailableShimView("No contacts", systemImage: "person.2.slash", description: Text("Error: No contacts to display keys for!"))
+        } else if self.account == nil {
+            ContentUnavailableShimView("Account disabled", systemImage: "iphone.homebutton.slash", description: Text("Error: Account disabled, can not display keys!"))
         }
     }
 }

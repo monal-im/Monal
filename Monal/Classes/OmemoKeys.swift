@@ -429,9 +429,9 @@ struct OmemoKeys: View {
         if self.account != nil && !self.contacts.isEmpty {
             OmemoKeysForChat(contact: viewContact)
         } else if self.contacts.isEmpty {
-            ContentUnavailableShimView("No contacts", systemImage: "person.2.slash", description: Text("Error: No contacts to display keys for!"))
+            ContentUnavailableShimView("No Contacts", systemImage: "person.2.slash", description: Text("Cannot display keys as there are no contacts to display keys for."))
         } else if self.account == nil {
-            ContentUnavailableShimView("Account disabled", systemImage: "iphone.homebutton.slash", description: Text("Error: Account disabled, can not display keys!"))
+            ContentUnavailableShimView("Account Disabled", systemImage: "iphone.homebutton.slash", description: Text("Cannot display keys as the account is disabled."))
         }
     }
 }

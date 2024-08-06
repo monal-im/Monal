@@ -292,7 +292,7 @@ struct OmemoKeys: View {
         self.viewContact = contact
 
         if let contact = contact {
-            if let account = contact.obj.account {
+            if let account = contact.account as xmpp? {
                 self.account = account
             }
         }

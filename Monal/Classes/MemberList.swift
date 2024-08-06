@@ -30,7 +30,7 @@ struct MemberList: View {
     @StateObject private var overlay = LoadingOverlayState()
 
     init(mucContact: ObservableKVOWrapper<MLContact>) {
-        account = mucContact.obj.account! as xmpp
+        account = (mucContact.account as xmpp?)!
         _muc = StateObject(wrappedValue:mucContact)
         _ownAffiliation = State(wrappedValue:"none")
         _memberList = State(wrappedValue:OrderedSet<ObservableKVOWrapper<MLContact>>())

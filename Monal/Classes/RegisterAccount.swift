@@ -60,9 +60,10 @@ struct RegisterAccount: View {
     @State private var showWebView = false
     @State private var errorObserverEnabled = false
 
-    @Environment(\.dismiss) private var dismiss
+    var delegate: SheetDismisserProtocol
 
-    init(registerData:[String:AnyObject]? = nil) {
+    init(delegate: SheetDismisserProtocol, registerData:[String:AnyObject]? = nil) {
+        self.delegate = delegate
         if let registerData = registerData {
             DDLogDebug("RegisterAccount created with data: \(registerData)");
             //for State stuff see https://forums.swift.org/t/assignment-to-state-var-in-init-doesnt-do-anything-but-the-compiler-gened-one-works/35235
@@ -198,7 +199,14 @@ struct RegisterAccount: View {
                         kUsername: self.username,
                         kResource: HelperTools.encodeRandomResource(),
                         kEnabled: true,
-                        kDirectTLS: false
+                        kDirectTLS: false,
+                        //creating an account involves transfering the password in cleartext only secured by TLS
+                        //--> logging in directly afterwards using PLAIN doesn't make the situation any worse ==> allow it
+                        //conversations.im already supports sasl2 and scram ## TODO: use SCRAM preload list
+                        //using the preload list in this case won't solve the situation, but increase the attack cost because
+                        //stripping off SASL2 won't suffice anymore (the attacker will have to use the password sniffed during account creation
+                        //to fake the SCRAM HMAC sent to both client and server)
+                        kPlainActivated: self.actualServer == "conversations.im" ? false : true,
                     ] as [String : Any]
 
                     let accountNo = DataLayer.sharedInstance().addAccount(with: dic);
@@ -406,7 +414,7 @@ struct RegisterAccount: View {
                             .alert(isPresented: $showAlert) {
                                 Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                                     if(self.registerComplete == true) {
-                                        dismiss()
+                                        self.delegate.dismiss()
                                         
                                         if let completion = self.completionHandler {
                                             DDLogVerbose("Calling reg completion handler...")
@@ -493,7 +501,8 @@ struct RegisterAccount: View {
 }
 
 struct RegisterAccount_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        RegisterAccount()
+        RegisterAccount(delegate:delegate)
     }
 }

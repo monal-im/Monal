@@ -30,7 +30,7 @@ struct OmemoQrCodeView: View {
     init(contact: ObservableKVOWrapper<MLContact>)
     {
         self.jid = contact.obj.contactJid
-        if let account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: contact.obj.accountId) {
+        if let account = contact.obj.account {
             let devices = Array(account.omemo.knownDevices(forAddressName: self.jid))
             var keyList = ""
             var prefix = "?"

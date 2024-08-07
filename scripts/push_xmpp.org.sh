@@ -9,7 +9,7 @@ echo ""
 echo "**********************************************"
 echo "* Reading buildNumber and creating timestamp *"
 echo "**********************************************"
-buildNumber=$(git tag --sort="v:refname" |grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
+buildNumber=$(git tag --sort="v:refname" | grep -v "Quicksy_Build_iOS" | grep "Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
 timestamp="$(date -u +%FT%T)"
 
 echo ""

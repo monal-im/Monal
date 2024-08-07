@@ -112,7 +112,6 @@ enum DummySettingsRows {
 @property (nonatomic) BOOL statusMessageChanged;
 @property (nonatomic) BOOL detailsChanged;
 
-@property (nonatomic) BOOL sasl2Supported;
 @property (nonatomic) BOOL plainActivated;
 
 @property (nonatomic) BOOL deactivateSave;
@@ -204,8 +203,6 @@ enum DummySettingsRows {
         self.rosterName = [settings objectForKey:kRosterName];
         self.statusMessage = [settings objectForKey:@"statusMessage"];
         
-        self.sasl2Supported = [[settings objectForKey:kSupportsSasl2] boolValue];
-        
         self.plainActivated = [[settings objectForKey:kPlainActivated] boolValue];
         
         //overwrite account section heading in edit mode
@@ -220,7 +217,6 @@ enum DummySettingsRows {
         self.rosterName = @"";
         self.statusMessage = @"";
         self.enabled = YES;
-        self.sasl2Supported = NO;
         self.plainActivated = NO;
         
         //overwrite account section heading in new mode
@@ -343,9 +339,8 @@ enum DummySettingsRows {
     if(self.statusMessage)
         [dic setObject:[self.statusMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:@"statusMessage"];
     
-    [dic setObject:[NSNumber numberWithBool:self.sasl2Supported] forKey:kSupportsSasl2];
-    
-    [dic setObject:[NSNumber numberWithBool:self.plainActivated] forKey:kPlainActivated];
+    //conversations.im already supports sasl2 and scram ## TODO: use SCRAM preload list
+    [dic setObject:([domain.lowercaseString isEqualToString:@"conversations.im"] ? @NO : @(self.plainActivated)) forKey:kPlainActivated];
     
     if(!self.editMode)
     {

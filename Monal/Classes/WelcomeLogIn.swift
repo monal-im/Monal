@@ -9,7 +9,7 @@
 struct WelcomeLogIn: View {
     static private let credFaultyPattern = "^.+@.+\\..{2,}$"
     
-    @Environment(\.dismiss) private var dismiss
+    var delegate: SheetDismisserProtocol
 
     @State private var isEditingJid: Bool = false
     @State private var jid: String = ""
@@ -183,7 +183,7 @@ struct WelcomeLogIn: View {
                                 .alert(isPresented: $showAlert) {
                                     Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                                         if(self.loginComplete == true) {
-                                            dismiss()
+                                            self.delegate.dismiss()
                                         }
                                     }))
                                 }
@@ -215,14 +215,14 @@ struct WelcomeLogIn: View {
                                 }
                             }
                             
-                            NavigationLink(destination: LazyClosureView(RegisterAccount())) {
+                            NavigationLink(destination: LazyClosureView(RegisterAccount(delegate: self.delegate))) {
                                 Text("Register a new account")
                                 .foregroundColor(monalDarkGreen)
                             }
                             
                             if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
                                 Button(action: {
-                                    dismiss()
+                                    self.delegate.dismiss()
                                 }){
                                     Text("Set up account later")
                                         .frame(maxWidth: .infinity)
@@ -308,7 +308,8 @@ struct WelcomeLogIn: View {
 }
 
 struct WelcomeLogIn_Previews: PreviewProvider {
+    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        WelcomeLogIn()
+        WelcomeLogIn(delegate:delegate)
     }
 }

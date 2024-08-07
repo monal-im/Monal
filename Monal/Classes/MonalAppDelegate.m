@@ -879,7 +879,7 @@ $$
         MLAssert(fromContact, @"fromContact should not be nil");
         NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
         MLAssert(messageId, @"messageId should not be nil");
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
+        xmpp* account = fromContact.account;
         //this can happen if that account got disabled
         if(account == nil)
         {
@@ -954,7 +954,7 @@ $$
         DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
         MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
         MLAssert(fromContact, @"fromContact should not be nil");
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
+        xmpp* account = fromContact.account;
         //this can happen if that account got disabled
         if(account == nil)
         {
@@ -1923,97 +1923,99 @@ $$
         return;
     }
     
-    //open the destination chat only once
-    for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayload])
-    {
-        DDLogInfo(@"Sending outbox entry: %@", payload);
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:payload[@"account_id"]];
-        if(account == nil)
+    [(ActiveChatsViewController*)self.activeChats dismissCompleteViewChainWithAnimation:YES andCompletion:^{
+        //open the destination chat only once
+        for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayload])
         {
-            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Sharing failed", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Cannot share something with disabled/deleted account, destination: %@, internal account id: %@", @""), payload[@"recipient"], payload[@"account_id"]] preferredStyle:UIAlertControllerStyleAlert];
-            [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-            }]];
-            [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
-            [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
-            continue;
+            DDLogInfo(@"Sending outbox entry: %@", payload);
+            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:payload[@"account_id"]];
+            if(account == nil)
+            {
+                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Sharing failed", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Cannot share something with disabled/deleted account, destination: %@, internal account id: %@", @""), payload[@"recipient"], payload[@"account_id"]] preferredStyle:UIAlertControllerStyleAlert];
+                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                }]];
+                [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
+                [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+                continue;
+            }
+            MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
+            
+            monal_id_block_t cleanup = ^(NSDictionary* payload) {
+                [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                if(self.activeChats.currentChatViewController != nil)
+                {
+                    [self.activeChats.currentChatViewController scrollToBottomAnimated:NO];
+                    [self.activeChats.currentChatViewController hideUploadHUD];
+                }
+                //send next item (if there is one left)
+                [self sendAllOutboxes];
+            };
+            
+            monal_id_block_t sendItem = ^(id dummy __unused){
+                BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
+                if([payload[@"type"] isEqualToString:@"text"])
+                {
+                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeText toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
+                        cleanup(payload);
+                    }];
+                }
+                else if([payload[@"type"] isEqualToString:@"url"])
+                {
+                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeUrl toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
+                        cleanup(payload);
+                    }];
+                }
+                else if([payload[@"type"] isEqualToString:@"geo"])
+                {
+                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeGeo toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
+                        cleanup(payload);
+                    }];
+                }
+                else if([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"])
+                {
+                    DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
+                    [self.activeChats.currentChatViewController showUploadHUD];
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                if(error != nil)
+                                {
+                                    DDLogError(@"Failed to upload outbox file: %@", error);
+                                    NSMutableDictionary* payloadCopy = [NSMutableDictionary dictionaryWithDictionary:payload];
+                                    cleanup(payloadCopy);
+                                    
+                                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Failed to share file", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Error: %@", @""), error] preferredStyle:UIAlertControllerStyleAlert];
+                                    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                                    }]];
+                                    [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
+                                }
+                                else
+                                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url havingType:kMessageTypeFiletransfer toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
+                                        cleanup(payload);
+                                    }];
+                            });
+                        })));
+                    });
+                }
+                else
+                    unreachable(@"Outbox payload type unknown", payload);
+            };
+            
+            DDLogVerbose(@"Trying to open chat of outbox receiver: %@", contact);
+            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+            //don't use [self openChatOfContact:withCompletion:] because it's asynchronous and can only handle one contact at a time (e.g. until the asynchronous execution finished)
+            //we can invoke the activeChats interface directly instead, because we already did the necessary preparations ourselves
+            [(ActiveChatsViewController*)self.activeChats presentChatWithContact:contact andCompletion:sendItem];
+            
+            //only send one item at a time (this method will be invoked again when sending completed)
+            break;
         }
-        MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
-        
-        monal_id_block_t cleanup = ^(NSDictionary* payload) {
-            [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-            if(self.activeChats.currentChatViewController != nil)
-            {
-                [self.activeChats.currentChatViewController scrollToBottomAnimated:NO];
-                [self.activeChats.currentChatViewController hideUploadHUD];
-            }
-            //send next item (if there is one left)
-            [self sendAllOutboxes];
-        };
-        
-        monal_id_block_t sendItem = ^(id dummy __unused){
-            BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
-            if([payload[@"type"] isEqualToString:@"text"])
-            {
-                [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeText toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                    DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
-                    cleanup(payload);
-                }];
-            }
-            else if([payload[@"type"] isEqualToString:@"url"])
-            {
-                [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeUrl toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                    DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
-                    cleanup(payload);
-                }];
-            }
-            else if([payload[@"type"] isEqualToString:@"geo"])
-            {
-                [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeGeo toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                    DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
-                    cleanup(payload);
-                }];
-            }
-            else if([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"])
-            {
-                DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
-                [self.activeChats.currentChatViewController showUploadHUD];
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                    $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            if(error != nil)
-                            {
-                                DDLogError(@"Failed to upload outbox file: %@", error);
-                                NSMutableDictionary* payloadCopy = [NSMutableDictionary dictionaryWithDictionary:payload];
-                                cleanup(payloadCopy);
-                                
-                                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Failed to share file", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Error: %@", @""), error] preferredStyle:UIAlertControllerStyleAlert];
-                                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                                }]];
-                                [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
-                            }
-                            else
-                                [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url havingType:kMessageTypeFiletransfer toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                                    DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
-                                    cleanup(payload);
-                                }];
-                        });
-                    })));
-                });
-            }
-            else
-                unreachable(@"Outbox payload type unknown", payload);
-        };
-        
-        DDLogVerbose(@"Trying to open chat of outbox receiver: %@", contact);
-        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
-        //don't use [self openChatOfContact:withCompletion:] because it's asynchronous and can only handle one contact at a time (e.g. until the asynchronous execution finished)
-        //we can invoke the activeChats interface directly instead, because we already did the necessary preparations ourselves
-        [(ActiveChatsViewController*)self.activeChats presentChatWithContact:contact andCompletion:sendItem];
-        
-        //only send one item at a time (this method will be invoked again when sending completed)
-        break;
-    }
+    }];
 }
 
 @end

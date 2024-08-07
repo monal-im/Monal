@@ -53,6 +53,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, readonly, copy) UIImage* avatar;
 @property (nonatomic, readonly) BOOL hasAvatar;
 @property (nonatomic, readonly) NSString* fullName;
+@property (nonatomic, readonly) xmpp* _Nullable account;
 /**
  usually user assigned nick name
  */

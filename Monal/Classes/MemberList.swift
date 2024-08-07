@@ -30,7 +30,7 @@ struct MemberList: View {
     @StateObject private var overlay = LoadingOverlayState()
 
     init(mucContact: ObservableKVOWrapper<MLContact>) {
-        account = MLXMPPManager.sharedInstance().getConnectedAccount(forID: mucContact.accountId)! as xmpp
+        account = mucContact.obj.account! as xmpp
         _muc = StateObject(wrappedValue:mucContact)
         _ownAffiliation = State(wrappedValue:"none")
         _memberList = State(wrappedValue:OrderedSet<ObservableKVOWrapper<MLContact>>())
@@ -278,7 +278,7 @@ struct MemberList: View {
                             .accessibilityLabel(Text("Open Profile of \(contact.contactDisplayName as String)"))
                             //invisible navigation link that can be triggered programmatically
                             .background(
-                                NavigationLink(destination: LazyClosureView(ContactDetails(contact:contact)), tag:contact, selection:$navigationActive) { EmptyView() }
+                                NavigationLink(destination: LazyClosureView(ContactDetails(delegate:SheetDismisserProtocol(), contact:contact)), tag:contact, selection:$navigationActive) { EmptyView() }
                                     .opacity(0)
                             )
                             

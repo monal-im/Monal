@@ -46,12 +46,13 @@ struct SVGRepresentation: Transferable {
 }
 
 struct ImageViewer: View {
+    var delegate: SheetDismisserProtocol
     let info: [String:AnyObject]
     @State private var previewImage: UIImage?
     @State private var controlsVisible = false
-    @Environment(\.dismiss) private var dismiss
 
-    init(info:[String:AnyObject]) throws {
+    init(delegate: SheetDismisserProtocol, info:[String:AnyObject]) throws {
+        self.delegate = delegate
         self.info = info
     }
     
@@ -136,7 +137,7 @@ struct ImageViewer: View {
                                 }
                                 
                                 Button(action: {
-                                    dismiss()
+                                    self.delegate.dismiss()
                                 }, label: {
                                     Image(systemName: "xmark")
                                         .foregroundColor(.primary)

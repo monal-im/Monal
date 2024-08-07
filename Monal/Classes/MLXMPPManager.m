@@ -647,7 +647,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     NSString* msgid = [[NSUUID UUID] UUIDString];
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
 
     MLAssert(message != nil, @"Message should not be nil");
     MLAssert(account != nil, @"Account should not be nil");
@@ -689,7 +689,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
 {
     BOOL success = NO;
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     if(account)
     {
         success = YES;
@@ -701,7 +701,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) sendChatState:(BOOL) isTyping toContact:(MLContact*) contact
 {
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     if(account)
         [account sendChatState:isTyping toContact:contact];
 }
@@ -711,16 +711,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 //this will NOT set plain_activated to YES, only using the advanced account creation ui can do this
 -(NSNumber*) login:(NSString*) jid password:(NSString*) password
 {
-    //if it is a JID
+    //check if it is a JID
     NSArray* elements = [jid componentsSeparatedByString:@"@"];
     MLAssert([elements count] > 1, @"Got invalid jid", (@{@"jid": nilWrapper(jid), @"elements": elements}));
 
     NSString* domain;
     NSString* user;
-    user = [elements objectAtIndex:0];
-    domain = [elements objectAtIndex:1];
+    user = ((NSString*)[elements objectAtIndex:0]).lowercaseString;
+    domain = ((NSString*)[elements objectAtIndex:1]).lowercaseString;
 
-    if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString])
+    if([[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain])
     {
         [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:nil userInfo:@{
             @"title": NSLocalizedString(@"Duplicate Account", @""),
@@ -730,11 +730,19 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     }
 
     NSMutableDictionary* dic  = [NSMutableDictionary new];
-    [dic setObject:domain.lowercaseString forKey:kDomain];
-    [dic setObject:user.lowercaseString forKey:kUsername];
+    [dic setObject:domain forKey:kDomain];
+    [dic setObject:user forKey:kUsername];
     [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kDirectTLS];
+    //we don't want to set kPlainActivated (not even according to our preload list) and default to plain_activated=false,
+    //because the error message will warn the user and direct them to the advanced account creation menu to activate PLAIN
+    //if they still want to connect to this server
+    //only exception: yax.im --> we don't want to suggest a server during account creation that has a scary warning
+    //when logging in using another device afterwards
+    //TODO: to be removed once yax.im and quicksy.im supports SASL2 and SSDP!!
+    //TODO: use preload list and allow PLAIN for all others once enough domains are on this list
+    [dic setObject:([domain isEqualToString:@"yax.im"] || [domain isEqualToString:@"quicksy.im"] ? @YES : @NO) forKey:kPlainActivated];
 
     NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
     if(accountNo == nil)
@@ -788,7 +796,7 @@ $$class_handler(handleRemoveContact, $$ID(MLContact*, contact))
 $$
 -(void) removeContact:(MLContact*) contact
 {
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     if(account)
     {
         //queue remove contact for execution once bound (e.g. on catchup done)
@@ -825,7 +833,7 @@ $$class_handler(handleAddContact, $$ID(MLContact*, contact), $_ID(NSString*, pre
 $$
 -(void) addContact:(MLContact*) contact withPreauthToken:(NSString* _Nullable) preauthToken
 {
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     if(account)
     {
         //queue add contact for execution once bound (e.g. on catchup done)
@@ -856,7 +864,7 @@ $$
 
 -(void) getEntitySoftWareVersionForContact:(MLContact*) contact andResource:(NSString*) resource
 {
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     
     NSString* xmppId = @"";
     if ((resource == nil) || ([resource length] == 0)) {
@@ -871,7 +879,7 @@ $$
 -(void) block:(BOOL) isBlocked contact:(MLContact*) contact
 {
     DDLogVerbose(@"Blocking %@: %@", contact, bool2str(isBlocked));
-    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    xmpp* account = contact.account;
     [account setBlocked:isBlocked forJid:contact.contactJid];
 }
 

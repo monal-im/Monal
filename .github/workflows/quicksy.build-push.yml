@@ -60,7 +60,7 @@ jobs:
           buildNumber="$(git tag --sort="v:refname" | grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')"
           version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
           if [ "${{ github.ref }}" != "refs/heads/stable" ]; then
-            version="1.$buildNumber"
+            version="1.$buildNumber.0"
           fi
           mkdir -p /Users/ci/releases
           OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"

@@ -15,16 +15,16 @@ jobs:
       release-notes_macos: ${{ steps.releasenotes.outputs.notes_macos }}
       release-id: ${{ steps.releasenotes.outputs.releaseID }}
     # create release only if the ios app made it to the appstore and ignore the macos appstore state
-    if: github.event.client_payload.Platform == 'iOS'
+    if: github.event.client_payload.platform == 'iOS'
     steps:
       # - run: |
-      #     echo ${{ github.event.client_payload.AppName }}
-      #     echo ${{ github.event.client_payload.Platform }}
-      #     echo ${{ github.event.client_payload.AppVersionNumber }}
+      #     echo ${{ github.event.client_payload.appName }}
+      #     echo ${{ github.event.client_payload.platform }}
+      #     echo ${{ github.event.client_payload.appVersionNumber }}
       - name: Load release info
         id: releasenotes
         run: |
-          buildNumber="$(fastlane run app_store_build_number api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" app_identifier:"G7YU7X7KRJ.SworIM" live:false version:"${{ github.event.client_payload.AppVersionNumber }}" 2>&1 | tee /dev/stderr | grep Result | sed -E 's/^.*Result: ([0-9]+).*$/\1/g')"
+          buildNumber="$(fastlane run app_store_build_number api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" app_identifier:"G7YU7X7KRJ.SworIM" live:false version:"${{ github.event.client_payload.appVersionNumber }}" 2>&1 | tee /dev/stderr | grep Result | sed -E 's/^.*Result: ([0-9]+).*$/\1/g')"
           mkdir -p /Users/ci/releases
           OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
           touch "$OUTPUT_FILE"

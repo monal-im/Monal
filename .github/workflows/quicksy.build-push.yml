@@ -32,6 +32,13 @@ jobs:
           lfs: true
       - name: Checkout submodules
         run: git submodule update -f --init --remote
+      - name: Check for proper semantic versioning
+        run: |
+          version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
+          if ! [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
+            echo "Invalid semver: '$version'!"
+            exit 1
+          fi
       - name: Get last build tag and increment it
         run: |
           oldBuildNumber=$(git tag --sort="v:refname" | grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')
@@ -62,8 +69,8 @@ jobs:
           if [ "${{ github.ref }}" != "refs/heads/stable" ]; then
             version="1.$buildNumber"
           fi
-          mkdir -p /Users/ci/releases
-          OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
+          mkdir -p /Users/ci/quicksy_releases
+          OUTPUT_FILE="/Users/ci/quicksy_releases/$buildNumber.output"
           touch "$OUTPUT_FILE"
           echo "OUTPUT_FILE=$OUTPUT_FILE" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           

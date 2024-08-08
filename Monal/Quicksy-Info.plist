@@ -89,7 +89,7 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Quicksy allows users to upload photos to recipients in a conversation</string>
     <key>NSContactsUsageDescription</key>
-    <string>Quicksy syncs your contact list in regular intervals to make suggestions about possible contacts, who are already using the app.</string>
+    <string>Quicksy uploads your contact list to the quicksy server in regular intervals to automatically list possible contacts, who are already using the app, in your contact list.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>INSendMessageIntent</string>

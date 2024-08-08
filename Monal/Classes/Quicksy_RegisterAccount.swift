@@ -53,7 +53,7 @@ class Quicksy_State: ObservableObject {
 
 struct Quicksy_RegisterAccount: View {
     var delegate: SheetDismisserProtocol
-    let countries: [Quicksy_Country] = COUNTRY_CODES
+    var countries: [Quicksy_Country] = []
     @StateObject private var overlay = LoadingOverlayState()
     @ObservedObject var state = Quicksy_State()
     @State private var currentIndex = 0
@@ -78,6 +78,11 @@ struct Quicksy_RegisterAccount: View {
     init(delegate: SheetDismisserProtocol) {
         self.delegate = delegate
         self.state.phoneNumber = nil
+        var countries = COUNTRY_CODES
+        countries.sort {
+            country2name($0) < country2name($1)
+        }
+        self.countries = countries
     }
     
     private func requestSMS(for number:String) {
@@ -120,6 +125,18 @@ struct Quicksy_RegisterAccount: View {
                 }
             }
         }
+    }
+    
+    private func country2name(_ country: Quicksy_Country) -> String {
+        if let name = country.name {
+            return name
+        }
+        if let alpha2 = country.alpha2 {
+            if let name = Locale.current.localizedString(forRegionCode: alpha2) {
+                return name
+            }
+        }
+        unreachable("Invalid country: \(String(describing:country))")
     }
     
     private var isValidNumber: Bool {
@@ -188,7 +205,7 @@ struct Quicksy_RegisterAccount: View {
                         Text("Country:")
                         Picker(selection: $selectedCountry, label: EmptyView()) {
                             ForEach(countries) { country in
-                                Text("\(country.name) (\(country.code))").tag(country as Quicksy_Country?)
+                                Text("\(country2name(country)) (\(country.code))").tag(country as Quicksy_Country?)
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
@@ -270,7 +287,7 @@ struct Quicksy_RegisterAccount: View {
                     DDLogInfo("Localization: current locale localized string for regionCode: \(String(describing:Locale.current.localizedString(forRegionCode:regionCode)))")
                     DDLogInfo("Localization: en_US localized string for regionCode: \(String(describing:Locale(identifier: "en_US").localizedString(forRegionCode:regionCode)))")
                     for country in countries {
-                        if country.name == Locale.current.localizedString(forRegionCode:regionCode) || country.name == Locale(identifier: "en_US").localizedString(forRegionCode:regionCode) {
+                        if country.alpha2 == regionCode || country.name == Locale.current.localizedString(forRegionCode:regionCode) || country.name == Locale(identifier: "en_US").localizedString(forRegionCode:regionCode) {
                             selectedCountry = country
                         }
                     }

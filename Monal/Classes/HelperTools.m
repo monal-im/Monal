@@ -676,7 +676,12 @@ void swizzle(Class c, SEL orig, SEL new)
     shouldProvideVoip = YES;
 #endif
 #else
+#ifdef IS_QUICKSY
+    NSLocale* userLocale = [NSLocale currentLocale];
+    shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
+#else
     shouldProvideVoip = YES;
+#endif
 #endif
     return shouldProvideVoip;
 }

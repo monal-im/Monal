@@ -234,8 +234,6 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
             DDLogDebug(@"Already displayed notification '%@', updating it...", idval);
             [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:NO andLMCReplaced:NO];
         }
-        else
-            unreachable(@"Unknown MLNotificationState!", @{@"state": @(state)});
     });
 }
 

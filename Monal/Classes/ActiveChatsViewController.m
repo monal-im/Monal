@@ -598,22 +598,14 @@ static NSMutableSet* _pushWarningDisplayed;
         MLContact* checkContact = [MLContact createContactFromJid:jid andAccountNo:checkAccount.accountNo];
         if(checkContact.isInRoster)
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
-                    [self presentChatWithContact:checkContact];
-                }];
-            });
+            [self presentChatWithContact:checkContact];
             return;
         }
     }
     
     appendToViewQueue((^(PMKResolver resolve) {
         UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewForJid:jid preauthToken:preauthToken prefillAccount:account andOmemoFingerprints:fingerprints withDismisser:^(MLContact* _Nonnull newContact) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
-                    [self presentChatWithContact:newContact];
-                }];
-            });
+            [self presentChatWithContact:newContact];
         }];
         addContactMenuView.ml_disposeCallback = ^{
             [self sheetDismissed];
@@ -628,11 +620,7 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     appendToViewQueue((^(PMKResolver resolve) {
         UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
-                    [self presentChatWithContact:newContact];
-                }];
-            });
+            [self presentChatWithContact:newContact];
         }];
         addContactMenuView.ml_disposeCallback = ^{
             [self sheetDismissed];
@@ -1014,50 +1002,52 @@ static NSMutableSet* _pushWarningDisplayed;
 -(void) presentChatWithContact:(MLContact*) contact andCompletion:(monal_id_block_t _Nullable) completion
 {
     DDLogVerbose(@"presenting chat with contact: %@, stacktrace: %@", contact, [NSThread callStackSymbols]);
-    dispatch_async(dispatch_get_main_queue(), ^{
-        // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
-        if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
-        {
-            // make sure the already open chat is reloaded and return
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-            if(completion != nil)
-                completion(@YES);
-            return;
-        }
-        
-        // clear old chat before opening a new one (but not for splitView == YES)
-        if(self.splitViewController.collapsed)
-            [self.navigationController popViewControllerAnimated:NO];
-        
-        // show placeholder if contact is nil, open chat otherwise
-        if(contact == nil)
-        {
-            [self presentSplitPlaceholder];
-            if(completion != nil)
-                completion(@NO);
-            return;
-        }
+    [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
+        [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
+            // only open contact chat when it is not opened yet (needed for opening via notifications and for macOS)
+            if([contact isEqualToContact:[MLNotificationManager sharedInstance].currentContact])
+            {
+                // make sure the already open chat is reloaded and return
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+                if(completion != nil)
+                    completion(@YES);
+                return;
+            }
+            
+            // clear old chat before opening a new one (but not for splitView == YES)
+            if(self.splitViewController.collapsed)
+                [self.navigationController popViewControllerAnimated:NO];
+            
+            // show placeholder if contact is nil, open chat otherwise
+            if(contact == nil)
+            {
+                [self presentSplitPlaceholder];
+                if(completion != nil)
+                    completion(@NO);
+                return;
+            }
 
-        //open chat (make sure we have an active buddy for it and add it to our ui, if needed)
-        //but don't animate this if the contact is already present in our list
-        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
-        if([[self getChatArrayForSection:pinnedChats] containsObject:contact] || [[self getChatArrayForSection:unpinnedChats] containsObject:contact])
-        {
-            [self scrollToContact:contact];
-            [self performSegueWithIdentifier:@"showConversation" sender:contact];
-            if(completion != nil)
-                completion(@YES);
-        }
-        else
-        {
-            [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
+            //open chat (make sure we have an active buddy for it and add it to our ui, if needed)
+            //but don't animate this if the contact is already present in our list
+            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+            if([[self getChatArrayForSection:pinnedChats] containsObject:contact] || [[self getChatArrayForSection:unpinnedChats] containsObject:contact])
+            {
                 [self scrollToContact:contact];
                 [self performSegueWithIdentifier:@"showConversation" sender:contact];
                 if(completion != nil)
                     completion(@YES);
-            }];
-        }
-    });
+            }
+            else
+            {
+                [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
+                    [self scrollToContact:contact];
+                    [self performSegueWithIdentifier:@"showConversation" sender:contact];
+                    if(completion != nil)
+                        completion(@YES);
+                }];
+            }
+        }];
+    }];
 }
 
 /*
@@ -1119,12 +1109,8 @@ static NSMutableSet* _pushWarningDisplayed;
         UINavigationController* nav = segue.destinationViewController;
         ContactsViewController* contacts = (ContactsViewController*)nav.topViewController;
         contacts.selectContact = ^(MLContact* selectedContact) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
-                [self dismissCompleteViewChainWithAnimation:YES andCompletion:^{
-                    [self presentChatWithContact:selectedContact];
-                }];
-            });
+            DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
+            [self presentChatWithContact:selectedContact];
         };
     }
 }

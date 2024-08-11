@@ -742,7 +742,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //when logging in using another device afterwards
     //TODO: to be removed once yax.im and quicksy.im supports SASL2 and SSDP!!
     //TODO: use preload list and allow PLAIN for all others once enough domains are on this list
-    [dic setObject:([domain isEqualToString:@"yax.im"] || [domain isEqualToString:@"quicksy.im"] ? @YES : @NO) forKey:kPlainActivated];
+    //allow plain for all servers not on preload list, since prosody with SASL2 wasn't even released yet
+    NSNumber* defaultPlainActivated = @YES;
+    [dic setObject:([domain isEqualToString:@"yax.im"] || [domain isEqualToString:@"quicksy.im"] ? @YES : defaultPlainActivated) forKey:kPlainActivated];
 
     NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
     if(accountNo == nil)

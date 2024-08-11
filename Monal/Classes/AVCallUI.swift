@@ -284,9 +284,14 @@ struct AVCallUI: View {
                             VStack {
                                 Spacer().frame(height: 8)
                                 Button(action: {
-                                    self.delegate.dismissWithoutAnimation()
                                     if let activeChats = self.appDelegate.obj.activeChats {
-                                        activeChats.presentChat(with:self.contact.obj)
+                                        //make sure we don't animate anything
+                                        activeChats.dismissCompleteViewChain(withAnimation: false) {
+                                            activeChats.presentChat(with:self.contact.obj)
+                                        }
+                                    } else {
+                                        //self.delegate.dismissWithoutAnimation()
+                                        unreachable("active chats should always be accessible from AVCallUI!")
                                     }
                                 }, label: {
                                     Image(systemName: "text.bubble")

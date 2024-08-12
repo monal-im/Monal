@@ -338,6 +338,7 @@ $$
     {
         //fetch newest devicelist (this is needed even after a subscribe on at least prosody)
         [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe))];
+        [self.state.openDevicelistFetches addObject:jid];
     }
 }
 

@@ -655,9 +655,9 @@ class SwiftuiInterface : NSObject {
     func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         if(ownContact == nil) {
-            host.rootView = AnyView(OmemoKeys(contact: nil))
+            host.rootView = AnyView(OmemoKeysView(contact: nil))
         } else {
-            host.rootView = AnyView(OmemoKeys(contact: ObservableKVOWrapper<MLContact>(ownContact!)))
+            host.rootView = AnyView(OmemoKeysView(contact: ObservableKVOWrapper<MLContact>(ownContact!)))
         }
         return host
     }

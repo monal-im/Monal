@@ -8,7 +8,7 @@
 
 import OrderedCollections
 
-struct OmemoKeysEntry: View {
+struct OmemoKeysEntryView: View {
     private let contactJid: String
     
     @State private var trustLevel: NSNumber
@@ -195,7 +195,7 @@ struct OmemoKeysEntry: View {
     }
 }
 
-struct OmemoKeysForContact: View {
+struct OmemoKeysForContactView: View {
     @State private var deviceIds: OrderedSet<NSNumber>
     @State private var showDeleteKeyAlert = false
     @State private var selectedDeviceForDeletion : NSNumber
@@ -212,7 +212,7 @@ struct OmemoKeysForContact: View {
         self.ownKeys = (account.connectionProperties.identity.jid == contact.obj.contactJid)
         self.contactJid = contact.obj.contactJid
         self.account = account
-        self.deviceIds = OmemoKeysForContact.knownDevices(account: self.account, jid: self.contactJid)
+        self.deviceIds = OmemoKeysForContactView.knownDevices(account: self.account, jid: self.contactJid)
         self.selectedDeviceForDeletion = -1
     }
     
@@ -221,7 +221,7 @@ struct OmemoKeysForContact: View {
     }
 
     private func refreshKnownDevices() -> Void {
-        self.deviceIds = OmemoKeysForContact.knownDevices(account: self.account, jid: self.contactJid)
+        self.deviceIds = OmemoKeysForContactView.knownDevices(account: self.account, jid: self.contactJid)
     }
 
     func deleteButton(deviceId: NSNumber) -> some View {
@@ -252,7 +252,7 @@ struct OmemoKeysForContact: View {
         ForEach(self.deviceIds, id: \.self) { deviceId in
             HStack {
                 ZStack(alignment: .topLeading) {
-                    OmemoKeysEntry(account: self.account, contactJid: self.contactJid, deviceId: deviceId, isOwnDevice: (ownKeys && deviceId == self.deviceId))
+                    OmemoKeysEntryView(account: self.account, contactJid: self.contactJid, deviceId: deviceId, isOwnDevice: (ownKeys && deviceId == self.deviceId))
                     if(ownKeys == true) {
                         if(deviceId != self.deviceId) {
                             deleteButton(deviceId: deviceId)
@@ -271,7 +271,7 @@ struct OmemoKeysForContact: View {
     }
 }
 
-struct OmemoKeysForChat: View {
+struct OmemoKeysForChatView: View {
     private var viewContact: ObservableKVOWrapper<MLContact>? // store initial contact with which the view was initialized for refreshs...
     private var account: xmpp?
 
@@ -353,12 +353,12 @@ struct OmemoKeysForChat: View {
             Section(header:helpDescription) {
                 if (self.contacts.count == 1) {
                     ForEach(self.contacts, id: \.self.obj) { contact in
-                        OmemoKeysForContact(contact: contact, account: self.account!)
+                        OmemoKeysForContactView(contact: contact, account: self.account!)
                     }
                 } else {
                     ForEach(self.contacts, id: \.self.obj) { contact in
                         DisclosureGroup(content: {
-                            OmemoKeysForContact(contact: contact, account: self.account!)
+                            OmemoKeysForContactView(contact: contact, account: self.account!)
                         }, label: {
                             HStack {
                                 Text("Keys of \(contact.obj.contactJid)")
@@ -416,7 +416,7 @@ struct OmemoKeysForChat: View {
     }
 }
 
-struct OmemoKeys: View {
+struct OmemoKeysView: View {
     private var viewContact: ObservableKVOWrapper<MLContact>?
     private var account: xmpp?
     @State private var contacts: OrderedSet<ObservableKVOWrapper<MLContact>>
@@ -429,7 +429,7 @@ struct OmemoKeys: View {
 
     var body: some View {
         if self.account != nil && !self.contacts.isEmpty {
-            OmemoKeysForChat(contact: viewContact)
+            OmemoKeysForChatView(contact: viewContact)
         } else if self.contacts.isEmpty {
             ContentUnavailableShimView("No Contacts", systemImage: "person.2.slash", description: Text("Cannot display keys as there are no contacts to display keys for."))
         } else if self.account == nil {
@@ -441,6 +441,6 @@ struct OmemoKeys: View {
 struct OmemoKeys_Previews: PreviewProvider {
     static var previews: some View {
         // TODO some dummy views, requires a dummy xmpp obj
-        OmemoKeys(contact:nil);
+        OmemoKeysView(contact:nil);
     }
 }

@@ -369,7 +369,7 @@ struct ContactDetails: View {
 #if !DISABLE_OMEMO
                 if !HelperTools.isContactBlacklisted(forEncryption:contact.obj) && !contact.isSelfChat {
                     if !contact.isGroup || contact.mucType == "group" {
-                        NavigationLink(destination: LazyClosureView(OmemoKeys(contact: contact))) {
+                        NavigationLink(destination: LazyClosureView(OmemoKeysView(contact: contact))) {
                             Text("Encryption Keys")
                         }
                     }

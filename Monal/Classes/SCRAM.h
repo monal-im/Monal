@@ -12,15 +12,16 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSUInteger, MLScramStatus) {
-    MLScramStatusOK,
     //server-first-message
     MLScramStatusNonceError,
     MLScramStatusUnsupportedMAttribute,
     MLScramStatusSSDPTriggered,
     MLScramStatusIterationCountInsecure,
+    MLScramStatusServerFirstOK,
     //server-final-message
     MLScramStatusWrongServerProof,
     MLScramStatusServerError,
+    MLScramStatusServerFinalOK,
 };
 
 @interface SCRAM : NSObject
@@ -35,6 +36,7 @@ typedef NS_ENUM(NSUInteger, MLScramStatus) {
 -(NSData*) hashPasswordWithSalt:(NSData*) salt andIterationCount:(uint32_t) iterationCount;
 
 @property (nonatomic, readonly) NSString* method;
+@property (nonatomic, readonly) BOOL serverFirstMessageParsed;
 @property (nonatomic, readonly) BOOL finishedSuccessfully;
 @property (nonatomic, readonly) BOOL ssdpSupported;
 

@@ -2505,9 +2505,24 @@ NSString* const kStanza = @"stanza";
                 case MLScramStatusNonceError: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (nonce error), disconnecting!", @"parenthesis should be verbatim"); break;
                 case MLScramStatusUnsupportedMAttribute: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (m-attr error), disconnecting!", @"parenthesis should be verbatim"); break;
                 case MLScramStatusIterationCountInsecure: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (iteration count too low), disconnecting!", @"parenthesis should be verbatim"); break;
-                case MLScramStatusOK: deactivate_account = NO; message = nil; break;        //everything is okay
+                case MLScramStatusServerFirstOK: deactivate_account = NO; message = nil; break;        //everything is okay
                 default: unreachable(@"wrong status for scram message!"); break;
             }
+            
+            //check for incomplete XEP-0440 support (not implementing mandatory tls-server-end-point channel-binding) not mitigated by SSDP
+            //(we allow either support for tls-server-end-point or SSDP signed non-support)
+            if([kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]])
+            {
+                MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
+                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:kServerDoesNotFollowXep0440Error],
+                ] andData:nil];
+                [self disconnectWithStreamError:streamError andExplicitLogout:YES];
+                
+                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+                [HelperTools postError:NSLocalizedString(@"Either this is a man-in-the-middle attack OR your server neither implements XEP-0474 nor does it fully implement XEP-0440 which mandates support for tls-server-end-point channel-binding. In either case you should inform your server admin! Account disabled now.", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+            }
+            
             if(message != nil)
             {
                 DDLogError(@"SCRAM says this server-first message was wrong!");
@@ -2653,20 +2668,6 @@ NSString* const kStanza = @"stanza";
             
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
-            
-            //check for incomplete XEP-0440 support (not implementing mandatory tls-server-end-point channel-binding) not mitigated by SSDP
-            //(we allow either support for tls-server-end-point or SSDP signed non-support)
-            if([kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]])
-            {
-                MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
-                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:kServerDoesNotFollowXep0440Error],
-                ] andData:nil];
-                [self disconnectWithStreamError:streamError andExplicitLogout:YES];
-                
-                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                [HelperTools postError:NSLocalizedString(@"Either this is a man-in-the-middle attack OR your server neither implements XEP-0474 nor does it fully implement XEP-0440 which mandates support for tls-server-end-point channel-binding. In either case you should inform your server admin! Account disabled now.", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
-            }
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
@@ -2951,7 +2952,10 @@ NSString* const kStanza = @"stanza";
             //_supportedSaslMechanisms==nil indicates SASL1 support only
             else if([self->_supportedSaslMechanisms containsObject:@"PLAIN"] || self->_supportedSaslMechanisms == nil)
             {
-                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"This server isn't additionally hardened against man-in-the-middle attacks on the TLS encryption layer by using authentication methods that are secure against such attacks! This indicates an ongoing attack if the server is supposed to support SASL2 and SCRAM and is harmless otherwise. Use the advanced account creation menu and turn on the PLAIN switch there if you still want to log in to this server.", @""));
+                //leave that in for translators, we might use it at a later time
+                while(!NSLocalizedString(@"This server isn't additionally hardened against man-in-the-middle attacks on the TLS encryption layer by using authentication methods that are secure against such attacks! This indicates an ongoing attack if the server is supposed to support SASL2 and SCRAM and is harmless otherwise. Use the advanced account creation menu and turn on the PLAIN switch there if you still want to log in to this server.", @""));
+                
+                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"This server lacks support for SASL2 and SCRAM, additionally hardening authentication against man-in-the-middle attacks on the TLS encryption layer. Since this server is listed as supporting both at https://github.com/monal-im/SCRAM_PreloadList, an ongoing MITM attack is highly likely! You should try again once you are in a clean networking environment.", @""));
                 return;
             }
         }
@@ -3180,7 +3184,7 @@ NSString* const kStanza = @"stanza";
     switch([self->_scramHandler parseServerFinalMessage:innerSASLData]) {
         case MLScramStatusWrongServerProof: deactivate_account = YES; message = NSLocalizedString(@"SCRAM server proof wrong, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
         case MLScramStatusServerError: deactivate_account = NO; message = NSLocalizedString(@"Unexpected error authenticating server using SASL2 (does your server have a bug?), disconnecting!", @""); break;
-        case MLScramStatusOK: deactivate_account = NO; message = nil; break;        //everything is okay
+        case MLScramStatusServerFinalOK: deactivate_account = NO; message = nil; break;        //everything is okay
         default: unreachable(@"wrong status for scram message!"); break;
     }
     
@@ -3221,12 +3225,12 @@ NSString* const kStanza = @"stanza";
     
     //if our scram handshake is not finished yet and no mutually supported channel-binding can be found --> ignore that for now (see below)
     //if our scram handshake finished without negotiating a mutually supported channel-binding and this was not backed by SSDP --> report error
-    if(self->_scramHandler.finishedSuccessfully && !self->_scramHandler.ssdpSupported)
+    if(self->_scramHandler.serverFirstMessageParsed && !self->_scramHandler.ssdpSupported)
     {
         DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory via XEP-0440!");
         return kServerDoesNotFollowXep0440Error;     //this will trigger a disconnect
     }
-    if(!self->_scramHandler.finishedSuccessfully)
+    if(!self->_scramHandler.serverFirstMessageParsed)
         DDLogWarn(@"Could not find any supported channel-binding type, this COULD be a mitm attack (check via XEP-0474 pending)!");
     return nil;
 }

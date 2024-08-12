@@ -58,6 +58,7 @@
     _password = password;
     _nonce = [NSUUID UUID].UUIDString;
     _ssdpString = nil;
+    _serverFirstMessageParsed = NO;
     _finishedSuccessfully = NO;
     return self;
 }
@@ -65,6 +66,7 @@
 -(void) setSSDPMechanisms:(NSArray<NSString*>*) mechanisms andChannelBindingTypes:(NSArray<NSString*>* _Nullable) cbTypes
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
+    MLAssert(!_serverFirstMessageParsed, @"SCRAM handler already parsed server-first-message!");
     DDLogVerbose(@"Creating SDDP string: %@\n%@", mechanisms, cbTypes);
     NSMutableString* ssdpString = [NSMutableString new];
     [ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
@@ -80,6 +82,7 @@
 -(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
+    MLAssert(!_serverFirstMessageParsed, @"SCRAM handler already parsed server-first-message!");
     if(channelBindingType == nil)
         _gssHeader = @"n,,";                                                                //not supported by us
     else if(!_usingChannelBinding)
@@ -94,7 +97,9 @@
 -(MLScramStatus) parseServerFirstMessage:(NSString*) str
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
+    MLAssert(!_serverFirstMessageParsed, @"SCRAM handler already parsed server-first-message!");
     NSDictionary* msg = [self parseScramString:str];
+    _serverFirstMessageParsed = YES;
     //server nonce MUST start with our client nonce
     if(![msg[@"r"] hasPrefix:_nonce])
         return MLScramStatusNonceError;
@@ -117,13 +122,14 @@
     }
     if(_iterationCount < 4096)
         return MLScramStatusIterationCountInsecure;
-    return MLScramStatusOK;
+    return MLScramStatusServerFirstOK;
 }
 
 //see https://stackoverflow.com/a/29299946/3528174
 -(NSString*) clientFinalMessageWithChannelBindingData:(NSData* _Nullable) channelBindingData
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
+    MLAssert(_serverFirstMessageParsed, @"SCRAM handler did not parsed server-first-message yet!");
     //calculate gss header with optional channel binding data
     NSMutableData* gssHeaderWithChannelBindingData = [NSMutableData new];
     [gssHeaderWithChannelBindingData appendData:[_gssHeader dataUsingEncoding:NSUTF8StringEncoding]];
@@ -162,6 +168,7 @@
 -(MLScramStatus) parseServerFinalMessage:(NSString*) str
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
+    MLAssert(_serverFirstMessageParsed, @"SCRAM handler did not parsed server-first-message yet!");
     NSDictionary* msg = [self parseScramString:str];
     //wrong v-value
     if(![HelperTools constantTimeCompareAttackerString:msg[@"v"] withKnownString:_expectedServerSignature])
@@ -174,7 +181,7 @@
     }
     //everything was successful
     _finishedSuccessfully = YES;
-    return MLScramStatusOK;
+    return MLScramStatusServerFinalOK;
 }
 
 -(NSData*) hashPasswordWithSalt:(NSData*) salt andIterationCount:(uint32_t) iterationCount

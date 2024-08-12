@@ -196,10 +196,13 @@ struct OmemoKeysEntry: View {
 }
 
 struct OmemoKeysForContact: View {
-    @State private var deviceId: NSNumber
     @State private var deviceIds: OrderedSet<NSNumber>
     @State private var showDeleteKeyAlert = false
     @State private var selectedDeviceForDeletion : NSNumber
+
+    private var deviceId: NSNumber {
+        return account.omemo.getDeviceId()
+    }
 
     private let contactJid: String
     private let account: xmpp
@@ -209,7 +212,6 @@ struct OmemoKeysForContact: View {
         self.ownKeys = (account.connectionProperties.identity.jid == contact.obj.contactJid)
         self.contactJid = contact.obj.contactJid
         self.account = account
-        self.deviceId = account.omemo.getDeviceId()
         self.deviceIds = OmemoKeysForContact.knownDevices(account: self.account, jid: self.contactJid)
         self.selectedDeviceForDeletion = -1
     }

@@ -1534,6 +1534,14 @@ void swizzle(Class c, SEL orig, SEL new)
     return blacklisted;
 }
 
++(void) removeAllShareInteractionsForAccountNo:(NSNumber*) accountNo
+{
+    DDLogInfo(@"Removing share interaction for all contacts on account id %@", accountNo);
+    for(MLContact* contact in [[DataLayer sharedInstance] contactList])
+        if(contact.accountId.intValue == accountNo.intValue)
+            [contact removeShareInteractions];
+}
+
 +(void) scheduleBackgroundTask:(BOOL) force
 {
     DDLogInfo(@"Scheduling new BackgroundTask with force=%s...", force ? "yes" : "no");

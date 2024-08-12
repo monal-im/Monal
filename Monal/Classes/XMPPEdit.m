@@ -480,7 +480,7 @@ enum DummySettingsRows {
     [questionAlert addAction:yesAction];
     
     UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
-    popPresenter.sourceItem = sender;
+    popPresenter.sourceView = self.view;
     
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
@@ -539,7 +539,7 @@ enum DummySettingsRows {
     [questionAlert addAction:yesAction];
     
     UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
-    popPresenter.sourceItem = sender;
+    popPresenter.sourceView = self.view;
     
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
@@ -571,7 +571,7 @@ enum DummySettingsRows {
     [questionAlert addAction:yesAction];
     
     UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
-    popPresenter.sourceItem = sender;
+    popPresenter.sourceView = self.view;
     
     [self presentViewController:questionAlert animated:YES completion:nil];
 

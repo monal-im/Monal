@@ -631,6 +631,7 @@ static NSMutableDictionary* _singletonCache;
     if(self.isGroup == NO)
     {
         NSSet* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
+        DDLogVerbose(@"Current isEncrypted=%@, encrypt=%@, knownDevices=%@", bool2str(self.isEncrypted), bool2str(encrypt), knownDevices);
         if(!self.isEncrypted && encrypt && knownDevices.count == 0)
         {
             // request devicelist again

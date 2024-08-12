@@ -196,32 +196,29 @@ struct OmemoKeysEntryView: View {
 }
 
 struct OmemoKeysForContactView: View {
-    @State private var deviceIds: OrderedSet<NSNumber>
     @State private var showDeleteKeyAlert = false
     @State private var selectedDeviceForDeletion : NSNumber
+    @ObservedObject private var devices: OmemoKeysForContact
 
     private var deviceId: NSNumber {
         return account.omemo.getDeviceId()
+    }
+
+    private var deviceIds: OrderedSet<NSNumber> {
+        return OrderedSet(devices.devices.sorted { $0.intValue < $1.intValue })
     }
 
     private let contactJid: String
     private let account: xmpp
     private let ownKeys: Bool
 
-    init(contact: ObservableKVOWrapper<MLContact>, account: xmpp) {
+    init(contact: ObservableKVOWrapper<MLContact>, devices: OmemoKeysForContact) {
+        let account = (contact.account as xmpp?)!
         self.ownKeys = (account.connectionProperties.identity.jid == contact.obj.contactJid)
         self.contactJid = contact.obj.contactJid
         self.account = account
-        self.deviceIds = OmemoKeysForContactView.knownDevices(account: self.account, jid: self.contactJid)
+        self.devices = devices
         self.selectedDeviceForDeletion = -1
-    }
-    
-    private static func knownDevices(account: xmpp, jid: String) -> OrderedSet<NSNumber> {
-        return OrderedSet(account.omemo.knownDevices(forAddressName: jid).sorted { return $0.intValue < $1.intValue })
-    }
-
-    private func refreshKnownDevices() -> Void {
-        self.deviceIds = OmemoKeysForContactView.knownDevices(account: self.account, jid: self.contactJid)
     }
 
     func deleteButton(deviceId: NSNumber) -> some View {
@@ -261,13 +258,6 @@ struct OmemoKeysForContactView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalOmemoStateUpdated")).receive(on: RunLoop.main)) { notification in
-            if notification.userInfo?["jid"] as? String == self.contactJid {
-                withAnimation() {
-                    refreshKnownDevices()
-                }
-            }
-        }
     }
 }
 
@@ -279,25 +269,27 @@ struct OmemoKeysForChatView: View {
     @State private var scannedJid : String = ""
     @State private var scannedFingerprints : Dictionary<NSInteger, String> = [:]
 
-    @State private var contacts: OrderedSet<ObservableKVOWrapper<MLContact>> // contact list may change/be reloaded -> state
-
     @State var selectedContact : ObservableKVOWrapper<MLContact>? // for reason why see start of body
     @State private var navigateToQRCodeView = false
     @State private var navigateToQRCodeScanner = false
 
     @State private var showScannedContactMissmatchAlert = false
 
-    init(contact: ObservableKVOWrapper<MLContact>?) {
-        self.account = nil
-        self.selectedContact = nil
-        self.contacts = getContactList(viewContact: contact)
-        self.viewContact = contact
+    @ObservedObject private var omemoKeys: OmemoKeysForChat
 
-        if let contact = contact {
-            if let account = contact.obj.account {
-                self.account = account
-            }
+    private var contacts: [(ObservableKVOWrapper<MLContact>, OmemoKeysForContact)] {
+        return omemoKeys.contacts.sorted { (entry1, entry2) -> Bool in
+            let entry1Jid: String = entry1.0.contactJid
+            let entry2Jid: String = entry2.0.contactJid
+            return entry1Jid < entry2Jid
         }
+    }
+
+    init(omemoKeys: OmemoKeysForChat) {
+        self.account = omemoKeys.viewContact?.account
+        self.selectedContact = nil
+        self.viewContact = omemoKeys.viewContact
+        self.omemoKeys = omemoKeys
     }
 
     private func isOwnKeys() -> Bool {
@@ -351,14 +343,14 @@ struct OmemoKeysForChatView: View {
             Text("You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen. Double tap onto a fingerprint to copy to clipboard.")
 
             Section(header:helpDescription) {
-                if (self.contacts.count == 1) {
-                    ForEach(self.contacts, id: \.self.obj) { contact in
-                        OmemoKeysForContactView(contact: contact, account: self.account!)
+                if (omemoKeys.contacts.count == 1) {
+                    ForEach(self.contacts, id: \.0) { contact, devices in
+                        OmemoKeysForContactView(contact: contact, devices: devices)
                     }
                 } else {
-                    ForEach(self.contacts, id: \.self.obj) { contact in
+                    ForEach(self.contacts, id: \.0) { contact, devices in
                         DisclosureGroup(content: {
-                            OmemoKeysForContactView(contact: contact, account: self.account!)
+                            OmemoKeysForContactView(contact: contact, devices: devices)
                         }, label: {
                             HStack {
                                 Text("Keys of \(contact.obj.contactJid)")
@@ -386,7 +378,7 @@ struct OmemoKeysForChatView: View {
                             Image(systemName: "camera.fill")
                         })
                     }*/
-                    if(self.contacts.count == 1 && self.account != nil) {
+                    if(omemoKeys.contacts.count == 1 && self.account != nil) {
                         Button(action: {
                             self.navigateToQRCodeView = true
                         }, label: {
@@ -399,7 +391,7 @@ struct OmemoKeysForChatView: View {
         .accentColor(monalGreen)
         .navigationBarTitle(isOwnKeys() ? Text("My Encryption Keys") : Text("Encryption Keys"), displayMode: .inline)
         .onAppear(perform: {
-            self.selectedContact = self.contacts.first // needs to be done here as first is nil in init
+            self.selectedContact = self.omemoKeys.contacts.keys.first // needs to be done here as first is nil in init
         })
         .alert(isPresented: $showScannedContactMissmatchAlert) {
             Alert(
@@ -410,26 +402,33 @@ struct OmemoKeysForChatView: View {
                     resetTrustFromQR(scannedJid: self.scannedJid, scannedFingerprints: self.scannedFingerprints)
                     self.scannedJid = ""
                     self.scannedFingerprints = [:]
-                    self.contacts = getContactList(viewContact: self.viewContact) // refresh all contacts because trust may have changed
             }))
         }
     }
 }
 
 struct OmemoKeysView: View {
-    private var viewContact: ObservableKVOWrapper<MLContact>?
-    private var account: xmpp?
-    @State private var contacts: OrderedSet<ObservableKVOWrapper<MLContact>>
+    @ObservedObject private var omemoKeys: OmemoKeysForChat
 
-    init(contact: ObservableKVOWrapper<MLContact>?) {
-        self.viewContact = contact
-        self.account = contact?.account
-        self.contacts = getContactList(viewContact: contact)
+    init(omemoKeys: OmemoKeysForChat) {
+        self.omemoKeys = omemoKeys
+    }
+
+    private var viewContact: ObservableKVOWrapper<MLContact>? {
+        return omemoKeys.viewContact
+    }
+
+    private var account: xmpp? {
+        return viewContact?.account
+    }
+
+    private var contacts: Set<ObservableKVOWrapper<MLContact>> {
+        return Set(omemoKeys.contacts.keys)
     }
 
     var body: some View {
         if self.account != nil && !self.contacts.isEmpty {
-            OmemoKeysForChatView(contact: viewContact)
+            OmemoKeysForChatView(omemoKeys: omemoKeys)
         } else if self.contacts.isEmpty {
             ContentUnavailableShimView("No Contacts", systemImage: "person.2.slash", description: Text("Cannot display keys as there are no contacts to display keys for."))
         } else if self.account == nil {
@@ -438,9 +437,48 @@ struct OmemoKeysView: View {
     }
 }
 
+class OmemoKeysForContact: ObservableObject {
+    @Published var devices: Set<NSNumber>
+
+    init(devices: Set<NSNumber>) {
+        self.devices = devices
+    }
+}
+
+class OmemoKeysForChat: ObservableObject {
+    var viewContact: ObservableKVOWrapper<MLContact>?
+    @Published var contacts: Dictionary<ObservableKVOWrapper<MLContact>, OmemoKeysForContact>
+
+    init(viewContact: ObservableKVOWrapper<MLContact>?) {
+        self.viewContact = viewContact
+        self.contacts = OmemoKeysForChat.knownDevices(viewContact: self.viewContact)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateContactDevices), name: NSNotification.Name("kMonalOmemoStateUpdated"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateContactDevices), name: NSNotification.Name("kMonalMucParticipantsAndMembersUpdated"), object: nil)
+    }
+
+    @objc
+    private func updateContactDevices() -> Void {
+        withAnimation() {
+            self.contacts = OmemoKeysForChat.knownDevices(viewContact: self.viewContact)
+        }
+    }
+
+    private static func knownDevices(viewContact: ObservableKVOWrapper<MLContact>?) -> Dictionary<ObservableKVOWrapper<MLContact>, OmemoKeysForContact> {
+        let contacts: OrderedSet<ObservableKVOWrapper<MLContact>> = getContactList(viewContact: viewContact)
+        let devices = contacts.map { ($0, devicesForContact(contact: $0)) }
+        return Dictionary(uniqueKeysWithValues: devices)
+    }
+
+    private static func devicesForContact(contact: ObservableKVOWrapper<MLContact>) -> OmemoKeysForContact {
+        let account: xmpp = (contact.account as xmpp?)!
+        let devicesForContact: Set<NSNumber> = account.omemo.knownDevices(forAddressName: contact.contactJid)
+        return OmemoKeysForContact(devices: devicesForContact)
+    }
+}
+
 struct OmemoKeys_Previews: PreviewProvider {
     static var previews: some View {
         // TODO some dummy views, requires a dummy xmpp obj
-        OmemoKeysView(contact:nil);
+        OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: nil));
     }
 }

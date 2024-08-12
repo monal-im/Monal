@@ -376,10 +376,7 @@ enum DummySettingsRows {
                     {
                         DDLogVerbose(@"Making sure newly created account is not connected and deleting all SiriKit interactions: %@", self.accountNo);
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo withExplicitLogout:YES];
-                        [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
-                            if(error != nil)
-                                DDLogError(@"Could not delete all SiriKit interactions: %@", error);
-                        }];
+                        [HelperTools removeAllShareInteractionsForAccountNo:self.accountNo];
                     }
                     //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
@@ -400,10 +397,7 @@ enum DummySettingsRows {
         {
             DDLogVerbose(@"Account is not enabled anymore, deleting all SiriKit interactions and making sure it's disconnected: %@", self.accountNo);
             [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo withExplicitLogout:YES];
-            [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
-                if(error != nil)
-                    DDLogError(@"Could not delete all SiriKit interactions: %@", error);
-            }];
+            [HelperTools removeAllShareInteractionsForAccountNo:self.accountNo];
         }
         //this case makes sure we recreate a completely new account instance below (using our new settings) if the account details changed
         else if(self.detailsChanged)

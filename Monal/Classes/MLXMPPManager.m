@@ -761,10 +761,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self disconnectAccount:accountNo withExplicitLogout:YES];
     [[DataLayer sharedInstance] removeAccount:accountNo];
     [SAMKeychain deletePasswordForService:kMonalKeychainName account:accountNo.stringValue];
-    [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
-        if(error != nil)
-            DDLogError(@"Could not delete all SiriKit interactions: %@", error);
-    }];
+    [HelperTools removeAllShareInteractionsForAccountNo:accountNo];
     // trigger UI removal
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 }

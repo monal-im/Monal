@@ -1323,12 +1323,14 @@ $$
     {
         DDLogVerbose(@"No omemo session for %@", buddyJid);
         MLContact* contact = [MLContact createContactFromJid:buddyJid andAccountNo:self.account.accountNo];
-        //only do so if we don't receive automatic headline pushes of the devicelist
-        if(!contact.isSubscribedTo)
-        {
-            DDLogVerbose(@"Fetching devicelist with subscribe from contact: %@", contact);
-            [self queryOMEMODevices:buddyJid withSubscribe:YES];
-        }
+        //only subscribe if we don't receive automatic headline pushes of the devicelist
+        DDLogVerbose(@"Fetching devicelist %@ from contact: %@", !contact.isSubscribedTo ? @"with subscribe" : @"without subscribe", contact);
+        [self queryOMEMODevices:buddyJid withSubscribe:!contact.isSubscribedTo];
+    }
+    else
+    {
+        //make sure we don't show the omemo key fetching hud forever
+        [self sendFetchUpdateNotificationForJid:buddyJid];
     }
 }
 

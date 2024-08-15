@@ -76,7 +76,7 @@ typedef void (^contactCompletion)(MLContact* _Nonnull selectedContact) NS_SWIFT_
 typedef void (^accountCompletion)(NSInteger accountRow) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 typedef void (^monal_void_block_t)(void) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 typedef void (^monal_id_block_t)(id _Nonnull) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
-typedef id _Nullable (^monal_id_returning_block_t)(id _Nonnull) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
+typedef id _Nullable (^monal_id_returning_void_block_t)(void) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 typedef id _Nullable (^monal_id_returning_id_block_t)(id _Nonnull) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 typedef void (^monal_upload_completion_t)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error) NS_SWIFT_UNAVAILABLE("To be redefined in swift.");
 
@@ -172,6 +172,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalFinishedOmemoBundleFetch @"kMonalFinishedOmemoBundleFetch"
 #define kMonalOmemoStateUpdated @"kMonalOmemoStateUpdated"
 #define kMonalUpdateBundleFetchStatus @"kMonalUpdateBundleFetchStatus"
+#define kMonalOmemoFetchingStateUpdate @"kMonalOmemoFetchingStateUpdate"
 #define kMonalIdle @"kMonalIdle"
 #define kMonalFiletransfersIdle @"kMonalFiletransfersIdle"
 #define kMonalNotIdle @"kMonalNotIdle"

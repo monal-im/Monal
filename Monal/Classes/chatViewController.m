@@ -66,6 +66,7 @@
 @property (nonatomic, assign) NSInteger thisday;
 @property (nonatomic, strong) MBProgressHUD* uploadHUD;
 @property (nonatomic, strong) MBProgressHUD* gpsHUD;
+@property (nonatomic, strong) MBProgressHUD* omemoHUD;
 @property (nonatomic, strong) UIBarButtonItem* callButton;
 
 @property (nonatomic, strong) NSMutableArray<MLMessage*>* messageList;
@@ -781,7 +782,7 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(handleDeletedMessage:) name:kMonalDeletedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
-
+    [nc addObserver:self selector:@selector(handleOmemoFetchStateUpdate:) name:kMonalOmemoFetchingStateUpdate object:nil];
 
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:kMonalRefresh object:nil];
@@ -847,58 +848,8 @@ enum msgSentState {
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-#ifndef DISABLE_OMEMO
-    if(self.xmppAccount && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
-    {
-        BOOL omemoDeviceForContactFound = NO;
-        if(!self.contact.isGroup)
-            omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid].count > 0;
-        else
-        {
-            omemoDeviceForContactFound = NO;
-            for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo])
-            {
-                if(participant[@"participant_jid"])
-                    omemoDeviceForContactFound |= [self.xmppAccount.omemo knownDevicesForAddressName:participant[@"participant_jid"]].count > 0;
-                else if(participant[@"member_jid"])
-                    omemoDeviceForContactFound |= [self.xmppAccount.omemo knownDevicesForAddressName:participant[@"member_jid"]].count > 0;
-                if(omemoDeviceForContactFound)
-                    break;
-            }
-        }
-        if(!omemoDeviceForContactFound && self.contact.isEncrypted)
-        {
-            if(!self.contact.isGroup && [[HelperTools splitJid:self.contact.contactJid][@"host"] isEqualToString:@"cheogram.com"])
-            {
-                // cheogram.com does not support OMEMO encryption as it is a PSTN gateway
-                // --> disable it
-                self.contact.isEncrypted = NO;
-                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-            }
-            else if(self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])
-            {
-                // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
-                // --> disable it
-                self.contact.isEncrypted = NO;
-                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-            }
-            else if(!self.contact.isGroup || (self.contact.isGroup && [self.contact.mucType isEqualToString:@"group"]))
-            {
-                // a 1:1 contact or a group type muc has OMEMO encryption enabled
-                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No OMEMO keys found", @"") message:NSLocalizedString(@"This contact may not support OMEMO encrypted messages. Please try to enable encryption again in a few seconds, if you think this is wrong.", @"") preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                    // Disable encryption
-                    self.contact.isEncrypted = NO;
-                    [self updateUIElements];
-                    [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-                    [alert dismissViewControllerAnimated:YES completion:nil];
-                }]];
-
-                [self presentViewController:alert animated:YES completion:nil];
-            }
-        }
-    }
-#endif
+    [self checkOmemoSupportWithAlert:NO];
+    
     [self refreshCounter];
 
     //init the floating last message button
@@ -1545,26 +1496,9 @@ enum msgSentState {
         }
         else if(gpsStatus == kCLAuthorizationStatusNotDetermined || gpsStatus == kCLAuthorizationStatusRestricted)
         {
-#if TARGET_OS_MACCATALYST
-            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed", @"") message:NSLocalizedString(@"Monal uses your location when you send a location message in a conversation.", @"") preferredStyle:UIAlertControllerStyleAlert];
-
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* _Nonnull action) {
-                [alert dismissViewControllerAnimated:YES completion:nil];
-            }]];
-
-            UIAlertAction* allow = [UIAlertAction actionWithTitle:NSLocalizedString(@"Allow", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* _Nonnull action) {
-                [self makeLocationManager];
-                self.sendLocation=YES;
-                [self.locationManager requestWhenInUseAuthorization];
-            }];
-            [alert addAction:allow];
-
-            [self presentViewController:alert animated:YES completion:nil];
-#else
             [self makeLocationManager];
             self.sendLocation = YES;
             [self.locationManager requestWhenInUseAuthorization];
-#endif
         }
         else
         {
@@ -3211,6 +3145,113 @@ enum msgSentState {
 {
     if(self.editingCallback)
         self.editingCallback(nil);      //dismiss swipe action
+}
+
+-(void) checkOmemoSupportWithAlert:(BOOL) showWarning
+{
+#ifndef DISABLE_OMEMO
+    if(self.xmppAccount && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
+    {
+        BOOL omemoDeviceForContactFound = NO;
+        if(!self.contact.isGroup)
+            omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid].count > 0;
+        else
+        {
+            omemoDeviceForContactFound = NO;
+            for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo])
+            {
+                if(participant[@"participant_jid"])
+                    omemoDeviceForContactFound |= [self.xmppAccount.omemo knownDevicesForAddressName:participant[@"participant_jid"]].count > 0;
+                else if(participant[@"member_jid"])
+                    omemoDeviceForContactFound |= [self.xmppAccount.omemo knownDevicesForAddressName:participant[@"member_jid"]].count > 0;
+                if(omemoDeviceForContactFound)
+                    break;
+            }
+        }
+        if(!omemoDeviceForContactFound && self.contact.isEncrypted)
+        {
+            if(!self.contact.isGroup && [[HelperTools splitJid:self.contact.contactJid][@"host"] isEqualToString:@"cheogram.com"])
+            {
+                // cheogram.com does not support OMEMO encryption as it is a PSTN gateway
+                // --> disable it
+                self.contact.isEncrypted = NO;
+                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+            }
+            else if(self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])
+            {
+                // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
+                // --> disable it
+                self.contact.isEncrypted = NO;
+                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+            }
+            else if(!self.contact.isGroup || (self.contact.isGroup && [self.contact.mucType isEqualToString:@"group"]))
+            {
+                [self hideOmemoHUD];
+                if(showWarning)
+                {
+                    DDLogWarn(@"Showing omemo not supported alert for: %@", self.contact);
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No OMEMO keys found", @"") message:NSLocalizedString(@"This contact may not support OMEMO encrypted messages. Please try to enable encryption again in a few seconds, if you think this is wrong.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        // Disable encryption
+                        self.contact.isEncrypted = NO;
+                        [self updateUIElements];
+                        [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                }
+                else
+                {
+                    // async dispatch is needed to show hud on chat open
+                    // we won't do this twice, because the user won't be able to change isEncrypted to YES,
+                    // unless we have omemo devices for that contact
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self showOmemoHUD];
+                    });
+                    // request omemo devicelist
+                    [self.xmppAccount.omemo subscribeAndFetchDevicelistIfNoSessionExistsForJid:self.contact.contactJid];
+                }
+            }
+        }
+        else
+            [self hideOmemoHUD];
+    }
+#endif
+}
+
+-(void) showOmemoHUD
+{
+    DDLogVerbose(@"Showing omemo HUD...");
+    if(!self.omemoHUD)
+    {
+        self.omemoHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.omemoHUD.removeFromSuperViewOnHide = YES;
+        self.omemoHUD.label.text = NSLocalizedString(@"Loading OMEMO keys", @"");
+    }
+    else
+        self.omemoHUD.hidden = NO;
+}
+
+-(void) hideOmemoHUD
+{
+    DDLogVerbose(@"Hiding omemo HUD...");
+    self.omemoHUD.hidden = YES;
+}
+
+-(void) handleOmemoFetchStateUpdate:(NSNotification*) notification
+{
+    xmpp* account = notification.object;
+    MLContact* contact = [MLContact createContactFromJid:notification.userInfo[@"jid"] andAccountNo:account.accountNo];
+    if(self.contact && [self.contact isEqualToContact:contact])
+    {
+        DDLogDebug(@"Got omemo fetching update: %@ --> %@", contact, notification.userInfo);
+        if(!((NSNumber*)notification.userInfo[@"isFetching"]).boolValue)
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //recheck support and show alert if needed
+                DDLogVerbose(@"Rechecking omemo support with alert, if needed...");
+                [self checkOmemoSupportWithAlert:YES];
+            });
+    }
 }
 
 -(void) showUploadHUD

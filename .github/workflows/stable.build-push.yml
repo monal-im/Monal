@@ -35,6 +35,13 @@ jobs:
           lfs: true
       - name: Checkout submodules
         run: git submodule update -f --init --remote
+      - name: Check for proper semantic versioning
+        run: |
+          version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
+          if ! [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
+            echo "Invalid semver: '$version'!"
+            exit 1
+          fi
       - name: Get last build tag and increment it
         run: |
           oldBuildNumber=$(git tag --sort="v:refname" | grep "Build_iOS" | grep -v "Quicksy_Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')
@@ -175,7 +182,10 @@ jobs:
           path: Monal/build/app/Monal.pkg
           if-no-files-found: error
       - name: Upload new catalyst stable to monal-im.org
-        run: ./scripts/uploadNonAlpha.sh stable
+        env:
+          UPLOAD_TYPE: stable
+          buildNumber: ${{ steps.releasenotes.outputs.buildNumber }}
+        run: ./scripts/uploadNonAlpha.sh
       - name: Publish catalyst to appstore connect
         #run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
         env:

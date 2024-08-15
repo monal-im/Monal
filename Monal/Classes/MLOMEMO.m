@@ -338,12 +338,17 @@ $$
     {
         //fetch newest devicelist (this is needed even after a subscribe on at least prosody)
         [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe))];
+        [self.state.openDevicelistFetches addObject:jid];
+        
+        [self sendFetchUpdateNotificationForJid:jid];
     }
 }
 
 $$instance_handler(handleDevicelistSubscribeInvalidation, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid))
     //mark devicelist subscription as done
     [self.state.openDevicelistSubscriptions removeObject:jid];
+    
+    [self sendFetchUpdateNotificationForJid:jid];
 $$
 
 $$instance_handler(handleDevicelistSubscribe, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
@@ -351,12 +356,14 @@ $$instance_handler(handleDevicelistSubscribe, account.omemo, $$ID(xmpp*, account
     
     if(success == NO)
     {
+        // TODO: improve error handling
         if(errorIq)
             DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorIq);
         else
             DDLogError(@"Error while subscribe to omemo deviceslist from: %@ - %@", jid, errorReason);
     }
-    // TODO: improve error handling
+    
+    [self sendFetchUpdateNotificationForJid:jid];
 $$
 
 $$instance_handler(handleDevicelistFetchInvalidation, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid))
@@ -370,6 +377,8 @@ $$instance_handler(handleDevicelistFetchInvalidation, account.omemo, $$ID(xmpp*,
     
     //retrigger queued key transport elements for this jid (if any)
     [self retriggerKeyTransportElementsForJid:jid];
+    
+    [self sendFetchUpdateNotificationForJid:jid];
 $$
 
 $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $$BOOL(subscribe), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
@@ -423,6 +432,8 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
         [self repairQueuedSessions];                        //now try to repair all broken sessions (our catchup is now really done)
     else
         [self retriggerKeyTransportElementsForJid:jid];     //retrigger queued key transport elements for this jid (if any)
+        
+    [self sendFetchUpdateNotificationForJid:jid];
 $$
 
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source
@@ -571,6 +582,7 @@ $$
         self.state.openBundleFetches[jid] = [NSMutableSet new];
     [self.state.openBundleFetches[jid] addObject:deviceid];
     
+    [self sendFetchUpdateNotificationForJid:jid];
 }
 
 //don't mark any devices as deleted in this invalidation handler (like we do for an error in the normal handler below),
@@ -588,6 +600,8 @@ $$instance_handler(handleBundleFetchInvalidation, account.omemo, $$ID(xmpp*, acc
     
     //retrigger queued key transport elements for this jid (if any)
     [self retriggerKeyTransportElementsForJid:jid];
+    
+    [self sendFetchUpdateNotificationForJid:jid];
 $$
 
 $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data), $$ID(NSNumber*, rid))
@@ -639,6 +653,8 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     
     //retrigger queued key transport elements for this jid (if any)
     [self retriggerKeyTransportElementsForJid:jid];
+    
+    [self sendFetchUpdateNotificationForJid:jid];
 $$
 
 -(void) handleBundleWithInvalidEntryForJid:(NSString*) jid andRid:(NSNumber*) rid
@@ -1305,10 +1321,16 @@ $$
 {
     if([self.monalSignalStore sessionsExistForBuddy:buddyJid] == NO)
     {
+        DDLogVerbose(@"No omemo session for %@", buddyJid);
         MLContact* contact = [MLContact createContactFromJid:buddyJid andAccountNo:self.account.accountNo];
-        //only do so if we don't receive automatic headline pushes of the devicelist
-        if(!contact.isSubscribedTo)
-            [self queryOMEMODevices:buddyJid withSubscribe:YES];
+        //only subscribe if we don't receive automatic headline pushes of the devicelist
+        DDLogVerbose(@"Fetching devicelist %@ from contact: %@", !contact.isSubscribedTo ? @"with subscribe" : @"without subscribe", contact);
+        [self queryOMEMODevices:buddyJid withSubscribe:!contact.isSubscribedTo];
+    }
+    else
+    {
+        //make sure we don't show the omemo key fetching hud forever
+        [self sendFetchUpdateNotificationForJid:buddyJid];
     }
 }
 
@@ -1321,10 +1343,11 @@ $$
     else if([self.monalSignalStore checkIfSessionIsStillNeeded:buddyJid] == NO)
         [danglingJids addObject:buddyJid];
 
-    [self notifyKnownDevicesUpdated:buddyJid];
     DDLogVerbose(@"Unsubscribing from dangling jids: %@", danglingJids);
     for(NSString* jid in danglingJids)
         [self.account.pubsub unsubscribeFromNode:@"eu.siacs.conversations.axolotl.devicelist" forJid:jid withHandler:$newHandler(self, handleDevicelistUnsubscribe)];
+    
+    [self notifyKnownDevicesUpdated:buddyJid];
 }
 
 //interfaces for UI
@@ -1400,6 +1423,18 @@ $$
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];
+}
+
+-(void) sendFetchUpdateNotificationForJid:(NSString*) jid
+{
+    BOOL isFetching = self.state.openBundleFetches[jid] != nil || [self.state.openDevicelistFetches containsObject:jid] || [self.state.openDevicelistSubscriptions containsObject:jid];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalOmemoFetchingStateUpdate object:self.account userInfo:@{
+        @"jid": jid,
+        @"isFetching": @(isFetching),
+        @"fetchingBundle": @(self.state.openBundleFetches[jid] != nil),
+        @"fetchingDevicelist": @([self.state.openDevicelistFetches containsObject:jid]),
+        @"subscribingDevicelist": @([self.state.openDevicelistSubscriptions containsObject:jid]),
+    }];
 }
 
 @end

@@ -224,7 +224,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     //do this asynchronous on a background thread
     [self notificationStateForMessage:message].thenInBackground(^(NSNumber* _state) {
         MLNotificationState state = _state.integerValue;
-        if(state == MLNotificationStatePending || state == MLNotificationStateNone)
+        if(state == MLNotificationStatePending)
         {
             DDLogDebug(@"Already pending or unknown notification '%@', updating/posting it...", idval);
             [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:YES andLMCReplaced:NO];
@@ -234,8 +234,6 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
             DDLogDebug(@"Already displayed notification '%@', updating it...", idval);
             [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:YES andSound:NO andLMCReplaced:NO];
         }
-        else
-            unreachable(@"Unknown MLNotificationState!", @{@"state": @(state)});
     });
 }
 

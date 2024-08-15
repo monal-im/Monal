@@ -2505,9 +2505,24 @@ NSString* const kStanza = @"stanza";
                 case MLScramStatusNonceError: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (nonce error), disconnecting!", @"parenthesis should be verbatim"); break;
                 case MLScramStatusUnsupportedMAttribute: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (m-attr error), disconnecting!", @"parenthesis should be verbatim"); break;
                 case MLScramStatusIterationCountInsecure: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (iteration count too low), disconnecting!", @"parenthesis should be verbatim"); break;
-                case MLScramStatusOK: deactivate_account = NO; message = nil; break;        //everything is okay
+                case MLScramStatusServerFirstOK: deactivate_account = NO; message = nil; break;        //everything is okay
                 default: unreachable(@"wrong status for scram message!"); break;
             }
+            
+            //check for incomplete XEP-0440 support (not implementing mandatory tls-server-end-point channel-binding) not mitigated by SSDP
+            //(we allow either support for tls-server-end-point or SSDP signed non-support)
+            if([kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]])
+            {
+                MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
+                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:kServerDoesNotFollowXep0440Error],
+                ] andData:nil];
+                [self disconnectWithStreamError:streamError andExplicitLogout:YES];
+                
+                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+                [HelperTools postError:NSLocalizedString(@"Either this is a man-in-the-middle attack OR your server neither implements XEP-0474 nor does it fully implement XEP-0440 which mandates support for tls-server-end-point channel-binding. In either case you should inform your server admin! Account disabled now.", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+            }
+            
             if(message != nil)
             {
                 DDLogError(@"SCRAM says this server-first message was wrong!");
@@ -2654,20 +2669,6 @@ NSString* const kStanza = @"stanza";
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
             
-            //check for incomplete XEP-0440 support (not implementing mandatory tls-server-end-point channel-binding) not mitigated by SSDP
-            //(we allow either support for tls-server-end-point or SSDP signed non-support)
-            if([kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]])
-            {
-                MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
-                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:kServerDoesNotFollowXep0440Error],
-                ] andData:nil];
-                [self disconnectWithStreamError:streamError andExplicitLogout:YES];
-                
-                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                [HelperTools postError:NSLocalizedString(@"Either this is a man-in-the-middle attack OR your server neither implements XEP-0474 nor does it fully implement XEP-0440 which mandates support for tls-server-end-point channel-binding. In either case you should inform your server admin! Account disabled now.", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
-            }
-            
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
             self->_accountState = kStateLoggedIn;
@@ -2678,6 +2679,11 @@ NSString* const kStanza = @"stanza";
                 _loginTimer = nil;
             }
             self->_loggedInOnce = YES;
+            
+            //pin sasl2 support for this account (this is done only after successful auth to prevent DOS MITM attacks simulating SASL2 support)
+            //downgrading to SASL1 would mean PLAIN instead of SCRAM and no protocol agility for channel-bindings,
+            //if XEP-0440 is not supported by server
+            [[DataLayer sharedInstance] deactivatePlainForAccount:self.accountNo];
             
             //NOTE: we don't have any stream restart when using SASL2
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
@@ -2892,6 +2898,21 @@ NSString* const kStanza = @"stanza";
 
 -(void) handleFeaturesBeforeAuth:(MLXMLNode*) parsedStanza
 {
+    return [self handleFeaturesBeforeAuth:parsedStanza withForceSasl2:NO];
+}
+
+-(void) handleFeaturesBeforeAuth:(MLXMLNode*) parsedStanza withForceSasl2:(BOOL) forceSasl2
+{
+    monal_id_returning_void_block_t checkProperSasl2Support = ^{
+        //check if we SASL2 is supported with something better than PLAIN and, if so, switch off plain_activated
+        NSSet* supportedSasl2Mechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
+        for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:YES])
+            if([supportedSasl2Mechanisms containsObject:mechanism])
+            {
+                return @YES;
+            }
+        return @NO;
+    };
     monal_id_block_t clearPipelineCacheOrReportSevereError = ^(NSString* msg) {
         DDLogWarn(@"Clearing auth pipeline due to error...");
         
@@ -2914,28 +2935,32 @@ NSString* const kStanza = @"stanza";
     };
     //called below, if neither SASL1 nor SASL2 could be used to negotiate a valid SASL mechanism
     monal_void_block_t noAuthSupported = ^{
-        DDLogWarn(@"No supported auth mechanism!");
+        DDLogWarn(@"No supported auth mechanism: %@", self->_supportedSaslMechanisms);
         
         //sasl2 will be pinned if we saw sasl2 support and PLAIN was NOT allowed by creating this account using the  advanced account creation menu
         //display scary warning message if sasl2 is pinned and login was successful at least once
         //or display a message pointing to the advanced account creation menu if sasl2 is pinned and login was NOT successful at least once
         //(e.g. we are trying to create this account just now)
-        if([[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo])
+        if(![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo])
         {
+            DDLogDebug(@"Plain is not activated for this account...");
             if(self->_loggedInOnce)
             {
                 clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Server suddenly lacks support for SASL2-SCRAM, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""));
+                return;
             }
-            else if([self->_supportedSaslMechanisms containsObject:@"PLAIN"])
+            //_supportedSaslMechanisms==nil indicates SASL1 support only
+            else if([self->_supportedSaslMechanisms containsObject:@"PLAIN"] || self->_supportedSaslMechanisms == nil)
             {
-                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Server only supports authentication methods not safe against man-in-the-middle attacks! Use the advanced account creation menu if you absolutely must use this server.", @""));
+                //leave that in for translators, we might use it at a later time
+                while(!NSLocalizedString(@"This server isn't additionally hardened against man-in-the-middle attacks on the TLS encryption layer by using authentication methods that are secure against such attacks! This indicates an ongoing attack if the server is supposed to support SASL2 and SCRAM and is harmless otherwise. Use the advanced account creation menu and turn on the PLAIN switch there if you still want to log in to this server.", @""));
+                
+                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"This server lacks support for SASL2 and SCRAM, additionally hardening authentication against man-in-the-middle attacks on the TLS encryption layer. Since this server is listed as supporting both at https://github.com/monal-im/SCRAM_PreloadList, an ongoing MITM attack is highly likely! You should try again once you are in a clean networking environment.", @""));
+                return;
             }
         }
-        else
-            clearPipelineCacheOrReportSevereError(NSLocalizedString(@"No supported auth mechanism found, disabling account!", @""));
+        clearPipelineCacheOrReportSevereError(NSLocalizedString(@"No supported auth mechanism found, disabling account!", @""));
     };
-    
-    MLAssert(!([[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo] && [[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo]), @"SASL2 pinned AND plain auth enabled, that should never happen!", @{@"account": self});
     
     if(![parsedStanza check:@"{urn:xmpp:ibr-token:0}register"])
         DDLogWarn(@"Server NOT supporting Pre-Authenticated IBR");
@@ -2958,8 +2983,10 @@ NSString* const kStanza = @"stanza";
         [self submitRegForm];
     }
     //prefer SASL2 over SASL1
-    else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && ![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo])
+    else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && (![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo] || forceSasl2))
     {
+        DDLogDebug(@"Trying SASL2...");
+        
         weakify(self);
         _blockToCallOnTCPOpen = ^{
             strongify(self);
@@ -3016,11 +3043,6 @@ NSString* const kStanza = @"stanza";
             noAuthSupported();
         };
         
-        //pin sasl2 support for this account
-        //downgrading to SASL1 would mean PLAIN instead of SCRAM and no protocol agility for channel-bindings
-        //if XEP-0440 is not supported by server
-        [[DataLayer sharedInstance] pinSasl2ForAccount:self.accountNo];
-        
         //extract menchanisms presented
         _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
         
@@ -3050,19 +3072,18 @@ NSString* const kStanza = @"stanza";
         else
             DDLogWarn(@"Waiting until TLS stream is connected before pipelining the auth element due to channel binding...");
     }
-    //SASL1 is fallback only if SASL2 isn't supported with something better than PLAIN
-    else if([parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"] && ![[DataLayer sharedInstance] isSasl2PinnedForAccount:self.accountNo])
+    //check if the server activated SASL2 after previously only upporting SASL1
+    else if([[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo] && ((NSNumber*)checkProperSasl2Support()).boolValue)
     {
-        //check if we SASL2 is supported with something better than PLAIN and, if so, switch off plain_activated
-        NSSet* supportedSasl2Mechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
-        for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:YES])
-            if([supportedSasl2Mechanisms containsObject:mechanism])
-            {
-                DDLogInfo(@"We detected SASL2 SCRAM support, deactivating forced SASL1 PLAIN fallback and retrying using SASL2...");
-                [[DataLayer sharedInstance] deactivatePlainForAccount:self.accountNo];
-                //try again, this time using sasl2
-                return [self handleFeaturesBeforeAuth:parsedStanza];
-            }
+        DDLogInfo(@"We detected SASL2 SCRAM support, deactivating forced SASL1 PLAIN fallback and retrying using SASL2...");
+        [[DataLayer sharedInstance] deactivatePlainForAccount:self.accountNo];
+        //try again, this time using sasl2
+        return [self handleFeaturesBeforeAuth:parsedStanza withForceSasl2:YES];
+    }
+    //SASL1 is fallback only if SASL2 isn't supported with something better than PLAIN
+    else if([parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"] && [[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo])
+    {
+        DDLogDebug(@"Trying SASL1...");
         
         //extract menchanisms presented
         NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
@@ -3104,15 +3125,12 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        //this is not a downgrade but something weird going on, report it as "no supported auth"
-        if(![parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && ![parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"])
-        {
-            noAuthSupported();
-            return;
-        }
+        DDLogDebug(@"Neither SASL2 nor SASL1 worked...");
         
-        //if the above case didn't trigger, this is a downgrade attack downgrading from SASL2 to SASL1, report is as such
-        clearPipelineCacheOrReportSevereError(NSLocalizedString(@"SASL2 to SASL1 downgrade attack detected, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""));
+        //this is not a downgrade but something weird going on, log it as such
+        if(![parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && ![parsedStanza check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism"])
+            DDLogError(@"Something weird happened: neither SASL1 nor SASL2 auth supported by this server!");
+        noAuthSupported();
     }
 }
 
@@ -3166,7 +3184,7 @@ NSString* const kStanza = @"stanza";
     switch([self->_scramHandler parseServerFinalMessage:innerSASLData]) {
         case MLScramStatusWrongServerProof: deactivate_account = YES; message = NSLocalizedString(@"SCRAM server proof wrong, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
         case MLScramStatusServerError: deactivate_account = NO; message = NSLocalizedString(@"Unexpected error authenticating server using SASL2 (does your server have a bug?), disconnecting!", @""); break;
-        case MLScramStatusOK: deactivate_account = NO; message = nil; break;        //everything is okay
+        case MLScramStatusServerFinalOK: deactivate_account = NO; message = nil; break;        //everything is okay
         default: unreachable(@"wrong status for scram message!"); break;
     }
     
@@ -3207,12 +3225,12 @@ NSString* const kStanza = @"stanza";
     
     //if our scram handshake is not finished yet and no mutually supported channel-binding can be found --> ignore that for now (see below)
     //if our scram handshake finished without negotiating a mutually supported channel-binding and this was not backed by SSDP --> report error
-    if(self->_scramHandler.finishedSuccessfully && !self->_scramHandler.ssdpSupported)
+    if(self->_scramHandler.serverFirstMessageParsed && !self->_scramHandler.ssdpSupported)
     {
         DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory via XEP-0440!");
         return kServerDoesNotFollowXep0440Error;     //this will trigger a disconnect
     }
-    if(!self->_scramHandler.finishedSuccessfully)
+    if(!self->_scramHandler.serverFirstMessageParsed)
         DDLogWarn(@"Could not find any supported channel-binding type, this COULD be a mitm attack (check via XEP-0474 pending)!");
     return nil;
 }

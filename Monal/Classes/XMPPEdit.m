@@ -112,7 +112,6 @@ enum DummySettingsRows {
 @property (nonatomic) BOOL statusMessageChanged;
 @property (nonatomic) BOOL detailsChanged;
 
-@property (nonatomic) BOOL sasl2Supported;
 @property (nonatomic) BOOL plainActivated;
 
 @property (nonatomic) BOOL deactivateSave;
@@ -204,8 +203,6 @@ enum DummySettingsRows {
         self.rosterName = [settings objectForKey:kRosterName];
         self.statusMessage = [settings objectForKey:@"statusMessage"];
         
-        self.sasl2Supported = [[settings objectForKey:kSupportsSasl2] boolValue];
-        
         self.plainActivated = [[settings objectForKey:kPlainActivated] boolValue];
         
         //overwrite account section heading in edit mode
@@ -220,7 +217,6 @@ enum DummySettingsRows {
         self.rosterName = @"";
         self.statusMessage = @"";
         self.enabled = YES;
-        self.sasl2Supported = NO;
         self.plainActivated = NO;
         
         //overwrite account section heading in new mode
@@ -343,9 +339,8 @@ enum DummySettingsRows {
     if(self.statusMessage)
         [dic setObject:[self.statusMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:@"statusMessage"];
     
-    [dic setObject:[NSNumber numberWithBool:self.sasl2Supported] forKey:kSupportsSasl2];
-    
-    [dic setObject:[NSNumber numberWithBool:self.plainActivated] forKey:kPlainActivated];
+    //conversations.im already supports sasl2 and scram ## TODO: use SCRAM preload list
+    [dic setObject:([domain.lowercaseString isEqualToString:@"conversations.im"] ? @NO : @(self.plainActivated)) forKey:kPlainActivated];
     
     if(!self.editMode)
     {
@@ -381,10 +376,7 @@ enum DummySettingsRows {
                     {
                         DDLogVerbose(@"Making sure newly created account is not connected and deleting all SiriKit interactions: %@", self.accountNo);
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo withExplicitLogout:YES];
-                        [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
-                            if(error != nil)
-                                DDLogError(@"Could not delete all SiriKit interactions: %@", error);
-                        }];
+                        [HelperTools removeAllShareInteractionsForAccountNo:self.accountNo];
                     }
                     //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
@@ -405,10 +397,7 @@ enum DummySettingsRows {
         {
             DDLogVerbose(@"Account is not enabled anymore, deleting all SiriKit interactions and making sure it's disconnected: %@", self.accountNo);
             [[MLXMPPManager sharedInstance] disconnectAccount:self.accountNo withExplicitLogout:YES];
-            [INInteraction deleteAllInteractionsWithCompletion:^(NSError* error) {
-                if(error != nil)
-                    DDLogError(@"Could not delete all SiriKit interactions: %@", error);
-            }];
+            [HelperTools removeAllShareInteractionsForAccountNo:self.accountNo];
         }
         //this case makes sure we recreate a completely new account instance below (using our new settings) if the account details changed
         else if(self.detailsChanged)
@@ -485,11 +474,8 @@ enum DummySettingsRows {
     [questionAlert addAction:yesAction];
     
     UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
-    if(@available(iOS 16.0, macCatalyst 16.0, *))
-        popPresenter.sourceItem = sender;
-    else
-        popPresenter.barButtonItem = sender;
-
+    popPresenter.sourceView = self.view;
+    
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
 
@@ -547,11 +533,8 @@ enum DummySettingsRows {
     [questionAlert addAction:yesAction];
     
     UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
-    if(@available(iOS 16.0, macCatalyst 16.0, *))
-        popPresenter.sourceItem = sender;
-    else
-        popPresenter.barButtonItem = sender;
-
+    popPresenter.sourceView = self.view;
+    
     [self presentViewController:questionAlert animated:YES completion:nil];
 }
 
@@ -582,11 +565,8 @@ enum DummySettingsRows {
     [questionAlert addAction:yesAction];
     
     UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
-    if(@available(iOS 16.0, macCatalyst 16.0, *))
-        popPresenter.sourceItem = sender;
-    else
-        popPresenter.barButtonItem = sender;
-
+    popPresenter.sourceView = self.view;
+    
     [self presentViewController:questionAlert animated:YES completion:nil];
 
 }

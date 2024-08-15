@@ -28,7 +28,7 @@ jobs:
           mkdir -p /Users/ci/releases
           OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
           touch "$OUTPUT_FILE"
-          cat "$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
+          cat "$OUTPUT_FILE" | tee /dev/stderr >> "$GITHUB_OUTPUT"
 
   promoteDraftRelease:
     name: Promote draft release to live release

@@ -540,7 +540,6 @@
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0386.html" />
         <xmpp:status>planned</xmpp:status>
-        <xmpp:note>XEP-0386: Bind 2.0</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -687,7 +686,7 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0158.html" />
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0484.html" />
         <xmpp:status>planned</xmpp:status>
       </xmpp:SupportedXep>
     </implements>

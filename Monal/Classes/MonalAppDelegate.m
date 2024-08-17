@@ -735,114 +735,121 @@ $$
         while(self.activeChats == nil)
             usleep(100000);
         dispatch_async(dispatch_get_main_queue(), ^{
-            BOOL registerNeeded = [MLXMPPManager sharedInstance].connectedXMPP.count == 0;
-            NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-            DDLogVerbose(@"URI path '%@'", components.path);
-            DDLogVerbose(@"URI query '%@'", components.query);
-            
-            NSString* jid = components.path;
-            NSDictionary* jidParts = [HelperTools splitJid:jid];
-            BOOL isRegister = NO;
-            BOOL isRoster = NO;
-            BOOL isGroupJoin = NO;
-            BOOL isIbr = NO;
-            NSString* preauthToken = nil;
-            NSMutableDictionary<NSNumber*, NSData*>* omemoFingerprints = [NSMutableDictionary new];
-            //someone had the really superior (NOT!) idea to split uri query parts by ';' instead of the standard '&'
-            //making all existing uri libs useless, see: https://xmpp.org/extensions/xep-0147.html
-            //blame this author: Peter Saint-Andre
-            NSArray* queryItems = [components.query componentsSeparatedByString:@";"];
-            for(NSString* item in queryItems)
-            {
-                NSArray* itemParts = [item componentsSeparatedByString:@"="];
-                NSString* name = itemParts[0];
-                NSString* value = @"";
-                if([itemParts count] > 1)
-                    value = itemParts[1];
-                DDLogVerbose(@"URI part '%@' = '%@'", name, value);
-                if([name isEqualToString:@"register"])
-                    isRegister = YES;
-                if([name isEqualToString:@"roster"])
-                    isRoster = YES;
-                if([name isEqualToString:@"join"])
-                    isGroupJoin = YES;
-                if([name isEqualToString:@"ibr"] && [value isEqualToString:@"y"])
-                    isIbr = YES;
-                if([name isEqualToString:@"preauth"])
-                    preauthToken = [value copy];
-                if([name hasPrefix:@"omemo-sid-"])
-                {
-                    NSNumber* sid = [NSNumber numberWithUnsignedInteger:(NSUInteger)[[name substringFromIndex:10] longLongValue]];
-                    NSData* fingerprint = [HelperTools signalIdentityWithHexKey:value];
-                    omemoFingerprints[sid] = fingerprint;
-                }
-            }
-            
-            if(!jidParts[@"host"])
-            {
-                DDLogError(@"Ignoring xmpp: uri without host jid part!");
-                return;
-            }
-            
-            if(isRegister || (isRoster && registerNeeded))
-            {
-                NSString* username = nilDefault(jidParts[@"node"], @"");
-                NSString* host = jidParts[@"host"];
+            //remove everything from our view queue (including currently displayed views)
+            //and add intro screens back to the queue, if needed, followed by the view handling the xmpp uri action
+            [self.activeChats resetViewQueue];
+            [self.activeChats dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                [self.activeChats segueToIntroScreensIfNeeded];
                 
-                if(isRoster)
+                BOOL registerNeeded = [MLXMPPManager sharedInstance].connectedXMPP.count == 0;
+                NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+                DDLogVerbose(@"URI path '%@'", components.path);
+                DDLogVerbose(@"URI query '%@'", components.query);
+                
+                NSString* jid = components.path;
+                NSDictionary* jidParts = [HelperTools splitJid:jid];
+                BOOL isRegister = NO;
+                BOOL isRoster = NO;
+                BOOL isGroupJoin = NO;
+                BOOL isIbr = NO;
+                NSString* preauthToken = nil;
+                NSMutableDictionary<NSNumber*, NSData*>* omemoFingerprints = [NSMutableDictionary new];
+                //someone had the really superior (NOT!) idea to split uri query parts by ';' instead of the standard '&'
+                //making all existing uri libs useless, see: https://xmpp.org/extensions/xep-0147.html
+                //blame this author: Peter Saint-Andre
+                NSArray* queryItems = [components.query componentsSeparatedByString:@";"];
+                for(NSString* item in queryItems)
                 {
-                    //isRoster variant does not specify a predefined username for the new account, register does (but this is still optional)
-                    username = @"";
-                    //isRoster variant without ibr does not specify a host to register on, too
-                    if(!isIbr)
-                        host = @"";
+                    NSArray* itemParts = [item componentsSeparatedByString:@"="];
+                    NSString* name = itemParts[0];
+                    NSString* value = @"";
+                    if([itemParts count] > 1)
+                        value = itemParts[1];
+                    DDLogVerbose(@"URI part '%@' = '%@'", name, value);
+                    if([name isEqualToString:@"register"])
+                        isRegister = YES;
+                    if([name isEqualToString:@"roster"])
+                        isRoster = YES;
+                    if([name isEqualToString:@"join"])
+                        isGroupJoin = YES;
+                    if([name isEqualToString:@"ibr"] && [value isEqualToString:@"y"])
+                        isIbr = YES;
+                    if([name isEqualToString:@"preauth"])
+                        preauthToken = [value copy];
+                    if([name hasPrefix:@"omemo-sid-"])
+                    {
+                        NSNumber* sid = [NSNumber numberWithUnsignedInteger:(NSUInteger)[[name substringFromIndex:10] longLongValue]];
+                        NSData* fingerprint = [HelperTools signalIdentityWithHexKey:value];
+                        omemoFingerprints[sid] = fingerprint;
+                    }
                 }
                 
-                //show register view and, if isRoster, add contact as usual after register (e.g. call this method again)
-                weakify(self);
-                [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^(NSNumber* accountNo) {
-                    strongify(self);
-                    DDLogVerbose(@"Got accountNo for newly registered account: %@", accountNo);
-                    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
-                    DDLogInfo(@"Got newly registered account: %@", account);
-                    
-                    //this should never happen
-                    MLAssert(account != nil, @"Can not use account after register!", (@{
-                        @"components": components,
-                        @"username": username,
-                        @"host": host,
-                    }));
-                    
-                    //add given jid to our roster if in roster mode (e.g. the jid is not the jid we just registered as like in register mode)
-                    if(account != nil && isRoster)      //silence memory warning despite assertion above
-                        return [self handleXMPPURL:url];
-                }];
-            }
-            //I know this if is moot, but I wanted to preserve the different cases:
-            //either we already have one or more accounts and the xmpp: uri is of type subscription (ibr does not matter here,
-            //because we already have an account) or muc join
-            //OR the xmpp: uri is a normal xmpp uri having only a jid we should add as our new contact (preauthToken will be nil in this case)
-            else if((!registerNeeded && (isRoster || isGroupJoin)) || !registerNeeded)
-            {
-                if([MLXMPPManager sharedInstance].connectedXMPP.count == 1)
+                if(!jidParts[@"host"])
                 {
-                    //the add contacts ui will check if the contact is already present on the selected account
-                    xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
-                    [self.activeChats showAddContactWithJid:jid preauthToken:preauthToken prefillAccount:account andOmemoFingerprints:omemoFingerprints];
+                    DDLogError(@"Ignoring xmpp: uri without host jid part!");
+                    return;
+                }
+                
+                if(isRegister || (isRoster && registerNeeded))
+                {
+                    NSString* username = nilDefault(jidParts[@"node"], @"");
+                    NSString* host = jidParts[@"host"];
+                    
+                    if(isRoster)
+                    {
+                        //isRoster variant does not specify a predefined username for the new account, register does (but this is still optional)
+                        username = @"";
+                        //isRoster variant without ibr does not specify a host to register on, too
+                        if(!isIbr)
+                            host = @"";
+                    }
+                    
+                    //show register view and, if isRoster, add contact as usual after register (e.g. call this method again)
+                    weakify(self);
+                    [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^(NSNumber* accountNo) {
+                        strongify(self);
+                        DDLogVerbose(@"Got accountNo for newly registered account: %@", accountNo);
+                        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+                        DDLogInfo(@"Got newly registered account: %@", account);
+                        
+                        //this should never happen
+                        MLAssert(account != nil, @"Can not use account after register!", (@{
+                            @"components": components,
+                            @"username": username,
+                            @"host": host,
+                        }));
+                        
+                        //add given jid to our roster if in roster mode (e.g. the jid is not the jid we just registered as like in register mode)
+                        if(account != nil && isRoster)      //silence memory warning despite assertion above
+                            return [self handleXMPPURL:url];
+                    }];
+                }
+                //I know this if is moot, but I wanted to preserve the different cases:
+                //either we already have one or more accounts and the xmpp: uri is of type subscription (ibr does not matter here,
+                //because we already have an account) or muc join
+                //OR the xmpp: uri is a normal xmpp uri having only a jid we should add as our new contact (preauthToken will be nil in this case)
+                else if((!registerNeeded && (isRoster || isGroupJoin)) || !registerNeeded)
+                {
+                    if([MLXMPPManager sharedInstance].connectedXMPP.count == 1)
+                    {
+                        //the add contacts ui will check if the contact is already present on the selected account
+                        xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+                        [self.activeChats showAddContactWithJid:jid preauthToken:preauthToken prefillAccount:account andOmemoFingerprints:omemoFingerprints];
+                    }
+                    else
+                        //the add contacts ui will check if the contact is already present on the selected account
+                        [self.activeChats showAddContactWithJid:jid preauthToken:preauthToken prefillAccount:nil andOmemoFingerprints:omemoFingerprints];
                 }
                 else
-                    //the add contacts ui will check if the contact is already present on the selected account
-                    [self.activeChats showAddContactWithJid:jid preauthToken:preauthToken prefillAccount:nil andOmemoFingerprints:omemoFingerprints];
-            }
-            else
-            {
-                DDLogError(@"No account available to handel xmpp: uri!");
-                
-                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error adding contact or channel", @"") message:NSLocalizedString(@"No account available to handel 'xmpp:' URI!", @"") preferredStyle:UIAlertControllerStyleAlert];
-                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                }]];
-                [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
-            }
+                {
+                    DDLogError(@"No account available to handel xmpp: uri!");
+                    
+                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error adding contact or channel", @"") message:NSLocalizedString(@"No account available to handel 'xmpp:' URI!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                    }]];
+                    [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
+                }
+            }];
         });
     });
 }

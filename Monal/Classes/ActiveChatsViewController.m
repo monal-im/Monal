@@ -115,6 +115,11 @@ static NSMutableSet* _pushWarningDisplayed;
     _blockQueueSemaphore = dispatch_semaphore_create(1);
 }
 
+-(void) resetViewQueue
+{
+    [_blockQueue removeAllObjects];
+}
+
 -(void) prependToViewQueue:(view_queue_block_t) block withId:(MLViewID) viewId andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
     @synchronized(_blockQueue) {

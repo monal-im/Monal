@@ -49,6 +49,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) showAddContact;
 -(void) sheetDismissed;
 
+-(void) segueToIntroScreensIfNeeded;
+-(void) resetViewQueue;
 -(void) dismissCompleteViewChainWithAnimation:(BOOL) animation andCompletion:(monal_void_block_t _Nullable) completion;
 
 @end

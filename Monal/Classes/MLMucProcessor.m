@@ -474,7 +474,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
             
 #ifndef DISABLE_OMEMO
-            BOOL isTypeGroup = [[[DataLayer sharedInstance] getMucTypeOfRoom:mucJid andAccount:_account.accountNo] isEqualToString:@"group"];
+            BOOL isTypeGroup = [[[DataLayer sharedInstance] getMucTypeOfRoom:mucJid andAccount:_account.accountNo] isEqualToString:kMucTypeGroup];
 #endif
             
             if(item[@"affiliation"] == nil || [@"none" isEqualToString:item[@"affiliation"]])
@@ -1418,11 +1418,11 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
         
     //extract further muc infos
     NSString* mucName = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/identity@name"];
-    NSString* mucType = @"channel";
+    NSString* mucType = kMucTypeChannel;
     //both are needed for omemo, see discussion with holger 2021-01-02/03 -- Thilo Molitor
     //see also: https://docs.modernxmpp.org/client/groupchat/
     if([features containsObject:@"muc_nonanonymous"] && [features containsObject:@"muc_membersonly"])
-        mucType = @"group";
+        mucType = kMucTypeGroup;
     
     //update db with new infos
     BOOL isBuddyMuc = [[DataLayer sharedInstance] isBuddyMuc:iqNode.fromUser forAccount:_account.accountNo];
@@ -1450,7 +1450,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
                 [_noUpdateBookmarks addObject:iqNode.fromUser];
         }
         //make public channels "mention only" on first join
-        if([@"channel" isEqualToString:mucType])
+        if([kMucTypeChannel isEqualToString:mucType])
         {
             DDLogDebug(@"Configuring new muc %@ to be mention-only...", iqNode.fromUser);
             [[DataLayer sharedInstance] setMucAlertOnMentionOnly:iqNode.fromUser onAccount:_account.accountNo];
@@ -1811,7 +1811,7 @@ $$
 
 -(void) logMembersOfMuc:(NSString*) jid
 {
-    if([[[DataLayer sharedInstance] getMucTypeOfRoom:jid andAccount:_account.accountNo] isEqualToString:@"group"])
+    if([[[DataLayer sharedInstance] getMucTypeOfRoom:jid andAccount:_account.accountNo] isEqualToString:kMucTypeGroup])
         DDLogInfo(@"Currently recorded members and participants of group %@: %@", jid, [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:jid forAccountId:_account.accountNo]);
     else
     {

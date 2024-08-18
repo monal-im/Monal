@@ -294,7 +294,7 @@ struct OmemoKeysForChatView: View {
 
     private func isOwnKeys() -> Bool {
         if let contact = self.viewContact, let account = self.account {
-            let isMuc = contact.isMuc && contact.mucType == "group"
+            let isMuc = contact.isMuc && contact.mucType == kMucTypeGroup
             let isOwnJid = account.connectionProperties.identity.jid == contact.contactJid
             return !isMuc && isOwnJid
         }

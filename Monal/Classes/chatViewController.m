@@ -601,7 +601,7 @@ enum msgSentState {
     else
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
     //disable encryption button on unsupported muc types
-    if(self.contact.isMuc && [self.contact.mucType isEqualToString:@"group"] == NO)
+    if(self.contact.isMuc && [self.contact.mucType isEqualToString:kMucTypeGroup] == NO)
         [self.navBarEncryptToggleButton setEnabled:NO];
     //disable encryption button for special jids
     if([HelperTools isContactBlacklistedForEncryption:self.contact])
@@ -653,7 +653,7 @@ enum msgSentState {
     {
         NSArray* members = [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo];
         NSInteger membercount = members.count;
-        if([self.contact.mucType isEqualToString:@"group"])
+        if([self.contact.mucType isEqualToString:kMucTypeGroup])
         {
             NSMutableSet* memberSet = [NSMutableSet new];
             for(NSDictionary* entry in members)
@@ -2264,7 +2264,7 @@ enum msgSentState {
     BOOL hideName = YES;
     if(self.contact.isMuc)
     {
-        if([@"group" isEqualToString:self.contact.mucType] && row.participantJid)
+        if([kMucTypeGroup isEqualToString:self.contact.mucType] && row.participantJid)
             hideName = (priorRow != nil && [priorRow.participantJid isEqualToString:row.participantJid]);
         else
             hideName = (priorRow != nil && [priorRow.actualFrom isEqualToString:row.actualFrom]);
@@ -3168,14 +3168,14 @@ enum msgSentState {
                 self.contact.isEncrypted = NO;
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
             }
-            else if(self.contact.isMuc && ![self.contact.mucType isEqualToString:@"group"])
+            else if(self.contact.isMuc && ![self.contact.mucType isEqualToString:kMucTypeGroup])
             {
                 // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
                 // --> disable it
                 self.contact.isEncrypted = NO;
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
             }
-            else if(!self.contact.isMuc || (self.contact.isMuc && [self.contact.mucType isEqualToString:@"group"]))
+            else if(!self.contact.isMuc || (self.contact.isMuc && [self.contact.mucType isEqualToString:kMucTypeGroup]))
             {
                 [self hideOmemoHUD];
                 if(showWarning)

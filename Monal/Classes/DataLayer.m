@@ -1165,7 +1165,7 @@ static NSDateFormatter* dbFormatter;
 {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"UPDATE buddylist SET muc_type=? WHERE account_id=? AND buddy_name=?;" andArguments:@[type, accountNo, room]];
-        if([type isEqualToString:@"group"] == NO)
+        if([type isEqualToString:kMucTypeGroup] == NO)
         {
             // non group type MUCs do not support encryption
             [self.db executeNonQuery:@"UPDATE buddylist SET encrypt=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];

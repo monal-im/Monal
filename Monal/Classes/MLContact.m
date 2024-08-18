@@ -113,7 +113,7 @@ static NSMutableDictionary* _singletonCache;
             @"account_id": @1,
             //@"muc_subject": nil,
             @"muc_nick": @"my_group_nick",
-            @"muc_type": @"group",
+            @"muc_type": kMucTypeGroup,
             @"Muc": @YES,
             @"pinned": @NO,
             @"blocked": @NO,
@@ -137,7 +137,7 @@ static NSMutableDictionary* _singletonCache;
             @"account_id": @1,
             //@"muc_subject": nil,
             @"muc_nick": @"my_channel_nick",
-            @"muc_type": @"channel",
+            @"muc_type": kMucTypeChannel,
             @"Muc": @YES,
             @"pinned": @NO,
             @"blocked": @NO,
@@ -639,7 +639,7 @@ static NSMutableDictionary* _singletonCache;
             return NO;
         }
     }
-    else if([self.mucType isEqualToString:@"group"] == NO)
+    else if([self.mucType isEqualToString:kMucTypeGroup] == NO)
     {
         return NO;
     }
@@ -765,7 +765,7 @@ static NSMutableDictionary* _singletonCache;
     updateIfIdNotEqual(self.accountNickInGroup, contact.accountNickInGroup);
     updateIfPrimitiveNotEqual(self.isMuc, contact.isMuc);
     if(self.isMuc)
-        updateIfIdNotEqual(self.mucType, nilDefault(contact.mucType, @"channel"));
+        updateIfIdNotEqual(self.mucType, nilDefault(contact.mucType, kMucTypeChannel));
     updateIfPrimitiveNotEqual(self.isMentionOnly, contact.isMentionOnly);
     updateIfPrimitiveNotEqual(self.isPinned, contact.isPinned);
     updateIfPrimitiveNotEqual(self.isBlocked, contact.isBlocked);
@@ -834,7 +834,7 @@ static NSMutableDictionary* _singletonCache;
     contact.mucType = [dic objectForKey:@"muc_type"];
     contact.isMuc = [[dic objectForKey:@"Muc"] boolValue];
     if(contact.isMuc  && !contact.mucType)
-        contact.mucType = @"channel";       //default value
+        contact.mucType = kMucTypeChannel;       //default value
     contact.mucType = nilDefault(contact.mucType, @"");
     contact.isMentionOnly = [[dic objectForKey:@"mentionOnly"] boolValue];
     contact.isPinned = [[dic objectForKey:@"pinned"] boolValue];

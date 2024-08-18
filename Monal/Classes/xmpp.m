@@ -3418,7 +3418,7 @@ NSString* const kStanza = @"stanza";
 #ifdef IS_ALPHA
     // WARNING NOT FOR PRODUCTION
     // encrypt messages that should not be encrypted (but still use plaintext body for devices not speaking omemo)
-    if(!encrypt && !isUpload && (!contact.isMuc || (contact.isMuc && [contact.mucType isEqualToString:@"group"])))
+    if(!encrypt && !isUpload && (!contact.isMuc || (contact.isMuc && [contact.mucType isEqualToString:kMucTypeGroup])))
     {
         [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];
         //[self addEME:@"eu.siacs.conversations.axolotl" withName:@"OMEMO" toMessageNode:messageNode];
@@ -3427,7 +3427,7 @@ NSString* const kStanza = @"stanza";
 #endif
 
 #ifndef DISABLE_OMEMO
-    if(encrypt && (!contact.isMuc || (contact.isMuc && [contact.mucType isEqualToString:@"group"])))
+    if(encrypt && (!contact.isMuc || (contact.isMuc && [contact.mucType isEqualToString:kMucTypeGroup])))
     {
         [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];
         [self addEME:@"eu.siacs.conversations.axolotl" withName:@"OMEMO" toMessageNode:messageNode];
@@ -3448,7 +3448,7 @@ NSString* const kStanza = @"stanza";
         [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
     
     //request receipts and chat-markers in 1:1 or groups (no channels!)
-    if(!contact.isMuc || [@"group" isEqualToString:contact.mucType])
+    if(!contact.isMuc || [kMucTypeGroup isEqualToString:contact.mucType])
     {
         [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:receipts"]];
         [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"markable" andNamespace:@"urn:xmpp:chat-markers:0"]];
@@ -5464,7 +5464,7 @@ NSString* const kStanza = @"stanza";
     }
     
     //don't send chatmarkers in channels (all messages have the same muc attributes, randomly pick the last one)
-    if(lastUnreadMessage.isMuc && [@"channel" isEqualToString:lastUnreadMessage.mucType])
+    if(lastUnreadMessage.isMuc && [kMucTypeChannel isEqualToString:lastUnreadMessage.mucType])
     {
         DDLogVerbose(@"Not sending XEP-0333 chat marker in channel...");
         [self publishMDSMarkerForMessage:lastUnreadMessage];      //always publish mds marker

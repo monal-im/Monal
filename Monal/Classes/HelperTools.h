@@ -49,6 +49,8 @@ typedef NS_ENUM(NSUInteger, MLDefinedIdentifier) {
     MLDefinedIdentifier_kBackgroundProcessingTask,
     MLDefinedIdentifier_kBackgroundRefreshingTask,
     MLDefinedIdentifier_kMonalKeychainName,
+    MLDefinedIdentifier_kMucTypeGroup,
+    MLDefinedIdentifier_kMucTypeChannel,
     MLDefinedIdentifier_SHORT_PING,
     MLDefinedIdentifier_LONG_PING,
     MLDefinedIdentifier_MUC_PING,

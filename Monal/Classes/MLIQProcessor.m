@@ -35,7 +35,7 @@
         (!contact.isMuc && contact.isSubscribedFrom) ||
         contact.isSelfChat ||
         [account.connectionProperties.identity.domain isEqualToString:iqNode.fromUser] ||
-        (contact.isMuc && [@"group" isEqualToString:contact.mucType])
+        (contact.isMuc && [kMucTypeGroup isEqualToString:contact.mucType])
     ))
         DDLogWarn(@"Invalid sender for iq (!subscribedFrom || isMuc), ignoring: %@", iqNode);
     

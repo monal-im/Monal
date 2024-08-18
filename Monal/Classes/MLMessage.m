@@ -8,6 +8,7 @@
 
 #import "MLMessage.h"
 #import "MLContact.h"
+#import "MLConstants.h"
 
 @implementation MLMessage
 {
@@ -156,7 +157,7 @@
 {
     if(self.isMuc)
     {
-        if([@"group" isEqualToString:self.mucType] && self.participantJid)
+        if([kMucTypeGroup isEqualToString:self.mucType] && self.participantJid)
             return [[MLContact createContactFromJid:self.participantJid andAccountNo:self.accountId] contactDisplayNameWithFallback:self.actualFrom];
         else
             return self.actualFrom;

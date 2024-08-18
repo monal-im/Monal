@@ -72,12 +72,12 @@ struct MemberList: View {
             (
                 (online[$0]! ? 0 : 1),
                 mucAffiliationToInt(affiliations[$0]),
-                (contactNames[$0]!),
+                (contactNames[$0]!.lowercased()),
                 ($0.contactJid as String)
             ) < (
                 (online[$1]! ? 0 : 1),
                 mucAffiliationToInt(affiliations[$1]),
-                (contactNames[$1]!),
+                (contactNames[$1]!.lowercased()),
                 ($1.contactJid as String)
             )
         }

@@ -36,7 +36,7 @@ struct ChannelMemberList: View {
             }
         }
         participants.sort {
-            (mucAffiliationToInt($0.value), $0.key) < (mucAffiliationToInt($1.value), $1.key)
+            (mucAffiliationToInt($0.value), $0.key.lowercased()) < (mucAffiliationToInt($1.value), $1.key.lowercased())
         }
     }
     

@@ -93,7 +93,7 @@ struct ContactDetails: View {
                             .applyClosure {view in
                                 if contact.isMuc {
                                     if ownAffiliation == "owner" {
-                                        view.accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
+                                        view.accessibilityLabel((contact.mucType == kMucTypeGroup) ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
                                             .onTapGesture {
                                                 showImagePicker()
                                             }
@@ -105,7 +105,7 @@ struct ContactDetails: View {
                                                         Image(systemName: "xmark.circle.fill")
                                                             .resizable()
                                                             .frame(width: 24.0, height: 24.0)
-                                                            .accessibilityLabel((contact.mucType == "group") ? Text("Remove Group Avatar") : Text("Remove Channel Avatar"))
+                                                            .accessibilityLabel((contact.mucType == kMucTypeGroup) ? Text("Remove Group Avatar") : Text("Remove Channel Avatar"))
                                                             .symbolRenderingMode(.palette)
                                                             .foregroundStyle(.white, .red)
                                                     })
@@ -118,14 +118,14 @@ struct ContactDetails: View {
                                                         Image(systemName: "pencil.circle.fill")
                                                             .resizable()
                                                             .frame(width: 24.0, height: 24.0)
-                                                            .accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
+                                                            .accessibilityLabel((contact.mucType == kMucTypeGroup) ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
                                                     })
                                                     .buttonStyle(.borderless)
                                                     .offset(x: 8, y: -8)
                                                 }
                                             }
                                     } else {
-                                        view.accessibilityLabel((contact.mucType == "group") ? Text("Group Avatar") : Text("Channel Avatar"))
+                                        view.accessibilityLabel((contact.mucType == kMucTypeGroup) ? Text("Group Avatar") : Text("Channel Avatar"))
                                     }
                                 } else {
                                     view.accessibilityLabel(Text("Avatar"))
@@ -216,7 +216,7 @@ struct ContactDetails: View {
                                 Button {
                                     showingSheetEditSubject.toggle()
                                 } label: {
-                                    if contact.obj.mucType == "group" {
+                                    if contact.obj.mucType == kMucTypeGroup {
                                         HStack {
                                             Text("Group subject:")
                                             Spacer().frame(width:8)
@@ -296,7 +296,7 @@ struct ContactDetails: View {
                 }
                 
 #if !DISABLE_OMEMO
-                if (!contact.isMuc || (contact.isMuc && contact.mucType == "group")) && !HelperTools.isContactBlacklisted(forEncryption:contact.obj) {
+                if (!contact.isMuc || (contact.isMuc && contact.mucType == kMucTypeGroup)) && !HelperTools.isContactBlacklisted(forEncryption:contact.obj) {
                     Button {
                         if contact.isEncrypted {
                             showingShouldDisableEncryptionAlert = true
@@ -346,11 +346,11 @@ struct ContactDetails: View {
 #endif
                 
                 if contact.isMuc && ownAffiliation == "owner" {
-                    let label = contact.obj.mucType == "group" ? NSLocalizedString("Rename Group", comment:"") : NSLocalizedString("Rename Channel", comment:"")
+                    let label = contact.obj.mucType == kMucTypeGroup ? NSLocalizedString("Rename Group", comment:"") : NSLocalizedString("Rename Channel", comment:"")
                     TextField(label, text: $contact.fullNameView, onEditingChanged: {
                         isEditingNickname = $0
                     })
-                    .accessibilityLabel(contact.obj.mucType == "group" ? Text("Group name") : Text("Channel name"))
+                    .accessibilityLabel(contact.obj.mucType == kMucTypeGroup ? Text("Group name") : Text("Channel name"))
                     .addClearButton(isEditing: isEditingNickname, text: $contact.fullNameView)
                 } else if !contact.isMuc && !contact.isSelfChat {
                     TextField(NSLocalizedString("Rename Contact", comment: "placeholder text in contact details"), text: $contact.nickNameView, onEditingChanged: {
@@ -370,7 +370,7 @@ struct ContactDetails: View {
                 
 #if !DISABLE_OMEMO
                 if !HelperTools.isContactBlacklisted(forEncryption:contact.obj) && !contact.isSelfChat {
-                    if !contact.isMuc || contact.mucType == "group" {
+                    if !contact.isMuc || contact.mucType == kMucTypeGroup {
                         NavigationLink(destination: LazyClosureView(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: contact)))) {
                             Text("Encryption Keys")
                         }
@@ -403,11 +403,11 @@ struct ContactDetails: View {
                     Text("Change Chat Background")
                 }
                 
-                if contact.obj.isMuc && contact.obj.mucType == "group" {
+                if contact.obj.isMuc && contact.obj.mucType == kMucTypeGroup {
                     NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
                         Text("Group Members")
                     }
-                } else if contact.obj.isMuc && contact.obj.mucType == "channel" {
+                } else if contact.obj.isMuc && contact.obj.mucType == kMucTypeChannel {
                     if ["owner", "admin"].contains(ownAffiliation) {
                         NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
                             Text("Channel Participants")
@@ -462,7 +462,7 @@ struct ContactDetails: View {
                                 showingRemoveContactConfirmation = true
                             }) {
                                 if contact.isMuc {
-                                    if contact.mucType == "group" {
+                                    if contact.mucType == kMucTypeGroup {
                                         Text("Leave Group")
                                             .foregroundColor(.red)
                                     } else {
@@ -497,7 +497,7 @@ struct ContactDetails: View {
                                 showingAddContactConfirmation = true
                             }) {
                                 if contact.isMuc {
-                                    if contact.mucType == "group" {
+                                    if contact.mucType == kMucTypeGroup {
                                         Text("Join Group")
                                     } else {
                                         Text("Join Channel")
@@ -508,7 +508,7 @@ struct ContactDetails: View {
                             }
                             .actionSheet(isPresented: $showingAddContactConfirmation) {
                                 ActionSheet(
-                                    title: Text(contact.isMuc ? (contact.mucType == "group" ? NSLocalizedString("Join Group", comment: "") : NSLocalizedString("Join Channel", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
+                                    title: Text(contact.isMuc ? (contact.mucType == kMucTypeGroup ? NSLocalizedString("Join Group", comment: "") : NSLocalizedString("Join Channel", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
                                     message: Text(contact.isMuc ? NSLocalizedString("You will receive subsequent messages from this conversation", comment: "") : NSLocalizedString("They will see when you are online. They will be able to send you encrypted messages.", comment: "")),
                                     buttons: [
                                         .cancel(),
@@ -530,7 +530,7 @@ struct ContactDetails: View {
                         Button(action: {
                             showingDestroyConfirmation = true
                         }) {
-                            if contact.mucType == "group" {
+                            if contact.mucType == kMucTypeGroup {
                                 Text("Destroy Group").foregroundColor(.red)
                             } else {
                                 Text("Destroy Channel").foregroundColor(.red)
@@ -538,14 +538,14 @@ struct ContactDetails: View {
                         }
                         .actionSheet(isPresented: $showingDestroyConfirmation) {
                             ActionSheet(
-                                title: contact.mucType == "group" ? Text("Destroy Group") : Text("Destroy Channel"),
-                                message: contact.mucType == "group" ? Text("Do you really want to destroy this group? Every member will be kicked out and it will be destroyed afterwards.") : Text("Do you really want to destroy this channel? Every member will be kicked out and it will be destroyed afterwards."),
+                                title: contact.mucType == kMucTypeGroup ? Text("Destroy Group") : Text("Destroy Channel"),
+                                message: contact.mucType == kMucTypeGroup ? Text("Do you really want to destroy this group? Every member will be kicked out and it will be destroyed afterwards.") : Text("Do you really want to destroy this channel? Every member will be kicked out and it will be destroyed afterwards."),
                                 buttons: [
                                     .cancel(),
                                     .destructive(
                                         Text("Yes"),
                                         action: {
-                                            showPromisingLoadingOverlay(overlay, headlineView:contact.mucType == "group" ? Text("Destroying group...") : Text("Destroying channel..."), descriptionView:Text("")) {
+                                            showPromisingLoadingOverlay(overlay, headlineView:contact.mucType == kMucTypeGroup ? Text("Destroying group...") : Text("Destroying channel..."), descriptionView:Text("")) {
                                                 promisifyMucAction(account:account, mucJid:contact.contactJid) {
                                                     self.account.mucProcessor.destroyRoom(contact.contactJid as String)
                                                 }
@@ -553,7 +553,7 @@ struct ContactDetails: View {
                                                 if let callback = callback {
                                                     self.successCallback = callback
                                                 }
-                                                successAlert(title: Text("Success"), message: contact.mucType == "group" ? Text("Successfully destroyed group.") : Text("Successfully destroyed channel."))
+                                                successAlert(title: Text("Success"), message: contact.mucType == kMucTypeGroup ? Text("Successfully destroyed group.") : Text("Successfully destroyed channel."))
                                             }.catch { error in
                                                 errorAlert(title: Text("Error destroying group!"), message: Text("\(String(describing:error))"))
                                             }
@@ -569,7 +569,7 @@ struct ContactDetails: View {
                     showingClearHistoryConfirmation = true
                 }) {
                     if contact.isMuc {
-                        if contact.obj.mucType == "group" {
+                        if contact.obj.mucType == kMucTypeGroup {
                             Text("Clear chat history of this group")
                         } else {
                             Text("Clear chat history of this channel")
@@ -600,7 +600,7 @@ struct ContactDetails: View {
             //omemo debug stuff, should be removed in a few months
             Section {
                 // only display omemo session reset button on 1:1 and private groups
-                if contact.obj.isMuc == false || (contact.isMuc && contact.mucType == "group") {
+                if contact.obj.isMuc == false || (contact.isMuc && contact.mucType == kMucTypeGroup) {
                     Button(action: {
                         showingResetOmemoSessionConfirmation = true
                     }) {

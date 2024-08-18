@@ -102,7 +102,7 @@ struct MemberList: View {
 
     func ownUserHasAffiliationToRemove(contact: ObservableKVOWrapper<MLContact>) -> Bool {
         //we don't want to set affiliation=none in channels using deletion swipe (this does not delete the user)
-        if self.muc.mucType == "channel" {
+        if self.muc.mucType == kMucTypeChannel {
             return false
         }
         if contact.contactJid == account.connectionProperties.identity.jid {
@@ -124,7 +124,7 @@ struct MemberList: View {
             if !contactOnline {
                 reinviteEntry = ["reinvite"]
             }
-            if self.muc.mucType == "group" {
+            if self.muc.mucType == kMucTypeGroup {
                 if ownAffiliation == "owner" {
                     return [/*"profile"*/] + reinviteEntry + ["owner", "admin", "member", "outcast"]
                 } else {        //only admin left, because other affiliations don't call actionsAllowed at all
@@ -152,7 +152,7 @@ struct MemberList: View {
         }
         //fallback (should hopefully never be needed)
         DDLogWarn("Fallback for group/channel \(String(describing:self.muc.contactJid as String)): affiliation=\(String(describing:affiliations[contact])), online=\(String(describing:online[contact]))")
-        if self.muc.mucType == "group" {
+        if self.muc.mucType == kMucTypeGroup {
             return [/*"profile",*/ "reinvite"]
         } else {
             return [/*"profile",*/ "reinvite", "none"]
@@ -176,7 +176,7 @@ struct MemberList: View {
                     if affiliations[contact] == "outcast" {
                         outcastResolution = showPromisingLoadingOverlay(self.overlay, headlineView: Text("Unblocking user"), descriptionView: Text("Unblocking user for this group/channel: \(contact.contactJid as String)")) {
                             promisifyAction {
-                                account.mucProcessor.setAffiliation(self.muc.mucType == "group" ? "member" : "none", ofUser:contact.contactJid, inMuc:self.muc.contactJid)
+                                account.mucProcessor.setAffiliation(self.muc.mucType == kMucTypeGroup ? "member" : "none", ofUser:contact.contactJid, inMuc:self.muc.contactJid)
                             }
                         }
                     }
@@ -228,7 +228,7 @@ struct MemberList: View {
                     NavigationLink(destination: LazyClosureView(ContactPicker(account, initializeFrom: memberList, allowRemoval: false) { newMemberList in
                         for member in newMemberList {
                             if !memberList.contains(member) {
-                                if self.muc.mucType == "group" {
+                                if self.muc.mucType == kMucTypeGroup {
                                     showPromisingLoadingOverlay(self.overlay, headlineView: Text("Adding new member"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
                                         promisifyAction {
                                             account.mucProcessor.setAffiliation("member", ofUser:member.contactJid, inMuc:self.muc.contactJid)
@@ -256,7 +256,7 @@ struct MemberList: View {
                             }
                         }
                     })) {
-                        if self.muc.mucType == "group" {
+                        if self.muc.mucType == kMucTypeGroup {
                             Text("Add members to group")
                         } else {
                             Text("Invite participants to channel")
@@ -301,7 +301,7 @@ struct MemberList: View {
                         }
                         .swipeActions(allowsFullSwipe: false) {
                             Button("Delete") {
-                                showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[contact]))?"), description: self.muc.mucType == "group" ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
+                                showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[contact]))?"), description: self.muc.mucType == kMucTypeGroup ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
                                     showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[contact]))"), descriptionView: Text("Removing \(contact.contactJid as String)...")) {
                                         promisifyAction {
                                             account.mucProcessor.setAffiliation("none", ofUser: contact.contactJid, inMuc: self.muc.contactJid)
@@ -345,7 +345,7 @@ struct MemberList: View {
                 DDLogVerbose("Got muc participants/members update from account \(xmppAccount)...")
                 //only trigger update if we are either in a group type muc or have admin/owner priviledges
                 //all other cases will close this view anyways, it makes no sense to update everything directly before hiding thsi view
-                if contact == self.muc && (contact.mucType == "group" || ["owner", "admin"].contains(DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:self.muc.obj) ?? "none")) {
+                if contact == self.muc && (contact.mucType == kMucTypeGroup || ["owner", "admin"].contains(DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:self.muc.obj) ?? "none")) {
                     updateMemberlist()
                 }
             }

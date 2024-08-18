@@ -628,6 +628,8 @@ void swizzle(Class c, SEL orig, SEL new)
         case MLDefinedIdentifier_kBackgroundProcessingTask: return kBackgroundProcessingTask; break;
         case MLDefinedIdentifier_kBackgroundRefreshingTask: return kBackgroundRefreshingTask; break;
         case MLDefinedIdentifier_kMonalKeychainName: return kMonalKeychainName; break;
+        case MLDefinedIdentifier_kMucTypeGroup: return kMucTypeGroup; break;
+        case MLDefinedIdentifier_kMucTypeChannel: return kMucTypeChannel; break;
         case MLDefinedIdentifier_SHORT_PING: return @(SHORT_PING); break;
         case MLDefinedIdentifier_LONG_PING: return @(LONG_PING); break;
         case MLDefinedIdentifier_MUC_PING: return @(MUC_PING); break;

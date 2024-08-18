@@ -189,6 +189,9 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalContactRemoved @"kMonalContactRemoved"
 #define kMonalMucParticipantsAndMembersUpdated @"kMonalMucParticipantsAndMembersUpdated"
 
+#define kMucTypeGroup @"group"
+#define kMucTypeChannel @"channel"
+
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048
 

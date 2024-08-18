@@ -634,7 +634,7 @@ static NSMutableDictionary* _typingNotifications;
                         //1:1 with user in our contact list that subscribed us (e.g. is allowed to see us)
                         (!possiblyUnknownContact.isMuc  && possiblyUnknownContact.isSubscribedFrom) ||
                         //muc group message from a user of this group
-                        ([possiblyUnknownContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
+                        ([possiblyUnknownContact.mucType isEqualToString:kMucTypeGroup] && messageNode.fromResource)
                     )
                     {
                         XMPPMessage* receiptNode = [XMPPMessage new];
@@ -725,7 +725,7 @@ static NSMutableDictionary* _typingNotifications;
     if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"] && ownNick != nil)
     {
         //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
-        if(possiblyUnknownContact.isMuc && [possiblyUnknownContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
+        if(possiblyUnknownContact.isMuc && [possiblyUnknownContact.mucType isEqualToString:kMucTypeGroup] && messageNode.fromResource)
         {
             //incoming chat markers from own account (muc echo, muc "carbon")
             //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessagesNotice goes to MLNotificationManager and activeChatsViewController/chatViewController

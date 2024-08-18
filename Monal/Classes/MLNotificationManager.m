@@ -599,7 +599,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     {
         groupDisplayName = contact.contactDisplayName;
         //we don't need different handling of incoming or outgoing messages for non-anon mucs because sender and receiver always contain the right contacts
-        if([@"group" isEqualToString:message.mucType] && message.participantJid)
+        if([kMucTypeGroup isEqualToString:message.mucType] && message.participantJid)
         {
             MLContact* contactInGroup = [MLContact createContactFromJid:message.participantJid andAccountNo:message.accountId];
             //use MLMessage's capability to calculate the fallback name using actualFrom

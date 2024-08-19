@@ -508,7 +508,7 @@ struct LazyClosureView<Content: View>: View {
     }
 }
 
-// use this to wrap a view into NavigationView, if it should be the outermost swiftui view of a new view stack
+// use this to wrap a view into NavigationStack, if it should be the outermost swiftui view of a new view stack
 struct AddTopLevelNavigation<Content: View>: View {
     let build: () -> Content
     let delegate: SheetDismisserProtocol
@@ -517,7 +517,7 @@ struct AddTopLevelNavigation<Content: View>: View {
         self.delegate = delegate
     }
     var body: some View {
-        NavigationView {
+        NavigationStack {
             build()
             .navigationBarTitleDisplayMode(.automatic)
             .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
@@ -527,7 +527,6 @@ struct AddTopLevelNavigation<Content: View>: View {
                 Image(systemName: "arrow.backward")
             }.keyboardShortcut(.escape, modifiers: []))
         }
-        .navigationViewStyle(.stack)
     }
 }
 
@@ -547,11 +546,10 @@ struct UIKitWorkaround<Content: View>: View {
 #if targetEnvironment(macCatalyst)
             build().navigationBarTitleDisplayMode(.inline)
 #else
-            NavigationView {
+            NavigationStack {
                 build()
                 .navigationBarTitleDisplayMode(.automatic)
             }
-            .navigationViewStyle(.stack)
 
 #endif
         }

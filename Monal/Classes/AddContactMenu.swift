@@ -326,7 +326,7 @@ struct AddContactMenu: View {
             }
         })
         .sheet(isPresented: $showQRCodeScanner) {
-            NavigationView {
+            NavigationStack {
                 MLQRCodeScanner(handleClose: {
                     self.showQRCodeScanner = false
                 })

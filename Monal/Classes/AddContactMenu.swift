@@ -296,7 +296,6 @@ struct AddContactMenu: View {
         }
         .addLoadingOverlay(overlay)
         .navigationBarTitle(Text("Add Contact or Channel"), displayMode: .inline)
-        .navigationViewStyle(.stack)
         .toolbar(content: {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 if account.connectionProperties.discoveredAdhocCommands["urn:xmpp:invite#invite"] != nil {

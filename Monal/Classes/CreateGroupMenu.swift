@@ -121,7 +121,6 @@ struct CreateGroupMenu: View {
         }
         .addLoadingOverlay(overlay)
         .navigationBarTitle(Text("Create new group"), displayMode: .inline)
-        .navigationViewStyle(.stack)
     }
 }
 

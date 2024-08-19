@@ -196,7 +196,7 @@ struct DebugView: View {
 }
 
 #Preview {
-    NavigationView {
+    NavigationStack {
         DebugView()
     }
 }

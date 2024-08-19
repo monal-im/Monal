@@ -436,7 +436,7 @@ struct RegisterAccount: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .sheet(isPresented: $showWebView) {
-                                    NavigationView {
+                                    NavigationStack {
                                         WebView(url: termsSiteForCurrentLanguage())
                                             .navigationBarTitle(Text("Terms of \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)"), displayMode: .inline)
                                             .toolbar(content: {

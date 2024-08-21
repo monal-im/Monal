@@ -39,7 +39,7 @@ struct ContactDetails: View {
     }
 
     private func updateRoleAndAffiliation() {
-        if contact.isGroup {
+        if contact.isMuc {
             self.ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? "none"
             self.ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:contact.obj) ?? "none"
         } else {
@@ -91,7 +91,7 @@ struct ContactDetails: View {
                             .resizable()
                             .scaledToFit()
                             .applyClosure {view in
-                                if contact.isGroup {
+                                if contact.isMuc {
                                     if ownAffiliation == "owner" {
                                         view.accessibilityLabel((contact.mucType == "group") ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
                                             .onTapGesture {
@@ -189,7 +189,7 @@ struct ContactDetails: View {
                         Text("Account: \(account.connectionProperties.identity.jid)")
                     }
                     
-                    if !contact.isSelfChat && !contact.isGroup {
+                    if !contact.isSelfChat && !contact.isMuc {
                         if let lastInteractionTime = contact.lastInteractionTime as Date? {
                             if lastInteractionTime.timeIntervalSince1970 > 0 {
                                 Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
@@ -202,7 +202,7 @@ struct ContactDetails: View {
                         }
                     }
                     
-                    if !contact.isGroup, let statusMessage = contact.statusMessage as String?, statusMessage.count > 0 {
+                    if !contact.isMuc, let statusMessage = contact.statusMessage as String?, statusMessage.count > 0 {
                         VStack {
                             Text("Status message:")
                             Text(contact.statusMessage as String)
@@ -210,7 +210,7 @@ struct ContactDetails: View {
                         }
                     }
                     
-                    if contact.isGroup && ((contact.groupSubject as String).count > 0 || ownRole == "moderator") {
+                    if contact.isMuc && ((contact.groupSubject as String).count > 0 || ownRole == "moderator") {
                         VStack {
                             if ownRole == "moderator" {
                                 Button {
@@ -255,7 +255,7 @@ struct ContactDetails: View {
             Section {
                 if !contact.isSelfChat {
                     Button {
-                        if contact.isGroup {
+                        if contact.isMuc {
                             if !contact.isMuted && !contact.isMentionOnly {
                                 contact.obj.toggleMentionOnly(true)
                             } else if !contact.isMuted && contact.isMentionOnly {
@@ -271,12 +271,12 @@ struct ContactDetails: View {
                     } label: {
                         if contact.isMuted  {
                             Label {
-                                contact.isGroup ? Text("Notifications disabled") : Text("Contact is muted")
+                                contact.isMuc ? Text("Notifications disabled") : Text("Contact is muted")
                             } icon: {
                                 Image(systemName: "bell.slash.fill")
                                     .foregroundColor(.red)
                             }
-                        } else if contact.isGroup && contact.isMentionOnly {
+                        } else if contact.isMuc && contact.isMentionOnly {
                             Label {
                                 Text("Notify only when mentioned")
                             } icon: {
@@ -285,7 +285,7 @@ struct ContactDetails: View {
                             }
                         } else {
                             Label {
-                                contact.isGroup ? Text("Notify on all messages") : Text("Contact is not muted")
+                                contact.isMuc ? Text("Notify on all messages") : Text("Contact is not muted")
                             } icon: {
                                 Image(systemName: "bell.fill")
                                     .foregroundColor(.green)
@@ -296,7 +296,7 @@ struct ContactDetails: View {
                 }
                 
 #if !DISABLE_OMEMO
-                if (!contact.isGroup || (contact.isGroup && contact.mucType == "group")) && !HelperTools.isContactBlacklisted(forEncryption:contact.obj) {
+                if (!contact.isMuc || (contact.isMuc && contact.mucType == "group")) && !HelperTools.isContactBlacklisted(forEncryption:contact.obj) {
                     Button {
                         if contact.isEncrypted {
                             showingShouldDisableEncryptionAlert = true
@@ -345,14 +345,14 @@ struct ContactDetails: View {
                 }
 #endif
                 
-                if contact.isGroup && ownAffiliation == "owner" {
+                if contact.isMuc && ownAffiliation == "owner" {
                     let label = contact.obj.mucType == "group" ? NSLocalizedString("Rename Group", comment:"") : NSLocalizedString("Rename Channel", comment:"")
                     TextField(label, text: $contact.fullNameView, onEditingChanged: {
                         isEditingNickname = $0
                     })
                     .accessibilityLabel(contact.obj.mucType == "group" ? Text("Group name") : Text("Channel name"))
                     .addClearButton(isEditing: isEditingNickname, text: $contact.fullNameView)
-                } else if !contact.isGroup && !contact.isSelfChat {
+                } else if !contact.isMuc && !contact.isSelfChat {
                     TextField(NSLocalizedString("Rename Contact", comment: "placeholder text in contact details"), text: $contact.nickNameView, onEditingChanged: {
                         isEditingNickname = $0
                     })
@@ -370,7 +370,7 @@ struct ContactDetails: View {
                 
 #if !DISABLE_OMEMO
                 if !HelperTools.isContactBlacklisted(forEncryption:contact.obj) && !contact.isSelfChat {
-                    if !contact.isGroup || contact.mucType == "group" {
+                    if !contact.isMuc || contact.mucType == "group" {
                         NavigationLink(destination: LazyClosureView(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: contact)))) {
                             Text("Encryption Keys")
                         }
@@ -378,7 +378,7 @@ struct ContactDetails: View {
                 }
 #endif
                 
-                if !contact.isGroup && !contact.isSelfChat {
+                if !contact.isMuc && !contact.isSelfChat {
                     NavigationLink(destination: LazyClosureView(ContactResources(contact: contact))) {
                         Text("Resources")
                     }
@@ -403,11 +403,11 @@ struct ContactDetails: View {
                     Text("Change Chat Background")
                 }
                 
-                if contact.obj.isGroup && contact.obj.mucType == "group" {
+                if contact.obj.isMuc && contact.obj.mucType == "group" {
                     NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
                         Text("Group Members")
                     }
-                } else if contact.obj.isGroup && contact.obj.mucType == "channel" {
+                } else if contact.obj.isMuc && contact.obj.mucType == "channel" {
                     if ["owner", "admin"].contains(ownAffiliation) {
                         NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
                             Text("Channel Participants")
@@ -461,7 +461,7 @@ struct ContactDetails: View {
                             Button(action: {
                                 showingRemoveContactConfirmation = true
                             }) {
-                                if contact.isGroup {
+                                if contact.isMuc {
                                     if contact.mucType == "group" {
                                         Text("Leave Group")
                                             .foregroundColor(.red)
@@ -476,8 +476,8 @@ struct ContactDetails: View {
                             }
                             .actionSheet(isPresented: $showingRemoveContactConfirmation) {
                                 ActionSheet(
-                                    title: Text(contact.isGroup ? NSLocalizedString("Leave this conversation", comment: "") : String(format: NSLocalizedString("Remove %@ from contacts?", comment: ""), contact.contactJid)),
-                                        message: Text(contact.isGroup ? NSLocalizedString("You will no longer receive messages from this conversation", comment: "") : NSLocalizedString("They will no longer see when you are online. They may not be able to send you encrypted messages.", comment: "")),
+                                    title: Text(contact.isMuc ? NSLocalizedString("Leave this conversation", comment: "") : String(format: NSLocalizedString("Remove %@ from contacts?", comment: ""), contact.contactJid)),
+                                        message: Text(contact.isMuc ? NSLocalizedString("You will no longer receive messages from this conversation", comment: "") : NSLocalizedString("They will no longer see when you are online. They may not be able to send you encrypted messages.", comment: "")),
                                     buttons: [
                                         .cancel(),
                                         .destructive(
@@ -496,7 +496,7 @@ struct ContactDetails: View {
                             Button(action: {
                                 showingAddContactConfirmation = true
                             }) {
-                                if contact.isGroup {
+                                if contact.isMuc {
                                     if contact.mucType == "group" {
                                         Text("Join Group")
                                     } else {
@@ -508,8 +508,8 @@ struct ContactDetails: View {
                             }
                             .actionSheet(isPresented: $showingAddContactConfirmation) {
                                 ActionSheet(
-                                    title: Text(contact.isGroup ? (contact.mucType == "group" ? NSLocalizedString("Join Group", comment: "") : NSLocalizedString("Join Channel", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
-                                    message: Text(contact.isGroup ? NSLocalizedString("You will receive subsequent messages from this conversation", comment: "") : NSLocalizedString("They will see when you are online. They will be able to send you encrypted messages.", comment: "")),
+                                    title: Text(contact.isMuc ? (contact.mucType == "group" ? NSLocalizedString("Join Group", comment: "") : NSLocalizedString("Join Channel", comment: "")) : String(format: NSLocalizedString("Add %@ to your contacts?", comment: ""), contact.contactJid)),
+                                    message: Text(contact.isMuc ? NSLocalizedString("You will receive subsequent messages from this conversation", comment: "") : NSLocalizedString("They will see when you are online. They will be able to send you encrypted messages.", comment: "")),
                                     buttons: [
                                         .cancel(),
                                         .default(
@@ -568,7 +568,7 @@ struct ContactDetails: View {
                 Button(action: {
                     showingClearHistoryConfirmation = true
                 }) {
-                    if contact.isGroup {
+                    if contact.isMuc {
                         if contact.obj.mucType == "group" {
                             Text("Clear chat history of this group")
                         } else {
@@ -600,7 +600,7 @@ struct ContactDetails: View {
             //omemo debug stuff, should be removed in a few months
             Section {
                 // only display omemo session reset button on 1:1 and private groups
-                if contact.obj.isGroup == false || (contact.isGroup && contact.mucType == "group") {
+                if contact.obj.isMuc == false || (contact.isMuc && contact.mucType == "group") {
                     Button(action: {
                         showingResetOmemoSessionConfirmation = true
                     }) {

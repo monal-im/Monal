@@ -246,7 +246,7 @@ enum msgSentState {
         //this does not matter if we aren't already in the main thread, hence the async dispatch
         [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
             //these contact types can not be called
-            if(self.contact.isGroup || self.contact.isSelfChat)
+            if(self.contact.isMuc || self.contact.isSelfChat)
             {
                 self.callButton = nil;
                 
@@ -601,7 +601,7 @@ enum msgSentState {
     else
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
     //disable encryption button on unsupported muc types
-    if(self.contact.isGroup && [self.contact.mucType isEqualToString:@"group"] == NO)
+    if(self.contact.isMuc && [self.contact.mucType isEqualToString:@"group"] == NO)
         [self.navBarEncryptToggleButton setEnabled:NO];
     //disable encryption button for special jids
     if([HelperTools isContactBlacklistedForEncryption:self.contact])
@@ -649,7 +649,7 @@ enum msgSentState {
 
     jidLabelText = contactDisplayName;
 
-    if(self.contact.isGroup)
+    if(self.contact.isMuc)
     {
         NSArray* members = [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo];
         NSInteger membercount = members.count;
@@ -1006,7 +1006,7 @@ enum msgSentState {
     unreadStatus.messageType = kMessageTypeStatus;
     unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @"");
     unreadStatus.actualFrom = self.jid;
-    unreadStatus.isMuc = self.contact.isGroup;
+    unreadStatus.isMuc = self.contact.isMuc;
 
     NSInteger unreadPos = (NSInteger)messages.count - 1;
     while(unreadPos >= 0)
@@ -1609,7 +1609,7 @@ enum msgSentState {
         return nil;
     }
 
-    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountId withMessage:message actuallyFrom:(self.contact.isGroup ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.contact.isEncrypted messageType:messageType mimeType:mimeType size:size];
+    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountId withMessage:message actuallyFrom:(self.contact.isMuc ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.contact.isEncrypted messageType:messageType mimeType:mimeType size:size];
     if(messageDBId != nil)
     {
         DDLogVerbose(@"added message");
@@ -1786,7 +1786,7 @@ enum msgSentState {
                     msg.errorReason = [dic objectForKey:@"errorReason"];
 
                     //ping muc to self-heal cases where we aren't joined anymore without noticing it
-                    if(self.contact.isGroup)
+                    if(self.contact.isMuc)
                         [self.xmppAccount.mucProcessor ping:self.contact.contactJid];
                 }
             }
@@ -2262,7 +2262,7 @@ enum msgSentState {
         priorRow = [self.messageList objectAtIndex:indexPath.row-1];
     // Only display names for groups
     BOOL hideName = YES;
-    if(self.contact.isGroup)
+    if(self.contact.isMuc)
     {
         if([@"group" isEqualToString:self.contact.mucType] && row.participantJid)
             hideName = (priorRow != nil && [priorRow.participantJid isEqualToString:row.participantJid]);
@@ -2555,7 +2555,7 @@ enum msgSentState {
         ]];
     //only allow retraction for outgoing messages or if we are the moderator of that muc
     //but only allow retraction in mucs if we already got the reflected stanzaid (or if this is an 1:1 chat)
-    else if((!message.inbound || (self.contact.isGroup && [[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact] isEqualToString:@"moderator"] && [[self.xmppAccount.mucProcessor getRoomFeaturesForMuc:self.contact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"])) && (!message.isMuc || (message.isMuc && message.stanzaId != nil)) && !message.retracted)
+    else if((!message.inbound || (self.contact.isMuc && [[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact] isEqualToString:@"moderator"] && [[self.xmppAccount.mucProcessor getRoomFeaturesForMuc:self.contact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"])) && (!message.isMuc || (message.isMuc && message.stanzaId != nil)) && !message.retracted)
         return [UISwipeActionsConfiguration configurationWithActions:@[
             quoteAction,
             copyAction,
@@ -2708,7 +2708,7 @@ enum msgSentState {
         //history database for this contact is completely empty, use global last stanza id for this mam archive
         if(oldestStanzaId == nil)
         {
-            if(self.contact.isGroup)
+            if(self.contact.isMuc)
                 oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:self.contact.contactJid andAccount:self.contact.accountId];
             else
                 oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.contact.accountId];
@@ -3144,7 +3144,7 @@ enum msgSentState {
     if(self.xmppAccount && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
     {
         BOOL omemoDeviceForContactFound = NO;
-        if(!self.contact.isGroup)
+        if(!self.contact.isMuc)
             omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid].count > 0;
         else
         {
@@ -3161,21 +3161,21 @@ enum msgSentState {
         }
         if(!omemoDeviceForContactFound && self.contact.isEncrypted)
         {
-            if(!self.contact.isGroup && [[HelperTools splitJid:self.contact.contactJid][@"host"] isEqualToString:@"cheogram.com"])
+            if(!self.contact.isMuc && [[HelperTools splitJid:self.contact.contactJid][@"host"] isEqualToString:@"cheogram.com"])
             {
                 // cheogram.com does not support OMEMO encryption as it is a PSTN gateway
                 // --> disable it
                 self.contact.isEncrypted = NO;
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
             }
-            else if(self.contact.isGroup && ![self.contact.mucType isEqualToString:@"group"])
+            else if(self.contact.isMuc && ![self.contact.mucType isEqualToString:@"group"])
             {
                 // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
                 // --> disable it
                 self.contact.isEncrypted = NO;
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
             }
-            else if(!self.contact.isGroup || (self.contact.isGroup && [self.contact.mucType isEqualToString:@"group"]))
+            else if(!self.contact.isMuc || (self.contact.isMuc && [self.contact.mucType isEqualToString:@"group"]))
             {
                 [self hideOmemoHUD];
                 if(showWarning)

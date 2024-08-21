@@ -31,13 +31,13 @@
     //or if they are from a muc group, not a channel
     MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
     if(!(
-        //we have to check for .isGroup because mucs always set .isSubscribedFrom to YES
-        (!contact.isGroup && contact.isSubscribedFrom) ||
+        //we have to check for .isMuc because mucs always set .isSubscribedFrom to YES
+        (!contact.isMuc && contact.isSubscribedFrom) ||
         contact.isSelfChat ||
         [account.connectionProperties.identity.domain isEqualToString:iqNode.fromUser] ||
-        (contact.isGroup && [@"group" isEqualToString:contact.mucType])
+        (contact.isMuc && [@"group" isEqualToString:contact.mucType])
     ))
-        DDLogWarn(@"Invalid sender for iq (!subscribedFrom || isGroup), ignoring: %@", iqNode);
+        DDLogWarn(@"Invalid sender for iq (!subscribedFrom || isMuc), ignoring: %@", iqNode);
     
     if([iqNode check:@"/<type=get>"])
         [self processGetIq:iqNode forAccount:account];
@@ -327,7 +327,7 @@ $$
         BOOL isKnownUser = [[DataLayer sharedInstance] contactDictionaryForUsername:contact[@"jid"] forAccount:account.accountNo] != nil;
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            if(contactObj.isGroup)
+            if(contactObj.isMuc)
                 DDLogWarn(@"Got roster remove request for MUC, ignoring it (possibly even triggered by us).");
             else
             {
@@ -348,7 +348,7 @@ $$
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
             }
             
-            if(contactObj.isGroup)
+            if(contactObj.isMuc)
             {
                 DDLogWarn(@"Removing muc '%@' from contactlist, got 'normal' roster entry!", contact[@"jid"]);
                 [[DataLayer sharedInstance] removeBuddy:contact[@"jid"] forAccount:account.accountNo];
@@ -369,7 +369,7 @@ $$
                                              andAccount:account.accountNo];
             
 #ifndef DISABLE_OMEMO
-            if(contactObj.isGroup == NO)
+            if(contactObj.isMuc == NO)
             {
                 //request omemo devicelist, but only if this is a new user
                 //(we could get a roster with already known users if roster version is not supported by the server)

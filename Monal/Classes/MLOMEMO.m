@@ -148,7 +148,7 @@ static const int KEY_SIZE = 16;
     if(removedContact == nil || removedContact.accountId.intValue != self.account.accountNo.intValue)
        return;
 
-    [self checkIfSessionIsStillNeeded:removedContact.contactJid isMuc:removedContact.isGroup];
+    [self checkIfSessionIsStillNeeded:removedContact.contactJid isMuc:removedContact.isMuc];
 #endif
 }
 

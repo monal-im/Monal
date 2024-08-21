@@ -83,7 +83,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, readonly) BOOL isActiveChat;
 @property (nonatomic, assign) BOOL isEncrypted;
 
-@property (nonatomic, readonly) BOOL isGroup;
+@property (nonatomic, readonly) BOOL isMuc;
 @property (nonatomic, readonly) NSString* groupSubject;
 @property (nonatomic, readonly) NSString* mucType;
 @property (nonatomic, readonly) NSString* accountNickInGroup;

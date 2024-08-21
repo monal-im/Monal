@@ -19,15 +19,15 @@ struct ContactViewEntry: View {
         if (!isDeletable) {
             return "Cannot delete notes to self"
         }
-        return contact.isGroup ? "Remove Conversation" : "Remove Contact"
+        return contact.isMuc ? "Remove Conversation" : "Remove Contact"
     }
 
     private var removeContactConfirmationTitle: String {
-        contact.isGroup ? "Leave this converstion?" : "Remove \(contact.contactJid) from contacts?"
+        contact.isMuc ? "Leave this converstion?" : "Remove \(contact.contactJid) from contacts?"
     }
 
     private var removeContactConfirmationDetail: String {
-        contact.isGroup ? "" : "They will no longer see when you are online. They may not be able to access your encryption keys."
+        contact.isMuc ? "" : "They will no longer see when you are online. They may not be able to access your encryption keys."
     }
 
     private var isDeletable: Bool {

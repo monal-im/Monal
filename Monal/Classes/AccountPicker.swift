@@ -40,9 +40,9 @@ struct AccountPicker: View {
                 
                 List {
                     ForEach(contacts) { contact in
-                        if let accountEntry = DataLayer.sharedInstance().details(forAccount:contact.accountId) {
+                        if let accountEntry = DataLayer.sharedInstance().details(forAccount:contact.accountID) {
                             let accountJid = "\(accountEntry["username"] ?? "<unknown>" as NSString)@\(accountEntry["domain"] ?? "<unknown>" as NSString)"
-                            let accountContact = MLContact.createContact(fromJid:accountJid, andAccountNo:accountEntry["account_id"] as! NSNumber)
+                            let accountContact = MLContact.createContact(fromJid:accountJid, andAccountID:accountEntry["account_id"] as! NSNumber)
                             Button {
                                 (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!.call(contact, with:callType)
                             } label: {

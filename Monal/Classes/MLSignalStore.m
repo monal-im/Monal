@@ -17,7 +17,7 @@
 {
     NSString* _dbPath;
 }
-@property (nonatomic, strong) NSNumber* accountId;
+@property (nonatomic, strong) NSNumber* accountID;
 @property (readonly, strong) MLSQLite* sqliteDatabase;
 @end
 
@@ -38,14 +38,14 @@
     return [MLSQLite sharedInstanceForFile:_dbPath];
 }
 
--(MLSignalStore*) initWithAccountId:(NSNumber*) accountId andAccountJid:(NSString* _Nonnull) accountJid
+-(MLSignalStore*) initWithAccountID:(NSNumber*) accountID andAccountJid:(NSString* _Nonnull) accountJid
 {
     self = [super init];
     _dbPath = [[HelperTools getContainerURLForPathComponents:@[@"sworim.sqlite"]] path];
     
-    self.accountId = accountId;
+    self.accountID = accountID;
     NSArray* data = [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeReader:@"SELECT identityPrivateKey, deviceid, identityPublicKey FROM signalIdentity WHERE account_id=?;" andArguments:@[accountId]];
+        return [self.sqliteDatabase executeReader:@"SELECT identityPrivateKey, deviceid, identityPublicKey FROM signalIdentity WHERE account_id=?;" andArguments:@[accountID]];
     }];
     NSDictionary* row = [data firstObject];
 
@@ -90,16 +90,16 @@
 {
     [self.sqliteDatabase voidWriteTransaction:^{
         // remove old keys that have been remove a long time ago from pubsub
-        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND pubSubRemovalTimestamp <= unixepoch('now', '-14 day');" andArguments:@[self.accountId]];
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND pubSubRemovalTimestamp <= unixepoch('now', '-14 day');" andArguments:@[self.accountID]];
         // mark old unused keys to be removed from pubsub
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND creationTimestamp<= unixepoch('now','-14 day');" andArguments:@[self.accountId]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND creationTimestamp<= unixepoch('now','-14 day');" andArguments:@[self.accountID]];
     }];
 }
 
 -(NSMutableArray<SignalPreKey*>*) readPreKeys
 {
     NSArray* keys = [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeReader:@"SELECT prekeyid, preKey FROM signalPreKey WHERE account_id=? AND keyUsed=0;" andArguments:@[self.accountId]];
+        return [self.sqliteDatabase executeReader:@"SELECT prekeyid, preKey FROM signalPreKey WHERE account_id=? AND keyUsed=0;" andArguments:@[self.accountID]];
     }];
     
     NSMutableArray<SignalPreKey*>* array = [[NSMutableArray alloc] initWithCapacity:keys.count];
@@ -114,7 +114,7 @@
 -(int) getHighestPreyKeyId
 {
     NSNumber* highestId = [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT prekeyid FROM signalPreKey WHERE account_id=? ORDER BY prekeyid DESC LIMIT 1;" andArguments:@[self.accountId]];
+        return [self.sqliteDatabase executeScalar:@"SELECT prekeyid FROM signalPreKey WHERE account_id=? ORDER BY prekeyid DESC LIMIT 1;" andArguments:@[self.accountID]];
     }];
 
     if(highestId == nil) {
@@ -127,7 +127,7 @@
 -(unsigned int) getPreKeyCount
 {
     NSNumber* count = [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT COUNT(prekeyid) FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NULL AND keyUsed=0;" andArguments:@[self.accountId]];
+        return [self.sqliteDatabase executeScalar:@"SELECT COUNT(prekeyid) FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NULL AND keyUsed=0;" andArguments:@[self.accountID]];
     }];
     return count.unsignedIntValue;
 }
@@ -152,7 +152,7 @@
 - (NSData* _Nullable) sessionRecordForAddress:(SignalAddress*) address
 {
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT recordData FROM signalContactSession WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
+        return [self.sqliteDatabase executeScalar:@"SELECT recordData FROM signalContactSession WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[self.accountID, address.name, [NSNumber numberWithInteger:address.deviceId]]];
     }];
 }
 
@@ -166,9 +166,9 @@
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
         if([self sessionRecordForAddress:address])
-            return [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactSession SET recordData=? WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[recordData, self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
+            return [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactSession SET recordData=? WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[recordData, self.accountID, address.name, [NSNumber numberWithInteger:address.deviceId]]];
         else
-            return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactSession (account_id, contactName, contactDeviceId, recordData) VALUES (?, ?, ?, ?);" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
+            return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactSession (account_id, contactName, contactDeviceId, recordData) VALUES (?, ?, ?, ?);" andArguments:@[self.accountID, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
     }];
 }
 
@@ -188,7 +188,7 @@
 - (BOOL) deleteSessionRecordForAddress:(SignalAddress*) address
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
-        return [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
+        return [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[self.accountID, address.name, [NSNumber numberWithInteger:address.deviceId]]];
     }];
 }
 
@@ -198,7 +198,7 @@
 - (NSArray<NSNumber*>*) allDeviceIdsForAddressName:(NSString*) jid
 {
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, jid]];
+        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountID, jid]];
     }];
 }
 
@@ -208,7 +208,7 @@
         return nil;
 
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND removedFromDeviceList IS NULL;" andArguments:@[self.accountId, jid]];
+        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND removedFromDeviceList IS NULL;" andArguments:@[self.accountID, jid]];
     }];
 }
 
@@ -224,7 +224,7 @@
                     AND contactName=? \
                     AND removedFromDeviceList IS NULL \
                     AND brokenSession=false \
-            ;" andArguments:@[self.accountId, jid]];
+            ;" andArguments:@[self.accountID, jid]];
     }];
 }
 
@@ -241,7 +241,7 @@
                     AND removedFromDeviceList IS NULL \
                     AND brokenSession=true \
                     AND (lastFailedBundleFetch IS NULL OR lastFailedBundleFetch <= unixepoch('now', '-5 day'))\
-            ;" andArguments:@[self.accountId, jid]];
+            ;" andArguments:@[self.accountID, jid]];
     }];
 }
 
@@ -253,8 +253,8 @@
 -(int) deleteAllSessionsForAddressName:(NSString*) addressName
 {
     return [[self.sqliteDatabase idWriteTransaction:^{
-        NSNumber* count = (NSNumber*) [self.sqliteDatabase executeScalar:@"COUNT * FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
-        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
+        NSNumber* count = (NSNumber*) [self.sqliteDatabase executeScalar:@"COUNT * FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountID, addressName]];
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountID, addressName]];
         return count;
     }] intValue];
 }
@@ -267,7 +267,7 @@
 {
     DDLogDebug(@"Loading prekey %lu", (unsigned long)preKeyId);
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT prekey FROM signalPreKey WHERE account_id=? AND prekeyid=? AND keyUsed=0;" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+        return [self.sqliteDatabase executeScalar:@"SELECT prekey FROM signalPreKey WHERE account_id=? AND prekeyid=? AND keyUsed=0;" andArguments:@[self.accountID, [NSNumber numberWithInteger:preKeyId]]];
     }];
 }
 
@@ -280,10 +280,10 @@
     DDLogDebug(@"Storing prekey %lu", (unsigned long)preKeyId);
     return [self.sqliteDatabase boolWriteTransaction:^{
         // Only store new preKeys
-        NSNumber* preKeyCnt = [self.sqliteDatabase executeScalar:@"SELECT count(*) FROM signalPreKey WHERE account_id=? AND prekeyid=? AND preKey=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
+        NSNumber* preKeyCnt = [self.sqliteDatabase executeScalar:@"SELECT count(*) FROM signalPreKey WHERE account_id=? AND prekeyid=? AND preKey=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:preKeyId], preKey]];
         if(preKeyCnt.intValue > 0)
             return YES;
-        return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalPreKey (account_id, prekeyid, preKey) VALUES (?, ?, ?);" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
+        return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalPreKey (account_id, prekeyid, preKey) VALUES (?, ?, ?);" andArguments:@[self.accountID, [NSNumber numberWithInteger:preKeyId], preKey]];
     }];
 }
 
@@ -305,7 +305,7 @@
     DDLogDebug(@"Marking prekey %lu as deleted", (unsigned long)preKeyId);
     // only mark the key for deletion -> key should be removed from pubSub
     return [self.sqliteDatabase boolWriteTransaction:^{
-        BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP, keyUsed=1 WHERE account_id=? AND prekeyid=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+        BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP, keyUsed=1 WHERE account_id=? AND prekeyid=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:preKeyId]]];
         [self reloadCachedPrekeys];
         return ret;
     }];
@@ -318,7 +318,7 @@
 {
     DDLogDebug(@"Loading signed prekey %lu", (unsigned long)signedPreKeyId);
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT signedPreKey FROM signalSignedPreKey WHERE account_id=? AND signedPreKeyId=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
+        return [self.sqliteDatabase executeScalar:@"SELECT signedPreKey FROM signalSignedPreKey WHERE account_id=? AND signedPreKeyId=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:signedPreKeyId]]];
     }];
 }
 
@@ -329,7 +329,7 @@
 {
     DDLogDebug(@"Storing signed prekey %lu", (unsigned long)signedPreKeyId);
     return [self.sqliteDatabase boolWriteTransaction:^{
-        return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalSignedPreKey (account_id, signedPreKeyId, signedPreKey) VALUES (?, ?, ?) ON CONFLICT(account_id, signedPreKeyId) DO UPDATE SET signedPreKey=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId], signedPreKey, signedPreKey]];
+        return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalSignedPreKey (account_id, signedPreKeyId, signedPreKey) VALUES (?, ?, ?) ON CONFLICT(account_id, signedPreKeyId) DO UPDATE SET signedPreKey=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:signedPreKeyId], signedPreKey, signedPreKey]];
     }];
 }
 
@@ -340,7 +340,7 @@
 - (BOOL) containsSignedPreKeyWithId:(uint32_t) signedPreKeyId
 {
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT signedPreKey FROM signalSignedPreKey WHERE account_id=? AND signedPreKeyId=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
+        return [self.sqliteDatabase executeScalar:@"SELECT signedPreKey FROM signalSignedPreKey WHERE account_id=? AND signedPreKeyId=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:signedPreKeyId]]];
     }] ? YES : NO;
 }
 
@@ -351,7 +351,7 @@
 {
     DDLogDebug(@"Removing signed prekey %lu", (unsigned long)signedPreKeyId);
     return [self.sqliteDatabase boolWriteTransaction:^{
-        return [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalSignedPreKey WHERE account_id=? AND signedPreKeyId=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
+        return [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalSignedPreKey WHERE account_id=? AND signedPreKeyId=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:signedPreKeyId]]];
     }];
 }
 
@@ -366,7 +366,7 @@
 -(BOOL) identityPublicKeyExists:(NSData*) publicKey andPrivateKey:(NSData *) privateKey
 {
     return [[self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT COUNT(*) FROM signalIdentity WHERE account_id=? AND deviceid=? AND identityPublicKey=? AND identityPrivateKey=?;" andArguments:@[self.accountId, [NSNumber numberWithUnsignedInt:self.deviceid], publicKey, privateKey]];
+        return [self.sqliteDatabase executeScalar:@"SELECT COUNT(*) FROM signalIdentity WHERE account_id=? AND deviceid=? AND identityPublicKey=? AND identityPrivateKey=?;" andArguments:@[self.accountID, [NSNumber numberWithUnsignedInt:self.deviceid], publicKey, privateKey]];
     }] boolValue];
 }
 
@@ -376,7 +376,7 @@
         if([self identityPublicKeyExists:publicKey andPrivateKey:privateKey])
             return YES;
 
-        return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalIdentity (account_id, deviceid, identityPublicKey, identityPrivateKey) values (?, ?, ?, ?);" andArguments:@[self.accountId, [NSNumber numberWithInteger:self.deviceid], publicKey, privateKey]];
+        return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalIdentity (account_id, deviceid, identityPublicKey, identityPrivateKey) values (?, ?, ?, ?);" andArguments:@[self.accountID, [NSNumber numberWithInteger:self.deviceid], publicKey, privateKey]];
     }];
 }
 
@@ -405,13 +405,13 @@
 -(BOOL) saveIdentity:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nullable) identityKey;
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
-        NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
         if(dbIdentity)
             return YES;
         // Set every new identity to TOFU to increase user experience
         return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity \
             (account_id, contactName, contactDeviceId, identity, trustLevel) \
-            VALUES (?, ?, ?, ?, ?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], identityKey, [NSNumber numberWithInt:MLOmemoInternalToFU]]];
+            VALUES (?, ?, ?, ?, ?)" andArguments:@[self.accountID, address.name, [NSNumber numberWithInteger:address.deviceId], identityKey, [NSNumber numberWithInt:MLOmemoInternalToFU]]];
     }];
 }
 
@@ -435,7 +435,7 @@
 -(NSData*) getIdentityForAddress:(SignalAddress*) address
 {
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:@"SELECT identity FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        return [self.sqliteDatabase executeScalar:@"SELECT identity FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
@@ -448,21 +448,21 @@
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:(trust ? MLOmemoInternalTrusted : MLOmemoInternalNotTrusted)], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:(trust ? MLOmemoInternalTrusted : MLOmemoInternalNotTrusted)], self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
 -(void) markDeviceAsDeleted:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=CURRENT_TIMESTAMP WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=CURRENT_TIMESTAMP WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
 -(void) removeDeviceDeletedMark:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=NULL WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=NULL WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
@@ -473,42 +473,42 @@
 -(void) updateLastSuccessfulDecryptTime:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastReceivedMsg=CURRENT_TIMESTAMP, brokenSession=false WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastReceivedMsg=CURRENT_TIMESTAMP, brokenSession=false WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
 -(void) markSessionAsBroken:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=true WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=true WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
 -(void) markBundleAsFixed:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=false, lastFailedBundleFetch=NULL WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=false, lastFailedBundleFetch=NULL WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
 -(void) markBundleAsBroken:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastFailedBundleFetch=unixepoch('now') WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastFailedBundleFetch=unixepoch('now') WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
 }
 
 -(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceId
 {
     return [self.sqliteDatabase boolReadTransaction:^{
-        return [[self.sqliteDatabase executeScalar:@"SELECT brokenSession FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, deviceId, jid]] boolValue];
+        return [[self.sqliteDatabase executeScalar:@"SELECT brokenSession FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, deviceId, jid]] boolValue];
     }];
 }
 
 -(int) getInternalTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey
 {
     return [[self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalar:(@"SELECT trustLevel FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?;") andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
+        return [self.sqliteDatabase executeScalar:(@"SELECT trustLevel FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?;") andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
     }] intValue];
 }
 
@@ -518,14 +518,14 @@
     {
         // untrust all devices
         [self.sqliteDatabase voidWriteTransaction:^{
-            [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountId, jid]];
+            [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountID, jid]];
         }];
     }
     else
     {
         // untrust all of our own devices except our own device id
         [self.sqliteDatabase voidWriteTransaction:^{
-            [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=? AND contactDeviceId!=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountId, jid, [NSNumber numberWithUnsignedInt:self.deviceid]]];
+            [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=? AND contactDeviceId!=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountID, jid, [NSNumber numberWithUnsignedInt:self.deviceid]]];
         }];
     }
 }
@@ -547,14 +547,14 @@
                 END \
                 FROM signalContactIdentity \
                 WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?; \
-                ") andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
+                ") andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
     }];
 }
 
 -(void) deleteDeviceforAddress:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
  }
 
@@ -564,7 +564,7 @@
 -(BOOL) sessionsExistForBuddy:(NSString*) buddyJid
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
-        NSNumber* contactDevicesExist = [self.sqliteDatabase executeScalar:@"SELECT COUNT(contactDeviceId) FROM signalContactIdentity WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, buddyJid]];
+        NSNumber* contactDevicesExist = [self.sqliteDatabase executeScalar:@"SELECT COUNT(contactDeviceId) FROM signalContactIdentity WHERE account_id=? AND contactName=?;" andArguments:@[self.accountID, buddyJid]];
         return (BOOL)(contactDevicesExist.intValue > 0);
     }];
 }
@@ -606,7 +606,7 @@
                     WHERE \
                         (username || '@' || domain) = ? \
                         AND account_id = ? \
-                ) AS accountCnt" andArguments:@[self.accountId, buddyJid, self.accountId, buddyJid, self.accountId, buddyJid]];
+                ) AS accountCnt" andArguments:@[self.accountID, buddyJid, self.accountID, buddyJid, self.accountID, buddyJid]];
 
         BOOL buddyStillNeeded = buddyJidCnt.intValue > 0;
         if(buddyStillNeeded == NO)
@@ -615,12 +615,12 @@
                 WHERE \
                     account_id=? \
                     AND contactName=? \
-             " andArguments:@[self.accountId, buddyJid]];
+             " andArguments:@[self.accountID, buddyJid]];
             [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
                 WHERE \
                     account_id=? \
                     AND contactName=? \
-             " andArguments:@[self.accountId, buddyJid]];
+             " andArguments:@[self.accountID, buddyJid]];
         }
         return buddyStillNeeded;
     }];
@@ -636,7 +636,7 @@
                 FROM signalContactIdentity \
                 WHERE \
                 account_id = ? \
-        " andArguments:@[self.accountId]];
+        " andArguments:@[self.accountID]];
         NSMutableSet<NSString*>* danglingJids = [NSMutableSet new];
         for(NSString* jid in jidsWithSession) {
             // check if the session is still needed
@@ -647,12 +647,12 @@
                     WHERE \
                         account_id = ? \
                         AND contactName = ? \
-                " andArguments:@[self.accountId, jid]];
+                " andArguments:@[self.accountID, jid]];
                 [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
                     WHERE \
                         account_id = ? \
                         AND contactName = ? \
-                " andArguments:@[self.accountId, jid]];
+                " andArguments:@[self.accountID, jid]];
             }
         }
         return danglingJids;

@@ -28,7 +28,7 @@
 @property (nonatomic, strong) SignalSignedPreKey* _Nullable signedPreKey;
 @property (nonatomic, strong) NSArray<SignalPreKey*>* _Nullable preKeys;
 
--(MLSignalStore* _Nonnull) initWithAccountId:(NSNumber* _Nonnull) accountId andAccountJid:(NSString* _Nonnull) accountJid;
+-(MLSignalStore* _Nonnull) initWithAccountID:(NSNumber* _Nonnull) accountID andAccountJid:(NSString* _Nonnull) accountJid;
 -(void) saveValues;
 
 -(NSData* _Nullable) getIdentityForAddress:(SignalAddress* _Nonnull) address;

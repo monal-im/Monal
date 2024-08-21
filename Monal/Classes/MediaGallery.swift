@@ -12,7 +12,7 @@ import AVFoundation
 struct MediaGalleryView: View {
     @State private var mediaItems: [[String: Any]] = []
     let contact: String
-    let accountNo: NSNumber
+    let accountID: NSNumber
     
     var body: some View {
         ScrollView {
@@ -34,7 +34,7 @@ struct MediaGalleryView: View {
     }
     
     private func fetchDownloadedMediaItems() {
-        if let attachments = DataLayer.sharedInstance().allAttachments(fromContact: contact, forAccount: accountNo) as? [[String: Any]] {
+        if let attachments = DataLayer.sharedInstance().allAttachments(fromContact: contact, forAccount: accountID) as? [[String: Any]] {
             mediaItems = attachments.filter { fileInfo in
                 if let mimeType = fileInfo["mimeType"] as? String,
                    !((fileInfo["needsDownloading"] as? NSNumber)?.boolValue ?? true) &&

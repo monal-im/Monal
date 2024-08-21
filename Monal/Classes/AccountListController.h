@@ -13,7 +13,7 @@
 @interface AccountListController : UITableViewController
 
 -(NSUInteger) getAccountNum;
--(NSNumber*) getAccountNoByIndex:(NSUInteger) index;
+-(NSNumber*) getAccountIDByIndex:(NSUInteger) index;
 -(void) setupAccountsView;
 -(void) refreshAccountList;
 -(void) initContactCell:(MLSwitchCell*) cell forAccNo:(NSUInteger) accNo;

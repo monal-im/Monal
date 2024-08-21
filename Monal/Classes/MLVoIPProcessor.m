@@ -224,13 +224,13 @@ static NSMutableDictionary* _pendingCalls;
     //handle tie breaking: check for already running call
     //(this is only needed if we are in the mainapp because of an already "running" call we now have to tie break)
     XMPPMessage* messageNode =  notification.userInfo[@"messageNode"];
-    NSNumber* accountNo = notification.userInfo[@"accountNo"];
-    MLContact* contact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo];
+    NSNumber* accountID = notification.userInfo[@"accountID"];
+    MLContact* contact = [MLContact createContactFromJid:messageNode.fromUser andAccountID:accountID];
     MLCall* existingCall = [self getActiveCallWithContact:contact];
     if(existingCall == nil || existingCall.state == MLCallStateFinished)
         return [self processIncomingCall:notification.userInfo withCompletion:nil];
     
-    MLCall* newCall = [self createCallWithJmiPropose:messageNode onAccountNo:accountNo];
+    MLCall* newCall = [self createCallWithJmiPropose:messageNode onAccountID:accountID];
     if(newCall == nil)
         return;
     
@@ -288,9 +288,9 @@ static NSMutableDictionary* _pendingCalls;
 {
     //TODO: handle jmi propose coming from other devices on our account (see TODO in MLMessageProcessor.m)
     XMPPMessage* messageNode =  userInfo[@"messageNode"];
-    NSNumber* accountNo = userInfo[@"accountNo"];
+    NSNumber* accountID = userInfo[@"accountID"];
     
-    MLCall* call = [self createCallWithJmiPropose:messageNode onAccountNo:accountNo];
+    MLCall* call = [self createCallWithJmiPropose:messageNode onAccountID:accountID];
     if(call == nil)
     {
         //ios will stop delivering voip notifications if an incoming pushkit notification doesn't trigger a visible ringing
@@ -812,7 +812,7 @@ static NSMutableDictionary* _pendingCalls;
     return update;
 }
 
--(MLCall* _Nullable) createCallWithJmiPropose:(XMPPMessage*) messageNode onAccountNo:(NSNumber*) accountNo
+-(MLCall* _Nullable) createCallWithJmiPropose:(XMPPMessage*) messageNode onAccountID:(NSNumber*) accountID
 {
     //if the jmi id is a uuid, just use it, otherwise infer a uuid from the given jmi id
     NSUUID* uuid = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}propose@id|uuidcast"];
@@ -831,7 +831,7 @@ static NSMutableDictionary* _pendingCalls;
     if([messageNode check:@"{urn:xmpp:jingle-message:0}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=video>"])
         callType = MLCallTypeVideo;
     
-    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:jmiid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountNo:accountNo] callType:callType andDirection:MLCallDirectionIncoming];
+    MLCall* call = [[MLCall alloc] initWithUUID:uuid jmiid:jmiid contact:[MLContact createContactFromJid:messageNode.fromUser andAccountID:accountID] callType:callType andDirection:MLCallDirectionIncoming];
     //order matters here!
     call.fullRemoteJid = messageNode.from;
     call.jmiPropose = messageNode;

@@ -389,7 +389,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) catchupFinished:(NSNotification*) notification
 {
     xmpp* account = notification.object;
-    DDLogInfo(@"### MAM/SMACKS CATCHUP FINISHED FOR ACCOUNT NO %@ ###", account.accountNo);
+    DDLogInfo(@"### MAM/SMACKS CATCHUP FINISHED FOR ACCOUNT NO %@ ###", account.accountID);
 }
 
 -(BOOL) allAccountsIdle
@@ -445,35 +445,35 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - Connection related
 
--(BOOL) isAccountForIdConnected:(NSNumber*) accountNo
+-(BOOL) isAccountForIdConnected:(NSNumber*) accountID
 {
-    xmpp* account = [self getEnabledAccountForID:accountNo];
+    xmpp* account = [self getEnabledAccountForID:accountID];
     if(account.accountState>=kStateBound) return YES;
     return NO;
 }
 
--(NSDate *) connectedTimeFor:(NSNumber*) accountNo
+-(NSDate *) connectedTimeFor:(NSNumber*) accountID
 {
-    xmpp* account = [self getEnabledAccountForID:accountNo];
+    xmpp* account = [self getEnabledAccountForID:accountID];
     return account.connectedTime;
 }
 
--(xmpp* _Nullable) getEnabledAccountForID:(NSNumber*) accountNo
+-(xmpp* _Nullable) getEnabledAccountForID:(NSNumber*) accountID
 {
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
         //using stringWithFormat: makes sure this REALLY is a string
-        if(xmppAccount.accountNo.intValue == accountNo.intValue)
+        if(xmppAccount.accountID.intValue == accountID.intValue)
             return xmppAccount;
     }
     return nil;
 }
 
--(void) connectAccount:(NSNumber*) accountNo
+-(void) connectAccount:(NSNumber*) accountID
 {
-    NSDictionary* account = [[DataLayer sharedInstance] detailsForAccount:accountNo];
+    NSDictionary* account = [[DataLayer sharedInstance] detailsForAccount:accountID];
     if(!account)
-        DDLogError(@"Expected account settings in db for accountNo: %@", accountNo);
+        DDLogError(@"Expected account settings in db for accountID: %@", accountID);
     else
         [self connectAccountWithDictionary:account];
 }
@@ -531,7 +531,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     }
     MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:jid password:password andResource:[account objectForKey:kResource]];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
-    xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[account objectForKey:kAccountID]];
+    xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountID:[account objectForKey:kAccountID]];
     xmppAccount.statusMessage = [account objectForKey:@"statusMessage"];
 
     @synchronized(_connectedXMPP) {
@@ -552,7 +552,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogWarn(@"connect blocked, not connecting newly created xmpp* instance");
 }
 
--(void) disconnectAccount:(NSNumber*) accountNo withExplicitLogout:(BOOL) explicitLogout
+-(void) disconnectAccount:(NSNumber*) accountID withExplicitLogout:(BOOL) explicitLogout
 {
     int index = 0;
     int pos = -1;
@@ -560,7 +560,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     @synchronized(_connectedXMPP) {
         for(xmpp* xmppAccount in _connectedXMPP)
         {
-            if(xmppAccount.accountNo.intValue == accountNo.intValue)
+            if(xmppAccount.accountID.intValue == accountID.intValue)
             {
                 account = xmppAccount;
                 pos=index;
@@ -608,9 +608,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     {
         //disconnect to prevent endless loops trying to connect
         dispatch_async(queue, ^{
-            DDLogVerbose(@"manager disconnecting: %@", xmppAccount.accountNo);
+            DDLogVerbose(@"manager disconnecting: %@", xmppAccount.accountID);
             [xmppAccount disconnect];
-            DDLogVerbose(@"manager disconnected: %@", xmppAccount.accountNo);
+            DDLogVerbose(@"manager disconnected: %@", xmppAccount.accountID);
         });
     }
     dispatch_barrier_sync(queue, ^{
@@ -628,23 +628,23 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     DDLogVerbose(@"manager connectIfNecessary done");
 }
 
--(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountNo
+-(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountID
 {
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-    [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
-    xmpp* xmpp = [self getEnabledAccountForID:accountNo];
+    [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountID.stringValue];
+    xmpp* xmpp = [self getEnabledAccountForID:accountID];
     [xmpp.connectionProperties.identity updatPassword:password];
 }
 
--(BOOL) isValidPassword:(NSString*) password forAccount:(NSNumber*) accountNo
+-(BOOL) isValidPassword:(NSString*) password forAccount:(NSNumber*) accountID
 {
-    return [password isEqualToString:[SAMKeychain passwordForService:kMonalKeychainName account:accountNo.stringValue]];
+    return [password isEqualToString:[SAMKeychain passwordForService:kMonalKeychainName account:accountID.stringValue]];
 }
 
 //this is only used by quicksy
--(NSString*) getPasswordForAccount:(NSNumber*) accountNo
+-(NSString*) getPasswordForAccount:(NSNumber*) accountID
 {
-    return [SAMKeychain passwordForService:kMonalKeychainName account:accountNo.stringValue];
+    return [SAMKeychain passwordForService:kMonalKeychainName account:accountID.stringValue];
 }
 
 #pragma mark -  XMPP commands
@@ -661,7 +661,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     // Save message to history
     NSNumber* messageDBId = [[DataLayer sharedInstance]
         addMessageHistoryTo:contact.contactJid
-                   forAccount:contact.accountId
+                   forAccount:contact.accountID
                   withMessage:message
                  actuallyFrom:(contact.isMuc ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
                        withId:msgid
@@ -749,29 +749,29 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     NSNumber* defaultPlainActivated = @YES;
     [dic setObject:([domain isEqualToString:@"yax.im"] || [domain isEqualToString:@"quicksy.im"] ? @YES : defaultPlainActivated) forKey:kPlainActivated];
 
-    NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
-    if(accountNo == nil)
+    NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
+    if(accountID == nil)
         return nil;
-    [self addNewAccountToKeychainAndConnectWithPassword:password andAccountNo:accountNo];
-    return accountNo;
+    [self addNewAccountToKeychainAndConnectWithPassword:password andAccountID:accountID];
+    return accountID;
 }
 
--(void) addNewAccountToKeychainAndConnectWithPassword:(NSString*) password andAccountNo:(NSNumber*) accountNo
+-(void) addNewAccountToKeychainAndConnectWithPassword:(NSString*) password andAccountID:(NSNumber*) accountID
 {
-    if(accountNo != nil && password != nil)
+    if(accountID != nil && password != nil)
     {
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-        [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
-        [self connectAccount:accountNo];
+        [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountID.stringValue];
+        [self connectAccount:accountID];
     }
 }
 
--(void) removeAccountForAccountNo:(NSNumber*) accountNo
+-(void) removeAccountForAccountID:(NSNumber*) accountID
 {
-    [self disconnectAccount:accountNo withExplicitLogout:YES];
-    [[DataLayer sharedInstance] removeAccount:accountNo];
-    [SAMKeychain deletePasswordForService:kMonalKeychainName account:accountNo.stringValue];
-    [HelperTools removeAllShareInteractionsForAccountNo:accountNo];
+    [self disconnectAccount:accountID withExplicitLogout:YES];
+    [[DataLayer sharedInstance] removeAccount:accountID];
+    [SAMKeychain deletePasswordForService:kMonalKeychainName account:accountID.stringValue];
+    [HelperTools removeAllShareInteractionsForAccountID:accountID];
     // trigger UI removal
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 }
@@ -814,12 +814,12 @@ $$
             [account removeFromRoster:contact];
         
         //remove from DB
-        [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
+        [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountID];
         [contact removeShareInteractions];
         
         //notify the UI
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{
-            @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]
+            @"contact": [MLContact createContactFromJid:contact.contactJid andAccountID:contact.accountID]
         }];
     }
 }
@@ -859,7 +859,7 @@ $$
         
         //notify the UI
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
-            @"contact": [MLContact createContactFromJid:contact.contactJid andAccountNo:contact.accountId]
+            @"contact": [MLContact createContactFromJid:contact.contactJid andAccountID:contact.accountID]
         }];
     }
 }
@@ -885,10 +885,10 @@ $$
     [account setBlocked:isBlocked forJid:contact.contactJid];
 }
 
--(void) block:(BOOL) isBlocked fullJid:(NSString*) fullJid onAccount:(NSNumber*) accountNo
+-(void) block:(BOOL) isBlocked fullJid:(NSString*) fullJid onAccount:(NSNumber*) accountID
 {
-    DDLogVerbose(@"Blocking %@ on account %@: %@", fullJid, accountNo, bool2str(isBlocked));
-    xmpp* account = [self getEnabledAccountForID:accountNo];
+    DDLogVerbose(@"Blocking %@ on account %@: %@", fullJid, accountID, bool2str(isBlocked));
+    xmpp* account = [self getEnabledAccountForID:accountID];
     [account setBlocked:isBlocked forJid:fullJid];
 }
 

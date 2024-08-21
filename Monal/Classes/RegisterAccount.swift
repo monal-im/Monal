@@ -46,7 +46,7 @@ struct RegisterAccount: View {
 
     @State private var showAlert = false
     @State private var registerComplete = false
-    @State private var registeredAccountNo = -1
+    @State private var registeredAccountID = -1
 
     @State private var xmppAccount: xmpp?
     @State private var captchaImg: Image?
@@ -175,7 +175,7 @@ struct RegisterAccount: View {
     private func createXMPPInstance() -> xmpp {
         let identity = MLXMPPIdentity.init(jid: String.init(format: "nothing@%@", self.actualServer), password: "nothing", andResource: "MonalReg");
         let server = MLXMPPServer.init(host: "", andPort: 5222, andDirectTLS: false)
-        return xmpp.init(server: server, andIdentity: identity, andAccountNo: -1)
+        return xmpp.init(server: server, andIdentity: identity, andAccountID: -1)
     }
 
     private func cleanupXMPPInstance() {
@@ -209,10 +209,10 @@ struct RegisterAccount: View {
                         kPlainActivated: self.actualServer == "conversations.im" ? false : true,
                     ] as [String : Any]
 
-                    let accountNo = DataLayer.sharedInstance().addAccount(with: dic);
-                    if(accountNo != nil) {
-                        self.registeredAccountNo = accountNo!.intValue
-                        MLXMPPManager.sharedInstance().addNewAccountToKeychainAndConnect(withPassword:self.password, andAccountNo:accountNo!)
+                    let accountID = DataLayer.sharedInstance().addAccount(with: dic);
+                    if(accountID != nil) {
+                        self.registeredAccountID = accountID!.intValue
+                        MLXMPPManager.sharedInstance().addNewAccountToKeychainAndConnect(withPassword:self.password, andAccountID:accountID!)
                         cleanupXMPPInstance()
                     } else {
                         cleanupXMPPInstance()
@@ -418,7 +418,7 @@ struct RegisterAccount: View {
                                         
                                         if let completion = self.completionHandler {
                                             DDLogVerbose("Calling reg completion handler...")
-                                            completion(self.registeredAccountNo as NSNumber)
+                                            completion(self.registeredAccountID as NSNumber)
                                         }
                                     }
                                 }))
@@ -467,12 +467,12 @@ struct RegisterAccount: View {
                 return
             }
             if let xmppAccount = notification.object as? xmpp, let errorMessage = notification.userInfo?["message"] as? String {
-                if(xmppAccount.accountNo.intValue == self.registeredAccountNo || xmppAccount.accountNo.intValue == -1) {
+                if(xmppAccount.accountID.intValue == self.registeredAccountID || xmppAccount.accountID.intValue == -1) {
                     DispatchQueue.main.async {
                         DDLogDebug("XMPP account matches registering one")
                         self.errorObserverEnabled = false
                         xmppAccount.disconnect(true)        //disconnect account (even if not listed in enabledAccounts and having id -1)
-                        MLXMPPManager.sharedInstance().removeAccount(forAccountNo:xmppAccount.accountNo)     //remove from enabledAccounts and db, if listed, do nothing otherwise (e.g. in the -1 case)
+                        MLXMPPManager.sharedInstance().removeAccount(forAccountID:xmppAccount.accountID)     //remove from enabledAccounts and db, if listed, do nothing otherwise (e.g. in the -1 case)
                         //reset local state var if the account had id -1 (e.g. is dummy for registering recorded in self.xmppAccount)
                         if(xmppAccount == self.xmppAccount) {
                             self.xmppAccount = nil
@@ -487,7 +487,7 @@ struct RegisterAccount: View {
                 return
             }
             if let xmppAccount = notification.object as? xmpp {
-                if(xmppAccount.accountNo.intValue == self.registeredAccountNo) {
+                if(xmppAccount.accountID.intValue == self.registeredAccountID) {
                     DispatchQueue.main.async {
                         hideLoadingOverlay(overlay)
                         self.errorObserverEnabled = false

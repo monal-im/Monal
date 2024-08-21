@@ -49,13 +49,13 @@
 
 -(void) reloadBlocksFromDB
 {
-    self.blockedJids = [[NSMutableArray alloc] initWithArray:[[DataLayer sharedInstance] blockedJidsForAccount:self.xmppAccount.accountNo]];
+    self.blockedJids = [[NSMutableArray alloc] initWithArray:[[DataLayer sharedInstance] blockedJidsForAccount:self.xmppAccount.accountID]];
 }
 
 -(void) refreshBlockState:(NSNotification*) notification
 {
-    NSNumber* notificationAccountNo = notification.userInfo[@"accountNo"];
-    if(notificationAccountNo.intValue == self.xmppAccount.accountNo.intValue)
+    NSNumber* notificationAccountID = notification.userInfo[@"accountID"];
+    if(notificationAccountID.intValue == self.xmppAccount.accountID.intValue)
     {
         weakify(self);
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -96,7 +96,7 @@
         if(![self.xmppAccount.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
             return;
         // unblock jid
-        [[MLXMPPManager sharedInstance] block:NO fullJid:self.blockedJids[indexPath.row][@"fullBlockedJid"] onAccount:self.xmppAccount.accountNo];
+        [[MLXMPPManager sharedInstance] block:NO fullJid:self.blockedJids[indexPath.row][@"fullBlockedJid"] onAccount:self.xmppAccount.accountID];
 
         self.blockingHUD.hidden = NO;
     }
@@ -131,7 +131,7 @@
             self.blockingHUD.hidden = NO;
 
             // block the jid
-            [[MLXMPPManager sharedInstance] block:YES fullJid:jidToBlock onAccount:self.xmppAccount.accountNo];
+            [[MLXMPPManager sharedInstance] block:YES fullJid:jidToBlock onAccount:self.xmppAccount.accountID];
 
             // close form
             [blockJidForm dismissViewControllerAnimated:YES completion:nil];

@@ -46,7 +46,7 @@ static const int KEY_SIZE = 16;
 {
     self = [super init];
     self.account = account;
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.account.accountNo andAccountJid:self.account.connectionProperties.identity.jid];
+    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountID:self.account.accountID andAccountJid:self.account.connectionProperties.identity.jid];
     SignalStorage* signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
     self.signalContext = [[SignalContext alloc] initWithStorage:signalStorage];
     self.openBundleFetchCnt = 0;
@@ -145,7 +145,7 @@ static const int KEY_SIZE = 16;
 #ifndef DISABLE_OMEMO
     MLContact* removedContact = notification.userInfo[@"contact"];
     DDLogVerbose(@"Got kMonalContactRemoved event for contact: %@", removedContact);
-    if(removedContact == nil || removedContact.accountId.intValue != self.account.accountNo.intValue)
+    if(removedContact == nil || removedContact.accountID.intValue != self.account.accountID.intValue)
        return;
 
     [self checkIfSessionIsStillNeeded:removedContact.contactJid isMuc:removedContact.isMuc];
@@ -157,7 +157,7 @@ static const int KEY_SIZE = 16;
     //this event will be called as soon as we are successfully authenticated, but BEFORE handleResourceBound: will be called
     //NOTE: handleResourceBound: won't be called for smacks resumptions at all
 #ifndef DISABLE_OMEMO
-    if(self.account.accountNo.intValue == ((xmpp*)notification.object).accountNo.intValue)
+    if(self.account.accountID.intValue == ((xmpp*)notification.object).accountID.intValue)
     {
         //mark catchup as running (will be smacks catchup or mam catchup)
         //this will queue any session repair attempts and key transport elements
@@ -171,7 +171,7 @@ static const int KEY_SIZE = 16;
     //this event will be called as soon as we are bound, but BEFORE mam catchup happens
     //NOTE: this event won't be called for smacks resumes!
 #ifndef DISABLE_OMEMO
-    if(self.account.accountNo.intValue == ((xmpp*)notification.object).accountNo.intValue)
+    if(self.account.accountID.intValue == ((xmpp*)notification.object).accountID.intValue)
     {
         DDLogInfo(@"We did a non-smacks-resume reconnect, resetting some of our state...");
         DDLogVerbose(@"Current state: %@", self.state);
@@ -200,7 +200,7 @@ static const int KEY_SIZE = 16;
 {
 #ifndef DISABLE_OMEMO
     //this event will be called as soon as mam OR smacks catchup on our account is done, it does not wait for muc mam catchups!
-    if(self.account.accountNo.intValue == ((xmpp*)notification.object).accountNo.intValue)
+    if(self.account.accountID.intValue == ((xmpp*)notification.object).accountID.intValue)
     {
         DDLogInfo(@"Catchup done now, handling omemo stuff...");
         DDLogVerbose(@"Current state: %@", self.state);
@@ -570,7 +570,7 @@ $$
     //update bundle fetch status
     self.openBundleFetchCnt++;
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
-        @"accountNo": self.account.accountNo,
+        @"accountID": self.account.accountID,
         @"completed": @(self.closedBundleFetchCnt),
         @"all": @(self.openBundleFetchCnt + self.closedBundleFetchCnt)
     }];
@@ -681,7 +681,7 @@ $$
         self.openBundleFetchCnt = 0;
         self.closedBundleFetchCnt = 0;
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{
-            @"accountNo": self.account.accountNo,
+            @"accountID": self.account.accountID,
         }];
         return YES;
     }
@@ -698,7 +698,7 @@ $$
     if(![self checkBundleFetchCount])
     {
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
-            @"accountNo": self.account.accountNo,
+            @"accountID": self.account.accountID,
             @"completed": @(self.closedBundleFetchCnt),
             @"all": @(self.openBundleFetchCnt + self.closedBundleFetchCnt),
         }];
@@ -1009,8 +1009,8 @@ $$
     }
     
     NSMutableSet<NSString*>* recipients = [NSMutableSet new];
-    if([[DataLayer sharedInstance] isBuddyMuc:toContact forAccount:self.account.accountNo])
-        for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:toContact forAccountId:self.account.accountNo])
+    if([[DataLayer sharedInstance] isBuddyMuc:toContact forAccount:self.account.accountID])
+        for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:toContact forAccountID:self.account.accountID])
         {
             if(participant[@"participant_jid"])
                 [recipients addObject:participant[@"participant_jid"]];
@@ -1322,7 +1322,7 @@ $$
     if([self.monalSignalStore sessionsExistForBuddy:buddyJid] == NO)
     {
         DDLogVerbose(@"No omemo session for %@", buddyJid);
-        MLContact* contact = [MLContact createContactFromJid:buddyJid andAccountNo:self.account.accountNo];
+        MLContact* contact = [MLContact createContactFromJid:buddyJid andAccountID:self.account.accountID];
         //only subscribe if we don't receive automatic headline pushes of the devicelist
         DDLogVerbose(@"Fetching devicelist %@ from contact: %@", !contact.isSubscribedTo ? @"with subscribe" : @"without subscribe", contact);
         [self queryOMEMODevices:buddyJid withSubscribe:!contact.isSubscribedTo];

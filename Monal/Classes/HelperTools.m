@@ -437,10 +437,10 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //disconnect and reset state (including pipelined auth etc.)
     //this has to be done before disabling the account to not trigger an assertion
-    [[MLXMPPManager sharedInstance] disconnectAccount:account.accountNo withExplicitLogout:YES];
+    [[MLXMPPManager sharedInstance] disconnectAccount:account.accountID withExplicitLogout:YES];
 
     //make sure we don't try this again even when the mainapp/appex gets restarted
-    NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:YES];
+    NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountID] copyItems:YES];
     accountDic[kEnabled] = @NO;
     [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];    
 }
@@ -1600,11 +1600,11 @@ void swizzle(Class c, SEL orig, SEL new)
     return blacklisted;
 }
 
-+(void) removeAllShareInteractionsForAccountNo:(NSNumber*) accountNo
++(void) removeAllShareInteractionsForAccountID:(NSNumber*) accountID
 {
-    DDLogInfo(@"Removing share interaction for all contacts on account id %@", accountNo);
+    DDLogInfo(@"Removing share interaction for all contacts on account id %@", accountID);
     for(MLContact* contact in [[DataLayer sharedInstance] contactList])
-        if(contact.accountId.intValue == accountNo.intValue)
+        if(contact.accountID.intValue == accountID.intValue)
             [contact removeShareInteractions];
 }
 

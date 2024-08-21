@@ -136,7 +136,7 @@ enum msgSentState {
 {
     self.hidesBottomBarWhenPushed = YES;
 
-    NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
+    NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountID];
     if(accountDict)
         self.jid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
 
@@ -151,7 +151,7 @@ enum msgSentState {
 {
     [super viewDidLoad];
 
-    if([[DataLayer sharedInstance] isContactInList:self.contact.contactJid forAccount:self.contact.accountId] == NO)
+    if([[DataLayer sharedInstance] isContactInList:self.contact.contactJid forAccount:self.contact.accountID] == NO)
     {
         DDLogWarn(@"ChatView: Contact %@ is unkown", self.contact.contactJid);
 #ifdef IS_ALPHA
@@ -534,7 +534,7 @@ enum msgSentState {
     
     MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
     MLCall* activeCall = [appDelegate.voipProcessor getActiveCallWithContact:self.contact];
-    if(activeCall == nil && ![[DataLayer sharedInstance] checkCap:@"urn:xmpp:jingle-message:0" forUser:self.contact.contactJid onAccountNo:self.contact.accountId])
+    if(activeCall == nil && ![[DataLayer sharedInstance] checkCap:@"urn:xmpp:jingle-message:0" forUser:self.contact.contactJid onAccountID:self.contact.accountID])
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Missing Call Support", @"") message:NSLocalizedString(@"Your contact may not support calls. Your call might never reach its destination.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Try nevertheless", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
@@ -632,7 +632,7 @@ enum msgSentState {
 
 -(void) updateUIElements
 {
-    if(self.contact.accountId == nil)
+    if(self.contact.accountID == nil)
         return;
 
     NSString* jidLabelText = nil;
@@ -644,14 +644,14 @@ enum msgSentState {
 
     //send button is always enabled, except if the account is permanently disabled
     sendButtonEnabled = YES;
-    if(![[DataLayer sharedInstance] isAccountEnabled:self.contact.accountId])
+    if(![[DataLayer sharedInstance] isAccountEnabled:self.contact.accountID])
         sendButtonEnabled = NO;
 
     jidLabelText = contactDisplayName;
 
     if(self.contact.isMuc)
     {
-        NSArray* members = [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo];
+        NSArray* members = [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountID:self.xmppAccount.accountID];
         NSInteger membercount = members.count;
         if([self.contact.mucType isEqualToString:kMucTypeGroup])
         {
@@ -687,14 +687,14 @@ enum msgSentState {
     {
         NSDictionary* userInfo = notification.userInfo;
         // Check if all objects of the notification are present
-        NSString* accountNo = [userInfo objectForKey:kAccountID];
+        NSString* accountID = [userInfo objectForKey:kAccountID];
         NSNumber* accountState = [userInfo objectForKey:kAccountState];
 
         // Only parse account changes for our current opened account
-        if(accountNo.intValue != self.xmppAccount.accountNo.intValue)
+        if(accountID.intValue != self.xmppAccount.accountID.intValue)
             return;
 
-        if(accountNo && accountState)
+        if(accountID && accountState)
             [self updateUIElements];
     }
     else
@@ -740,8 +740,8 @@ enum msgSentState {
     if(notification)
     {
         NSDictionary* data = notification.userInfo;
-        NSString* notifcationAccountNo = data[@"accountNo"];
-        if(![jid isEqualToString:data[@"jid"]] || self.contact.accountId.intValue != notifcationAccountNo.intValue)
+        NSString* notifcationAccountID = data[@"accountID"];
+        if(![jid isEqualToString:data[@"jid"]] || self.contact.accountID.intValue != notifcationAccountID.intValue)
             return;     // ignore other accounts or contacts
         if([data[@"isTyping"] boolValue] == YES)
         {
@@ -769,7 +769,7 @@ enum msgSentState {
 
     //throw on empty contacts
     MLAssert(self.contact.contactJid != nil, @"can not open chat for empty contact jid");
-    MLAssert(self.contact.accountId != nil, @"can not open chat for empty account id");
+    MLAssert(self.contact.accountID != nil, @"can not open chat for empty account id");
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -818,7 +818,7 @@ enum msgSentState {
 
     self.placeHolderText.text = [NSString stringWithFormat:NSLocalizedString(@"Message from %@", @""), self.jid];
     // Load message draft from db
-    NSString* messageDraft = [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountId];
+    NSString* messageDraft = [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountID];
     if(messageDraft && [messageDraft length] > 0) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.chatInput.text = messageDraft;
@@ -901,7 +901,7 @@ enum msgSentState {
 -(BOOL) saveMessageDraft
 {
     // Save message draft
-    return [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text];
+    return [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountID withComment:self.chatInput.text];
 }
 
 -(void) dealloc
@@ -962,7 +962,7 @@ enum msgSentState {
             //don't block the main thread while writing to the db (another thread could hold a write transaction already, slowing down the main thread)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
                 //get list of unread messages
-                NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
+                NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountID tillStanzaId:nil wasOutgoing:NO];
 
                 //publish MDS display marker and optionally send displayed marker for last unread message (XEP-0333)
                 DDLogDebug(@"Sending MDS (and possibly XEP-0333 displayed marker) for messages: %@", unread);
@@ -992,8 +992,8 @@ enum msgSentState {
     if(!self.contact.contactJid)
         return;
 
-    NSMutableArray<MLMessage*>* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
-    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
+    NSMutableArray<MLMessage*>* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountID];
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountID];
 
     if([unreadMsgCnt integerValue] == 0)
         self->_firstmsg = YES;
@@ -1040,15 +1040,15 @@ enum msgSentState {
     DDLogVerbose(@"Sending message");
     NSString* newMessageID = messageID ? messageID : [[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
-    NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
+    NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountID];
     if(accountDict == nil)
     {
-        DDLogError(@"AccountNo %@ not found!", self.contact.accountId);
+        DDLogError(@"AccountID %@ not found!", self.contact.accountID);
         return;
     }
-    if(self.contact.contactJid == nil || [[DataLayer sharedInstance] isContactInList:self.contact.contactJid forAccount:self.contact.accountId] == NO)
+    if(self.contact.contactJid == nil || [[DataLayer sharedInstance] isContactInList:self.contact.contactJid forAccount:self.contact.accountID] == NO)
     {
-        DDLogError(@"Can not send message to unkown contact %@ on accountNo %@ - GUI Error", self.contact.contactJid, self.contact.accountId);
+        DDLogError(@"Can not send message to unkown contact %@ on accountID %@ - GUI Error", self.contact.contactJid, self.contact.accountID);
         return;
     }
     if(!messageID && !messageType) {
@@ -1609,7 +1609,7 @@ enum msgSentState {
         return nil;
     }
 
-    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountId withMessage:message actuallyFrom:(self.contact.isMuc ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.contact.isEncrypted messageType:messageType mimeType:mimeType size:size];
+    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountID withMessage:message actuallyFrom:(self.contact.isMuc ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.contact.isEncrypted messageType:messageType mimeType:mimeType size:size];
     if(messageDBId != nil)
     {
         DDLogVerbose(@"added message");
@@ -1646,7 +1646,7 @@ enum msgSentState {
         // make sure its in active chats list
         if(_firstmsg == YES)
         {
-            [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId];
+            [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountID];
             _firstmsg = NO;
         }
         
@@ -2331,13 +2331,13 @@ enum msgSentState {
     return cell;
 }
 
--(MLContact*) getMLContactForJid:(NSString*) jid andAccount:(NSNumber*) accountNo
+-(MLContact*) getMLContactForJid:(NSString*) jid andAccount:(NSNumber*) accountID
 {
-    NSString* cacheKey = [NSString stringWithFormat:@"%@|%@", jid, accountNo];
+    NSString* cacheKey = [NSString stringWithFormat:@"%@|%@", jid, accountID];
     @synchronized(_localMLContactCache) {
         if(_localMLContactCache[cacheKey])
             return _localMLContactCache[cacheKey];
-        return _localMLContactCache[cacheKey] = [MLContact createContactFromJid:jid andAccountNo:accountNo];
+        return _localMLContactCache[cacheKey] = [MLContact createContactFromJid:jid andAccountID:accountID];
     }
 }
 
@@ -2676,7 +2676,7 @@ enum msgSentState {
     NSNumber* beforeId = nil;
     if(self.messageList.count > 0)
         beforeId = ((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId;
-    oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount:self.contact.accountId beforeMsgHistoryID:beforeId];
+    oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount:self.contact.accountID beforeMsgHistoryID:beforeId];
 
     if(!self.isLoadingMam && [oldMessages count] < kMonalBackscrollingMsgCount)
     {
@@ -2709,9 +2709,9 @@ enum msgSentState {
         if(oldestStanzaId == nil)
         {
             if(self.contact.isMuc)
-                oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:self.contact.contactJid andAccount:self.contact.accountId];
+                oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForMuc:self.contact.contactJid andAccount:self.contact.accountID];
             else
-                oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.contact.accountId];
+                oldestStanzaId = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.contact.accountID];
         }
 
         //now load more (older) messages from mam
@@ -3141,7 +3141,7 @@ enum msgSentState {
 -(void) checkOmemoSupportWithAlert:(BOOL) showWarning
 {
 #ifndef DISABLE_OMEMO
-    if(self.xmppAccount && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
+    if(self.xmppAccount && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountID])
     {
         BOOL omemoDeviceForContactFound = NO;
         if(!self.contact.isMuc)
@@ -3149,7 +3149,7 @@ enum msgSentState {
         else
         {
             omemoDeviceForContactFound = NO;
-            for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo])
+            for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountID:self.xmppAccount.accountID])
             {
                 if(participant[@"participant_jid"])
                     omemoDeviceForContactFound |= [self.xmppAccount.omemo knownDevicesForAddressName:participant[@"participant_jid"]].count > 0;
@@ -3166,14 +3166,14 @@ enum msgSentState {
                 // cheogram.com does not support OMEMO encryption as it is a PSTN gateway
                 // --> disable it
                 self.contact.isEncrypted = NO;
-                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountID:self.contact.accountID];
             }
             else if(self.contact.isMuc && ![self.contact.mucType isEqualToString:kMucTypeGroup])
             {
                 // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
                 // --> disable it
                 self.contact.isEncrypted = NO;
-                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountID:self.contact.accountID];
             }
             else if(!self.contact.isMuc || (self.contact.isMuc && [self.contact.mucType isEqualToString:kMucTypeGroup]))
             {
@@ -3186,7 +3186,7 @@ enum msgSentState {
                         // Disable encryption
                         self.contact.isEncrypted = NO;
                         [self updateUIElements];
-                        [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+                        [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountID:self.contact.accountID];
                         [alert dismissViewControllerAnimated:YES completion:nil];
                     }]];
                     [self presentViewController:alert animated:YES completion:nil];
@@ -3232,7 +3232,7 @@ enum msgSentState {
 -(void) handleOmemoFetchStateUpdate:(NSNotification*) notification
 {
     xmpp* account = notification.object;
-    MLContact* contact = [MLContact createContactFromJid:notification.userInfo[@"jid"] andAccountNo:account.accountNo];
+    MLContact* contact = [MLContact createContactFromJid:notification.userInfo[@"jid"] andAccountID:account.accountID];
     if(self.contact && [self.contact isEqualToContact:contact])
     {
         DDLogDebug(@"Got omemo fetching update: %@ --> %@", contact, notification.userInfo);

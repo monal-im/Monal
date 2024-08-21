@@ -43,7 +43,7 @@ static NSMutableDictionary* _singletonCache;
 @property (nonatomic, assign) BOOL isSubscribedFrom;
 @property (nonatomic, assign) BOOL hasIncomingContactRequest;
 
-@property (nonatomic, strong) NSNumber* accountId;
+@property (nonatomic, strong) NSNumber* accountID;
 @property (nonatomic, strong) NSString* contactJid;
 @property (nonatomic, strong) NSString* fullName;
 @property (nonatomic, strong) NSString* nickName;
@@ -182,9 +182,9 @@ static NSMutableDictionary* _singletonCache;
 
 +(NSString*) ownDisplayNameForAccount:(xmpp*) account
 {
-    NSDictionary* accountDic = [[DataLayer sharedInstance] detailsForAccount:account.accountNo];
+    NSDictionary* accountDic = [[DataLayer sharedInstance] detailsForAccount:account.accountID];
     NSString* displayName = accountDic[kRosterName];
-    DDLogVerbose(@"Own nickname in accounts table %@: '%@'", account.accountNo, displayName);
+    DDLogVerbose(@"Own nickname in accounts table %@: '%@'", account.accountID, displayName);
     if(!displayName || !displayName.length)
     {
         // default is local part, see https://docs.modernxmpp.org/client/design/#contexts
@@ -195,21 +195,21 @@ static NSMutableDictionary* _singletonCache;
     return nilDefault(displayName, @"");
 }
 
-+(MLContact*) createContactFromDatabaseWithJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
++(MLContact*) createContactFromDatabaseWithJid:(NSString*) jid andAccountID:(NSNumber*) accountID
 {
-    NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
+    NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountID];
     
     // check if we know this contact and return a dummy one if not
     if(contactDict == nil)
     {
-        DDLogInfo(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
+        DDLogInfo(@"Returning dummy MLContact for %@ on accountID %@", jid, accountID);
         return [self contactFromDictionary:@{
             @"buddy_name": jid.lowercaseString,
             @"nick_name": @"",
             @"full_name": @"",
             @"subscription": kSubNone,
             @"ask": @"",
-            @"account_id": accountNo,
+            @"account_id": accountID,
             //@"muc_subject": nil,
             //@"muc_nick": nil,
             @"Muc": @NO,
@@ -229,12 +229,12 @@ static NSMutableDictionary* _singletonCache;
         return [self contactFromDictionary:contactDict];
 }
 
-+(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo
++(MLContact*) createContactFromJid:(NSString*) jid andAccountID:(NSNumber*) accountID
 {
     MLAssert(jid != nil, @"jid must not be nil");
-    MLAssert(accountNo != nil && accountNo.intValue >= 0, @"accountNo must not be nil and > 0");
+    MLAssert(accountID != nil && accountID.intValue >= 0, @"accountID must not be nil and > 0");
     
-    NSString* cacheKey = [NSString stringWithFormat:@"%@|%@", accountNo, jid];
+    NSString* cacheKey = [NSString stringWithFormat:@"%@|%@", accountID, jid];
     @synchronized(_singletonCache) {
         if(_singletonCache[cacheKey] != nil)
         {
@@ -245,7 +245,7 @@ static NSMutableDictionary* _singletonCache;
                 [_singletonCache removeObjectForKey:cacheKey];
         }
         
-        MLContact* retval = [self createContactFromDatabaseWithJid:jid andAccountNo:accountNo];
+        MLContact* retval = [self createContactFromDatabaseWithJid:jid andAccountID:accountID];
         
         _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:retval];
         return retval;
@@ -276,9 +276,9 @@ static NSMutableDictionary* _singletonCache;
 -(void) handleLastInteractionTimeUpdate:(NSNotification*) notification
 {
     NSDictionary* data = notification.userInfo;
-    NSNumber* notificationAccountNo = data[@"accountNo"];
+    NSNumber* notificationAccountID = data[@"accountID"];
     
-    if(![self.contactJid isEqualToString:data[@"jid"]] || self.accountId.intValue != notificationAccountNo.intValue)
+    if(![self.contactJid isEqualToString:data[@"jid"]] || self.accountID.intValue != notificationAccountID.intValue)
         return;     // ignore other accounts or contacts
     if(data[@"lastInteraction"] == nil)
         return;     // ignore typing notifications
@@ -291,8 +291,8 @@ static NSMutableDictionary* _singletonCache;
 -(void) handleBlockListRefresh:(NSNotification*) notification
 {
     NSDictionary* data = notification.userInfo;
-    NSNumber* notificationAccountNo = data[@"accountNo"];
-    if(self.accountId.intValue != notificationAccountNo.intValue)
+    NSNumber* notificationAccountID = data[@"accountID"];
+    if(self.accountID.intValue != notificationAccountID.intValue)
         return;         // ignore other accounts
     long blockingType = [[DataLayer sharedInstance] isBlockedContact:self];
     self.isBlocked = blockingType == kBlockingMatchedNodeHost;
@@ -303,7 +303,7 @@ static NSMutableDictionary* _singletonCache;
 {
     NSDictionary* data = notification.userInfo;
     MLContact* contact = data[@"contact"];
-    if(![self.contactJid isEqualToString:contact.contactJid] || self.accountId.intValue != contact.accountId.intValue)
+    if(![self.contactJid isEqualToString:contact.contactJid] || self.accountID.intValue != contact.accountID.intValue)
         return;     // ignore other accounts or contacts
     [self refresh];
     [self updateUnreadCount];
@@ -324,14 +324,14 @@ static NSMutableDictionary* _singletonCache;
     xmpp* account = notification.object;
     NSString* room = notification.userInfo[@"room"];
     NSString* subject = notification.userInfo[@"subject"];
-    if(![self.contactJid isEqualToString:room] || self.accountId.intValue != account.accountNo.intValue)
+    if(![self.contactJid isEqualToString:room] || self.accountID.intValue != account.accountID.intValue)
         return;     // ignore other accounts or contacts
     self.groupSubject = nilDefault(subject, @"");
 }
 
 -(void) refresh
 {
-    [self updateWithContact:[[self class] createContactFromDatabaseWithJid:self.contactJid andAccountNo:self.accountId]];
+    [self updateWithContact:[[self class] createContactFromDatabaseWithJid:self.contactJid andAccountID:self.accountID]];
 }
 
 -(void) updateUnreadCount
@@ -458,7 +458,7 @@ static NSMutableDictionary* _singletonCache;
         return;             //no change at all
     self.fullName = name;
     xmpp* account = self.account;
-    [[DataLayer sharedInstance] setFullName:self.fullName forContact:self.contactJid andAccount:account.accountNo];
+    [[DataLayer sharedInstance] setFullName:self.fullName forContact:self.contactJid andAccount:account.accountID];
     // abort old change timer and start a new one
     if(_cancelFullNameChange)
         _cancelFullNameChange();
@@ -504,7 +504,7 @@ static NSMutableDictionary* _singletonCache;
 
 +(NSSet*) keyPathsForValuesAffectingIsSelfChat
 {
-    return [NSSet setWithObjects:@"contactJid", @"accountId", nil];
+    return [NSSet setWithObjects:@"contactJid", @"accountID", nil];
 }
 
 -(BOOL) isInRoster
@@ -574,25 +574,25 @@ static NSMutableDictionary* _singletonCache;
 
 -(xmpp* _Nullable) account
 {
-    return [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountId];
+    return [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
 }
 
 +(NSSet*) keyPathsForValuesAffectingAccount
 {
-    return [NSSet setWithObject:@"accountId"];
+    return [NSSet setWithObject:@"accountID"];
 }
 
 // this will cache the unread count on first access
 -(NSInteger) unreadCount
 {
     if(_unreadCount == -1)
-        _unreadCount = [[[DataLayer sharedInstance] countUserUnreadMessages:self.contactJid forAccount:self.accountId] integerValue];
+        _unreadCount = [[[DataLayer sharedInstance] countUserUnreadMessages:self.contactJid forAccount:self.accountID] integerValue];
     return _unreadCount;
 }
 
 -(void) removeShareInteractions
 {
-    [INInteraction deleteInteractionsWithIdentifiers:@[[NSString stringWithFormat:@"%@|%@", self.accountId, self.contactJid]] completion:^(NSError* error) {
+    [INInteraction deleteInteractionsWithIdentifiers:@[[NSString stringWithFormat:@"%@|%@", self.accountID, self.contactJid]] completion:^(NSError* error) {
         if(error != nil)
             DDLogError(@"Could not delete all SiriKit interactions: %@", error);
     }];
@@ -614,9 +614,9 @@ static NSMutableDictionary* _singletonCache;
     if(!self.isMuc || self.isMentionOnly == mentionOnly)
         return;
     if(mentionOnly)
-        [[DataLayer sharedInstance] setMucAlertOnMentionOnly:self.contactJid onAccount:self.accountId];
+        [[DataLayer sharedInstance] setMucAlertOnMentionOnly:self.contactJid onAccount:self.accountID];
     else
-        [[DataLayer sharedInstance] setMucAlertOnAll:self.contactJid onAccount:self.accountId];
+        [[DataLayer sharedInstance] setMucAlertOnAll:self.contactJid onAccount:self.accountID];
     self.isMentionOnly = mentionOnly;
 }
 
@@ -647,9 +647,9 @@ static NSMutableDictionary* _singletonCache;
         return YES;
     
     if(encrypt)
-        [[DataLayer sharedInstance] encryptForJid:self.contactJid andAccountNo:self.accountId];
+        [[DataLayer sharedInstance] encryptForJid:self.contactJid andAccountID:self.accountID];
     else
-        [[DataLayer sharedInstance] disableEncryptForJid:self.contactJid andAccountNo:self.accountId];
+        [[DataLayer sharedInstance] disableEncryptForJid:self.contactJid andAccountID:self.accountID];
     self.isEncrypted = encrypt;
     return YES;
 #endif
@@ -660,9 +660,9 @@ static NSMutableDictionary* _singletonCache;
     if(self.isPinned == pinned)
         return;
     if(pinned)
-        [[DataLayer sharedInstance] pinChat:self.accountId andBuddyJid:self.contactJid];
+        [[DataLayer sharedInstance] pinChat:self.accountID andBuddyJid:self.contactJid];
     else
-        [[DataLayer sharedInstance] unPinChat:self.accountId andBuddyJid:self.contactJid];
+        [[DataLayer sharedInstance] unPinChat:self.accountID andBuddyJid:self.contactJid];
     self.isPinned = pinned;
     // update active chats
     xmpp* account = self.account;
@@ -697,7 +697,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(void) clearHistory
 {
-    [[DataLayer sharedInstance] clearMessagesWithBuddy:self.contactJid onAccount:self.accountId];
+    [[DataLayer sharedInstance] clearMessagesWithBuddy:self.contactJid onAccount:self.accountID];
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 }
 
@@ -710,7 +710,7 @@ static NSMutableDictionary* _singletonCache;
     [coder encodeObject:self.fullName forKey:@"fullName"];
     [coder encodeObject:self.subscription forKey:@"subscription"];
     [coder encodeObject:self.ask forKey:@"ask"];
-    [coder encodeObject:self.accountId forKey:@"accountId"];
+    [coder encodeObject:self.accountID forKey:@"accountID"];
     [coder encodeObject:self.groupSubject forKey:@"groupSubject"];
     [coder encodeObject:self.accountNickInGroup forKey:@"accountNickInGroup"];
     [coder encodeObject:self.mucType forKey:@"mucType"];
@@ -735,7 +735,7 @@ static NSMutableDictionary* _singletonCache;
     self.fullName = [coder decodeObjectForKey:@"fullName"];
     self.subscription = [coder decodeObjectForKey:@"subscription"];
     self.ask = [coder decodeObjectForKey:@"ask"];
-    self.accountId = [coder decodeObjectForKey:@"accountId"];
+    self.accountID = [coder decodeObjectForKey:@"accountID"];
     self.groupSubject = [coder decodeObjectForKey:@"groupSubject"];
     self.accountNickInGroup = [coder decodeObjectForKey:@"accountNickInGroup"];
     self.mucType = [coder decodeObjectForKey:@"mucType"];
@@ -760,7 +760,7 @@ static NSMutableDictionary* _singletonCache;
     updateIfIdNotEqual(self.fullName, contact.fullName);
     updateIfIdNotEqual(self.subscription, contact.subscription);
     updateIfIdNotEqual(self.ask, contact.ask);
-    updateIfIdNotEqual(self.accountId, contact.accountId);
+    updateIfIdNotEqual(self.accountID, contact.accountID);
     updateIfIdNotEqual(self.groupSubject, contact.groupSubject);
     updateIfIdNotEqual(self.accountNickInGroup, contact.accountNickInGroup);
     updateIfPrimitiveNotEqual(self.isMuc, contact.isMuc);
@@ -783,14 +783,14 @@ static NSMutableDictionary* _singletonCache;
 {
     return message != nil &&
            [self.contactJid isEqualToString:message.buddyName] &&
-           self.accountId.intValue == message.accountId.intValue;
+           self.accountID.intValue == message.accountID.intValue;
 }
 
 -(BOOL) isEqualToContact:(MLContact*) contact
 {
     return contact != nil &&
            [self.contactJid isEqualToString:contact.contactJid] &&
-           self.accountId.intValue == contact.accountId.intValue;
+           self.accountID.intValue == contact.accountID.intValue;
 }
 
 -(BOOL) isEqual:(id _Nullable) object
@@ -807,17 +807,17 @@ static NSMutableDictionary* _singletonCache;
 
 -(NSUInteger) hash
 {
-    return [self.contactJid hash] ^ [self.accountId hash];
+    return [self.contactJid hash] ^ [self.accountID hash];
 }
 
 -(NSString*) id
 {
-    return [NSString stringWithFormat:@"%@|%@", self.accountId, self.contactJid];
+    return [NSString stringWithFormat:@"%@|%@", self.accountID, self.contactJid];
 }
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@ (%@) %@%@%@, kSub=%@", self.accountId, self.contactJid, self.isMuc ? self.mucType : @"1:1", self.isInRoster ? @"inRoster" : @"not(inRoster)", self.hasIncomingContactRequest ? @"[incomingContactRequest]" : @"", self.hasOutgoingContactRequest ? @"[outgoingContactRequest]" : @"", self.subscription];
+    return [NSString stringWithFormat:@"%@: %@ (%@) %@%@%@, kSub=%@", self.accountID, self.contactJid, self.isMuc ? self.mucType : @"1:1", self.isInRoster ? @"inRoster" : @"not(inRoster)", self.hasIncomingContactRequest ? @"[incomingContactRequest]" : @"", self.hasOutgoingContactRequest ? @"[outgoingContactRequest]" : @"", self.subscription];
 }
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic
@@ -828,7 +828,7 @@ static NSMutableDictionary* _singletonCache;
     contact.fullName = nilDefault([dic objectForKey:@"full_name"], @"");
     contact.subscription = nilDefault([dic objectForKey:@"subscription"], kSubNone);
     contact.ask = nilDefault([dic objectForKey:@"ask"], @"");
-    contact.accountId = [dic objectForKey:@"account_id"];
+    contact.accountID = [dic objectForKey:@"account_id"];
     contact.groupSubject = nilDefault([dic objectForKey:@"muc_subject"], @"");
     contact.accountNickInGroup = nilDefault([dic objectForKey:@"muc_nick"], @"");
     contact.mucType = [dic objectForKey:@"muc_type"];

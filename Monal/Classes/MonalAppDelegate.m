@@ -783,10 +783,10 @@ $$
                     
                     //show register view and, if isRoster, add contact as usual after register (e.g. call this method again)
                     weakify(self);
-                    [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^(NSNumber* accountNo) {
+                    [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^(NSNumber* accountID) {
                         strongify(self);
-                        DDLogVerbose(@"Got accountNo for newly registered account: %@", accountNo);
-                        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:accountNo];
+                        DDLogVerbose(@"Got accountID for newly registered account: %@", accountID);
+                        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:accountID];
                         DDLogInfo(@"Got newly registered account: %@", account);
                         
                         //this should never happen
@@ -878,7 +878,7 @@ $$
     if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
     {
         DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
-        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
+        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountID:response.notification.request.content.userInfo[@"fromContactAccountID"]];
         MLAssert(fromContact, @"fromContact should not be nil");
         NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
         MLAssert(messageId, @"messageId should not be nil");
@@ -899,7 +899,7 @@ $$
         
         
         //make sure we have an active buddy for this chat
-        [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountId];
+        [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountID];
         
         //handle message actions
         if([response.actionIdentifier isEqualToString:@"REPLY_ACTION"])
@@ -913,7 +913,7 @@ $$
             }
             
             //mark messages as read because we are replying
-            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountID tillStanzaId:messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
             //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
@@ -925,7 +925,7 @@ $$
                 @"contact": fromContact
             }];
             
-            BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:fromContact.contactJid andAccountNo:fromContact.accountId];
+            BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:fromContact.contactJid andAccountID:fromContact.accountID];
             [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText havingType:kMessageTypeText toContact:fromContact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
                 DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", bool2str(successSendObject), messageIdSentObject);
             }];
@@ -933,7 +933,7 @@ $$
         else if([response.actionIdentifier isEqualToString:@"MARK_AS_READ_ACTION"])
         {
             DDLogInfo(@"MARK_AS_READ_ACTION triggered...");
-            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountId tillStanzaId:messageId wasOutgoing:NO];
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountID tillStanzaId:messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
             //publish MDS display marker and optionally send displayed marker for last unread message (XEP-0333)
@@ -955,7 +955,7 @@ $$
     else if([response.notification.request.content.categoryIdentifier isEqualToString:@"subscription"])
     {
         DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
-        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
+        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountID:response.notification.request.content.userInfo[@"fromContactAccountID"]];
         MLAssert(fromContact, @"fromContact should not be nil");
         xmpp* account = fromContact.account;
         //this can happen if that account got disabled
@@ -1945,7 +1945,7 @@ $$
                 [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
                 continue;
             }
-            MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountNo:account.accountNo];
+            MLContact* contact = [MLContact createContactFromJid:payload[@"recipient"] andAccountID:account.accountID];
             
             monal_id_block_t cleanup = ^(NSDictionary* payload) {
                 [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
@@ -1960,25 +1960,25 @@ $$
             };
             
             monal_id_block_t sendItem = ^(id dummy __unused){
-                BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
+                BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountID:contact.accountID];
                 if([payload[@"type"] isEqualToString:@"text"])
                 {
                     [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeText toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
+                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountID, messageIdSentObject);
                         cleanup(payload);
                     }];
                 }
                 else if([payload[@"type"] isEqualToString:@"url"])
                 {
                     [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeUrl toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
+                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountID, messageIdSentObject);
                         cleanup(payload);
                     }];
                 }
                 else if([payload[@"type"] isEqualToString:@"geo"])
                 {
                     [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeGeo toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
+                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountID, messageIdSentObject);
                         cleanup(payload);
                     }];
                 }
@@ -2002,7 +2002,7 @@ $$
                                 }
                                 else
                                     [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url havingType:kMessageTypeFiletransfer toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountNo, messageIdSentObject);
+                                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountID, messageIdSentObject);
                                         cleanup(payload);
                                     }];
                             });
@@ -2014,7 +2014,7 @@ $$
             };
             
             DDLogVerbose(@"Trying to open chat of outbox receiver: %@", contact);
-            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountID];
             //don't use [self openChatOfContact:withCompletion:] because it's asynchronous and can only handle one contact at a time (e.g. until the asynchronous execution finished)
             //we can invoke the activeChats interface directly instead, because we already did the necessary preparations ourselves
             [(ActiveChatsViewController*)self.activeChats presentChatWithContact:contact andCompletion:sendItem];

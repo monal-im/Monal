@@ -80,8 +80,8 @@
         //check if intentContact is in enabled account list
         for(NSDictionary* accountToCheck in self.accounts)
         {
-            NSNumber* accountNo = [accountToCheck objectForKey:@"account_id"];
-            if(accountNo.intValue == self.intentContact.accountId.intValue)
+            NSNumber* accountID = [accountToCheck objectForKey:@"account_id"];
+            if(accountID.intValue == self.intentContact.accountID.intValue)
             {
                 self.recipient = self.intentContact;
                 self.account = accountToCheck;
@@ -99,8 +99,8 @@
         {
             for(NSDictionary* accountToCheck in self.accounts)
             {
-                NSNumber* accountNo = [accountToCheck objectForKey:@"account_id"];
-                if(accountNo.intValue == recipient.accountId.intValue)
+                NSNumber* accountID = [accountToCheck objectForKey:@"account_id"];
+                if(accountID.intValue == recipient.accountID.intValue)
                 {
                     self.recipient = recipient;
                     self.account = accountToCheck;
@@ -116,10 +116,10 @@
     [self reloadConfigurationItems];
 }
 
--(MLContact* _Nullable) getLastContactForAccount:(NSNumber*) accountNo
+-(MLContact* _Nullable) getLastContactForAccount:(NSNumber*) accountID
 {
     for(MLContact* recipient in self.recipients) {
-        if(recipient.accountId.intValue == accountNo.intValue) {
+        if(recipient.accountID.intValue == accountID.intValue) {
             return recipient;
         }
     }
@@ -147,7 +147,7 @@
             if(self.contentText && [self.contentText length] > 0)
             {
                 NSMutableDictionary* payload = [NSMutableDictionary new];
-                payload[@"account_id"] = self.recipient.accountId;
+                payload[@"account_id"] = self.recipient.accountID;
                 payload[@"recipient"] = self.recipient.contactJid;
                 payload[@"type"] = @"text";
                 payload[@"data"] = self.contentText;
@@ -198,7 +198,7 @@
                     return;
                 }
                 
-                payload[@"account_id"] = self.recipient.accountId;
+                payload[@"account_id"] = self.recipient.accountID;
                 payload[@"recipient"] = self.recipient.contactJid;
                 DDLogDebug(@"Adding shareSheet payload(%u): %@", loading, payload);
                 [[DataLayer sharedInstance] addShareSheetPayload:payload];
@@ -256,8 +256,8 @@
         for (MLContact* contact in self.recipients)
         {
             // only show contacts from the selected account
-            NSNumber* accountNo = [self.account objectForKey:@"account_id"];
-            if(contact.accountId.intValue == accountNo.intValue)
+            NSNumber* accountID = [self.account objectForKey:@"account_id"];
+            if(contact.accountID.intValue == accountID.intValue)
                 [recipientsToShow addObject:@{@"contact": contact}];
         }
 

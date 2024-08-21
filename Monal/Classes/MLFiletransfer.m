@@ -119,7 +119,7 @@ static NSObject* _hardlinkingSyncObject;
             //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = contentLength;
-            xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountId];
+            xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
             if(account != nil)      //don't send out update notices for already deleted accounts
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
             else
@@ -286,7 +286,7 @@ static NSObject* _hardlinkingSyncObject;
             //update db with content type and size
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:filetransferSize];
             //send out update notification (using our directly update MLMessage object instead of reloading it from db after updating the db)
-            xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountId];
+            xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
             if(account != nil)      //don't send out update notices for already deleted accounts
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
             else
@@ -326,7 +326,7 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
     if([HelperTools isAppExtension])
     {
         DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at '%@': we STILL are in the appex, rescheduling this to next account connect", cacheFile, [hardlinkPathComponents componentsJoinedByString:@"/"]);
-        //the reconnect handler framework will add $ID(account) to the callerArgs, no need to add an accountNo etc. here
+        //the reconnect handler framework will add $ID(account) to the callerArgs, no need to add an accountID etc. here
         //direct=YES is indicating that this hardlinking handler was called directly instead of serializing/unserializing it to/from db
         //AND that we are in the mainapp currently
         //always use direct = NO here, to make sure the file is hardlinkable even if the direct handling depicted above changes and
@@ -429,13 +429,13 @@ $$
 +(void) hardlinkFileForMessage:(MLMessage*) msg
 {
     NSDictionary* fileInfo = [self getFileInfoForMessage:msg];
-    xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountId];
+    xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
     if(account == nil)
         return;
     
     NSString* groupDisplayName = nil;
     NSString* fromDisplayName = nil;
-    MLContact* contact = [MLContact createContactFromJid:msg.buddyName andAccountNo:msg.accountId];
+    MLContact* contact = [MLContact createContactFromJid:msg.buddyName andAccountID:msg.accountID];
     if(msg.isMuc)
     {
         groupDisplayName = contact.contactDisplayName;
@@ -494,7 +494,7 @@ $$
     if([HelperTools isAppExtension])
     {
         DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at %@: we are in the appex, rescheduling this to next account connect", fileInfo[@"cacheFile"], [hardlinkPathComponents componentsJoinedByString:@"/"]);
-        [account addReconnectionHandler:handler];       //the reconnect handler framework will add $ID(account) to the callerArgs, no need to add an accountNo etc. here
+        [account addReconnectionHandler:handler];       //the reconnect handler framework will add $ID(account) to the callerArgs, no need to add an accountID etc. here
     }
     else
         $call(handler, $ID(account), $BOOL(direct, YES));       //no reconnect handler framework used, explicitly bind $ID(account) via callerArgs
@@ -915,7 +915,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
             }
             
             //ignore upload if account was already removed
-            if([[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountNo] == nil)
+            if([[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountID] == nil)
             {
                 NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to upload file: account was removed", @"")}];
                 [_fileManager removeItemAtPath:file error:nil];      //remove temporary file

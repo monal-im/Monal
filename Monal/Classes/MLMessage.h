@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  account number in the database should be an integer
  */
-@property (nonatomic, copy) NSNumber* accountId;
+@property (nonatomic, copy) NSNumber* accountID;
 
 /**
   jid of the contact that this msg corresponds to

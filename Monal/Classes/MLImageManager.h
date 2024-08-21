@@ -47,6 +47,6 @@
  Purge cache in the event of  a memory warning
  */
 -(void) purgeCache;
--(void) purgeCacheForContact:(NSString* _Nonnull) contact andAccount:(NSNumber* _Nonnull) accountNo;
+-(void) purgeCacheForContact:(NSString* _Nonnull) contact andAccount:(NSNumber* _Nonnull) accountID;
 
 @end

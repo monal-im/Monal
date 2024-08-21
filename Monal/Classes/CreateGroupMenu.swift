@@ -91,7 +91,7 @@ struct CreateGroupMenu: View {
                                 DataLayer.sharedInstance().setFullName(self.groupName, forContact:roomJid, andAccount:self.selectedAccount!.accountID)
                                 self.selectedAccount!.mucProcessor.changeName(ofMuc: roomJid, to: self.groupName)
                                 for user in self.selectedContacts {
-                                    self.selectedAccount!.mucProcessor.setAffiliation("member", ofUser: user.contactJid, inMuc: roomJid)
+                                    self.selectedAccount!.mucProcessor.setAffiliation(kMucAffiliationMember, ofUser: user.contactJid, inMuc: roomJid)
                                     self.selectedAccount!.mucProcessor.inviteUser(user.contactJid, inMuc: roomJid)
                                 }
                                 let groupContact = MLContact.createContact(fromJid: roomJid, andAccountID: self.selectedAccount!.accountID)

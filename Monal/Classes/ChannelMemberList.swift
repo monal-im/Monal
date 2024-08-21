@@ -17,12 +17,12 @@ struct ChannelMemberList: View {
     init(mucContact: ObservableKVOWrapper<MLContact>) {
         account = mucContact.obj.account! as xmpp
         _channel = StateObject(wrappedValue:mucContact)
-        _ownAffiliation = State(wrappedValue:"none")
+        _ownAffiliation = State(wrappedValue:kMucAffiliationNone)
         _participants = State(wrappedValue:OrderedDictionary<String, String>())
     }
     
     func updateParticipantList() {
-        ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:channel.obj) ?? "none"
+        ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:channel.obj) ?? kMucAffiliationNone
         participants.removeAll(keepingCapacity:true)
         for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:channel.contactJid, forAccountID:account.accountID)) {
             //ignore ourselves
@@ -32,7 +32,7 @@ struct ChannelMemberList: View {
                 }
             }
             if let nick = memberInfo["room_nick"] as? String {
-                participants[nick] = memberInfo["affiliation"] as? String ?? "none"
+                participants[nick] = memberInfo["affiliation"] as? String ?? kMucAffiliationNone
             }
         }
         participants.sort {

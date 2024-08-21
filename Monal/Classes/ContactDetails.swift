@@ -9,8 +9,8 @@
 struct ContactDetails: View {
     var delegate: SheetDismisserProtocol
     private var account: xmpp
-    @State private var ownRole = "participant"
-    @State private var ownAffiliation = "none"
+    @State private var ownRole = kMucRoleParticipant
+    @State private var ownAffiliation = kMucAffiliationNone
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     @State private var showingRemoveAvatarConfirmation = false
     @State private var showingBlockContactConfirmation = false
@@ -40,11 +40,11 @@ struct ContactDetails: View {
 
     private func updateRoleAndAffiliation() {
         if contact.isMuc {
-            self.ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? "none"
-            self.ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:contact.obj) ?? "none"
+            self.ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? kMucRoleNone
+            self.ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:contact.obj) ?? kMucAffiliationNone
         } else {
-            self.ownRole = "participant"
-            self.ownAffiliation = "none"
+            self.ownRole = kMucRoleParticipant
+            self.ownAffiliation = kMucAffiliationNone
         }
     }
     
@@ -92,7 +92,7 @@ struct ContactDetails: View {
                             .scaledToFit()
                             .applyClosure {view in
                                 if contact.isMuc {
-                                    if ownAffiliation == "owner" {
+                                    if ownAffiliation == kMucAffiliationOwner {
                                         view.accessibilityLabel((contact.mucType == kMucTypeGroup) ? Text("Change Group Avatar") : Text("Change Channel Avatar"))
                                             .onTapGesture {
                                                 showImagePicker()
@@ -210,9 +210,9 @@ struct ContactDetails: View {
                         }
                     }
                     
-                    if contact.isMuc && ((contact.groupSubject as String).count > 0 || ownRole == "moderator") {
+                    if contact.isMuc && ((contact.groupSubject as String).count > 0 || ownRole == kMucRoleModerator) {
                         VStack {
-                            if ownRole == "moderator" {
+                            if ownRole == kMucRoleModerator {
                                 Button {
                                     showingSheetEditSubject.toggle()
                                 } label: {
@@ -345,7 +345,7 @@ struct ContactDetails: View {
                 }
 #endif
                 
-                if contact.isMuc && ownAffiliation == "owner" {
+                if contact.isMuc && ownAffiliation == kMucAffiliationOwner {
                     let label = contact.obj.mucType == kMucTypeGroup ? NSLocalizedString("Rename Group", comment:"") : NSLocalizedString("Rename Channel", comment:"")
                     TextField(label, text: $contact.fullNameView, onEditingChanged: {
                         isEditingNickname = $0
@@ -408,7 +408,7 @@ struct ContactDetails: View {
                         Text("Group Members")
                     }
                 } else if contact.obj.isMuc && contact.obj.mucType == kMucTypeChannel {
-                    if ["owner", "admin"].contains(ownAffiliation) {
+                    if [kMucAffiliationOwner, kMucAffiliationAdmin].contains(ownAffiliation) {
                         NavigationLink(destination: LazyClosureView(MemberList(mucContact:contact))) {
                             Text("Channel Participants")
                         }
@@ -525,7 +525,7 @@ struct ContactDetails: View {
                     }
                 }
 
-                if ownAffiliation == "owner" {
+                if ownAffiliation == kMucAffiliationOwner {
                     Section {
                         Button(action: {
                             showingDestroyConfirmation = true

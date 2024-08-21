@@ -918,7 +918,7 @@ static NSDateFormatter* dbFormatter;
             nick = [self ownNickNameforMuc:room forAccount:accountID];
         MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
-        for(NSString* type in @[@"member", @"admin", @"owner"])
+        for(NSString* type in @[kMucAffiliationMember, kMucAffiliationAdmin, kMucAffiliationOwner])
         {
             [self cleanupParticipantsListFor:room andType:type onAccountID:accountID];
             [self cleanupMembersListFor:room andType:type onAccountID:accountID];

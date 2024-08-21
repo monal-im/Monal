@@ -2555,7 +2555,7 @@ enum msgSentState {
         ]];
     //only allow retraction for outgoing messages or if we are the moderator of that muc
     //but only allow retraction in mucs if we already got the reflected stanzaid (or if this is an 1:1 chat)
-    else if((!message.inbound || (self.contact.isMuc && [[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact] isEqualToString:@"moderator"] && [[self.xmppAccount.mucProcessor getRoomFeaturesForMuc:self.contact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"])) && (!message.isMuc || (message.isMuc && message.stanzaId != nil)) && !message.retracted)
+    else if((!message.inbound || (self.contact.isMuc && [[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact] isEqualToString:kMucRoleModerator] && [[self.xmppAccount.mucProcessor getRoomFeaturesForMuc:self.contact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"])) && (!message.isMuc || (message.isMuc && message.stanzaId != nil)) && !message.retracted)
         return [UISwipeActionsConfiguration configurationWithActions:@[
             quoteAction,
             copyAction,

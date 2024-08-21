@@ -74,7 +74,7 @@ static NSDictionary* _defaultOptions;
 
 -(void) handleAccountDiscoReady:(NSNotification*) notification
 {
-    if(_account.accountNo.intValue != ((xmpp*)notification.object).accountNo.intValue)
+    if(_account.accountID.intValue != ((xmpp*)notification.object).accountID.intValue)
         return;
     //we clear the queue so that the invalidation handlers can't get called twice:
     //once as invalidation of the queued operation handler and once as the invalidation of an iq handler of this operation

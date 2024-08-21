@@ -221,13 +221,13 @@ enum DummySettingsRows {
 
         if(self.selected && self.selected.row >= (int) [self getAccountNum])
         {
-            editor.accountNo = [NSNumber numberWithInt:-1];
+            editor.accountID = [NSNumber numberWithInt:-1];
         }
         else
         {
             MLAssert(self.selected != nil, @"self.selected must not be nil");
             editor.originIndex = self.selected;
-            editor.accountNo = [self getAccountNoByIndex:self.selected.row];
+            editor.accountID = [self getAccountIDByIndex:self.selected.row];
         }
     }
 }

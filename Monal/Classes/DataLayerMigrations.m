@@ -77,10 +77,10 @@
             NSMutableArray* results = [db executeReader:@"select account_id, username, domain from account"];
             for(NSDictionary* row in results) {
                 NSString* accountJid = [NSString stringWithFormat:@"%@@%@", [row objectForKey:kUsername], [row objectForKey:kDomain]];
-                NSString* accountNo = [row objectForKey:kAccountID];
+                NSString* accountID = [row objectForKey:kAccountID];
 
                 // delete chats with accountJid == buddy_name
-                [db executeNonQuery:@"delete from activechats where account_id=? and buddy_name=?" andArguments:@[accountNo, accountJid]];
+                [db executeNonQuery:@"delete from activechats where account_id=? and buddy_name=?" andArguments:@[accountID, accountJid]];
             }
         }];
 

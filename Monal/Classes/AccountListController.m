@@ -57,10 +57,10 @@
     return self.accountList.count;
 }
 
--(NSNumber*) getAccountNoByIndex:(NSUInteger) index
+-(NSNumber*) getAccountIDByIndex:(NSUInteger) index
 {
     NSNumber* result = [[self.accountList objectAtIndex: index] objectForKey:@"account_id"];
-    MLAssert(result != nil, @"getAccountNoByIndex, result should not be nil");
+    MLAssert(result != nil, @"getAccountIDByIndex, result should not be nil");
     return result;
 }
 

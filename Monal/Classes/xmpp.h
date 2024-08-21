@@ -82,7 +82,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, strong) NSString* statusMessage;
 
 // DB info
-@property (nonatomic, strong) NSNumber* accountNo;
+@property (nonatomic, strong) NSNumber* accountID;
 
 @property (nonatomic, readonly) xmppState accountState;
 @property (nonatomic, readonly) BOOL reconnectInProgress;
@@ -104,7 +104,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, strong, readonly) NSString* capsHash;
 @property (nullable, nonatomic, strong, readonly) NSArray* supportedChannelBindingTypes;
 
--(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSNumber*) accountNo;
+-(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountID:(NSNumber*) accountID;
 
 -(void) freezeParseQueue;
 -(void) unfreezeParseQueue;

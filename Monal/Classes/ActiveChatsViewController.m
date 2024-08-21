@@ -372,8 +372,8 @@ static NSMutableSet* _pushWarningDisplayed;
             BOOL found = NO;
             for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
             {
-                NSNumber* accountNo = accountDict[kAccountID];
-                if(self.currentChatViewController.contact.accountId.intValue == accountNo.intValue)
+                NSNumber* accountID = accountDict[kAccountID];
+                if(self.currentChatViewController.contact.accountID.intValue == accountID.intValue)
                     found = YES;
             }
             if(!found)
@@ -404,7 +404,7 @@ static NSMutableSet* _pushWarningDisplayed;
 -(void) refreshContact:(NSNotification*) notification
 {
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
-    DDLogInfo(@"Refreshing contact %@ at %@: unread=%lu", contact.contactJid, contact.accountId, (unsigned long)contact.unreadCount);
+    DDLogInfo(@"Refreshing contact %@ at %@: unread=%lu", contact.contactJid, contact.accountID, (unsigned long)contact.unreadCount);
     
     //update red dot
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -606,7 +606,7 @@ static NSMutableSet* _pushWarningDisplayed;
     //check if contact is already known in any of our accounts and open a chat with the first contact we can find
     for(xmpp* checkAccount in [MLXMPPManager sharedInstance].connectedXMPP)
     {
-        MLContact* checkContact = [MLContact createContactFromJid:jid andAccountNo:checkAccount.accountNo];
+        MLContact* checkContact = [MLContact createContactFromJid:jid andAccountID:checkAccount.accountID];
         if(checkContact.isInRoster)
         {
             [self presentChatWithContact:checkContact];
@@ -809,20 +809,20 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
     {
-        NSNumber* accountNo = accountDict[kAccountID];
-        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:accountNo];
+        NSNumber* accountID = accountDict[kAccountID];
+        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:accountID];
         if(!account)
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
+            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountID is nil!" userInfo:accountDict];
         
         prependToViewQueue((^(PMKResolver resolve) {
-            if(![_mamWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
+            if(![_mamWarningDisplayed containsObject:accountID] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
             {
                 if(![account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:mam:2"])
                 {
                     DDLogDebug(@"Showing MAM not supported warning...");
                     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support MAM (XEP-0313). That means you could frequently miss incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                        [_mamWarningDisplayed addObject:accountNo];
+                        [_mamWarningDisplayed addObject:accountID];
                         resolve(nil);
                     }]];
                     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
@@ -831,7 +831,7 @@ static NSMutableSet* _pushWarningDisplayed;
                 }
                 else
                 {
-                    [_mamWarningDisplayed addObject:accountNo];
+                    [_mamWarningDisplayed addObject:accountID];
                     resolve(nil);
                 }
             }
@@ -840,14 +840,14 @@ static NSMutableSet* _pushWarningDisplayed;
         }));
         
         prependToViewQueue((^(PMKResolver resolve) {
-            if(![_smacksWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound)
+            if(![_smacksWarningDisplayed containsObject:accountID] && account.accountState >= kStateBound)
             {
                 if(!account.connectionProperties.supportsSM3)
                 {
                     DDLogDebug(@"Showing smacks not supported warning...");
                     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support Stream Management (XEP-0198). That means your outgoing messages can get lost frequently!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                        [_smacksWarningDisplayed addObject:accountNo];
+                        [_smacksWarningDisplayed addObject:accountID];
                         resolve(nil);
                     }]];
                     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
@@ -856,7 +856,7 @@ static NSMutableSet* _pushWarningDisplayed;
                 }
                 else
                 {
-                    [_smacksWarningDisplayed addObject:accountNo];
+                    [_smacksWarningDisplayed addObject:accountID];
                     resolve(nil);
                 }
             }
@@ -865,14 +865,14 @@ static NSMutableSet* _pushWarningDisplayed;
         }));
         
         prependToViewQueue((^(PMKResolver resolve) {
-            if(![_pushWarningDisplayed containsObject:accountNo] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
+            if(![_pushWarningDisplayed containsObject:accountID] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
             {
                 if(![account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
                 {
                     DDLogDebug(@"Showing push not supported warning...");
                     UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:NSLocalizedString(@"Account %@", @""), account.connectionProperties.identity.jid] message:NSLocalizedString(@"Your server does not support PUSH (XEP-0357). That means you have to manually open the app to retrieve new incoming messages!! You should switch your server or talk to the server admin to enable this!", @"") preferredStyle:UIAlertControllerStyleAlert];
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                        [_pushWarningDisplayed addObject:accountNo];
+                        [_pushWarningDisplayed addObject:accountID];
                         resolve(nil);
                     }]];
                     [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
@@ -881,7 +881,7 @@ static NSMutableSet* _pushWarningDisplayed;
                 }
                 else
                 {
-                    [_pushWarningDisplayed addObject:accountNo];
+                    [_pushWarningDisplayed addObject:accountID];
                     resolve(nil);
                 }
             }
@@ -1050,7 +1050,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
             //open chat (make sure we have an active buddy for it and add it to our ui, if needed)
             //but don't animate this if the contact is already present in our list
-            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+            [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountID];
             if([[self getChatArrayForSection:pinnedChats] containsObject:contact] || [[self getChatArrayForSection:unpinnedChats] containsObject:contact])
             {
                 [self scrollToContact:contact];
@@ -1180,7 +1180,7 @@ static NSMutableSet* _pushWarningDisplayed;
         chatContact = [self.unpinnedContacts objectAtIndex:indexPath.row];
     
     // Display msg draft or last msg
-    MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:chatContact.contactJid forAccount:chatContact.accountId];
+    MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:chatContact.contactJid forAccount:chatContact.accountID];
 
     [cell initCell:chatContact withLastMessage:messageRow];
 
@@ -1238,7 +1238,7 @@ static NSMutableSet* _pushWarningDisplayed;
         }
         [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         // removeActiveBuddy in db
-        [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
+        [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountID];
         // remove contact from activechats table
         [self refreshDisplay];
         // open placeholder
@@ -1443,8 +1443,8 @@ static NSMutableSet* _pushWarningDisplayed;
             @"host": nilWrapper(host),
             @"username": nilWrapper(username),
             @"token": nilWrapper(token),
-            @"completion": nilDefault(callback, (^(id accountNo) {
-                DDLogWarn(@"Dummy reg completion called for accountNo: %@", accountNo);
+            @"completion": nilDefault(callback, (^(id accountID) {
+                DDLogWarn(@"Dummy reg completion called for accountID: %@", accountID);
             })),
         }];
         registerViewController.ml_disposeCallback = ^{

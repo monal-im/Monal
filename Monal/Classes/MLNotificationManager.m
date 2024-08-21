@@ -78,7 +78,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     });
     xmpp* xmppAccount = notification.object;
     MLContact* contact = notification.userInfo[@"contact"];
-    NSString* idval = [NSString stringWithFormat:@"subscription(%@, %@)", contact.accountId, contact.contactJid];
+    NSString* idval = [NSString stringWithFormat:@"subscription(%@, %@)", contact.accountID, contact.contactJid];
     
     //remove contact requests notification once the contact request has been accepted
     if(!contact.hasIncomingContactRequest)
@@ -138,7 +138,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     //don't simply use contact directly to make sure we always use a freshly created up to date contact when unpacking the userInfo dict
     content.userInfo = @{
         @"fromContactJid": contact.contactJid,
-        @"fromContactAccountId": contact.accountId,
+        @"fromContactAccountID": contact.accountID,
     };
     
     DDLogDebug(@"Publishing notification with id %@", idval);
@@ -257,13 +257,13 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         return;
     }
     
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.buddyName onAccount:message.accountId];
-    if(!muted && message.isMuc == YES && [[DataLayer sharedInstance] isMucAlertOnMentionOnly:message.buddyName onAccount:message.accountId])
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.buddyName onAccount:message.accountID];
+    if(!muted && message.isMuc == YES && [[DataLayer sharedInstance] isMucAlertOnMentionOnly:message.buddyName onAccount:message.accountID])
     {
         NSString* displayName = [MLContact ownDisplayNameForAccount:xmppAccount];
         NSString* ownJid = xmppAccount.connectionProperties.identity.jid;
         NSString* userPart = [HelperTools splitJid:ownJid][@"user"];
-        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:message.buddyName forAccount:message.accountId];
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:message.buddyName forAccount:message.accountID];
         if(!(
             [message.messageText localizedCaseInsensitiveContainsString:nick] ||
             [message.messageText localizedCaseInsensitiveContainsString:displayName] ||
@@ -370,12 +370,12 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
 
 -(NSString*) threadIdentifierWithMessage:(MLMessage*) message
 {
-    return [NSString stringWithFormat:@"thread(%@, %@)", message.accountId, message.buddyName];
+    return [NSString stringWithFormat:@"thread(%@, %@)", message.accountID, message.buddyName];
 }
 
 -(NSString*) threadIdentifierWithContact:(MLContact*) contact
 {
-    return [NSString stringWithFormat:@"thread(%@, %@)", contact.accountId, contact.contactJid];
+    return [NSString stringWithFormat:@"thread(%@, %@)", contact.accountID, contact.contactJid];
 }
 
 -(UNMutableNotificationContent*) updateBadgeForContent:(UNMutableNotificationContent*) content
@@ -457,7 +457,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         //don't simply use contact directly to make sure we always use a freshly created up to date contact when unpacking the userInfo dict
         content.userInfo = @{
             @"fromContactJid": message.buddyName,
-            @"fromContactAccountId": message.accountId,
+            @"fromContactAccountID": message.accountID,
             @"messageId": message.messageId
         };
         
@@ -577,7 +577,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:@"dummyText" andAudioAttachment:nil direction:INInteractionDirectionOutgoing];
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionOutgoing;
-    interaction.identifier = [NSString stringWithFormat:@"%@|%@", message.accountId, message.buddyName];
+    interaction.identifier = [NSString stringWithFormat:@"%@|%@", message.accountID, message.buddyName];
     [interaction donateInteractionWithCompletion:^(NSError *error) {
         if(error)
             DDLogError(@"Could not donate outgoing interaction: %@", error);
@@ -590,8 +590,8 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     // - https://developer.apple.com/documentation/usernotifications/implementing_communication_notifications?language=objc
     // - https://gist.github.com/Dexwell/dedef7389eae26c5b9db927dc5588905
     // - https://stackoverflow.com/a/68705169/3528174
-    xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:message.accountId];
-    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
+    xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:message.accountID];
+    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountID:message.accountID];
     INPerson* sender = nil;
     NSString* groupDisplayName = nil;
     NSMutableArray* recipients = [NSMutableArray new];
@@ -601,14 +601,14 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         //we don't need different handling of incoming or outgoing messages for non-anon mucs because sender and receiver always contain the right contacts
         if([kMucTypeGroup isEqualToString:message.mucType] && message.participantJid)
         {
-            MLContact* contactInGroup = [MLContact createContactFromJid:message.participantJid andAccountNo:message.accountId];
+            MLContact* contactInGroup = [MLContact createContactFromJid:message.participantJid andAccountID:message.accountID];
             //use MLMessage's capability to calculate the fallback name using actualFrom
             sender = [self makeINPersonWithContact:contactInGroup andDisplayName:message.contactDisplayName andAccount:account];
             
             //add other group members
-            for(NSDictionary* member in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountId:message.accountId])
+            for(NSDictionary* member in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountID:message.accountID])
             {
-                MLContact* contactInGroup = [MLContact createContactFromJid:emptyDefault(member[@"participant_jid"], @"", member[@"member_jid"]) andAccountNo:message.accountId];
+                MLContact* contactInGroup = [MLContact createContactFromJid:emptyDefault(member[@"participant_jid"], @"", member[@"member_jid"]) andAccountID:message.accountID];
                 [recipients addObject:[self makeINPersonWithContact:contactInGroup andDisplayName:member[@"room_nick"] andAccount:account]];
             }
         }
@@ -654,7 +654,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
                                                                           content:msgText
                                                                speakableGroupName:(groupDisplayName ? [[INSpeakableString alloc] initWithSpokenPhrase:groupDisplayName] : nil)
                                                            conversationIdentifier:[[NSString alloc] initWithData:[HelperTools serializeObject:contact] encoding:NSISOLatin1StringEncoding]
-                                                                      serviceName:message.accountId.stringValue
+                                                                      serviceName:message.accountID.stringValue
                                                                            sender:sender
                                                                       attachments:(audioAttachment ? @[audioAttachment] : @[])];
     //DDLogDebug(@"Intent is now: %@", intent);
@@ -703,7 +703,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     INPersonHandle* personHandle = [[INPersonHandle alloc] initWithValue:account.connectionProperties.identity.jid type:INPersonHandleTypeUnknown label:@"Monal IM"];
     NSPersonNameComponents* nameComponents = [NSPersonNameComponents new];
     nameComponents.nickname = [MLContact ownDisplayNameForAccount:account];
-    MLContact* ownContact = [MLContact createContactFromJid:account.connectionProperties.identity.jid andAccountNo:account.accountNo];
+    MLContact* ownContact = [MLContact createContactFromJid:account.connectionProperties.identity.jid andAccountID:account.accountID];
     INImage* contactImage = nil;
     if(ownContact.avatar != nil)
     {
@@ -759,7 +759,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
 -(void) showLegacyNotificationForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
-    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
+    MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountID:message.accountID];
     NSString* idval = [self identifierWithMessage:message];
     
     //Only show contact name if allowed
@@ -787,7 +787,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         //don't simply use contact directly to make sure we always use a freshly created up to date contact when unpacking the userInfo dict
         content.userInfo = @{
             @"fromContactJid": message.buddyName,
-            @"fromContactAccountId": message.accountId,
+            @"fromContactAccountID": message.accountID,
             @"messageId": message.messageId
         };
 

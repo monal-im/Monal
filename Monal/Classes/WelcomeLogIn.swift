@@ -22,7 +22,7 @@ struct WelcomeLogIn: View {
     // login related
     @State private var currentTimeout : DispatchTime? = nil
     @State private var errorObserverEnabled = false
-    @State private var newAccountNo: NSNumber? = nil
+    @State private var newAccountID: NSNumber? = nil
     @State private var loginComplete = false
     @State private var isLoadingOmemoBundles = false
     
@@ -100,10 +100,10 @@ struct WelcomeLogIn: View {
         DispatchQueue.main.asyncAfter(deadline: newTimeout) {
             if(newTimeout == self.currentTimeout) {
                 DDLogWarn("First login timeout triggered...")
-                if(self.newAccountNo != nil) {
+                if(self.newAccountID != nil) {
                     DDLogVerbose("Removing account...")
-                    MLXMPPManager.sharedInstance().removeAccount(forAccountNo: self.newAccountNo!)
-                    self.newAccountNo = nil
+                    MLXMPPManager.sharedInstance().removeAccount(forAccountID: self.newAccountID!)
+                    self.newAccountID = nil
                 }
                 self.currentTimeout = nil
                 showTimeoutAlert()
@@ -163,12 +163,12 @@ struct WelcomeLogIn: View {
                                         startLoginTimeout()
                                         showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
                                         self.errorObserverEnabled = true
-                                        self.newAccountNo = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
-                                        if(self.newAccountNo == nil) {
+                                        self.newAccountID = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
+                                        if(self.newAccountID == nil) {
                                             currentTimeout = nil // <- disable timeout on error
                                             errorObserverEnabled = false
                                             showLoginErrorAlert(errorMessage:NSLocalizedString("Account already configured in Monal!", comment: ""))
-                                            self.newAccountNo = nil
+                                            self.newAccountID = nil
                                         }
                                     }
                                 }){
@@ -249,21 +249,21 @@ struct WelcomeLogIn: View {
             if(self.errorObserverEnabled == false) {
                 return
             }
-            if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo, let errorMessage = notification.userInfo?["message"] as? String {
-                if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
+            if let xmppAccount = notification.object as? xmpp, let newAccountID : NSNumber = self.newAccountID, let errorMessage = notification.userInfo?["message"] as? String {
+                if(xmppAccount.accountID.intValue == newAccountID.intValue) {
                     DispatchQueue.main.async {
                         currentTimeout = nil // <- disable timeout on error
                         errorObserverEnabled = false
                         showLoginErrorAlert(errorMessage: errorMessage)
-                        MLXMPPManager.sharedInstance().removeAccount(forAccountNo: newAccountNo)
-                        self.newAccountNo = nil
+                        MLXMPPManager.sharedInstance().removeAccount(forAccountID: newAccountID)
+                        self.newAccountID = nil
                     }
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLResourceBoundNotice")).receive(on: RunLoop.main)) { notification in
-            if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
-                if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
+            if let xmppAccount = notification.object as? xmpp, let newAccountID : NSNumber = self.newAccountID {
+                if(xmppAccount.accountID.intValue == newAccountID.intValue) {
                     DispatchQueue.main.async {
                         currentTimeout = nil // <- disable timeout on successful connection
                         self.errorObserverEnabled = false
@@ -273,8 +273,8 @@ struct WelcomeLogIn: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
-            if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
-                if(notificationAccountNo.intValue == newAccountNo.intValue) {
+            if let notificationAccountID = notification.userInfo?["accountID"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountID : NSNumber = self.newAccountID {
+                if(notificationAccountID.intValue == newAccountID.intValue) {
                     isLoadingOmemoBundles = true
                     showLoadingOverlay(
                         overlay, 
@@ -285,8 +285,8 @@ struct WelcomeLogIn: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedOmemoBundleFetch")).receive(on: RunLoop.main)) { notification in
-            if let notificationAccountNo = notification.userInfo?["accountNo"] as? NSNumber, let newAccountNo : NSNumber = self.newAccountNo {
-                if(notificationAccountNo.intValue == newAccountNo.intValue && isLoadingOmemoBundles) {
+            if let notificationAccountID = notification.userInfo?["accountID"] as? NSNumber, let newAccountID : NSNumber = self.newAccountID {
+                if(notificationAccountID.intValue == newAccountID.intValue && isLoadingOmemoBundles) {
                     DispatchQueue.main.async {
                         self.loginComplete = true
                         showSuccessAlert()
@@ -295,8 +295,8 @@ struct WelcomeLogIn: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
-            if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
-                if(xmppAccount.accountNo.intValue == newAccountNo.intValue && !isLoadingOmemoBundles) {
+            if let xmppAccount = notification.object as? xmpp, let newAccountID : NSNumber = self.newAccountID {
+                if(xmppAccount.accountID.intValue == newAccountID.intValue && !isLoadingOmemoBundles) {
                     DispatchQueue.main.async {
                         self.loginComplete = true
                         showSuccessAlert()

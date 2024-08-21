@@ -52,7 +52,7 @@ struct AddContactMenu: View {
         self.selectedAccount = enabledAccounts.first != nil ? 0 : -1;
         if let prefillAccount = prefillAccount {
             for index in enabledAccounts.indices {
-                if enabledAccounts[index].accountNo.isEqual(to:prefillAccount.accountNo) {
+                if enabledAccounts[index].accountID.isEqual(to:prefillAccount.accountID) {
                     self.selectedAccount = index
                 }
             }
@@ -115,7 +115,7 @@ struct AddContactMenu: View {
     
     func addJid(jid: String) {
         let account = self.enabledAccounts[selectedAccount]
-        let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
+        let contact = MLContact.createContact(fromJid: jid, andAccountID: account.accountID)
         if contact.isInRoster {
             self.newContact = contact
             //import omemo fingerprints as manually trusted, if requested
@@ -137,7 +137,7 @@ struct AddContactMenu: View {
         }.done { type in
             let type = type as! String
             if type == "account" {
-                let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
+                let contact = MLContact.createContact(fromJid: jid, andAccountID: account.accountID)
                 self.newContact = contact
                 MLXMPPManager.sharedInstance().add(contact, withPreauthToken:preauthToken)
                 //import omemo fingerprints as manually trusted, if requested
@@ -149,7 +149,7 @@ struct AddContactMenu: View {
                         account.joinMuc(jid)
                     }
                 }.done { _ in
-                    self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
+                    self.newContact = MLContact.createContact(fromJid: jid, andAccountID: account.accountID)
                     successAlert(title: Text("Success!"), message: Text("Successfully joined group/channel \(jid)!"))
                 }.catch { error in
                     errorAlert(title: Text("Error entering group/channel!"), message: Text("\(String(describing:error))"))

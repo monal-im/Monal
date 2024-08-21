@@ -1271,7 +1271,7 @@
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
     //ignore sdp for disabled accounts
-    if(account != [[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountNo])
+    if(account != [[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountID])
         return;
     //don't use self.account because that asserts on nil
     if(self.contact.account == nil)
@@ -1279,7 +1279,7 @@
     
     XMPPIQ* iqNode = userInfo[@"iqNode"];
     NSString* jmiid = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle@sid"];
-    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
+    if(![account.accountID isEqualToNumber:self.account.accountID] || ![self.jmiid isEqual:jmiid])
     {
         DDLogInfo(@"Incoming ICE candidate not matching %@, ignoring...", [self short]);
         return;
@@ -1410,7 +1410,7 @@
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
     //ignore sdp for disabled accounts
-    if(account != [[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountNo])
+    if(account != [[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountID])
         return;
     //don't use self.account because that asserts on nil
     if(self.contact.account == nil)
@@ -1418,7 +1418,7 @@
     XMPPIQ* iqNode = userInfo[@"iqNode"];
     
     NSString* jmiid = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle@sid"];
-    if(![account.accountNo isEqualToNumber:self.account.accountNo] || ![self.jmiid isEqual:jmiid])
+    if(![account.accountID isEqualToNumber:self.account.accountID] || ![self.jmiid isEqual:jmiid])
     {
         DDLogInfo(@"Ignoring incoming SDP not matching: %@", self);
         return;

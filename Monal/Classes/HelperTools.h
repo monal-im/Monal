@@ -132,7 +132,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(void) configureFileProtection:(NSString*) protectionLevel forFile:(NSString*) file;
 +(void) configureFileProtectionFor:(NSString*) file;
 +(BOOL) isContactBlacklistedForEncryption:(MLContact*) contact;
-+(void) removeAllShareInteractionsForAccountNo:(NSNumber*) accountNo;
++(void) removeAllShareInteractionsForAccountID:(NSNumber*) accountID;
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
 
 +(void) scheduleBackgroundTask:(BOOL) force;

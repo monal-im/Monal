@@ -78,7 +78,7 @@ struct CreateGroupMenu: View {
                             //room already existing in our local bookmarks --> just open it
                             //this should never happen since we randomly generated a jid above
                             hideLoadingOverlay(overlay)
-                            let groupContact = MLContact.createContact(fromJid: generatedJid, andAccountNo: self.selectedAccount!.accountNo)
+                            let groupContact = MLContact.createContact(fromJid: generatedJid, andAccountID: self.selectedAccount!.accountID)
                             self.delegate.dismissWithoutAnimation()
                             if let activeChats = self.appDelegate.activeChats {
                                 activeChats.presentChat(with:groupContact)
@@ -88,13 +88,13 @@ struct CreateGroupMenu: View {
                         self.selectedAccount!.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
                             let success : Bool = data["success"] as! Bool;
                             if success {
-                                DataLayer.sharedInstance().setFullName(self.groupName, forContact:roomJid, andAccount:self.selectedAccount!.accountNo)
+                                DataLayer.sharedInstance().setFullName(self.groupName, forContact:roomJid, andAccount:self.selectedAccount!.accountID)
                                 self.selectedAccount!.mucProcessor.changeName(ofMuc: roomJid, to: self.groupName)
                                 for user in self.selectedContacts {
                                     self.selectedAccount!.mucProcessor.setAffiliation("member", ofUser: user.contactJid, inMuc: roomJid)
                                     self.selectedAccount!.mucProcessor.inviteUser(user.contactJid, inMuc: roomJid)
                                 }
-                                let groupContact = MLContact.createContact(fromJid: roomJid, andAccountNo: self.selectedAccount!.accountNo)
+                                let groupContact = MLContact.createContact(fromJid: roomJid, andAccountID: self.selectedAccount!.accountID)
                                 hideLoadingOverlay(overlay)
                                 self.delegate.dismissWithoutAnimation()
                                 if let activeChats = self.appDelegate.activeChats {

@@ -38,7 +38,7 @@
     {
         if([self.passwordNew getText].length > 0 && [self.passwordOld getText] > 0)
         {
-            if([[MLXMPPManager sharedInstance] isValidPassword:[self.passwordOld getText] forAccount:self.xmppAccount.accountNo] == NO)
+            if([[MLXMPPManager sharedInstance] isValidPassword:[self.passwordOld getText] forAccount:self.xmppAccount.accountID] == NO)
             {
                 UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Password!", @"") message:NSLocalizedString(@"The current password is not correct.", @"") preferredStyle:UIAlertControllerStyleAlert];
                 UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {}];
@@ -63,7 +63,7 @@
                         title = NSLocalizedString(@"Success", @"");
                         displayMessage = NSLocalizedString(@"The password has been changed", @"");
                
-                       [[MLXMPPManager sharedInstance] updatePassword:[self.passwordNew getText] forAccount:self.xmppAccount.accountNo];
+                       [[MLXMPPManager sharedInstance] updatePassword:[self.passwordNew getText] forAccount:self.xmppAccount.accountID];
                     } else  {
                         if(displayMessage.length == 0) displayMessage = NSLocalizedString(@"Could not change the password", @"");
                     }
@@ -167,9 +167,9 @@
         if(indexPath.row == 0)
         {
 #ifdef IS_QUICKSY
-            [textCell initTextCell:[[MLXMPPManager sharedInstance] getPasswordForAccount:self.xmppAccount.accountNo] andPlaceholder:NSLocalizedString(@"Current Password", @"") andDelegate:self];
+            [textCell initTextCell:[[MLXMPPManager sharedInstance] getPasswordForAccount:self.xmppAccount.accountID] andPlaceholder:NSLocalizedString(@"Current Password", @"") andDelegate:self];
 #else
-            [textCell initPasswordCell:[[MLXMPPManager sharedInstance] getPasswordForAccount:self.xmppAccount.accountNo] andPlaceholder:NSLocalizedString(@"Current Password", @"") andDelegate:self];
+            [textCell initPasswordCell:[[MLXMPPManager sharedInstance] getPasswordForAccount:self.xmppAccount.accountID] andPlaceholder:NSLocalizedString(@"Current Password", @"") andDelegate:self];
 #endif
             self.passwordOld = textCell;
         }

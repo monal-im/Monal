@@ -41,12 +41,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  disconnects the specified account
  */
--(void) disconnectAccount:(NSNumber*) accountNo withExplicitLogout:(BOOL) explicitLogout;
+-(void) disconnectAccount:(NSNumber*) accountID withExplicitLogout:(BOOL) explicitLogout;
 
 /**
  connects the specified account
  */
--(void) connectAccount:(NSNumber*) accountNo;
+-(void) connectAccount:(NSNumber*) accountID;
 
 #pragma mark XMPP commands
 /**
@@ -64,7 +64,7 @@ NS_ASSUME_NONNULL_BEGIN
  Block  a jid
  */
 -(void) block:(BOOL) isBlocked contact:(MLContact*) contact;
--(void) block:(BOOL) isBlocked fullJid:(NSString*) contact onAccount:(NSNumber*) accountNo;
+-(void) block:(BOOL) isBlocked fullJid:(NSString*) contact onAccount:(NSNumber*) accountID;
 
 /**
  Returns the user set name of the conencted account
@@ -74,28 +74,28 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  gets the connected account apecified by id. return nil otherwise
  */
--(xmpp* _Nullable) getEnabledAccountForID:(NSNumber*) accountNo;
+-(xmpp* _Nullable) getEnabledAccountForID:(NSNumber*) accountID;
 
 /**
  Returns YES if account is connected
  */
--(BOOL) isAccountForIdConnected:(NSNumber*) accountNo;
+-(BOOL) isAccountForIdConnected:(NSNumber*) accountID;
 
 /**
  When the account estblihsed its current connection. 
  */
--(NSDate *) connectedTimeFor:(NSNumber*) accountNo;
+-(NSDate *) connectedTimeFor:(NSNumber*) accountID;
 
 -(NSNumber* _Nullable) login:(NSString*) jid password:(NSString*) password;
--(void) removeAccountForAccountNo:(NSNumber*) accountNo;
--(void) addNewAccountToKeychainAndConnectWithPassword:(NSString*) password andAccountNo:(NSNumber*) accountNo;
+-(void) removeAccountForAccountID:(NSNumber*) accountID;
+-(void) addNewAccountToKeychainAndConnectWithPassword:(NSString*) password andAccountID:(NSNumber*) accountID;
 
 /**
  update the password in the keychan and update memory cache
  */
--(BOOL) isValidPassword:(NSString*) password forAccount:(NSNumber*) accountNo;
--(NSString*) getPasswordForAccount:(NSNumber*) accountNo;
--(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountNo;
+-(BOOL) isValidPassword:(NSString*) password forAccount:(NSNumber*) accountID;
+-(NSString*) getPasswordForAccount:(NSNumber*) accountID;
+-(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountID;
 
 /**
 Sends a message to a specified contact in account. Calls completion handler on success or failure.

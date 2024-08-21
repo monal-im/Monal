@@ -18,7 +18,7 @@
 +(MLMessage*) messageFromDictionary:(NSDictionary*) dic
 {
     MLMessage* message = [MLMessage new];
-    message.accountId = [dic objectForKey:@"account_id"];
+    message.accountID = [dic objectForKey:@"account_id"];
     
     message.buddyName = [dic objectForKey:@"buddy_name"];
     message.inbound = [(NSNumber*)[dic objectForKey:@"inbound"] boolValue];
@@ -63,7 +63,7 @@
 
 -(void) encodeWithCoder:(NSCoder*) coder
 {
-    [coder encodeObject:self.accountId forKey:@"accountId"];
+    [coder encodeObject:self.accountID forKey:@"accountID"];
     [coder encodeObject:self.buddyName forKey:@"buddyName"];
     [coder encodeBool:self.inbound forKey:@"inbound"];
     [coder encodeObject:self.actualFrom forKey:@"actualFrom"];
@@ -94,7 +94,7 @@
 -(instancetype) initWithCoder:(NSCoder*) coder
 {
     self = [self init];
-    self.accountId = [coder decodeObjectForKey:@"accountId"];
+    self.accountID = [coder decodeObjectForKey:@"accountID"];
     self.buddyName = [coder decodeObjectForKey:@"buddyName"];
     self.inbound = [coder decodeBoolForKey:@"inbound"];
     self.actualFrom = [coder decodeObjectForKey:@"actualFrom"];
@@ -125,7 +125,7 @@
 
 -(void) updateWithMessage:(MLMessage*) msg
 {
-    self.accountId = msg.accountId;
+    self.accountID = msg.accountID;
     self.buddyName = msg.buddyName;
     self.inbound = msg.inbound;
     self.actualFrom = msg.actualFrom;
@@ -158,32 +158,32 @@
     if(self.isMuc)
     {
         if([kMucTypeGroup isEqualToString:self.mucType] && self.participantJid)
-            return [[MLContact createContactFromJid:self.participantJid andAccountNo:self.accountId] contactDisplayNameWithFallback:self.actualFrom];
+            return [[MLContact createContactFromJid:self.participantJid andAccountID:self.accountID] contactDisplayNameWithFallback:self.actualFrom];
         else
             return self.actualFrom;
     }
     else
-        return [MLContact createContactFromJid:self.buddyName andAccountNo:self.accountId].contactDisplayName;
+        return [MLContact createContactFromJid:self.buddyName andAccountID:self.accountID].contactDisplayName;
 }
 
 -(MLContact*) contact
 {
     if(self->_contact != nil)
         return self->_contact;
-    return self->_contact = [MLContact createContactFromJid:self.buddyName andAccountNo:self.accountId];
+    return self->_contact = [MLContact createContactFromJid:self.buddyName andAccountID:self.accountID];
 }
 
 -(BOOL) isEqualToContact:(MLContact*) contact
 {
     return contact != nil &&
            [self.buddyName isEqualToString:contact.contactJid] &&
-           self.accountId.intValue == contact.accountId.intValue;
+           self.accountID.intValue == contact.accountID.intValue;
 }
 
 -(BOOL) isEqualToMessage:(MLMessage*) message
 {
     return message != nil &&
-           self.accountId.intValue == message.accountId.intValue &&
+           self.accountID.intValue == message.accountID.intValue &&
            [self.buddyName isEqualToString:message.buddyName] &&
            self.inbound == message.inbound &&
            [self.actualFrom isEqualToString:message.actualFrom] &&
@@ -208,7 +208,7 @@
 
 -(NSUInteger) hash
 {
-    return [self.accountId hash] ^ [self.buddyName hash] ^ (self.inbound ? 1 : 0) ^
+    return [self.accountID hash] ^ [self.buddyName hash] ^ (self.inbound ? 1 : 0) ^
            [self.actualFrom hash] ^ [self.messageText hash] ^ [self.messageId hash] ^
            [self.stanzaId hash];
 }
@@ -216,7 +216,7 @@
 -(NSString*) description
 {
     return [NSString stringWithFormat:@"%@: %@ {%@messageID: %@, stanzaID: %@} --> %@",
-        self.accountId,
+        self.accountID,
         self.participantJid ? self.participantJid : self.buddyName,
         self.retracted ? @"retracted " : @"",
         self.messageId,

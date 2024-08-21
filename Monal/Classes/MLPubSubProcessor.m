@@ -72,17 +72,17 @@ $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(
             if(!avatarHash)     //the user disabled his avatar
             {
                 DDLogInfo(@"User '%@' disabled his avatar", jid);
-                [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountNo:account.accountNo] WithData:nil];
-                [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
+                [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountID:account.accountID] WithData:nil];
+                [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountID];
                 //delete cache to make sure the image will be regenerated
-                [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
+                [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountID];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                    @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
+                    @"contact": [MLContact createContactFromJid:jid andAccountID:account.accountID]
                 }];
             }
             else
             {
-                NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:jid andAccount:account.accountNo];
+                NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:jid andAccount:account.accountID];
                 if(currentHash && [avatarHash isEqualToString:currentHash])
                 {
                     DDLogInfo(@"Avatar hash of '%@' is the same, we don't need to update our avatar image data", jid);
@@ -107,12 +107,12 @@ $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(
     else
     {
         DDLogInfo(@"User %@ disabled his avatar", jid);
-        [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountNo:account.accountNo] WithData:nil];
-        [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
+        [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountID:account.accountID] WithData:nil];
+        [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountID];
         //delete cache to make sure the image will be regenerated
-        [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
+        [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountID];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-            @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
+            @"contact": [MLContact createContactFromJid:jid andAccountID:account.accountID]
         }];
     }
 $$
@@ -155,12 +155,12 @@ $$class_handler(handleAvatarFetchResult, $$ID(xmpp*, account), $$ID(NSString*, j
         if(![HelperTools isAppExtension] || image.size.width * image.size.height < 600 * 600)
         {
             NSData* imageData = [HelperTools resizeAvatarImage:image withCircularMask:YES toMaxBase64Size:256000];
-            [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountNo:account.accountNo] WithData:imageData];
-            [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
+            [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountID:account.accountID] WithData:imageData];
+            [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountID];
             //delete cache to make sure the image will be regenerated
-            [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
+            [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountID];
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
+                @"contact": [MLContact createContactFromJid:jid andAccountID:account.accountID]
             }];
             DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
         }
@@ -181,19 +181,19 @@ $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
             if([jid isEqualToString:account.connectionProperties.identity.jid])        //own roster name
             {
                 DDLogInfo(@"Got own nickname: %@", [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
-                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:YES];
+                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountID] copyItems:YES];
                 accountDic[kRosterName] = [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"];
                 [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
             }
             else                                                                    //roster name of contact
             {
                 DDLogInfo(@"Got nickname of %@: %@", jid, [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
-                [[DataLayer sharedInstance] setFullName:[data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:account.accountNo];
-                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                [[DataLayer sharedInstance] setFullName:[data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:account.accountID];
+                MLContact* contact = [MLContact createContactFromJid:jid andAccountID:account.accountID];
                 if(contact)     //ignore updates for jids not in our roster
                 {
                     //delete cache to make sure the image will be regenerated
-                    [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
+                    [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountID];
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                         @"contact": contact
                     }];
@@ -208,19 +208,19 @@ $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         if([jid isEqualToString:account.connectionProperties.identity.jid])        //own roster name
         {
             DDLogInfo(@"Own nickname got retracted");
-            NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:NO];
+            NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountID] copyItems:NO];
             accountDic[kRosterName] = @"";
             [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
         }
         else
         {
             DDLogInfo(@"Nickname of %@ got retracted", jid);
-            [[DataLayer sharedInstance] setFullName:@"" forContact:jid andAccount:account.accountNo];
-            MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+            [[DataLayer sharedInstance] setFullName:@"" forContact:jid andAccount:account.accountID];
+            MLContact* contact = [MLContact createContactFromJid:jid andAccountID:account.accountID];
             if(contact)     //ignore updates for jids not in our roster
             {
                 //delete cache to make sure the image will be regenerated
-                [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
+                [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountID];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                     @"contact": contact
                 }];
@@ -244,7 +244,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         return;
     }
     
-    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountNo];
+    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountID];
     
     //new/updated bookmarks
     if([type isEqualToString:@"publish"])
@@ -266,33 +266,33 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
             //check if this is a new entry with autojoin=true
             if(![ownFavorites containsObject:room] && [autojoin boolValue])
             {
-                DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountNo);
+                DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountID);
                 //make sure we update our favorites table right away, to counter any race conditions when joining multiple mucs with one bookmarks update
                 if(nick == nil)
                     nick = [account.mucProcessor calculateNickForMuc:room];
                 //this will record the desired nickname: the mucProcessor will pick that up and use it to join the muc
-                [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
+                [[DataLayer sharedInstance] addMucFavorite:room forAccountID:account.accountID andMucNick:nick];
                 //try to join muc, but don't perform a bookmarks update (this muc came in through a bookmark already)
                 [account.mucProcessor sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:NO];
             }
             //check if it is a known entry that changed autojoin to false
             else if([ownFavorites containsObject:room] && ![autojoin boolValue])
             {
-                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
+                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountID);
                 //delete local favorites entry and leave room afterwards, but keep buddylist entry because only the autojoin flag changed
                 [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:YES];
             }
             //check for nickname changes
             else if([ownFavorites containsObject:room] && nick != nil)
             {
-                NSString* oldNick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                NSString* oldNick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
                 if(![nick isEqualToString:oldNick])
                 {
-                    DDLogInfo(@"Updating muc '%@' nick on account %@ in database to nick provided by bookmarks: '%@'...", room, account.accountNo, nick);
+                    DDLogInfo(@"Updating muc '%@' nick on account %@ in database to nick provided by bookmarks: '%@'...", room, account.accountID, nick);
                     
                     //update muc nickname in database
-                    [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
-                    [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];        //this will upate the already existing favorites entry
+                    [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountID];
+                    [[DataLayer sharedInstance] addMucFavorite:room forAccountID:account.accountID andMucNick:nick];        //this will upate the already existing favorites entry
                     
                     //rejoin the muc (e.g. change nick)
                     //we don't have to do a full disco because we are sure this is a real muc and we are joined already
@@ -309,7 +309,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
             NSString* room = [itemId lowercaseString];
             if([ownFavorites containsObject:room])
             {
-                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
+                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountID);
                 //delete local favorites entry and leave room afterwards
                 [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
             }
@@ -323,7 +323,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         //--> remove and leave all mucs
         for(NSString* room in ownFavorites)
         {
-            DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
+            DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountID);
             //delete local favorites entry and leave room afterwards
             [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
         }
@@ -355,7 +355,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
         max_items = @"max";
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     
-    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountNo];
+    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountID];
     DDLogVerbose(@"Own favorites: %@", ownFavorites);
     
     //filter passwort protected mucs and make sure jids (the item ids) are always lowercase
@@ -386,10 +386,10 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
         //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
         if([ownFavorites containsObject:room] && ![autojoin boolValue])
         {
-            DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountNo);
+            DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountID);
             
             //add or update nickname
-            NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+            NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
             if(nick != nil)
             {
                 if(![item check:@"{urn:xmpp:bookmarks:1}conference/nick"])
@@ -414,8 +414,8 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     [toAdd  minusSet:[NSSet setWithArray:[_data allKeys]]];
     for(NSString* room in toAdd)
     {
-        DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
-        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+        DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountID);
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
         [account.pubsub publishItem:
             [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": room} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"conference" andNamespace:@"urn:xmpp:bookmarks:1" withAttributes:@{
@@ -443,7 +443,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     [toRemove  minusSet:ownFavorites];
     for(NSString* room in toRemove)
     {
-        DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountNo);
+        DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountID);
         [account.pubsub retractItemWithId:room onNode:@"urn:xmpp:bookmarks:1" andHandler:$newHandler(self, bookmarks2Retracted, $ID(room))];
     }
 $$
@@ -493,7 +493,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
         return;
     }
     
-    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountNo];
+    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountID];
     
     //new/updated bookmarks
     if([type isEqualToString:@"publish"])
@@ -527,33 +527,33 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
                 //check if this is a new entry with autojoin=true
                 if(![ownFavorites containsObject:room] && [autojoin boolValue])
                 {
-                    DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountNo);
+                    DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountID);
                     //make sure we update our favorites table right away, to counter any race conditions when joining multiple mucs with one bookmarks update
                     if(nick == nil)
                         nick = [account.mucProcessor calculateNickForMuc:room];
                     //this will record the desired nickname: the mucProcessor will pick that up and use it to join the muc
-                    [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
+                    [[DataLayer sharedInstance] addMucFavorite:room forAccountID:account.accountID andMucNick:nick];
                     //try to join muc, but don't perform a bookmarks update (this muc came in through a bookmark already)
                     [account.mucProcessor sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:NO];
                 }
                 //check if it is a known entry that changed autojoin to false
                 else if([ownFavorites containsObject:room] && ![autojoin boolValue])
                 {
-                    DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
+                    DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountID);
                     //delete local favorites entry and leave room afterwards, but keep buddylist entry because only the autojoin flag changed
                     [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:YES];
                 }
                 //check for nickname changes
                 else if([ownFavorites containsObject:room] && nick != nil)
                 {
-                    NSString* oldNick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                    NSString* oldNick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
                     if(![nick isEqualToString:oldNick])
                     {
-                        DDLogInfo(@"Updating muc '%@' nick on account %@ in database to nick provided by bookmarks: '%@'...", room, account.accountNo, nick);
+                        DDLogInfo(@"Updating muc '%@' nick on account %@ in database to nick provided by bookmarks: '%@'...", room, account.accountID, nick);
                         
                         //update muc nickname in database
-                        [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
-                        [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];        //this will upate the already existing favorites entry
+                        [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountID];
+                        [[DataLayer sharedInstance] addMucFavorite:room forAccountID:account.accountID andMucNick:nick];        //this will upate the already existing favorites entry
                         
                         //rejoin the muc (e.g. change nick)
                         //we don't have to do a full disco because we are sure this is a real muc and we are joined already
@@ -568,7 +568,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
             [toLeave  minusSet:bookmarkedMucs];
             for(NSString* room in toLeave)
             {
-                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
+                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountID);
                 //delete local favorites entry and leave room afterwards
                 [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
             }
@@ -581,7 +581,7 @@ $$class_handler(bookmarksHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$
     //--> remove and leave all mucs
     for(NSString* room in ownFavorites)
     {
-        DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
+        DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountID);
         //delete local favorites entry and leave room afterwards
         [account.mucProcessor leave:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
     }
@@ -608,7 +608,7 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
     }
     
     BOOL changed = NO;
-    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountNo];
+    NSSet* ownFavorites = [[DataLayer sharedInstance] listMucsForAccount:account.accountID];
     
     for(NSString* itemId in data)
     {
@@ -639,15 +639,15 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
             //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
             if([ownFavorites containsObject:room] && ![autojoin boolValue])
             {
-                DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountNo);
+                DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountID);
                 
                 //add or update nickname
-                NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
                 if(nick != nil)
                 {
                     if(![conference check:@"nick"])
                         [conference addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
-                    ((MLXMLNode*)[conference findFirst:@"nick"]).data = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                    ((MLXMLNode*)[conference findFirst:@"nick"]).data = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
                 }
                 
                 //update autojoin value to true
@@ -661,11 +661,11 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
         [toAdd  minusSet:bookmarkedMucs];
         for(NSString* room in toAdd)
         {
-            DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
-            NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+            DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountID);
+            NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
             [[data[itemId] findFirst:@"{storage:bookmarks}storage"] addChildNode:[[MLXMLNode alloc] initWithElement:@"conference" withAttributes:@{
                 @"jid": room,
-                @"name": [[MLContact createContactFromJid:room andAccountNo:account.accountNo] contactDisplayName],
+                @"name": [[MLContact createContactFromJid:room andAccountID:account.accountID] contactDisplayName],
                 @"autojoin": @"true",
             } andChildren:(nick != nil ? @[[[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick]] : @[]) andData:nil]];
             changed = YES;
@@ -676,7 +676,7 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
         [toRemove  minusSet:ownFavorites];
         for(NSString* room in toRemove)
         {
-            DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountNo);
+            DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountID);
             [[data[itemId] findFirst:@"{storage:bookmarks}storage"] removeChildNode:[data[itemId] findFirst:@"{storage:bookmarks}storage/conference<jid=%@>", room]];
             changed = YES;
         }
@@ -703,11 +703,11 @@ $$class_handler(handleBookarksFetchResult, $$ID(xmpp*, account), $$BOOL(success)
     NSMutableArray* conferences = [NSMutableArray new];
     for(NSString* room in ownFavorites)
     {
-        DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
-        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+        DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountID);
+        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
         [conferences addObject:[[MLXMLNode alloc] initWithElement:@"conference" withAttributes:@{
             @"jid": room,
-            @"name": [[MLContact createContactFromJid:room andAccountNo:account.accountNo] contactDisplayName],
+            @"name": [[MLContact createContactFromJid:room andAccountID:account.accountID] contactDisplayName],
             @"autojoin": @"true",
         } andChildren:(nick != nil ? @[[[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick]] : @[]) andData:nil]];
     }

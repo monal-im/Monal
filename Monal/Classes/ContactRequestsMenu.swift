@@ -63,13 +63,13 @@ struct ContactRequestsMenu: View {
         let requests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
         enabledAccounts.removeAll()
         for account in MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp] {
-            enabledAccounts[account.accountNo.intValue] = account
+            enabledAccounts[account.accountID.intValue] = account
         }
         pendingRequests.removeAll()
         for contact in requests {
             //add only requests having an enabled (dubbed connected) account
             //(should be a noop because allContactRequests() returns only enabled accounts)
-            if let account = enabledAccounts[contact.accountId.intValue] {
+            if let account = enabledAccounts[contact.accountID.intValue] {
                 if pendingRequests[account] == nil {
                     pendingRequests[account] = []
                 }

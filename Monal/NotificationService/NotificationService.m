@@ -164,7 +164,7 @@
     {
         //disconnect while still being in the receive queue to make sure we don't process any other stanza after this jmi one
         //(we don't want to handle a second jmi stanza for example: that could confuse tie-breaking and other parts of our call handling)
-        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:notification.userInfo[@"accountNo"]];
+        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:notification.userInfo[@"accountID"]];
         [account disconnect];
         
         //now disconnect all other accounts, post the voip push and kill the appex

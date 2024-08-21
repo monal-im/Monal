@@ -78,7 +78,7 @@ struct ContactPicker: View {
     private var allContacts: OrderedSet<ObservableKVOWrapper<MLContact>> {
         //build list of all possible contacts on this account (excluding selfchat and other mucs)
         var contactsTmp: OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()
-        for contact in DataLayer.sharedInstance().possibleGroupMembers(forAccount: account.accountNo) {
+        for contact in DataLayer.sharedInstance().possibleGroupMembers(forAccount: account.accountID) {
             contactsTmp.append(ObservableKVOWrapper(contact))
         }
         return contactsTmp

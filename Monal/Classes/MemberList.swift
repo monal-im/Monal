@@ -45,12 +45,12 @@ struct MemberList: View {
         affiliations.removeAll(keepingCapacity:true)
         online.removeAll(keepingCapacity:true)
         nicknames.removeAll(keepingCapacity:true)
-        for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:self.muc.contactJid, forAccountId:account.accountNo)) {
+        for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:self.muc.contactJid, forAccountID:account.accountID)) {
             DDLogVerbose("Got member/participant entry: \(String(describing:memberInfo))")
             guard let jid = memberInfo["participant_jid"] as? String ?? memberInfo["member_jid"] as? String else {
                 continue
             }
-            let contact = ObservableKVOWrapper(MLContact.createContact(fromJid:jid, andAccountNo:account.accountNo))
+            let contact = ObservableKVOWrapper(MLContact.createContact(fromJid:jid, andAccountID:account.accountID))
             nicknames[contact] = memberInfo["room_nick"] as? String
             if !memberList.contains(contact) {
                 continue

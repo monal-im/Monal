@@ -43,12 +43,12 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(BOOL) isEqualToMessage:(MLMessage*) message;
 -(BOOL) isEqual:(id _Nullable) object;
 
-+(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSNumber*) accountNo;
++(MLContact*) createContactFromJid:(NSString*) jid andAccountID:(NSNumber*) accountID;
 
 /**
  account number in the database should be an integer
  */
-@property (nonatomic, readonly) NSNumber* accountId;
+@property (nonatomic, readonly) NSNumber* accountID;
 @property (nonatomic, readonly) NSString* contactJid;
 @property (nonatomic, readonly, copy) UIImage* avatar;
 @property (nonatomic, readonly) BOOL hasAvatar;

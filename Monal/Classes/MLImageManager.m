@@ -107,10 +107,10 @@
     [self.backgroundCache removeAllObjects];
 }
 
--(void) purgeCacheForContact:(NSString*) contact andAccount:(NSNumber*) accountNo
+-(void) purgeCacheForContact:(NSString*) contact andAccount:(NSNumber*) accountID
 {
-    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", accountNo, contact]];
-    [self resetCachedBackgroundImageForContact:[MLContact createContactFromJid:contact andAccountNo:accountNo]];
+    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", accountID, contact]];
+    [self resetCachedBackgroundImageForContact:[MLContact createContactFromJid:contact andAccountID:accountID]];
 }
 
 -(void) cleanupHashes
@@ -121,16 +121,16 @@
     for(MLContact* contact in contactList)
     {
         NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-        writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
+        writablePath = [writablePath stringByAppendingPathComponent:contact.accountID.stringValue];
         writablePath = [writablePath stringByAppendingPathComponent:[self fileNameforContact:contact]];
-        NSString* hash = [[DataLayer sharedInstance] getAvatarHashForContact:contact.contactJid andAccount:contact.accountId];
+        NSString* hash = [[DataLayer sharedInstance] getAvatarHashForContact:contact.contactJid andAccount:contact.accountID];
         BOOL hasHash = ![@"" isEqualToString:hash];
         
         if(hasHash && ![fileManager isReadableFileAtPath:writablePath])
         {
             DDLogDebug(@"Deleting orphan hash '%@' of contact: %@", hash, contact);
             //delete avatar hash from db if the file containing our image data vanished
-            [[DataLayer sharedInstance] setAvatarHash:@"" forContact:contact.contactJid andAccount:contact.accountId];
+            [[DataLayer sharedInstance] setAvatarHash:@"" forContact:contact.contactJid andAccount:contact.accountID];
         }
         
         if(!hasHash && [fileManager isReadableFileAtPath:writablePath])
@@ -221,7 +221,7 @@
 
 -(NSString*) fileNameforContact:(MLContact*) contact
 {
-    return [NSString stringWithFormat:@"%@_%@.png", contact.accountId.stringValue, [contact.contactJid lowercaseString]];;
+    return [NSString stringWithFormat:@"%@_%@.png", contact.accountID.stringValue, [contact.contactJid lowercaseString]];;
 }
 
 -(void) setIconForContact:(MLContact*) contact WithData:(NSData* _Nullable) data
@@ -233,7 +233,7 @@
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
     NSString *writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-    writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:contact.accountID.stringValue];
     NSError* error;
     [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
     [HelperTools configureFileProtectionFor:writablePath];
@@ -254,7 +254,7 @@
     }
     
     //remove from cache if its there
-    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", contact.accountId, contact]];
+    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", contact.accountID, contact]];
     
 }
 
@@ -263,7 +263,7 @@
     NSString* filename = [self fileNameforContact:contact];
     
     NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-    writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:contact.accountID.stringValue];
     writablePath = [writablePath stringByAppendingPathComponent:filename];
     
     DDLogVerbose(@"Checking avatar image at: %@", writablePath);
@@ -281,14 +281,14 @@
     
     __block UIImage* toreturn = nil;
     //get filname from DB
-    NSString* cacheKey = [NSString stringWithFormat:@"%@_%@", contact.accountId, contact.contactJid];
+    NSString* cacheKey = [NSString stringWithFormat:@"%@_%@", contact.accountID, contact.contactJid];
     
     //check cache
     toreturn = [self.iconCache objectForKey:cacheKey];
     if(!toreturn)
     {
         NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-        writablePath = [writablePath stringByAppendingPathComponent:contact.accountId.stringValue];
+        writablePath = [writablePath stringByAppendingPathComponent:contact.accountID.stringValue];
         writablePath = [writablePath stringByAppendingPathComponent:filename];
         
         DDLogVerbose(@"Loading avatar image at: %@", writablePath);

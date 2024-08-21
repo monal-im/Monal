@@ -395,7 +395,7 @@ struct ContactDetails: View {
                     }
                     .tint(Color.primary)
                 }
-                NavigationLink(destination: LazyClosureView{MediaGalleryView(contact: contact.contactJid as String, accountNo: contact.accountId)}) {
+                NavigationLink(destination: LazyClosureView{MediaGalleryView(contact: contact.contactJid as String, accountID: contact.accountID)}) {
                     Text("View Media Gallery")
                 }
                 

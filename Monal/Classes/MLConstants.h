@@ -204,7 +204,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 //contact cells
 #define kusernameKey @"username"
 #define kfullNameKey @"fullName"
-#define kaccountNoKey @"accountNo"
+#define kaccountIDKey @"accountID"
 #define kstateKey @"state"
 #define kstatusKey @"status"
 

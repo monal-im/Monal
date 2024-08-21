@@ -26,6 +26,20 @@ let kBackgroundRefreshingTask = HelperTools.getObjcDefinedValue(.kBackgroundRefr
 let kMonalKeychainName = HelperTools.getObjcDefinedValue(.kMonalKeychainName)
 let kMucTypeGroup = HelperTools.getObjcDefinedValue(.kMucTypeGroup)
 let kMucTypeChannel = HelperTools.getObjcDefinedValue(.kMucTypeChannel)
+
+let kMucRoleModerator = HelperTools.getObjcDefinedValue(.kMucRoleModerator)
+let kMucRoleNone = HelperTools.getObjcDefinedValue(.kMucRoleNone)
+let kMucRoleParticipant = HelperTools.getObjcDefinedValue(.kMucRoleParticipant)
+let kMucRoleVisitor = HelperTools.getObjcDefinedValue(.kMucRoleVisitor)
+
+let kMucAffiliationOwner = HelperTools.getObjcDefinedValue(.kMucAffiliationOwner)
+let kMucAffiliationAdmin = HelperTools.getObjcDefinedValue(.kMucAffiliationAdmin)
+let kMucAffiliationMember = HelperTools.getObjcDefinedValue(.kMucAffiliationMember)
+let kMucAffiliationOutcast = HelperTools.getObjcDefinedValue(.kMucAffiliationOutcast)
+let kMucAffiliationNone = HelperTools.getObjcDefinedValue(.kMucAffiliationNone)
+let kMucActionShowProfile = HelperTools.getObjcDefinedValue(.kMucActionShowProfile)
+let kMucActionReinvite = HelperTools.getObjcDefinedValue(.kMucActionReinvite)
+
 let SHORT_PING = HelperTools.getObjcDefinedValue(.SHORT_PING)
 let LONG_PING = HelperTools.getObjcDefinedValue(.LONG_PING)
 let MUC_PING = HelperTools.getObjcDefinedValue(.MUC_PING)

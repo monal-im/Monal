@@ -629,6 +629,17 @@ void swizzle(Class c, SEL orig, SEL new)
         case MLDefinedIdentifier_kBackgroundRefreshingTask: return kBackgroundRefreshingTask; break;
         case MLDefinedIdentifier_kMonalKeychainName: return kMonalKeychainName; break;
         case MLDefinedIdentifier_kMucTypeGroup: return kMucTypeGroup; break;
+        case MLDefinedIdentifier_kMucRoleModerator: return kMucRoleModerator; break;
+        case MLDefinedIdentifier_kMucRoleNone: return kMucRoleNone; break;
+        case MLDefinedIdentifier_kMucRoleParticipant: return kMucRoleParticipant; break;
+        case MLDefinedIdentifier_kMucRoleVisitor: return kMucRoleVisitor; break;
+        case MLDefinedIdentifier_kMucAffiliationOwner: return kMucAffiliationOwner; break;
+        case MLDefinedIdentifier_kMucAffiliationAdmin: return kMucAffiliationAdmin; break;
+        case MLDefinedIdentifier_kMucAffiliationMember: return kMucAffiliationMember; break;
+        case MLDefinedIdentifier_kMucAffiliationOutcast: return kMucAffiliationOutcast; break;
+        case MLDefinedIdentifier_kMucAffiliationNone: return kMucAffiliationNone; break;
+        case MLDefinedIdentifier_kMucActionShowProfile: return kMucActionShowProfile; break;
+        case MLDefinedIdentifier_kMucActionReinvite: return kMucActionReinvite; break;
         case MLDefinedIdentifier_kMucTypeChannel: return kMucTypeChannel; break;
         case MLDefinedIdentifier_SHORT_PING: return @(SHORT_PING); break;
         case MLDefinedIdentifier_LONG_PING: return @(LONG_PING); break;

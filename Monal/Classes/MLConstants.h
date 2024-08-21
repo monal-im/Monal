@@ -192,6 +192,19 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMucTypeGroup @"group"
 #define kMucTypeChannel @"channel"
 
+#define kMucRoleModerator @"moderator"
+#define kMucRoleNone @"none"
+#define kMucRoleParticipant @"participant"
+#define kMucRoleVisitor @"visitor"
+
+#define kMucAffiliationOwner @"owner"
+#define kMucAffiliationAdmin @"admin"
+#define kMucAffiliationMember @"member"
+#define kMucAffiliationOutcast @"outcast"
+#define kMucAffiliationNone @"none"
+#define kMucActionShowProfile @"profile"
+#define kMucActionReinvite @"reinvite"
+
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048
 

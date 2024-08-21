@@ -61,7 +61,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         @"muc#roomconfig_enablelogging": @"0",
         @"muc#roomconfig_changesubject": @"0",
         @"muc#roomconfig_allowinvites": @"0",
-        @"muc#roomconfig_getmemberlist": @"participant",
+        @"muc#roomconfig_getmemberlist": kMucRoleParticipant,
         @"muc#roomconfig_publicroom": @"0",
         @"muc#roomconfig_moderatedroom": @"0",
         @"muc#maxhistoryfetch": @"0",               //should use mam
@@ -477,7 +477,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             BOOL isTypeGroup = [[[DataLayer sharedInstance] getMucTypeOfRoom:mucJid andAccount:_account.accountID] isEqualToString:kMucTypeGroup];
 #endif
             
-            if(item[@"affiliation"] == nil || [@"none" isEqualToString:item[@"affiliation"]])
+            if(item[@"affiliation"] == nil || [kMucAffiliationNone isEqualToString:item[@"affiliation"]])
             {
                 DDLogVerbose(@"Removing member '%@' from muc '%@'...", item[@"jid"], mucJid);
                 [[DataLayer sharedInstance] removeMember:item fromMuc:mucJid forAccountID:_account.accountID];
@@ -881,7 +881,7 @@ $$
                 
                 //load members/admins/owners list (this has to be done *after* joining the muc to not get auth errors)
                 DDLogInfo(@"Querying member/admin/owner lists for muc %@...", node.fromUser);
-                for(NSString* type in @[@"member", @"admin", @"owner"])
+                for(NSString* type in @[kMucAffiliationMember, kMucAffiliationAdmin, kMucAffiliationOwner])
                 {
                     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:node.fromUser];
                     [discoInfo setMucListQueryFor:type];
@@ -1490,7 +1490,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     
     if(join)
     {
-        for(NSString* type in @[@"member", @"admin", @"owner"])
+        for(NSString* type in @[kMucAffiliationMember, kMucAffiliationAdmin, kMucAffiliationOwner])
         {
             DDLogInfo(@"Clearing muc participants table for type %@: %@", type, iqNode.fromUser);
             [[DataLayer sharedInstance] cleanupParticipantsListFor:iqNode.fromUser andType:type onAccountID:_account.accountID];

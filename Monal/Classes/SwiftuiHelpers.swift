@@ -110,19 +110,19 @@ func promisifyMucAction(account: xmpp, mucJid: String, action: @escaping () thro
 
 func mucAffiliationToString(_ affiliation: String?) -> String {
     if let affiliation = affiliation {
-        if affiliation == "owner" {
+        if affiliation == kMucAffiliationOwner {
             return NSLocalizedString("Owner", comment:"muc affiliation")
-        } else if affiliation == "admin" {
+        } else if affiliation == kMucAffiliationAdmin {
             return NSLocalizedString("Admin", comment:"muc affiliation")
-        } else if affiliation == "member" {
+        } else if affiliation == kMucAffiliationMember {
             return NSLocalizedString("Member", comment:"muc affiliation")
-        } else if affiliation == "none" {
+        } else if affiliation == kMucAffiliationNone {
             return NSLocalizedString("Participant", comment:"muc affiliation")
-        } else if affiliation == "outcast" {
+        } else if affiliation == kMucAffiliationOutcast {
             return NSLocalizedString("Blocked", comment:"muc affiliation")
-        } else if affiliation == "profile" {
+        } else if affiliation == kMucActionShowProfile {
             return NSLocalizedString("Open contact details", comment:"muc members list")
-        } else if affiliation == "reinvite" {
+        } else if affiliation == kMucActionReinvite {
             return NSLocalizedString("Invite again", comment:"muc invite")
         }
     }
@@ -131,19 +131,19 @@ func mucAffiliationToString(_ affiliation: String?) -> String {
 
 func mucAffiliationToInt(_ affiliation: String?) -> Int {
     if let affiliation = affiliation {
-        if affiliation == "owner" {
+        if affiliation == kMucAffiliationOwner {
             return 1
-        } else if affiliation == "admin" {
+        } else if affiliation == kMucAffiliationAdmin {
             return 2
-        } else if affiliation == "member" {
+        } else if affiliation == kMucAffiliationMember {
             return 3
-        } else if affiliation == "none" {
+        } else if affiliation == kMucAffiliationNone {
             return 4
-        } else if affiliation == "outcast" {
+        } else if affiliation == kMucAffiliationOutcast {
             return 5
-        } else if affiliation == "profile" {
+        } else if affiliation == kMucActionShowProfile {
             return 1000
-        } else if affiliation == "reinvite" {
+        } else if affiliation == kMucActionReinvite {
             return 100
         }
     }

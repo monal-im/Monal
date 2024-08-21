@@ -32,7 +32,7 @@ struct MemberList: View {
     init(mucContact: ObservableKVOWrapper<MLContact>) {
         account = mucContact.obj.account! as xmpp
         _muc = StateObject(wrappedValue:mucContact)
-        _ownAffiliation = State(wrappedValue:"none")
+        _ownAffiliation = State(wrappedValue:kMucAffiliationNone)
         _memberList = State(wrappedValue:OrderedSet<ObservableKVOWrapper<MLContact>>())
         _affiliations = State(wrappedValue:[:])
         _online = State(wrappedValue:[:])
@@ -41,7 +41,7 @@ struct MemberList: View {
     
     func updateMemberlist() {
         memberList = getContactList(viewContact:self.muc)
-        ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:self.muc.obj) ?? "none"
+        ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:self.muc.obj) ?? kMucAffiliationNone
         affiliations.removeAll(keepingCapacity:true)
         online.removeAll(keepingCapacity:true)
         nicknames.removeAll(keepingCapacity:true)
@@ -55,7 +55,7 @@ struct MemberList: View {
             if !memberList.contains(contact) {
                 continue
             }
-            affiliations[contact] = memberInfo["affiliation"] as? String ?? "none"
+            affiliations[contact] = memberInfo["affiliation"] as? String ?? kMucAffiliationNone
             if let num = memberInfo["online"] as? NSNumber {
                 online[contact] = num.boolValue
             } else {
@@ -109,9 +109,9 @@ struct MemberList: View {
             return false
         }
         if let contactAffiliation = affiliations[contact] {
-            if ownAffiliation == "owner" {
+            if ownAffiliation == kMucAffiliationOwner {
                 return true
-            } else if ownAffiliation == "admin" && (contactAffiliation != "owner" && contactAffiliation != "admin") {
+            } else if ownAffiliation == kMucAffiliationAdmin && (contactAffiliation != kMucAffiliationOwner && contactAffiliation != kMucAffiliationAdmin) {
                 return true
             }
         }
@@ -122,30 +122,30 @@ struct MemberList: View {
         if let contactAffiliation = affiliations[contact], let contactOnline = online[contact] {
             var reinviteEntry: [String] = []
             if !contactOnline {
-                reinviteEntry = ["reinvite"]
+                reinviteEntry = [kMucActionReinvite]
             }
             if self.muc.mucType == kMucTypeGroup {
-                if ownAffiliation == "owner" {
-                    return [/*"profile"*/] + reinviteEntry + ["owner", "admin", "member", "outcast"]
+                if ownAffiliation == kMucAffiliationOwner {
+                    return [/*kMucActionShowProfile*/] + reinviteEntry + [kMucAffiliationOwner, kMucAffiliationAdmin, kMucAffiliationMember, kMucAffiliationOutcast]
                 } else {        //only admin left, because other affiliations don't call actionsAllowed at all
-                    if ["member", "outcast"].contains(contactAffiliation) {
-                        return [/*"profile"*/] + reinviteEntry + ["member", "outcast"]
+                    if [kMucAffiliationMember, kMucAffiliationOutcast].contains(contactAffiliation) {
+                        return [/*kMucActionShowProfile*/] + reinviteEntry + [kMucAffiliationMember, kMucAffiliationOutcast]
                     } else {
                         //if this contact is a co-admin or owner, we aren't allowed to do much to their affiliation
                         //return contact affiliation because that should be displayed as selected in picker
-                        return [/*"profile"*/] + reinviteEntry + [contactAffiliation]
+                        return [/*kMucActionShowProfile*/] + reinviteEntry + [contactAffiliation]
                     }
                 }
             } else {
-                if ownAffiliation == "owner" {
-                    return [/*"profile"*/] + reinviteEntry + ["owner", "admin", "member", "none", "outcast"]
+                if ownAffiliation == kMucAffiliationOwner {
+                    return [/*kMucActionShowProfile*/] + reinviteEntry + [kMucAffiliationOwner, kMucAffiliationAdmin, kMucAffiliationMember, kMucAffiliationNone, kMucAffiliationOutcast]
                 } else {        //only admin left, because other affiliations don't call actionsAllowed at all
-                    if ["member", "none", "outcast"].contains(contactAffiliation) {
-                        return [/*"profile"*/] + reinviteEntry + ["member", "none", "outcast"]
+                    if [kMucAffiliationMember, kMucAffiliationNone, kMucAffiliationOutcast].contains(contactAffiliation) {
+                        return [/*kMucActionShowProfile*/] + reinviteEntry + [kMucAffiliationMember, kMucAffiliationNone, kMucAffiliationOutcast]
                     } else {
                         //if this contact is a co-admin or owner, we aren't allowed to do much to their affiliation
                         //return contact affiliation because that should be displayed as selected in picker
-                        return [/*"profile"*/] + reinviteEntry + [contactAffiliation]
+                        return [/*kMucActionShowProfile*/] + reinviteEntry + [contactAffiliation]
                     }
                 }
             }
@@ -153,30 +153,30 @@ struct MemberList: View {
         //fallback (should hopefully never be needed)
         DDLogWarn("Fallback for group/channel \(String(describing:self.muc.contactJid as String)): affiliation=\(String(describing:affiliations[contact])), online=\(String(describing:online[contact]))")
         if self.muc.mucType == kMucTypeGroup {
-            return [/*"profile",*/ "reinvite"]
+            return [/*kMucActionShowProfile,*/ kMucActionReinvite]
         } else {
-            return [/*"profile",*/ "reinvite", "none"]
+            return [/*kMucActionShowProfile,*/ kMucActionReinvite, kMucAffiliationNone]
         }
     }
     
     @ViewBuilder
     func makePickerView(contact: ObservableKVOWrapper<MLContact>) -> some View {
         Picker(selection: Binding<String>(
-            get: { affiliations[contact] ?? "none" },
+            get: { affiliations[contact] ?? kMucAffiliationNone },
             set: { newAffiliation in
                 if newAffiliation == affiliations[contact] {
                     return
                 }
-                if newAffiliation == "profile" {
+                if newAffiliation == kMucActionShowProfile {
                     DDLogVerbose("Activating navigation to \(String(describing:contact))")
                     navigationActive = contact
-                } else if newAffiliation == "reinvite" {
+                } else if newAffiliation == kMucActionReinvite {
                     //first remove potential ban, then reinvite
                     var outcastResolution: Promise<monal_void_block_t?> = Promise.value(nil)
-                    if affiliations[contact] == "outcast" {
+                    if affiliations[contact] == kMucAffiliationOutcast {
                         outcastResolution = showPromisingLoadingOverlay(self.overlay, headlineView: Text("Unblocking user"), descriptionView: Text("Unblocking user for this group/channel: \(contact.contactJid as String)")) {
                             promisifyAction {
-                                account.mucProcessor.setAffiliation(self.muc.mucType == kMucTypeGroup ? "member" : "none", ofUser:contact.contactJid, inMuc:self.muc.contactJid)
+                                account.mucProcessor.setAffiliation(self.muc.mucType == kMucTypeGroup ? kMucAffiliationMember : kMucAffiliationNone, ofUser:contact.contactJid, inMuc:self.muc.contactJid)
                             }
                         }
                     }
@@ -192,7 +192,7 @@ struct MemberList: View {
                     }.catch { error in
                         showAlert(title:Text("Error unblocking user!"), description:Text("\(String(describing:error))"))
                     }
-                } else if newAffiliation == "outcast" {
+                } else if newAffiliation == kMucAffiliationOutcast {
                     showActionSheet(title: Text("Block user?"), description: Text("Do you want to block this user from entering this group/channel?")) {
                         DDLogVerbose("Changing affiliation of \(String(describing:contact)) to: \(String(describing:newAffiliation))...")
                         showPromisingLoadingOverlay(self.overlay, headlineView: Text("Blocking member"), descriptionView: Text("Blocking \(contact.contactJid as String)")) {
@@ -224,14 +224,14 @@ struct MemberList: View {
     var body: some View {
         List {
             Section(header: Text("\(self.muc.contactDisplayName as String) (affiliation: \(mucAffiliationToString(ownAffiliation)))")) {
-                if ownAffiliation == "owner" || ownAffiliation == "admin" {
+                if ownAffiliation == kMucAffiliationOwner || ownAffiliation == kMucAffiliationAdmin {
                     NavigationLink(destination: LazyClosureView(ContactPicker(account, initializeFrom: memberList, allowRemoval: false) { newMemberList in
                         for member in newMemberList {
                             if !memberList.contains(member) {
                                 if self.muc.mucType == kMucTypeGroup {
                                     showPromisingLoadingOverlay(self.overlay, headlineView: Text("Adding new member"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
                                         promisifyAction {
-                                            account.mucProcessor.setAffiliation("member", ofUser:member.contactJid, inMuc:self.muc.contactJid)
+                                            account.mucProcessor.setAffiliation(kMucAffiliationMember, ofUser:member.contactJid, inMuc:self.muc.contactJid)
                                         }
                                     }.done { _ in
                                         showPromisingLoadingOverlay(self.overlay, headlineView: Text("Inviting new member"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
@@ -286,7 +286,7 @@ struct MemberList: View {
                                     .opacity(0)
                             )
                             
-                            if ownAffiliation == "owner" || ownAffiliation == "admin" {
+                            if ownAffiliation == kMucAffiliationOwner || ownAffiliation == kMucAffiliationAdmin {
                                 makePickerView(contact:contact)
                                     .fixedSize()
                                     .offset(x:8, y:0)
@@ -304,7 +304,7 @@ struct MemberList: View {
                                 showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[contact]))?"), description: self.muc.mucType == kMucTypeGroup ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
                                     showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[contact]))"), descriptionView: Text("Removing \(contact.contactJid as String)...")) {
                                         promisifyAction {
-                                            account.mucProcessor.setAffiliation("none", ofUser: contact.contactJid, inMuc: self.muc.contactJid)
+                                            account.mucProcessor.setAffiliation(kMucAffiliationNone, ofUser: contact.contactJid, inMuc: self.muc.contactJid)
                                         }
                                     }.catch { error in
                                         showAlert(title:Text("Error removing user!"), description:Text("\(String(describing:error))"))
@@ -345,7 +345,7 @@ struct MemberList: View {
                 DDLogVerbose("Got muc participants/members update from account \(xmppAccount)...")
                 //only trigger update if we are either in a group type muc or have admin/owner priviledges
                 //all other cases will close this view anyways, it makes no sense to update everything directly before hiding thsi view
-                if contact == self.muc && (contact.mucType == kMucTypeGroup || ["owner", "admin"].contains(DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:self.muc.obj) ?? "none")) {
+                if contact == self.muc && (contact.mucType == kMucTypeGroup || [kMucAffiliationOwner, kMucAffiliationAdmin].contains(DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:self.muc.obj) ?? kMucAffiliationNone)) {
                     updateMemberlist()
                 }
             }

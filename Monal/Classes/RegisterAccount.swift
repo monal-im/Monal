@@ -471,8 +471,8 @@ struct RegisterAccount: View {
                     DispatchQueue.main.async {
                         DDLogDebug("XMPP account matches registering one")
                         self.errorObserverEnabled = false
-                        xmppAccount.disconnect(true)        //disconnect account (even if not listed in connectedAccounts and having id -1)
-                        MLXMPPManager.sharedInstance().removeAccount(forAccountNo:xmppAccount.accountNo)     //remove from connectedAccounts and db, if listed, do nothing otherwise (e.g. in the -1 case)
+                        xmppAccount.disconnect(true)        //disconnect account (even if not listed in enabledAccounts and having id -1)
+                        MLXMPPManager.sharedInstance().removeAccount(forAccountNo:xmppAccount.accountNo)     //remove from enabledAccounts and db, if listed, do nothing otherwise (e.g. in the -1 case)
                         //reset local state var if the account had id -1 (e.g. is dummy for registering recorded in self.xmppAccount)
                         if(xmppAccount == self.xmppAccount) {
                             self.xmppAccount = nil

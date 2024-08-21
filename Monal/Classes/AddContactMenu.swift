@@ -13,7 +13,7 @@ struct AddContactMenu: View {
     var delegate: SheetDismisserProtocol
     static private let jidFaultyPattern = "^([^@]+@)?.+(\\..{2,})?$"
 
-    @State private var connectedAccounts: [xmpp]
+    @State private var enabledAccounts: [xmpp]
     @State private var selectedAccount: Int
     @State private var scannedFingerprints: [NSNumber:Data]? = nil
     @State private var importScannedFingerprints: Bool = false
@@ -47,12 +47,12 @@ struct AddContactMenu: View {
             self.scannedFingerprints = omemoFingerprints
         }
         
-        let connectedAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
-        self.connectedAccounts = connectedAccounts
-        self.selectedAccount = connectedAccounts.first != nil ? 0 : -1;
+        let enabledAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
+        self.enabledAccounts = enabledAccounts
+        self.selectedAccount = enabledAccounts.first != nil ? 0 : -1;
         if let prefillAccount = prefillAccount {
-            for index in connectedAccounts.indices {
-                if connectedAccounts[index].accountNo.isEqual(to:prefillAccount.accountNo) {
+            for index in enabledAccounts.indices {
+                if enabledAccounts[index].accountNo.isEqual(to:prefillAccount.accountNo) {
                     self.selectedAccount = index
                 }
             }
@@ -114,7 +114,7 @@ struct AddContactMenu: View {
     }
     
     func addJid(jid: String) {
-        let account = self.connectedAccounts[selectedAccount]
+        let account = self.enabledAccounts[selectedAccount]
         let contact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
         if contact.isInRoster {
             self.newContact = contact
@@ -122,7 +122,7 @@ struct AddContactMenu: View {
             trustFingerprints(self.importScannedFingerprints ? self.scannedFingerprints : [:], for:jid, on:account)
             //only alert of already known contact if we did not import the omemo fingerprints
             if !self.importScannedFingerprints || self.scannedFingerprints?.count ?? 0 == 0 {
-                if self.connectedAccounts.count > 1 {
+                if self.enabledAccounts.count > 1 {
                     self.success = true
                     successAlert(title: Text("Already present"), message: Text("This contact is already in the contact list of the selected account"))
                 } else {
@@ -161,10 +161,10 @@ struct AddContactMenu: View {
     }
 
     var body: some View {
-        let account = self.connectedAccounts[selectedAccount]
+        let account = self.enabledAccounts[selectedAccount]
         let splitJid = HelperTools.splitJid(account.connectionProperties.identity.jid)
         Form {
-            if connectedAccounts.isEmpty {
+            if enabledAccounts.isEmpty {
                 Text("Please make sure at least one account has connected before trying to add a contact or channel.")
                     .foregroundColor(.secondary)
             }
@@ -175,9 +175,9 @@ struct AddContactMenu: View {
                 }
                 
                 Section(header:Text("Contact and Group/Channel Jids are usually in the format: name@domain.tld")) {
-                    if connectedAccounts.count > 1 {
+                    if enabledAccounts.count > 1 {
                         Picker("Use account", selection: $selectedAccount) {
-                            ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
+                            ForEach(Array(self.enabledAccounts.enumerated()), id: \.element) { idx, account in
                                 Text(account.connectionProperties.identity.jid).tag(idx)
                             }
                         }

@@ -57,19 +57,19 @@ struct ContactRequestsMenuEntry: View {
 
 struct ContactRequestsMenu: View {
     @State var pendingRequests: [xmpp:[MLContact]] = [:]
-    @State var connectedAccounts: [Int:xmpp] = [:]
+    @State var enabledAccounts: [Int:xmpp] = [:]
     
     func updateRequests() {
         let requests = DataLayer.sharedInstance().allContactRequests() as! [MLContact]
-        connectedAccounts.removeAll()
+        enabledAccounts.removeAll()
         for account in MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp] {
-            connectedAccounts[account.accountNo.intValue] = account
+            enabledAccounts[account.accountNo.intValue] = account
         }
         pendingRequests.removeAll()
         for contact in requests {
             //add only requests having an enabled (dubbed connected) account
             //(should be a noop because allContactRequests() returns only enabled accounts)
-            if let account = connectedAccounts[contact.accountId.intValue] {
+            if let account = enabledAccounts[contact.accountId.intValue] {
                 if pendingRequests[account] == nil {
                     pendingRequests[account] = []
                 }
@@ -86,7 +86,7 @@ struct ContactRequestsMenu: View {
             } else {
                 List {
                     ForEach(pendingRequests.sorted(by:{ $0.0.connectionProperties.identity.jid < $1.0.connectionProperties.identity.jid }), id: \.key) { account, requests in
-                        if connectedAccounts.count == 1 {
+                        if enabledAccounts.count == 1 {
                             ForEach(requests.indices, id: \.self) { idx in
                                 ContactRequestsMenuEntry(contact: requests[idx])
                             }

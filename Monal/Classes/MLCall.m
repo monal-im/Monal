@@ -1271,7 +1271,7 @@
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
     //ignore sdp for disabled accounts
-    if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
+    if(account != [[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountNo])
         return;
     //don't use self.account because that asserts on nil
     if(self.contact.account == nil)
@@ -1410,7 +1410,7 @@
     xmpp* account = notification.object;
     NSDictionary* userInfo = notification.userInfo;
     //ignore sdp for disabled accounts
-    if(account != [[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo])
+    if(account != [[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountNo])
         return;
     //don't use self.account because that asserts on nil
     if(self.contact.account == nil)

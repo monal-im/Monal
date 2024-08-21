@@ -590,7 +590,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     // - https://developer.apple.com/documentation/usernotifications/implementing_communication_notifications?language=objc
     // - https://gist.github.com/Dexwell/dedef7389eae26c5b9db927dc5588905
     // - https://stackoverflow.com/a/68705169/3528174
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:message.accountId];
+    xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:message.accountId];
     MLContact* contact = [MLContact createContactFromJid:message.buddyName andAccountNo:message.accountId];
     INPerson* sender = nil;
     NSString* groupDisplayName = nil;

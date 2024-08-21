@@ -31,7 +31,7 @@
     
     NSString* displayName;
     if(msg.inbound == NO)
-        displayName = [MLContact ownDisplayNameForAccount:[[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId]];
+        displayName = [MLContact ownDisplayNameForAccount:[[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountId]];
     else
         displayName = msg.contactDisplayName;
     

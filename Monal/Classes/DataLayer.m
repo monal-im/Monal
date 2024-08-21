@@ -2470,7 +2470,7 @@ static NSDateFormatter* dbFormatter;
         //and delete the timer afterwards
         //thanks to foreign keys deleting an account will automatically delete it's idle timers, too.
         //therefore the following assertion only handles deactivated accounts
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:timer[@"account_id"]];
+        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:timer[@"account_id"]];
         MLAssert(account != nil, @"Deleting an idle timer should not be done when an account is disabled!", (@{
             @"timerId": timerId,
             @"accountNo": nilWrapper(timer[@"account_id"])
@@ -2485,7 +2485,7 @@ static NSDateFormatter* dbFormatter;
     if(accountNo == nil)
         return;
     return [self.db voidWriteTransaction:^{
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:accountNo];
         MLAssert(account != nil, @"Cleaning up idle timers should not be done when an account is disabled!", (@{
             @"accountNo": nilWrapper(accountNo)
         }));

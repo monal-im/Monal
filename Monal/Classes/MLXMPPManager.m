@@ -447,18 +447,18 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(BOOL) isAccountForIdConnected:(NSNumber*) accountNo
 {
-    xmpp* account = [self getConnectedAccountForID:accountNo];
+    xmpp* account = [self getEnabledAccountForID:accountNo];
     if(account.accountState>=kStateBound) return YES;
     return NO;
 }
 
 -(NSDate *) connectedTimeFor:(NSNumber*) accountNo
 {
-    xmpp* account = [self getConnectedAccountForID:accountNo];
+    xmpp* account = [self getEnabledAccountForID:accountNo];
     return account.connectedTime;
 }
 
--(xmpp* _Nullable) getConnectedAccountForID:(NSNumber*) accountNo
+-(xmpp* _Nullable) getEnabledAccountForID:(NSNumber*) accountNo
 {
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
@@ -480,7 +480,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) connectAccountWithDictionary:(NSDictionary*) account
 {
-    xmpp* existing = [self getConnectedAccountForID:[account objectForKey:kAccountID]];
+    xmpp* existing = [self getEnabledAccountForID:[account objectForKey:kAccountID]];
     if(existing)
     {
         if(![account[@"enabled"] boolValue])
@@ -591,7 +591,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     for(NSDictionary* account in allAccounts)
     {
         DDLogVerbose(@"Forcefully disconnecting account %@ (%@@%@)", [account objectForKey:kAccountID], [account objectForKey:@"username"], [account objectForKey:@"domain"]);
-        xmpp* xmppAccount = [self getConnectedAccountForID:[account objectForKey:kAccountID]];
+        xmpp* xmppAccount = [self getEnabledAccountForID:[account objectForKey:kAccountID]];
         if(xmppAccount != nil)
             [xmppAccount disconnect:YES];
     }
@@ -632,7 +632,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 {
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
     [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo.stringValue];
-    xmpp* xmpp = [self getConnectedAccountForID:accountNo];
+    xmpp* xmpp = [self getEnabledAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
 }
 
@@ -888,7 +888,7 @@ $$
 -(void) block:(BOOL) isBlocked fullJid:(NSString*) fullJid onAccount:(NSNumber*) accountNo
 {
     DDLogVerbose(@"Blocking %@ on account %@: %@", fullJid, accountNo, bool2str(isBlocked));
-    xmpp* account = [self getConnectedAccountForID:accountNo];
+    xmpp* account = [self getEnabledAccountForID:accountNo];
     [account setBlocked:isBlocked forJid:fullJid];
 }
 

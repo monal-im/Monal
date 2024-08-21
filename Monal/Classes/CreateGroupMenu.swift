@@ -11,7 +11,7 @@ import OrderedCollections
 struct CreateGroupMenu: View {
     private var appDelegate: MonalAppDelegate
     private var delegate: SheetDismisserProtocol
-    @State private var connectedAccounts: [xmpp]
+    @State private var enabledAccounts: [xmpp]
     @State private var selectedAccount: xmpp?
     @State private var groupName: String = ""
     @State private var showAlert = false
@@ -25,9 +25,9 @@ struct CreateGroupMenu: View {
         self.appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
         self.delegate = delegate
 
-        let connectedAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
-        self.connectedAccounts = connectedAccounts
-        _selectedAccount = State(wrappedValue: connectedAccounts.first)
+        let enabledAccounts = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
+        self.enabledAccounts = enabledAccounts
+        _selectedAccount = State(wrappedValue: enabledAccounts.first)
     }
 
     private func errorAlert(title: Text, message: Text = Text("")) {
@@ -47,16 +47,16 @@ struct CreateGroupMenu: View {
 
     var body: some View {
         Form {
-            if connectedAccounts.isEmpty {
+            if enabledAccounts.isEmpty {
                 Text("Please make sure at least one account has connected before trying to create new group.")
                     .foregroundColor(.secondary)
             }
             else
             {
                 Section(header: popoverFormSpacingWorkaround) {
-                    if connectedAccounts.count > 1 {
+                    if enabledAccounts.count > 1 {
                         Picker(selection: $selectedAccount, label: Text("Use account")) {
-                            ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in
+                            ForEach(Array(self.enabledAccounts.enumerated()), id: \.element) { idx, account in
                                 Text(account.connectionProperties.identity.jid).tag(account as xmpp?)
                             }
                         }

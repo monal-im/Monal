@@ -295,7 +295,11 @@ enum DummySettingsRows {
         case kSettingSectionAbout: {
             switch(indexPath.row) {
                 case RateMonalRow: {
+#ifdef IS_QUICKSY
+                    [cell initTapCell:NSLocalizedString(@"Rate Quicksy", @"")];
+#else
                     [cell initTapCell:NSLocalizedString(@"Rate Monal", @"")];
+#endif
                     break;
                 }
                 case OpenSourceRow: {
@@ -412,7 +416,13 @@ enum DummySettingsRows {
         case kSettingSectionAbout: {
             switch(indexPath.row) {
                 case RateMonalRow:
+#if TARGET_OS_MACCATALYST
+                    [self openStoreProductViewControllerWithITunesItemIdentifier:1637078500];
+#elif defined(IS_QUICKSY)
+                    [self openStoreProductViewControllerWithITunesItemIdentifier:6538727270];
+#else
                     [self openStoreProductViewControllerWithITunesItemIdentifier:317711500];
+#endif
                     break;
                 case OpenSourceRow:
                     [self performSegueWithIdentifier:@"showOpenSource" sender:self];

@@ -786,7 +786,7 @@ $$
                     [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^(NSNumber* accountNo) {
                         strongify(self);
                         DDLogVerbose(@"Got accountNo for newly registered account: %@", accountNo);
-                        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+                        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:accountNo];
                         DDLogInfo(@"Got newly registered account: %@", account);
                         
                         //this should never happen
@@ -1935,7 +1935,7 @@ $$
         for(NSDictionary* payload in [[DataLayer sharedInstance] getShareSheetPayload])
         {
             DDLogInfo(@"Sending outbox entry: %@", payload);
-            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:payload[@"account_id"]];
+            xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:payload[@"account_id"]];
             if(account == nil)
             {
                 UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Sharing failed", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Cannot share something with disabled/deleted account, destination: %@, internal account id: %@", @""), payload[@"recipient"], payload[@"account_id"]] preferredStyle:UIAlertControllerStyleAlert];

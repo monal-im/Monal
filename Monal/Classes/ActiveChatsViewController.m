@@ -786,18 +786,18 @@ static NSMutableSet* _pushWarningDisplayed;
             
             DDLogDebug(@"Got list of contact phone numbers: %@", numbers);
             
-            NSArray<xmpp*>* connectedAccounts = [MLXMPPManager sharedInstance].connectedXMPP;
-            if(connectedAccounts.count == 0)
+            NSArray<xmpp*>* enabledAccounts = [MLXMPPManager sharedInstance].connectedXMPP;
+            if(enabledAccounts.count == 0)
             {
                 DDLogError(@"No connected account while trying to send quicksy phonebook!");
                 return;
             }
-            else if(connectedAccounts.count > 1)
+            else if(enabledAccounts.count > 1)
                 DDLogWarn(@"More than 1 connected account while trying to send quicksy phonebook, using first one!");
             
             XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqGetType to:@"api.quicksy.im"];
             [iqNode setQuicksyPhoneBook:numbers.allKeys];
-            [connectedAccounts[0] sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleQuicksyPhoneBook, $ID(numbers))];
+            [enabledAccounts[0] sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleQuicksyPhoneBook, $ID(numbers))];
         }
         else
             DDLogError(@"Access to contacts not granted!");
@@ -810,7 +810,7 @@ static NSMutableSet* _pushWarningDisplayed;
     for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
     {
         NSNumber* accountNo = accountDict[kAccountID];
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
+        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:accountNo];
         if(!account)
             @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountNo is nil!" userInfo:accountDict];
         

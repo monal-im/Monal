@@ -367,7 +367,7 @@ enum DummySettingsRows {
                     {
                         DDLogVerbose(@"Now connecting newly created account: %@", self.accountNo);
                         [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
-                        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+                        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountNo];
                         [account publishStatusMessage:self.statusMessage];
                         [account publishRosterName:self.rosterName];
                         [account publishAvatar:self.selectedAvatarImage];
@@ -414,7 +414,7 @@ enum DummySettingsRows {
         {
             DDLogVerbose(@"Account is (still) enabled, connecting it: %@", self.accountNo);
             [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
-            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+            xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountNo];
             if(self.statusMessageChanged)
                 [account publishStatusMessage:self.statusMessage];
             if(self.rosterNameChanged)
@@ -481,7 +481,7 @@ enum DummySettingsRows {
 
 -(IBAction) deleteAccountClicked:(id) sender
 {
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountNo];
     if(xmppAccount.accountState < kStateBound)
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error Removing Account", @"")
@@ -873,11 +873,11 @@ enum DummySettingsRows {
     if([segue.identifier isEqualToString:@"showServerDetails"])
     {
         MLServerDetails* server= (MLServerDetails*)segue.destinationViewController;
-        server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+        server.xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountNo];
     }
     else if([segue.identifier isEqualToString:@"showBlockedUsers"])
     {
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountNo];
         // force blocklist update
         [xmppAccount fetchBlocklist];
         MLBlockedUsersTableViewController* blockedUsers = (MLBlockedUsersTableViewController*)segue.destinationViewController;
@@ -888,7 +888,7 @@ enum DummySettingsRows {
         if(self.jid && self.accountNo)
         {
             MLPasswordChangeTableViewController* pwchange = (MLPasswordChangeTableViewController*)segue.destinationViewController;
-            pwchange.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+            pwchange.xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountNo];
         }
     }
 }
@@ -1005,7 +1005,7 @@ enum DummySettingsRows {
 
 -(void) getPhotoAction:(UIGestureRecognizer*) recognizer
 {
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountNo];
     if (!account)
         return;
     UIAlertController* actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")

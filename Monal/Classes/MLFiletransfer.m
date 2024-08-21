@@ -119,7 +119,7 @@ static NSObject* _hardlinkingSyncObject;
             //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = contentLength;
-            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
+            xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountId];
             if(account != nil)      //don't send out update notices for already deleted accounts
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
             else
@@ -286,7 +286,7 @@ static NSObject* _hardlinkingSyncObject;
             //update db with content type and size
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:filetransferSize];
             //send out update notification (using our directly update MLMessage object instead of reloading it from db after updating the db)
-            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
+            xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountId];
             if(account != nil)      //don't send out update notices for already deleted accounts
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
             else
@@ -429,7 +429,7 @@ $$
 +(void) hardlinkFileForMessage:(MLMessage*) msg
 {
     NSDictionary* fileInfo = [self getFileInfoForMessage:msg];
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:msg.accountId];
+    xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountId];
     if(account == nil)
         return;
     
@@ -915,7 +915,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
             }
             
             //ignore upload if account was already removed
-            if([[MLXMPPManager sharedInstance] getConnectedAccountForID:account.accountNo] == nil)
+            if([[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountNo] == nil)
             {
                 NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to upload file: account was removed", @"")}];
                 [_fileManager removeItemAtPath:file error:nil];      //remove temporary file

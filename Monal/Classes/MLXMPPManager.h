@@ -74,7 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  gets the connected account apecified by id. return nil otherwise
  */
--(xmpp* _Nullable) getConnectedAccountForID:(NSNumber*) accountNo;
+-(xmpp* _Nullable) getEnabledAccountForID:(NSNumber*) accountNo;
 
 /**
  Returns YES if account is connected

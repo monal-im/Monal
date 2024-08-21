@@ -574,7 +574,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(xmpp* _Nullable) account
 {
-    return [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountId];
+    return [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountId];
 }
 
 +(NSSet*) keyPathsForValuesAffectingAccount

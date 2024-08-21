@@ -1892,7 +1892,7 @@ NSString* const kStanza = @"stanza";
                     }));
                 }
 
-                if(contact.isGroup || [presenceNode check:@"{http://jabber.org/protocol/muc#user}x"] || [presenceNode check:@"{http://jabber.org/protocol/muc}x"])
+                if(contact.isMuc || [presenceNode check:@"{http://jabber.org/protocol/muc#user}x"] || [presenceNode check:@"{http://jabber.org/protocol/muc}x"])
                 {
                     //only handle presences for mucs we know
                     if([[DataLayer sharedInstance] isBuddyMuc:presenceNode.fromUser forAccount:self.accountNo])
@@ -1915,7 +1915,7 @@ NSString* const kStanza = @"stanza";
                 if(![presenceNode check:@"/@type"])
                 {
                     DDLogVerbose(@"presence notice from %@", presenceNode.fromUser);
-                    if(contact.isGroup)
+                    if(contact.isMuc)
                         [self.mucProcessor processPresence:presenceNode];
                     else
                     {
@@ -3418,7 +3418,7 @@ NSString* const kStanza = @"stanza";
 #ifdef IS_ALPHA
     // WARNING NOT FOR PRODUCTION
     // encrypt messages that should not be encrypted (but still use plaintext body for devices not speaking omemo)
-    if(!encrypt && !isUpload && (!contact.isGroup || (contact.isGroup && [contact.mucType isEqualToString:@"group"])))
+    if(!encrypt && !isUpload && (!contact.isMuc || (contact.isMuc && [contact.mucType isEqualToString:@"group"])))
     {
         [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];
         //[self addEME:@"eu.siacs.conversations.axolotl" withName:@"OMEMO" toMessageNode:messageNode];
@@ -3427,7 +3427,7 @@ NSString* const kStanza = @"stanza";
 #endif
 
 #ifndef DISABLE_OMEMO
-    if(encrypt && (!contact.isGroup || (contact.isGroup && [contact.mucType isEqualToString:@"group"])))
+    if(encrypt && (!contact.isMuc || (contact.isMuc && [contact.mucType isEqualToString:@"group"])))
     {
         [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];
         [self addEME:@"eu.siacs.conversations.axolotl" withName:@"OMEMO" toMessageNode:messageNode];
@@ -3442,13 +3442,13 @@ NSString* const kStanza = @"stanza";
     }
     
     //set message type
-    if(contact.isGroup)
+    if(contact.isMuc)
         [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
     else
         [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
     
     //request receipts and chat-markers in 1:1 or groups (no channels!)
-    if(!contact.isGroup || [@"group" isEqualToString:contact.mucType])
+    if(!contact.isMuc || [@"group" isEqualToString:contact.mucType])
     {
         [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:receipts"]];
         [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"markable" andNamespace:@"urn:xmpp:chat-markers:0"]];
@@ -4415,7 +4415,7 @@ NSString* const kStanza = @"stanza";
     };
     query = ^(NSString* _Nullable before) {
         XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-        if(contact.isGroup)
+        if(contact.isMuc)
         {
             if(!before)
                 before = [[DataLayer sharedInstance] lastStanzaIdForMuc:contact.contactJid andAccount:self.accountNo];
@@ -5474,7 +5474,7 @@ NSString* const kStanza = @"stanza";
     //all messages have the same contact, randomly pick the last one
     MLContact* contact = [MLContact createContactFromJid:lastUnreadMessage.buddyName andAccountNo:lastUnreadMessage.accountId];
     //don't send chatmarkers to 1:1 chats with users in our contact list that did not subscribe us (e.g. are not allowed to see us)
-    if(!contact.isGroup && !contact.isSubscribedFrom)
+    if(!contact.isMuc && !contact.isSubscribedFrom)
     {
         DDLogVerbose(@"Not sending chat marker, we are not subscribed from this contact...");
         [self publishMDSMarkerForMessage:lastUnreadMessage];      //always publish mds marker

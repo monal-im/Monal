@@ -58,7 +58,7 @@ static NSMutableDictionary* _singletonCache;
 @property (nonatomic, assign) BOOL isMuted;
 @property (nonatomic, assign) BOOL isActiveChat;
 
-@property (nonatomic, assign) BOOL isGroup;
+@property (nonatomic, assign) BOOL isMuc;
 @property (nonatomic, strong) NSString* groupSubject;
 @property (nonatomic, strong) NSString* mucType;
 @property (nonatomic, strong) NSString* accountNickInGroup;
@@ -427,7 +427,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(void) setNickNameView:(NSString*) name
 {
-    MLAssert(!self.isGroup, @"Using nickNameView only allowed for 1:1 contacts!", (@{@"contact": self}));
+    MLAssert(!self.isMuc, @"Using nickNameView only allowed for 1:1 contacts!", (@{@"contact": self}));
     if([self.nickName isEqualToString:name] || name == nil)
         return;             //no change at all
     self.nickName = name;
@@ -453,7 +453,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(void) setFullNameView:(NSString*) name
 {
-    MLAssert(self.isGroup, @"Using fullNameView only allowed for mucs!", (@{@"contact": self}));
+    MLAssert(self.isMuc, @"Using fullNameView only allowed for mucs!", (@{@"contact": self}));
     if([self.fullName isEqualToString:name] || name == nil)
         return;             //no change at all
     self.fullName = name;
@@ -554,22 +554,22 @@ static NSMutableDictionary* _singletonCache;
 
 -(BOOL) hasIncomingContactRequest
 {
-    return self.isGroup == NO && [[DataLayer sharedInstance] hasContactRequestForContact:self];
+    return self.isMuc == NO && [[DataLayer sharedInstance] hasContactRequestForContact:self];
 }
 
 +(NSSet*) keyPathsForValuesAffectingHasIncomingContactRequest
 {
-    return [NSSet setWithObjects:@"isGroup", nil];
+    return [NSSet setWithObjects:@"isMuc", nil];
 }
 
 -(BOOL) hasOutgoingContactRequest
 {
-    return self.isGroup == NO && [self.ask isEqualToString:kAskSubscribe];
+    return self.isMuc == NO && [self.ask isEqualToString:kAskSubscribe];
 }
 
 +(NSSet*) keyPathsForValuesAffectingHasOutgoingContactRequest
 {
-    return [NSSet setWithObjects:@"isGroup", @"ask", nil];
+    return [NSSet setWithObjects:@"isMuc", @"ask", nil];
 }
 
 -(xmpp* _Nullable) account
@@ -611,7 +611,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(void) toggleMentionOnly:(BOOL) mentionOnly
 {
-    if(!self.isGroup || self.isMentionOnly == mentionOnly)
+    if(!self.isMuc || self.isMentionOnly == mentionOnly)
         return;
     if(mentionOnly)
         [[DataLayer sharedInstance] setMucAlertOnMentionOnly:self.contactJid onAccount:self.accountId];
@@ -628,7 +628,7 @@ static NSMutableDictionary* _singletonCache;
     xmpp* account = self.account;
     if(account == nil || account.omemo == nil)
         return NO;
-    if(self.isGroup == NO)
+    if(self.isMuc == NO)
     {
         NSSet* knownDevices = [account.omemo knownDevicesForAddressName:self.contactJid];
         DDLogVerbose(@"Current isEncrypted=%@, encrypt=%@, knownDevices=%@", bool2str(self.isEncrypted), bool2str(encrypt), knownDevices);
@@ -714,7 +714,7 @@ static NSMutableDictionary* _singletonCache;
     [coder encodeObject:self.groupSubject forKey:@"groupSubject"];
     [coder encodeObject:self.accountNickInGroup forKey:@"accountNickInGroup"];
     [coder encodeObject:self.mucType forKey:@"mucType"];
-    [coder encodeBool:self.isGroup forKey:@"isGroup"];
+    [coder encodeBool:self.isMuc forKey:@"isMuc"];
     [coder encodeBool:self.isMentionOnly forKey:@"isMentionOnly"];
     [coder encodeBool:self.isPinned forKey:@"isPinned"];
     [coder encodeBool:self.isBlocked forKey:@"isBlocked"];
@@ -739,7 +739,7 @@ static NSMutableDictionary* _singletonCache;
     self.groupSubject = [coder decodeObjectForKey:@"groupSubject"];
     self.accountNickInGroup = [coder decodeObjectForKey:@"accountNickInGroup"];
     self.mucType = [coder decodeObjectForKey:@"mucType"];
-    self.isGroup = [coder decodeBoolForKey:@"isGroup"];
+    self.isMuc = [coder decodeBoolForKey:@"isMuc"];
     self.isMentionOnly = [coder decodeBoolForKey:@"isMentionOnly"];
     self.isPinned = [coder decodeBoolForKey:@"isPinned"];
     self.isBlocked = [coder decodeBoolForKey:@"isBlocked"];
@@ -763,8 +763,8 @@ static NSMutableDictionary* _singletonCache;
     updateIfIdNotEqual(self.accountId, contact.accountId);
     updateIfIdNotEqual(self.groupSubject, contact.groupSubject);
     updateIfIdNotEqual(self.accountNickInGroup, contact.accountNickInGroup);
-    updateIfPrimitiveNotEqual(self.isGroup, contact.isGroup);
-    if(self.isGroup)
+    updateIfPrimitiveNotEqual(self.isMuc, contact.isMuc);
+    if(self.isMuc)
         updateIfIdNotEqual(self.mucType, nilDefault(contact.mucType, @"channel"));
     updateIfPrimitiveNotEqual(self.isMentionOnly, contact.isMentionOnly);
     updateIfPrimitiveNotEqual(self.isPinned, contact.isPinned);
@@ -817,7 +817,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@ (%@) %@%@%@, kSub=%@", self.accountId, self.contactJid, self.isGroup ? self.mucType : @"1:1", self.isInRoster ? @"inRoster" : @"not(inRoster)", self.hasIncomingContactRequest ? @"[incomingContactRequest]" : @"", self.hasOutgoingContactRequest ? @"[outgoingContactRequest]" : @"", self.subscription];
+    return [NSString stringWithFormat:@"%@: %@ (%@) %@%@%@, kSub=%@", self.accountId, self.contactJid, self.isMuc ? self.mucType : @"1:1", self.isInRoster ? @"inRoster" : @"not(inRoster)", self.hasIncomingContactRequest ? @"[incomingContactRequest]" : @"", self.hasOutgoingContactRequest ? @"[outgoingContactRequest]" : @"", self.subscription];
 }
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic
@@ -832,8 +832,8 @@ static NSMutableDictionary* _singletonCache;
     contact.groupSubject = nilDefault([dic objectForKey:@"muc_subject"], @"");
     contact.accountNickInGroup = nilDefault([dic objectForKey:@"muc_nick"], @"");
     contact.mucType = [dic objectForKey:@"muc_type"];
-    contact.isGroup = [[dic objectForKey:@"Muc"] boolValue];
-    if(contact.isGroup  && !contact.mucType)
+    contact.isMuc = [[dic objectForKey:@"Muc"] boolValue];
+    if(contact.isMuc  && !contact.mucType)
         contact.mucType = @"channel";       //default value
     contact.mucType = nilDefault(contact.mucType, @"");
     contact.isMentionOnly = [[dic objectForKey:@"mentionOnly"] boolValue];

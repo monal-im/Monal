@@ -63,7 +63,7 @@ class SheetDismisserProtocol: ObservableObject {
 
 func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedSet<ObservableKVOWrapper<MLContact>> {
     if let contact = viewContact {
-        if(contact.isGroup) {
+        if(contact.isMuc) {
             //this uses the account the muc belongs to and treats every other account to be remote,
             //even when multiple accounts of the same monal instance are in the same group
             var contactList : OrderedSet<ObservableKVOWrapper<MLContact>> = OrderedSet()

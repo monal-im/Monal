@@ -300,7 +300,7 @@
         if(toreturn == nil)             //return default avatar
         {
             DDLogVerbose(@"Using/generating dummy icon for contact: %@", contact);
-            if(contact.isGroup)
+            if(contact.isMuc)
             {
                 if([@"channel" isEqualToString:contact.mucType])
                     toreturn = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_channel" inBundle:nil compatibleWithTraitCollection:nil]];
@@ -310,7 +310,7 @@
             else
                 toreturn = [self generateDummyIconForContact:contact];
         }
-        else if(contact.isGroup)        //add group indicator overlay for non-default muc avatar
+        else if(contact.isMuc)        //add group indicator overlay for non-default muc avatar
         {
             UIImage* overlay = nil;
             if([@"channel" isEqualToString:contact.mucType])

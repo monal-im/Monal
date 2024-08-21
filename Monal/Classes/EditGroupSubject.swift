@@ -15,7 +15,7 @@ struct EditGroupSubject: View {
     //@Environment(\.dismiss) var dismiss
 
     init(contact: ObservableKVOWrapper<MLContact>) {
-        MLAssert(contact.isGroup, "contact must be a muc")
+        MLAssert(contact.isMuc, "contact must be a muc")
         
         _subject = State(wrappedValue: contact.obj.groupSubject)
         _contact = StateObject(wrappedValue: contact)

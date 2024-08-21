@@ -42,7 +42,7 @@ NSString* const kMessageHeadlineType = @"headline";
 
 -(XMPPMessage*) initToContact:(MLContact*) toContact
 {
-    self = [self initWithType:(toContact.isGroup ? kMessageGroupChatType : kMessageChatType) to:toContact.contactJid];
+    self = [self initWithType:(toContact.isMuc ? kMessageGroupChatType : kMessageChatType) to:toContact.contactJid];
     return self;
 }
 

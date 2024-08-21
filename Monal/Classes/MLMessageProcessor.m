@@ -233,7 +233,7 @@ static NSMutableDictionary* _typingNotifications;
     {
         NSString* maybeMucJid = [carbonType isEqualToString:@"sent"] ? messageNode.toUser : messageNode.fromUser;
         MLContact* carbonTestContact = [MLContact createContactFromJid:maybeMucJid andAccountNo:account.accountNo];
-        if(carbonTestContact.isGroup)
+        if(carbonTestContact.isMuc)
         {
             DDLogWarn(@"Ignoring carbon copied muc pm...");
             return nil;
@@ -450,7 +450,7 @@ static NSMutableDictionary* _typingNotifications;
     {
         NSString* idToRetract = [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract@id"];
         NSNumber* historyIdToRetract = nil;
-        if(possiblyUnknownContact.isGroup && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"] && [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract/{urn:xmpp:message-moderate:1}moderated"])
+        if(possiblyUnknownContact.isMuc && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"] && [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract/{urn:xmpp:message-moderate:1}moderated"])
         {
             historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForModeratedStanzaId:idToRetract from:messageNode.fromUser andAccount:account.accountNo];
         }
@@ -485,8 +485,8 @@ static NSMutableDictionary* _typingNotifications;
     {
         //ignore tombstones if not supported by server (someone probably faked them)
         if(
-            (!possiblyUnknownContact.isGroup && [account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:message-retract:1#tombstone"]) ||
-            (possiblyUnknownContact.isGroup && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-retract:1#tombstone"])
+            (!possiblyUnknownContact.isMuc && [account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:message-retract:1#tombstone"]) ||
+            (possiblyUnknownContact.isMuc && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-retract:1#tombstone"])
         )
         {
             //first add an empty message into our history db...
@@ -632,7 +632,7 @@ static NSMutableDictionary* _typingNotifications;
                     //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
                     if(
                         //1:1 with user in our contact list that subscribed us (e.g. is allowed to see us)
-                        (!possiblyUnknownContact.isGroup  && possiblyUnknownContact.isSubscribedFrom) ||
+                        (!possiblyUnknownContact.isMuc  && possiblyUnknownContact.isSubscribedFrom) ||
                         //muc group message from a user of this group
                         ([possiblyUnknownContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
                     )
@@ -725,7 +725,7 @@ static NSMutableDictionary* _typingNotifications;
     if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"] && ownNick != nil)
     {
         //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
-        if(possiblyUnknownContact.isGroup && [possiblyUnknownContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
+        if(possiblyUnknownContact.isMuc && [possiblyUnknownContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
         {
             //incoming chat markers from own account (muc echo, muc "carbon")
             //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessagesNotice goes to MLNotificationManager and activeChatsViewController/chatViewController

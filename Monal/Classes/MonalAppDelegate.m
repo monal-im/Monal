@@ -722,7 +722,7 @@ $$
                 NSDictionary* jidParts = [HelperTools splitJid:jid];
                 BOOL isRegister = NO;
                 BOOL isRoster = NO;
-                BOOL isGroupJoin = NO;
+                BOOL isMucJoin = NO;
                 BOOL isIbr = NO;
                 NSString* preauthToken = nil;
                 NSMutableDictionary<NSNumber*, NSData*>* omemoFingerprints = [NSMutableDictionary new];
@@ -743,7 +743,7 @@ $$
                     if([name isEqualToString:@"roster"])
                         isRoster = YES;
                     if([name isEqualToString:@"join"])
-                        isGroupJoin = YES;
+                        isMucJoin = YES;
                     if([name isEqualToString:@"ibr"] && [value isEqualToString:@"y"])
                         isIbr = YES;
                     if([name isEqualToString:@"preauth"])
@@ -806,7 +806,7 @@ $$
                 //either we already have one or more accounts and the xmpp: uri is of type subscription (ibr does not matter here,
                 //because we already have an account) or muc join
                 //OR the xmpp: uri is a normal xmpp uri having only a jid we should add as our new contact (preauthToken will be nil in this case)
-                else if((!registerNeeded && (isRoster || isGroupJoin)) || !registerNeeded)
+                else if((!registerNeeded && (isRoster || isMucJoin)) || !registerNeeded)
                 {
                     if([MLXMPPManager sharedInstance].connectedXMPP.count == 1)
                     {

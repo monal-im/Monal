@@ -306,7 +306,7 @@
 {
     MLAssert(indexPath.section == 0, @"Wrong section");
     MLContact* contact = self.contacts[indexPath.row];
-    if(contact.isGroup == YES)
+    if(contact.isMuc == YES)
         return NSLocalizedString(@"Remove Conversation", @"");
     else
         return NSLocalizedString(@"Remove Contact", @"");
@@ -338,7 +338,7 @@
     NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), contact.contactJid];
     NSString* detailString = NSLocalizedString(@"They will no longer see when you are online. They may not be able to access your encryption keys.", @"");
     
-    if(contact.isGroup)
+    if(contact.isMuc)
     {
         messageString = NSLocalizedString(@"Leave this converstion?", @"");
         detailString = nil;

@@ -40,7 +40,7 @@
         self.userImage.image = image;
     }];
     
-    if(contact.isGroup && contact.isMentionOnly)
+    if(contact.isMuc && contact.isMentionOnly)
     {
         self.muteBadge.hidden = YES;
         self.mentionBadge.hidden = NO;

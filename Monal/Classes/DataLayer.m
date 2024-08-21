@@ -1038,7 +1038,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSString* _Nullable) getOwnAffiliationInGroupOrChannel:(MLContact*) contact
 {
-    MLAssert(contact.isGroup, @"Function should only be called on a group contact");
+    MLAssert(contact.isMuc, @"Function should only be called on a group contact");
     return [self.db idReadTransaction:^{
         NSString* retval = [self.db executeScalar:@"SELECT M.affiliation FROM muc_participants AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE M.room=? AND A.account_id=? AND (A.username || '@' || A.domain) == M.participant_jid" andArguments:@[contact.contactJid, contact.accountId]];
         if(retval == nil)
@@ -1049,7 +1049,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSString*  _Nullable) getOwnRoleInGroupOrChannel:(MLContact*) contact
 {
-    MLAssert(contact.isGroup, @"Function should only be called on a group contact");
+    MLAssert(contact.isMuc, @"Function should only be called on a group contact");
     return [self.db idReadTransaction:^{
         return [self.db executeScalar:@"SELECT M.role FROM muc_participants AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE M.room=? AND A.account_id=? AND (A.username || '@' || A.domain) == M.participant_jid" andArguments:@[contact.contactJid, contact.accountId]];
     }];

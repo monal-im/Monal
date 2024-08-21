@@ -663,7 +663,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         addMessageHistoryTo:contact.contactJid
                    forAccount:contact.accountId
                   withMessage:message
-                 actuallyFrom:(contact.isGroup ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
+                 actuallyFrom:(contact.isMuc ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
                        withId:msgid
                     encrypted:encrypted
                   messageType:messageType
@@ -808,7 +808,7 @@ $$
             return;
         }
         
-        if(contact.isGroup)
+        if(contact.isMuc)
             [account leaveMuc:contact.contactJid];
         else
             [account removeFromRoster:contact];
@@ -845,7 +845,7 @@ $$
             return;
         }
         
-        if(contact.isGroup)
+        if(contact.isMuc)
             [account joinMuc:contact.contactJid];
         else
         {

@@ -80,7 +80,7 @@ static NSMutableDictionary* _pendingCalls;
     config.supportsVideo = YES;
     config.includesCallsInRecents = YES;
     //see https://stackoverflow.com/a/45823730/3528174
-#ifndef QUICKSY
+#ifndef IS_QUICKSY
     config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:@"CallKitLogo"]);
 #else
     config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:@"QuicksyCallKitLogo"]);

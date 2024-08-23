@@ -1417,7 +1417,7 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     }
         
     //extract further muc infos
-    NSString* mucName = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\"];
+    NSString* mucName = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/identity@name"];
     NSString* mucType = @"channel";
     //both are needed for omemo, see discussion with holger 2021-01-02/03 -- Thilo Molitor
     //see also: https://docs.modernxmpp.org/client/groupchat/

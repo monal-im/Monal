@@ -570,6 +570,7 @@ struct AddTopLevelNavigation<Content: View>: View {
                 self.delegate.dismiss()
             }){
                 Image(systemName: "arrow.backward")
+                    .tint(monalGreen)
             }.keyboardShortcut(.escape, modifiers: []))
         }
     }

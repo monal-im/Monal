@@ -108,6 +108,11 @@ struct ContactsView: View {
     private var contactList: [MLContact] {
         return contacts.contacts
             .filter(ContactsView.shouldDisplayContact)
+            .sorted { ContactsView.sortingCriteria($0) < ContactsView.sortingCriteria($1) }
+    }
+
+    private static func sortingCriteria(_ contact: MLContact) -> (String, String) {
+        return (contact.contactDisplayName.lowercased(), contact.contactJid.lowercased())
     }
 
     init(contacts: Contacts, delegate: SheetDismisserProtocol, dismissWithContact: @escaping (MLContact) -> ()) {

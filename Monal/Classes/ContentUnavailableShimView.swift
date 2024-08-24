@@ -40,6 +40,10 @@ struct ContentUnavailableShimView: View {
     }
 }
 
+extension ContentUnavailableShimView {
+    static var search: ContentUnavailableShimView = ContentUnavailableShimView("No Results", systemImage: "magnifyingglass", description: Text("Check the spelling or try a new search."))
+}
+
 #Preview {
     ContentUnavailableShimView("Cannot Display", systemImage: "iphone.homebutton.slash", description: Text("Cannot display for this reason."))
 }

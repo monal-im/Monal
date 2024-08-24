@@ -1,5 +1,5 @@
 //
-//  ContentNotAvailableView.swift
+//  ContentUnavailableShimView.swift
 //  Monal
 //
 //  Created by Matthew Fennell <matthew@fennell.dev> on 05/08/2024.

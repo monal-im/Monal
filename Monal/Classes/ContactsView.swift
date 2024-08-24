@@ -96,6 +96,7 @@ struct ContactsView: View {
     private let delegate: SheetDismisserProtocol
     private let dismissWithContact: (MLContact) -> ()
 
+    @State private var searchText: String = ""
     @State private var selectedContactForContactDetails: ObservableKVOWrapper<MLContact>? = nil
 
     private static func shouldDisplayContact(contact: MLContact) -> Bool {
@@ -111,8 +112,21 @@ struct ContactsView: View {
             .sorted { ContactsView.sortingCriteria($0) < ContactsView.sortingCriteria($1) }
     }
 
+    private var searchResults: [MLContact] {
+        if searchText.isEmpty { return contactList }
+        return contactList.filter { searchMatchesContact(contact: $0, search: searchText) }
+    }
+
     private static func sortingCriteria(_ contact: MLContact) -> (String, String) {
         return (contact.contactDisplayName.lowercased(), contact.contactJid.lowercased())
+    }
+
+    private func searchMatchesContact(contact: MLContact, search: String) -> Bool {
+        let jid = contact.contactJid.lowercased()
+        let name = contact.contactDisplayName.lowercased()
+        let search = search.lowercased()
+
+        return jid.contains(search) || name.contains(search)
     }
 
     init(contacts: Contacts, delegate: SheetDismisserProtocol, dismissWithContact: @escaping (MLContact) -> ()) {
@@ -123,16 +137,22 @@ struct ContactsView: View {
 
     var body: some View {
         List {
-            ForEach(contactList, id: \.self) { contact in
+            ForEach(searchResults, id: \.self) { contact in
                 ContactViewEntry(contact: contact, selectedContactForContactDetails: $selectedContactForContactDetails, dismissWithContact: dismissWithContact)
             }
         }
         .animation(.default, value: contactList)
         .navigationTitle("Contacts")
         .listStyle(.plain)
+        .searchable(text: $searchText)
+        .autocorrectionDisabled()
+        .textInputAutocapitalization(.never)
+        .keyboardType(.emailAddress)
         .overlay {
             if contactList.isEmpty {
                 ContentUnavailableShimView("You need friends for this ride", systemImage: "figure.wave", description: Text("Add new contacts with the + button above. Your friends will pop up here when they can talk"))
+            } else if searchResults.isEmpty {
+                ContentUnavailableShimView.search
             }
         }
         .toolbar {

@@ -456,6 +456,44 @@ extension View {
     }
 }
 
+struct NumberlessBadge: View {
+    @Binding var notificationCount: Int
+    private let size: Int
+    private let inset: Int
+
+    var badgeSize: CGFloat {
+        CGFloat(integerLiteral: size)
+    }
+
+    var edgeInset: CGFloat {
+        CGFloat(integerLiteral: inset)
+    }
+
+    init(_ notificationCount: Binding<Int>, size: Int = 7, inset: Int = 1) {
+        self._notificationCount = notificationCount
+        self.size = size
+        self.inset = inset
+    }
+
+    var body: some View {
+        HStack {
+            Spacer()
+            VStack {
+                if notificationCount > 0 {
+                    Image(systemName: "circle.fill")
+                        .resizable()
+                        .frame(width: badgeSize, height: badgeSize)
+                        .tint(.red)
+                        .padding(.trailing, edgeInset)
+                        .padding(.top, edgeInset)
+                }
+                Spacer()
+            }
+        }
+        .animation(.default, value: notificationCount)
+    }
+}
+
 // //see https://stackoverflow.com/a/68291983
 // struct OverflowContentViewModifier: ViewModifier {
 //     @State private var contentOverflow: Bool = false

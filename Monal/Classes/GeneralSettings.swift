@@ -389,12 +389,19 @@ struct PrivacySettingsSubview: View {
             Section(header: Text("Misc")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.allowVersionIQ) {
                     Text("Publish version")
+#if IS_QUICKSY
+                    Text("Allow contacts in your contact list to query your Quicksy and iOS versions.")
+#else
                     Text("Allow contacts in your contact list to query your Monal and iOS versions.")
+#endif
                 }
+//the quicksy.im server always has a proper TURN server, no need for this setting there
+#if !IS_QUICKSY
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcUseFallbackTurn) {
                     Text("Calls: Allow TURN fallback to Monal-Servers")
                     Text("This will make calls possible even if your XMPP server does not provide a TURN server.")
                 }
+#endif
             }
         }
     }

@@ -265,6 +265,10 @@ struct MemberList: View {
                 }
                 
                 ForEach(memberList, id:\.self) { contact in
+                    var isDeletable: Bool {
+                        ownUserHasAffiliationToRemove(contact: contact)
+                    }
+
                     if !contact.isSelfChat {
                         HStack {
                             HStack {
@@ -295,7 +299,7 @@ struct MemberList: View {
                                 view
                             }
                         }
-                        .deleteDisabled(!ownUserHasAffiliationToRemove(contact: contact))
+                        .deleteDisabled(!isDeletable)
                     }
                 }
                 .onDelete(perform: { memberIdx in

@@ -557,9 +557,13 @@ struct LazyClosureView<Content: View>: View {
 struct AddTopLevelNavigation<Content: View>: View {
     let build: () -> Content
     let delegate: SheetDismisserProtocol
+    @StateObject private var sizeClass: ObservableKVOWrapper<SizeClassWrapper>
     init(withDelegate delegate: SheetDismisserProtocol, to build: @autoclosure @escaping () -> Content) {
         self.build = build
         self.delegate = delegate
+
+        let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
+        self._sizeClass = StateObject(wrappedValue: ObservableKVOWrapper<SizeClassWrapper>(activeChats.sizeClass))
     }
     var body: some View {
         NavigationStack {
@@ -567,13 +571,16 @@ struct AddTopLevelNavigation<Content: View>: View {
             .navigationBarTitleDisplayMode(.automatic)
             .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action : {
-                        self.delegate.dismiss()
-                    }){
-                        Image(systemName: "arrow.backward")
-                            .tint(monalGreen)
-                    }.keyboardShortcut(.escape, modifiers: [])
+                let isCompact = UIUserInterfaceSizeClass(rawValue: sizeClass.horizontal) == .compact
+                if isCompact {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button(action : {
+                            self.delegate.dismiss()
+                        }){
+                            Image(systemName: "arrow.backward")
+                                .tint(monalGreen)
+                        }.keyboardShortcut(.escape, modifiers: [])
+                    }
                 }
             }
         }

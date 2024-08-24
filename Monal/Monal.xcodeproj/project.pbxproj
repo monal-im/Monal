@@ -81,6 +81,7 @@
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
 		34BC08122C5E9BE30099FB85 /* ContentUnavailableShimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */; };
+		34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E58B4A2C68E7BC009A1634 /* ContactsView.swift */; };
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
@@ -502,6 +503,7 @@
 		2E5021A8D40FCC591D952104 /* Pods-NotificaionService.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.alpha-ios.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.alpha-ios.xcconfig"; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* MonalSourceCodePrefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonalSourceCodePrefix.pch; sourceTree = "<group>"; };
 		34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentUnavailableShimView.swift; sourceTree = "<group>"; };
+		34E58B4A2C68E7BC009A1634 /* ContactsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
 		3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXEPSlashMeHandler.h; sourceTree = "<group>"; };
 		38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXEPSlashMeHandler.m; sourceTree = "<group>"; };
 		389E298925E901CA009A5268 /* MLAudioRecoderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAudioRecoderManager.m; sourceTree = "<group>"; };
@@ -1073,6 +1075,7 @@
 				26158AF01FFA6E4500E53BDC /* MLWebViewController.h */,
 				26158AF11FFA6E4500E53BDC /* MLWebViewController.m */,
 				84FC375828981A5600634E3E /* PasswordMigration.swift */,
+				34E58B4A2C68E7BC009A1634 /* ContactsView.swift */,
 				3D631822294BAB1D00026BE7 /* ContactPicker.swift */,
 				3D27D955290B0BB60014748B /* AddContactMenu.swift */,
 				3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */,
@@ -2099,6 +2102,7 @@
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				3DC5035C2822F5220064C8A7 /* OmemoKeysView.swift in Sources */,
+				34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,

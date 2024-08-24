@@ -36,6 +36,15 @@ struct CreateGroupMenu: View {
         showAlert = true
     }
 
+    // When a Form is placed inside a Popover, and the horizontal size class is regular, the spacing chosen by SwiftUI is incorrect.
+    // In particular, the spacing between the top of the first element and the navigation bar is too small, meaning the two overlap.
+    // This only happens when the view is inside a popover, and the horizontal size class is regular.
+    // Therefore, it is inconvenient to apply some manual spacing, as this we would have to work out in which situations it should be applied.
+    // Placing a Text view inside the header causes SwiftUI to add consistent spacing in all situations.
+    var popoverFormSpacingWorkaround: some View {
+        Text("")
+    }
+
     var body: some View {
         Form {
             if connectedAccounts.isEmpty {
@@ -44,7 +53,7 @@ struct CreateGroupMenu: View {
             }
             else
             {
-                Section() {
+                Section(header: popoverFormSpacingWorkaround) {
                     if connectedAccounts.count > 1 {
                         Picker(selection: $selectedAccount, label: Text("Use account")) {
                             ForEach(Array(self.connectedAccounts.enumerated()), id: \.element) { idx, account in

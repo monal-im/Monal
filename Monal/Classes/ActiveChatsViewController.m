@@ -62,6 +62,9 @@ typedef void (^view_queue_block_t)(PMKResolver _Nonnull);
 @property (atomic, strong) NSMutableArray* pinnedContacts;
 @end
 
+@implementation SizeClassWrapper
+@end
+
 @implementation ActiveChatsViewController
 
 enum activeChatsControllerSections {
@@ -282,6 +285,9 @@ static NSMutableSet* _pushWarningDisplayed;
     
     self.view = self.chatListTable;
     
+    self.sizeClass = [SizeClassWrapper new];
+    [self updateSizeClass];
+
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleRefreshDisplayNotification:) name:kMonalRefresh object:nil];
     [nc addObserver:self selector:@selector(handleContactRemoved:) name:kMonalContactRemoved object:nil];
@@ -1113,6 +1119,10 @@ static NSMutableSet* _pushWarningDisplayed;
         UIViewController* contactsView = [[SwiftuiInterface new] makeContactsViewWithDismisser: callback onButton: self.composeButton];
         [self presentViewController:contactsView animated:YES completion:^{}];
     }
+}
+
+-(void) updateSizeClass {
+    self.sizeClass.horizontal = self.view.traitCollection.horizontalSizeClass;
 }
 
 -(NSMutableArray*) getChatArrayForSection:(size_t) section

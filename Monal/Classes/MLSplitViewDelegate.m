@@ -28,11 +28,22 @@
     if([splitViewController.viewControllers count] > 1)
         secondaryController = splitViewController.viewControllers[1];
     
+    if([primaryController isKindOfClass:NSClassFromString(@"ActiveChatsViewController")])
+        [(ActiveChatsViewController*)primaryController updateSizeClass];
+
     if([primaryController isKindOfClass:NSClassFromString(@"ActiveChatsViewController")] && [secondaryController isKindOfClass:NSClassFromString(@"MLPlaceholderViewController")])
         [(ActiveChatsViewController*)primaryController presentSplitPlaceholder];
     
     if([primaryController isKindOfClass:NSClassFromString(@"MLSettingsTableViewController")] && [secondaryController isKindOfClass:NSClassFromString(@"MLPlaceholderViewController")])
         [(MLSettingsTableViewController*)primaryController presentSplitPlaceholder];
+}
+
+-(void) splitViewControllerDidCollapse:(UISplitViewController*) splitViewController
+{
+    UIViewController* primaryController = ((UINavigationController*)splitViewController.viewControllers[0]).viewControllers[0];
+
+    if([primaryController isKindOfClass:NSClassFromString(@"ActiveChatsViewController")])
+        [(ActiveChatsViewController*)primaryController updateSizeClass];
 }
 
 @end

@@ -318,6 +318,7 @@ struct MemberList: View {
                 }
             }
         }
+        .animation(.default, value: memberList)
         .actionSheet(isPresented: $showActionSheet) {
             ActionSheet(
                 title: actionSheetPrompt.title,

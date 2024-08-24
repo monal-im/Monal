@@ -1106,12 +1106,12 @@ static NSMutableSet* _pushWarningDisplayed;
             return;
         }
 
-        UINavigationController* nav = segue.destinationViewController;
-        ContactsViewController* contacts = (ContactsViewController*)nav.topViewController;
-        contacts.selectContact = ^(MLContact* selectedContact) {
+        contactCompletion callback = ^(MLContact* selectedContact) {
             DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
             [self presentChatWithContact:selectedContact];
         };
+        UIViewController* contactsView = [[SwiftuiInterface new] makeContactsViewWithDismisser: callback onButton: self.composeButton];
+        [self presentViewController:contactsView animated:YES completion:^{}];
     }
 }
 

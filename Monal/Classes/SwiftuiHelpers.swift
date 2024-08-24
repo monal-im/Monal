@@ -743,6 +743,19 @@ class SwiftuiInterface : NSObject {
         return host
     }
 
+    @objc(makeContactsViewWithDismisser:onButton:)
+    func makeContactsView(dismisser: @escaping (MLContact) -> (), button: UIBarButtonItem) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView: AnyView(EmptyView()))
+        let contactsView = ContactsView(contacts: Contacts(), delegate: delegate, dismissWithContact: dismisser)
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: contactsView))
+        host.modalPresentationStyle = .popover
+        host.popoverPresentationController?.sourceItem = button
+        host.preferredContentSize = host.sizeThatFits(in: CGSize(width: 0, height: 600))
+        return host
+    }
+
     @objc
     func makeView(name: String) -> UIViewController {
         let delegate = SheetDismisserProtocol()

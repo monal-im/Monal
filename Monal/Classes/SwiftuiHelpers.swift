@@ -559,12 +559,16 @@ struct AddTopLevelNavigation<Content: View>: View {
             build()
             .navigationBarTitleDisplayMode(.automatic)
             .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
-            .navigationBarItems(leading: Button(action : {
-                self.delegate.dismiss()
-            }){
-                Image(systemName: "arrow.backward")
-                    .tint(monalGreen)
-            }.keyboardShortcut(.escape, modifiers: []))
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action : {
+                        self.delegate.dismiss()
+                    }){
+                        Image(systemName: "arrow.backward")
+                            .tint(monalGreen)
+                    }.keyboardShortcut(.escape, modifiers: [])
+                }
+            }
         }
     }
 }

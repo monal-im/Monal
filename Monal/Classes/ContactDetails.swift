@@ -250,7 +250,7 @@ struct ContactDetails: View {
                 .padding([.top, .bottom])
                 .frame(maxWidth: .infinity)
             }
-                
+            
             // info/nondestructive buttons
             Section {
                 if !contact.isSelfChat {
@@ -394,6 +394,9 @@ struct ContactDetails: View {
                         Text("Show shared Media and Files")
                     }
                     .tint(Color.primary)
+                }
+                NavigationLink(destination: LazyClosureView{MediaGalleryView(contact: contact.contactJid as String, accountNo: contact.accountId)}) {
+                    Text("View Media Gallery")
                 }
                 
                 NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact))) {

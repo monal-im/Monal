@@ -7,6 +7,7 @@
 //
 
 #import "MLSelectionController.h"
+#import "MLContact.h"
 
 @interface MLSelectionController ()
 

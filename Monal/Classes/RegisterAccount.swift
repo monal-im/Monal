@@ -168,8 +168,8 @@ struct RegisterAccount: View {
         return DataLayer.sharedInstance().doesAccountExistUser(username, andDomain:actualServer)
     }
 
-    private var buttonColor: Color {
-        return (!serverSelected && (!serverProvided || xmppServerFaulty)) || (!credentialsEntered || !passwordsMatch || credentialsFaulty || credentialsExist) ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
+    private var registerButtonDisabled: Bool {
+	return (!serverSelected && (!serverProvided || xmppServerFaulty)) || (!credentialsEntered || !passwordsMatch || credentialsFaulty || credentialsExist)
     }
 
     private func createXMPPInstance() -> xmpp {
@@ -406,10 +406,10 @@ struct RegisterAccount: View {
                                     .frame(maxWidth: .infinity)
                                     .padding(9.0)
                                     .background(Color(UIColor.tertiarySystemFill))
-                                    .foregroundColor(buttonColor)
                                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             }
                             .buttonStyle(BorderlessButtonStyle())
+                            .disabled(registerButtonDisabled)
                             .listRowSeparator(.hidden)
                             .alert(isPresented: $showAlert) {
                                 Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {

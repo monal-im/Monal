@@ -90,8 +90,8 @@ struct WelcomeLogIn: View {
         return DataLayer.sharedInstance().doesAccountExistUser(components[0], andDomain:components[1])
     }
 
-    private var buttonColor: Color {
-        return !credentialsEntered || credentialsFaulty ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
+    private var loginButtonDisabled: Bool {
+        return !credentialsEntered || credentialsFaulty
     }
     
     private func startLoginTimeout() {
@@ -176,10 +176,10 @@ struct WelcomeLogIn: View {
                                         .frame(maxWidth: .infinity)
                                         .padding(9.0)
                                         .background(Color(UIColor.tertiarySystemFill))
-                                        .foregroundColor(buttonColor)
                                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
+                                .disabled(loginButtonDisabled)
                                 .alert(isPresented: $showAlert) {
                                     Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel, action: {
                                         if(self.loginComplete == true) {
@@ -217,7 +217,7 @@ struct WelcomeLogIn: View {
                             
                             NavigationLink(destination: LazyClosureView(RegisterAccount(delegate: self.delegate))) {
                                 Text("Register a new account")
-                                .foregroundColor(monalDarkGreen)
+                                .foregroundColor(Color.accentColor)
                             }
                             
                             if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {

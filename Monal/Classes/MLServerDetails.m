@@ -7,7 +7,6 @@
 //
 
 #import "MLServerDetails.h"
-#import "UIColor+Theme.h"
 #import "SCRAM.h"
 #import "MLContactSoftwareVersionInfo.h"
 #import "DataLayer.h"

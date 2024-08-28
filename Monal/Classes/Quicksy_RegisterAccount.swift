@@ -247,13 +247,9 @@ struct Quicksy_RegisterAccount: View {
                                 showPhoneNumberCheckAlert = selectedCountry.code + phoneNumber
                             }) {
                                 Text("Next")
-                                    .fontWeight(.bold)
-                                    .padding(10)
-                                    .background(!isValidNumber ? Color(UIColor.lightGray) : Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
                             }
                             .disabled(!isValidNumber)
+                            .buttonStyle(MonalProminentButtonStyle())
                         }
                     }
                 }
@@ -268,12 +264,8 @@ struct Quicksy_RegisterAccount: View {
                             phoneNumberFocused = true
                         }) {
                             Text("Change it")
-                                .fontWeight(.bold)
-                                .padding(10)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
                         }
+                        .buttonStyle(MonalProminentButtonStyle())
                         
                         Spacer()
                         
@@ -281,12 +273,8 @@ struct Quicksy_RegisterAccount: View {
                             requestSMS(for:number)
                         }) {
                             Text("OK")
-                                .fontWeight(.bold)
-                                .padding(10)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
                         }
+                        .buttonStyle(MonalProminentButtonStyle())
                     }
                 })
                 .onAppear {
@@ -349,12 +337,8 @@ struct Quicksy_RegisterAccount: View {
                             showBackAlert = true
                         }) {
                             Text("Previous")
-                                .fontWeight(.bold)
-                                .padding(10)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
                         }
+                        .buttonStyle(MonalProminentButtonStyle())
                             
                         Spacer()
                             
@@ -362,12 +346,8 @@ struct Quicksy_RegisterAccount: View {
                             createAccount()
                         }) {
                             Text("Next")
-                                .fontWeight(.bold)
-                                .padding(10)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
                         }
+                        .buttonStyle(MonalProminentButtonStyle())
                     }
                 }
                 .richAlert(isPresented:$showBackAlert, title:Text("Cancel?")) { error in
@@ -380,12 +360,8 @@ struct Quicksy_RegisterAccount: View {
                             showBackAlert = nil
                         }) {
                             Text("No")
-                                .fontWeight(.bold)
-                                .padding(10)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
                         }
+                        .buttonStyle(MonalProminentButtonStyle())
                         
                         Spacer()
                         
@@ -394,12 +370,8 @@ struct Quicksy_RegisterAccount: View {
                             state.phoneNumber = nil
                         }) {
                             Text("Yes")
-                                .fontWeight(.bold)
-                                .padding(10)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
                         }
+                        .buttonStyle(MonalProminentButtonStyle())
                     }
                 }
                 .onAppear {
@@ -457,12 +429,8 @@ struct Quicksy_RegisterAccount: View {
                     showErrorAlert = nil
                 }) {
                     Text("OK")
-                        .fontWeight(.bold)
-                        .padding(10)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
                 }
+                .buttonStyle(MonalProminentButtonStyle())
             }
         })
         .padding()

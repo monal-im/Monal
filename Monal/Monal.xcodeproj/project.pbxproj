@@ -72,7 +72,6 @@
 		26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 262D9EAB17924532009292B4 /* MLConstants.h */; };
-		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
@@ -148,7 +147,6 @@
 		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
 		844921EA2C29F9A000B99A9C /* MLDelayableTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 844921E92C29F9A000B99A9C /* MLDelayableTimer.m */; };
 		844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */; };
-		844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		845836BA2C49F36300B11EC5 /* Quicksy Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */; };
 		845D636B2AD4AEDA0066EFFB /* ImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845D636A2AD4AEDA0066EFFB /* ImageViewer.swift */; };
 		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
@@ -217,6 +215,7 @@
 		C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */; };
 		C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7AB2777621B0001F295 /* ContactResources.swift */; };
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
+		D09B51F62C7F30DD008D725B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
 		E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */; };
 		E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */; };
@@ -429,8 +428,6 @@
 		26CC579523A0867400ABB92A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		26CF3EA81780D6B7002B7085 /* XMPPIQ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIQ.h; sourceTree = "<group>"; };
 		26CF3EA91780D6B7002B7085 /* XMPPIQ.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIQ.m; sourceTree = "<group>"; };
-		26D59D9120714F32006F1DEE /* UIColor+Theme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIColor+Theme.h"; path = "Classes/UIColor+Theme.h"; sourceTree = "<group>"; };
-		26D59D9220714F32006F1DEE /* UIColor+Theme.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIColor+Theme.m"; path = "Classes/UIColor+Theme.m"; sourceTree = "<group>"; };
 		26D7C05C23D6AFD800CA123C /* MLChatInputContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatInputContainer.h; sourceTree = "<group>"; };
 		26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatInputContainer.m; sourceTree = "<group>"; };
 		26D89F041A890672009B147C /* MLSwitchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSwitchCell.h; sourceTree = "<group>"; };
@@ -1153,8 +1150,6 @@
 				1D3623250D0F684500981E51 /* MonalAppDelegate.m */,
 				26715E5E17650AF900684F3D /* View Controllers */,
 				8D1107310486CEB800E47090 /* Monal-Info.plist */,
-				26D59D9120714F32006F1DEE /* UIColor+Theme.h */,
-				26D59D9220714F32006F1DEE /* UIColor+Theme.m */,
 			);
 			name = "Monal-iOS";
 			sourceTree = "<group>";
@@ -1828,6 +1823,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				848C73E12BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */,
+				D09B51F62C7F30DD008D725B /* Images.xcassets in Resources */,
 				845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */,
 				26AA70182146BBB900598605 /* iosShare.storyboard in Resources */,
 			);
@@ -2114,7 +2110,6 @@
 				3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */,
 				849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */,
 				C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */,
-				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
 				952EBC802BAF72F300183DBF /* DebugView.swift in Sources */,
 				3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */,
 				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
@@ -2159,7 +2154,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				844EEC6D28E718DB00CB5EF9 /* UIColor+Theme.m in Sources */,
 				26AA70152146BBB900598605 /* ShareViewController.m in Sources */,
 				263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */,
 			);
@@ -2635,6 +2629,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = monalGreen;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -2999,6 +2994,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = monalGreen;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3159,6 +3155,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = monalGreen;
 				CLANG_ADDRESS_SANITIZER_CONTAINER_OVERFLOW = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -3437,6 +3434,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = monalGreen;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -3790,6 +3788,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = monalGreen;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -4202,6 +4201,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = monalGreen;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;

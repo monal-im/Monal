@@ -197,7 +197,7 @@ struct WelcomeLogIn: View {
                                         .frame(maxHeight: .infinity)
                                         .padding(9.0)
                                         .background(Color(UIColor.tertiarySystemFill))
-                                        .foregroundColor(.black)
+                                        .foregroundColor(.primary)
                                         .clipShape(Circle())
                                 }
                                 .buttonStyle(BorderlessButtonStyle())

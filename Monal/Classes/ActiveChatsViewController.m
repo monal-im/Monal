@@ -24,7 +24,6 @@
 #import "MLCall.h"      //for MLCallType
 #import "XMPPIQ.h"
 #import "MLIQProcessor.h"
-#import "UIColor+Theme.h"
 #import "Quicksy_Country.h"
 #import <Monal-Swift.h>
 
@@ -246,7 +245,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) configureComposeButton
 {
-    UIImage* image = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];
+    UIImage* image = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.tintColor];
     UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
     self.composeButton.customView = [HelperTools
         buttonWithNotificationBadgeForImage:image

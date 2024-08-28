@@ -388,7 +388,6 @@ struct OmemoKeysForChatView: View {
                 }
             }
         }
-        .accentColor(monalGreen)
         .navigationBarTitle(isOwnKeys() ? Text("My Encryption Keys") : Text("Encryption Keys"), displayMode: .inline)
         .onAppear(perform: {
             self.selectedContact = self.omemoKeys.contacts.keys.first // needs to be done here as first is nil in init

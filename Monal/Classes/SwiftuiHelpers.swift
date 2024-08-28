@@ -19,9 +19,6 @@ import FLAnimatedImage
 import OrderedCollections
 import CropViewController
 
-let monalGreen = Color(UIColor(red:128.0/255, green:203.0/255, blue:182.0/255, alpha:1.0));
-let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255, alpha:1.0));
-
 //see https://stackoverflow.com/a/62207329/3528174
 //and https://www.hackingwithswift.com/forums/100-days-of-swiftui/extending-shapestyle-for-adding-colors-instead-of-extending-color/12324
 public extension ShapeStyle where Self == Color {
@@ -202,6 +199,18 @@ extension View {
     }
     func addTopRight(@ViewBuilder _ overlayClosure: @escaping () -> some View) -> some View {
         modifier(TopRight(overlay:overlayClosure()))
+    }
+}
+
+struct MonalProminentButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) var isEnabled
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(10)
+            .background(Color.accentColor)
+            .foregroundColor(Color(UIColor.systemBackground))
+            .fontWeight(isEnabled ? .bold : .regular)
+            .cornerRadius(10)
     }
 }
 

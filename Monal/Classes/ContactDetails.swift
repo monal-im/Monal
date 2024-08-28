@@ -281,6 +281,7 @@ struct ContactDetails: View {
                                 Text("Notify only when mentioned")
                             } icon: {
                                 Image(systemName: "bell.badge")
+                                    .foregroundColor(.primary)
                             }
                         } else {
                             Label {
@@ -291,6 +292,7 @@ struct ContactDetails: View {
                             }
                         }
                     }
+                    .tint(Color.primary)
                 }
                 
 #if !DISABLE_OMEMO
@@ -391,6 +393,7 @@ struct ContactDetails: View {
                     }) {
                         Text("Show shared Media and Files")
                     }
+                    .tint(Color.primary)
                 }
                 
                 NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact))) {

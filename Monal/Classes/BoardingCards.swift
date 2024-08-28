@@ -47,7 +47,6 @@ struct OnboardingView: View {
                                     } label: {
                                         Label("Back", systemImage: "chevron.left")
                                             .labelStyle(.iconOnly)
-                                            .foregroundColor(.blue)
                                             .padding(10)
                                     }
                                 } else {
@@ -59,7 +58,7 @@ struct OnboardingView: View {
                                     if let imageName = card.imageName {
                                         Image(systemName: imageName)
                                             .font(.custom("MarkerFelt-Wide", size: 80))
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(.accentColor)
                                             .accessibilityHidden(true)
                                         
                                     }
@@ -116,12 +115,8 @@ struct OnboardingView: View {
                                             delegate.dismissWithoutAnimation()
                                         } label: {
                                             Text(card.nextText ?? NSLocalizedString("Close", comment:"onboarding"))
-                                                .fontWeight(.bold)
-                                                .padding(10)
-                                                .background(Color.blue)
-                                                .foregroundColor(.white)
-                                                .cornerRadius(10)
                                         }
+                                        .buttonStyle(MonalProminentButtonStyle())
                                     }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -242,12 +237,9 @@ struct TakeMeToSettingsView: View {
                 delegate.dismissWithoutAnimation()
             }) {
                 Text("Take me to settings")
-                    .fontWeight(.bold)
-                    .padding(10)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
             }
+            .buttonStyle(MonalProminentButtonStyle())
+
             Spacer()
         }
     }

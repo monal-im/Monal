@@ -21,7 +21,7 @@ struct ContactPickerEntry: View {
                         .foregroundColor(.gray)
                 } else if(isPicked) {
                     Image(systemName: "checkmark.circle")
-                        .foregroundColor(.blue)
+                        .foregroundColor(.accentColor)
                 } else {
                     Image(systemName: "circle")
                 }

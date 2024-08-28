@@ -30,7 +30,6 @@
 @import UserNotifications;
 
 #import "MLXMPPManager.h"
-#import "UIColor+Theme.h"
 
 #import <AVKit/AVKit.h>
 
@@ -516,9 +515,6 @@ $$
     [[UINavigationBar appearance] setStandardAppearance:appearance];
 #if TARGET_OS_MACCATALYST
     self.window.windowScene.titlebar.titleVisibility = UITitlebarTitleVisibilityHidden;
-#else
-    [[UITabBar appearance] setTintColor:[UIColor monaldarkGreen]];
-    [[UINavigationBar appearance] setTintColor:[UIColor monalGreen]];
 #endif
     [[UINavigationBar appearance] setPrefersLargeTitles:YES];
 

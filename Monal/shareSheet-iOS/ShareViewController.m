@@ -9,7 +9,6 @@
 #import "ShareViewController.h"
 #import "MLSelectionController.h"
 
-#import "UIColor+Theme.h"
 #import "MLContact.h"
 #import "MLConstants.h"
 #import "HelperTools.h"
@@ -51,8 +50,8 @@
 -(void) viewDidLoad
 {
     [super viewDidLoad];
-    [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
-    [self.navigationController.navigationBar setBackgroundColor:[UIColor monaldarkGreen]];
+    [self.navigationController.navigationBar setTintColor:UIColor.systemBackgroundColor];
+    [self.navigationController.navigationBar setBackgroundColor:[UIColor colorNamed:@"monalGreen"]];
     self.navigationController.navigationItem.title = NSLocalizedString(@"Monal", @"");
     
     DDLogInfo(@"Extension context: %@", self.extensionContext);

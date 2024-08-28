@@ -11,7 +11,6 @@
 #import "DataLayer.h"
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
-#import "UIColor+Theme.h"
 #import "xmpp.h"
 #import <Monal-Swift.h>
 #import "HelperTools.h"
@@ -55,7 +54,7 @@
 
 -(void) configureAddContactImage
 {
-    UIImage* image = [[UIImage systemImageNamed:@"person.fill.badge.plus"] imageWithTintColor:UIColor.monalGreen];
+    UIImage* image = [[UIImage systemImageNamed:@"person.fill.badge.plus"] imageWithTintColor:UIColor.tintColor];
     UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openAddContacts:)];
     self.navigationItem.rightBarButtonItems[0].customView = [HelperTools
         buttonWithNotificationBadgeForImage:image

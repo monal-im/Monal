@@ -119,29 +119,54 @@ struct ImageViewer: View {
         } else if (info["mimeType"] as! String).hasPrefix("video/") {
             if let filePath = info["cacheFile"] as? String,
                let mimeType = info["mimeType"] as? String {
-                customPlayer.configurePlayer(filePath: filePath, mimeType: mimeType)
+                let fileExtension: String? = nil
+                customPlayer.configurePlayer(filePath: filePath, mimeType: mimeType, fileExtension: fileExtension)
                 isPlayerReady = true
             }
         }
     }
 }
 
+//class CustomAVPlayer: ObservableObject {
+//    @Published var player: AVPlayer?
+//    @Published var playerViewController: AVPlayerViewController?
+//    
+//    func configurePlayer(filePath: String, mimeType: String) {
+//        // Clear existing player
+//        player = nil
+//        playerViewController = nil
+//        
+//        // Create URL
+//        let videoFileUrl = URL(fileURLWithPath: filePath)
+//        
+//        // Create asset with MIME type
+//        let videoAsset = AVURLAsset(url: videoFileUrl, options: [
+//            "AVURLAssetOutOfBandMIMETypeKey": mimeType
+//        ])
+//        
+//        // Create player and player view controller
+//        let playerItem = AVPlayerItem(asset: videoAsset)
+//        player = AVPlayer(playerItem: playerItem)
+//        playerViewController = AVPlayerViewController()
+//        playerViewController?.player = player
+//        
+//        DDLogDebug("Created AVPlayer(\(mimeType)): \(String(describing: player))")
+//    }
+//}
+
 class CustomAVPlayer: ObservableObject {
     @Published var player: AVPlayer?
     @Published var playerViewController: AVPlayerViewController?
     
-    func configurePlayer(filePath: String, mimeType: String) {
+    func configurePlayer(filePath: String, mimeType: String, fileExtension: String?) {
         // Clear existing player
         player = nil
         playerViewController = nil
         
-        // Create URL
-        let videoFileUrl = URL(fileURLWithPath: filePath)
-        
-        // Create asset with MIME type
-        let videoAsset = AVURLAsset(url: videoFileUrl, options: [
-            "AVURLAssetOutOfBandMIMETypeKey": mimeType
-        ])
+        guard let videoAsset = HelperTools.createAVURLAsset(withFilePath: filePath, mimeType: mimeType, fileExtension: fileExtension) else {
+            print("Failed to create AVURLAsset")
+            return
+        }
         
         // Create player and player view controller
         let playerItem = AVPlayerItem(asset: videoAsset)

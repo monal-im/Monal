@@ -2835,4 +2835,56 @@ a=%@\r\n", mid, candidate];
     return [NSURLSession sessionWithConfiguration:sessionConfig];
 }
 
++ (nullable AVURLAsset *)createAVURLAssetWithFilePath:(NSString *)filePath
+                                             mimeType:(NSString *)mimeType
+                                        fileExtension:(nullable NSString *)fileExtension
+{
+    NSURL *videoFileUrl = [NSURL fileURLWithPath:filePath];
+    
+    if (@available(iOS 17.0, macCatalyst 17.0, *)) {
+        // iOS 17 and later: Use the public symbol AVURLAssetOverrideMIMETypeKey
+        return [AVURLAsset URLAssetWithURL:videoFileUrl options:@{AVURLAssetOverrideMIMETypeKey: mimeType}];
+    } else {
+        // iOS 16 and earlier: Create a symlink with the correct file extension
+        if (fileExtension == nil) {
+            NSLog(@"Could not get file extension for file, not creating AVURLAsset...");
+            return nil;
+        }
+        
+        NSArray *pathComponents = @[@"documentCache", [NSString stringWithFormat:@"tmp.player_symlink.%@.%@", videoFileUrl.lastPathComponent, fileExtension]];
+        NSURL *symlinkPath = [[[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.monal"] URLByAppendingPathComponent:[pathComponents componentsJoinedByString:@"/"]];
+        
+        NSError *error;
+        if ([[NSFileManager defaultManager] fileExistsAtPath:symlinkPath.path]) {
+            [[NSFileManager defaultManager] removeItemAtURL:symlinkPath error:&error];
+            if (error) {
+                NSLog(@"Error removing existing symlink: %@", error);
+                return nil;
+            }
+        }
+        
+        [[NSFileManager defaultManager] createSymbolicLinkAtURL:symlinkPath withDestinationURL:videoFileUrl error:&error];
+        if (error) {
+            NSLog(@"Error creating symlink: %@", error);
+            return nil;
+        }
+        
+        AVURLAsset *asset = [AVURLAsset URLAssetWithURL:symlinkPath options:nil];
+        
+        // Schedule symlink removal after a short delay
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            if ([[NSFileManager defaultManager] fileExistsAtPath:symlinkPath.path]) {
+                NSError *removalError;
+                [[NSFileManager defaultManager] removeItemAtURL:symlinkPath error:&removalError];
+                if (removalError) {
+                    NSLog(@"Error removing symlink: %@", removalError);
+                }
+            }
+        });
+        
+        return asset;
+    }
+}
+
+
 @end

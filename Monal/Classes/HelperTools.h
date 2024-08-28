@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 #import "MLDelayableTimer.h"
+#import <AVFoundation/AVFoundation.h>
 
 #include "metamacros.h"
 
@@ -200,6 +201,10 @@ void swizzle(Class c, SEL orig, SEL new);
 +(BOOL) isIP:(NSString*) host;
 
 +(NSURLSession*) createEphemeralURLSession;
+
++ (nullable AVURLAsset *)createAVURLAssetWithFilePath:(NSString *)filePath
+                                             mimeType:(NSString *)mimeType
+                                        fileExtension:(nullable NSString *)fileExtension;
 
 @end
 

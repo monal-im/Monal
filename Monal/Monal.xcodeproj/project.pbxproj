@@ -134,6 +134,10 @@
 		8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */; };
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
+		8418B55D2C7EC6B7006FAF60 /* Quicksy_Country.h in Headers */ = {isa = PBXBuildFile; fileRef = 8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */; };
+		8418B55E2C7EC6B7006FAF60 /* Quicksy_Country.m in Sources */ = {isa = PBXBuildFile; fileRef = 8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */; };
+		8418B5632C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */; };
+		8418B5642C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m in Sources */ = {isa = PBXBuildFile; fileRef = 8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */; };
 		841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F19297B18720074F9B7 /* AccountPicker.swift */; };
 		841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */; };
 		841EE4302A426F2300D3AF14 /* MLCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */; };
@@ -151,7 +155,6 @@
 		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		846DF27C2937FAA600AAB9C0 /* ChatPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */; };
 		848227912C4A6194003CCA33 /* MLPlaceholderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 848227902C4A6194003CCA33 /* MLPlaceholderViewController.m */; };
-		848501342C4F2B6D00C1B693 /* CountryCodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848501332C4F2B6D00C1B693 /* CountryCodes.swift */; };
 		848717F3295ED64600B8D288 /* MLCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 848717F1295ED64500B8D288 /* MLCall.m */; };
 		848904A9289C82C30097E19C /* SCRAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 848904A8289C82C30097E19C /* SCRAM.m */; };
 		848C73E02BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 848C73DF2BDF2014007035C9 /* PrivacyInfo.xcprivacy */; };
@@ -169,7 +172,6 @@
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
 		84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 84E231F22C16A9CE00735FB7 /* SVGView */; };
 		84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
-		84E55E8029644279003E191A /* ActiveChatsViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E55E7F2964426D003E191A /* ActiveChatsViewController.h */; };
 		84F194D12C15197200F0A994 /* FrameUp in Frameworks */ = {isa = PBXBuildFile; productRef = 84F194D02C15197200F0A994 /* FrameUp */; };
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; };
@@ -574,6 +576,11 @@
 		840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueCell.h; sourceTree = "<group>"; };
 		8414ADFA2A7ABAC900EFFCCC /* LibMonalRustSwiftBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LibMonalRustSwiftBridge; path = ../rust/LibMonalRustSwiftBridge; sourceTree = "<group>"; };
 		841898AB2957DBAC00FEC77D /* RichAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichAlert.swift; sourceTree = "<group>"; };
+		8418B5582C7EBD39006FAF60 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
+		8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Quicksy_Country.h; sourceTree = "<group>"; };
+		8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Quicksy_Country.m; sourceTree = "<group>"; };
+		8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "HelperTools+Quicksy_CountryCodes.h"; sourceTree = "<group>"; };
+		8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "HelperTools+Quicksy_CountryCodes.m"; sourceTree = "<group>"; };
 		841B6F19297B18720074F9B7 /* AccountPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountPicker.swift; sourceTree = "<group>"; };
 		841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVCallUI.swift; sourceTree = "<group>"; };
 		841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLCrashReporter.m; path = Classes/MLCrashReporter.m; sourceTree = "<group>"; };
@@ -589,7 +596,6 @@
 		845D636A2AD4AEDA0066EFFB /* ImageViewer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageViewer.swift; sourceTree = "<group>"; };
 		846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPlaceholder.swift; sourceTree = "<group>"; };
 		848227902C4A6194003CCA33 /* MLPlaceholderViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPlaceholderViewController.m; sourceTree = "<group>"; };
-		848501332C4F2B6D00C1B693 /* CountryCodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryCodes.swift; sourceTree = "<group>"; };
 		848717F1295ED64500B8D288 /* MLCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLCall.m; path = Classes/MLCall.m; sourceTree = SOURCE_ROOT; };
 		848717F2295ED64500B8D288 /* MLCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLCall.h; path = Classes/MLCall.h; sourceTree = SOURCE_ROOT; };
 		848904A8289C82C30097E19C /* SCRAM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SCRAM.m; sourceTree = "<group>"; };
@@ -603,7 +609,6 @@
 		84C1CD512A8F617F007076ED /* MLStreamRedirect.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLStreamRedirect.m; sourceTree = "<group>"; };
 		84C1CD532A8F6196007076ED /* MLStreamRedirect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLStreamRedirect.h; sourceTree = "<group>"; };
 		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
-		84E55E7F2964426D003E191A /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
 		84F194C32C0FE70900F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Main.strings"; sourceTree = "<group>"; };
 		84F194C42C0FE74500F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Settings.strings"; sourceTree = "<group>"; };
 		84F194C52C0FE78B00F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/iosShare.strings"; sourceTree = "<group>"; };
@@ -1212,7 +1217,7 @@
 		26DB52121777EA5100B50353 /* Tab views */ = {
 			isa = PBXGroup;
 			children = (
-				84E55E7F2964426D003E191A /* ActiveChatsViewController.h */,
+				8418B5582C7EBD39006FAF60 /* ActiveChatsViewController.h */,
 				2644D4961FF29E1900F46AB5 /* Settings */,
 				2644D48F1FF004B800F46AB5 /* ChatViews */,
 				268C1E471FDACDD300BD6921 /* Contact Details */,
@@ -1245,6 +1250,10 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */,
+				8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */,
+				8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */,
+				8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */,
 				84FC37562897523500634E3E /* metamacros.h */,
 				54391BB9273499E80050DAFB /* UIColor+Extension.h */,
 				54391BBA273499E80050DAFB /* UIColor+Extension.m */,
@@ -1274,7 +1283,6 @@
 				84C1CD532A8F6196007076ED /* MLStreamRedirect.h */,
 				844921E92C29F9A000B99A9C /* MLDelayableTimer.m */,
 				844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */,
-				848501332C4F2B6D00C1B693 /* CountryCodes.swift */,
 			);
 			name = tools;
 			sourceTree = "<group>";
@@ -1496,6 +1504,7 @@
 				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
 				541B6AB5262BC9040038B936 /* MLStream.h in Headers */,
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
+				8418B5632C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h in Headers */,
 				541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */,
 				8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */,
 				C1613B5A2520723D0062C0C2 /* MLBasePaser.h in Headers */,
@@ -1506,11 +1515,11 @@
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
 				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
-				84E55E8029644279003E191A /* ActiveChatsViewController.h in Headers */,
 				541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */,
 				844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */,
 				84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */,
 				389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */,
+				8418B55D2C7EC6B7006FAF60 /* Quicksy_Country.h in Headers */,
 				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
 				C1F5C7A92775DA000001F295 /* MLContactSoftwareVersionInfo.h in Headers */,
 				84FC37572897523500634E3E /* metamacros.h in Headers */,
@@ -2181,6 +2190,7 @@
 				848904A9289C82C30097E19C /* SCRAM.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
 				540BD0D424D8D2000087A743 /* IPC.m in Sources */,
+				8418B55E2C7EC6B7006FAF60 /* Quicksy_Country.m in Sources */,
 				84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */,
 				541B6AB4262BC9040038B936 /* MLStream.m in Sources */,
 				84FC37552897521500634E3E /* snprintf.m in Sources */,
@@ -2195,10 +2205,10 @@
 				542CF3FF2763314F002C3710 /* hsluv.c in Sources */,
 				8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */,
 				389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */,
-				848501342C4F2B6D00C1B693 /* CountryCodes.swift in Sources */,
 				84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
 				C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */,
+				8418B5642C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m in Sources */,
 				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,
 				C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */,
 				26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */,

@@ -58,6 +58,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "MLContactSoftwareVersionInfo.h"
 #import "IPC.h"
 #import "MLDelayableTimer.h"
+#import "Quicksy_Country.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -324,6 +325,7 @@ void swizzle(Class c, SEL orig, SEL new)
     if(
         [value isKindOfClass:[NSString class]] ||
         [value isKindOfClass:[NSNumber class]] ||
+        [value isKindOfClass:[NSDate class]] ||
         [value isKindOfClass:[NSURL class]] ||
         [value isKindOfClass:[NSDictionary class]] ||
         [value isKindOfClass:[NSMutableDictionary class]] ||

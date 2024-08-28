@@ -47,8 +47,8 @@ class Quicksy_State: ObservableObject {
     @defaultsDB("Quicksy_phoneNumber")
     var phoneNumber: String?
     
-    @defaultsDB("Quicksy_countryCode")
-    var countryCode: String?
+    @defaultsDB("Quicksy_country")
+    var country: Quicksy_Country?
 }
 
 struct Quicksy_RegisterAccount: View {
@@ -77,8 +77,7 @@ struct Quicksy_RegisterAccount: View {
     
     init(delegate: SheetDismisserProtocol) {
         self.delegate = delegate
-        self.state.phoneNumber = nil
-        var countries = COUNTRY_CODES
+        var countries = COUNTRY_CODES as! [Quicksy_Country]
         countries.sort {
             country2name($0) < country2name($1)
         }
@@ -92,6 +91,7 @@ struct Quicksy_RegisterAccount: View {
         }.done { data, response in
             DDLogDebug("Got sendSMSRequest success: \(String(describing:response))\n\(String(describing:data))")
             state.phoneNumber = number
+            state.country = selectedCountry         //used to add a country code to phonebook entries not having any
         }.catch { error in
             DDLogError("Catched sendSMSRequest error: \(String(describing:error))")
             if let response = error as? PMKHTTPError {
@@ -101,9 +101,8 @@ struct Quicksy_RegisterAccount: View {
     }
     
     private func createAccount() {
-        state.countryCode = selectedCountry!.code       //used to add a country code to phonebook entries not having any
         let password = HelperTools.generateRandomPassword()
-        if let number = state.phoneNumber {
+        if let number = state.phoneNumber, let _ = state.country {
             showPromisingLoadingOverlay(overlay, headline:NSLocalizedString("Registering account...", comment: ""), description: "") {
                 sendRegisterRequest(number:number, pin:pin, password:password)
             }.done { result in
@@ -111,12 +110,22 @@ struct Quicksy_RegisterAccount: View {
                 startLoginTimeout()
                 showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
                 self.errorObserverEnabled = true
-                self.newAccountNo = MLXMPPManager.sharedInstance().login("\(number)@quicksy.im", password: password)
-                if(self.newAccountNo == nil) {
-                    currentTimeout = nil // <- disable timeout on error
-                    errorObserverEnabled = false
-                    showLoginErrorAlert(errorMessage:NSLocalizedString("Account already configured!", comment: ""))
-                    self.newAccountNo = nil
+                //check if account is already configured and reset its password and its enabled and needs_password_migration states 
+                if let newAccountID = DataLayer.sharedInstance().accountID(forUser:number, andDomain:"quicksy.im") {
+                    self.newAccountNo = newAccountID
+                    var accountDict = DataLayer.sharedInstance().details(forAccount:newAccountID) as! [String:AnyObject]
+                    accountDict["needs_password_migration"] = NSNumber(value:false)
+                    accountDict["enabled"] = NSNumber(value:true)
+                    DDLogDebug("Updating account in DB: enabled=\(String(describing:accountDict["enabled"])), needs_password_migration=\(String(describing:accountDict["needs_password_migration"])), password.count=\(password.count)")
+                    DataLayer.sharedInstance().updateAccoun(with:accountDict)
+                    MLXMPPManager.sharedInstance().updatePassword(password, forAccount:newAccountID)
+                    DDLogDebug("Connecting successfully recovered and enabled account...")
+                    MLXMPPManager.sharedInstance().connectAccount(newAccountID)
+                } else {
+                    self.newAccountNo = MLXMPPManager.sharedInstance().login("\(number)@quicksy.im", password: password)
+                    if(self.newAccountNo == nil) {
+                        unreachable("Account already configured? This should never happen!")
+                    }
                 }
             }.catch { error in
                 DDLogError("Catched sendRegisterRequest error: \(String(describing:error))")
@@ -191,7 +200,7 @@ struct Quicksy_RegisterAccount: View {
             /// Ensure the ZStack takes the entire area
             Color.clear
             
-            if state.phoneNumber == nil {
+            if state.phoneNumber == nil || state.country == nil {
                 VStack(alignment: .leading) {
                     Text("Verify your phone number")
                         .font(.title)
@@ -287,13 +296,20 @@ struct Quicksy_RegisterAccount: View {
                     DDLogInfo("Localization: current locale localized string for regionCode: \(String(describing:Locale.current.localizedString(forRegionCode:regionCode)))")
                     DDLogInfo("Localization: en_US localized string for regionCode: \(String(describing:Locale(identifier: "en_US").localizedString(forRegionCode:regionCode)))")
                     for country in countries {
-                        if country.alpha2 == regionCode || country.name == Locale.current.localizedString(forRegionCode:regionCode) || country.name == Locale(identifier: "en_US").localizedString(forRegionCode:regionCode) {
+                        if let previousCountry = state.country {
+                            //check alpha2 code and country name explicitly to still match even when changing other properties
+                            if previousCountry.alpha2 == country.alpha2 || previousCountry.name == country.name {
+                                selectedCountry = country
+                                break
+                            }
+                        } else if country.alpha2 == regionCode || country.name == Locale.current.localizedString(forRegionCode:regionCode) || country.name == Locale(identifier: "en_US").localizedString(forRegionCode:regionCode) {
                             selectedCountry = country
+                            break
                         }
                     }
                     phoneNumberFocused = true
                 }
-            } else if let number = state.phoneNumber {
+            } else if let number = state.phoneNumber, let _ = state.country {
                 VStack(alignment: .leading) {
                     Text("Verify your phone number")
                         .font(.title)
@@ -389,6 +405,8 @@ struct Quicksy_RegisterAccount: View {
                 .onAppear {
                     pinFocused = true
                 }
+            } else {
+                unreachable("quicksy registration out of ui options!")
             }
         }
         .alert(isPresented: $showAlert) {

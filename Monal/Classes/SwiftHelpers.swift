@@ -35,6 +35,9 @@ public typealias monal_id_block_t = @convention(block) (AnyObject?) -> Void;
 public typealias monal_id_returning_void_block_t = @convention(block) () -> AnyObject?;
 public typealias monal_id_returning_id_block_t = @convention(block) (AnyObject?) -> AnyObject?;
 
+extension MLContact : Identifiable {}               //make MLContact be usable in swiftui ForEach clauses etc.
+extension Quicksy_Country : Identifiable {}         //make Quicksy_Country be usable in swiftui ForEach clauses etc.
+
 //see https://stackoverflow.com/a/40629365/3528174
 extension String: Error {}
 

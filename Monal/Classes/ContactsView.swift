@@ -59,7 +59,6 @@ struct ContactViewEntry: View {
                             selectedContactForContactDetails = ObservableKVOWrapper<MLContact>(contact)
                         } label: {
                             Image(systemName: "info.circle")
-                                .tint(.blue)
                                 .imageScale(.large)
                         }
                         .accessibilityLabel("Open contact details")
@@ -161,13 +160,12 @@ struct ContactsView: View {
                     Image(systemName: "person.3.fill")
                 }
                 .accessibilityLabel("Create contact group")
-                .tint(monalGreen)
+
                 NavigationLink(destination: AddContactMenu(delegate: SheetDismisserProtocol(), dismissWithNewContact: dismissWithContact)) {
                     Image(systemName: "person.fill.badge.plus")
                         .overlay { NumberlessBadge($contacts.requestCount) }
                 }
                 .accessibilityLabel(contacts.requestCount > 0 ? "Add contact (contact requests pending)" : "Add New Contact")
-                .tint(monalGreen)
             }
         }
         .sheet(item: $selectedContactForContactDetails) { selectedContact in

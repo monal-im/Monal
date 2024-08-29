@@ -77,7 +77,7 @@ class MediaItem: Identifiable, ObservableObject {
             }
             return
         } else if mimeType.starts(with: "video/") {
-            if let thumbnail = await videoPreview(for: fileInfo, in: 1) {
+            if let thumbnail = await videoPreview(for:fileInfo) {
                 self.thumbnail = thumbnail.thumbnail(size: CGSize(width: 100, height: 100))
             } else {
                 DDLogError("Failed to generate video thumbnail for: \(fileInfo)")
@@ -90,65 +90,23 @@ class MediaItem: Identifiable, ObservableObject {
         self.thumbnail = UIImage(systemName: "doc")
     }
 
-    func videoPreview(for fileInfo: [String: Any], in seconds: Double) async -> UIImage? {
+    @MainActor
+    func videoPreview(for fileInfo: [String: Any]) async -> UIImage? {
         let moviePath = URL(fileURLWithPath: fileInfo["cacheFile"] as! String)
-        DDLogInfo("Trying to generate thumbnail for: \(String(describing:fileInfo))")
-
-        guard #available(iOS 17.0, macCatalyst 17.0, *) else {
-            DDLogDebug("Generating thumbnail with symlink method...")
-
-            //this won't work if we don't have a file extension in our file info (happens if the file was sent/received without an extension)
-            //--> just bail out for now (if that happens frequently, we probably should instead use
-            //    stringByAppendingPathExtensionForType with UTType.typeWithMIMEType as argument)
-            guard let fileExtension = fileInfo["fileExtension"] as? String else {
-                DDLogInfo("Could not get file extension for file, not generating thumbnail...")
-                return nil
-            }
-
-            //create a symlink for our file having the proper file extension
-            //the "tmp." prefix will make sure this gets garbage collected by doStartupCleanup in MLFiletransfer
-            let symlinkPath = HelperTools.getContainerURL(forPathComponents:["documentCache", "tmp.player_symlink.\(moviePath.lastPathComponent).\(fileExtension)"])
-            do {
-                if FileManager.default.fileExists(atPath: symlinkPath.path) {
-                    try FileManager.default.removeItem(at: symlinkPath)
-                }
-                try FileManager.default.createSymbolicLink(at: symlinkPath, withDestinationURL: moviePath)
-            } catch {
-                DDLogError("Error creating symlink: \(error)")
-                return nil
-            }
-            defer {
-                if FileManager.default.fileExists(atPath: symlinkPath.path) {
-                    try? FileManager.default.removeItem(at: symlinkPath)
-                }
-            }
-
-            //now generate the preview using the symlink
-            let asset = AVURLAsset(url: symlinkPath)
-            let imageGenerator = AVAssetImageGenerator(asset: asset)
-            imageGenerator.appliesPreferredTrackTransform = true
-            let time = CMTime(seconds: seconds, preferredTimescale: 600)
-            do {
-                let (cgImage, _) = try await imageGenerator.image(at: time)
-                return UIImage(cgImage: cgImage)
-            } catch {
-                DDLogError("Error generating thumbnail: \(error)")
-                return nil
-            }
+        DDLogInfo("Trying to generate video thumbnail for: \(String(describing:fileInfo))")
+        
+        var payload: NSMutableDictionary = [:]
+        HelperTools.addUploadItemPreview(forItem:moviePath, provider:nil, andPayload:payload) { newPayload in
+            payload = newPayload ?? [:]
         }
-
-        //generate a thumbnail using the modern ios 17 method to attach a mime type to an AVURLAsset
-        let asset = AVURLAsset(url: moviePath, options:[AVURLAssetOverrideMIMETypeKey: fileInfo["mimeType"] as! String])
-        let imageGenerator = AVAssetImageGenerator(asset: asset)
-        imageGenerator.appliesPreferredTrackTransform = true
-        let time = CMTime(seconds: seconds, preferredTimescale: 600)
-        do {
-            let (cgImage, _) = try await imageGenerator.image(at: time)
-            return UIImage(cgImage: cgImage)
-        } catch {
-            DDLogError("Error generating thumbnail: \(error)")
-            return nil
+        guard let image = payload["preview"] as? UIImage else {
+            return try? await HelperTools.generateVideoThumbnail(
+                fromFile:fileInfo["cacheFile"] as! String,
+                havingMimeType:fileInfo["mimeType"] as! String,
+                andFileExtension:fileInfo["fileExtension"] as? String
+            ).toPromise().asyncOnMainActor()
         }
+        return image
     }
 }
 

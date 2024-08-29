@@ -927,6 +927,82 @@ void swizzle(Class c, SEL orig, SEL new)
     return retval;
 }
 
++(void) createAVURLAssetFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension withCompletionHandler:(void(^)(AVURLAsset* _Nullable)) completion
+{
+    NSURL* fileUrl = [NSURL fileURLWithPath:file];
+    if(@available(iOS 17.0, macCatalyst 17.0, *))
+    {
+        //generate an AVURLAsset using the modern ios 17 method to attach a mime type to an AVURLAsset
+        return completion([AVURLAsset URLAssetWithURL:fileUrl options:@{AVURLAssetOverrideMIMETypeKey: mimeType}]);
+    }
+    
+    //TODO: instead of this symlink method hack, we *maybe* could use the AVURLAssetOutOfBandMIMETypeKey in place of
+    //TODO: AVURLAssetOverrideMIMETypeKey on ios 16, BUT: that symbol isn't public and may be catched by apple review
+    //TODO: (but it makes our code way cleaner than using this symlink stuff)
+    DDLogDebug(@"Generating thumbnail with symlink method...");
+    if(fileExtension == nil)
+    {
+        //this will return nil if the mime type isn't known by apple
+        fileExtension = [[UTType typeWithMIMEType:mimeType] preferredFilenameExtension];
+        //--> bail out if this is still nil
+        if(fileExtension == nil)
+        {
+            DDLogWarn(@"Could not get file extension for file, not creating AVURLAsset...");
+            return completion(nil);
+        }
+    }
+    
+    NSURL* symlinkUrl = [self getContainerURLForPathComponents:@[
+        @"documentCache",
+        [NSString stringWithFormat:@"tmp.avurlasset_symlink.%@.%@", fileUrl.lastPathComponent, fileExtension]
+    ]];
+    NSError* error = nil;
+    if([[NSFileManager defaultManager] fileExistsAtPath:symlinkUrl.path])
+        [[NSFileManager defaultManager] removeItemAtURL:symlinkUrl error:&error];
+    if(error != nil)
+    {
+        DDLogError(@"Could not delete old leftover symlink file at '%@': %@", symlinkUrl, error);
+        return completion(nil);
+    }
+    [[NSFileManager defaultManager] createSymbolicLinkAtURL:symlinkUrl withDestinationURL:fileUrl error:&error];
+    if(error != nil)
+    {
+        DDLogError(@"Could not create symlink file '%@' pointing to '%@': %@", symlinkUrl, fileUrl, error);
+        return completion(nil);
+    }
+    
+    //create the AVURLAsset and invoke the callback using it
+    completion([AVURLAsset URLAssetWithURL:fileUrl options:@{}]);
+    
+    //remove file afterwards and just log errors if removal of symlink fails
+    [[NSFileManager defaultManager] removeItemAtURL:symlinkUrl error:&error];
+    if(error != nil)
+        DDLogError(@"Could not clean up symlink file '%@' pointing to '%@': %@", symlinkUrl, fileUrl, error);
+}
+
++(AnyPromise*) generateVideoThumbnailFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension
+{
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        [self createAVURLAssetFromFile:file havingMimeType:mimeType andFileExtension:fileExtension withCompletionHandler:^(AVURLAsset* asset) {
+            if(asset == nil)
+                return resolve([NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: @"Could not create AVURLAsset"}]);
+            
+            AVAssetImageGenerator* imageGenerator = [[AVAssetImageGenerator alloc] initWithAsset:asset];
+            imageGenerator.appliesPreferredTrackTransform=TRUE;
+            CMTime time = CMTimeMakeWithSeconds(1, 600);
+
+            [imageGenerator generateCGImageAsynchronouslyForTime:time completionHandler:^(CGImageRef image, CMTime actualTime, NSError* error) {
+                if(error != nil)
+                {
+                    DDLogError(@"Error generating thumbnail: %@", error);
+                    return resolve(error);
+                }
+                return resolve([UIImage imageWithCGImage:image]);
+            }];  
+        }];
+    }];
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcompletion-handler"
 +(void) addUploadItemPreviewForItem:(NSURL* _Nullable) url provider:(NSItemProvider* _Nullable) provider andPayload:(NSMutableDictionary*) payload withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion
@@ -1001,8 +1077,18 @@ void swizzle(Class c, SEL orig, SEL new)
                 }
             }
             
-            //last resort
-            useProvider();
+            //try to generate video thumbnail
+            [self generateVideoThumbnailFromFile:url.path havingMimeType:[UTType typeWithFilenameExtension:url.pathExtension].preferredMIMEType andFileExtension:url.pathExtension].then(^(UIImage* image) {
+                payload[@"preview"] = image;
+                DDLogVerbose(@"Managed to generate thumbnail for url=%@ using generateVideoThumbnailFromFile: %@", url, image);
+                [url stopAccessingSecurityScopedResource];
+                return completion(payload);
+            }).catch(^(NSError* error) {
+                DDLogError(@"Could not create video thumbnail, using provider as last resort: %@", error);
+                
+                //last resort
+                useProvider();
+            });
         }];
     }
     else

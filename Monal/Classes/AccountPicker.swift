@@ -56,7 +56,6 @@ struct AccountPicker: View {
         //}
         .textFieldStyle(.roundedBorder)
         .navigationBarTitle(Text("Account Picker"))
-        .accentColor(monalGreen)
     }
 }
 

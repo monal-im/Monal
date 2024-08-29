@@ -93,10 +93,6 @@ struct AddContactMenu: View {
         return toAdd.range(of: AddContactMenu.jidFaultyPattern, options:.regularExpression) == nil
     }
 
-    private var buttonColor: Color {
-        return toAddEmpty || toAddInvalid ? Color(UIColor.systemGray) : Color(UIColor.systemBlue)
-    }
-
     func trustFingerprints(_ fingerprints:[NSNumber:Data]?, for jid:String, on account:xmpp) {
         //we don't untrust other devices not included in here, because conversations only exports its own fingerprint
         if let fingerprints = fingerprints {
@@ -236,12 +232,8 @@ struct AddContactMenu: View {
                         }) {
                             scannedFingerprints == nil ? Text("Add") : Text("Add scanned contact")
                         }
-                        //.fontWeight(.bold)
-                        .padding(10)
-                        .background(toAddEmpty || toAddInvalid ? Color.gray : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
                         .disabled(toAddEmpty || toAddInvalid)
+                        .buttonStyle(MonalProminentButtonStyle())
                     }
                 }
                 
@@ -315,13 +307,13 @@ struct AddContactMenu: View {
                             }
                         })
                     }, label: {
-                        Image(systemName: "square.and.arrow.up").foregroundColor(monalGreen)
+                        Image(systemName: "square.and.arrow.up")
                     })
                 }
                 Button(action: {
                     self.showQRCodeScanner = true
                 }, label: {
-                    Image(systemName: "camera.fill").foregroundColor(monalGreen)
+                    Image(systemName: "camera.fill")
                 })
             }
         })
@@ -339,7 +331,6 @@ struct AddContactMenu: View {
                         }, label: {
                             Text("Close")
                         })
-                        .foregroundColor(monalGreen)
                     })
                 })
             }

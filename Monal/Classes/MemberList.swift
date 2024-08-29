@@ -265,6 +265,10 @@ struct MemberList: View {
                 }
                 
                 ForEach(memberList, id:\.self) { contact in
+                    var isDeletable: Bool {
+                        ownUserHasAffiliationToRemove(contact: contact)
+                    }
+
                     if !contact.isSelfChat {
                         HStack {
                             HStack {
@@ -295,23 +299,26 @@ struct MemberList: View {
                                 view
                             }
                         }
-                        .deleteDisabled(!ownUserHasAffiliationToRemove(contact: contact))
-                    }
-                }
-                .onDelete(perform: { memberIdx in
-                    let member = memberList[memberIdx.first!]
-                    showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[member]))?"), description: self.muc.mucType == "group" ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
-                        showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[member]))"), descriptionView: Text("Removing \(member.contactJid as String)...")) {
-                            promisifyAction {
-                                account.mucProcessor.setAffiliation("none", ofUser: member.contactJid, inMuc: self.muc.contactJid)
+                        .swipeActions(allowsFullSwipe: false) {
+                            Button("Delete") {
+                                showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[contact]))?"), description: self.muc.mucType == "group" ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
+                                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[contact]))"), descriptionView: Text("Removing \(contact.contactJid as String)...")) {
+                                        promisifyAction {
+                                            account.mucProcessor.setAffiliation("none", ofUser: contact.contactJid, inMuc: self.muc.contactJid)
+                                        }
+                                    }.catch { error in
+                                        showAlert(title:Text("Error removing user!"), description:Text("\(String(describing:error))"))
+                                    }
+                                }
                             }
-                        }.catch { error in
-                            showAlert(title:Text("Error removing user!"), description:Text("\(String(describing:error))"))
+                            .tint(.red)
+                            .disabled(!isDeletable)
                         }
                     }
-                })
+                }
             }
         }
+        .animation(.default, value: memberList)
         .actionSheet(isPresented: $showActionSheet) {
             ActionSheet(
                 title: actionSheetPrompt.title,

@@ -46,7 +46,7 @@ struct LogFilesView: View {
                     ForEach(sortedLogFileInfos, id: \.self) { logFileInfo in
                         Button(logFileInfo.fileName) {
                             fileURL = URL(fileURLWithPath: logFileInfo.filePath)
-                        }.foregroundColor(monalDarkGreen)
+                        }
                     }
                 }
                 Section(header: Text("Database Files")) {
@@ -56,14 +56,14 @@ struct LogFilesView: View {
                         } else {
                             showingDBExportFailedAlert = true
                         }
-                    }.foregroundColor(monalDarkGreen)
+                    }
                     Button("IPC Database") {
                         if let dbFile = HelperTools.exportIPCDatabase() {
                             self.fileURL = URL(fileURLWithPath: dbFile)
                         } else {
                             showingDBExportFailedAlert = true
                         }
-                    }.foregroundColor(monalDarkGreen)
+                    }
                 }
             }
             .listStyle(.grouped)

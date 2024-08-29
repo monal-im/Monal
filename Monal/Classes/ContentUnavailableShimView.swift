@@ -1,5 +1,5 @@
 //
-//  ContentNotAvailableView.swift
+//  ContentUnavailableShimView.swift
 //  Monal
 //
 //  Created by Matthew Fennell <matthew@fennell.dev> on 05/08/2024.
@@ -38,6 +38,10 @@ struct ContentUnavailableShimView: View {
             }
         }
     }
+}
+
+extension ContentUnavailableShimView {
+    static var search: ContentUnavailableShimView = ContentUnavailableShimView("No Results", systemImage: "magnifyingglass", description: Text("Check the spelling or try a new search."))
 }
 
 #Preview {

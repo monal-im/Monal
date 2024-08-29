@@ -19,11 +19,6 @@ import FLAnimatedImage
 import OrderedCollections
 import CropViewController
 
-extension MLContact : Identifiable {}       //make MLContact be usable in swiftui ForEach clauses
-
-let monalGreen = Color(UIColor(red:128.0/255, green:203.0/255, blue:182.0/255, alpha:1.0));
-let monalDarkGreen = Color(UIColor(red:20.0/255, green:138.0/255, blue:103.0/255, alpha:1.0));
-
 //see https://stackoverflow.com/a/62207329/3528174
 //and https://www.hackingwithswift.com/forums/100-days-of-swiftui/extending-shapestyle-for-adding-colors-instead-of-extending-color/12324
 public extension ShapeStyle where Self == Color {
@@ -204,6 +199,18 @@ extension View {
     }
     func addTopRight(@ViewBuilder _ overlayClosure: @escaping () -> some View) -> some View {
         modifier(TopRight(overlay:overlayClosure()))
+    }
+}
+
+struct MonalProminentButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) var isEnabled
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(10)
+            .background(Color.accentColor)
+            .foregroundColor(Color(UIColor.systemBackground))
+            .fontWeight(isEnabled ? .bold : .regular)
+            .cornerRadius(10)
     }
 }
 
@@ -456,6 +463,44 @@ extension View {
     }
 }
 
+struct NumberlessBadge: View {
+    @Binding var notificationCount: Int
+    private let size: Int
+    private let inset: Int
+
+    var badgeSize: CGFloat {
+        CGFloat(integerLiteral: size)
+    }
+
+    var edgeInset: CGFloat {
+        CGFloat(integerLiteral: inset)
+    }
+
+    init(_ notificationCount: Binding<Int>, size: Int = 7, inset: Int = 1) {
+        self._notificationCount = notificationCount
+        self.size = size
+        self.inset = inset
+    }
+
+    var body: some View {
+        HStack {
+            Spacer()
+            VStack {
+                if notificationCount > 0 {
+                    Image(systemName: "circle.fill")
+                        .resizable()
+                        .frame(width: badgeSize, height: badgeSize)
+                        .tint(.red)
+                        .padding(.trailing, edgeInset)
+                        .padding(.top, edgeInset)
+                }
+                Spacer()
+            }
+        }
+        .animation(.default, value: notificationCount)
+    }
+}
+
 // //see https://stackoverflow.com/a/68291983
 // struct OverflowContentViewModifier: ViewModifier {
 //     @State private var contentOverflow: Bool = false
@@ -512,20 +557,32 @@ struct LazyClosureView<Content: View>: View {
 struct AddTopLevelNavigation<Content: View>: View {
     let build: () -> Content
     let delegate: SheetDismisserProtocol
+    @StateObject private var sizeClass: ObservableKVOWrapper<SizeClassWrapper>
     init(withDelegate delegate: SheetDismisserProtocol, to build: @autoclosure @escaping () -> Content) {
         self.build = build
         self.delegate = delegate
+
+        let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
+        self._sizeClass = StateObject(wrappedValue: ObservableKVOWrapper<SizeClassWrapper>(activeChats.sizeClass))
     }
     var body: some View {
         NavigationStack {
             build()
             .navigationBarTitleDisplayMode(.automatic)
             .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
-            .navigationBarItems(leading: Button(action : {
-                self.delegate.dismiss()
-            }){
-                Image(systemName: "arrow.backward")
-            }.keyboardShortcut(.escape, modifiers: []))
+            .toolbar {
+                let isCompact = UIUserInterfaceSizeClass(rawValue: sizeClass.horizontal) == .compact
+                if isCompact {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button(action : {
+                            self.delegate.dismiss()
+                        }){
+                            Image(systemName: "arrow.backward")
+                                .tint(monalGreen)
+                        }.keyboardShortcut(.escape, modifiers: [])
+                    }
+                }
+            }
         }
     }
 }
@@ -697,6 +754,19 @@ class SwiftuiInterface : NSObject {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
         host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: AddContactMenu(delegate: delegate, dismissWithNewContact: dismisser, prefillJid: jid, preauthToken: preauthToken, prefillAccount: prefillAccount, omemoFingerprints: omemoFingerprints)))
+        return host
+    }
+
+    @objc(makeContactsViewWithDismisser:onButton:)
+    func makeContactsView(dismisser: @escaping (MLContact) -> (), button: UIBarButtonItem) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView: AnyView(EmptyView()))
+        let contactsView = ContactsView(contacts: Contacts(), delegate: delegate, dismissWithContact: dismisser)
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: contactsView))
+        host.modalPresentationStyle = .popover
+        host.popoverPresentationController?.sourceItem = button
+        host.preferredContentSize = host.sizeThatFits(in: CGSize(width: 0, height: 600))
         return host
     }
 

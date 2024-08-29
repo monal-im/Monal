@@ -58,6 +58,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "MLContactSoftwareVersionInfo.h"
 #import "IPC.h"
 #import "MLDelayableTimer.h"
+#import "Quicksy_Country.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -73,6 +74,11 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 
 @interface MLDelayableTimer()
 -(void) invalidate;
+@end
+
+@interface NSUserDefaults (SerializeNSObject)
+-(id) swizzled_objectForKey:(NSString*) defaultName;
+-(void) swizzled_setObject:(id) value forKey:(NSString*) defaultName;
 @end
 
 static char* _crashBundleName = "UnifiedReport";
@@ -288,6 +294,63 @@ void swizzle(Class c, SEL orig, SEL new)
     self = [super init];
     self.obj = obj;
     return self;
+}
+@end
+
+@implementation NSUserDefaults (SerializeNSObject)
+-(id) swizzled_objectForKey:(NSString*) defaultName
+{
+    //this will call the original not this one, because of swizzling!
+    id data = [self swizzled_objectForKey:defaultName];
+    //always unserialize this: every real NSData should be serialized to NSData (e.g. an NSData containing a serialized NSData)
+    //and therefore any exception thrown by unserialize of not serialized data should never happen as it is an implementation error in Monal
+    if([data isKindOfClass:[NSData class]])
+    {
+        @try {
+            return [HelperTools unserializeData:data];
+        } @catch (NSException* exception) {
+            NSMutableDictionary* userInfo = [NSMutableDictionary dictionaryWithDictionary:nilDefault(exception.userInfo, @{})];
+            [userInfo addEntriesFromDictionary:@{@"userDefaultsName":defaultName}];
+            @throw [NSException exceptionWithName:exception.name reason:exception.reason userInfo:userInfo];
+        }
+    }
+    return data;
+}
+
+-(void) swizzled_setObject:(id) value forKey:(NSString*) defaultName
+{
+    id toSave = value;
+    //these are the default datatypes/class clusters already handled by NSUserDefaults
+    //(NSData gets a special handling by us and is therefore not listed here)
+    if(
+        [value isKindOfClass:[NSString class]] ||
+        [value isKindOfClass:[NSNumber class]] ||
+        [value isKindOfClass:[NSDate class]] ||
+        [value isKindOfClass:[NSURL class]] ||
+        [value isKindOfClass:[NSDictionary class]] ||
+        [value isKindOfClass:[NSMutableDictionary class]] ||
+        [value isKindOfClass:[NSArray class]] ||
+        [value isKindOfClass:[NSMutableArray class]]
+    )
+        ;       //do nothing, already handled by original NSUserDefaults method
+    //every NSData should be double serialized (see swizzled_objectForKey: above for a detailed explanation)
+    //everything else will just be (single) serialized to NSData
+    else
+        toSave = [HelperTools serializeObject:value];
+    return [self swizzled_setObject:toSave forKey:defaultName];
+}
+
+//see https://stackoverflow.com/a/13326633 and https://fek.io/blog/method-swizzling-in-obj-c-and-swift/
++(void) load
+{
+    if(self == NSUserDefaults.self)
+    {
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            swizzle([self class], @selector(objectForKey:), @selector(swizzled_objectForKey:));
+            swizzle([self class], @selector(setObject:forKey:), @selector(swizzled_setObject:forKey:));
+        });
+    }
 }
 @end
 
@@ -817,6 +880,7 @@ void swizzle(Class c, SEL orig, SEL new)
         [NSURL class],
         [OmemoState class],
         [MLContactSoftwareVersionInfo class],
+        [Quicksy_Country class],
     ]] fromData:data error:&error];
     if(error)
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];

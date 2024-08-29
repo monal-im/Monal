@@ -120,7 +120,6 @@ struct PasswordMigration: View {
                 }
             }
         }
-        .accentColor(monalGreen)
     }
 }
 

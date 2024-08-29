@@ -281,6 +281,7 @@ struct ContactDetails: View {
                                 Text("Notify only when mentioned")
                             } icon: {
                                 Image(systemName: "bell.badge")
+                                    .foregroundColor(.primary)
                             }
                         } else {
                             Label {
@@ -291,6 +292,7 @@ struct ContactDetails: View {
                             }
                         }
                     }
+                    .tint(Color.primary)
                 }
                 
 #if !DISABLE_OMEMO
@@ -391,9 +393,10 @@ struct ContactDetails: View {
                     }) {
                         Text("Show shared Media and Files")
                     }
-                    NavigationLink(destination: LazyClosureView{MediaGalleryView(contact: contact.contactJid as String, accountNo: contact.accountId)}) {
-                        Text("View Media Gallery")
-                    }
+                    .tint(Color.primary)
+                }
+                NavigationLink(destination: LazyClosureView{MediaGalleryView(contact: contact.contactJid as String, accountNo: contact.accountId)}) {
+                    Text("View Media Gallery")
                 }
                 
                 NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact))) {

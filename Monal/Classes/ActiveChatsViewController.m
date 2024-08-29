@@ -24,7 +24,7 @@
 #import "MLCall.h"      //for MLCallType
 #import "XMPPIQ.h"
 #import "MLIQProcessor.h"
-#import "UIColor+Theme.h"
+#import "Quicksy_Country.h"
 #import <Monal-Swift.h>
 
 #define prependToViewQueue(firstArg, ...)                           metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self prependToViewQueue:firstArg withId:MLViewIDUnspecified andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_prependToViewQueue(firstArg, __VA_ARGS__))
@@ -60,6 +60,9 @@ typedef void (^view_queue_block_t)(PMKResolver _Nonnull);
 }
 @property (atomic, strong) NSMutableArray* unpinnedContacts;
 @property (atomic, strong) NSMutableArray* pinnedContacts;
+@end
+
+@implementation SizeClassWrapper
 @end
 
 @implementation ActiveChatsViewController
@@ -245,7 +248,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) configureComposeButton
 {
-    UIImage* image = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];
+    UIImage* image = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.tintColor];
     UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
     self.composeButton.customView = [HelperTools
         buttonWithNotificationBadgeForImage:image
@@ -282,6 +285,9 @@ static NSMutableSet* _pushWarningDisplayed;
     
     self.view = self.chatListTable;
     
+    self.sizeClass = [SizeClassWrapper new];
+    [self updateSizeClass];
+
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleRefreshDisplayNotification:) name:kMonalRefresh object:nil];
     [nc addObserver:self selector:@selector(handleContactRemoved:) name:kMonalContactRemoved object:nil];
@@ -654,7 +660,7 @@ static NSMutableSet* _pushWarningDisplayed;
         
         prependToViewQueue(MLViewIDWelcomeLoginView, (^(PMKResolver resolve) {
 #ifdef IS_QUICKSY
-            if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0)
+            if([[[DataLayer sharedInstance] accountList] count] == 0)
             {
                 DDLogDebug(@"Showing account registration view...");
                 UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:@{}];
@@ -713,6 +719,19 @@ static NSMutableSet* _pushWarningDisplayed;
             NSArray* needingMigration = [[DataLayer sharedInstance] accountListNeedingPasswordMigration];
             if(needingMigration.count > 0)
             {
+#ifdef IS_QUICKSY
+                DDLogDebug(@"Showing account registration view to do password migration...");
+                UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:@{}];
+                if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
+                    view.modalPresentationStyle = UIModalPresentationFullScreen;
+                else
+                    view.ml_disposeCallback = ^{
+                        [self sheetDismissed];
+                    };
+                [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                    [self presentViewController:view animated:NO completion:^{resolve(nil);}];
+                }];
+#else
                 DDLogDebug(@"Showing password migration view...");
                 UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
                 passwordMigration.ml_disposeCallback = ^{
@@ -721,6 +740,7 @@ static NSMutableSet* _pushWarningDisplayed;
                 [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
                     [self presentViewController:passwordMigration animated:YES completion:^{resolve(nil);}];
                 }];
+#endif
             }
             else
                 resolve(nil);
@@ -737,7 +757,8 @@ static NSMutableSet* _pushWarningDisplayed;
     [store requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError* _Nullable error) {
         if(granted)
         {
-            NSString* countryCode = [[HelperTools defaultsDB] objectForKey:@"Quicksy_countryCode"];
+            Quicksy_Country* country = [[HelperTools defaultsDB] objectForKey:@"Quicksy_country"];
+            NSString* countryCode = country.code;
             NSCharacterSet* allowedCharacters = [[NSCharacterSet characterSetWithCharactersInString:@"+0123456789"] invertedSet];
             NSMutableDictionary* numbers = [NSMutableDictionary new];
             
@@ -1106,13 +1127,17 @@ static NSMutableSet* _pushWarningDisplayed;
             return;
         }
 
-        UINavigationController* nav = segue.destinationViewController;
-        ContactsViewController* contacts = (ContactsViewController*)nav.topViewController;
-        contacts.selectContact = ^(MLContact* selectedContact) {
+        contactCompletion callback = ^(MLContact* selectedContact) {
             DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
             [self presentChatWithContact:selectedContact];
         };
+        UIViewController* contactsView = [[SwiftuiInterface new] makeContactsViewWithDismisser: callback onButton: self.composeButton];
+        [self presentViewController:contactsView animated:YES completion:^{}];
     }
+}
+
+-(void) updateSizeClass {
+    self.sizeClass.horizontal = self.view.traitCollection.horizontalSizeClass;
 }
 
 -(NSMutableArray*) getChatArrayForSection:(size_t) section

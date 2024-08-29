@@ -42,7 +42,15 @@ module HelperToolsPrivate {
     header "../Classes/HelperTools.h"
     export *
 }
+module HelperToolsQuicksy_CountryCodesPrivate {
+    header "../Classes/HelperTools+Quicksy_CountryCodes.h"
+    export *
+}
 module MLDelayableTimerPrivate {
     header "../Classes/MLDelayableTimer.h"
+    export *
+}
+module Quicksy_CountryPrivate {
+    header "../Classes/Quicksy_Country.h"
     export *
 }

@@ -90,16 +90,16 @@ struct OmemoKeysEntryView: View {
 
     // @ViewBuilder
     func getTrustLevelIcon() -> some View {
-        var accentColor = Color.yellow
+        var iconColor = Color.yellow
         var iconName = "key.fill"
         switch(self.trustLevel.int32Value) {
         case MLOmemoTrusted:
-            accentColor = Color.green
+            iconColor = Color.green
             break
         case MLOmemoToFU:
             break
         case MLOmemoNotTrusted:
-            accentColor = Color.red
+            iconColor = Color.red
             break
         case MLOmemoTrustedButRemoved:
             iconName = "trash.fill"
@@ -111,7 +111,7 @@ struct OmemoKeysEntryView: View {
         return Image(systemName: iconName)
             .frame(width: 30, height: 30, alignment: .center)
             .foregroundColor(Color.primary)
-            .background(accentColor)
+            .background(iconColor)
             .cornerRadius(30)
     }
 
@@ -388,7 +388,6 @@ struct OmemoKeysForChatView: View {
                 }
             }
         }
-        .accentColor(monalGreen)
         .navigationBarTitle(isOwnKeys() ? Text("My Encryption Keys") : Text("Encryption Keys"), displayMode: .inline)
         .onAppear(perform: {
             self.selectedContact = self.omemoKeys.contacts.keys.first // needs to be done here as first is nil in init

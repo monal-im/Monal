@@ -143,7 +143,7 @@ struct ContactsView: View {
         .animation(.default, value: contactList)
         .navigationTitle("Contacts")
         .listStyle(.plain)
-        .searchable(text: $searchText)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
         .keyboardType(.emailAddress)

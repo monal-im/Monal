@@ -152,14 +152,15 @@ class MediaItem: Identifiable, ObservableObject {
     }
 }
 
-    struct MediaItemView: View {
-        @StateObject private var item: MediaItem
+struct MediaItemView: View {
+    @StateObject private var item: MediaItem
 
-        init(fileInfo: [String: Any]) {
-            _item = StateObject(wrappedValue: MediaItem(fileInfo: fileInfo))
-        }
+    init(fileInfo: [String: Any]) {
+        _item = StateObject(wrappedValue: MediaItem(fileInfo: fileInfo))
+    }
 
-        var body: some View {
+    var body: some View {
+        ZStack {
             Group {
                 if let thumbnail = item.thumbnail {
                     Image(uiImage: thumbnail)
@@ -174,8 +175,19 @@ class MediaItem: Identifiable, ObservableObject {
             .frame(width: 100, height: 100)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
+            
+            // Add play icon overlay for video files
+            if let mimeType = item.fileInfo["mimeType"] as? String, mimeType.starts(with: "video/") {
+                Image(systemName: "play.circle.fill")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(.white)
+                    .background(Color.black.opacity(0.5))
+                    .clipShape(Circle())
+            }
         }
     }
+}
 
 struct MediaItemDetailView: View {
     @StateObject private var item: MediaItem

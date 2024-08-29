@@ -7,7 +7,7 @@
 //
 
 #import "MLFileTransferVideoCell.h"
-
+#import "HelperTools.h"
 
 @implementation MLFileTransferVideoCell
 
@@ -63,9 +63,17 @@ AVPlayer *avplayer;
         mimeType = @"audio/mp4";
     }
     
-    AVURLAsset* videoAsset = [[AVURLAsset alloc] initWithURL:videoFileUrl options:@{
-        @"AVURLAssetOutOfBandMIMETypeKey": mimeType
+    __block AVURLAsset* videoAsset = nil;
+    //the completion is calles synchronously
+    [HelperTools createAVURLAssetFromFile:fileUrlStr havingMimeType:mimeType andFileExtension:nil withCompletionHandler:^(AVURLAsset* asset) {
+        videoAsset = asset;
     }];
+    if(videoAsset == nil)
+    {
+        DDLogWarn(@"Could not create AVURLAsset for video cell!");
+        return;
+    }
+    
     avplayer = [AVPlayer playerWithPlayerItem:[AVPlayerItem playerItemWithAsset:videoAsset]];
     DDLogInfo(@"Created AVPlayer(%@): %@", mimeType, avplayer);
     avplayerVC.player = avplayer;

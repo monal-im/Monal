@@ -69,7 +69,7 @@ class MediaItem: Identifiable, ObservableObject {
         }
 
         if mimeType.starts(with: "image/") {
-            if let image = UIImage(contentsOfFile: cacheFile)?.thumbnail(size: CGSize(width: 100, height: 100)) {
+            if let image = UIImage(contentsOfFile: cacheFile) {
                 self.thumbnail = image
             } else {
                 DDLogError("Failed to generate image thumbnail for: \(fileInfo)")
@@ -78,7 +78,7 @@ class MediaItem: Identifiable, ObservableObject {
             return
         } else if mimeType.starts(with: "video/") {
             if let thumbnail = await videoPreview(for:fileInfo) {
-                self.thumbnail = thumbnail.thumbnail(size: CGSize(width: 100, height: 100))
+                self.thumbnail = thumbnail
             } else {
                 DDLogError("Failed to generate video thumbnail for: \(fileInfo)")
                 self.thumbnail = UIImage(systemName: "video")
@@ -123,14 +123,14 @@ struct MediaItemView: View {
                 if let thumbnail = item.thumbnail {
                     Image(uiImage: thumbnail)
                         .resizable()
-                        .scaledToFill()
+                        //.scaledToFit()        //leaves empty room around image if not having a square format
+                        .scaledToFill()         //this is what the ios gallery app uses (will crop the edges of that preview)
                 } else {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle())
-                        .frame(width: 50, height: 50)
                 }
             }
-            .frame(width: 100, height: 100)
+            .frame(width: 100, height: 100, alignment: .center)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
             

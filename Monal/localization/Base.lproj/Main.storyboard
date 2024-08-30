@@ -31,52 +31,6 @@
             </objects>
             <point key="canvasLocation" x="-2798" y="-1290"/>
         </scene>
-        <!--Contacts -->
-        <scene sceneID="i7L-1h-zmZ">
-            <objects>
-                <tableViewController clearsSelectionOnViewWillAppear="NO" id="6Ao-6z-tB7" userLabel="Contacts " customClass="ContactsViewController" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="4Ri-hX-ob8">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="680"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <connections>
-                            <outlet property="dataSource" destination="6Ao-6z-tB7" id="U7P-Iw-tsb"/>
-                            <outlet property="delegate" destination="6Ao-6z-tB7" id="m7e-a4-sdI"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1">
-                        <barButtonItem key="leftBarButtonItem" title="Close" id="NyY-WQ-3hC">
-                            <connections>
-                                <action selector="close:" destination="6Ao-6z-tB7" id="JZL-x6-OVB"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" id="2vX-Wb-Pa6"/>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
-                        <segue destination="WjA-je-Xez" kind="show" identifier="showNewRecipient" id="7Wf-Gt-qkN"/>
-                    </connections>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-1204" y="-2626"/>
-        </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="ctJ-St-O59">
-            <objects>
-                <navigationController id="hMh-kj-2DY" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="vzd-J2-f8E">
-                        <rect key="frame" x="0.0" y="13" width="375" height="50"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <connections>
-                        <segue destination="6Ao-6z-tB7" kind="relationship" relationship="rootViewController" id="PAV-0F-VOk"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="cXK-V1-EEa" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-2099" y="-2608"/>
-        </scene>
         <!--Placeholder View Controller-->
         <scene sceneID="ian-aI-Nym">
             <objects>
@@ -132,13 +86,7 @@
                             </connections>
                         </barButtonItem>
                         <rightBarButtonItems>
-                            <barButtonItem title="Contact List" id="pyP-qb-mfr">
-                                <connections>
-                                    <segue destination="hMh-kj-2DY" kind="popoverPresentation" identifier="showContacts" popoverAnchorBarButtonItem="pyP-qb-mfr" id="lBM-pO-Hdw">
-                                        <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                    </segue>
-                                </connections>
-                            </barButtonItem>
+                            <barButtonItem title="Contact List" id="pyP-qb-mfr"/>
                             <barButtonItem enabled="NO" title="Spinner" id="lQZ-nm-6qt"/>
                         </rightBarButtonItems>
                     </navigationItem>
@@ -2457,56 +2405,6 @@
             </objects>
             <point key="canvasLocation" x="2876.811594202899" y="209.59821428571428"/>
         </scene>
-        <!--Send A Message -->
-        <scene sceneID="vwP-ns-Kg8">
-            <objects>
-                <tableViewController id="WjA-je-Xez" customClass="MLComposeViewController" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="RtG-dm-hyz">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="680"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="addButton" id="DD1-1q-KsC">
-                                <rect key="frame" x="0.0" y="38" width="375" height="43.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="DD1-1q-KsC" id="HFV-P5-JCg">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jIW-zk-rUu">
-                                            <rect key="frame" x="169.5" y="7" width="36" height="30"/>
-                                            <state key="normal" title="Send">
-                                                <color key="titleColor" red="0.4541509151" green="0.72539824249999996" blue="0.68004375699999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            </state>
-                                            <connections>
-                                                <action selector="send:" destination="WjA-je-Xez" eventType="touchUpInside" id="XRf-MC-KAb"/>
-                                            </connections>
-                                        </button>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="jIW-zk-rUu" firstAttribute="centerX" secondItem="HFV-P5-JCg" secondAttribute="centerX" id="UDc-mG-DX0"/>
-                                        <constraint firstItem="jIW-zk-rUu" firstAttribute="centerY" secondItem="HFV-P5-JCg" secondAttribute="centerY" id="rKu-5a-nHX"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="WjA-je-Xez" id="hen-4b-Abk"/>
-                            <outlet property="delegate" destination="WjA-je-Xez" id="0Br-bL-Au9"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Send A Message " id="MiR-iW-O6e">
-                        <barButtonItem key="rightBarButtonItem" title="Close" id="Vtv-sv-ErG">
-                            <connections>
-                                <action selector="close:" destination="WjA-je-Xez" id="PuF-5l-APQ"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Q5t-24-y4S" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="590" y="-2482"/>
-        </scene>
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="xp1-3q-JGG"/>
@@ -2529,9 +2427,6 @@
         </namedColor>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
-        <systemColor name="groupTableViewBackgroundColor">
-            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

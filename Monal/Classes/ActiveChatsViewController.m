@@ -16,7 +16,6 @@
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
 #import "MLImageManager.h"
-#import "ContactsViewController.h"
 #import "MLXEPSlashMeHandler.h"
 #import "MLNotificationQueue.h"
 #import "MLSettingsAboutViewController.h"

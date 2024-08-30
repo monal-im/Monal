@@ -1119,20 +1119,6 @@ static NSMutableSet* _pushWarningDisplayed;
         };
         [self presentViewController:detailsViewController animated:YES completion:^{}];
     }
-    else if([segue.identifier isEqualToString:@"showContacts"])
-    {
-        // Only segue if at least one account is enabled
-        if([self showAccountNumberWarningIfNeeded]) {
-            return;
-        }
-
-        contactCompletion callback = ^(MLContact* selectedContact) {
-            DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
-            [self presentChatWithContact:selectedContact];
-        };
-        UIViewController* contactsView = [[SwiftuiInterface new] makeContactsViewWithDismisser: callback onButton: self.composeButton];
-        [self presentViewController:contactsView animated:YES completion:^{}];
-    }
 }
 
 -(void) updateSizeClass {
@@ -1424,11 +1410,18 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) showContacts
 {
+    if([self showAccountNumberWarningIfNeeded]) {
+        return;
+    }
+
     appendToViewQueue((^(PMKResolver resolve) {
-        // Only segue if at least one account is enabled
-        if(![self showAccountNumberWarningIfNeeded]);
-            [self performSegueWithIdentifier:@"showContacts" sender:self];
-        resolve(nil);
+        contactCompletion callback = ^(MLContact* selectedContact) {
+            DDLogVerbose(@"Got selected contact from contactlist ui: %@", selectedContact);
+            [self presentChatWithContact:selectedContact];
+        };
+
+        UIViewController* contactsView = [[SwiftuiInterface new] makeContactsViewWithDismisser: callback onButton: self.composeButton];
+        [self presentViewController:contactsView animated:YES completion:^{resolve(nil);}];
     }));
 }
 

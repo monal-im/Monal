@@ -18,7 +18,6 @@
 		2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */; };
 		26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26158AF11FFA6E4500E53BDC /* MLWebViewController.m */; };
 		26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */ = {isa = PBXBuildFile; fileRef = 26158AF31FFA8A6A00E53BDC /* opensource.html */; };
-		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A628B176C159000059090 /* AccountListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628A176C159000059090 /* AccountListController.m */; };
 		261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		261E542623A0A1D300394F59 /* monalxmpp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -339,8 +338,6 @@
 		26158AF01FFA6E4500E53BDC /* MLWebViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLWebViewController.h; sourceTree = "<group>"; };
 		26158AF11FFA6E4500E53BDC /* MLWebViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLWebViewController.m; sourceTree = "<group>"; };
 		26158AF31FFA8A6A00E53BDC /* opensource.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = opensource.html; sourceTree = "<group>"; };
-		261A627E176C055400059090 /* ContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsViewController.h; sourceTree = "<group>"; };
-		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6284176C156500059090 /* ActiveChatsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActiveChatsViewController.m; sourceTree = "<group>"; };
 		261A6289176C159000059090 /* AccountListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountListController.h; sourceTree = "<group>"; };
 		261A628A176C159000059090 /* AccountListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountListController.m; sourceTree = "<group>"; };
@@ -1224,8 +1221,6 @@
 				268C1E471FDACDD300BD6921 /* Contact Details */,
 				2665C1191C4AA22700CC9A04 /* Accounts */,
 				262797AC178A573F00B85D94 /* Tableviewcells */,
-				261A627E176C055400059090 /* ContactsViewController.h */,
-				261A627F176C055400059090 /* ContactsViewController.m */,
 				261A6284176C156500059090 /* ActiveChatsViewController.m */,
 				2609B5271FD5B26800F09FA1 /* MLSplitViewDelegate.h */,
 				2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */,
@@ -2090,7 +2085,6 @@
 				E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */,
 				E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */,
 				84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */,
-				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,

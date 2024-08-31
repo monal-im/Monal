@@ -573,8 +573,8 @@ struct AddTopLevelNavigation<Content: View>: View {
                 .navigationBarTitleDisplayMode(.automatic)
                 .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
                 .toolbar {
-                    let isCompact = UIUserInterfaceSizeClass(rawValue: sizeClass.horizontal) == .compact
-                    if isCompact {
+                    let shouldDisplayBackButton = UIUserInterfaceSizeClass(rawValue: sizeClass.horizontal) == .compact
+                    if shouldDisplayBackButton {
                         ToolbarItem(placement: .topBarLeading) {
                             Button(action : {
                                 self.delegate.dismiss()

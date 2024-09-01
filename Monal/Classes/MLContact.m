@@ -48,6 +48,7 @@ static NSMutableDictionary* _singletonCache;
 @property (nonatomic, strong) NSString* fullName;
 @property (nonatomic, strong) NSString* nickName;
 @property (nonatomic, strong) xmpp* account;
+@property (nonatomic, strong) NSSet<NSString*>* rosterGroups;
 
 @property (nonatomic, strong) NSDate* _Nullable lastInteractionTime;
 
@@ -100,6 +101,7 @@ static NSMutableDictionary* _singletonCache;
             @"count": @1,
             @"isActiveChat": @YES,
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],
+            @"rosterGroups": [NSSet new],
         }];
     }
     else if(type == 2)
@@ -124,6 +126,7 @@ static NSMutableDictionary* _singletonCache;
             @"count": @2,
             @"isActiveChat": @YES,
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640153174],
+            @"rosterGroups": [NSSet new],
         }];
     }
     else if(type == 3)
@@ -148,6 +151,7 @@ static NSMutableDictionary* _singletonCache;
             @"count": @3,
             @"isActiveChat": @YES,
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640157074],
+            @"rosterGroups": [NSSet new],
         }];
     }
     else
@@ -171,6 +175,7 @@ static NSMutableDictionary* _singletonCache;
             @"count": @4,
             @"isActiveChat": @YES,
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640157174],
+            @"rosterGroups": [NSSet new],
         }];
     }
 }
@@ -223,6 +228,7 @@ static NSMutableDictionary* _singletonCache;
             @"count": @0,
             @"isActiveChat": @NO,
             @"lastInteraction": nilWrapper(nil),
+            @"rosterGroups": [NSSet set],
         }];
     }
     else
@@ -725,6 +731,7 @@ static NSMutableDictionary* _singletonCache;
     [coder encodeBool:self.isEncrypted forKey:@"isEncrypted"];
     [coder encodeBool:self.isMuted forKey:@"isMuted"];
     [coder encodeObject:self.lastInteractionTime forKey:@"lastInteractionTime"];
+    [coder encodeObject:self.rosterGroups forKey:@"rosterGroups"];
 }
 
 -(instancetype) initWithCoder:(NSCoder*) coder
@@ -750,6 +757,7 @@ static NSMutableDictionary* _singletonCache;
     self.isEncrypted = [coder decodeBoolForKey:@"isEncrypted"];
     self.isMuted = [coder decodeBoolForKey:@"isMuted"];
     self.lastInteractionTime = [coder decodeObjectForKey:@"lastInteractionTime"];
+    self.rosterGroups = [coder decodeObjectForKey:@"rosterGroups"];
     return self;
 }
 
@@ -777,6 +785,7 @@ static NSMutableDictionary* _singletonCache;
     updateIfPrimitiveNotEqual(self.isMuted, contact.isMuted);
     //don't update lastInteractionTime from contact, we dynamically update ourselves by handling kMonalLastInteractionUpdatedNotice
     //updateIfIdNotEqual(self.lastInteractionTime, contact.lastInteractionTime);
+    updateIfIdNotEqual(self.rosterGroups, contact.rosterGroups);
 }
 
 -(BOOL) isEqualToMessage:(MLMessage*) message
@@ -847,6 +856,7 @@ static NSMutableDictionary* _singletonCache;
     contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
     // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
     contact.lastInteractionTime = nilExtractor([dic objectForKey:@"lastInteraction"]);        //no default needed, already done in DataLayer
+    contact.rosterGroups = [dic objectForKey:@"rosterGroups"];
     contact->_avatar = nil;
     return contact;
 }

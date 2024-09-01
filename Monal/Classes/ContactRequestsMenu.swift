@@ -81,7 +81,7 @@ struct ContactRequestsMenu: View {
     var body: some View {
         Section(header: Text("Allowing someone to add you as a contact lets them see your profile picture and when you are online.")) {
             if(pendingRequests.isEmpty) {
-                Text("No pending constact requests")
+                Text("No pending contact requests")
                     .foregroundColor(.secondary)
             } else {
                 List {

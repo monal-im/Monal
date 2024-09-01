@@ -370,6 +370,12 @@ $$
                                              forContact:contact[@"jid"]
                                              andAccount:account.accountID];
             
+            NSSet* groups = [NSSet setWithArray:[contactNode find:@"group#"]];
+            DDLogVerbose(@"Setting following groups: %@ for contact %@", groups, contact[@"jid"]);
+            [[DataLayer sharedInstance] setGroups:groups
+                                       forContact:contact[@"jid"]
+                                        inAccount:account.accountID];
+
 #ifndef DISABLE_OMEMO
             if(contactObj.isMuc == NO)
             {

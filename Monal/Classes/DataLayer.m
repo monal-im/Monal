@@ -479,16 +479,14 @@ static NSDateFormatter* dbFormatter;
 
         if([results count] == 0)
             return (NSMutableDictionary*)nil;
-        else
-        {
-            NSMutableDictionary* contact = [results[0] mutableCopy];
-            //correctly extract NSDate object or 1970, if last interaction is zero
-            contact[@"lastInteraction"] = nilWrapper([self lastInteractionOfJid:username forAccountID:accountID]);
-            //if we have this muc in our favorites table, this muc is "subscribed"
-            if([self.db executeScalar:@"SELECT room FROM muc_favorites WHERE room=? AND account_id=?;" andArguments:@[username, accountID]] != nil)
-                contact[@"subscription"] = @"both";
-            return contact;
-        }
+
+        NSMutableDictionary* contact = [results[0] mutableCopy];
+        //correctly extract NSDate object or 1970, if last interaction is zero
+        contact[@"lastInteraction"] = nilWrapper([self lastInteractionOfJid:username forAccountID:accountID]);
+        //if we have this muc in our favorites table, this muc is "subscribed"
+        if([self.db executeScalar:@"SELECT room FROM muc_favorites WHERE room=? AND account_id=?;" andArguments:@[username, accountID]] != nil)
+            contact[@"subscription"] = @"both";
+        return contact;
     }];
 }
 

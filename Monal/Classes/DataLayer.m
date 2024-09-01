@@ -819,6 +819,38 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+/**
+ Ensures that the given groups are the only ones persisted for the given contact
+
+ This function updates the groups in the database to match the groups passed to the function. This means (for instance) that passing an empty groups set will delete all the groups for a user.
+ */
+-(void) setGroups:(NSSet*) groups forContact:(NSString*) contact inAccount:(NSNumber*) accountNo
+{
+    if(groups == nil || contact == nil || accountNo == nil)
+        return;
+
+    NSSet* validGroups = [groups filteredSetUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.length > 0"]];
+
+    if([validGroups count] < [groups count]) {
+        DDLogWarn(@"Refusing to persist group(s) with empty name for contact %@", contact);
+    }
+
+    DDLogVerbose(@"For contact %@ and account %@, intend to persist these groups: %@", contact, accountNo, validGroups);
+
+    NSString* deleteBuddyGroups = @"DELETE FROM buddy_groups \
+        WHERE buddy_id IN ( \
+            SELECT buddy_id FROM buddylist WHERE buddy_name=? AND account_id=? \
+        );";
+    NSString* saveBuddyGroups = @"INSERT OR IGNORE INTO buddy_groups ('buddy_id', 'group_name') \
+        SELECT buddy_id, ? FROM buddylist WHERE buddy_name=? AND account_id=?;";
+
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:deleteBuddyGroups andArguments:@[contact, accountNo]];
+        for(NSString* group in groups) {
+            [self.db executeNonQuery:saveBuddyGroups andArguments:@[group, contact, accountNo]];
+        }
+    }];
+}
 
 
 #pragma mark Contact info

@@ -858,6 +858,9 @@ static NSMutableDictionary* _singletonCache;
     contact.lastInteractionTime = nilExtractor([dic objectForKey:@"lastInteraction"]);        //no default needed, already done in DataLayer
     contact.rosterGroups = [dic objectForKey:@"rosterGroups"];
     contact->_avatar = nil;
+
+    MLAssert(contact.rosterGroups != nil, @"rosterGroups must be non-nil (if a user is in no groups, it should be empty set)");
+
     return contact;
 }
 

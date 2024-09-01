@@ -461,7 +461,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
 
     return [self.db idReadTransaction:^{
-        NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, mentionOnly, b.account_id, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
+        NSArray* results = [self.db executeReader:@"SELECT b.buddy_id, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, mentionOnly, b.account_id, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
             CASE \
                 WHEN a.buddy_name IS NOT NULL THEN 1 \
                 ELSE 0 \
@@ -481,6 +481,7 @@ static NSDateFormatter* dbFormatter;
             return (NSMutableDictionary*)nil;
 
         NSMutableDictionary* contact = [results[0] mutableCopy];
+        [contact removeObjectForKey:@"buddy_id"];
         //correctly extract NSDate object or 1970, if last interaction is zero
         contact[@"lastInteraction"] = nilWrapper([self lastInteractionOfJid:username forAccountID:accountID]);
         //if we have this muc in our favorites table, this muc is "subscribed"

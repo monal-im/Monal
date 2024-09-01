@@ -1091,6 +1091,17 @@
             [db executeNonQuery:@"ALTER TABLE account DROP COLUMN 'supports_sasl2';"];
         }];
         
+        //allow for storage of roster groups
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.407 withBlock:^{
+            [db executeNonQuery:@"CREATE TABLE 'buddy_groups' ( \
+                'buddy_id' INTEGER NOT NULL, \
+                'group_name' VARCHAR(50) NOT NULL, \
+                FOREIGN KEY('buddy_id') REFERENCES 'buddylist'('buddy_id') ON DELETE CASCADE, \
+                PRIMARY KEY('buddy_id', 'group_name') \
+            );"];
+            [db executeNonQuery:@"CREATE INDEX buddyIdIndex ON 'buddy_groups'('buddy_id');"];
+        }];
+
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

@@ -54,6 +54,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, readonly) BOOL hasAvatar;
 @property (nonatomic, readonly) NSString* fullName;
 @property (nonatomic, readonly) xmpp* _Nullable account;
+@property (nonatomic, readonly) NSSet<NSString*>* rosterGroups;
 /**
  usually user assigned nick name
  */

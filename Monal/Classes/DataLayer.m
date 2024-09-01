@@ -481,7 +481,13 @@ static NSDateFormatter* dbFormatter;
             return (NSMutableDictionary*)nil;
 
         NSMutableDictionary* contact = [results[0] mutableCopy];
+        NSNumber* buddyId = contact[@"buddy_id"];
         [contact removeObjectForKey:@"buddy_id"];
+
+        NSArray* groupArray = [self.db executeScalarReader:@"SELECT DISTINCT group_name FROM buddy_groups WHERE buddy_id=?;" andArguments:@[buddyId]];
+        NSSet* groups = [NSSet setWithArray:groupArray];
+        [contact setValue:groups forKey:@"rosterGroups"];
+
         //correctly extract NSDate object or 1970, if last interaction is zero
         contact[@"lastInteraction"] = nilWrapper([self lastInteractionOfJid:username forAccountID:accountID]);
         //if we have this muc in our favorites table, this muc is "subscribed"

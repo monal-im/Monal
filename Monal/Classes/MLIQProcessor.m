@@ -310,9 +310,11 @@ $$
         return NO;
     }
     
-    NSArray* rosterList = [iqNode find:@"{jabber:iq:roster}query/item@@"];
-    for(NSMutableDictionary* contact in rosterList)
+    NSArray* rosterList = [iqNode find:@"{jabber:iq:roster}query/item"];
+    for(MLXMLNode* contactNode in rosterList)
     {
+        NSMutableDictionary* contact = [contactNode findFirst:@"/@@"];
+
         //ignore roster entries without jid (is this even possible?)
         if(contact[@"jid"] == nil)
             continue;

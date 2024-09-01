@@ -772,7 +772,7 @@ class SwiftuiInterface : NSObject {
         host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: contactsView))
         host.modalPresentationStyle = .popover
         host.popoverPresentationController?.sourceItem = button
-        host.preferredContentSize = host.sizeThatFits(in: CGSize(width: 0, height: 600))
+        host.preferredContentSize = host.sizeThatFits(in: CGSize(width: 400, height: 600))
         return host
     }
 

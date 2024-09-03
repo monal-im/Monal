@@ -74,7 +74,6 @@
 		26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 262D9EAB17924532009292B4 /* MLConstants.h */; };
 		26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
-		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
 		26E8462224EABAD600ECE419 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462424EABAD600ECE419 /* Settings.storyboard */; };
 		26E8462824EABAED00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462A24EABAED00ECE419 /* Main.storyboard */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
@@ -217,6 +216,7 @@
 		C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7AB2777621B0001F295 /* ContactResources.swift */; };
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
 		D09B51F62C7F30DD008D725B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
+		D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */; };
 		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
 		E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */; };
 		E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */; };
@@ -432,8 +432,6 @@
 		26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatInputContainer.m; sourceTree = "<group>"; };
 		26D89F041A890672009B147C /* MLSwitchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSwitchCell.h; sourceTree = "<group>"; };
 		26D89F051A890672009B147C /* MLSwitchCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSwitchCell.m; sourceTree = "<group>"; };
-		26E3ED851FEC0CB7008ABDA5 /* MLServerDetails.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLServerDetails.h; sourceTree = "<group>"; };
-		26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLServerDetails.m; sourceTree = "<group>"; };
 		26E8462324EABAD600ECE419 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Settings.storyboard; sourceTree = "<group>"; };
 		26E8462924EABAED00ECE419 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		26E8462B24EABBFC00ECE419 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = external/de.lproj/Main.strings; sourceTree = "<group>"; };
@@ -761,6 +759,7 @@
 		C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactSoftwareVersionInfo.h; sourceTree = "<group>"; };
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
 		C1F5C7AB2777621B0001F295 /* ContactResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactResources.swift; sourceTree = "<group>"; };
+		D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDetails.swift; sourceTree = "<group>"; };
 		D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
 		D8D2595B2BE453296E59F1AF /* Pods-MonalUITests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore.xcconfig"; sourceTree = "<group>"; };
 		DC5DA2C9782510B3433FD50D /* Pods-monalxmpp.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.beta.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.beta.xcconfig"; sourceTree = "<group>"; };
@@ -1049,14 +1048,13 @@
 				261A628A176C159000059090 /* AccountListController.m */,
 				2636C43D177BD58C001CA71F /* XMPPEdit.h */,
 				2636C43E177BD58C001CA71F /* XMPPEdit.m */,
-				26E3ED851FEC0CB7008ABDA5 /* MLServerDetails.h */,
-				26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */,
 				262AEFE620AE756800498F82 /* MLMAMPrefTableViewController.h */,
 				262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */,
 				26AAAAD82295742400200433 /* MLPasswordChangeTableViewController.h */,
 				26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */,
 				C1B1982425AB31B800D5028E /* MLBlockedUsersTableViewController.h */,
 				C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */,
+				D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -2103,10 +2101,10 @@
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */,
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
-				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				3DC5035C2822F5220064C8A7 /* OmemoKeysView.swift in Sources */,
 				34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
+				D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
 				3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */,

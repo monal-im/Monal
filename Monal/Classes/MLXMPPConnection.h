@@ -39,7 +39,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSMutableDictionary* discoveredAdhocCommands;
 @property (nonatomic, strong) MLContactSoftwareVersionInfo* _Nullable serverVersion;
 
-@property (nonatomic, strong) NSMutableDictionary* conferenceServers;
+@property (nonatomic, strong) NSMutableDictionary<NSString*, MLXMLNode*>* conferenceServers;
+@property (nonatomic, readonly) NSArray<NSDictionary*>* conferenceServerIdentities;
 
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
 @property (nonatomic, strong) NSString* _Nullable uploadServer;
@@ -50,6 +51,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL supportsBookmarksCompat;
 @property (nonatomic, assign) BOOL usingCarbons2;
 @property (nonatomic, strong) NSString* serverIdentity;
+
+@property (nonatomic, readonly) BOOL supportsRosterVersioning;
+@property (nonatomic, readonly) BOOL supportsClientState;
+@property (nonatomic, readonly) BOOL supportsRosterPreApproval;
 
 @property (nonatomic, assign) BOOL supportsPubSub;
 @property (nonatomic, assign) BOOL supportsPubSubMax;

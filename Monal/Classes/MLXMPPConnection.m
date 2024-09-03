@@ -34,4 +34,33 @@
     return self;
 }
 
+-(BOOL) supportsRosterVersioning
+{
+    return [self.serverFeatures check:@"{urn:xmpp:features:rosterver}ver"];
+}
+
+-(BOOL) supportsClientState
+{
+    return [self.serverFeatures check:@"{urn:xmpp:csi:0}csi"];
+}
+
+-(BOOL) supportsRosterPreApproval
+{
+    return [self.serverFeatures check:@"{urn:xmpp:features:pre-approval}sub"];
+}
+
+-(NSArray<NSDictionary*>*) conferenceServerIdentities
+{
+    NSMutableArray<NSDictionary*>* result = [NSMutableArray array];
+
+    for (NSString* jid in self.conferenceServers) {
+        NSDictionary* entry = [self.conferenceServers[jid] findFirst:@"identity@@"];
+        NSMutableDictionary* mutableEntry = [entry mutableCopy];
+        mutableEntry[@"jid"] = jid;
+        [result addObject:mutableEntry];
+    }
+
+    return [result copy];
+}
+
 @end

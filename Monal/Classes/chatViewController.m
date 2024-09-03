@@ -1164,40 +1164,45 @@ enum msgSentState {
     [self resignTextView];
 }
 
+-(void) handleRecord:(BOOL) granted
+{
+    if(granted)
+    {
+        if(!self->_isRecording)
+        {
+            DDLogInfo(@"Starting to record audio...");
+            [[MLAudioRecoderManager sharedInstance] setRecoderManagerDelegate:self];
+            [[MLAudioRecoderManager sharedInstance] start];
+            self->_isRecording = YES;
+        }
+        else
+        {
+            DDLogInfo(@"Stopping audio recording...");
+            [[MLAudioRecoderManager sharedInstance] stop:YES];
+            self->_isRecording = NO;
+        }
+    }
+    else
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access", @"") message:NSLocalizedString(@"If you want to use audio message you will need to allow access in Settings-> Privacy-> Microphone.", @"") preferredStyle:UIAlertControllerStyleAlert];
+
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+
+            }];
+
+            [messageAlert addAction:closeAction];
+            [self presentViewController:messageAlert animated:YES completion:nil];
+        });
+    }
+}
+
 -(IBAction) record:(id) sender
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         DDLogInfo(@"Record button pressed...");
         [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
-            if(granted)
-            {
-                if(!self->_isRecording)
-                {
-                    DDLogInfo(@"Starting to record audio...");
-                    [[MLAudioRecoderManager sharedInstance] setRecoderManagerDelegate:self];
-                    [[MLAudioRecoderManager sharedInstance] start];
-                    self->_isRecording = YES;
-                }
-                else
-                {
-                    DDLogInfo(@"Stopping audio recording...");
-                    [[MLAudioRecoderManager sharedInstance] stop:YES];
-                    self->_isRecording = NO;
-                }
-            }
-            else
-            {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access", @"") message:NSLocalizedString(@"If you want to use audio message you will need to allow access in Settings-> Privacy-> Microphone.", @"") preferredStyle:UIAlertControllerStyleAlert];
-
-                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-
-                    }];
-
-                    [messageAlert addAction:closeAction];
-                    [self presentViewController:messageAlert animated:YES completion:nil];
-                });
-            }
+            [self handleRecord:granted];
         }];
     });
 }

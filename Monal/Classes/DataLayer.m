@@ -829,9 +829,9 @@ static NSDateFormatter* dbFormatter;
 
  This function updates the groups in the database to match the groups passed to the function. This means (for instance) that passing an empty groups set will delete all the groups for a user.
  */
--(void) setGroups:(NSSet*) groups forContact:(NSString*) contact inAccount:(NSNumber*) accountNo
+-(void) setGroups:(NSSet*) groups forContact:(NSString*) contact inAccount:(NSNumber*) accountID
 {
-    if(groups == nil || contact == nil || accountNo == nil)
+    if(groups == nil || contact == nil || accountID == nil)
         return;
 
     NSSet* validGroups = [groups filteredSetUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.length > 0"]];
@@ -840,7 +840,7 @@ static NSDateFormatter* dbFormatter;
         DDLogWarn(@"Refusing to persist group(s) with empty name for contact %@", contact);
     }
 
-    DDLogVerbose(@"For contact %@ and account %@, intend to persist these groups: %@", contact, accountNo, validGroups);
+    DDLogVerbose(@"For contact %@ and account %@, intend to persist these groups: %@", contact, accountID, validGroups);
 
     NSString* deleteBuddyGroups = @"DELETE FROM buddy_groups \
         WHERE buddy_id IN ( \
@@ -850,9 +850,9 @@ static NSDateFormatter* dbFormatter;
         SELECT buddy_id, ? FROM buddylist WHERE buddy_name=? AND account_id=?;";
 
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:deleteBuddyGroups andArguments:@[contact, accountNo]];
+        [self.db executeNonQuery:deleteBuddyGroups andArguments:@[contact, accountID]];
         for(NSString* group in groups) {
-            [self.db executeNonQuery:saveBuddyGroups andArguments:@[group, contact, accountNo]];
+            [self.db executeNonQuery:saveBuddyGroups andArguments:@[group, contact, accountID]];
         }
     }];
 }

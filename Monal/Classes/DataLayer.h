@@ -282,7 +282,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSNumber*) accountID;
 -(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSNumber*) accountID;
--(void) setGroups:(NSSet*) groups forContact:(NSString*) contact inAccount:(NSNumber*) accountNo;
+-(void) setGroups:(NSSet*) groups forContact:(NSString*) contact inAccount:(NSNumber*) accountID;
 
 #pragma mark History Message Search
 /*

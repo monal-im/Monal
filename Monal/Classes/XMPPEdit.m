@@ -13,7 +13,6 @@
 #import "MLButtonCell.h"
 #import "MLImageManager.h"
 #import "MLPasswordChangeTableViewController.h"
-#import "MLServerDetails.h"
 #import "MLSwitchCell.h"
 #import "MLOMEMO.h"
 #import "MLNotificationQueue.h"
@@ -818,9 +817,12 @@ enum DummySettingsRows {
     {
         switch(newIndexPath.row)
         {
-            case SettingsServerDetailsRow:
-                [self performSegueWithIdentifier:@"showServerDetails" sender:self];
+            case SettingsServerDetailsRow: {
+                xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
+                UIViewController* serverDetailsView = [[SwiftuiInterface new] makeServerDetailsViewFor:xmppAccount];
+                [self showDetailViewController:serverDetailsView sender:self];
                 break;
+            }
         }
     }
     else if(newIndexPath.section == kSettingSectionGeneral)
@@ -875,9 +877,12 @@ enum DummySettingsRows {
     {
         switch(indexPath.row)
         {
-            case SettingsServerDetailsRow:
-                [self performSegueWithIdentifier:@"showServerDetails" sender:self];
+            case SettingsServerDetailsRow: {
+                xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
+                UIViewController* serverDetailsView = [[SwiftuiInterface new] makeServerDetailsViewFor:xmppAccount];
+                [self showDetailViewController:serverDetailsView sender:self];
                 break;
+            }
         }
     }
 }
@@ -887,12 +892,7 @@ enum DummySettingsRows {
 
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
-    if([segue.identifier isEqualToString:@"showServerDetails"])
-    {
-        MLServerDetails* server= (MLServerDetails*)segue.destinationViewController;
-        server.xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
-    }
-    else if([segue.identifier isEqualToString:@"showBlockedUsers"])
+    if([segue.identifier isEqualToString:@"showBlockedUsers"])
     {
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
         // force blocklist update

@@ -355,7 +355,7 @@ $$
         if(unreadMsgCnt != nil)
             unread = [unreadMsgCnt integerValue];
         DDLogInfo(@"Updating unread badge to: %ld", (long)unread);
-        [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
+        [[UNUserNotificationCenter currentNotificationCenter] setBadgeCount:unread withCompletionHandler:nil];
     }];
 }
 

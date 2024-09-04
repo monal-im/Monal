@@ -202,6 +202,8 @@ struct Quicksy_RegisterAccount: View {
             
             if state.phoneNumber == nil || state.country == nil {
                 VStack(alignment: .leading) {
+                    Text("")
+                    
                     Text("Verify your phone number")
                         .font(.title)
                         .fontWeight(.bold)
@@ -283,29 +285,35 @@ struct Quicksy_RegisterAccount: View {
                     DDLogInfo("Localization: using regionCode: \(String(describing:regionCode))")
                     DDLogInfo("Localization: current locale localized string for regionCode: \(String(describing:Locale.current.localizedString(forRegionCode:regionCode)))")
                     DDLogInfo("Localization: en_US localized string for regionCode: \(String(describing:Locale(identifier: "en_US").localizedString(forRegionCode:regionCode)))")
+                    DDLogInfo("Previous country: \(String(describing:state.country))")
                     for country in countries {
                         if let previousCountry = state.country {
                             //check alpha2 code and country name explicitly to still match even when changing other properties
-                            if previousCountry.alpha2 == country.alpha2 || previousCountry.name == country.name {
+                            if (previousCountry.alpha2 != nil && previousCountry.alpha2 == country.alpha2) || (previousCountry.name != nil && previousCountry.name == country.name) {
+                                DDLogInfo("Selecting country from previous: \(String(describing:country))")
                                 selectedCountry = country
                                 break
                             }
                         } else if country.alpha2 == regionCode || country.name == Locale.current.localizedString(forRegionCode:regionCode) || country.name == Locale(identifier: "en_US").localizedString(forRegionCode:regionCode) {
+                            DDLogInfo("Selecting country from locale: \(String(describing:country))")
                             selectedCountry = country
                             break
                         }
                     }
+                    DDLogInfo("Finally preselected country: \(String(describing:selectedCountry))")
                     phoneNumberFocused = true
                 }
             } else if let number = state.phoneNumber, let _ = state.country {
                 VStack(alignment: .leading) {
+                    Text("")
+                    
                     Text("Verify your phone number")
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                         .padding(.bottom, 8)
                         
-                    Text("We sent you an SMS to \(number)")
+                    Text("We sent you an SMS to **\(number)**")
                     Text("Please enter the six-digit pin below")
                     HStack {
                         TextField("Pin", text: $pin)

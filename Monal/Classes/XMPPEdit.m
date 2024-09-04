@@ -17,6 +17,8 @@
 #import "MLSwitchCell.h"
 #import "MLOMEMO.h"
 #import "MLNotificationQueue.h"
+#import "MonalAppDelegate.h"
+#import "ActiveChatsViewController.h"
 #import "Monal-Swift.h"
 
 @import MobileCoreServices;
@@ -467,7 +469,14 @@ enum DummySettingsRows {
         [hud hideAnimated:YES afterDelay:1.0f];
         
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [self dismissViewControllerAnimated:YES completion:nil];
+            [self dismissViewControllerAnimated:YES completion:^{
+                //we want to start fresh instead of doing a "password migration"-restore directly triggering an sms
+                [[HelperTools defaultsDB] removeObjectForKey:@"Quicksy_phoneNumber"];
+                [[HelperTools defaultsDB] removeObjectForKey:@"Quicksy_country"];
+                //make sure we show account creation view etc. after removing the last account
+                MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+                [appDelegate.activeChats segueToIntroScreensIfNeeded];
+            }];
         });
     }];
     [questionAlert addAction:noAction];
@@ -523,7 +532,14 @@ enum DummySettingsRows {
                     [hud hideAnimated:YES afterDelay:1.0f];
                     
                     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                        [self dismissViewControllerAnimated:YES completion:nil];
+                        [self dismissViewControllerAnimated:YES completion:^{
+                            //we want to start fresh instead of doing a "password migration"-restore directly triggering an sms
+                            [[HelperTools defaultsDB] removeObjectForKey:@"Quicksy_phoneNumber"];
+                            [[HelperTools defaultsDB] removeObjectForKey:@"Quicksy_country"];
+                            //make sure we show account creation view etc. after removing the last account
+                            MonalAppDelegate* appDelegate = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+                            [appDelegate.activeChats segueToIntroScreensIfNeeded];
+                        }];
                     });
                 }
             });

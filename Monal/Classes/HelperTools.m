@@ -124,7 +124,6 @@ static struct {
 // running under the debugger or has a debugger attached post facto).
 bool isDebugerActive(void)
 {
-#ifdef IS_ALPHA
     int                 junk;
     int                 mib[4];
     struct kinfo_proc   info;
@@ -148,9 +147,6 @@ bool isDebugerActive(void)
 
     // We're being debugged if the P_TRACED flag is set.
     return ( (info.kp_proc.p_flag & P_TRACED) != 0 );
-#else
-    return 0;
-#endif
 }
 
 //see https://stackoverflow.com/a/2180788
@@ -259,7 +255,10 @@ void uncaughtExceptionHandler(NSException* exception)
 
     //don't report that crash through KSCrash if the debugger is active
     if(isDebugerActive())
+    {
+        DDLogError(@"Not reporting crash through KSCrash: debugger is active!");
         return;
+    }
     
     //make sure this crash will be recorded by kscrash using the NSException rather than the c++ exception thrown by the objc runtime
     //this will make sure that the stacktrace matches the objc exception rather than being a top level c++ stacktrace
@@ -508,6 +507,8 @@ void swizzle(Class c, SEL orig, SEL new)
         //don't install KSCrash if the debugger is active
         if(!isDebugerActive())
             [self installCrashHandler];
+        else
+            DDLogWarn(@"Not installing crash handler: debugger is active!");
         [self installExceptionHandler];
     }
     else

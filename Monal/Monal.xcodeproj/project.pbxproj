@@ -138,6 +138,7 @@
 		8418B55E2C7EC6B7006FAF60 /* Quicksy_Country.m in Sources */ = {isa = PBXBuildFile; fileRef = 8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */; };
 		8418B5632C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */; };
 		8418B5642C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m in Sources */ = {isa = PBXBuildFile; fileRef = 8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */; };
+		8418B5672C87E0ED006FAF60 /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 8418B5662C87E0ED006FAF60 /* ExyteChat */; };
 		841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F19297B18720074F9B7 /* AccountPicker.swift */; };
 		841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */; };
 		841EE4302A426F2300D3AF14 /* MLCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */; };
@@ -787,6 +788,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8418B5672C87E0ED006FAF60 /* ExyteChat in Frameworks */,
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
 				C1E1EC7B286A025F0097EC74 /* SwiftSoup in Frameworks */,
 				84F194D12C15197200F0A994 /* FrameUp in Frameworks */,
@@ -1552,6 +1554,7 @@
 				C1E1EC7A286A025F0097EC74 /* SwiftSoup */,
 				841898A92957712000FEC77D /* ViewExtractor */,
 				84F194D02C15197200F0A994 /* FrameUp */,
+				8418B5662C87E0ED006FAF60 /* ExyteChat */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1769,6 +1772,7 @@
 				849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
 				84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */,
 				84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */,
+				8418B5652C87E0ED006FAF60 /* XCRemoteSwiftPackageReference "Chat" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4660,6 +4664,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		8418B5652C87E0ED006FAF60 /* XCRemoteSwiftPackageReference "Chat" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/Chat";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.5;
+			};
+		};
 		849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/cocoalumberjack/cocoalumberjack";
@@ -4711,6 +4723,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */;
 			productName = ViewExtractor;
+		};
+		8418B5662C87E0ED006FAF60 /* ExyteChat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8418B5652C87E0ED006FAF60 /* XCRemoteSwiftPackageReference "Chat" */;
+			productName = ExyteChat;
 		};
 		849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */ = {
 			isa = XCSwiftPackageProductDependency;

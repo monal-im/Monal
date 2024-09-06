@@ -98,6 +98,12 @@ struct ContactsView: View {
     @State private var searchText: String = ""
     @State private var selectedContactForContactDetails: ObservableKVOWrapper<MLContact>? = nil
 
+    init(contacts: Contacts, delegate: SheetDismisserProtocol, dismissWithContact: @escaping (MLContact) -> ()) {
+        self.contacts = contacts
+        self.delegate = delegate
+        self.dismissWithContact = dismissWithContact
+    }
+
     private static func shouldDisplayContact(contact: MLContact) -> Bool {
 #if IS_QUICKSY
         return true
@@ -126,12 +132,6 @@ struct ContactsView: View {
         let search = search.lowercased()
 
         return jid.contains(search) || name.contains(search)
-    }
-
-    init(contacts: Contacts, delegate: SheetDismisserProtocol, dismissWithContact: @escaping (MLContact) -> ()) {
-        self.contacts = contacts
-        self.delegate = delegate
-        self.dismissWithContact = dismissWithContact
     }
 
     var body: some View {

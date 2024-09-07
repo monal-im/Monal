@@ -4701,7 +4701,7 @@
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.6.1;
+				minimumVersion = 2.7.5;
 			};
 		};
 		C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
@@ -4709,7 +4709,7 @@
 			repositoryURL = "https://github.com/apple/swift-collections.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.5;
+				minimumVersion = 1.1.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

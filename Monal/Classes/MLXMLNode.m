@@ -204,7 +204,7 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(id) copyWithZone:(NSZone*) zone
 {
-    MLXMLNode* copy = [[[self class] alloc] initWithElement:_element];
+    MLXMLNode* copy = [[[self class] alloc] initWithElement:[_element copy]];
     copy.attributes = [[NSMutableDictionary alloc] initWithDictionary:_attributes copyItems:YES];
     for(MLXMLNode* child in _children)
         [copy addChildNode:child];
@@ -219,7 +219,7 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(id) shallowCopyWithData:(BOOL) copyData
 {
-    MLXMLNode* copy = [[[self class] alloc] initWithElement:_element];
+    MLXMLNode* copy = [[[self class] alloc] initWithElement:[_element copy]];
     copy.attributes = [[NSMutableDictionary alloc] initWithDictionary:_attributes copyItems:YES];
     if(copyData)
         copy.data = _data ? [_data copy] : nil;
@@ -256,7 +256,7 @@ static NSRegularExpression* attributeFilterRegex;
     //namespace inheritance (will be stripped by XMLString later on)
     //we do this here to make sure manual created nodes always have a namespace like the nodes created by the xml parser do
     if(!insertedChild.attributes[@"xmlns"])
-        insertedChild.attributes[@"xmlns"] = _attributes[@"xmlns"];
+        insertedChild.attributes[@"xmlns"] = [_attributes[@"xmlns"] copy];
     [_children addObject:insertedChild];
     [self invalidateUpstreamCache];
     //this one can be removed if the query path component ".." is removed from our language

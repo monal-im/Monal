@@ -51,6 +51,7 @@ static NSMutableDictionary* _singletonCache;
 @property (nonatomic, strong) NSSet<NSString*>* rosterGroups;
 
 @property (nonatomic, strong) NSDate* _Nullable lastInteractionTime;
+@property (nonatomic, assign) BOOL isTyping;
 
 @property (nonatomic, assign) NSInteger unreadCount;
 
@@ -286,9 +287,11 @@ static NSMutableDictionary* _singletonCache;
     
     if(![self.contactJid isEqualToString:data[@"jid"]] || self.accountID.intValue != notificationAccountID.intValue)
         return;     // ignore other accounts or contacts
-    if(data[@"lastInteraction"] == nil)
-        return;     // ignore typing notifications
     
+    self.isTyping = [data[@"isTyping"] boolValue];
+    
+    if(data[@"lastInteraction"] == nil)
+        return;
     //this will be nil if "urn:xmpp:idle:1" is not supported by any of the contact's devices
     DDLogVerbose(@"Updating lastInteractionTime=%@ of %@", data[@"lastInteraction"], self);
     self.lastInteractionTime = nilExtractor(data[@"lastInteraction"]);

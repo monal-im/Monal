@@ -72,6 +72,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  */
 @property (nonatomic, copy) NSString* statusMessage;
 @property (nonatomic, readonly) NSDate* _Nullable lastInteractionTime;
+@property (nonatomic, readonly) BOOL isTyping;
 
 /**
  used to display the badge on a row

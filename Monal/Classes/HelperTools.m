@@ -1607,6 +1607,7 @@ void swizzle(Class c, SEL orig, SEL new)
 +(BOOL) isContactBlacklistedForEncryption:(MLContact*) contact
 {
     BOOL blacklisted = NO;
+    //cheogram.com does not support OMEMO encryption as it is a PSTN gateway
     blacklisted = [@"cheogram.com" isEqualToString:[self splitJid:contact.contactJid][@"host"]];
     if(blacklisted)
         DDLogWarn(@"Jid blacklisted for encryption: %@", contact);
@@ -2248,9 +2249,8 @@ void swizzle(Class c, SEL orig, SEL new)
 
 /*
  * create string containing the info when a user was seen the last time
- * return nil if no timestamp was found in the db
  */
-+(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction
++(NSString*) formatLastInteraction:(NSDate*) lastInteraction
 {
     // get current timestamp
     unsigned long currentTimestamp = [HelperTools currentTimestampInSeconds].unsignedLongValue;

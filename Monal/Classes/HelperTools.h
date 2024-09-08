@@ -142,7 +142,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSString* _Nullable) exportIPCDatabase;
 +(void) configureFileProtection:(NSString*) protectionLevel forFile:(NSString*) file;
 +(void) configureFileProtectionFor:(NSString*) file;
-+(BOOL) isContactBlacklistedForEncryption:(MLContact*) contact;
++(BOOL) isContactBlacklistedForEncryption:(MLContact*) contact NS_SWIFT_NAME(isContactBlacklistedForEncryption(_:));
 +(void) removeAllShareInteractionsForAccountID:(NSNumber*) accountID;
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
 
@@ -160,7 +160,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;
 +(NSSet*) getOwnFeatureSet;
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features andForms:(NSArray*) forms;
-+(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction;
++(NSString*) formatLastInteraction:(NSDate*) lastInteraction;
 +(NSString*) stringFromTimeInterval:(NSUInteger) interval;
 +(NSDate*) parseDateTimeString:(NSString*) datetime;
 +(NSString*) generateDateTimeString:(NSDate*) datetime;

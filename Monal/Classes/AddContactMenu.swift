@@ -286,7 +286,24 @@ struct AddContactMenu: View {
                     .frame(maxWidth: .infinity)
             }
         }
-        .addLoadingOverlay(overlay)
+        .sheet(isPresented: $showQRCodeScanner) {
+            NavigationStack {
+                MLQRCodeScanner(handleClose: {
+                    self.showQRCodeScanner = false
+                })
+                .navigationTitle("QR-Code Scanner")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar(content: {
+                    ToolbarItem(placement: .navigationBarLeading, content: {
+                        Button(action: {
+                            self.showQRCodeScanner = false
+                        }, label: {
+                            Text("Close")
+                        })
+                    })
+                })
+            }
+        }
         .navigationBarTitle(Text("Add Contact or Channel"), displayMode: .inline)
         .toolbar(content: {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -317,24 +334,7 @@ struct AddContactMenu: View {
                 })
             }
         })
-        .sheet(isPresented: $showQRCodeScanner) {
-            NavigationStack {
-                MLQRCodeScanner(handleClose: {
-                    self.showQRCodeScanner = false
-                })
-                .navigationTitle("QR-Code Scanner")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar(content: {
-                    ToolbarItem(placement: .navigationBarLeading, content: {
-                        Button(action: {
-                            self.showQRCodeScanner = false
-                        }, label: {
-                            Text("Close")
-                        })
-                    })
-                })
-            }
-        }
+        .addLoadingOverlay(overlay)
     }
 }
 

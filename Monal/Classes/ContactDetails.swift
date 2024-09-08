@@ -7,8 +7,7 @@
 //
 
 struct ContactDetails: View {
-    var delegate: SheetDismisserProtocol
-    private var account: xmpp
+    @Environment(\.presentationMode) private var presentationMode
     @State private var ownRole = kMucRoleParticipant
     @State private var ownAffiliation = kMucAffiliationNone
     @StateObject var contact: ObservableKVOWrapper<MLContact>
@@ -31,8 +30,10 @@ struct ContactDetails: View {
     @State private var success = false
     @State private var successCallback: monal_void_block_t?
     @StateObject private var overlay = LoadingOverlayState()
+    var delegate: SheetDismisserProtocol?
+    private var account: xmpp
 
-    init(delegate: SheetDismisserProtocol, contact: ObservableKVOWrapper<MLContact>) {
+    init(delegate: SheetDismisserProtocol?, contact: ObservableKVOWrapper<MLContact>) {
         self.delegate = delegate
         _contact = StateObject(wrappedValue: contact)
         self.account = contact.obj.account!
@@ -296,7 +297,7 @@ struct ContactDetails: View {
                 }
                 
 #if !DISABLE_OMEMO
-                if (!contact.isMuc || (contact.isMuc && contact.mucType == kMucTypeGroup)) && !HelperTools.isContactBlacklisted(forEncryption:contact.obj) {
+                if (!contact.isMuc || (contact.isMuc && contact.mucType == kMucTypeGroup)) && !HelperTools.isContactBlacklistedForEncryption(contact.obj) {
                     Button {
                         if contact.isEncrypted {
                             showingShouldDisableEncryptionAlert = true
@@ -321,7 +322,7 @@ struct ContactDetails: View {
                         }
                     }
                     .alert(isPresented: $showingCannotEncryptAlert) {
-                        Alert(title: Text("No OMEMO keys found"), message: Text("This contact may not support OMEMO encrypted messages. Please try again in a few seconds."), dismissButton: .default(Text("Close")))
+                        Alert(title: Text("Encryption Not Supported"), message: Text("This contact does not appear to have any devices that support encryption, please try again later if you think this is wrong."), dismissButton: .default(Text("Close")))
                     }
                     .actionSheet(isPresented: $showingShouldDisableEncryptionAlert) {
                         ActionSheet(
@@ -369,7 +370,7 @@ struct ContactDetails: View {
                 }
                 
 #if !DISABLE_OMEMO
-                if !HelperTools.isContactBlacklisted(forEncryption:contact.obj) && !contact.isSelfChat {
+                if !HelperTools.isContactBlacklistedForEncryption(contact.obj) && !contact.isSelfChat {
                     if !contact.isMuc || contact.mucType == kMucTypeGroup {
                         NavigationLink(destination: LazyClosureView(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: contact)))) {
                             Text("Encryption Keys")
@@ -484,9 +485,13 @@ struct ContactDetails: View {
                                             Text("Yes"),
                                             action: {
                                                 contact.obj.removeFromRoster()      //this will dismiss the chatview via kMonalContactRemoved notification
-                                                //this will do nothing for contact details opened through group members list (which is fine!)
-                                                //NOTE: this holds for all delegate.dismiss() calls
-                                                self.delegate.dismiss()
+                                                //NOTE: since we can get opened from objc through active chats,
+                                                //NOTE: we still need to support our SheetDismisserProtocol
+                                                if let delegate = self.delegate {
+                                                    delegate.dismiss()
+                                                } else {
+                                                    self.presentationMode.wrappedValue.dismiss()
+                                                }
                                             }
                                         )
                                     ]
@@ -686,12 +691,11 @@ struct ContactDetails: View {
 }
 
 struct ContactDetails_Previews: PreviewProvider {
-    static var delegate = SheetDismisserProtocol()
     static var previews: some View {
-        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
-        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(1)))
-        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(2)))
-        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(3)))
-        ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(4)))
+        ContactDetails(delegate:nil, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(0)))
+        ContactDetails(delegate:nil, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(1)))
+        ContactDetails(delegate:nil, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(2)))
+        ContactDetails(delegate:nil, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(3)))
+        ContactDetails(delegate:nil, contact:ObservableKVOWrapper<MLContact>(MLContact.makeDummyContact(4)))
     }
 }

@@ -555,11 +555,12 @@ struct LazyClosureView<Content: View>: View {
 
 // use this to wrap a view into NavigationStack, if it should be the outermost swiftui view of a new view stack
 struct AddTopLevelNavigation<Content: View>: View {
-    let build: () -> Content
-    let delegate: SheetDismisserProtocol
+    @Environment(\.presentationMode) private var presentationMode
     @StateObject private var sizeClass: ObservableKVOWrapper<SizeClassWrapper>
+    let build: () -> Content
+    let delegate: SheetDismisserProtocol?
     
-    init(withDelegate delegate: SheetDismisserProtocol, to build: @autoclosure @escaping () -> Content) {
+    init(withDelegate delegate: SheetDismisserProtocol?, to build: @autoclosure @escaping () -> Content) {
         self.build = build
         self.delegate = delegate
 
@@ -581,7 +582,12 @@ struct AddTopLevelNavigation<Content: View>: View {
                     if shouldDisplayBackButton {
                         ToolbarItem(placement: .topBarLeading) {
                             Button(action : {
-                                self.delegate.dismiss()
+                                //NOTE: since we can get opened from objc, we still need to support our SheetDismisserProtocol
+                                if let delegate = self.delegate {
+                                    delegate.dismiss()
+                                } else {
+                                    self.presentationMode.wrappedValue.dismiss()
+                                }
                             }) {
                                 Image(systemName: "arrow.backward")
                             }
@@ -619,11 +625,19 @@ struct UIKitWorkaround<Content: View>: View {
     }
 }
 
-// Alert properties for use in Alert
+// properties for use in Alert
 struct AlertPrompt {
     var title: Text = Text("")
     var message: Text = Text("")
     var dismissLabel: Text = Text("Close")
+    var dismissCallback: monal_void_block_t? = nil
+}
+
+// properties for use in actionSheet
+struct ConfirmationPrompt {
+    var title: Text = Text("")
+    var message: Text = Text("")
+    var buttons: [ActionSheet.Button] = []
 }
 
 extension View {

@@ -169,7 +169,7 @@ struct ContactsView: View {
             }
         }
         .sheet(item: $selectedContactForContactDetails) { selectedContact in
-            AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactDetails(delegate: SheetDismisserProtocol(), contact: selectedContact)))
+            AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactDetails(delegate:delegate, contact:selectedContact)))
         }
     }
 }

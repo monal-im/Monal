@@ -8,9 +8,9 @@
 
 //data class for overlay state
 class LoadingOverlayState : ObservableObject {
-    var enabled: Bool
-    var headline: AnyView
-    var description: AnyView
+    @Published var enabled: Bool
+    @Published var headline: AnyView
+    @Published var description: AnyView
     init(enabled:Bool = false, headline:AnyView = AnyView(Text("")), description:AnyView = AnyView(Text(""))) {
         self.enabled = enabled
         self.headline = headline

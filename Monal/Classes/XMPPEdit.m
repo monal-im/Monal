@@ -832,7 +832,8 @@ enum DummySettingsRows {
                 break;
             case SettingsOmemoKeysRow: {
                 UIViewController* ownOmemoKeysView;
-                if(self.jid == nil || self.accountID == nil)
+                xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
+                if(self.jid == nil || self.accountID == nil || xmppAccount == nil)
                 {
                     ownOmemoKeysView = [[SwiftuiInterface new] makeOwnOmemoKeyView:nil];
                 } else {

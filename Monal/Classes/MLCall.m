@@ -654,7 +654,10 @@
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else
-                    unreachable(@"Unexpected finish reason!", (@{@"call": self}));
+                {
+                    DDLogError(@"Unexpected finish reason: %@", (@{@"call": self, @"finishReason": @(self.finishReason)}));
+                    [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                }
             }
             else
             {
@@ -680,7 +683,10 @@
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else
-                    unreachable(@"Unexpected finish reason!", (@{@"call": self}));
+                {
+                    DDLogError(@"Unexpected finish reason: %@", (@{@"call": self, @"finishReason": @(self.finishReason)}));
+                    [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                }
             }
         }
         else
@@ -706,7 +712,10 @@
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     }
                     else
-                        unreachable(@"Unexpected finish reason!", (@{@"call": self}));
+                    {
+                        DDLogError(@"Unexpected finish reason: %@", (@{@"call": self, @"finishReason": @(self.finishReason)}));
+                        [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                    }
                 }
                 else
                 {
@@ -732,7 +741,10 @@
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     }
                     else
-                        unreachable(@"Unexpected finish reason!", (@{@"call": self}));
+                    {
+                        DDLogError(@"Unexpected finish reason: %@", (@{@"call": self, @"finishReason": @(self.finishReason)}));
+                        [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
+                    }
                 }
             }
             else

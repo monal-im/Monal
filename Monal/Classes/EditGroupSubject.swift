@@ -11,7 +11,7 @@ struct EditGroupSubject: View {
     private let account: xmpp?
     @State private var subject: String
 
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
     //@Environment(\.dismiss) var dismiss
 
     init(contact: ObservableKVOWrapper<MLContact>) {
@@ -37,13 +37,13 @@ struct EditGroupSubject: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abort") {
-                        self.presentationMode.wrappedValue.dismiss()
+                        self.dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         self.account!.mucProcessor.changeSubject(ofMuc: contact.contactJid, to: self.subject)
-                        self.presentationMode.wrappedValue.dismiss()
+                        self.dismiss()
                     }
                 }
             }

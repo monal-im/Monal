@@ -177,16 +177,19 @@ struct ContactsView: View {
 class Contacts: ObservableObject {
     @Published var contacts: Set<MLContact>
     @Published var requestCount: Int
+    private var subscriptions: Set<AnyCancellable> = Set()
 
     init() {
         self.contacts = Set(DataLayer.sharedInstance().contactList())
         self.requestCount = DataLayer.sharedInstance().allContactRequests().count
-
-        NotificationCenter.default.addObserver(self, selector: #selector(refreshContacts), name: NSNotification.Name("kMonalContactRemoved"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(refreshContacts), name: NSNotification.Name("kMonalContactRefresh"), object: nil)
+        subscriptions = [
+            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRemoved"))
+                .sink() { _ in self.refreshContacts() },
+            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh"))
+                .sink() { _ in self.refreshContacts() }
+        ]
     }
 
-    @objc
     private func refreshContacts() {
         self.contacts = Set(DataLayer.sharedInstance().contactList())
         self.requestCount = DataLayer.sharedInstance().allContactRequests().count

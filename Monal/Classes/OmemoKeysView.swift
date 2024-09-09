@@ -447,15 +447,19 @@ class OmemoKeysForContact: ObservableObject {
 class OmemoKeysForChat: ObservableObject {
     @Published var contacts: Dictionary<ObservableKVOWrapper<MLContact>, OmemoKeysForContact>
     var viewContact: ObservableKVOWrapper<MLContact>?
+    private var subscriptions: Set<AnyCancellable> = Set()
 
     init(viewContact: ObservableKVOWrapper<MLContact>?) {
         self.viewContact = viewContact
         self.contacts = OmemoKeysForChat.knownDevices(viewContact: self.viewContact)
-        NotificationCenter.default.addObserver(self, selector: #selector(updateContactDevices), name: NSNotification.Name("kMonalOmemoStateUpdated"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(updateContactDevices), name: NSNotification.Name("kMonalMucParticipantsAndMembersUpdated"), object: nil)
+        subscriptions = [
+            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalOmemoStateUpdated"))
+                .sink() { _ in self.updateContactDevices() },
+            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalMucParticipantsAndMembersUpdated"))
+                .sink() { _ in self.updateContactDevices() },
+        ]
     }
 
-    @objc
     private func updateContactDevices() -> Void {
         withAnimation() {
             self.contacts = OmemoKeysForChat.knownDevices(viewContact: self.viewContact)

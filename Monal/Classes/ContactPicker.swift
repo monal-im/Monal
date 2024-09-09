@@ -34,7 +34,6 @@ struct ContactPickerEntry: View {
 struct ContactPicker: View {
     typealias completionType = (OrderedSet<ObservableKVOWrapper<MLContact>>)->Void
     let account: xmpp
-    @Environment(\.presentationMode) private var presentationMode
     @Binding var returnedContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
     @State var selectedContacts: OrderedSet<ObservableKVOWrapper<MLContact>>
     @State var searchText = ""

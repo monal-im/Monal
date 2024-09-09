@@ -445,8 +445,8 @@ class OmemoKeysForContact: ObservableObject {
 }
 
 class OmemoKeysForChat: ObservableObject {
-    var viewContact: ObservableKVOWrapper<MLContact>?
     @Published var contacts: Dictionary<ObservableKVOWrapper<MLContact>, OmemoKeysForContact>
+    var viewContact: ObservableKVOWrapper<MLContact>?
 
     init(viewContact: ObservableKVOWrapper<MLContact>?) {
         self.viewContact = viewContact

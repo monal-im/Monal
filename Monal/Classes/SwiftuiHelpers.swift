@@ -555,7 +555,7 @@ struct LazyClosureView<Content: View>: View {
 
 // use this to wrap a view into NavigationStack, if it should be the outermost swiftui view of a new view stack
 struct AddTopLevelNavigation<Content: View>: View {
-    @Environment(\.presentationMode) private var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var sizeClass: ObservableKVOWrapper<SizeClassWrapper>
     let build: () -> Content
     let delegate: SheetDismisserProtocol?
@@ -586,7 +586,7 @@ struct AddTopLevelNavigation<Content: View>: View {
                                 if let delegate = self.delegate {
                                     delegate.dismiss()
                                 } else {
-                                    self.presentationMode.wrappedValue.dismiss()
+                                    self.dismiss()
                                 }
                             }) {
                                 Image(systemName: "arrow.backward")

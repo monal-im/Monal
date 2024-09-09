@@ -13,8 +13,8 @@
 @_exported import Logging
 @_exported import SwiftUI
 @_exported import monalxmpp
+@_exported import Combine
 import PhotosUI
-import Combine
 import FLAnimatedImage
 import OrderedCollections
 import CropViewController

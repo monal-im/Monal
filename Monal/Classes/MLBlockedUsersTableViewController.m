@@ -14,7 +14,7 @@
 
 @interface MLBlockedUsersTableViewController ()
 
-@property(nonatomic, strong) NSMutableArray<NSDictionary<NSString*, NSString*>*>* blockedJids;
+@property(nonatomic, strong) NSMutableArray<NSString*>* blockedJids;
 @property (nonatomic, strong) MBProgressHUD* blockingHUD;
 
 - (IBAction)addBlockButton:(id)sender;
@@ -81,7 +81,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"blockUser" forIndexPath:indexPath];
 
-    cell.textLabel.text = self.blockedJids[indexPath.row][@"fullBlockedJid"];
+    cell.textLabel.text = self.blockedJids[indexPath.row];
 
     return cell;
 }
@@ -96,7 +96,7 @@
         if(![self.xmppAccount.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
             return;
         // unblock jid
-        [[MLXMPPManager sharedInstance] block:NO fullJid:self.blockedJids[indexPath.row][@"fullBlockedJid"] onAccount:self.xmppAccount.accountID];
+        [[MLXMPPManager sharedInstance] block:NO fullJid:self.blockedJids[indexPath.row] onAccount:self.xmppAccount.accountID];
 
         self.blockingHUD.hidden = NO;
     }

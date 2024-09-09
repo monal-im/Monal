@@ -226,13 +226,6 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kinfoTypeKey @"type"
 #define kinfoStatusKey @"status"
 
-//blocking rules
-#define kBlockingNoMatch 0
-#define kBlockingMatchedNodeHostResource 1
-#define kBlockingMatchedNodeHost 2
-#define kBlockingMatchedHostResource 3
-#define kBlockingMatchedHost 4
-
 //use this to completely disable omemo in build
 //#ifndef DISABLE_OMEMO
 //#define DISABLE_OMEMO 1

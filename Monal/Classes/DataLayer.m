@@ -2217,13 +2217,9 @@ static NSDateFormatter* dbFormatter;
 {
     if(!jid || accountID == nil)
         return;
-    NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
+
     [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"INSERT OR IGNORE INTO blocklistCache(account_id, node, host, resource) VALUES(?, ?, ?, ?)" andArguments:@[accountID,
-                parsedJid[@"node"] ? parsedJid[@"node"] : [NSNull null],
-                parsedJid[@"host"] ? parsedJid[@"host"] : [NSNull null],
-                parsedJid[@"resource"] ? parsedJid[@"resource"] : [NSNull null],
-        ]];
+        [self.db executeNonQuery:@"INSERT OR IGNORE INTO blocklistCache(account_id, blocked_jid) VALUES(?, ?);" andArguments:@[accountID, jid]];
     }];
 }
 
@@ -2240,81 +2236,26 @@ static NSDateFormatter* dbFormatter;
 
 -(void) unBlockJid:(NSString*) jid withAccountID:(NSNumber*) accountID
 {
-    NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
     [self.db voidWriteTransaction:^{
-        if(parsedJid[@"node"] && parsedJid[@"host"] && parsedJid[@"resource"])
-        {
-            [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource=?" andArguments:@[accountID, parsedJid[@"node"], parsedJid[@"host"], parsedJid[@"resource"]]];    }
-        else if(parsedJid[@"node"] && parsedJid[@"host"])
-        {
-            [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource IS NULL" andArguments:@[accountID, parsedJid[@"node"], parsedJid[@"host"]]];
-        }
-        else if(parsedJid[@"host"] && parsedJid[@"resource"])
-        {
-            [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource=?" andArguments:@[accountID, parsedJid[@"host"], parsedJid[@"resource"]]];
-        }
-        else if(parsedJid[@"host"])
-        {
-            [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource IS NULL" andArguments:@[accountID, parsedJid[@"host"]]];
-        }
+        [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=? AND blocked_jid=?;" andArguments:@[accountID, jid]];
     }];
 }
 
--(uint8_t) isBlockedContact:(MLContact*) contact
+-(BOOL) isBlockedContact:(MLContact*) contact
 {
     if(!contact)
-        return kBlockingNoMatch;
+        return NO;
 
-    return (uint8_t)[[self.db idReadTransaction:^{
-        NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:contact.contactJid];
-        NSNumber* blocked;
-        uint8_t ruleId = kBlockingNoMatch;
-        if(parsedJid[@"node"] && parsedJid[@"host"] && parsedJid[@"resource"])
-        {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource=?;" andArguments:@[contact.accountID, parsedJid[@"node"], parsedJid[@"host"], parsedJid[@"resource"]]];
-            ruleId = kBlockingMatchedNodeHostResource;
-        }
-        else if(parsedJid[@"node"] && parsedJid[@"host"])
-        {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource IS NULL;" andArguments:@[contact.accountID, parsedJid[@"node"], parsedJid[@"host"]]];
-            ruleId = kBlockingMatchedNodeHost;
-        }
-        else if(parsedJid[@"host"] && parsedJid[@"resource"])
-        {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource=?;" andArguments:@[contact.accountID, parsedJid[@"host"], parsedJid[@"resource"]]];
-            ruleId = kBlockingMatchedHostResource;
-        }
-        else if(parsedJid[@"host"])
-        {
-            blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource IS NULL;" andArguments:@[contact.accountID, parsedJid[@"host"]]];
-            ruleId = kBlockingMatchedHost;
-        }
-        if(blocked.intValue >= 1)
-            return [NSNumber numberWithInt:ruleId];
-        else
-            return [NSNumber numberWithInt:kBlockingNoMatch];
-    }] intValue];
+    return [self.db boolReadTransaction:^{
+        NSNumber* count = (NSNumber*) [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND blocked_jid=?;" andArguments:@[contact.accountID, contact.contactJid]];
+        return (BOOL) (count.intValue > 0);
+    }];
 }
 
--(NSArray<NSDictionary<NSString*, NSString*>*>*) blockedJidsForAccount:(NSNumber*) accountID
+-(NSArray<NSString*>*) blockedJidsForAccount:(NSNumber*) accountID
 {
     return [self.db idReadTransaction:^{
-        NSArray* blockedJidsFromDB = [self.db executeReader:@"SELECT * FROM blocklistCache WHERE account_id=?" andArguments:@[accountID]];
-        NSMutableArray* blockedJids = [NSMutableArray new];
-        for(NSDictionary* blockedJid in blockedJidsFromDB)
-        {
-            NSString* fullJid = @"";
-            if(blockedJid[@"node"])
-                fullJid = [NSString stringWithFormat:@"%@@", blockedJid[@"node"]];
-            if(blockedJid[@"host"])
-                fullJid = [NSString stringWithFormat:@"%@%@", fullJid, blockedJid[@"host"]];
-            if(blockedJid[@"resource"])
-                fullJid = [NSString stringWithFormat:@"%@/%@", fullJid, blockedJid[@"resource"]];
-            NSMutableDictionary* blockedMutableJid = [[NSMutableDictionary alloc] initWithDictionary:blockedJid];
-            [blockedMutableJid setValue:fullJid forKey:@"fullBlockedJid"];
-            [blockedJids addObject:blockedMutableJid];
-        }
-        return blockedJids;
+        return (NSArray<NSString*>*) [self.db executeScalarReader:@"SELECT blocked_jid FROM blocklistCache WHERE account_id=?;" andArguments:@[accountID]];
     }];
 }
 

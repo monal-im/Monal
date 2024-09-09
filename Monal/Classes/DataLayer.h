@@ -263,11 +263,11 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) setMucAlertOnAll:(NSString*) jid onAccount:(NSNumber*) accountID;
 -(BOOL) isMucAlertOnMentionOnly:(NSString*) jid onAccount:(NSNumber*) accountID;
 
--(void) blockJid:(NSString *) jid withAccountID:(NSNumber*) accountID;
--(void) unBlockJid:(NSString *) jid withAccountID:(NSNumber*) accountID;
--(uint8_t) isBlockedContact:(MLContact*) contact;
+-(void) blockJid:(NSString*) jid withAccountID:(NSNumber*) accountID;
+-(void) unBlockJid:(NSString*) jid withAccountID:(NSNumber*) accountID;
+-(BOOL) isBlockedContact:(MLContact*) contact;
 -(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids forAccountID:(NSNumber*) accountID;
--(NSArray<NSDictionary<NSString*, NSString*>*>*) blockedJidsForAccount:(NSNumber*) accountID;
+-(NSArray<NSString*>*) blockedJidsForAccount:(NSNumber*) accountID;
 
 -(BOOL) isPinnedChat:(NSNumber*) accountID andBuddyJid:(NSString*) buddyJid;
 -(void) pinChat:(NSNumber*) accountID andBuddyJid:(NSString*) buddyJid;

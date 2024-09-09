@@ -240,7 +240,7 @@ public struct ImageCropView: UIViewControllerRepresentable {
     private let onCanceled: () -> Void
     private let onImageCropped: (UIImage,CGRect,Int) -> Void
     
-    @Environment(\.presentationMode) private var presentationMode
+    @Environment(\.dismiss) private var dismiss
 
     public init(originalImage: UIImage, configureBlock: @escaping (CropViewController) -> Void, onCanceled: @escaping () -> Void, success onImageCropped: @escaping (UIImage,CGRect,Int) -> Void) {
         self.originalImage = originalImage
@@ -261,7 +261,7 @@ public struct ImageCropView: UIViewControllerRepresentable {
 
     public func makeCoordinator() -> Coordinator {
         Coordinator(
-            onDismiss: { self.presentationMode.wrappedValue.dismiss() },
+            onDismiss: { self.dismiss() },
             onCanceled: self.onCanceled,
             onImageCropped: self.onImageCropped
         )

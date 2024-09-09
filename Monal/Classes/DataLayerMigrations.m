@@ -1128,8 +1128,20 @@
                 FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
             );"];
         }];
-        
-        
+
+        //simplify the blocklistCache table
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.410 withBlock:^{
+            //the cache is regenerated on log-in, thus there is no need to migrate the data
+            [db executeNonQuery:@"DROP TABLE blocklistCache;"];
+            [db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
+                'account_id' INTEGER NOT NULL, \
+                'blocked_jid' TEXT NOT_NULL CHECK(LENGTH(blocked_jid) > 0), \
+                UNIQUE('account_id','blocked_jid'), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+            );"];
+        }];
+
+
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs
         if(![[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"])

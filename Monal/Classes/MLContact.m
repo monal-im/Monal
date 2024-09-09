@@ -303,9 +303,8 @@ static NSMutableDictionary* _singletonCache;
     NSNumber* notificationAccountID = data[@"accountID"];
     if(self.accountID.intValue != notificationAccountID.intValue)
         return;         // ignore other accounts
-    long blockingType = [[DataLayer sharedInstance] isBlockedContact:self];
-    self.isBlocked = blockingType == kBlockingMatchedNodeHost;
-    DDLogInfo(@"Updated contact %@ to blocking state %ld => isBlocked=%@", self, blockingType, bool2str(self.isBlocked));
+    self.isBlocked = [[DataLayer sharedInstance] isBlockedContact:self];
+    DDLogInfo(@"Updated the blocking state of contact %@ => isBlocked=%@", self, bool2str(self.isBlocked));
 }
 
 -(void) handleContactRefresh:(NSNotification*) notification

@@ -9,7 +9,6 @@
 #import "XMPPEdit.h"
 #import "xmpp.h"
 #import "MBProgressHUD.h"
-#import "MLBlockedUsersTableViewController.h"
 #import "MLButtonCell.h"
 #import "MLImageManager.h"
 #import "MLPasswordChangeTableViewController.h"
@@ -845,9 +844,15 @@ enum DummySettingsRows {
                 [self showDetailViewController:ownOmemoKeysView sender:self];
                 break;
             }
-            case SettingsBlockedUsersRow:
-                [self performSegueWithIdentifier:@"showBlockedUsers" sender:self];
+            case SettingsBlockedUsersRow: {
+                xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
+                if(xmppAccount != nil)
+                {
+                    UIViewController* blockedUsersView = [[SwiftuiInterface new] makeBlockedUsersViewFor:xmppAccount];
+                    [self showDetailViewController:blockedUsersView sender:self];
+                }
                 break;
+            }
         }
     }
     else if(newIndexPath.section == kSettingSectionAdvanced)
@@ -892,15 +897,7 @@ enum DummySettingsRows {
 
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
-    if([segue.identifier isEqualToString:@"showBlockedUsers"])
-    {
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
-        // force blocklist update
-        [xmppAccount fetchBlocklist];
-        MLBlockedUsersTableViewController* blockedUsers = (MLBlockedUsersTableViewController*)segue.destinationViewController;
-        blockedUsers.xmppAccount = xmppAccount;
-    }
-    else if([segue.identifier isEqualToString:@"showPassChange"])
+    if([segue.identifier isEqualToString:@"showPassChange"])
     {
         if(self.jid && self.accountID)
         {

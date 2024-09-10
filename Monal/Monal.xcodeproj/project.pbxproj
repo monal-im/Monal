@@ -203,7 +203,6 @@
 		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
 		C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1943A4B25309A9D0036172F /* MLReloadCell.m */; };
 		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
-		C1B1982625AB31B800D5028E /* MLBlockedUsersTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */; };
 		C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B940E926144AF500E9D290 /* AESGCMTest.m */; };
 		C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */ = {isa = PBXBuildFile; fileRef = C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */; };
 		C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */; };
@@ -216,6 +215,7 @@
 		C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */; };
 		C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7AB2777621B0001F295 /* ContactResources.swift */; };
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
+		D02192F32C89BB3800202A59 /* BlockedUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D02192F22C89BB3800202A59 /* BlockedUsers.swift */; };
 		D09B51F62C7F30DD008D725B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */; };
 		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
@@ -686,8 +686,6 @@
 		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
 		C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperTools.m; sourceTree = "<group>"; };
-		C1B1982425AB31B800D5028E /* MLBlockedUsersTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBlockedUsersTableViewController.h; sourceTree = "<group>"; };
-		C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBlockedUsersTableViewController.m; sourceTree = "<group>"; };
 		C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MonalXMPPUnitTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		C1B940E926144AF500E9D290 /* AESGCMTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGCMTest.m; sourceTree = "<group>"; };
 		C1C8394E24F0EDFD00BBCF17 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = external/ar.lproj/Main.strings; sourceTree = "<group>"; };
@@ -760,6 +758,7 @@
 		C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactSoftwareVersionInfo.h; sourceTree = "<group>"; };
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
 		C1F5C7AB2777621B0001F295 /* ContactResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactResources.swift; sourceTree = "<group>"; };
+		D02192F22C89BB3800202A59 /* BlockedUsers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockedUsers.swift; sourceTree = "<group>"; };
 		D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDetails.swift; sourceTree = "<group>"; };
 		D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
 		D8D2595B2BE453296E59F1AF /* Pods-MonalUITests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1054,9 +1053,8 @@
 				262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */,
 				26AAAAD82295742400200433 /* MLPasswordChangeTableViewController.h */,
 				26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */,
-				C1B1982425AB31B800D5028E /* MLBlockedUsersTableViewController.h */,
-				C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */,
 				D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */,
+				D02192F22C89BB3800202A59 /* BlockedUsers.swift */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -2096,6 +2094,7 @@
 				3D27D956290B0BB60014748B /* AddContactMenu.swift in Sources */,
 				261A628B176C159000059090 /* AccountListController.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
+				D02192F32C89BB3800202A59 /* BlockedUsers.swift in Sources */,
 				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
 				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
@@ -2137,7 +2136,6 @@
 				E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */,
 				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
 				54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */,
-				C1B1982625AB31B800D5028E /* MLBlockedUsersTableViewController.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
 				2644D4991FF29E5600F46AB5 /* MLSettingsTableViewController.m in Sources */,

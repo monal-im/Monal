@@ -373,7 +373,7 @@ extension Optional : OptionalProtocol {
     func unwrap() -> Any {
         switch self {
             // If a nil is unwrapped it will crash!
-            case .none: preconditionFailure("nil unwrap!")
+            case .none: unreachable("nil unwrap!")
             case .some(let unwrapped): return unwrapped
         }
     }

@@ -991,7 +991,8 @@ static NSDateFormatter* dbFormatter;
     
     [self.db voidWriteTransaction:^{
         //create entry if not already existing
-        [self.db executeNonQuery:@"INSERT OR IGNORE INTO muc_participants ('account_id', 'room', 'room_nick', 'occupant_id') VALUES(?, ?, ?, ?);" andArguments:@[accountID, room, participant[@"nick"], nilWrapper(participant[@"occupant_id"])]];
+        //(update occupant_id if that nick is already existing --> occupant_id and nick should always be matching and up to date)
+        [self.db executeNonQuery:@"INSERT INTO muc_participants ('account_id', 'room', 'room_nick', 'occupant_id') VALUES(?, ?, ?, ?) ON CONFLICT DO UPDATE SET occupant_id=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountID, room, participant[@"nick"], nilWrapper(participant[@"occupant_id"]), nilWrapper(participant[@"occupant_id"]), accountID, room, participant[@"nick"]]];
         
         //update entry with optional fields (the first two fields are for members that are not just participants)
         if(participant[@"jid"])
@@ -1152,6 +1153,22 @@ static NSDateFormatter* dbFormatter;
         DDLogVerbose(@"%@", query);
 
         return [self.db executeNonQuery:query andArguments:params];
+    }];
+}
+
+-(BOOL) updateOwnOccupantID:(NSString* _Nullable) occupantID forMuc:(NSString*) room onAccountID:(NSNumber*) accountID
+{
+    return [self.db boolWriteTransaction:^{
+        NSString* query = @"UPDATE buddylist SET muc_occupant_id=? WHERE account_id=? AND buddy_name=? AND muc=1;";
+        NSArray* params = @[nilWrapper(occupantID), accountID, room];
+        return [self.db executeNonQuery:query andArguments:params];
+    }];
+}
+
+-(NSString* _Nullable) getOwnOccupantIdForMuc:(NSString*) room onAccountID:(NSNumber*) accountID
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT muc_occupant_id FROM buddylist WHERE buddy_name=? AND account_id=? AND muc=1;" andArguments:@[room, accountID]];
     }];
 }
 
@@ -1569,9 +1586,6 @@ static NSDateFormatter* dbFormatter;
             (B.Muc=1 AND M.buddy_name=? AND (\
                     (M.occupant_id=? AND M.occupant_id IS NOT NULL) OR \
                     (M.participant_jid=? AND M.participant_jid IS NOT NULL) \
-                ) AND ( \
-                    (M.actual_from=B.muc_nick AND M.inbound=0) OR \
-                    (M.actual_from!=B.muc_nick AND M.inbound=1) \
                 ) \
             ) \
         );" andArguments:@[messageid, accountID, from, from, from, nilWrapper(occupantId), nilWrapper(participantJid)]];

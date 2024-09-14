@@ -128,6 +128,9 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSNumber*) accountID;
 -(BOOL) updateOwnNickName:(NSString*) nick forMuc:(NSString*) room forAccount:(NSNumber*) accountID;
 
+-(BOOL) updateOwnOccupantID:(NSString* _Nullable) occupantID forMuc:(NSString*) room onAccountID:(NSNumber*) accountID;
+-(NSString* _Nullable) getOwnOccupantIdForMuc:(NSString*) room onAccountID:(NSNumber*) accountID;
+
 -(BOOL) updateMucSubject:(NSString*) subject forAccount:(NSNumber*) accountID andRoom:(NSString*) room;
 -(NSString*) mucSubjectforAccount:(NSNumber*) accountID andRoom:(NSString*) room;
 

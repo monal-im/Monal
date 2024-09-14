@@ -309,32 +309,43 @@ static NSMutableDictionary* _typingNotifications;
     DDLogInfo(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", possiblyUnknownContact);
     [[DataLayer sharedInstance] addContact:possiblyUnknownContact.contactJid forAccount:account.accountID nickname:nil];
     
-    NSString* ownNick;
+    NSString* ownNick = nil;
+    NSString* ownOccupantId = nil;
     NSString* actualFrom = messageNode.fromUser;
     NSString* participantJid = nil;
     NSString* occupantId = nil;
     if([messageNode check:@"/<type=groupchat>"] && messageNode.fromResource)
     {
-        ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountID];
         actualFrom = messageNode.fromResource;
+        
+        ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountID];
+        ownOccupantId = [[DataLayer sharedInstance] getOwnOccupantIdForMuc:messageNode.fromUser onAccountID:account.accountID];
+        
+        //occupant ids are widely supported now and allow us to have a stable identifier of every muc participant,
+        //even if it is a semi-anonymous channel
+        if([[account.mucProcessor getRoomFeaturesForMuc:messageNode.fromUser] containsObject:@"urn:xmpp:occupant-id:0"] && [messageNode check:@"{urn:xmpp:occupant-id:0}occupant-id@id"])
+        {
+            occupantId = [messageNode findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
+            NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForOccupant:occupantId inRoom:messageNode.fromUser forAccountID:account.accountID];
+            //we will be able to get to know the real jid, if this is a group or we are the channel admin
+            participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
+        }
+        
         //mam catchups will contain a muc#user item listing the jid of the participant
         //this can't be reconstructed from *current* participant lists because someone new could have taken the same nick
         //we don't accept this in non-mam context to make sure this can't be spoofed somehow
-        participantJid = [messageNode findFirst:@"/<type=groupchat>/{http://jabber.org/protocol/muc#user}x/item@jid"];
-        if(![outerMessageNode check:@"{urn:xmpp:mam:2}result"] || participantJid == nil)
+        //NOTE: this will override the participantJid extracted using the occupantId above,
+        //NOTE: but those should ALWAYS be the same (that's the exact purpose of occupant ids)
+        if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])
+            participantJid = [messageNode findFirst:@"/<type=groupchat>/{http://jabber.org/protocol/muc#user}x/item@jid"];
+        
+        //try to get the jid of the current participant if the occupant-id based approach above did not work
+        if(![outerMessageNode check:@"{urn:xmpp:mam:2}result"] && occupantId == nil && participantJid == nil)
         {
-            if([[account.mucProcessor getRoomFeaturesForMuc:messageNode.fromUser] containsObject:@"urn:xmpp:occupant-id:0"] && [messageNode check:@"{urn:xmpp:occupant-id:0}occupant-id@id"])
-            {
-                occupantId = [messageNode findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
-                NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForOccupant:occupantId inRoom:messageNode.fromUser forAccountID:account.accountID];
-                participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
-            }
-            else
-            {
-                NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountID:account.accountID];
-                participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
-            }
+            NSDictionary* mucParticipant = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountID:account.accountID];
+            participantJid = mucParticipant ? mucParticipant[@"participant_jid"] : nil;
         }
+        
         //make sure this is not the full jid
         if(participantJid != nil)
             participantJid = [HelperTools splitJid:participantJid][@"user"];
@@ -346,13 +357,16 @@ static NSMutableDictionary* _typingNotifications;
     //inbound value for groupchat messages
     if(ownNick != nil)
     {
-        //we know the real jid of a participant? --> use this for inbound calculation
-        //(use the nickname otherwise)
-        if(participantJid != nil)
+        //we got an occupant-id? --> use that for inbound calculation
+        //use the reported jid otherwise (note: biboumi will report made-up jids not matching our real jid, so this will fail)
+        //if both don't work, try the nickname (but only for inbound calculation, NOT for calculating LMC or retraction auth)
+        if(occupantId != nil)
+            inbound = ![occupantId isEqualToString:ownOccupantId];
+        else if(participantJid != nil)
             inbound = ![participantJid isEqualToString:account.connectionProperties.identity.jid];
         else
             inbound = ![ownNick isEqualToString:actualFrom];
-        DDLogDebug(@"This is muc, inbound is now: %@ (ownNick: %@, actualFrom: %@, participantJid: %@)", inbound ? @"YES": @"NO", ownNick, actualFrom, participantJid);
+        DDLogDebug(@"This is muc, inbound is now: %@ (ownNick: %@, ownOccupantId: %@, ownJid: %@, occupantId: %@, actualFrom: %@, participantJid: %@)", bool2str(inbound), ownNick, ownOccupantId, account.connectionProperties.identity.jid, occupantId, actualFrom, participantJid);
     }
     
     if([messageNode check:@"/<type=groupchat>/subject"])

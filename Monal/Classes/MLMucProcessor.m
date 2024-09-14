@@ -872,6 +872,14 @@ $$
                     [_noUpdateBookmarks removeObject:node.fromUser];
                 }
                 
+                //update own occupant-id in buddylist
+                NSString* occupantId = nil;
+                @synchronized(_stateLockObject) {
+                    if([_roomFeatures[node.fromUser] containsObject:@"urn:xmpp:occupant-id:0"])
+                        occupantId = [node findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
+                }
+                [[DataLayer sharedInstance] updateOwnOccupantID:occupantId forMuc:node.fromUser onAccountID:_account.accountID];
+                
                 DDLogDebug(@"Updating muc contact...");
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
                     @"contact": [MLContact createContactFromJid:node.fromUser andAccountID:_account.accountID]

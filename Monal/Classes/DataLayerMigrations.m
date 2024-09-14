@@ -1101,7 +1101,12 @@
             );"];
             [db executeNonQuery:@"CREATE INDEX buddyIdIndex ON 'buddy_groups'('buddy_id');"];
         }];
-
+        
+        //add own occupant-id to database
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.408 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN muc_occupant_id VARCHAR(128) NULL DEFAULT NULL;"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

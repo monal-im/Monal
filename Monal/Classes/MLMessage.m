@@ -213,6 +213,11 @@
            [self.stanzaId hash];
 }
 
+-(NSString*) id
+{
+    return [NSString stringWithFormat:@"%@|%@", self.accountID, self.messageDBId];
+}
+
 -(NSString*) description
 {
     return [NSString stringWithFormat:@"%@: %@ {%@messageID: %@, stanzaID: %@} --> %@",

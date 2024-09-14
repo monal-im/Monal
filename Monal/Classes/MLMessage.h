@@ -19,6 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 +(BOOL) supportsSecureCoding;
 
+@property (readonly) NSString* id;     //for Identifiable protocol
+
 /**
  account number in the database should be an integer
  */

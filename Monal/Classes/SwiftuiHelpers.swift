@@ -240,7 +240,7 @@ public struct ImageCropView: UIViewControllerRepresentable {
     private let onCanceled: () -> Void
     private let onImageCropped: (UIImage,CGRect,Int) -> Void
     
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
 
     public init(originalImage: UIImage, configureBlock: @escaping (CropViewController) -> Void, onCanceled: @escaping () -> Void, success onImageCropped: @escaping (UIImage,CGRect,Int) -> Void) {
         self.originalImage = originalImage
@@ -261,7 +261,7 @@ public struct ImageCropView: UIViewControllerRepresentable {
 
     public func makeCoordinator() -> Coordinator {
         Coordinator(
-            onDismiss: { self.dismiss() },
+            onDismiss: { self.presentationMode.wrappedValue.dismiss() },
             onCanceled: self.onCanceled,
             onImageCropped: self.onImageCropped
         )
@@ -555,7 +555,7 @@ struct LazyClosureView<Content: View>: View {
 
 // use this to wrap a view into NavigationStack, if it should be the outermost swiftui view of a new view stack
 struct AddTopLevelNavigation<Content: View>: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
     @StateObject private var sizeClass: ObservableKVOWrapper<SizeClassWrapper>
     let build: () -> Content
     let delegate: SheetDismisserProtocol?
@@ -586,7 +586,7 @@ struct AddTopLevelNavigation<Content: View>: View {
                                 if let delegate = self.delegate {
                                     delegate.dismiss()
                                 } else {
-                                    self.dismiss()
+                                    self.presentationMode.wrappedValue.dismiss()
                                 }
                             }) {
                                 Image(systemName: "arrow.backward")

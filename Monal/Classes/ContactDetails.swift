@@ -7,7 +7,7 @@
 //
 
 struct ContactDetails: View {
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) private var presentationMode
     @State private var ownRole = kMucRoleParticipant
     @State private var ownAffiliation = kMucAffiliationNone
     @StateObject var contact: ObservableKVOWrapper<MLContact>
@@ -490,7 +490,7 @@ struct ContactDetails: View {
                                                 if let delegate = self.delegate {
                                                     delegate.dismiss()
                                                 } else {
-                                                    self.dismiss()
+                                                    self.presentationMode.wrappedValue.dismiss()
                                                 }
                                             }
                                         )

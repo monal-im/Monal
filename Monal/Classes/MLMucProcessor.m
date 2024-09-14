@@ -888,8 +888,8 @@ $$
                 [self logMembersOfMuc:node.fromUser];
                 
                 //load members/admins/owners list (this has to be done *after* joining the muc to not get auth errors)
-                DDLogInfo(@"Querying member/admin/owner lists for muc %@...", node.fromUser);
-                for(NSString* type in @[kMucAffiliationMember, kMucAffiliationAdmin, kMucAffiliationOwner])
+                DDLogInfo(@"Querying outcast/member/admin/owner lists for muc %@...", node.fromUser);
+                for(NSString* type in @[kMucAffiliationOutcast, kMucAffiliationMember, kMucAffiliationAdmin, kMucAffiliationOwner])
                 {
                     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:node.fromUser];
                     [discoInfo setMucListQueryFor:type];
@@ -1498,11 +1498,8 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     
     if(join)
     {
-        for(NSString* type in @[kMucAffiliationMember, kMucAffiliationAdmin, kMucAffiliationOwner])
-        {
-            DDLogInfo(@"Clearing muc participants table for type %@: %@", type, iqNode.fromUser);
-            [[DataLayer sharedInstance] cleanupParticipantsListFor:iqNode.fromUser andType:type onAccountID:_account.accountID];
-        }
+        DDLogInfo(@"Clearing muc participants table: %@", iqNode.fromUser);
+        [[DataLayer sharedInstance] cleanupParticipantsListFor:iqNode.fromUser onAccountID:_account.accountID];
         
         //now try to join this room if requested
         [self sendJoinPresenceFor:iqNode.fromUser];

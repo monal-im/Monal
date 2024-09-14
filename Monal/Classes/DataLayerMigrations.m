@@ -1107,6 +1107,28 @@
             [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN muc_occupant_id VARCHAR(128) NULL DEFAULT NULL;"];
         }];
         
+        //allow NULL values for optional fields and make this explicit
+        //we don't need to migrate data because of our non-smacks reconnect on db upgrade
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.409 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE muc_participants DROP COLUMN participant_jid;"];
+            [db executeNonQuery:@"ALTER TABLE muc_participants DROP COLUMN affiliation;"];
+            [db executeNonQuery:@"ALTER TABLE muc_participants DROP COLUMN role;"];
+            [db executeNonQuery:@"ALTER TABLE muc_participants ADD COLUMN participant_jid VARCHAR(255) NULL DEFAULT NULL;"];
+            [db executeNonQuery:@"ALTER TABLE muc_participants ADD COLUMN affiliation VARCHAR(255) NULL DEFAULT NULL;"];
+            [db executeNonQuery:@"ALTER TABLE muc_participants ADD COLUMN role VARCHAR(255) NULL DEFAULT NULL;"];
+            
+            [db executeNonQuery:@"DROP TABLE muc_members;"];
+            [db executeNonQuery:@"CREATE TABLE 'muc_members' ( \
+                'account_id' INTEGER NOT NULL, \
+                'room' VARCHAR(255) NOT NULL, \
+                'member_jid' VARCHAR(255) NULL DEFAULT NULL, \
+                'affiliation' VARCHAR(255) NULL DEFAULT NULL, \
+                PRIMARY KEY('account_id','room','member_jid'), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+            );"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

@@ -955,11 +955,15 @@ static NSDateFormatter* dbFormatter;
             nick = [self ownNickNameforMuc:room forAccount:accountID];
         MLAssert(nick != nil, @"Could not determine muc nick when adding muc");
         
-        for(NSString* type in @[kMucAffiliationMember, kMucAffiliationAdmin, kMucAffiliationOwner])
-        {
-            [self cleanupParticipantsListFor:room andType:type onAccountID:accountID];
-            [self cleanupMembersListFor:room andType:type onAccountID:accountID];
-        }
+        //this cleanup is made *before* sending out the join presence to join a muc
+        //--> every entry should be removed and filled again by the incoming presence flood triggered by our join
+        [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountID, room]];
+        
+        //this cleanup is made *before* sending out the join presence to join a muc and the list-fetching iqs
+        //--> every entry should be removed and filled again by the incoming presence flood triggered by our join or the list-fetching responses
+        //NOTE: initMuc will only be called on first join, not on rejoin --> these cleanups won't be called on rejoin so that
+        //NOTE: the members list will always be properly filled even while a rejoin is in progress
+        [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=?;" andArguments:@[accountID, room]];
         
         BOOL encrypt = NO;
 #ifndef DISABLE_OMEMO
@@ -972,10 +976,10 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) cleanupParticipantsListFor:(NSString*) room andType:(NSString*) type onAccountID:(NSNumber*) accountID
+-(void) cleanupParticipantsListFor:(NSString*) room onAccountID:(NSNumber*) accountID
 {
     //clean up old muc data (will be refilled by incoming presences and/or disco queries)
-    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=? AND affiliation=?;" andArguments:@[accountID, room, type]];
+    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountID, room]];
 }
 
 -(void) cleanupMembersListFor:(NSString*) room andType:(NSString*) type onAccountID:(NSNumber*) accountID
@@ -995,12 +999,9 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"INSERT INTO muc_participants ('account_id', 'room', 'room_nick', 'occupant_id') VALUES(?, ?, ?, ?) ON CONFLICT DO UPDATE SET occupant_id=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountID, room, participant[@"nick"], nilWrapper(participant[@"occupant_id"]), nilWrapper(participant[@"occupant_id"]), accountID, room, participant[@"nick"]]];
         
         //update entry with optional fields (the first two fields are for members that are not just participants)
-        if(participant[@"jid"])
-            [self.db executeNonQuery:@"UPDATE muc_participants SET participant_jid=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[participant[@"jid"], accountID, room, participant[@"nick"]]];
-        if(participant[@"affiliation"])
-            [self.db executeNonQuery:@"UPDATE muc_participants SET affiliation=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[participant[@"affiliation"], accountID, room, participant[@"nick"]]];
-        if(participant[@"role"])
-            [self.db executeNonQuery:@"UPDATE muc_participants SET role=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[participant[@"role"], accountID, room, participant[@"nick"]]];
+        [self.db executeNonQuery:@"UPDATE muc_participants SET participant_jid=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[nilWrapper(participant[@"jid"]), accountID, room, participant[@"nick"]]];
+        [self.db executeNonQuery:@"UPDATE muc_participants SET affiliation=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[nilWrapper(participant[@"affiliation"]), accountID, room, participant[@"nick"]]];
+        [self.db executeNonQuery:@"UPDATE muc_participants SET role=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[nilWrapper(participant[@"role"]), accountID, room, participant[@"nick"]]];
     }];
 }
 
@@ -1024,8 +1025,7 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"INSERT OR IGNORE INTO muc_members ('account_id', 'room', 'member_jid') VALUES(?, ?, ?);" andArguments:@[accountID, room, member[@"jid"]]];
         
         //update entry with optional fields
-        if(member[@"affiliation"])
-            [self.db executeNonQuery:@"UPDATE muc_members SET affiliation=? WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[member[@"affiliation"], accountID, room, member[@"jid"]]];
+        [self.db executeNonQuery:@"UPDATE muc_members SET affiliation=? WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[nilWrapper(member[@"affiliation"]), accountID, room, member[@"jid"]]];
     }];
 }
 

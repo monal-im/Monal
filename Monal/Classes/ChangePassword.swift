@@ -44,19 +44,15 @@ struct ChangePassword: View {
             return
         }
 
-        showLoadingOverlay(overlay, headlineView: Text("Changing Password"), descriptionView: Text(""))
-
-        account.changePassword(newPass) { success, message in
-            DispatchQueue.main.async {
-                hideLoadingOverlay(overlay)
-                if success {
-                    successAlert(title: Text("Success"), message: Text("The password has been changed"))
-                    MLXMPPManager.sharedInstance().updatePassword(newPass, forAccount: accountID)
-                } else {
-                    errorAlert(title: Text("Error"), message: Text(message ?? "Could not change the password"))
-                }
-
-            }
+        showPromisingLoadingOverlay(overlay, headlineView: Text("Changing Password"), descriptionView: Text("")) {
+            account.changePassword(newPass)
+        }
+        .done { _ in
+            successAlert(title: Text("Success"), message: Text("The password has been changed"))
+            MLXMPPManager.sharedInstance().updatePassword(newPass, forAccount: accountID)
+        }
+        .catch { error in
+            errorAlert(title: Text("Error"), message: Text(error.localizedDescription))
         }
 
     }

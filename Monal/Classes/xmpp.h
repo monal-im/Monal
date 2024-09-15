@@ -216,7 +216,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 #pragma mark - account management
 
--(void) changePassword:(NSString*) newPass withCompletion:(xmppCompletion _Nullable) completion;
+-(AnyPromise*) changePassword:(NSString*) newPass;
 
 -(void) requestRegFormWithToken:(NSString* _Nullable) token andCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
 -(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary* _Nullable) hiddenFields withCompletion:(xmppCompletion _Nullable) completion;

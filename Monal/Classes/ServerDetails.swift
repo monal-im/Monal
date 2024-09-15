@@ -334,8 +334,7 @@ struct ServerDetails: View {
 
         var result: [EntryData] = []
         let saslMethods = connection.saslMethods as! [String: Bool]
-        for method in saslMethods.keys.sorted() {
-            let used = saslMethods[method]!
+        for (method, used) in saslMethods.sortedByKey() {
             let supported = (SCRAM.supportedMechanisms(includingChannelBinding: true) as! [String]).contains(method)
             var description: String
             switch method {
@@ -375,8 +374,7 @@ struct ServerDetails: View {
         var result: [EntryData] = []
         let channelBindingTypes = connection.channelBindingTypes as! [String: Bool]
         let supportedChannelBindingTypes = xmppAccount.supportedChannelBindingTypes as! [String]
-        for type in channelBindingTypes.keys.sorted() {
-            let used = channelBindingTypes[type]!
+        for (type, used) in channelBindingTypes.sortedByKey() {
             let supported = supportedChannelBindingTypes.contains(type)
             var description: String
 

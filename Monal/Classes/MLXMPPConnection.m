@@ -26,6 +26,7 @@
     self.serverFeatures = [MLXMLNode new];
     self.accountDiscoFeatures = [NSSet new];
     self.serverDiscoFeatures = [NSSet new];
+    self.serverContactAddresses = [NSDictionary new];
     self.conferenceServers = [NSMutableDictionary new];
     self.discoveredServices = [NSMutableArray new];
     self.discoveredStunTurnServers = [NSMutableArray new];

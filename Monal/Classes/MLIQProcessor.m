@@ -548,6 +548,20 @@ $$class_handler(handleServerDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
     //query external services to learn stun/turn servers
     if([features containsObject:@"urn:xmpp:extdisco:2"])
         [account queryExternalServicesOn:iqNode.fromUser];
+
+    //get the server's contact addresses (XEP-0157)
+    XMPPDataForm* dataForm = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/network/serverinfo}result\\"];
+    NSMutableDictionary<NSString*, NSArray*>* resultDictionary = [NSMutableDictionary dictionary];
+    for (NSString* fieldName in dataForm.allKeys)
+    {
+        if ([fieldName hasSuffix:@"-addresses"])
+        {
+            NSArray* addresses = [dataForm getField:fieldName][@"allValues"];
+            if (addresses != nil && addresses.count > 0)
+                resultDictionary[fieldName] = addresses;
+        }
+    }
+    account.connectionProperties.serverContactAddresses = [resultDictionary copy];
 $$
 
 $$class_handler(handleServiceDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))

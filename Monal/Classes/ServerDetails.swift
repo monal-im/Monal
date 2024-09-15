@@ -158,6 +158,50 @@ struct ServerDetails: View {
         return result
     }
 
+    private func getServerContactAddressesEntryData(connection: MLXMPPConnection) -> [EntryData] {
+        let contactAddresses = connection.serverContactAddresses as! [String: [String]]
+        guard contactAddresses.count > 0 else {
+            return [
+                EntryData(
+                    title: NSLocalizedString("None", comment: ""),
+                    description: NSLocalizedString("This server does not provide any contact addresses.", comment: ""),
+                    status: .normal
+                )
+            ]
+        }
+
+        var result: [EntryData] = []
+        for (addressType, addresses) in contactAddresses.sortedByKey() {
+            var title: String
+            // We need to hardcode the strings so they can be localized, at least until the string extraction script is fixed.
+            switch(addressType) {
+                case "abuse-addresses":
+                    title = NSLocalizedString("Abuse", comment: "")
+                case "admin-addresses":
+                    title = NSLocalizedString("Admin", comment: "")
+                case "feedback-addresses":
+                    title = NSLocalizedString("Feedback", comment: "")
+                case "sales-addresses":
+                    title = NSLocalizedString("Sales", comment: "")
+                case "security-addresses":
+                    title = NSLocalizedString("Security", comment: "")
+                case "status-addresses":
+                    title = NSLocalizedString("Status", comment: "")
+                case "support-addresses":
+                    title = NSLocalizedString("Support", comment: "")
+                default:
+                    title = addressType.replacingOccurrences(of: "-", with: " ")
+            }
+            result.append(
+                EntryData(
+                    title: "\(title):",
+                    description: addresses.joined(separator: "\n\n"),
+                    status: .normal
+                )
+            )
+        }
+        return result
+    }
     private func getMUCEntryData(connection: MLXMPPConnection) -> [EntryData] {
         let conferenceServers = connection.conferenceServerIdentities as! [[String: String]]
         guard conferenceServers.count > 0 else {
@@ -366,6 +410,12 @@ struct ServerDetails: View {
 
             Section(header: Text("These are the modern XMPP capabilities Monal detected on your server after you have logged in.")) {
                 ForEach(getXEPEntryData(connection: connection)) { entryData in
+                    ServerDetailsEntry(entryData)
+                }
+            }
+
+            Section(header: Text("These are your server's contact addresses.")) {
+                ForEach(getServerContactAddressesEntryData(connection: connection)) { entryData in
                     ServerDetailsEntry(entryData)
                 }
             }

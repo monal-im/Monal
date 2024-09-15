@@ -33,6 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) MLXMLNode* serverFeatures;
 @property (nonatomic, strong) NSSet* accountDiscoFeatures;
 @property (nonatomic, strong) NSSet* serverDiscoFeatures;
+@property (nonatomic, strong) NSDictionary<NSString*, NSArray*>* serverContactAddresses;
 
 @property (nonatomic, strong) NSMutableArray* discoveredServices;
 @property (nonatomic, strong) NSMutableArray* discoveredStunTurnServers;

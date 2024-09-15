@@ -3526,6 +3526,9 @@ NSString* const kStanza = @"stanza";
             [values setValue:[self.connectionProperties.serverDiscoFeatures copy] forKey:@"serverDiscoFeatures"];
             [values setValue:[self.connectionProperties.accountDiscoFeatures copy] forKey:@"accountDiscoFeatures"];
             
+            if(self.connectionProperties.serverContactAddresses)
+                [values setValue:[self.connectionProperties.serverContactAddresses copy] forKey:@"serverContactAddresses"];
+
             if(self.connectionProperties.uploadServer)
                 [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
             
@@ -3681,6 +3684,8 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.serverDiscoFeatures = [dic objectForKey:@"serverDiscoFeatures"];
             self.connectionProperties.accountDiscoFeatures = [dic objectForKey:@"accountDiscoFeatures"];
             
+            self.connectionProperties.serverContactAddresses = [dic objectForKey:@"serverContactAddresses"];
+
             self.connectionProperties.discoveredServices = [[dic objectForKey:@"discoveredServices"] mutableCopy];
             self.connectionProperties.discoveredStunTurnServers = [[dic objectForKey:@"discoveredStunTurnServers"] mutableCopy];
             self.connectionProperties.discoveredAdhocCommands = [[dic objectForKey:@"discoveredAdhocCommands"] mutableCopy];
@@ -3919,6 +3924,7 @@ NSString* const kStanza = @"stanza";
     //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
     self.connectionProperties.serverDiscoFeatures = [NSSet new];
     self.connectionProperties.accountDiscoFeatures = [NSSet new];
+    self.connectionProperties.serverContactAddresses = [NSDictionary new];
     self.connectionProperties.discoveredServices = [NSMutableArray new];
     self.connectionProperties.discoveredStunTurnServers = [NSMutableArray new];
     self.connectionProperties.discoveredAdhocCommands = [NSMutableDictionary new];

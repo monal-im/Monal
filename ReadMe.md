@@ -64,7 +64,8 @@ Monal is licensed under the BSD license. Any code contributions should be compat
 ### Pull Requests
 We take pull requests. Please use the develop branch to make changes. Please take a look at:
 
-- [Overview: Tasks and Issues](https://github.com/monal-im/Monal/issues/322) 
+- [Building Monal](https://github.com/monal-im/Monal/wiki/Building-Monal)
+- [Issues with a Help wanted label](https://github.com/monal-im/Monal/issues?q=is%3Aissue+is%3Aopen+label%3A%22%3Asuperhero%3A+Help+wanted%22)
 - [Support Monal](https://github.com/monal-im/Monal/issues/363)
 
 Monal is licensed under the BSD license. Any code contributions should be compatible with that license.  ** NO GPL ** .  By contributing to this project, you agree that your code is not GPL or any similarly restrictive license. You agree that your code can be used to publish in App stores such as Apple's that use DRM.

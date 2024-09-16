@@ -275,25 +275,24 @@ struct ContactDetails: View {
                                 contact.isMuc ? Text("Notifications disabled") : Text("Contact is muted")
                             } icon: {
                                 Image(systemName: "bell.slash.fill")
-                                    .foregroundColor(.red)
                             }
+                            .foregroundStyle(Color.red)
                         } else if contact.isMuc && contact.isMentionOnly {
                             Label {
                                 Text("Notify only when mentioned")
                             } icon: {
                                 Image(systemName: "bell.badge")
-                                    .foregroundColor(.primary)
                             }
+                            .foregroundStyle(Color.primary)
                         } else {
                             Label {
                                 contact.isMuc ? Text("Notify on all messages") : Text("Contact is not muted")
                             } icon: {
                                 Image(systemName: "bell.fill")
-                                    .foregroundColor(.green)
                             }
+                            .foregroundStyle(Color.green)
                         }
                     }
-                    .tint(Color.primary)
                 }
                 
 #if !DISABLE_OMEMO
@@ -310,15 +309,15 @@ struct ContactDetails: View {
                                 Text("Messages are encrypted")
                             } icon: {
                                 Image(systemName: "lock.fill")
-                                    .foregroundColor(.green)
                             }
+                            .foregroundStyle(Color.green)
                         } else {
                             Label {
                                 Text("Messages are NOT encrypted")
                             } icon: {
                                 Image(systemName: "lock.open.fill")
-                                    .foregroundColor(.red)
                             }
+                            .foregroundStyle(Color.red)
                         }
                     }
                     .alert(isPresented: $showingCannotEncryptAlert) {
@@ -394,7 +393,6 @@ struct ContactDetails: View {
                     }) {
                         Text("Show shared Media and Files")
                     }
-                    .tint(Color.primary)
                 }
                 NavigationLink(destination: LazyClosureView{MediaGalleryView(contact: contact.contactJid as String, accountID: contact.accountID)}) {
                     Text("View Media Gallery")
@@ -632,6 +630,7 @@ struct ContactDetails: View {
 #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .tint(Color.primary)
         .addLoadingOverlay(overlay)
         .navigationBarTitle(contact.contactDisplayName as String, displayMode:.inline)
         .alert(isPresented: $showAlert) {

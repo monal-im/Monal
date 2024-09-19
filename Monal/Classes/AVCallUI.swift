@@ -172,7 +172,7 @@ struct AVCallUI: View {
     var body: some View {
         ZStack {
             Color.background
-                .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea()
             
             if MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
                 VideoView(renderer:self.remoteRenderer)

@@ -23,7 +23,7 @@ struct LoadingOverlay: ViewModifier {
     @ObservedObject var state : LoadingOverlayState
     public func body(content: Content) -> some View {
         ZStack(alignment: .center) {
-            Color(UIColor.systemGroupedBackground).ignoresSafeArea().edgesIgnoringSafeArea(.all)
+            Color(UIColor.systemGroupedBackground).ignoresSafeArea()
             
             content
             .disabled(state.enabled == true)

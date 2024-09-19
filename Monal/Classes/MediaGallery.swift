@@ -234,7 +234,7 @@ struct MediaItemSwipeView: View {
         }
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .animation(.easeInOut, value: currentIndex)
-        .edgesIgnoringSafeArea(.all)
+        .ignoresSafeArea()
         .navigationBarHidden(true)
         .statusBar(hidden: true)
     }

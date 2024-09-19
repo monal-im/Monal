@@ -62,7 +62,7 @@ struct ImageViewer: View {
     var body: some View {
         ZStack(alignment: .top) {
             Color.background
-                .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea()
             
             if (info["mimeType"] as! String).hasPrefix("image/svg") {
                 VStack {
@@ -187,7 +187,7 @@ struct ControlsOverlay: View {
     var body: some View {
         VStack {
             Color.background
-                .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea()
                 .overlay(
                     HStack {
                         Spacer().frame(width: 20)

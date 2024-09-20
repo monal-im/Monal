@@ -716,6 +716,26 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(NSNumber*) login:(NSString*) jid password:(NSString*) password
 {
+    NSArray* elements = [jid componentsSeparatedByString:@"@"];
+    MLAssert([elements count] > 1, @"Got invalid jid", (@{@"jid": nilWrapper(jid), @"elements": elements}));
+    NSString* domain = ((NSString*)[elements objectAtIndex:1]).lowercaseString;
+
+    //we don't want to set kPlainActivated (not even according to our preload list) and default to plain_activated=false,
+    //because the error message will warn the user and direct them to the advanced account creation menu to activate PLAIN
+    //if they still want to connect to this server
+    //only exception: yax.im --> we don't want to suggest a server during account creation that has a scary warning
+    //when logging in using another device afterwards
+    //TODO: to be removed once yax.im and quicksy.im supports SASL2 and SSDP!!
+    //TODO: use preload list and allow PLAIN for all others once enough domains are on this list
+    //allow plain for all servers not on preload list, since prosody with SASL2 wasn't even released yet
+    BOOL defaultPlainActivated = YES;
+    BOOL plainActivated = ([domain isEqualToString:@"yax.im"] || [domain isEqualToString:@"quicksy.im"]) ? YES : defaultPlainActivated;
+
+    return [self login:jid password:password hardcodedServer:nil hardcodedPort:nil forceDirectTLS:NO allowPlainAuth:plainActivated];
+}
+
+-(NSNumber*) login:(NSString*) jid password:(NSString*) password hardcodedServer:(NSString*) hardcodedServer hardcodedPort:(NSString*) hardcodedPort forceDirectTLS:(BOOL) directTLS allowPlainAuth:(BOOL) plainActivated
+{
     //check if it is a JID
     NSArray* elements = [jid componentsSeparatedByString:@"@"];
     MLAssert([elements count] > 1, @"Got invalid jid", (@{@"jid": nilWrapper(jid), @"elements": elements}));
@@ -739,17 +759,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [dic setObject:user forKey:kUsername];
     [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
     [dic setObject:@YES forKey:kEnabled];
-    [dic setObject:@NO forKey:kDirectTLS];
-    //we don't want to set kPlainActivated (not even according to our preload list) and default to plain_activated=false,
-    //because the error message will warn the user and direct them to the advanced account creation menu to activate PLAIN
-    //if they still want to connect to this server
-    //only exception: yax.im --> we don't want to suggest a server during account creation that has a scary warning
-    //when logging in using another device afterwards
-    //TODO: to be removed once yax.im and quicksy.im supports SASL2 and SSDP!!
-    //TODO: use preload list and allow PLAIN for all others once enough domains are on this list
-    //allow plain for all servers not on preload list, since prosody with SASL2 wasn't even released yet
-    NSNumber* defaultPlainActivated = @YES;
-    [dic setObject:([domain isEqualToString:@"yax.im"] || [domain isEqualToString:@"quicksy.im"] ? @YES : defaultPlainActivated) forKey:kPlainActivated];
+    if(hardcodedServer != nil)
+        [dic setObject:hardcodedServer forKey:kServer];
+    if(hardcodedPort != nil)
+        [dic setObject:hardcodedPort forKey:kPort];
+    [dic setObject:@(directTLS) forKey:kDirectTLS];
+    [dic setObject:@(plainActivated) forKey:kPlainActivated];
 
     NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
     if(accountID == nil)

@@ -247,9 +247,11 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=?, needs_password_migration=? WHERE account_id=?;";
         NSString* server = (NSString*)[dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
+        if ([port isEqual:@""])
+            port = nil;
         NSArray* params = @[
-            server == nil ? @"" : server,
-            port == nil ? @"5222" : port,
+            nilDefault(server, @""),
+            nilDefault(port, @"5222"),
             ((NSString*)[dictionary objectForKey:kUsername]),
             ((NSString*)[dictionary objectForKey:kResource]),
             ((NSString*)[dictionary objectForKey:kDomain]),
@@ -272,9 +274,11 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"INSERT INTO account (server, other_port, resource, domain, enabled, directTLS, username, rosterName, statusMessage, plain_activated) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         NSString* server = (NSString*) [dictionary objectForKey:kServer];
         NSString* port = (NSString*)[dictionary objectForKey:kPort];
+        if ([port isEqual:@""])
+            port = nil;
         NSArray* params = @[
-            server == nil ? @"" : server,
-            port == nil ? @"5222" : port,
+            nilDefault(server, @""),
+            nilDefault(port, @"5222"),
             ((NSString *)[dictionary objectForKey:kResource]),
             ((NSString *)[dictionary objectForKey:kDomain]),
             [dictionary objectForKey:kEnabled] ,

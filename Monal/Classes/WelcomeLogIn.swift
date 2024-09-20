@@ -9,12 +9,18 @@
 struct WelcomeLogIn: View {
     static private let credFaultyPattern = "^.+@.+\\..{2,}$"
     
+    var advancedMode: Bool = false
     var delegate: SheetDismisserProtocol
 
     @State private var isEditingJid: Bool = false
     @State private var jid: String = ""
     @State private var isEditingPassword: Bool = false
     @State private var password: String = ""
+
+    @State private var hardcodedServer: String = ""
+    @State private var hardcodedPort: String = "5222"
+    @State private var allowPlainAuth: Bool = false
+    @State private var forceDirectTLS: Bool = false
 
     @State private var showAlert = false
     @State private var showQRCodeScanner = false
@@ -26,7 +32,7 @@ struct WelcomeLogIn: View {
     @State private var loginComplete = false
     @State private var isLoadingOmemoBundles = false
     
-    @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
+    @State private var alertPrompt = AlertPrompt()
     @StateObject private var overlay = LoadingOverlayState()
 
 #if IS_ALPHA
@@ -40,18 +46,21 @@ struct WelcomeLogIn: View {
     private var credentialsEnteredAlert: Bool {
         alertPrompt.title = Text("Empty Values!")
         alertPrompt.message = Text("Please make sure you have entered both a username and password.")
+        alertPrompt.dismissLabel = Text("Close")
         return credentialsEntered
     }
 
     private var credentialsFaultyAlert: Bool {
         alertPrompt.title = Text("Invalid Credentials!")
         alertPrompt.message = Text("Your XMPP jid should be in in the format user@domain.tld. For special configurations, use manual setup.")
+        alertPrompt.dismissLabel = Text("Close")
         return credentialsFaulty
     }
 
     private var credentialsExistAlert: Bool {
         alertPrompt.title = Text("Duplicate jid!")
         alertPrompt.message = Text("This account already exists in Monal.")
+        alertPrompt.dismissLabel = Text("Close")
         return credentialsExist
     }
 
@@ -60,6 +69,7 @@ struct WelcomeLogIn: View {
         hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Timeout Error")
         alertPrompt.message = Text("We were not able to connect your account. Please check your username and password and make sure you are connected to the internet.")
+        alertPrompt.dismissLabel = Text("Close")
         showAlert = true
     }
 
@@ -67,6 +77,7 @@ struct WelcomeLogIn: View {
         hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Success!")
         alertPrompt.message = Text("You are set up and connected.")
+        alertPrompt.dismissLabel = Text("Close")
         showAlert = true
     }
 
@@ -74,7 +85,20 @@ struct WelcomeLogIn: View {
         hideLoadingOverlay(overlay)
         alertPrompt.title = Text("Error")
         alertPrompt.message = Text(String(format: NSLocalizedString("We were not able to connect your account. Please check your username and password and make sure you are connected to the internet.\n\nTechnical error message: %@", comment: ""), errorMessage))
+        alertPrompt.dismissLabel = Text("Close")
         showAlert = true
+    }
+
+    private func showPlainAuthWarningAlert() {
+        alertPrompt.title = Text("Warning")
+        alertPrompt.message = Text("If you turn this on, you will no longer be safe from man-in-the-middle attacks. Such attacks enable the adversary to manipulate your incoming and outgoing messages, add their own OMEMO keys, change your account details and even know or change your password!\n\nYou should rather switch to another server than turning this on.")
+        alertPrompt.dismissLabel = Text("Understood")
+        showAlert = true
+    }
+
+    private var jidDomainPart: String {
+        let jidComponents = HelperTools.splitJid(jid)
+        return jidComponents["host"] ?? ""
     }
 
     private var credentialsEntered: Bool {
@@ -119,22 +143,23 @@ struct WelcomeLogIn: View {
             GeometryReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading) {
-                        VStack {
-                            HStack () {
-                                Image(decorative: appLogoId)
-                                    .resizable()
-                                    .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                                    .padding()
-                                
-                                Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
-                                    .padding()
-                                    .padding(.leading, -16.0)
-                                
+                        if !advancedMode {
+                            VStack {
+                                HStack () {
+                                    Image(decorative: appLogoId)
+                                        .resizable()
+                                        .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                        .padding()
+
+                                    Text("Log in to your existing account or register a new account. If required you will find more advanced options in Monal settings.")
+                                        .padding()
+                                        .padding(.leading, -16.0)
+                                }
                             }
+                            .frame(maxWidth: .infinity)
+                            .background(Color(UIColor.systemBackground))
                         }
-                        .frame(maxWidth: .infinity)
-                        .background(Color(UIColor.systemBackground))
 
                         Form {
                             Text("I already have an account:")
@@ -154,7 +179,53 @@ struct WelcomeLogIn: View {
                             SecureField(NSLocalizedString("Password", comment: "placeholder when adding account"), text: $password)
                                 .addClearButton(isEditing:  password.count > 0, text: $password)
                                 .listRowSeparator(.hidden)
-                            
+
+                            if advancedMode {
+                                TextField("Optional Hardcoded Hostname", text: $hardcodedServer)
+                                    .textInputAutocapitalization(.never)
+                                    .autocorrectionDisabled()
+                                    .keyboardType(.URL)
+                                    .addClearButton(isEditing:  hardcodedServer.count > 0, text: $hardcodedServer)
+                                    .listRowSeparator(.hidden)
+
+                                if !hardcodedServer.isEmpty {
+                                    HStack {
+                                        Text("Port")
+                                        Spacer()
+                                        TextField("Optional Hardcoded Port", text: $hardcodedPort)
+                                            .keyboardType(.numberPad)
+                                            .addClearButton(isEditing:  hardcodedPort.count > 0, text: $hardcodedPort)
+                                            .onDisappear {
+                                                hardcodedPort = "5222"
+                                            }
+                                    }
+                                    .listRowSeparator(.hidden)
+
+                                    Toggle(isOn: $forceDirectTLS) {
+                                        Text("Always use direct TLS, not STARTTLS")
+                                    }
+                                    .onDisappear {
+                                        forceDirectTLS = false
+                                    }
+                                }
+
+                                Toggle(isOn: $allowPlainAuth) {
+                                    Text("Allow MITM-prone PLAIN authentication")
+                                }
+                                // TODO: use the SCRAM preload list instead of hardcoding servers
+                                .disabled(["conversations.im"].contains(jidDomainPart.lowercased()))
+                                .onChange(of: jid) { _ in
+                                    if ["conversations.im"].contains(jidDomainPart.lowercased()) {
+                                        allowPlainAuth = false
+                                    }
+                                }
+                                .onChange(of: allowPlainAuth) { _ in
+                                    if allowPlainAuth {
+                                        showPlainAuthWarningAlert()
+                                    }
+                                }
+                            }
+
                             HStack() {
                                 Button(action: {
                                     showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
@@ -163,7 +234,11 @@ struct WelcomeLogIn: View {
                                         startLoginTimeout()
                                         showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
                                         self.errorObserverEnabled = true
-                                        self.newAccountID = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
+                                        if advancedMode {
+                                            self.newAccountID = MLXMPPManager.sharedInstance().login(self.jid, password: self.password, hardcodedServer:self.hardcodedServer, hardcodedPort:self.hardcodedPort, forceDirectTLS: self.forceDirectTLS, allowPlainAuth: self.allowPlainAuth)
+                                        } else {
+                                            self.newAccountID = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
+                                        }
                                         if(self.newAccountID == nil) {
                                             currentTimeout = nil // <- disable timeout on error
                                             errorObserverEnabled = false
@@ -188,36 +263,44 @@ struct WelcomeLogIn: View {
                                     }))
                                 }
 
-                                // Just sets the credential in jid and password variables and shows them in the input fields
-                                // so user can control what they scanned and if o.k. login via the "Login" button.
-                                Button(action: {
-                                    showQRCodeScanner = true
-                                }){
-                                    Image(systemName: "qrcode")
-                                        .frame(maxHeight: .infinity)
-                                        .padding(9.0)
-                                        .background(Color(UIColor.tertiarySystemFill))
-                                        .foregroundColor(.primary)
-                                        .clipShape(Circle())
+                                if !advancedMode {
+                                    // Just sets the credential in jid and password variables and shows them in the input fields
+                                    // so user can control what they scanned and if o.k. login via the "Login" button.
+                                    Button(action: {
+                                        showQRCodeScanner = true
+                                    }){
+                                        Image(systemName: "qrcode")
+                                            .frame(maxHeight: .infinity)
+                                            .padding(9.0)
+                                            .background(Color(UIColor.tertiarySystemFill))
+                                            .foregroundColor(.primary)
+                                            .clipShape(Circle())
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle())
+                                    .sheet(isPresented: $showQRCodeScanner) {
+                                        Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
+                                        // Get existing credentials from QR and put values in jid and password
+                                        MLQRCodeScanner(
+                                            handleLogin: { jid, password in
+                                                self.jid = jid
+                                                self.password = password
+                                            }, handleClose: {
+                                                self.showQRCodeScanner = false
+                                            }
+                                        )
+                                    }
                                 }
-                                .buttonStyle(BorderlessButtonStyle())
-                                .sheet(isPresented: $showQRCodeScanner) {
-                                    Text("QR-Code Scanner").font(.largeTitle.weight(.bold))
-                                    // Get existing credentials from QR and put values in jid and password
-                                    MLQRCodeScanner(
-                                        handleLogin: { jid, password in
-                                            self.jid = jid
-                                            self.password = password
-                                        }, handleClose: {
-                                            self.showQRCodeScanner = false
-                                        }
-                                    )
-                                }
+
                             }
-                            
+                            .listRowSeparator(.hidden, edges: .top)
+                            // Align the (bottom) list row separator to the very left
+                            .alignmentGuide(.listRowSeparatorLeading) { _ in
+                                return 0
+                            }
+
                             NavigationLink(destination: LazyClosureView(RegisterAccount(delegate: self.delegate))) {
                                 Text("Register a new account")
-                                .foregroundColor(Color.accentColor)
+                                    .foregroundColor(Color.accentColor)
                             }
                             
                             if(DataLayer.sharedInstance().enabledAccountCnts() == 0) {
@@ -243,7 +326,8 @@ struct WelcomeLogIn: View {
             }
         }
         .addLoadingOverlay(overlay)
-        .navigationBarTitle(Text("Welcome"), displayMode:.large)
+        .navigationTitle(advancedMode ? Text("Add Account (advanced)") : Text("Welcome"))
+        .navigationBarTitleDisplayMode(advancedMode ? .inline : .large)
         .onDisappear {UITableView.appearance().tableHeaderView = nil}       //why that??
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
             if(self.errorObserverEnabled == false) {

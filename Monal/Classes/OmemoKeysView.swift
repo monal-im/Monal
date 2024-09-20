@@ -137,7 +137,7 @@ struct OmemoKeysEntryView: View {
             setTrustLevel(keyEnabled)
         })
 
-        let fingerprintString = HelperTools.signalHexKeyWithSpaces(with: fingerprint)
+        let fingerprintString: String = self.fingerprint.isEmpty ? "" : HelperTools.signalHexKeyWithSpaces(with: fingerprint)
         let clipboardValue = "OMEMO fingerprint of \(self.contactJid), device \(self.deviceId): \(fingerprintString)"
         GroupBox {
             HStack(alignment:.bottom) {

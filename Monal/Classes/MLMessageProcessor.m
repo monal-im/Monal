@@ -397,13 +397,6 @@ static NSMutableDictionary* _typingNotifications;
         return nil;
     }
     
-    //ignore all other groupchat messages coming from bare jid (e.g. not being a "normal" muc message nor a subject update handled above)
-    if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
-    {
-        DDLogVerbose(@"Ignoring groupchat message without resource (should be already handled above)...");
-        return nil;
-    }
-    
     NSString* decrypted;
     if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
     {
@@ -581,6 +574,9 @@ static NSMutableDictionary* _typingNotifications;
             else if([lowercaseBody hasPrefix:@"https://"])
                 messageType = kMessageTypeUrl;
         }
+        //messages from room jids are classified as status messages
+        if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
+            messageType = kMessageTypeStatus;
         DDLogInfo(@"Got message of type: %@", messageType);
         
         if(body)

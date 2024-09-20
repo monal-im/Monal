@@ -816,6 +816,8 @@ class SwiftuiInterface : NSObject {
                 host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate:delegate, to:WelcomeLogIn(delegate:delegate))))
             case "LogIn":
                 host = UIHostingController(rootView:AnyView(UIKitWorkaround(WelcomeLogIn(delegate:delegate))))
+            case "AdvancedLogIn":
+                host = UIHostingController(rootView:AnyView(UIKitWorkaround(WelcomeLogIn(advancedMode: true, delegate: delegate))))
             case "ChatPlaceholder":
                 host = UIHostingController(rootView:AnyView(ChatPlaceholder()))
             case "GeneralSettings" :

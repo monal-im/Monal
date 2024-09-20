@@ -87,6 +87,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSDate *) connectedTimeFor:(NSNumber*) accountID;
 
 -(NSNumber* _Nullable) login:(NSString*) jid password:(NSString*) password;
+-(NSNumber* _Nullable) login:(NSString*) jid password:(NSString*) password hardcodedServer:(NSString* _Nullable) hardcodedServer hardcodedPort:(NSString* _Nullable) hardcodedPort forceDirectTLS:(BOOL) directTLS allowPlainAuth:(BOOL) plainActivated;
 -(void) removeAccountForAccountID:(NSNumber*) accountID;
 -(void) addNewAccountToKeychainAndConnectWithPassword:(NSString*) password andAccountID:(NSNumber*) accountID;
 

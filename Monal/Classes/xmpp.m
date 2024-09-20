@@ -4471,9 +4471,15 @@ NSString* const kStanza = @"stanza";
         [discoInfo setiqTo:jid];
         [discoInfo setDiscoInfoNode];
         [self sendIq:discoInfo withResponseHandler:^(XMPPIQ* response) {
+            NSSet* identities = [NSSet setWithArray:[response find:@"{http://jabber.org/protocol/disco#info}query/identity@category"]];
             NSSet* features = [NSSet setWithArray:[response find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
-            //check if this is a muc or account
-            if([features containsObject:@"http://jabber.org/protocol/muc"])
+            //check if this is an account or a muc
+            //this test has to come first because a gateway component may have an "account" identity while also supporintg MUC.
+            //usually this means that there's a bot at the component's address that facilitates registration without adhoc commands.
+            //the "account" jidType makes it possible to add the component as a contact.
+            if([identities containsObject:@"account"])
+                return resolve(@"account");
+            else if([features containsObject:@"http://jabber.org/protocol/muc"])
                 return resolve(@"muc");
             else
                 return resolve(@"account");

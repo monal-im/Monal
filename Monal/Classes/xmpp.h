@@ -231,7 +231,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) bindResource:(NSString*) resource;
 -(void) initSession;
 -(void) sendDisplayMarkerForMessages:(NSArray<MLMessage*>*) unread;
--(void) publishAvatar:(UIImage*) image;
+-(void) publishAvatar:(UIImage* _Nullable) image;
 -(void) publishStatusMessage:(NSString*) message;
 -(void) delayIncomingMessageStanzasForArchiveJid:(NSString*) archiveJid;
 

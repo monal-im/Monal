@@ -162,6 +162,12 @@ $$class_handler(handleAvatarFetchResult, $$ID(xmpp*, account), $$ID(NSString*, j
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": [MLContact createContactFromJid:jid andAccountID:account.accountID]
             }];
+            if ([jid isEqualToString:account.connectionProperties.identity.jid])
+            {
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalAccountSettingsRefresh object:account userInfo:@{
+                    @"accountID": account.accountID
+                }];
+            }
             DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
         }
         else
@@ -184,6 +190,10 @@ $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
                 NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountID] copyItems:YES];
                 accountDic[kRosterName] = [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"];
                 [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
+                //TODO: post a notification here so the view can refresh
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalAccountSettingsRefresh object:account userInfo:@{
+                    @"accountID": account.accountID
+                }];
             }
             else                                                                    //roster name of contact
             {
@@ -211,6 +221,14 @@ $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
             NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountID] copyItems:NO];
             accountDic[kRosterName] = @"";
             [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
+
+            //delete cache to make sure the image will be regenerated
+            [[MLImageManager sharedInstance] purgeCacheForContact:account.connectionProperties.identity.jid andAccount:account.accountID];
+            //TODO: post a notification here so the view can refresh
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalAccountSettingsRefresh object:account userInfo:@{
+                @"accountID": account.accountID
+            }];
+
         }
         else
         {
@@ -777,6 +795,13 @@ $$class_handler(avatarDeleted, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPI
         return;
     }
     DDLogDebug(@"Removed avatar from pep");
+
+    //delete cache to make sure the image will be regenerated
+    [[MLImageManager sharedInstance] purgeCacheForContact:account.connectionProperties.identity.jid andAccount:account.accountID];
+    //post notification
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalAccountSettingsRefresh object:account userInfo:@{
+        @"accountID": account.accountID
+    }];
 $$
 
 $$class_handler(avatarMetadataPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
@@ -787,6 +812,12 @@ $$class_handler(avatarMetadataPublished, $$ID(xmpp*, account), $$BOOL(success), 
         return;
     }
     DDLogDebug(@"Published avatar metadata to pep");
+    //delete cache to make sure the image will be regenerated
+    [[MLImageManager sharedInstance] purgeCacheForContact:account.connectionProperties.identity.jid andAccount:account.accountID];
+
+    //[[MLNotificationQueue currentQueue] postNotificationName:kMonalAccountSettingsRefresh object:account userInfo:@{
+    //    @"accountID": account.accountID
+    //}];
 $$
 
 $$class_handler(avatarDataPublished, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $$ID(NSString*, imageHash), $$UINTEGER(imageBytesLen))

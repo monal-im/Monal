@@ -12,7 +12,6 @@
 #import "HelperTools.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
-#import "XMPPEdit.h"
 #import "MonalAppDelegate.h"
 #import "ActiveChatsViewController.h"
 #import <Monal-Swift.h>
@@ -215,21 +214,6 @@ enum DummySettingsRows {
 
         [web initViewWithUrl:[NSURL URLWithString:@"https://github.com/monal-im/Monal/wiki/FAQ---Frequently-Asked-Questions"]];
     }
-    else if([segue.identifier isEqualToString:@"editXMPP"])
-    {
-        XMPPEdit* editor = (XMPPEdit*) segue.destinationViewController.childViewControllers.firstObject; // segue.destinationViewController;
-
-        if(self.selected && self.selected.row >= (int) [self getAccountNum])
-        {
-            editor.accountID = [NSNumber numberWithInt:-1];
-        }
-        else
-        {
-            MLAssert(self.selected != nil, @"self.selected must not be nil");
-            editor.originIndex = self.selected;
-            editor.accountID = [self getAccountIDByIndex:self.selected.row];
-        }
-    }
 }
 
 -(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
@@ -362,7 +346,11 @@ enum DummySettingsRows {
         case kSettingSectionAccounts: {
             self.selected = indexPath;
             if(indexPath.row < (int) [self getAccountNum])
-                [self performSegueWithIdentifier:@"editXMPP" sender:self];
+            {
+                NSNumber* accountID = [self getAccountIDByIndex:indexPath.row];
+                UIViewController* accountSettingsView = [[SwiftuiInterface new] makeAccountSettingsViewFor:accountID];
+                [self showDetailViewController:accountSettingsView sender:self];
+            }
             else
             {
                 switch(indexPath.row - [self getAccountNum]) {

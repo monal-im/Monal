@@ -1868,6 +1868,10 @@ NSString* const kStanza = @"stanza";
                     NSMutableDictionary* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.accountID];
                     accountDetails[@"statusMessage"] = [presenceNode check:@"status#"] ? [presenceNode findFirst:@"status#"] : @"";
                     [[DataLayer sharedInstance] updateAccounWithDictionary:accountDetails];
+                    //TODO: post a notification so the view can be refreshed
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalAccountSettingsRefresh object:self userInfo:@{
+                    @"accountID": self.accountID
+                }];
                 }
             }
             else

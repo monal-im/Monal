@@ -699,12 +699,12 @@ class SwiftuiInterface : NSObject {
         return host
     }
     
-    @objc(makeImageViewerForCurrentItem:)
-    func makeImageViewerFor(currentItem:[String:AnyObject]) -> UIViewController {
+    @objc(makeImageViewerForCurrentItem:allItems:)
+    func makeImageViewerFor(currentItem:[String:AnyObject], allItems: [[String:AnyObject]]) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host
-        host.rootView = AnyView(MediaItemSwipeView(currentItem: currentItem, allItems: [currentItem]))
+        host.rootView = AnyView(MediaItemSwipeView(currentItem: currentItem, allItems: allItems))
         return host
     }
     

@@ -2357,8 +2357,8 @@ enum msgSentState {
                 [(MLChatCell *)cell openlink:self];
             } else  {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    NSDictionary* info = [MLFiletransfer getFileInfoForMessage:[self.messageList objectAtIndex:indexPath.row]];
-                    UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewerForInfo:info];
+                    NSDictionary* selectedItem = [MLFiletransfer getFileInfoForMessage:[self.messageList objectAtIndex:indexPath.row]];
+                    UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewerForCurrentItem:selectedItem];
                     imageViewer.modalPresentationStyle = UIModalPresentationOverFullScreen;
                     [self presentViewController:imageViewer animated:YES completion:^{}];
                 });

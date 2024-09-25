@@ -178,15 +178,25 @@ extension View {
     }
 }
 
-struct TopRight<T: View>: ViewModifier {
+struct TopEdge<T: View>: ViewModifier {
+    enum Edge {
+        case left, right
+    }
+    let edge: Edge
     let overlay: T
     public func body(content: Content) -> some View {
         ZStack(alignment: .topLeading) {
             content
             VStack {
                 HStack {
-                    Spacer()
-                    overlay
+                    if edge == .left {
+                        overlay
+                        Spacer()
+                    }
+                    else if edge == .right {
+                        Spacer()
+                        overlay
+                    }
                 }
                 Spacer()
             }
@@ -195,10 +205,17 @@ struct TopRight<T: View>: ViewModifier {
 }
 extension View {
     func addTopRight<T: View>(view overlayClosure: @autoclosure @escaping () -> T) -> some View {
-        modifier(TopRight(overlay:overlayClosure()))
+        modifier(TopEdge(edge: .right, overlay:overlayClosure()))
     }
     func addTopRight(@ViewBuilder _ overlayClosure: @escaping () -> some View) -> some View {
-        modifier(TopRight(overlay:overlayClosure()))
+        modifier(TopEdge(edge: .right, overlay:overlayClosure()))
+    }
+
+    func addTopLeft<T: View>(view overlayClosure: @autoclosure @escaping () -> T) -> some View {
+        modifier(TopEdge(edge: .left, overlay:overlayClosure()))
+    }
+    func addTopLeft(@ViewBuilder _ overlayClosure: @escaping () -> some View) -> some View {
+        modifier(TopEdge(edge: .left, overlay:overlayClosure()))
     }
 }
 

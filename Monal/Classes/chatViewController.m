@@ -2369,7 +2369,8 @@ enum msgSentState {
             } else  {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     NSDictionary* selectedItem = [MLFiletransfer getFileInfoForMessage:[self.messageList objectAtIndex:indexPath.row]];
-                    UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewerForCurrentItem:selectedItem];
+                    NSMutableArray* allItems = [[DataLayer sharedInstance] allAttachmentsFromContact:self.contact.contactJid forAccount:self.contact.accountID];
+                    UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewerForCurrentItem:selectedItem allItems:allItems];
                     imageViewer.modalPresentationStyle = UIModalPresentationOverFullScreen;
                     [self presentViewController:imageViewer animated:YES completion:^{}];
                 });

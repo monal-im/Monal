@@ -388,15 +388,16 @@ struct ContactDetails: View {
                 let displayName = contact.contactDisplayName as String
                 let sharedUrl = HelperTools.getSharedDocumentsURL(forPathComponents:[accountJid, displayName])
                 if UIApplication.shared.canOpenURL(sharedUrl) && FileManager.default.fileExists(atPath:sharedUrl.path) {
+                    NavigationLink(destination: LazyClosureView{MediaGalleryView(contact: contact.contactJid as String, accountID: contact.accountID)}) {
+                        Text("View Media Gallery")
+                    }
+
                     Button(action: {
                             UIApplication.shared.open(sharedUrl, options:[:])
                     }) {
                         Text("Show shared Media and Files")
                     }
                     .tint(Color.primary)
-                }
-                NavigationLink(destination: LazyClosureView{MediaGalleryView(contact: contact.contactJid as String, accountNo: contact.accountId)}) {
-                    Text("View Media Gallery")
                 }
                 
                 NavigationLink(destination: LazyClosureView(BackgroundSettings(contact:contact))) {

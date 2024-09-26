@@ -121,6 +121,9 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     
     @defaultsDB("hardlinkFiletransfersIntoDocuments")
     var hardlinkFiletransfersIntoDocuments: Bool
+    
+    @defaultsDB("showAdvancedUI")
+    var showAdvancedUI: Bool
 }
 
 
@@ -235,6 +238,10 @@ struct UserInterfaceSettings: View {
                         .font(.footnote)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.showAdvancedUI) {
+                    Text("Show advanced options in UI")
+                    Text("Show power-user options in settings and other parts of the user interface.")
+                }
             }
         }
         .navigationBarTitle(Text("User Interface"), displayMode: .inline)
@@ -280,16 +287,18 @@ struct SecuritySettings: View {
                     Text("Every new contact will have encryption enabled, but already known contacts will preserve their encryption settings.")
                 }
                 
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.useDnssecForAllConnections) {
-                    Text("Use DNSSEC validation for all connections")
-                    Text(
+                if generalSettingsDefaultsDB.showAdvancedUI {
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.useDnssecForAllConnections) {
+                        Text("Use DNSSEC validation for all connections")
+                        Text(
 """
 Use DNSSEC to validate all DNS query responses before connecting to the IP address designated \
 in the DNS response.\n\
 While being more secure, this can lead to connection problems in certain networks \
 like hotel wifi, ugly mobile carriers etc.
 """
-                    )
+                        )
+                    }
                 }
                 
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcAllowP2P) {
@@ -399,7 +408,7 @@ struct PrivacySettingsSubview: View {
 #if !IS_QUICKSY
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcUseFallbackTurn) {
                     Text("Calls: Allow TURN fallback to Monal-Servers")
-                    Text("This will make calls possible even if your XMPP server does not provide a TURN server.")
+                    Text("This will make calls possible even if your XMPP server does not provide a TURN server, but leaks your IP to Monal's servers if your XMPP server does not provide a TURN server.")
                 }
 #endif
             }

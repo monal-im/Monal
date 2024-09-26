@@ -76,7 +76,6 @@
 -(void) initContactCell:(MLSwitchCell*) cell forAccNo:(NSUInteger) accNo
 {
     [cell initTapCell:@"\n\n"];
-    cell = [cell initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
     NSDictionary* account = [self.accountList objectAtIndex:accNo];
     MLAssert(account != nil, ([NSString stringWithFormat:@"Expected non nil account in row %lu", (unsigned long)accNo]));
     if([(NSString*)[account objectForKey:@"domain"] length] > 0) {
@@ -89,7 +88,6 @@
     }
 
     UIImageView* accessory = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
-    cell.detailTextLabel.text = nil;
 
     if([[account objectForKey:@"enabled"] boolValue] == YES)
     {
@@ -98,17 +96,11 @@
         {
             accessory.image = [UIImage imageNamed:@"Connected"];
             cell.accessoryView = accessory;
-            
-            NSDate* connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:[[self.accountList objectAtIndex:accNo] objectForKey:@"account_id"]];
-            if(connectedTime) {
-                cell.detailTextLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Connected since: %@", @""), [self.uptimeFormatter stringFromDate:connectedTime]];
-            }
         }
         else
         {
             accessory.image = [UIImage imageNamed:@"Disconnected"];
             cell.accessoryView = accessory;
-            cell.detailTextLabel.text = NSLocalizedString(@"Connecting...", @"");
         }
     }
     else
@@ -116,7 +108,6 @@
         cell.imageView.image = [UIImage systemImageNamed:@"circle"];
         accessory.image = nil;
         cell.accessoryView = accessory;
-        cell.detailTextLabel.text = NSLocalizedString(@"Account disabled", @"");
     }
 }
 

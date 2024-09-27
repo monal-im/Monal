@@ -736,7 +736,14 @@ class SwiftuiInterface : NSObject {
         }
         return host
     }
-    
+
+    @objc
+    func makeChangePasswordView(for accountID: NSNumber) -> UIViewController {
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+            host.rootView = AnyView(ChangePassword(accountID: accountID))
+        return host
+    }
+
     @objc
     func makeAccountRegistration(_ registerData: [String:AnyObject]?) -> UIViewController {
         let delegate = SheetDismisserProtocol()

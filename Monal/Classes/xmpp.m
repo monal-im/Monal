@@ -4583,23 +4583,19 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
--(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion
+-(AnyPromise*) changePassword:(NSString*) newPass
 {
-    XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [iq setiqTo:self.connectionProperties.identity.domain];
-    [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
-    [self sendIq:iq withResponseHandler:^(XMPPIQ* response __unused) {
-        //dispatch completion handler outside of the receiveQueue
-        if(completion)
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                completion(YES, @"");
-            });
-    } andErrorHandler:^(XMPPIQ* error) {
-        //dispatch completion handler outside of the receiveQueue
-        if(completion)
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                completion(NO, error ? [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Could not change password", @"")] : NSLocalizedString(@"Could not change password: your account is currently not connected", @""));
-            });
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
+        [iq setiqTo:self.connectionProperties.identity.domain];
+        [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
+
+        [self sendIq:iq withResponseHandler:^(XMPPIQ* response) {
+            resolve(nil);
+        } andErrorHandler:^(XMPPIQ* error) {
+            NSString* errorMessage = error ? [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Could not change password", @"")] : NSLocalizedString(@"Could not change password: your account is currently not connected", @"");
+            resolve([NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}]);
+        }];
     }];
 }
 

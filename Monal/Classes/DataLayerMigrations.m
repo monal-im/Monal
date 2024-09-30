@@ -1141,6 +1141,12 @@
             );"];
         }];
 
+        //a contact's blocked state is deduced directly from the blocklistCache table.
+        //as such, this column is redundant.
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.411 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE buddylist DROP COLUMN 'blocked';"];
+        }];
+
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

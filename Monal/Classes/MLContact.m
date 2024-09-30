@@ -94,7 +94,6 @@ static NSMutableDictionary* _singletonCache;
             //@"muc_nick": nil,
             @"Muc": @NO,
             @"pinned": @NO,
-            @"blocked": @NO,
             @"encrypt": @NO,
             @"muted": @NO,
             @"status": @"",
@@ -119,7 +118,6 @@ static NSMutableDictionary* _singletonCache;
             @"muc_type": kMucTypeGroup,
             @"Muc": @YES,
             @"pinned": @NO,
-            @"blocked": @NO,
             @"encrypt": @NO,
             @"muted": @NO,
             @"status": @"",
@@ -144,7 +142,6 @@ static NSMutableDictionary* _singletonCache;
             @"muc_type": kMucTypeChannel,
             @"Muc": @YES,
             @"pinned": @NO,
-            @"blocked": @NO,
             @"encrypt": @NO,
             @"muted": @NO,
             @"status": @"",
@@ -168,7 +165,6 @@ static NSMutableDictionary* _singletonCache;
             //@"muc_nick": nil,
             @"Muc": @NO,
             @"pinned": @NO,
-            @"blocked": @NO,
             @"encrypt": @NO,
             @"muted": @NO,
             @"status": @"",
@@ -204,12 +200,12 @@ static NSMutableDictionary* _singletonCache;
 +(MLContact*) createContactFromDatabaseWithJid:(NSString*) jid andAccountID:(NSNumber*) accountID
 {
     NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountID];
-    
+    MLContact* retval;
     // check if we know this contact and return a dummy one if not
     if(contactDict == nil)
     {
         DDLogInfo(@"Returning dummy MLContact for %@ on accountID %@", jid, accountID);
-        return [self contactFromDictionary:@{
+        retval = [self contactFromDictionary:@{
             @"buddy_name": jid.lowercaseString,
             @"nick_name": @"",
             @"full_name": @"",
@@ -221,7 +217,6 @@ static NSMutableDictionary* _singletonCache;
             @"Muc": @NO,
             @"mentionOnly": @NO,
             @"pinned": @NO,
-            @"blocked": @NO,
             @"encrypt": @NO,
             @"muted": @NO,
             @"status": @"",
@@ -233,7 +228,12 @@ static NSMutableDictionary* _singletonCache;
         }];
     }
     else
-        return [self contactFromDictionary:contactDict];
+    {
+        retval = [self contactFromDictionary:contactDict];
+    }
+    //initialize the blocking state, which is not stored in the buddylist table
+    retval.isBlocked = [[DataLayer sharedInstance] isBlockedContact:retval];
+    return retval;
 }
 
 +(MLContact*) createContactFromJid:(NSString*) jid andAccountID:(NSNumber*) accountID
@@ -849,7 +849,6 @@ static NSMutableDictionary* _singletonCache;
     contact.mucType = nilDefault(contact.mucType, @"");
     contact.isMentionOnly = [[dic objectForKey:@"mentionOnly"] boolValue];
     contact.isPinned = [[dic objectForKey:@"pinned"] boolValue];
-    contact.isBlocked = [[dic objectForKey:@"blocked"] boolValue];
     contact.statusMessage = nilDefault([dic objectForKey:@"status"], @"");
     contact.state = nilDefault([dic objectForKey:@"state"], @"online");
     contact->_unreadCount = -1;

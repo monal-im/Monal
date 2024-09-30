@@ -461,7 +461,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
 
     return [self.db idReadTransaction:^{
-        NSArray* results = [self.db executeReader:@"SELECT b.buddy_id, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, mentionOnly, b.account_id, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
+        NSArray* results = [self.db executeReader:@"SELECT b.buddy_id, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, mentionOnly, b.account_id, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', encrypt, muted, \
             CASE \
                 WHEN a.buddy_name IS NOT NULL THEN 1 \
                 ELSE 0 \

@@ -21,7 +21,7 @@ static NSRegularExpression* dataFormQueryRegex;
 
 +(void) initialize
 {
-    dataFormQueryRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*)?(\\[([0-9]+)\\])?(@[a-zA-Z0-9_:#-]+|%[a-zA-Z0-9_:#-]+)?" options:0 error:nil];
+    dataFormQueryRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*)?(\\[([0-9]+)\\])?(@[a-zA-Z0-9_:#-]+|&[a-zA-Z0-9_:#-]+)?" options:0 error:nil];
 }
 
 //this simple init is not public api because type and form type are mandatory in xep-0004
@@ -275,7 +275,7 @@ static NSRegularExpression* dataFormQueryRegex;
             return self[[parsedQuery[@"index"] unsignedIntegerValue]][parsedQuery[@"var"]];
         return self[parsedQuery[@"var"]];
     }
-    if([parsedQuery[@"extractionCommand"] isEqualToString:@"%"])
+    if([parsedQuery[@"extractionCommand"] isEqualToString:@"&"])
     {
         if(parsedQuery[@"index"] != nil)
             return [self getField:parsedQuery[@"var"] atIndex:parsedQuery[@"index"]];

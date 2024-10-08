@@ -77,9 +77,15 @@
             DDLogWarn(@"Tried to pause already fired timer: %@", self);
             return;
         }
+        NSTimeInterval remaining = _wrappedTimer.fireDate.timeIntervalSinceNow;
+        if(remaining == 0)
+        {
+            DDLogWarn(@"Tried to pause timer the exact second its firing: %@", self);
+            return;
+        }
         DDLogDebug(@"Pausing timer: %@", self);
-        _remainingTime = _wrappedTimer.fireDate.timeIntervalSinceNow;
         _wrappedTimer.fireDate = NSDate.distantFuture;      //postpone timer virtually indefinitely
+        _remainingTime = remaining;
     }
 }
 
@@ -89,6 +95,11 @@
         if(!_wrappedTimer.valid)
         {
             DDLogWarn(@"Tried to resume already fired timer: %@", self);
+            return;
+        }
+        if(_remainingTime == 0)
+        {
+            DDLogWarn(@"Tried to resume non-paused timer: %@", self);
             return;
         }
         DDLogDebug(@"Resuming timer: %@", self);

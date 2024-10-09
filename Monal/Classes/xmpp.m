@@ -4485,7 +4485,8 @@ NSString* const kStanza = @"stanza";
             //the "account" jidType makes it possible to add the component as a contact.
             if([identities containsObject:@"account"])
                 return resolve(@"account");
-            else if([features containsObject:@"http://jabber.org/protocol/muc"])
+            else if([identities containsObject:@"conference"]
+                   && [features containsObject:@"http://jabber.org/protocol/muc"])
                 return resolve(@"muc");
             else
                 return resolve(@"account");

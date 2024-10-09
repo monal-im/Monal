@@ -287,6 +287,11 @@ void swizzle(Class c, SEL orig, SEL new)
         method_exchangeImplementations(origMethod, newMethod);
 }
 
+static void notification_center_logging(CFNotificationCenterRef center, void* observer, CFStringRef name, const void* object, CFDictionaryRef userInfo)
+{
+    DDLogDebug(@"NSNotification %@ with %@: %@", name, object, userInfo);
+}
+
 @implementation WeakContainer
 -(id) initWithObj:(id) obj
 {
@@ -516,6 +521,14 @@ void swizzle(Class c, SEL orig, SEL new)
     
     [SwiftHelpers initSwiftHelpers];
     [self activityLog];
+    
+    //see https://stackoverflow.com/a/3738387
+    CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), 
+        NULL, 
+        notification_center_logging, 
+        NULL, 
+        NULL,  
+        CFNotificationSuspensionBehaviorDeliverImmediately);
 }
 
 +(void) configureDefaultAudioSession

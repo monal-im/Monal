@@ -132,7 +132,7 @@ jobs:
       - name: Create fastlane metadata directory
         id: metadata
         env:
-          CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
+          CHANGELOG_IOS: ${{ steps.releasenotes.outputs.notes_ios }}
         run: |
           path_ios="$(mktemp -d)"
           cp -av ./appstore_quicksy_metadata/* "$path_ios"

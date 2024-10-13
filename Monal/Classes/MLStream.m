@@ -686,25 +686,30 @@
         //don't schedule delegate calls if no runloop was specified
         if(self.shared_state.runLoop == nil)
             return;
-        //schedule the delegate calls in the runloop that was registered
-        CFRunLoopPerformBlock([self.shared_state.runLoop getCFRunLoop], (__bridge CFStringRef)self.shared_state.runLoopMode, ^{
-            @synchronized(self.shared_state) {
-                if(event == NSStreamEventOpenCompleted && self.open_called && self.shared_state.open)
-                    [self->_delegate stream:self handleEvent:event];
-                else if(event == NSStreamEventHasBytesAvailable && self.open_called && self.shared_state.open)
-                    [self->_delegate stream:self handleEvent:event];
-                else if(event == NSStreamEventHasSpaceAvailable && self.open_called && self.shared_state.open)
-                    [self->_delegate stream:self handleEvent:event];
-                else if(event == NSStreamEventErrorOccurred)
-                    [self->_delegate stream:self handleEvent:event];
-                else if(event == NSStreamEventEndEncountered && self.open_called && self.shared_state.open)
-                    [self->_delegate stream:self handleEvent:event];
-                else
-                    DDLogVerbose(@"Ignored event %ld", (long)event);
-            }
-        });
-        //trigger wakeup of runloop to execute the block as soon as possible
-        CFRunLoopWakeUp([self.shared_state.runLoop getCFRunLoop]);
+        //make sure to NOT hold the @synchronized lock when calling the delegate to not introduce deadlocks
+        BOOL handleEvent = NO;
+        if(event == NSStreamEventOpenCompleted && self.open_called && self.shared_state.open)
+            handleEvent = YES;
+        else if(event == NSStreamEventHasBytesAvailable && self.open_called && self.shared_state.open)
+            handleEvent = YES;
+        else if(event == NSStreamEventHasSpaceAvailable && self.open_called && self.shared_state.open)
+            handleEvent = YES;
+        else if(event == NSStreamEventErrorOccurred)
+            handleEvent = YES;
+        else if(event == NSStreamEventEndEncountered && self.open_called && self.shared_state.open)
+            handleEvent = YES;
+        //check if the event should be handled
+        if(!handleEvent)
+            DDLogVerbose(@"Ignoring event %ld", (long)event);
+        else
+        {
+            //schedule the delegate calls in the runloop that was registered
+            CFRunLoopPerformBlock([self.shared_state.runLoop getCFRunLoop], (__bridge CFStringRef)self.shared_state.runLoopMode, ^{
+                [self->_delegate stream:self handleEvent:event];
+            });
+            //trigger wakeup of runloop to execute the block as soon as possible
+            CFRunLoopWakeUp([self.shared_state.runLoop getCFRunLoop]);
+        }
     }
 }
 

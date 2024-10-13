@@ -33,6 +33,11 @@
     return [NSString stringWithFormat:@"%@|%@", nilDefault(self.name, @""), nilDefault(self.alpha2, @"")];
 }
 
+-(NSString*) description
+{
+    return [NSString stringWithFormat:@"%@ (%@) --> %@", nilDefault(self.name, nilDefault(self.alpha2, @"")), self.code, self.pattern];
+}
+
 +(BOOL) supportsSecureCoding
 {
     return YES;

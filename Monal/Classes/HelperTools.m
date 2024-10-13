@@ -330,7 +330,8 @@ void swizzle(Class c, SEL orig, SEL new)
         [value isKindOfClass:[NSDictionary class]] ||
         [value isKindOfClass:[NSMutableDictionary class]] ||
         [value isKindOfClass:[NSArray class]] ||
-        [value isKindOfClass:[NSMutableArray class]]
+        [value isKindOfClass:[NSMutableArray class]] ||
+        value == nil
     )
         ;       //do nothing, already handled by original NSUserDefaults method
     //every NSData should be double serialized (see swizzled_objectForKey: above for a detailed explanation)

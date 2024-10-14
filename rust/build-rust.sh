@@ -12,6 +12,8 @@ then
   source ~/.cargo/env
 fi
 
+echo "Installing required components"
+
 rustup +nightly component add rust-src
 cargo install swift-bridge-cli
 #rustup component add rust-src --toolchain x86_64-apple-ios-macabi
@@ -19,7 +21,7 @@ cargo install swift-bridge-cli
 
 rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
 
-# Build the project for the desired platforms:
+echo "Building stdlib for the desired platforms..."
 #cargo build --target x86_64-apple-darwin
 #cargo build --target aarch64-apple-darwin
 cargo +nightly build --verbose -Z build-std --target x86_64-apple-ios-macabi
@@ -27,6 +29,7 @@ cargo +nightly build --verbose -Z build-std --target aarch64-apple-ios-macabi
 
 BRIDGE_NAME=libmonal_rust_swift_bridge.a
 
+echo "Creating catalyst target universal lib..."
 mkdir -p ./target/catalyst-macos/debug
 lipo \
     ./target/x86_64-apple-ios-macabi/debug/$BRIDGE_NAME \
@@ -34,16 +37,20 @@ lipo \
     -create -output \
     ./target/catalyst-macos/debug/$BRIDGE_NAME
 
+echo "Building rust code for all targets..."
 cargo build --target aarch64-apple-ios
 cargo build --target x86_64-apple-ios
 cargo build --target aarch64-apple-ios-sim
 
+echo "Creating ios target universal lib..."
 mkdir -p ./target/universal-ios/debug
 lipo \
     ./target/aarch64-apple-ios-sim/debug/$BRIDGE_NAME \
-    ./target/x86_64-apple-ios/debug/$BRIDGE_NAME -create -output \
+    ./target/x86_64-apple-ios/debug/$BRIDGE_NAME \
+    -create -output \
     ./target/universal-ios/debug/$BRIDGE_NAME
 
+echo "Creating swift package..."
 swift-bridge-cli create-package \
   --bridges-dir ./monal-rust-swift-bridge/generated \
   --out-dir LibMonalRustSwiftBridge \

@@ -12,6 +12,7 @@ crate-type = ["staticlib"]
 swift-bridge = "0.1"
 sdp-to-jingle = { path = "../sdp-to-jingle" }
 monal-panic-handler = { path = "../monal-panic-handler" }
+monal-html-parser = { path = "../monal-html-parser" }
 
 
 [build-dependencies]

@@ -2998,7 +2998,7 @@ enum msgSentState {
                 return;
             }
             //limit to 512KB of html
-            if(contentLength.intValue > 65536)
+            if(contentLength.intValue > 524288)
             {
                 DDLogWarn(@"Now loading preview HTML for %@ with byte range 0-512k...", row.url);
                 [self downloadPreviewWithRow:indexPath usingByterange:YES andResultHandler:resultHandler];
@@ -3038,7 +3038,7 @@ enum msgSentState {
         request.requiresDNSSECValidation = YES;
     [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
     if(useByterange)
-        [request setValue:@"bytes=0-65536" forHTTPHeaderField:@"Range"];
+        [request setValue:@"bytes=0-524288" forHTTPHeaderField:@"Range"];
     request.timeoutInterval = 10;
     NSURLSession* session = [HelperTools createEphemeralURLSession];
     [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error) {
@@ -3050,11 +3050,10 @@ enum msgSentState {
             MLOgHtmlParser* ogParser = nil;
             NSString* text = nil;
             NSURL* image = nil;
-            if([body length] <= 65536)
-            {
-                NSURL* baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", row.url.scheme, row.url.host, row.url.path]];
-                ogParser = [[MLOgHtmlParser alloc] initWithHtml:body andBaseUrl:baseURL];
-            }
+            if([body length] > 524288)
+                body = [body substringToIndex:524288];
+            NSURL* baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", row.url.scheme, row.url.host, row.url.path]];
+            ogParser = [[MLOgHtmlParser alloc] initWithHtml:body andBaseUrl:baseURL];
             if(ogParser != nil)
             {
                 text = [ogParser getOgTitle];

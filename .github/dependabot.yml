@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: "swift"
+    directory: "/Monal/Monal.xcodeproj/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "cargo"
+    directory: "/rust/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/"
+    schedule:
+      interval: "weekly"

@@ -395,6 +395,32 @@ public class SwiftHelpers: NSObject {
     }
 }
 
+//TODO: remove this
+extension UIImage {
+    public func thumbnail(size: CGSize) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        defer { UIGraphicsEndImageContext() }
+        draw(in: CGRect(origin: .zero, size: size))
+        return UIGraphicsGetImageFromCurrentImageContext()
+    }
+}
+
+// **********************************************
+// **************** rust bridges ****************
+// **********************************************
+
+fileprivate extension RustVec {
+    func intoArray() -> [T] {
+        var array: [T] = []
+        for _ in 0..<self.len() {
+            array.append(self.pop()!)
+        }
+        return array.reversed()
+    }
+}
+
+extension RustString: Error {}
+
 @objcMembers
 public class JingleSDPBridge : NSObject {
     @objc(getJingleStringForSDPString:withInitiator:)
@@ -418,5 +444,18 @@ public class JingleSDPBridge : NSObject {
         }
         DDLogDebug("Got empty optional from rust!")
         return nil
+    }
+}
+
+@objcMembers
+public class HtmlParserBridge : NSObject {
+    var document: MonalHtmlParser
+    
+    public init(html: String) {
+        self.document = MonalHtmlParser(html)
+    }
+    
+    public func select(_ selector: String, attribute: String? = nil) throws -> [String] {
+        return self.document.select(selector, attribute).intoArray().map { $0.toString() }
     }
 }

@@ -6,15 +6,44 @@ on:
       - beta
       - stable
 
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to check"
+        required: true
+        type: number
+
 jobs:
   check-pr-semver-title:
     runs-on: ubuntu-latest
     name: Validate PR Title
 
     steps:
+      - name: Get PR details
+        id: find_pr
+        run: |
+          if [ -z "${{ github.event.inputs.pr_number }}" ]; then
+            prNumber=${{ github.event.pull_request.number }}
+          else
+            prNumber=${{ github.event.inputs.pr_number }}
+          fi
+          echo "prNumber=$prNumber" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+      - name: Fetch pull request title
+        id: pr_title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+            const prNumber = ${{ steps.find_pr.outputs.prNumber }};
+            const { data: pull_request } = await github.rest.pulls.get({
+              owner: owner,
+              repo: repo,
+              pull_number: prNumber
+            });
+            return pull_request.title;
       - name: Check PR title format
         run: |
-          version="${{ github.event.pull_request.title }}"
+          version="${{ steps.pr_title.outputs.result }}"
           if ! [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
             echo "Invalid semver: '$version'!"
             exit 1

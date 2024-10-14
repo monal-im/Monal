@@ -1,7 +1,9 @@
 use crate::ffi::rust_panic_handler;
+use monal_html_parser::MonalHtmlParser;
 
 #[swift_bridge::bridge]
 mod ffi {
+    //simple functions exported from rust to swift
     extern "Rust" {
         pub fn install_panichandler();
         pub fn trigger_panic();
@@ -9,6 +11,19 @@ mod ffi {
         pub fn jingle_str_to_sdp_str(jingle_str: String, initiator: bool) -> Option<String>;
     }
 
+    //rust struct exported from rust to swift
+    extern "Rust" {
+        type MonalHtmlParser;
+        #[swift_bridge(init)]
+        pub fn new(html: String) -> MonalHtmlParser;
+        pub fn select(
+            &self,
+            selector: String,
+            atrribute: Option<String>,
+        ) -> Vec<String>;
+    }
+
+    //exported from our internal swift helper to rust
     extern "Swift" {
         fn rust_panic_handler(text: String, backtrace: String);
     }

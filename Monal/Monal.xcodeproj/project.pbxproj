@@ -210,7 +210,6 @@
 		C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */; };
 		C1D7D7AF283FB4E500401389 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		C1D7D7B0283FB4E700401389 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
-		C1E1EC7B286A025F0097EC74 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = C1E1EC7A286A025F0097EC74 /* SwiftSoup */; };
 		C1E4654824EE517000CA5AAF /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		C1E8A7F72B8E47C300760220 /* EditGroupSubject.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E8A7F62B8E47C300760220 /* EditGroupSubject.swift */; };
 		C1F5C7A92775DA000001F295 /* MLContactSoftwareVersionInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */; };
@@ -790,7 +789,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
-				C1E1EC7B286A025F0097EC74 /* SwiftSoup in Frameworks */,
 				84F194D12C15197200F0A994 /* FrameUp in Frameworks */,
 				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
@@ -1553,7 +1551,6 @@
 			name = Monal;
 			packageProductDependencies = (
 				C1F5C7AE2777638B0001F295 /* OrderedCollections */,
-				C1E1EC7A286A025F0097EC74 /* SwiftSoup */,
 				841898A92957712000FEC77D /* ViewExtractor */,
 				84F194D02C15197200F0A994 /* FrameUp */,
 			);
@@ -1768,7 +1765,6 @@
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (
 				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */,
-				C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 				849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
 				84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */,
@@ -4678,16 +4674,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ryanlintott/FrameUp";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.8.0;
-			};
-		};
-		C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.6.1;
+				kind = exactVersion;
+				version = 0.8.0;
 			};
 		};
 		C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */ = {
@@ -4734,11 +4722,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */;
 			productName = FrameUp;
-		};
-		C1E1EC7A286A025F0097EC74 /* SwiftSoup */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = C1E1EC79286A025F0097EC74 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
-			productName = SwiftSoup;
 		};
 		C1F5C7AE2777638B0001F295 /* OrderedCollections */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -24,11 +24,12 @@ def process_zip(zip_file_path):
     with zipfile.ZipFile(zip_file_path, 'r') as zip_file:
         sorted_files = []
         for file_name in zip_file.namelist():
-            if file_name == "Dictionary.json":
-                sorted_files.append(("Dictionary-1.json", file_name))
-            elif re.match(r'Dictionary-(\d+)\.json', file_name):
-                sorted_files.append((file_name, file_name))
-        sorted_files.sort(key=lambda x: int(re.search(r'Dictionary-(\d+)\.json', x[0]).group(1)))
+            if re.match(r'^[^/]+-(\d+)\.json$', file_name):
+                sorted_files.append((re.search(r'^[^/]+-(\d+)\.json$', file_name).group(1), file_name))
+            elif re.match(r'^[^/]+\.json$', file_name):
+                sorted_files.append(("1", file_name))
+        sorted_files.sort(key=lambda x: int(x[0]))
+        print(sorted_files)
         for _, file_name in sorted_files:
             logger.debug(f"Parsing file: {file_name}")
             with zip_file.open(file_name) as json_file:

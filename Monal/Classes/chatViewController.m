@@ -1818,25 +1818,30 @@ enum msgSentState {
 
 -(void) handleSentMessage:(NSNotification*) notification
 {
-    [self updateMsgState:((XMPPMessage*)notification.userInfo[@"message"]).id withEvent:msgSent withOptDic:nil];
+    XMPPMessage* msg = notification.userInfo[@"message"];
+    if([msg.toUser isEqualToString:self.contact.contactJid])
+        [self updateMsgState:msg.id withEvent:msgSent withOptDic:nil];
 }
 
 -(void) handleMessageError:(NSNotification*) notification
 {
     NSDictionary* dic = notification.userInfo;
-    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgErrorAfterSent withOptDic:dic];
+    if([dic[@"jid"] isEqualToString:self.contact.contactJid])
+        [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgErrorAfterSent withOptDic:dic];
 }
 
 -(void) handleReceivedMessage:(NSNotification*) notification
 {
     NSDictionary *dic = notification.userInfo;
-    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgRecevied withOptDic:nil];
+    if([dic[@"jid"] isEqualToString:self.contact.contactJid])
+        [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgRecevied withOptDic:nil];
 }
 
 -(void) handleDisplayedMessage:(NSNotification*) notification
 {
     NSDictionary *dic = notification.userInfo;
-    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgDisplayed withOptDic:nil];
+    if([dic[@"message"] isEqualToContact:self.contact])
+        [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgDisplayed withOptDic:nil];
 }
 
 -(void) handleFiletransferMessageUpdate:(NSNotification*) notification

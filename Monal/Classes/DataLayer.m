@@ -1402,43 +1402,43 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setMessageId:(NSString* _Nonnull) messageid sent:(BOOL) sent
+-(void) setMessageId:(NSString* _Nonnull) messageid andJid:(NSString*) jid sent:(BOOL) sent
 {
     [self.db voidWriteTransaction:^{
         BOOL _sent = sent;
         //force sent YES if the message was already received
         if(!_sent)
         {
-            if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND received;" andArguments:@[messageid]])
+            if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND buddy_name=? AND received;" andArguments:@[messageid, jid]])
                 _sent = YES;
         }
         NSString* query = @"UPDATE message_history SET sent=? WHERE messageid=? AND NOT sent;";
-        DDLogVerbose(@"setting sent %@", messageid);
+        DDLogVerbose(@"setting sent %@, %@", messageid, jid);
         [self.db executeNonQuery:query andArguments:@[[NSNumber numberWithBool:_sent], messageid]];
     }];
 }
 
--(void) setMessageId:(NSString* _Nonnull ) messageid received:(BOOL) received
+-(void) setMessageId:(NSString* _Nonnull ) messageid andJid:(NSString*) jid received:(BOOL) received
 {
     [self.db voidWriteTransaction:^{
-        NSString* query = @"UPDATE message_history SET received=?, sent=? WHERE messageid=?;";
-        DDLogVerbose(@"setting received confrmed %@", messageid);
-        [self.db executeNonQuery:query andArguments:@[[NSNumber numberWithBool:received], [NSNumber numberWithBool:YES], messageid]];
+        NSString* query = @"UPDATE message_history SET received=?, sent=? WHERE messageid=? AND buddy_name=?;";
+        DDLogVerbose(@"setting received confrmed %@, %@", messageid, jid);
+        [self.db executeNonQuery:query andArguments:@[[NSNumber numberWithBool:received], [NSNumber numberWithBool:YES], messageid, jid]];
     }];
 }
 
--(void) setMessageId:(NSString* _Nonnull) messageid errorType:(NSString* _Nonnull) errorType errorReason:(NSString* _Nonnull) errorReason
+-(void) setMessageId:(NSString* _Nonnull) messageid andJid:(NSString*) jid errorType:(NSString* _Nonnull) errorType errorReason:(NSString* _Nonnull) errorReason
 {
     [self.db voidWriteTransaction:^{
         //ignore error if the message was already received by *some* client
-        if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND received;" andArguments:@[messageid]])
+        if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND buddy_name=? AND received;" andArguments:@[messageid, jid]])
         {
-            DDLogVerbose(@"ignoring message error for %@ [%@, %@]", messageid, errorType, errorReason);
+            DDLogVerbose(@"ignoring message error for %@, %@ [%@, %@]", messageid, jid, errorType, errorReason);
             return;
         }
-        NSString* query = @"UPDATE message_history SET errorType=?, errorReason=? WHERE messageid=?;";
-        DDLogVerbose(@"setting message error %@ [%@, %@]", messageid, errorType, errorReason);
-        [self.db executeNonQuery:query andArguments:@[errorType, errorReason, messageid]];
+        NSString* query = @"UPDATE message_history SET errorType=?, errorReason=? WHERE messageid=? AND buddy_name=?;";
+        DDLogVerbose(@"setting message error %@, %@ [%@, %@]", messageid, jid, errorType, errorReason);
+        [self.db executeNonQuery:query andArguments:@[errorType, errorReason, messageid, jid]];
     }];
 }
 

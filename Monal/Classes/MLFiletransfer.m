@@ -88,7 +88,7 @@ static NSObject* _hardlinkingSyncObject;
             {
                 DDLogError(@"Failed to fetch headers of %@ at %@: %@", msg, url, error);
                 //check done, remove from "currently checking/downloading list" and set error
-                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to fetch download metadata: %@", @""), error] forMessageId:msg.messageId];
+                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to fetch download metadata: %@", @""), error] forMessage:msg];
                 [self markAsComplete:historyId];
                 return;
             }
@@ -178,7 +178,7 @@ static NSObject* _hardlinkingSyncObject;
         if(!urlComponents)
         {
             DDLogError(@"url components decoding failed for %@", msg);
-            [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode download link", @"") forMessageId:msg.messageId];
+            [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode download link", @"") forMessage:msg];
             [self markAsComplete:historyId];
             return;
         }
@@ -190,7 +190,7 @@ static NSObject* _hardlinkingSyncObject;
             if(error)
             {
                 DDLogError(@"File download for %@ failed: %@", msg, error);
-                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to download file: %@", @""), error] forMessageId:msg.messageId];
+                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to download file: %@", @""), error] forMessage:msg];
                 [self markAsComplete:historyId];
                 return;
             }
@@ -217,7 +217,7 @@ static NSObject* _hardlinkingSyncObject;
                 if(urlComponents.fragment.length < 88)
                 {
                     DDLogError(@"File download for %@ failed: %@", msg, error);
-                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode encrypted link", @"") forMessageId:msg.messageId];
+                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode encrypted link", @"") forMessage:msg];
                     [self markAsComplete:historyId];
                     return;
                 }
@@ -234,7 +234,7 @@ static NSObject* _hardlinkingSyncObject;
                     if(decryptedData == nil)
                     {
                         DDLogError(@"File download decryption failed for %@", msg);
-                        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt download", @"") forMessageId:msg.messageId];
+                        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt download", @"") forMessage:msg];
                         [self markAsComplete:historyId];
                         return;
                     }
@@ -242,7 +242,7 @@ static NSObject* _hardlinkingSyncObject;
                     if(error)
                     {
                         DDLogError(@"File download for %@ failed: %@", msg, error);
-                        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to write decrypted download into cache directory", @"") forMessageId:msg.messageId];
+                        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to write decrypted download into cache directory", @"") forMessage:msg];
                         [self markAsComplete:historyId];
                         return;
                     }
@@ -252,7 +252,7 @@ static NSObject* _hardlinkingSyncObject;
                 else
                 {
                     DDLogError(@"Failed to decrypt file (iv, key, data length checks failed) for %@", msg);
-                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt filetransfer", @"") forMessageId:msg.messageId];
+                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt filetransfer", @"") forMessage:msg];
                     [self markAsComplete:historyId];
                     return;
                 }
@@ -266,7 +266,7 @@ static NSObject* _hardlinkingSyncObject;
                 if(error)
                 {
                     DDLogError(@"File download for %@ failed: %@", msg, error);
-                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to copy downloaded file into cache directory: %@", @""), error] forMessageId:msg.messageId];
+                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to copy downloaded file into cache directory: %@", @""), error] forMessage:msg];
                     [self markAsComplete:historyId];
                     return;
                 }
@@ -811,18 +811,20 @@ $$
     return [[NSString alloc] initWithData:[HelperTools dataWithHexString:[file pathExtension]] encoding:NSUTF8StringEncoding];
 }
 
-+(void) setErrorType:(NSString*) errorType andErrorText:(NSString*) errorText forMessageId:(NSString*) messageId
++(void) setErrorType:(NSString*) errorType andErrorText:(NSString*) errorText forMessage:(MLMessage*) msg
 {
     //update db
     [[DataLayer sharedInstance]
-        setMessageId:messageId
+        setMessageId:msg.messageId
+        andJid:msg.buddyName
         errorType:errorType
         errorReason:errorText
     ];
     
     //inform chatview of error
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
-        @"MessageID": messageId,
+        @"MessageID": msg.messageId,
+        @"jid": msg.buddyName,
         @"errorType": errorType,
         @"errorReason": errorText
     }];

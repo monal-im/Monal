@@ -75,7 +75,7 @@ static NSMutableDictionary* _typingNotifications;
             errorType= @"unknown error";
         NSString* errorReason = [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
         NSString* errorText = [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
-        DDLogInfo(@"Got errorType='%@', errorReason='%@', errorText='%@' for message '%@'", errorType, errorReason, errorText, [messageNode findFirst:@"/@id"]);
+        DDLogInfo(@"Got errorType='%@', errorReason='%@', errorText='%@' for message '%@'", errorType, errorReason, errorText, messageNode.id);
         
         if(errorReason)
             errorType = [NSString stringWithFormat:@"%@ - %@", errorType, errorReason];
@@ -84,14 +84,16 @@ static NSMutableDictionary* _typingNotifications;
         
         //update db
         [[DataLayer sharedInstance]
-            setMessageId:[messageNode findFirst:@"/@id"]
+            setMessageId:messageNode.id
+            andJid:messageNode.fromUser
             errorType:errorType
             errorReason:errorText
         ];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
-            kMessageId: [messageNode findFirst:@"/@id"],
+            kMessageId: messageNode.id,
+            @"jid": messageNode.fromUser,
             @"errorType": errorType,
-            @"errorReason": errorText
+            @"errorReason": errorText,
         }];
 
         return nil;
@@ -215,12 +217,12 @@ static NSMutableDictionary* _typingNotifications;
     {
         DDLogWarn(@"Ignoring muc pm marked as such...");
         //ignore muc pms without id attribute (we can't send out errors pointing to this message without an id)
-        if([messageNode findFirst:@"/@id"] == nil)
+        if(messageNode.id == nil)
             return nil;
         XMPPMessage* errorReply = [XMPPMessage new];
         [errorReply.attributes setObject:@"error" forKey:@"type"];
         [errorReply.attributes setObject:messageNode.from forKey:@"to"];                       //this has to be the full jid here
-        [errorReply.attributes setObject:[messageNode findFirst:@"/@id"] forKey:@"id"];        //don't set origin id here
+        [errorReply.attributes setObject:messageNode.id forKey:@"id"];        //don't set origin id here
         [errorReply addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"feature-not-implemented" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
             [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:@"The receiver does not seem to support MUC-PMs"]
@@ -284,7 +286,7 @@ static NSMutableDictionary* _typingNotifications;
     //all modern clients using origin-id should use the same id for origin-id AND message id 
     NSString* messageId = [messageNode findFirst:@"{urn:xmpp:sid:0}origin-id@id"];
     if(messageId == nil || !messageId.length)
-        messageId = [messageNode findFirst:@"/@id"];
+        messageId = messageNode.id;
     if(messageId == nil || !messageId.length)
     {
         if([messageNode check:@"body#"])
@@ -730,10 +732,13 @@ static NSMutableDictionary* _typingNotifications;
         NSString* msgId = [messageNode findFirst:@"{urn:xmpp:receipts}received@id"];
         
         //save in DB
-        [[DataLayer sharedInstance] setMessageId:msgId received:YES];
+        [[DataLayer sharedInstance] setMessageId:msgId andJid:messageNode.fromUser received:YES];
         
         //Post notice
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{kMessageId:msgId}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{
+            kMessageId:msgId,
+            @"jid": messageNode.fromUser,
+        }];
     }
     
     //handle chat-markers in groupchats slightly different

@@ -898,9 +898,9 @@ $$
 
 -(void) handleSentMessage:(NSNotification*) notification
 {
-    NSString* messageId = ((XMPPMessage*)notification.userInfo[@"message"]).id;
-    DDLogInfo(@"message %@ sent, setting status accordingly", messageId);
-    [[DataLayer sharedInstance] setMessageId:messageId sent:YES];
+    XMPPMessage* msg = notification.userInfo[@"message"];
+    DDLogInfo(@"message %@, %@ sent, setting status accordingly", msg.id, msg.toUser);
+    [[DataLayer sharedInstance] setMessageId:msg.id andJid:msg.toUser sent:YES];
 }
 
 #pragma mark - APNS

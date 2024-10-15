@@ -335,6 +335,9 @@ impl JingleRtpSessionsPayloadType {
         let mut retval = SdpAttributeFmtp {
             payload_type: self.id,
             parameters: SdpAttributeFmtpParameters {
+                level_idx: None,
+                profile: None,
+                tier: None,
                 packetization_mode: self
                     .get_fmtp_param(&mut known_param_names, "packetization_mode"),
                 level_asymmetry_allowed: self

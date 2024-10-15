@@ -1269,6 +1269,10 @@ $$
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             xmpp* xmppAccount = notification.object;
+            //ignore errors with unknown accounts
+            //(possibly meaning an account we currently try to create --> the creating ui will take care of this already)
+            if(xmppAccount == nil)
+                return;
             if(![notification.userInfo[@"isSevere"] boolValue])
                 DDLogError(@"Minor XMPP Error(%@): %@", xmppAccount.connectionProperties.identity.jid, notification.userInfo[@"message"]);
             NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:notification.userInfo[@"message"] leftView:nil rightView:nil style:([notification.userInfo[@"isSevere"] boolValue] ? BannerStyleDanger : BannerStyleWarning) colors:nil];

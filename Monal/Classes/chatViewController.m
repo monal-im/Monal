@@ -3060,10 +3060,13 @@ enum msgSentState {
         else
         {
             NSString* body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            NSURL* baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", row.url.scheme, row.url.host, row.url.path]];
-            MLOgHtmlParser* ogParser = [[MLOgHtmlParser alloc] initWithHtml:body andBaseUrl:baseURL];
+            MLOgHtmlParser* ogParser = nil;
             NSString* text = nil;
             NSURL* image = nil;
+            if([body length] > 524288)
+                body = [body substringToIndex:524288];
+            NSURL* baseURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", row.url.scheme, row.url.host, row.url.path]];
+            ogParser = [[MLOgHtmlParser alloc] initWithHtml:body andBaseUrl:baseURL];
             if(ogParser != nil)
             {
                 text = [ogParser getOgTitle];

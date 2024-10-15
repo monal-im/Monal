@@ -8,6 +8,11 @@
 
 import OrderedCollections
 
+class NotificationDebuggingDefaultsDB: ObservableObject {
+    @defaultsDB("lastAppexStart")
+    var lastAppexStart: Date?
+}
+
 struct NotificationDebugging: View {
     private let applePushEnabled: Bool
     private let applePushToken: String
@@ -19,17 +24,24 @@ struct NotificationDebugging: View {
     @State private var showPushToken = false
 
     @State private var selectedPushServer: String
+    
+    @ObservedObject var notificationDebuggingDefaultsDB = NotificationDebuggingDefaultsDB()
 
     var body: some View {
         Form {
             Group {
                 Section(header: Text("Status").font(.title3)) {
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing:10) {
                         buildNotificationStateLabel(Text("Apple Push Service"), isWorking: self.applePushEnabled);
                         Divider()
                         Text("Apple push service should always be on. If it is off, your device can not talk to Apple's server.").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
                         if !self.applePushEnabled, let apnsError = MLXMPPManager.sharedInstance().apnsError {
                             Text("Error: \(String(describing:apnsError))").foregroundColor(.red).font(.footnote)
+                        }
+                        if let lastAppexStart = notificationDebuggingDefaultsDB.lastAppexStart {
+                            Text("Last incoming push: \(String(describing:lastAppexStart))").foregroundColor(.gray).font(.footnote)
+                        } else {
+                            Text("Last incoming push: unknown").foregroundColor(.gray).font(.footnote)
                         }
                     }.onTapGesture(count: 2, perform: {
                         showPushToken = true

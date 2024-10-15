@@ -4684,8 +4684,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ryanlintott/FrameUp";
 			requirement = {
-				kind = exactVersion;
-				version = 0.8.0;
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.2;
 			};
 		};
 		C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */ = {

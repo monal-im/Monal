@@ -2535,7 +2535,11 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 #if TARGET_OS_MACCATALYST
     NSString* resource = [NSString stringWithFormat:@"Monal-macOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
 #else
+#if IS_QUICKSY
+    NSString* resource = [NSString stringWithFormat:@"Quicksy-iOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
+#else
     NSString* resource = [NSString stringWithFormat:@"Monal-iOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
+#endif
 #endif
     return resource;
 }

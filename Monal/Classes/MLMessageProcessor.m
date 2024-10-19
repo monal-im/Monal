@@ -210,7 +210,7 @@ static NSMutableDictionary* _typingNotifications;
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(
         ![messageNode check:@"/<type=groupchat>"] &&
-        ([messageNode check:@"{http://jabber.org/protocol/muc#user}x"] || messageNode.fromResource != nil) &&
+        [messageNode check:@"{http://jabber.org/protocol/muc#user}x"] &&
         ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"] &&
         [messageNode check:@"body#"]
     )
@@ -247,7 +247,7 @@ static NSMutableDictionary* _typingNotifications;
     }
     
     
-    if((possiblyUnknownContact.isMuc || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
+    if(([messageNode check:@"/<type=groupchat>"] || [messageNode check:@"{http://jabber.org/protocol/muc#user}x"]) && ![messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
         // Ignore all group chat msgs from unkown groups
         if(![[[DataLayer sharedInstance] listMucsForAccount:account.accountID] containsObject:messageNode.fromUser])

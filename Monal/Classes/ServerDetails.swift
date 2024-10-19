@@ -406,14 +406,14 @@ struct ServerDetails: View {
                 showServerVersionInfoView(connection: connection)
             }
 
-            Section(header: Text("These are the modern XMPP capabilities Monal detected on your server after you have logged in.")) {
-                ForEach(getXEPEntryData(connection: connection)) { entryData in
+            Section(header: Text("These are your server's contact addresses.")) {
+                ForEach(getServerContactAddressesEntryData(connection: connection)) { entryData in
                     ServerDetailsEntry(entryData)
                 }
             }
 
-            Section(header: Text("These are your server's contact addresses.")) {
-                ForEach(getServerContactAddressesEntryData(connection: connection)) { entryData in
+            Section(header: Text("These are the modern XMPP capabilities Monal detected on your server after you have logged in.")) {
+                ForEach(getXEPEntryData(connection: connection)) { entryData in
                     ServerDetailsEntry(entryData)
                 }
             }

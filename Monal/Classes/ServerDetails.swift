@@ -195,7 +195,7 @@ struct ServerDetails: View {
             result.append(
                 EntryData(
                     title: "\(title):",
-                    description: addresses.joined(separator: "\n\n"),
+                    description: addresses.map{"[\($0)](\($0))"}.joined(separator: "\n\n"),
                     status: .normal
                 )
             )

@@ -1955,10 +1955,10 @@ $$
             monal_id_block_t cleanup = ^(NSDictionary* payload) {
                 [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-                if(self.activeChats.currentChatViewController != nil)
+                if(self.activeChats.currentChatView != nil)
                 {
-                    [self.activeChats.currentChatViewController scrollToBottomAnimated:NO];
-                    [self.activeChats.currentChatViewController hideUploadHUD];
+                    [self.activeChats.currentChatView scrollToBottomAnimated:NO];
+                    [self.activeChats.currentChatView hideUploadHUD];
                 }
                 //send next item (if there is one left)
                 [self sendAllOutboxes];
@@ -1990,7 +1990,7 @@ $$
                 else if([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"])
                 {
                     DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
-                    [self.activeChats.currentChatViewController showUploadHUD];
+                    [self.activeChats.currentChatView showUploadHUD];
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                         $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
                             dispatch_async(dispatch_get_main_queue(), ^{

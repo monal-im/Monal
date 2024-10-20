@@ -366,13 +366,13 @@ static NSMutableSet* _pushWarningDisplayed;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         //make sure we don't display a chat view for a disabled account
-        if(self.currentChatViewController != nil && self.currentChatViewController.contact != nil)
+        if([MLNotificationManager sharedInstance].currentContact != nil)
         {
             BOOL found = NO;
             for(NSDictionary* accountDict in [[DataLayer sharedInstance] enabledAccountList])
             {
                 NSNumber* accountID = accountDict[kAccountID];
-                if(self.currentChatViewController.contact.accountID.intValue == accountID.intValue)
+                if([MLNotificationManager sharedInstance].currentContact.accountID.intValue == accountID.intValue)
                     found = YES;
             }
             if(!found)
@@ -899,6 +899,7 @@ static NSMutableSet* _pushWarningDisplayed;
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeViewWithName:@"ChatPlaceholder"];
         [self showDetailViewController:detailsViewController sender:self];
     }
+    [MLNotificationManager sharedInstance].currentContact = nil;
 }
 
 -(void) showNotificationSettings
@@ -1109,7 +1110,6 @@ static NSMutableSet* _pushWarningDisplayed;
         UIBarButtonItem* barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
         self.navigationItem.backBarButtonItem = barButtonItem;
         [chatVC setupWithContact:sender];
-        self.currentChatViewController = chatVC;
     }
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
@@ -1523,6 +1523,17 @@ static NSMutableSet* _pushWarningDisplayed;
         DDLogVerbose(@"View chain completely dismissed...");
         completion();
     }
+}
+
+-(chatViewController* _Nullable) currentChatView
+{
+    NSArray* controllers = ((UINavigationController*)self.splitViewController.viewControllers[0]).viewControllers;
+    chatViewController* chatView = nil;
+    if(controllers.count > 1)
+        chatView = [((UINavigationController*)controllers[1]).viewControllers firstObject];
+    if(![chatView isKindOfClass:NSClassFromString(@"chatViewController")])
+        chatView = nil;
+    return chatView;
 }
 
 -(void) scrollToContact:(MLContact*) contact

@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ryanlintott/FrameUp",
       "state" : {
-        "revision" : "53792a1251375394b8e1bcfb2100e0961a52795c",
-        "version" : "0.9.4"
+        "revision" : "df55c5d5c3871dadbb61d0cc9f431525a96bbc72",
+        "version" : "0.9.5"
       }
     },
     {

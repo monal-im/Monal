@@ -10,4 +10,4 @@ crate-type = ["staticlib", "lib"]
 
 [dependencies]
 clap = {version = "4.5.20", features = ["derive"]}
-scraper = "0.20.0"
+scraper = "0.21.0"

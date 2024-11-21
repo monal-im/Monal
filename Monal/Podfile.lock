@@ -3,26 +3,26 @@ PODS:
   - CropViewController (2.7.4)
   - DZNEmptyDataSet (1.8.1)
   - FLAnimatedImage (1.0.17)
-  - KSCrash/Core (1.17.4):
+  - KSCrash/Core (1.17.7):
     - KSCrash/Reporting/Filters/Basic
-  - KSCrash/Recording (1.17.4):
-    - KSCrash/Recording/Tools (= 1.17.4)
-  - KSCrash/Recording/Tools (1.17.4)
-  - KSCrash/Reporting/Filters/AppleFmt (1.17.4):
+  - KSCrash/Recording (1.17.7):
+    - KSCrash/Recording/Tools (= 1.17.7)
+  - KSCrash/Recording/Tools (1.17.7)
+  - KSCrash/Reporting/Filters/AppleFmt (1.17.7):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/Base (1.17.4):
+  - KSCrash/Reporting/Filters/Base (1.17.7):
     - KSCrash/Recording
-  - KSCrash/Reporting/Filters/Basic (1.17.4):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/GZip (1.17.4):
+  - KSCrash/Reporting/Filters/Basic (1.17.7):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/JSON (1.17.4):
+  - KSCrash/Reporting/Filters/GZip (1.17.7):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/Sets (1.17.4):
+  - KSCrash/Reporting/Filters/JSON (1.17.7):
+    - KSCrash/Recording
+    - KSCrash/Reporting/Filters/Base
+  - KSCrash/Reporting/Filters/Sets (1.17.7):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/AppleFmt
     - KSCrash/Reporting/Filters/Base
@@ -30,39 +30,39 @@ PODS:
     - KSCrash/Reporting/Filters/GZip
     - KSCrash/Reporting/Filters/JSON
     - KSCrash/Reporting/Filters/Stringify
-  - KSCrash/Reporting/Filters/Stringify (1.17.4):
+  - KSCrash/Reporting/Filters/Stringify (1.17.7):
     - KSCrash/Recording
     - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/Tools (1.17.4):
+  - KSCrash/Reporting/Filters/Tools (1.17.7):
     - KSCrash/Recording
-  - KSCrash/Reporting/Tools (1.17.4):
+  - KSCrash/Reporting/Tools (1.17.7):
     - KSCrash/Recording
   - MarqueeLabel (4.3.2)
   - MBProgressHUD (1.2.0)
   - NotificationBannerSwift (3.2.1):
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
-  - PromiseKit (8.1.1):
-    - PromiseKit/CorePromise (= 8.1.1)
-    - PromiseKit/Foundation (= 8.1.1)
-    - PromiseKit/UIKit (= 8.1.1)
-  - PromiseKit/CorePromise (8.1.1)
-  - PromiseKit/Foundation (8.1.1):
+  - PromiseKit (8.1.2):
+    - PromiseKit/CorePromise (= 8.1.2)
+    - PromiseKit/Foundation (= 8.1.2)
+    - PromiseKit/UIKit (= 8.1.2)
+  - PromiseKit/CorePromise (8.1.2)
+  - PromiseKit/Foundation (8.1.2):
     - PromiseKit/CorePromise
-  - PromiseKit/UIKit (8.1.1):
+  - PromiseKit/UIKit (8.1.2):
     - PromiseKit/CorePromise
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.19.4):
-    - SDWebImage/Core (= 5.19.4)
-  - SDWebImage/Core (5.19.4)
+  - SDWebImage (5.20.0):
+    - SDWebImage/Core (= 5.20.0)
+  - SDWebImage/Core (5.20.0)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.6.0)
-  - "sqlite3/common (3.46.0+1)"
-  - "sqlite3/perf-threadsafe (3.46.0+1)":
+  - sqlite3/common (3.47.0)
+  - sqlite3/perf-threadsafe (3.47.0):
     - sqlite3/common
-  - WebRTC-lib (127.0.0)
+  - WebRTC-lib (130.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -122,18 +122,18 @@ SPEC CHECKSUMS:
   CropViewController: 3489bbf95a3e11c654382b0bae08ac645cdf1b93
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
-  KSCrash: 158a0998f08ae7d4e54ef8a2da62d6e08b46d03a
+  KSCrash: ea6fc545b7dbb916a141aaadd4343fb891141290
   MarqueeLabel: 15e524a6762552bb279cb17438b8a94990269fb9
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
-  PromiseKit: d1be44b474e5acfa16adf007a1f49f104e10fead
+  PromiseKit: e057b5b3c0ce9a0145674d633930924234104ee3
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: 066c47b573f408f18caa467d71deace7c0f8280d
+  SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  sqlite3: 292c3e1bfe89f64e51ea7fc7dab9182a017c8630
-  WebRTC-lib: 3e56b5c5fe21b0d6b682e543c39f68c81ccc8f26
+  sqlite3: 0aa20658a9b238a3b1ff7175eb7bdd863b0ab4fd
+  WebRTC-lib: 73de4fee6337c39be0ab9ddd516dc64bb73cefc5
 
 PODFILE CHECKSUM: e66b7bd410467c69adaa2ca9b0fca4fb025d8aa4
 

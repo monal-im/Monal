@@ -842,4 +842,14 @@ class SwiftuiInterface : NSObject {
         delegate.host = host!
         return host!
     }
+
+    struct SoundsSettings: UIViewControllerRepresentable {
+        func makeUIViewController(context: Context) -> MLSoundsTableViewController {
+            let viewController = MLSoundsTableViewController()
+            viewController.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "soundCell")
+            return viewController
+        }
+        func updateUIViewController(_ uiViewController: MLSoundsTableViewController, context: Context) {
+        }
+    }
 }

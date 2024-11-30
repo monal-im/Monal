@@ -316,9 +316,8 @@ static NSMutableSet* _pushWarningDisplayed;
 #if !TARGET_OS_MACCATALYST
     self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
 #endif
-
+    self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
     [self configureComposeButton];
-    [self configureSettingsButton];
 
     self.spinnerButton.customView = self.spinner;
     
@@ -955,8 +954,8 @@ static NSMutableSet* _pushWarningDisplayed;
 -(void) showSettings
 {
     appendToViewQueue((^(PMKResolver resolve) {
-        UIViewController* settingsView = [[SwiftuiInterface new] makeSettingsView];
-        [self presentViewController:settingsView animated:YES completion:^{resolve(nil);}];
+        [self performSegueWithIdentifier:@"showSettings" sender:self];
+        resolve(nil);
     }));
 }
 

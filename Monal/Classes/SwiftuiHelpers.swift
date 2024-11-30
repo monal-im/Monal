@@ -812,6 +812,15 @@ class SwiftuiInterface : NSObject {
     }
 
     @objc
+    func makeSettingsView() -> UIViewController {
+        let delegate = SheetDismisserProtocol()
+        let host = UIHostingController(rootView:AnyView(EmptyView()))
+        delegate.host = host
+        host.rootView = AnyView(AddTopLevelNavigation(withDelegate: delegate, to: Settings(delegate: delegate)))
+        return host
+    }
+
+    @objc
     func makeView(name: String) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         var host: UIHostingController<AnyView>? = nil

@@ -556,16 +556,12 @@ struct LazyClosureView<Content: View>: View {
 // use this to wrap a view into NavigationStack, if it should be the outermost swiftui view of a new view stack
 struct AddTopLevelNavigation<Content: View>: View {
     @Environment(\.presentationMode) private var presentationMode
-    @StateObject private var sizeClass: ObservableKVOWrapper<SizeClassWrapper>
     let build: () -> Content
     let delegate: SheetDismisserProtocol?
     
     init(withDelegate delegate: SheetDismisserProtocol?, to build: @autoclosure @escaping () -> Content) {
         self.build = build
         self.delegate = delegate
-
-        let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
-        self._sizeClass = StateObject(wrappedValue: ObservableKVOWrapper<SizeClassWrapper>(activeChats.sizeClass))
     }
     
     var body: some View {
@@ -574,10 +570,13 @@ struct AddTopLevelNavigation<Content: View>: View {
                 .navigationBarTitleDisplayMode(.automatic)
                 .navigationBarBackButtonHidden(true) // will not be shown because swiftui does not know we navigated here from UIKit
                 .toolbar {
+// The macCatalyst build is currently using the iPad UI idiom
+// But we want to display the back button on mac
 #if targetEnvironment(macCatalyst)
                     let shouldDisplayBackButton = true
 #else
-                    let shouldDisplayBackButton = UIUserInterfaceSizeClass(rawValue: sizeClass.horizontal) == .compact
+                    // Only hide the back button on iPads
+                    let shouldDisplayBackButton = UIDevice.current.userInterfaceIdiom != .pad
 #endif
                     if shouldDisplayBackButton {
                         ToolbarItem(placement: .topBarLeading) {

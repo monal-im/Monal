@@ -1595,9 +1595,6 @@ $$
         }];
     };
     
-    //resume logging and other core tasks
-    [HelperTools signalResumption];
-    
     //only proceed with our BGTASK if the NotificationServiceExtension is not running
     [MLProcessLock lock];
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
@@ -1702,9 +1699,6 @@ $$
         }];
     };
     
-    //resume logging and other core tasks
-    [HelperTools signalResumption];
-    
     //only proceed with our BGTASK if the NotificationServiceExtension is not running
     [MLProcessLock lock];
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
@@ -1748,6 +1742,9 @@ $$
 -(void) configureBackgroundTasks
 {
     [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundProcessingTask usingQueue:dispatch_get_main_queue() launchHandler:^(BGTask *task) {
+        //resume logging and other core tasks
+        [HelperTools signalResumption];
+        
         DDLogDebug(@"RUNNING BGPROCESSING LAUNCH HANDLER");
         DDLogInfo(@"BG time available: %f", [UIApplication sharedApplication].backgroundTimeRemaining);
         if(![HelperTools isInBackground])
@@ -1768,6 +1765,9 @@ $$
     }];
     
     [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundRefreshingTask usingQueue:dispatch_get_main_queue() launchHandler:^(BGTask *task) {
+        //resume logging and other core tasks
+        [HelperTools signalResumption];
+        
         DDLogDebug(@"RUNNING BGREFRESHING LAUNCH HANDLER");
         DDLogInfo(@"BG time available: %f", [UIApplication sharedApplication].backgroundTimeRemaining);
         if(![HelperTools isInBackground])

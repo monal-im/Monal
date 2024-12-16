@@ -514,7 +514,7 @@ static BOOL warnUnclean = NO;
             }
         }
         
-    #ifdef DEBUG
+#ifdef DEBUG
         if(warnUnclean)
         {
             UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
@@ -528,7 +528,7 @@ static BOOL warnUnclean = NO;
             else
                 warnUnclean = NO;       //try again on error
         }
-    #endif
+#endif
         
         //proxy to push singleton
         DDLogDebug(@"proxying to incomingPush");
@@ -545,7 +545,7 @@ static BOOL warnUnclean = NO;
         DDLogError(@"notification handler expired, that should never happen!");
         
 /*
-    #ifdef DEBUG
+#ifdef DEBUG
         UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
         errorContent.title = @"Unexpected appex expiration";
         errorContent.body = @"This should never happen, please contact the developers and provide a logfile!";
@@ -554,7 +554,7 @@ static BOOL warnUnclean = NO;
         NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
         if(error)
             DDLogError(@"Error posting local appex expiration error notification: %@", error);
-    #endif
+#endif
         
         //It seems the iOS induced deadlock unlocks itself after this expiration handler got called and even new pushes
         //can come in while this handler is still running

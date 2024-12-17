@@ -736,7 +736,7 @@ $$
     uint32_t deviceId = (uint32_t)rid.unsignedIntValue;
     SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:deviceId];
     SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
-    NSMutableArray<NSNumber*>* preKeyIds = [[bundle find:@"prekeys/preKeyPublic@preKeyId|uint"] mutableCopy];
+    NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|uint"];
 
     if(preKeyIds == nil || preKeyIds.count == 0)
     {

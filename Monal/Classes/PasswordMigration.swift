@@ -94,7 +94,7 @@ struct PasswordMigration: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack{
                     Button(action: {
-                        DDLogInfo("Saving migrated accounts: \(String(describing:self.needingMigration))")
+                        DDLogInfo("Saving migrated accounts...")
                         for id in self.needingMigration.keys {
                             var dic = self.needingMigration[id]!
                             //don't show this migration dialog again, even if the user did not activate this account
@@ -108,6 +108,8 @@ struct PasswordMigration: View {
                                     MLXMPPManager.sharedInstance().connectAccount(dic["account_id"] as! NSNumber)
                                 }
                             } else {
+                                //make sure to never enable accounts without password
+                                dic["enabled"] = NSNumber(value:false)
                                 DDLogDebug("Updating account in DB: enabled=\(String(describing:dic["enabled"])), needs_password_migration=\(String(describing:dic["needs_password_migration"])), password.count=0")
                                 DataLayer.sharedInstance().updateAccoun(with:dic)
                             }

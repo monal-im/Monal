@@ -4012,7 +4012,8 @@ NSString* const kStanza = @"stanza";
         } andChildren:@[] andData:nil]
     ] andData:nil]];
     [self sendIq:credentialsQuery withResponseHandler:^(XMPPIQ* response) {
-        completion([response findFirst:@"{urn:xmpp:extdisco:2}credentials/service@@"]);
+        //ejabberd <= 24.10 incorrectly uses {urn:xmpp:extdisco:2}services/service, support this as fallback
+        completion(nilDefault([response findFirst:@"{urn:xmpp:extdisco:2}credentials/service@@"], [response findFirst:@"{urn:xmpp:extdisco:2}services/service@@"]));
     } andErrorHandler:^(XMPPIQ* error) {
         DDLogWarn(@"Got error while quering for credentials of external service %@: %@", service, error);
         completion(@{});

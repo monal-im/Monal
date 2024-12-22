@@ -26,7 +26,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-static const size_t MIN_OMEMO_KEYS = 25;
+static const size_t MIN_OMEMO_KEYS = 90;
 static const size_t MAX_OMEMO_KEYS = 100;
 static const int KEY_SIZE = 16;
 
@@ -736,7 +736,7 @@ $$
     uint32_t deviceId = (uint32_t)rid.unsignedIntValue;
     SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:deviceId];
     SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
-    NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|uint"];
+    NSMutableArray<NSNumber*>* preKeyIds = [[bundle find:@"prekeys/preKeyPublic@preKeyId|uint"] mutableCopy];
 
     if(preKeyIds == nil || preKeyIds.count == 0)
     {
@@ -750,8 +750,9 @@ $$
     {
         // select random preKey and try to import it
         const uint32_t preKeyIdxToTest = arc4random_uniform((uint32_t)preKeyIds.count);
-        // load preKey
         NSNumber* preKeyId = preKeyIds[preKeyIdxToTest];
+        [preKeyIds removeObjectAtIndex:preKeyIdxToTest];
+        processedKeys++;
         if(preKeyId == nil)
             continue;;
         NSData* key = [bundle findFirst:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKeyId];
@@ -790,7 +791,7 @@ $$
         [self notifyKnownDevicesUpdated:jid];
 
         return;
-    } while(++processedKeys < preKeyIds.count);
+    } while(preKeyIds.count > 0);
     DDLogError(@"Could not import a single prekey from bundle for rid %@ (tried %lu keys)", rid, processedKeys);
     //TODO: should we blacklist this device id?
     @synchronized(self.state.queuedSessionRepairs) {

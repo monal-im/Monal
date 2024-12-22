@@ -1380,18 +1380,19 @@ NSString* const kStanza = @"stanza";
                         DDLogWarn(@"Throwing away incoming stanza queued in parse queue, accountState < kStateConnected");
                         return;
                     }
+                    NSString* loggedStanza = [NSString stringWithFormat:@"%@: %@", parsedStanza.element, nilDefault([parsedStanza findFirst:@"/@id"], parsedStanza)];
                     [MLNotificationQueue queueNotificationsInBlock:^{
                         //add whole processing of incoming stanzas to one big transaction
                         //this will make it impossible to leave inconsistent database entries on app crashes or iphone crashes/reboots
-                        DDLogVerbose(@"Starting transaction for: %@", parsedStanza);
+                        DDLogVerbose(@"Starting transaction for: %@", loggedStanza);
                         [[DataLayer sharedInstance] createTransaction:^{
-                            DDLogVerbose(@"Started transaction for: %@", parsedStanza);
+                            DDLogVerbose(@"Started transaction for: %@", loggedStanza);
                             //don't write data to our tcp stream while inside this db transaction (all effects to the outside world should be transactional, too)
                             [self freezeSendQueue];
                             [self processInput:parsedStanza withDelayedReplay:NO];
-                            DDLogVerbose(@"Ending transaction for: %@", parsedStanza);
+                            DDLogVerbose(@"Ending transaction for: %@", loggedStanza);
                         }];
-                        DDLogVerbose(@"Ended transaction for: %@", parsedStanza);
+                        DDLogVerbose(@"Ended transaction for: %@", loggedStanza);
                         [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
                     } onQueue:@"receiveQueue"];
                     [self persistState];        //make sure to persist all state changes triggered by the events in the notification queue
@@ -4011,7 +4012,8 @@ NSString* const kStanza = @"stanza";
         } andChildren:@[] andData:nil]
     ] andData:nil]];
     [self sendIq:credentialsQuery withResponseHandler:^(XMPPIQ* response) {
-        completion([response findFirst:@"{urn:xmpp:extdisco:2}credentials/service@@"]);
+        //ejabberd <= 24.10 incorrectly uses {urn:xmpp:extdisco:2}services/service, support this as fallback
+        completion(nilDefault([response findFirst:@"{urn:xmpp:extdisco:2}credentials/service@@"], [response findFirst:@"{urn:xmpp:extdisco:2}services/service@@"]));
     } andErrorHandler:^(XMPPIQ* error) {
         DDLogWarn(@"Got error while quering for credentials of external service %@: %@", service, error);
         completion(@{});

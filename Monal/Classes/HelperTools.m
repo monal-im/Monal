@@ -75,14 +75,23 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 -(void) invalidate;
 @end
 
+//make method visible
+@interface DDLog()
+-(void) queueLogMessage:(DDLogMessage*) logMessage asynchronously:(BOOL) asyncFlag;
+@end
+
+@interface DDLog (AllowQueueFreeze)
+-(void) swizzled_queueLogMessage:(DDLogMessage*) logMessage asynchronously:(BOOL) asyncFlag;
+@end
+
 static char* _crashBundleName = "UnifiedReport";
 static NSString* _processID;
 static DDFileLogger* _fileLogger = nil;
 static char _origLogfilePath[1024] = "";
 static char _logfilePath[1024] = "";
 static NSObject* _isAppExtensionLock = nil;
-static NSObject* _suspensionHandlingLock = nil;
-static BOOL _suspensionHandlingIsSuspended = NO;
+static NSObject* _suspensionHandling_lock = nil;
+static BOOL _suspensionHandling_isSuspended = NO;
 static NSMutableDictionary* _versionInfoCache;
 static MLStreamRedirect* _stdoutRedirector = nil;
 static MLStreamRedirect* _stderrRedirector = nil;
@@ -293,12 +302,36 @@ void swizzle(Class c, SEL orig, SEL new)
 }
 @end
 
+@implementation DDLog (AllowQueueFreeze)
+
+-(void) swizzled_queueLogMessage:(DDLogMessage*) logMessage asynchronously:(BOOL) asyncFlag
+{
+    //don't do sync logging for any message (usually ERROR), while the global logging queue is suspended
+    @synchronized(_suspensionHandling_lock) {
+        return [self swizzled_queueLogMessage:logMessage asynchronously:_suspensionHandling_isSuspended ? YES : asyncFlag];
+    }
+}
+
+//see https://stackoverflow.com/a/13326633 and https://fek.io/blog/method-swizzling-in-obj-c-and-swift/
++(void) load
+{
+    if(self == DDLog.self)
+    {
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            swizzle([self class], @selector(queueLogMessage:asynchronously:), @selector(swizzled_queueLogMessage:asynchronously:));
+        });
+    }
+}
+
+@end
+
 @implementation HelperTools
 
 +(void) initialize
 {
-    _suspensionHandlingLock = [NSObject new];
-    _suspensionHandlingIsSuspended = NO;
+    _suspensionHandling_lock = [NSObject new];
+    _suspensionHandling_isSuspended = NO;
     _isAppExtensionLock = [NSObject new];
     _versionInfoCache = [NSMutableDictionary new];
     
@@ -586,13 +619,13 @@ void swizzle(Class c, SEL orig, SEL new)
         runloops = [NSMutableDictionary new];
     });
     
-    //every identifier has its own thread priority/qos class
-    __block dispatch_queue_priority_t priority;
+    //every identifier has its own thread qos class
+    __block NSQualityOfService qos;
     __block char* name;
     switch(identifier)
     {
-        case MLRunLoopIdentifierNetwork: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; name = "im.monal.runloop.networking"; break;
-        case MLRunLoopIdentifierTimer: priority = DISPATCH_QUEUE_PRIORITY_BACKGROUND; name = "im.monal.runloop.timer"; break;
+        case MLRunLoopIdentifierNetwork: qos = NSQualityOfServiceBackground; name = "im.monal.runloop.networking"; break;
+        case MLRunLoopIdentifierTimer: qos = NSQualityOfServiceBackground; name = "im.monal.runloop.timer"; break;
         default: unreachable(@"unknown runloop identifier!");
     }
     
@@ -601,9 +634,7 @@ void swizzle(Class c, SEL orig, SEL new)
         {
             NSCondition* condition = [NSCondition new];
             [condition lock];
-            dispatch_async(dispatch_queue_create_with_target(name, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(priority, 0)), ^{
-                //set thread name, too (not only runloop name)
-                [NSThread.currentThread setName:[NSString stringWithFormat:@"%s", name]];
+            NSThread* newRunloopThread = [[NSThread alloc] initWithBlock:^{
                 //we don't need an @synchronized block around this because the @synchronized block of the outer thread
                 //waits until we signal our condition (e.g. no other thread can race with us)
                 NSRunLoop* localLoop = runloops[@(identifier)] = [NSRunLoop currentRunLoop];
@@ -615,7 +646,13 @@ void swizzle(Class c, SEL orig, SEL new)
                     [localLoop run];
                     usleep(10000);          //sleep 10ms if we ever return from our runloop to not consume too much cpu
                 }
-            });
+            }];
+            //configure and start thread
+            [newRunloopThread setName:[NSString stringWithFormat:@"%s", name]];
+            //newRunloopThread.threadPriority = 1.0;
+            newRunloopThread.qualityOfService = qos;
+            [newRunloopThread start];
+            //wait for the new thread to create a new runloop, it will immediately spin the runloop after signalling this condition
             [condition wait];
             [condition unlock];
         }
@@ -1880,27 +1917,31 @@ void swizzle(Class c, SEL orig, SEL new)
 
 +(void) signalSuspension
 {
-    @synchronized(_suspensionHandlingLock) {
-        if(!_suspensionHandlingIsSuspended)
+    @synchronized(_suspensionHandling_lock) {
+        if(!_suspensionHandling_isSuspended)
         {
             DDLogVerbose(@"Suspending logger queue...");
             [HelperTools flushLogsWithTimeout:0.100];
             dispatch_suspend([DDLog loggingQueue]);
-            _suspensionHandlingIsSuspended = YES;
+            _suspensionHandling_isSuspended = YES;
+            
+            DDLogVerbose(@"Posting kMonalFrozen notification now...");
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFrozen object:nil];
         }
     }
-    DDLogVerbose(@"Posting kMonalIsFreezed notification now...");
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIsFreezed object:nil];
 }
 
 +(void) signalResumption
 {
-    @synchronized(_suspensionHandlingLock) {
-        if(_suspensionHandlingIsSuspended)
+    @synchronized(_suspensionHandling_lock) {
+        if(_suspensionHandling_isSuspended)
         {
             DDLogVerbose(@"Resuming logger queue...");
             dispatch_resume([DDLog loggingQueue]);
-            _suspensionHandlingIsSuspended = NO;
+            _suspensionHandling_isSuspended = NO;
+            
+            DDLogVerbose(@"Posting kMonalUnfrozen notification now...");
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUnfrozen object:nil];
         }
     }
 }

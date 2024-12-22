@@ -65,7 +65,7 @@ static volatile int _ownLockFD;
         lock = flock(_ownLockFD, LOCK_EX | LOCK_NB);
         if(lock != 0)
             @throw [NSException exceptionWithName:@"LockingError" reason:[NSString stringWithFormat:@"flock returned: %d (%d) on file: %s", lock, errno, _ownLockPath] userInfo:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(unlock) name:kMonalIsFreezed object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(unlock) name:kMonalFrozen object:nil];
     }
 }
 

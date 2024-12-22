@@ -28,6 +28,23 @@ struct PasswordMigration: View {
         DDLogInfo("Migration needed: \(String(describing:self.needingMigration))")
     }
     
+    func updatePassword(_ password: String, for id: Int) {
+        self.needingMigration[id]?["password"] = password as NSString
+        if(password.count > 0) {
+            //first change? --> activate account and use "needs_password_migration" to record
+            //the fact that we just activated this account automatically
+            //(making the password field empty will reset this)
+            if((self.needingMigration[id]?["needs_password_migration"] as! NSNumber).boolValue) {
+                self.needingMigration[id]?["enabled"] = NSNumber(value:true)
+                self.needingMigration[id]?["needs_password_migration"] = NSNumber(value:false)
+            }
+        //reset our "account automatically activated" flag and deactivate our account
+        } else {
+            self.needingMigration[id]?["enabled"] = NSNumber(value:false)
+            self.needingMigration[id]?["needs_password_migration"] = NSNumber(value:true)
+        }
+    }
+    
     var body: some View {
         //ScrollView {
             VStack {
@@ -61,26 +78,11 @@ struct PasswordMigration: View {
                             
                             SecureField(NSLocalizedString("Password", comment: "placeholder when migrating account"), text:Binding(
                                 get: { self.needingMigration[id]?["password"] as? String ?? "" },
-                                set: {
-                                    self.needingMigration[id]?["password"] = $0 as NSString
-                                    if($0.count > 0) {
-                                        //first change? --> activate account and use "needs_password_migration" to record
-                                        //the fact that we just activated this account automatically
-                                        //(making the password field empty will reset this)
-                                        if((self.needingMigration[id]?["needs_password_migration"] as! NSNumber).boolValue) {
-                                            self.needingMigration[id]?["enabled"] = NSNumber(value:true)
-                                            self.needingMigration[id]?["needs_password_migration"] = NSNumber(value:false)
-                                        }
-                                    //reset our "account automatically activated" flag and deactivate our account
-                                    } else {
-                                        self.needingMigration[id]?["enabled"] = NSNumber(value:false)
-                                        self.needingMigration[id]?["needs_password_migration"] = NSNumber(value:true)
-                                    }
-                                }
+                                set: { updatePassword($0, for:id) }
                             ))
                             .addClearButton(isEditing: true, text:Binding(
                                 get: { self.needingMigration[id]?["password"] as? String ?? "" },
-                                set: { self.needingMigration[id]?["password"] = $0 as NSString }
+                                set: { updatePassword($0, for:id) }
                             ))
                         }
                     }
@@ -94,7 +96,7 @@ struct PasswordMigration: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack{
                     Button(action: {
-                        DDLogInfo("Saving migrated accounts: \(String(describing:self.needingMigration))")
+                        DDLogInfo("Saving migrated accounts...")
                         for id in self.needingMigration.keys {
                             var dic = self.needingMigration[id]!
                             //don't show this migration dialog again, even if the user did not activate this account
@@ -108,6 +110,8 @@ struct PasswordMigration: View {
                                     MLXMPPManager.sharedInstance().connectAccount(dic["account_id"] as! NSNumber)
                                 }
                             } else {
+                                //make sure to never enable accounts without password
+                                dic["enabled"] = NSNumber(value:false)
                                 DDLogDebug("Updating account in DB: enabled=\(String(describing:dic["enabled"])), needs_password_migration=\(String(describing:dic["needs_password_migration"])), password.count=0")
                                 DataLayer.sharedInstance().updateAccoun(with:dic)
                             }

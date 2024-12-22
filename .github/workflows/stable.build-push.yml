@@ -67,6 +67,9 @@ jobs:
                   printf("\n")
               }'
           }
+          function replace_unwanted_chars {
+            sed -e 's/>=/greater or equal than/g' -e 's/<=/lower or equal than/g' -e 's/>/greater than/g' -e 's/</lower than/g')
+          }
           buildNumber="$(git tag --sort="v:refname" | grep "Build_iOS" | grep -v "Quicksy_Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')"
           version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
           mkdir -p /Users/ci/releases
@@ -86,11 +89,11 @@ jobs:
           echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           echo "notes_ios<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "$(git log -n 1 --merges --pretty=format:%b)" | repairNotes | grep -v '^[\t\n ]*MACOS_ONLY.*$' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]?(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | repairNotes | grep -v '^[\t\n ]*MACOS_ONLY.*$' | sed -E 's/^[\t\n ]*IOS_ONLY[\t\n ]?(.*)$/\1/g' | replace_unwanted_chars | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           echo "notes_macos<<__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
-          echo "$(git log -n 1 --merges --pretty=format:%b)" | repairNotes | grep -v '^[\t\n ]*IOS_ONLY.*$' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]?(.*)$/\1/g' | tee /dev/stderr >> "$OUTPUT_FILE"
+          echo "$(git log -n 1 --merges --pretty=format:%b)" | repairNotes | grep -v '^[\t\n ]*IOS_ONLY.*$' | sed -E 's/^[\t\n ]*MACOS_ONLY[\t\n ]?(.*)$/\1/g' | replace_unwanted_chars | tee /dev/stderr >> "$OUTPUT_FILE"
           echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           cat "$OUTPUT_FILE" >> "$GITHUB_OUTPUT"

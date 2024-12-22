@@ -72,7 +72,7 @@ jobs:
               }'
           }
           function replace_unwanted_chars {
-            sed -e 's/>=/greater or equal than/g' -e 's/<=/lower or equal than/g' -e 's/>/greater than/g' -e 's/</lower than/g')
+            sed -e 's/>=/greater or equal than/g' -e 's/<=/lower or equal than/g' -e 's/>/greater than/g' -e 's/</lower than/g'
           }
           buildNumber="$(git tag --sort="v:refname" | grep "Build_iOS" | grep -v "Quicksy_Build_iOS" | tail -n1 | sed 's/Build_iOS_//g')"
           version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"

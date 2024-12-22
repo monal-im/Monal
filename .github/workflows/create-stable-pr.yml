@@ -99,7 +99,7 @@ jobs:
                 repo,
                 head: 'beta',
                 base: 'stable',
-                draft: true,
+                draft: false,
                 title: `${{ steps.get_commits.outputs.buildVersion }}`,
                 body: `${{ steps.get_commits.outputs.description }}`,
               });

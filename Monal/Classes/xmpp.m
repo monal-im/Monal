@@ -705,6 +705,8 @@ NSString* const kStanza = @"stanza";
                 [row objectForKey:@"ttl"]
             );
     }
+    else
+        DDLogWarn(@"No SRV records discovered, using legacy starttls to A/AAAA record of domain!");
     
     [self createStreams];
     return NO;

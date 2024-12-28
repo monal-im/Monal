@@ -16,8 +16,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLPromise()
 
--(void) resolve:(id _Nullable) argument;
-
 @property(nonatomic, strong) AnyPromise* anyPromise;
 @property(nonatomic, strong) id resolvedArgument;
 @property(nonatomic, assign) BOOL isResolved;

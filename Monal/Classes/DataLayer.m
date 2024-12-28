@@ -2625,4 +2625,19 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(NSSet<MLPromise*>*) getAllPromises
+{
+    DDLogDebug(@"Getting all promises from the DB");
+    return [self.db idReadTransaction:^{
+        NSString* query = @"SELECT promise FROM promises;";
+        NSArray<NSData*>* results = [self.db executeScalarReader:query];
+        NSMutableSet<MLPromise*>* promises = [NSMutableSet new];
+        for(NSData* data in results)
+        {
+            [promises addObject:[HelperTools unserializeData:data]];
+        }
+        return promises;
+    }];
+}
+
 @end

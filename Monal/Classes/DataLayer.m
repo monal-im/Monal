@@ -2604,15 +2604,6 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) removeAllPromises
-{
-    DDLogDebug(@"Removing all promises from the DB");
-    [self.db voidWriteTransaction:^{
-        NSString* query = @"DELETE FROM promises;";
-        [self.db executeNonQuery:query];
-    }];
-}
-
 -(MLPromise*) getPromise:(MLPromise*) promise
 {
     DDLogDebug(@"Getting promise %@ with uuid %@ from DB", promise, promise.uuid);

@@ -69,6 +69,7 @@ typedef NS_ENUM(NSInteger, PromiseResolutionState) {
 @property(nonatomic, strong) id resolvedArgument;
 @property(nonatomic, strong) MLPromiseRejection* rejection;
 @property(nonatomic) PromiseResolutionState state;
+@property(nonatomic) BOOL isStale;
 
 @end
 
@@ -85,6 +86,7 @@ static NSMutableDictionary* _resolvers;
 {
     self.uuid = [NSUUID UUID];
     self.state = PromiseResolutionStateUnresolved;
+    self.isStale = NO;
 
     [self serialize];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deserialize) name:kMonalUnfrozen object:nil];
@@ -100,6 +102,7 @@ static NSMutableDictionary* _resolvers;
     self.resolvedArgument = [coder decodeObjectForKey:@"resolvedArgument"];
     self.rejection = [coder decodeObjectForKey:@"rejection"];
     self.state = [coder decodeIntegerForKey:@"state"];
+    self.isStale = [coder decodeBoolForKey:@"isStale"];
     DDLogVerbose(@"Initialised from coder a promise %@", self);
     return self;
 }
@@ -132,7 +135,9 @@ static NSMutableDictionary* _resolvers;
 +(void) consumeStalePromises
 {
     MLAssert([_resolvers count] == 0, @"Resolvers map should be empty, but it was not. This function should only be called on app start-up");
-    [[DataLayer sharedInstance] removeAllPromises];
+    NSMutableSet<MLPromise*>* stalePromises = [[[DataLayer sharedInstance] getAllPromises] mutableCopy];
+    [stalePromises setValue:@YES forKey:@"isStale"];
+    [stalePromises makeObjectsPerformSelector:@selector(attemptConsume)];
 }
 
 -(void) resolveWithArgument:(id _Nullable) argument andState:(PromiseResolutionState) state
@@ -201,18 +206,21 @@ static NSMutableDictionary* _resolvers;
 
     PMKResolver resolve = _resolvers[self.uuid];
 
-    if(resolve == nil)
+    if(resolve == nil && !self.isStale)
     {
         DDLogDebug(@"Tried to consume promise %@ when there is no resolver available", self);
         return;
     }
 
-    DDLogDebug(@"Resolving promise %@ and argument %@", self, self.resolvedArgument);
-    resolve(self.resolvedArgument);
+    if(!self.isStale)
+    {
+        DDLogDebug(@"Resolving promise %@ with uuid %@ and argument %@", self, self.uuid, self.resolvedArgument);
+        resolve(self.resolvedArgument);
 
-    DDLogVerbose(@"Removing resolver with uuid %@ from resolvers map", self.uuid);
-    [_resolvers removeObjectForKey:self.uuid];
-    DDLogVerbose(@"Resolvers map is now: %@", _resolvers);
+        [_resolvers removeObjectForKey:self.uuid];
+        DDLogVerbose(@"Removed resolver with uuid %@ from resolvers map", self.uuid);
+        DDLogVerbose(@"Resolvers map is now: %@", _resolvers);
+    }
 
     [[DataLayer sharedInstance] removePromise:self];
 }
@@ -228,6 +236,7 @@ static NSMutableDictionary* _resolvers;
     [coder encodeObject:self.resolvedArgument forKey:@"resolvedArgument"];
     [coder encodeObject:self.rejection forKey:@"rejection"];
     [coder encodeInteger:self.state forKey:@"state"];
+    [coder encodeBool:self.isStale forKey:@"isStale"];
 }
 
 -(NSString*) description

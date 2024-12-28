@@ -14,11 +14,17 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSInteger, PromiseResolutionState) {
+    PromiseResolutionStateUnresolved,
+    PromiseResolutionStateFulfilled,
+    PromiseResolutionStateRejected,
+};
+
 @interface MLPromise()
 
 @property(nonatomic, strong) AnyPromise* anyPromise;
 @property(nonatomic, strong) id resolvedArgument;
-@property(nonatomic, assign) BOOL isResolved;
+@property(nonatomic) PromiseResolutionState state;
 
 @end
 
@@ -34,7 +40,7 @@ static NSMutableDictionary* _resolvers;
 -(instancetype) init
 {
     self.uuid = [NSUUID UUID];
-    self.isResolved = false;
+    self.state = PromiseResolutionStateUnresolved;
 
     [self serialize];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deserialize) name:kMonalUnfrozen object:nil];
@@ -48,7 +54,7 @@ static NSMutableDictionary* _resolvers;
 {
     self.uuid = [coder decodeObjectForKey:@"uuid"];
     self.resolvedArgument = [coder decodeObjectForKey:@"resolvedArgument"];
-    self.isResolved = [coder decodeBoolForKey:@"isResolved"];
+    self.state = [coder decodeIntegerForKey:@"state"];
     DDLogVerbose(@"Initialised from coder a promise %@", self);
     return self;
 }
@@ -69,7 +75,7 @@ static NSMutableDictionary* _resolvers;
 {
     MLPromise* dbPromise = [[DataLayer sharedInstance] getPromise:self];
     self.resolvedArgument = dbPromise.resolvedArgument;
-    self.isResolved = dbPromise.isResolved;
+    self.state = dbPromise.state;
     DDLogVerbose(@"Deserialized promise %@", self);
 
     [self attemptConsume];
@@ -84,25 +90,25 @@ static NSMutableDictionary* _resolvers;
     [[DataLayer sharedInstance] removeAllPromises];
 }
 
--(void) resolve:(id _Nullable) argument
+-(void) resolveWithArgument:(id _Nullable) argument andState:(PromiseResolutionState) state
 {
     DDLogDebug(@"Resolving promise %@ and argument %@", self, argument);
-    NSAssert(!self.isResolved, @"Trying to resolve an already resolved promise");
+    NSAssert(self.state == PromiseResolutionStateUnresolved, @"Trying to resolve an already resolved promise");
 
     self.resolvedArgument = argument;
-    self.isResolved = true;
+    self.state = state;
     [self serialize];
     [self attemptConsume];
 }
 
 -(void) fulfill:(id _Nullable) argument
 {
-    [self resolve:argument];
+    [self resolveWithArgument:argument andState:PromiseResolutionStateFulfilled];
 }
 
 -(void) reject:(NSError*) error
 {
-    [self resolve:error];
+    [self resolveWithArgument:error andState:PromiseResolutionStateRejected];
 }
 
 -(AnyPromise*) toAnyPromise
@@ -140,7 +146,7 @@ static NSMutableDictionary* _resolvers;
         return;
     }
 
-    if(!self.isResolved)
+    if(self.state == PromiseResolutionStateUnresolved)
     {
         DDLogDebug(@"Not consuming promise %@ as it has not been resolved yet", self);
         return;
@@ -173,12 +179,25 @@ static NSMutableDictionary* _resolvers;
 {
     [coder encodeObject:self.uuid forKey:@"uuid"];
     [coder encodeObject:self.resolvedArgument forKey:@"resolvedArgument"];
-    [coder encodeBool:self.isResolved forKey:@"isResolved"];
+    [coder encodeInteger:self.state forKey:@"state"];
 }
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"MLPromise(uuid=%@, isResolved=%@)", self.uuid, bool2str(self.isResolved)];
+    return [NSString stringWithFormat:@"MLPromise(uuid=%@, state=%@)", self.uuid, self.stateName];
+}
+
+-(NSString*) stateName
+{
+    switch(self.state)
+    {
+        case PromiseResolutionStateUnresolved:
+            return @"unresolved";
+        case PromiseResolutionStateFulfilled:
+            return @"fulfilled";
+        case PromiseResolutionStateRejected:
+            return @"rejected";
+    }
 }
 
 @end

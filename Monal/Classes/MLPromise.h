@@ -27,10 +27,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, strong) NSUUID* uuid;
 
 -(void) fulfill:(id _Nullable) arg;
--(void) reject:(NSError*) error;
+-(void) rejectWithError:(NSError*) error andNode:(XMPPStanza* _Nullable) node forAccountWithID:(NSNumber*) accountID;
 -(AnyPromise*) toAnyPromise;
 
 +(void) removeStalePromises;
+
+@end
+
+@interface MLPromiseRejection : NSObject<NSSecureCoding>
 
 @end
 

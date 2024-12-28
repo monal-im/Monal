@@ -252,7 +252,7 @@ $$class_handler(handleMAMBackscrollingResultInvalidation, $$ID(xmpp*, account), 
     DDLogError(@"Got backscrolling mam error for %@", contact.contactJid);
     NSString* errorMessage = [NSString stringWithFormat:NSLocalizedString(@"Could not fetch more old chat history for '%@' from the server archive. Please try again.", @""), contact.contactJid];
     NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
-    [promise reject:error];
+    [promise rejectWithError:error andNode:nil forAccountWithID:account.accountID];
 $$
 
 $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLContact*, contact), $_ID(NSMutableOrderedSet*, historyIdsOfAlreadyRetreivedMessages), $$PROMISE(promise))
@@ -284,7 +284,7 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
     {
         NSString* errorMessage = [HelperTools extractXMPPError:iqNode withDescription:NSLocalizedString(@"Could not fetch more old history for this chat from the server archive. Please try again later.", @"")];
         NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
-        [promise reject:error];
+        [promise rejectWithError:error andNode:iqNode forAccountWithID:account.accountID];
     }
     else
     {
@@ -883,7 +883,7 @@ $$class_handler(handlePasswordChangeInvalidation, $$ID(xmpp*, account), $$ID(NSS
     [SAMKeychain deletePasswordForService:kMonalTmpKeychainName account:uuid];
     NSString* errorMessage = [NSString stringWithFormat:NSLocalizedString(@"Could not change the password of '%@'. Please try again.", @""), jid];
     NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
-    [promise reject:error];
+    [promise rejectWithError:error andNode:nil forAccountWithID:account.accountID];
 $$
 
 $$class_handler(handlePasswordChange, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, uuid), $$PROMISE(promise))
@@ -894,7 +894,7 @@ $$class_handler(handlePasswordChange, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode
         [SAMKeychain deletePasswordForService:kMonalTmpKeychainName account:uuid];
         NSString* errorMessage = [HelperTools extractXMPPError:iqNode withDescription:[NSString stringWithFormat:NSLocalizedString(@"Could not change the password of '%@'", @""), jid]];
         NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
-        [promise reject:error];
+        [promise rejectWithError:error andNode:iqNode forAccountWithID:account.accountID];
     }
     else
     {

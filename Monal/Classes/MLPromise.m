@@ -20,10 +20,54 @@ typedef NS_ENUM(NSInteger, PromiseResolutionState) {
     PromiseResolutionStateRejected,
 };
 
+@interface MLPromiseRejection()
+
+@property(nonatomic, strong) NSString* errorDescription;
+@property(nonatomic, strong) XMPPStanza* node;
+@property(nonatomic, strong) NSNumber* accountID;
+
+-(instancetype) initWithErrorDescription:(NSString*) description andNode:(XMPPStanza*) node forAccountWithID:(NSNumber*) accountID;
+
+@end
+
+@implementation MLPromiseRejection
+
+-(instancetype) initWithErrorDescription:(NSString*) errorDescription andNode:(XMPPStanza*) node forAccountWithID:(NSNumber*) accountID
+{
+    self = [self init];
+    self.errorDescription = errorDescription;
+    self.node = node;
+    self.accountID = accountID;
+    return self;
+}
+
+-(nullable instancetype) initWithCoder:(NSCoder*) coder
+{
+    self.errorDescription = [coder decodeObjectForKey:@"errorDescription"];
+    self.node = [coder decodeObjectForKey:@"node"];
+    self.accountID = [coder decodeObjectForKey:@"accountID"];
+    return self;
+}
+
+-(void) encodeWithCoder:(NSCoder*) coder
+{
+    [coder encodeObject:self.errorDescription forKey:@"errorDescription"];
+    [coder encodeObject:self.node forKey:@"node"];
+    [coder encodeObject:self.accountID forKey:@"accountID"];
+}
+
++(BOOL) supportsSecureCoding
+{
+    return YES;
+}
+
+@end
+
 @interface MLPromise()
 
 @property(nonatomic, strong) AnyPromise* anyPromise;
 @property(nonatomic, strong) id resolvedArgument;
+@property(nonatomic, strong) MLPromiseRejection* rejection;
 @property(nonatomic) PromiseResolutionState state;
 
 @end
@@ -54,6 +98,7 @@ static NSMutableDictionary* _resolvers;
 {
     self.uuid = [coder decodeObjectForKey:@"uuid"];
     self.resolvedArgument = [coder decodeObjectForKey:@"resolvedArgument"];
+    self.rejection = [coder decodeObjectForKey:@"rejection"];
     self.state = [coder decodeIntegerForKey:@"state"];
     DDLogVerbose(@"Initialised from coder a promise %@", self);
     return self;
@@ -107,8 +152,9 @@ static NSMutableDictionary* _resolvers;
     [self resolveWithArgument:argument andState:PromiseResolutionStateFulfilled];
 }
 
--(void) reject:(NSError*) error
+-(void) rejectWithError:(NSError*) error andNode:(XMPPStanza* _Nullable) node forAccountWithID:(NSNumber*) accountID
 {
+    self.rejection = [[MLPromiseRejection alloc] initWithErrorDescription:error.description andNode:node forAccountWithID:accountID];
     [self resolveWithArgument:error andState:PromiseResolutionStateRejected];
 }
 
@@ -180,6 +226,7 @@ static NSMutableDictionary* _resolvers;
 {
     [coder encodeObject:self.uuid forKey:@"uuid"];
     [coder encodeObject:self.resolvedArgument forKey:@"resolvedArgument"];
+    [coder encodeObject:self.rejection forKey:@"rejection"];
     [coder encodeInteger:self.state forKey:@"state"];
 }
 

@@ -94,6 +94,7 @@ static NSMutableDictionary* _resolvers;
 {
     DDLogDebug(@"Resolving promise %@ and argument %@", self, argument);
     NSAssert(self.state == PromiseResolutionStateUnresolved, @"Trying to resolve an already resolved promise");
+    NSAssert(self.resolvedArgument == nil, @"Promise is unresolved, therefore resolvedArgument should be nil");
 
     self.resolvedArgument = argument;
     self.state = state;

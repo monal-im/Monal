@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) rejectWithError:(NSError*) error andNode:(XMPPStanza* _Nullable) node forAccountWithID:(NSNumber*) accountID;
 -(AnyPromise*) toAnyPromise;
 
-+(void) removeStalePromises;
++(void) consumeStalePromises;
 
 @end
 

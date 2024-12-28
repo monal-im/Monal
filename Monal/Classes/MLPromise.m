@@ -129,7 +129,7 @@ static NSMutableDictionary* _resolvers;
 // A stale promise is a promise that is still in the DB, but doesn't have an entry in the resolvers map.
 // It is "stale" because it is not possible to consume it - we've lost the linkage from MLPromise to AnyPromise that _resolvers provides.
 // When we start the app, the resolvers map is empty; therefore, all promises still in the DB are stale.
-+(void) removeStalePromises
++(void) consumeStalePromises
 {
     MLAssert([_resolvers count] == 0, @"Resolvers map should be empty, but it was not. This function should only be called on app start-up");
     [[DataLayer sharedInstance] removeAllPromises];

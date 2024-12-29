@@ -19,6 +19,8 @@
 #import "MLContact.h"
 #import "xmpp.h"
 
+DDLoggerName const DDLoggerNameUDP = @"monal.loggger.udp.mainQueue";
+
 static NSData* _key;
 static volatile MLUDPLogger* _self;
 
@@ -78,6 +80,16 @@ static volatile MLUDPLogger* _self;
     }
 }
 
++(void) directlyWriteLogMessage:(DDLogMessage*) logMessage
+{
+    if(_self == nil)
+    {
+        [[self class] logError:@"Ignoring call to directlySyncWriteLogMessage: _self still nil!"];
+        return;
+    }
+    return [_self logMessage:logMessage];
+}
+
 -(void) dealloc
 {
     _self = nil;
@@ -87,12 +99,18 @@ static volatile MLUDPLogger* _self;
 {
     _self = self;
     _send_condition = [NSCondition new];
-    _send_queue = dispatch_queue_create("MLUDPLoggerSendQueue", dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0));
+    _send_queue = dispatch_queue_create("MLUDPLoggerInternalSendQueue", dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0));
 }
 
 -(void) willRemoveLogger
 {
     _self = nil;
+}
+
+
+-(DDLoggerName) loggerName
+{
+    return DDLoggerNameUDP;
 }
 
 +(void) logError:(NSString*) format, ... NS_FORMAT_FUNCTION(1, 2)

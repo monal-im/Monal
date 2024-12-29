@@ -60,7 +60,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     MLContact* _contactToOpen;
     monal_id_block_t _completionToCall;
     BOOL _shutdownPending;
-    BOOL _wasFreezed;
+    BOOL _wasFrozen;
 }
 @end
 
@@ -319,7 +319,7 @@ $$
     _wakeupCompletions = [NSMutableDictionary new];
     DDLogVerbose(@"Setting _shutdownPending to NO...");
     _shutdownPending = NO;
-    _wasFreezed = NO;
+    _wasFrozen = NO;
     
     //[self runParserTests];
     //[self runSDPTests];
@@ -1148,11 +1148,7 @@ $$
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         [account freeze];
     [MLProcessLock unlock];
-    _wasFreezed = YES;
-    @synchronized(self) {
-        DDLogVerbose(@"Setting _shutdownPending to NO...");
-        _shutdownPending = NO;
-    }
+    _wasFrozen = YES;
 }
 
 -(void) applicationWillEnterForeground:(UIApplication*) application
@@ -1170,14 +1166,14 @@ $$
     
     //only show loading HUD if we really got freezed before
     MBProgressHUD* loadingHUD;
-    if(_wasFreezed)
+    if(_wasFrozen)
     {
         loadingHUD = [MBProgressHUD showHUDAddedTo:[self getTopViewController].view animated:YES];
         loadingHUD.label.text = NSLocalizedString(@"Refreshing...", @"");
         loadingHUD.mode = MBProgressHUDModeIndeterminate;
         loadingHUD.removeFromSuperViewOnHide = YES;
         
-        _wasFreezed = NO;
+        _wasFrozen = NO;
     }
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{

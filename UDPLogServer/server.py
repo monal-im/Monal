@@ -161,7 +161,11 @@ while True:
     kwargs = flag_to_kwargs(decoded["flag"] if "flag" in decoded else None)
     
     # print original formatted log message
-    logline = ("%d: %s" % (decoded["tag"]["counter"], formatLogline(decoded)))
+    logline = "%s%d: %s" % (
+        "+++ LOG_QUEUE_DISABLED +++ " if "tag" in decoded and "loggingQueueSuspended" in decoded["tag"] and decoded["tag"]["loggingQueueSuspended"]==True else "",
+        decoded["tag"]["counter"],
+        formatLogline(decoded)
+    )
     if logfd:
         print(logline, file=logfd)
     print(colorize(logline, **kwargs), flush=True)

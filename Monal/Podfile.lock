@@ -59,8 +59,8 @@ PODS:
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.6.0)
-  - sqlite3/common (3.47.0)
-  - sqlite3/perf-threadsafe (3.47.0):
+  - sqlite3/common (3.47.2)
+  - sqlite3/perf-threadsafe (3.47.2):
     - sqlite3/common
   - WebRTC-lib (130.0.0)
 
@@ -132,7 +132,7 @@ SPEC CHECKSUMS:
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  sqlite3: 0aa20658a9b238a3b1ff7175eb7bdd863b0ab4fd
+  sqlite3: 7559e33dae4c78538df563795af3a86fc887ee71
   WebRTC-lib: 73de4fee6337c39be0ab9ddd516dc64bb73cefc5
 
 PODFILE CHECKSUM: e66b7bd410467c69adaa2ca9b0fca4fb025d8aa4

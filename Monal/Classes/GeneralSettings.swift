@@ -265,8 +265,8 @@ struct SecuritySettings: View {
          259200: NSLocalizedString("3 days", comment:"Message autdelete time"),
          604800: NSLocalizedString("1 week", comment:"Message autdelete time"),
         2419200: NSLocalizedString("4 weeks", comment:"Message autdelete time"),
-        5184000: NSLocalizedString("2 month", comment:"Message autdelete time"),        //based on 30 days per month
-        7776000: NSLocalizedString("3 month", comment:"Message autdelete time"),        //based on 30 days per month
+        5184000: NSLocalizedString("2 months", comment:"Message autdelete time"),        //based on 30 days per month
+        7776000: NSLocalizedString("3 months", comment:"Message autdelete time"),        //based on 30 days per month
     ]
     
     init() {

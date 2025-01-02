@@ -178,15 +178,25 @@ extension View {
     }
 }
 
-struct TopRight<T: View>: ViewModifier {
+struct TopEdge<T: View>: ViewModifier {
+    enum Edge {
+        case left, right
+    }
+    let edge: Edge
     let overlay: T
     public func body(content: Content) -> some View {
         ZStack(alignment: .topLeading) {
             content
             VStack {
                 HStack {
-                    Spacer()
-                    overlay
+                    if edge == .left {
+                        overlay
+                        Spacer()
+                    }
+                    else if edge == .right {
+                        Spacer()
+                        overlay
+                    }
                 }
                 Spacer()
             }
@@ -195,10 +205,17 @@ struct TopRight<T: View>: ViewModifier {
 }
 extension View {
     func addTopRight<T: View>(view overlayClosure: @autoclosure @escaping () -> T) -> some View {
-        modifier(TopRight(overlay:overlayClosure()))
+        modifier(TopEdge(edge: .right, overlay:overlayClosure()))
     }
     func addTopRight(@ViewBuilder _ overlayClosure: @escaping () -> some View) -> some View {
-        modifier(TopRight(overlay:overlayClosure()))
+        modifier(TopEdge(edge: .right, overlay:overlayClosure()))
+    }
+
+    func addTopLeft<T: View>(view overlayClosure: @autoclosure @escaping () -> T) -> some View {
+        modifier(TopEdge(edge: .left, overlay:overlayClosure()))
+    }
+    func addTopLeft(@ViewBuilder _ overlayClosure: @escaping () -> some View) -> some View {
+        modifier(TopEdge(edge: .left, overlay:overlayClosure()))
     }
 }
 
@@ -732,18 +749,7 @@ class SwiftuiInterface : NSObject {
         host.rootView = AnyView(MediaItemSwipeView(currentItem: currentItem, allItems: allItems))
         return host
     }
-    
-    @objc
-    func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
-        let host = UIHostingController(rootView:AnyView(EmptyView()))
-        if(ownContact == nil) {
-            host.rootView = AnyView(UIKitWorkaround(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: nil))))
-        } else {
-            host.rootView = AnyView(UIKitWorkaround(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: ObservableKVOWrapper<MLContact>(ownContact!)))))
-        }
-        return host
-    }
-    
+
     @objc
     func makeAccountRegistration(_ registerData: [String:AnyObject]?) -> UIViewController {
         let delegate = SheetDismisserProtocol()
@@ -758,16 +764,11 @@ class SwiftuiInterface : NSObject {
     }
 
     @objc
-    func makeServerDetailsView(for xmppAccount: xmpp) -> UIViewController {
+    func makeAccountSettingsView(for accountID: NSNumber) -> UIViewController {
+        let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-            host.rootView = AnyView(ServerDetails(xmppAccount: xmppAccount))
-        return host
-    }
-
-    @objc
-    func makeBlockedUsersView(for xmppAccount: xmpp) -> UIViewController {
-        let host = UIHostingController(rootView:AnyView(EmptyView()))
-            host.rootView = AnyView(BlockedUsers(xmppAccount: xmppAccount))
+        delegate.host = host
+        host.rootView = AnyView(UIKitWorkaround(AccountSettings(accountID: accountID, delegate: delegate)))
         return host
     }
 

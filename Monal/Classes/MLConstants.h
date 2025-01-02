@@ -185,6 +185,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 
 #define kMonalRefresh @"kMonalRefresh"
 #define kMonalContactRefresh @"kMonalContactRefresh"
+#define kMonalAccountSettingsRefresh @"kMonalAccountSettingsRefresh"
 #define kMonalXmppUserSoftWareVersionRefresh @"kMonalXmppUserSoftWareVersionRefresh"
 #define kMonalBlockListRefresh @"kMonalBlockListRefresh"
 #define kMonalContactRemoved @"kMonalContactRemoved"

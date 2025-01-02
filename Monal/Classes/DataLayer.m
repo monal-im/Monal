@@ -191,6 +191,20 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(BOOL) disableAccountForAccountID:(NSNumber*) accountID
+{
+    return [self.db boolReadTransaction:^{
+        return [self.db executeNonQuery:@"UPDATE account SET enabled=0 WHERE account_id=?;" andArguments:@[accountID]];
+    }];
+}
+
+-(BOOL) enableAccountForAccountID:(NSNumber*) accountID
+{
+    return [self.db boolReadTransaction:^{
+        return [self.db executeNonQuery:@"UPDATE account SET enabled=1 WHERE account_id=?;" andArguments:@[accountID]];
+    }];
+}
+
 -(NSNumber*) accountIDForUser:(NSString*) user andDomain:(NSString*) domain
 {
     if(!user && !domain)

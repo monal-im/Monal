@@ -475,7 +475,9 @@ class OmemoKeysForChat: ObservableObject {
     }
 
     private static func devicesForContact(contact: ObservableKVOWrapper<MLContact>) -> OmemoKeysForContact {
-        let account: xmpp = (contact.account as xmpp?)!
+        guard let account = contact.obj.account else {
+            return OmemoKeysForContact(devices: [])
+        }
         let devicesForContact: Set<NSNumber> = account.omemo.knownDevices(forAddressName: contact.contactJid)
         return OmemoKeysForContact(devices: devicesForContact)
     }

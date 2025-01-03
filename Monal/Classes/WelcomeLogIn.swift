@@ -181,7 +181,7 @@ struct WelcomeLogIn: View {
                                 .listRowSeparator(.hidden)
 
                             if advancedMode {
-                                TextField("Optional Hardcoded Hostname", text: $hardcodedServer)
+                                TextField(NSLocalizedString("Optional Hardcoded Hostname", comment: "advanced account settings"), text: $hardcodedServer)
                                     .textInputAutocapitalization(.never)
                                     .autocorrectionDisabled()
                                     .keyboardType(.URL)
@@ -192,7 +192,7 @@ struct WelcomeLogIn: View {
                                     HStack {
                                         Text("Port")
                                         Spacer()
-                                        TextField("Optional Hardcoded Port", text: $hardcodedPort)
+                                        TextField(NSLocalizedString("Optional Hardcoded Port", comment: "advanced account settings"), text: $hardcodedPort)
                                             .keyboardType(.numberPad)
                                             .addClearButton(isEditing:  hardcodedPort.count > 0, text: $hardcodedPort)
                                             .onDisappear {

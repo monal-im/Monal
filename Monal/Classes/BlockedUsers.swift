@@ -27,7 +27,7 @@ struct BlockedUsers: View {
 
     var body: some View {
         if showBlockingUnsupportedPlaceholder {
-            ContentUnavailableShimView("Blocking unsupported", systemImage: "iphone.homebutton.slash", description: Text("Your server does not support blocking (XEP-0191)."))
+            ContentUnavailableShimView(NSLocalizedString("Blocking unsupported", comment: ""), systemImage: "iphone.homebutton.slash", description: Text("Your server does not support blocking (XEP-0191)."))
         } else {
             List {
                 ForEach(blockedJids, id: \.self) { blockedJid in
@@ -42,7 +42,7 @@ struct BlockedUsers: View {
                 }
             }
             .listStyle(.plain)
-            .navigationTitle("Blocked Users")
+            .navigationTitle(Text("Blocked Users"))
             .animation(.default, value: blockedJids)
             .onAppear {
                 if !(xmppAccount.accountState.rawValue >= xmppState.stateBound.rawValue && xmppAccount.connectionProperties.accountDiscoDone) {
@@ -84,13 +84,13 @@ struct BlockedUsers: View {
                     })
                 }
             }
-            .alert("Enter the jid that you want to block", isPresented: $showAddingToBlocklistForm, actions: {
+            .alert(NSLocalizedString("Enter the jid that you want to block", comment: ""), isPresented: $showAddingToBlocklistForm, actions: {
                 TextField("user@example.org/resource", text: $jidToBlock)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.emailAddress)
                     .autocorrectionDisabled()
 
-                Button("Block", role: .destructive) {
+                Button(NSLocalizedString("Block", comment: ""), role: .destructive) {
                     guard (jidToBlock.range(of: BlockedUsers.jidPattern, options: .regularExpression) != nil) else {
                         showInvalidJidAlert = true
                         return
@@ -101,7 +101,7 @@ struct BlockedUsers: View {
                     MLXMPPManager.sharedInstance().block(true, fullJid: jidToBlock, onAccount: self.xmppAccount.accountID)
                 }
 
-                Button("Cancel", role: .cancel, action: {})
+                Button(NSLocalizedString("Cancel", comment: ""), role: .cancel, action: {})
             }
             )
             // If .onDisappear is applied to the alert or any of its subviews, its perform action won't
@@ -112,7 +112,7 @@ struct BlockedUsers: View {
                     jidToBlock = ""
                 }
             }
-            .alert("Input is not a valid jid", isPresented: $showInvalidJidAlert, actions: {})
+            .alert(NSLocalizedString("Input is not a valid jid", comment: ""), isPresented: $showInvalidJidAlert, actions: {})
             .addLoadingOverlay(overlay)
         }
     }

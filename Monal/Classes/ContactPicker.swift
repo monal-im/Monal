@@ -101,7 +101,7 @@ struct ContactPicker: View {
     var body: some View {
         if(allContacts.isEmpty) {
             Text("No contacts to show :(")
-                .navigationTitle("Contact Lists")
+                .navigationTitle(Text("Contact Lists"))
         } else {
             List(searchResults) { contact in
                 let contactIsSelected = self.selectedContacts.contains(contact);

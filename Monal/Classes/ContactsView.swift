@@ -136,7 +136,7 @@ struct ContactsView: View {
             }
         }
         .animation(.default, value: contactList)
-        .navigationTitle("Contacts")
+        .navigationTitle(Text("Contacts"))
         .listStyle(.plain)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
         .autocorrectionDisabled()

@@ -291,7 +291,7 @@ struct AddContactMenu: View {
                 MLQRCodeScanner(handleClose: {
                     self.showQRCodeScanner = false
                 })
-                .navigationTitle("QR-Code Scanner")
+                .navigationTitle(Text("QR-Code Scanner"))
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar(content: {
                     ToolbarItem(placement: .navigationBarLeading, content: {

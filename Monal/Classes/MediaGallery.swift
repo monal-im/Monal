@@ -27,7 +27,7 @@ struct MediaGalleryView: View {
             }
             .padding()
         }
-        .navigationTitle("Shared Media")
+        .navigationTitle(Text("Shared Media"))
         .onAppear {
             fetchDownloadedMediaItems()
         }

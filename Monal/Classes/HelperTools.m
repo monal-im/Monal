@@ -275,9 +275,11 @@ void logException(NSException* exception)
     NSString* prefix = @"CRASH";
 #endif
     //log error and flush all logs
+    DDLogWarn(@"Crash pending!!!");
     [DDLog flushLog];
     DDLogError(@"*****************\n%@(%@): %@\nUserInfo: %@\nStack Trace: %@", prefix, [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
+    DDLogWarn(@"Crash logged!!!");
     [HelperTools flushLogsWithTimeout:0.250];
 }
 
@@ -286,11 +288,11 @@ void uncaughtExceptionHandler(NSException* exception)
     logException(exception);
 
     //don't report that crash through KSCrash if the debugger is active
-    if(isDebugerActive())
-    {
-        DDLogError(@"Not reporting crash through KSCrash: debugger is active!");
-        return;
-    }
+//     if(isDebugerActive())
+//     {
+//         DDLogError(@"Not reporting crash through KSCrash: debugger is active!");
+//         return;
+//     }
     
     //make sure this crash will be recorded by kscrash using the NSException rather than the c++ exception thrown by the objc runtime
     //this will make sure that the stacktrace matches the objc exception rather than being a top level c++ stacktrace
@@ -598,11 +600,12 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     if(enableDefaultLogAndCrashFramework)
     {
         [self configureLogging];
+        [self installExceptionHandler];
         //don't install KSCrash if the debugger is active
-        if(!isDebugerActive())
-            [self installCrashHandler];
-        else
-            DDLogWarn(@"Not installing crash handler: debugger is active!");
+        //if(!isDebugerActive())
+            //[self installCrashHandler];
+//         else
+//             DDLogWarn(@"Not installing crash handler: debugger is active!");
         [self installExceptionHandler];
     }
     else
@@ -2220,6 +2223,8 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 
 +(void) configureLogging
 {
+    NSError* error;
+    
     //network logger (start as early as possible)
     MLUDPLogger* udpLogger = [MLUDPLogger new];
     [DDLog addLogger:udpLogger];
@@ -2233,10 +2238,17 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     printf("stdout redirection complete...");
     
     //redirect apple system logs, too
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    [DDASLLogCapture start];
-#pragma clang diagnostic pop
+    /*
+    OSLogStore* osLogStore = [OSLogStore storeWithScope:OSLogStoreCurrentProcessIdentifier error:&error];
+    if(error)
+        DDLogError(@"Failed to open os log store: %@", error);
+    else
+    {
+        dispatch_async(, ^{
+            [osLogStore entriesEnumeratorAndReturnError:&error];
+        });
+    }
+    */
     
     NSString* containerUrl = [[HelperTools getContainerURLForPathComponents:@[]] path];
     DDLogInfo(@"Logfile dir: %@", containerUrl);
@@ -2253,7 +2265,6 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     
     DDLogDebug(@"Sorted logfiles: %@", [logFileManager sortedLogFileInfos]);
     DDLogDebug(@"Current logfile: %@", self.fileLogger.currentLogFileInfo.filePath);
-    NSError* error;
     NSDictionary* attrs = [[NSFileManager defaultManager] attributesOfItemAtPath:self.fileLogger.currentLogFileInfo.filePath error:&error];
     if(error)
         DDLogError(@"File attributes error: %@", error);
@@ -2281,6 +2292,20 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     NSArray* directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:containerUrl error:nil];
     for(NSString* file in directoryContents)
         DDLogVerbose(@"File %@/%@", containerUrl, file);
+    
+    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString* documentsUrl = [paths objectAtIndex:0];
+    documentsUrl = [documentsUrl stringByAppendingPathComponent:@".."];
+    documentsUrl = [documentsUrl stringByAppendingPathComponent:@"Library"];
+    directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:documentsUrl error:nil];
+    for(NSString* file in directoryContents)
+        DDLogVerbose(@"App File %@/%@", documentsUrl, file);
+    documentsUrl = [paths objectAtIndex:0];
+    documentsUrl = [documentsUrl stringByAppendingPathComponent:@".."];
+    documentsUrl = [documentsUrl stringByAppendingPathComponent:@"SystemData"];
+    directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:documentsUrl error:nil];
+    for(NSString* file in directoryContents)
+        DDLogVerbose(@"App File %@/%@", documentsUrl, file);
 }
 
 +(int) pendingCrashreportCount

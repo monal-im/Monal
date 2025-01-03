@@ -148,6 +148,13 @@ struct CrashTestingView: View {
                         print(delegate.unsafelyUnwrapped.audiovisualTypes())
                         
                     }
+                    Button("MLAssert Crash") {
+                        HelperTools.flushLogs(withTimeout: 0.100)
+                        MLAssert(false, "MLAssert_example1")
+                    }
+                    Button("MLAssert Crash without flush") {
+                        MLAssert(false, "MLAssert_example2")
+                    }
                     Button("Assertion Crash") {
                         HelperTools.flushLogs(withTimeout: 0.100)
                         assert(false)

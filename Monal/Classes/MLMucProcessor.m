@@ -524,7 +524,7 @@ $$instance_handler(handleRoomConfigFormInvalidation, account.mucProcessor, $$ID(
     }
     else
         DDLogError(@"Config form fetch failed for muc '%@'!", roomJid);
-    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could fetch room config form for '%@': timeout", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not fetch room config form for '%@': please try again", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
 $$
 
 $$instance_handler(handleRoomConfigForm, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError), $$BOOL(joinOnSuccess))
@@ -599,7 +599,7 @@ $$instance_handler(handleRoomConfigResultInvalidation, account.mucProcessor, $$I
     }
     else
         DDLogError(@"Config form submit failed for muc '%@'!", roomJid);
-    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not configure group '%@': timeout", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not configure group '%@': please try again", @""), roomJid] forMuc:roomJid withNode:nil andIsSevere:YES];
 $$
 
 $$instance_handler(handleRoomConfigResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$ID(NSDictionary*, mandatoryOptions), $$ID(NSDictionary*, optionalOptions), $$BOOL(deleteOnError), $$BOOL(joinOnSuccess))
@@ -1050,11 +1050,11 @@ $$
 }
 
 $$instance_handler(handleRoomDestroyResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
-    DDLogError(@"Could not destroy room '%@' on account %@: invalidation called", room, account);
+    DDLogError(@"Could not destroy room '%@' on account %@", room, account);
     @synchronized(_stateLockObject) {
         [_destroying removeObject:room];
     }
-    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to destroy group/channel '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to destroy group/channel '%@': please try again", @""), room] forMuc:room withNode:nil andIsSevere:YES];
 $$
 
 $$instance_handler(handleRoomDestroyResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, room))
@@ -1254,8 +1254,8 @@ $$
 }
 
 $$instance_handler(handleAffiliationUpdateResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid))
-    DDLogError(@"Failed to change affiliation of '%@' in '%@' to '%@': timeout", jid, roomJid, affiliation);
-    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@': timeout", @""), jid, roomJid, affiliation] forMuc:roomJid withNode:nil andIsSevere:YES];
+    DDLogError(@"Failed to change affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
+    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@': please try again", @""), jid, roomJid, affiliation] forMuc:roomJid withNode:nil andIsSevere:YES];
 $$
 
 $$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid))
@@ -1309,7 +1309,7 @@ $$
 }
 
 $$instance_handler(handleAvatarPublishResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room), $$ID(MLPromise*, promise))
-    NSString* errorString = [NSString stringWithFormat:NSLocalizedString(@"Publishing avatar for muc '%@' returned timeout", @""), room];
+    NSString* errorString = [NSString stringWithFormat:NSLocalizedString(@"Failed to publish avatar image for group/channel %@: please try again", @""), room];
     NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}];
     [promise reject:error];
 $$

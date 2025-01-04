@@ -1426,8 +1426,8 @@ $$
                 [DDLog flushLog];
                 DDLogVerbose(@"Setting _shutdownPending to YES...");
                 _shutdownPending = YES;
-                [HelperTools scheduleBackgroundTask:NO];            //request bg fetch execution in BGFETCH_DEFAULT_INTERVAL seconds
                 [[MLXMPPManager sharedInstance] disconnectAll];     //disconnect all accounts to prevent TCP buffer leaking
+                [HelperTools scheduleBackgroundTask:NO];            //request bg fetch execution in BGFETCH_DEFAULT_INTERVAL seconds
                 [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
                     BOOL stopped = NO;
                     //make sure this will be done only once, even if we have an uikit bgtask and a bg fetch running simultaneously
@@ -1504,12 +1504,12 @@ $$
                         //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                         
+                        //disconnect all accounts to prevent TCP buffer leaking
+                        [[MLXMPPManager sharedInstance] disconnectAll];
+                        
                         //schedule a BGProcessingTaskRequest to process this further as soon as possible
                         //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                         [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
-                        
-                        //disconnect all accounts to prevent TCP buffer leaking
-                        [[MLXMPPManager sharedInstance] disconnectAll];
                         
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1563,12 +1563,12 @@ $$
                     //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
                     [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:YES];
                     
+                    //disconnect all accounts to prevent TCP buffer leaking
+                    [[MLXMPPManager sharedInstance] disconnectAll];
+                    
                     //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                     //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                     [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
-                    
-                    //disconnect all accounts to prevent TCP buffer leaking
-                    [[MLXMPPManager sharedInstance] disconnectAll];
                     
                     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                     DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1667,12 +1667,12 @@ $$
                     //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
                     [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:YES];
                     
+                    //disconnect all accounts to prevent TCP buffer leaking
+                    [[MLXMPPManager sharedInstance] disconnectAll];
+                    
                     //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                     //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                     [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
-                    
-                    //disconnect all accounts to prevent TCP buffer leaking
-                    [[MLXMPPManager sharedInstance] disconnectAll];
                     
                     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                     DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1894,12 +1894,12 @@ $$
                             BOOL wasIdle = [[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle];
                             [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                             
+                            //disconnect all accounts to prevent TCP buffer leaking
+                            [[MLXMPPManager sharedInstance] disconnectAll];
+                            
                             //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
                             //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                             [HelperTools scheduleBackgroundTask:!wasIdle];
-                            
-                            //disconnect all accounts to prevent TCP buffer leaking
-                            [[MLXMPPManager sharedInstance] disconnectAll];
                             
                             //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                             DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");

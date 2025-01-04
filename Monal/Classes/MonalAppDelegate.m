@@ -443,6 +443,11 @@ $$
         title:NSLocalizedString(@"Deny new contact", @"")
         options:UNNotificationActionOptionNone
     ];
+    UNNotificationAction* blockSubscriptionAction = [UNNotificationAction
+        actionWithIdentifier:@"BLOCK_SUBSCRIPTION_ACTION"
+        title:NSLocalizedString(@"Block new contact", @"")
+        options:UNNotificationActionOptionNone
+    ];
     if(@available(iOS 15.0, macCatalyst 15.0, *))
     {
         replyAction = [UNTextInputNotificationAction
@@ -469,6 +474,12 @@ $$
             actionWithIdentifier:@"DENY_SUBSCRIPTION_ACTION"
             title:NSLocalizedString(@"Deny new contact", @"")
             options:UNNotificationActionOptionNone
+            icon:[UNNotificationActionIcon iconWithSystemImageName:@"person.crop.circle.badge.minus"]
+        ];
+        blockSubscriptionAction = [UNNotificationAction
+            actionWithIdentifier:@"BLOCK_SUBSCRIPTION_ACTION"
+            title:NSLocalizedString(@"Block new contact", @"")
+            options:UNNotificationActionOptionNone
             icon:[UNNotificationActionIcon iconWithSystemImageName:@"person.crop.circle.badge.xmark"]
         ];
     }
@@ -484,7 +495,7 @@ $$
     ];
     UNNotificationCategory* subscriptionCategory = [UNNotificationCategory
         categoryWithIdentifier:@"subscription"
-        actions:@[approveSubscriptionAction, denySubscriptionAction]
+        actions:@[approveSubscriptionAction, denySubscriptionAction, blockSubscriptionAction]
         intentIdentifiers:@[]
         options:UNNotificationCategoryOptionCustomDismissAction
     ];
@@ -1011,6 +1022,12 @@ $$
         {
             DDLogInfo(@"DENY_SUBSCRIPTION_ACTION triggered...");
             [[MLXMPPManager sharedInstance] removeContact:fromContact];
+        }
+        else if([response.actionIdentifier isEqualToString:@"BLOCK_SUBSCRIPTION_ACTION"])
+        {
+            DDLogInfo(@"BLOCK_SUBSCRIPTION_ACTION triggered...");
+            [[MLXMPPManager sharedInstance] removeContact:fromContact];
+            [[MLXMPPManager sharedInstance] block:YES contact:fromContact];
         }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{

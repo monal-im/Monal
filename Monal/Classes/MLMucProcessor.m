@@ -971,10 +971,7 @@ $$
     NSString* mucServer = nil;
     for(NSString* jid in _account.connectionProperties.conferenceServers)
     {
-        // Do not use gateways
-        if(![_account.connectionProperties.conferenceServers[jid] check:@"identity<category=gateway>"]
-          && [_account.connectionProperties.conferenceServers[jid] check:@"identity<category=conference>"]
-          && [_account.connectionProperties.conferenceServers[jid] check:@"identity<type=text>"])
+        if([_account.connectionProperties.conferenceServers[jid] check:@"identity<type=text>"])
         {
             mucServer = jid;
             break;

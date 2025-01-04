@@ -17,7 +17,6 @@ FOUNDATION_EXPORT DDLoggerName const DDLoggerNameUDP NS_SWIFT_NAME(DDLoggerName.
 
 +(void) flushWithTimeout:(double) timeout;
 +(void) directlyWriteLogMessage:(DDLogMessage*) logMessage;
-+(instancetype) getCurrentInstance;
 
 @end
 

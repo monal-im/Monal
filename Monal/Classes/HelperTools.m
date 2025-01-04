@@ -302,18 +302,6 @@ void swizzle(Class c, SEL orig, SEL new)
 }
 @end
 
-@implementation DDLogMessage(TaggedMessage)
-@dynamic ml_isDirect;
--(void) setMl_isDirect:(BOOL) value
-{
-    objc_setAssociatedObject(self, @selector(ml_isDirect), @(value), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
--(BOOL) ml_isDirect
-{
-    return ((NSNumber*)objc_getAssociatedObject(self, @selector(ml_isDirect))).boolValue;
-}
-@end
-
 @implementation DDLog (AllowQueueFreeze)
 
 -(void) swizzled_queueLogMessage:(DDLogMessage*) logMessage asynchronously:(BOOL) asyncFlag
@@ -325,22 +313,31 @@ void swizzle(Class c, SEL orig, SEL new)
         udpLoggerEnabled = [[HelperTools defaultsDB] boolForKey:@"udpLoggerEnabled"];
     });
     
-    //use udp logger to log all messages, even if the loggging queue is in suspended state
-    //this hopefully enables us to catch strange bugs sometimes hanging and then watchdog-killing the app when resuming from resumption
-    if(udpLoggerEnabled && _suspensionHandling_isSuspended)
-    {
-        //this marks a message as already directly logged to allow the udp logger to later ignore the queued log request for the same message
-        logMessage.ml_isDirect = YES;
-        //make sure all udp log messages are still logged chronologically and prevent race conditions with our static counter var
-        dispatch_async([MLUDPLogger getCurrentInstance].loggerQueue, ^{
-            [MLUDPLogger directlyWriteLogMessage:logMessage];
-        });
-    }
-    
     //don't do sync logging for any message (usually ERROR), while the global logging queue is suspended
     //don't use _suspensionHandling_lock here because that can introduce deadlocks
     //(for example if we have log statements in our MLLogFileManager code rotating the logfile and creating a new one)
-    return [self swizzled_queueLogMessage:logMessage asynchronously:_suspensionHandling_isSuspended ? YES : asyncFlag];
+    BOOL isSuspended = _suspensionHandling_isSuspended;
+    if(isSuspended && udpLoggerEnabled)
+    {
+        //use udp logger to log all messages, even if the loggging queue is in suspended state
+        //this hopefully enables us to catch strange bugs sometimes hanging and then watchdog-killing the app when resuming from resumption
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        [MLUDPLogger directlyWriteLogMessage:[[DDLogMessage alloc]
+             initWithFormat:[NSString stringWithFormat:@"+++ LOG_QUEUE_DISABLED+++ %@", logMessage.messageFormat]
+                  formatted:[NSString stringWithFormat:@"+++ LOG_QUEUE_DISABLED+++ %@", logMessage.message]
+                      level:logMessage.level
+                       flag:logMessage.flag
+                    context:logMessage.context
+                       file:logMessage.file
+                   function:logMessage.function
+                       line:logMessage.line
+                        tag:logMessage.tag
+                    options:logMessage.options
+                  timestamp:logMessage.timestamp]];
+#pragma clang diagnostic pop
+    }
+    return [self swizzled_queueLogMessage:logMessage asynchronously:isSuspended ? YES : asyncFlag];
 }
 
 //see https://stackoverflow.com/a/13326633 and https://fek.io/blog/method-swizzling-in-obj-c-and-swift/
@@ -1902,10 +1899,10 @@ void swizzle(Class c, SEL orig, SEL new)
         @"queueThreadLabel": nilWrapper([self getQueueThreadLabelFor:logMessage]),
         @"processType": [self isAppExtension] ? @"appex" : @"mainapp",
         @"processName": nilWrapper([[[NSBundle mainBundle] executablePath] lastPathComponent]),
-        @"counter": @(*counter),
+        @"counter": [NSNumber numberWithUnsignedLongLong:*counter],
         @"processID": nilWrapper(_processID),
         @"qosName": nilWrapper(qos2name(logMessage.qos)),
-        @"loggingQueueSuspended": @(_suspensionHandling_isSuspended),
+        @"loggingQueueSuspended": bool2str(_suspensionHandling_isSuspended),
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
         @"tag": nilWrapper(logMessage.tag),
@@ -1914,21 +1911,21 @@ void swizzle(Class c, SEL orig, SEL new)
     NSDictionary* msgDict = @{
         @"messageFormat": nilWrapper(logMessage.messageFormat),
         @"message": nilWrapper(logMessage.message),
-        @"level": @(logMessage.level),
-        @"flag": @(logMessage.flag),
-        @"context": @(logMessage.context),
+        @"level": [NSNumber numberWithInteger:logMessage.level],
+        @"flag": [NSNumber numberWithInteger:logMessage.flag],
+        @"context": [NSNumber numberWithInteger:logMessage.context],
         @"file": nilWrapper(logMessage.file),
         @"fileName": nilWrapper(logMessage.fileName),
         @"function": nilWrapper(logMessage.function),
-        @"line": @(logMessage.line),
+        @"line": [NSNumber numberWithInteger:logMessage.line],
         @"representedObject": nilWrapper(logMessage.representedObject),
         @"tag": nilWrapper(tag),
-        @"options": @(logMessage.options),
+        @"options": [NSNumber numberWithInteger:logMessage.options],
         @"timestamp": [dateFormatter stringFromDate:logMessage.timestamp],
         @"threadID": nilWrapper(logMessage.threadID),
         @"threadName": nilWrapper(logMessage.threadName),
         @"queueLabel": nilWrapper(logMessage.queueLabel),
-        @"qos": @(logMessage.qos),
+        @"qos": [NSNumber numberWithInteger:logMessage.qos],
     };
     
     //encode json into NSData
@@ -1949,13 +1946,6 @@ void swizzle(Class c, SEL orig, SEL new)
     [_stdoutRedirector flushWithTimeout:timeout];
     [DDLog flushLog];
     [MLUDPLogger flushWithTimeout:timeout];
-}
-
-+(BOOL) isAppSuspended
-{
-    @synchronized(_suspensionHandling_lock) {
-        return _suspensionHandling_isSuspended;
-    }
 }
 
 +(void) signalSuspension

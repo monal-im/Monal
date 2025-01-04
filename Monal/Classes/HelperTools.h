@@ -69,10 +69,6 @@ void swizzle(Class c, SEL orig, SEL new);
 -(id) initWithObj:(id) obj;
 @end
 
-@interface DDLogMessage(TaggedMessage)
-@property (nonatomic) BOOL ml_isDirect;
-@end
-
 @interface HelperTools : NSObject
 
 @property (class, nonatomic, strong, nullable) DDFileLogger* fileLogger;
@@ -82,7 +78,6 @@ void swizzle(Class c, SEL orig, SEL new);
 +(void) installExceptionHandler;
 +(int) pendingCrashreportCount;
 +(void) flushLogsWithTimeout:(double) timeout;
-+(BOOL) isAppSuspended;
 +(void) signalSuspension;
 +(void) signalResumption;
 +(void) __attribute__((noreturn)) MLAssertWithText:(NSString*) text andUserData:(id _Nullable) additionalData andFile:(const char* const) file andLine:(int) line andFunc:(const char* const) func;

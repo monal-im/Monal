@@ -871,20 +871,6 @@ NSString* const kStanza = @"stanza";
     }));
 }
 
--(void) addTimerToCancelOnDisconnect:(monal_void_block_t) timer
-{
-    @synchronized(self->_timersToCancelOnDisconnect) {
-        [self->_timersToCancelOnDisconnect addObject:timer];
-    }
-}
-
--(void) removeTimerToCancelOnDisconnect:(monal_void_block_t) timer
-{
-    @synchronized(self->_timersToCancelOnDisconnect) {
-        [self->_timersToCancelOnDisconnect removeObject:timer];
-    }
-}
-
 -(void) connect
 {
     if([self parseQueueFrozen])
@@ -1490,8 +1476,6 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendPing:(double) timeout
 {
-    static monal_void_block_t delayTimer = nil;        //it doesn't matter if this has a race condition
-    
     DDLogVerbose(@"sendPing called");
     [self dispatchAsyncOnReceiveQueue: ^{
         DDLogVerbose(@"sendPing called - now inside receiveQueue");
@@ -1522,18 +1506,12 @@ NSString* const kStanza = @"stanza";
         }
         else if([self->_parseQueue operationCount] > 4)
         {
-            if(delayTimer != nil)
-                DDLogWarn(@"Ping already delayed, ignoring additional ping...");
-            else
-            {
-                DDLogWarn(@"parseQueue overflow, delaying ping by 4 seconds.");
-                delayTimer = createTimer(4.0, (^{
-                    [self removeTimerToCancelOnDisconnect:delayTimer];
-                    delayTimer = nil;
+            DDLogWarn(@"parseQueue overflow, delaying ping by 4 seconds.");
+            @synchronized(self->_timersToCancelOnDisconnect) {
+                [self->_timersToCancelOnDisconnect addObject:createTimer(4.0, (^{
                     DDLogDebug(@"ping delay expired, retrying ping.");
                     [self sendPing:timeout];
-                }));
-                [self addTimerToCancelOnDisconnect:delayTimer];
+                }))];
             }
         }
         else
@@ -4892,14 +4870,15 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"%@ Stream %@ encountered eof, trying to reconnect via parse queue in 1 second", [stream class], stream);
             //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue
             //already when pushing our reconnect block onto the parseQueue
-            //this timer will only be created once on every connect cycle (and removed from our timers list on reconnect/disconnect)
-            [self addTimerToCancelOnDisconnect:createTimer(1.0, (^{
-                //add this to parseQueue to make sure we completely handle everything that came in before the connection was closed, before handling the close event itself
-                [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    DDLogInfo(@"Inside parseQueue: %@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
-                    [self reconnect];
-                }]] waitUntilFinished:NO];
-            }))];
+            @synchronized(self->_timersToCancelOnDisconnect) {
+                [self->_timersToCancelOnDisconnect addObject:createTimer(1.0, (^{
+                    //add this to parseQueue to make sure we completely handle everything that came in before the connection was closed, before handling the close event itself
+                    [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                        DDLogInfo(@"Inside parseQueue: %@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
+                        [self reconnect];
+                    }]] waitUntilFinished:NO];
+                }))];
+            }
             break;
         }
     }

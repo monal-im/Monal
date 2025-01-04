@@ -306,38 +306,10 @@ void swizzle(Class c, SEL orig, SEL new)
 
 -(void) swizzled_queueLogMessage:(DDLogMessage*) logMessage asynchronously:(BOOL) asyncFlag
 {
-    //make sure this method remains performant even when checking for udp logging presence
-    static BOOL udpLoggerEnabled = NO;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        udpLoggerEnabled = [[HelperTools defaultsDB] boolForKey:@"udpLoggerEnabled"];
-    });
-    
     //don't do sync logging for any message (usually ERROR), while the global logging queue is suspended
-    //don't use _suspensionHandling_lock here because that can introduce deadlocks
-    //(for example if we have log statements in our MLLogFileManager code rotating the logfile and creating a new one)
-    BOOL isSuspended = _suspensionHandling_isSuspended;
-    if(isSuspended && udpLoggerEnabled)
-    {
-        //use udp logger to log all messages, even if the loggging queue is in suspended state
-        //this hopefully enables us to catch strange bugs sometimes hanging and then watchdog-killing the app when resuming from resumption
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        [MLUDPLogger directlyWriteLogMessage:[[DDLogMessage alloc]
-             initWithFormat:[NSString stringWithFormat:@"+++ LOG_QUEUE_DISABLED+++ %@", logMessage.messageFormat]
-                  formatted:[NSString stringWithFormat:@"+++ LOG_QUEUE_DISABLED+++ %@", logMessage.message]
-                      level:logMessage.level
-                       flag:logMessage.flag
-                    context:logMessage.context
-                       file:logMessage.file
-                   function:logMessage.function
-                       line:logMessage.line
-                        tag:logMessage.tag
-                    options:logMessage.options
-                  timestamp:logMessage.timestamp]];
-#pragma clang diagnostic pop
+    @synchronized(_suspensionHandling_lock) {
+        return [self swizzled_queueLogMessage:logMessage asynchronously:_suspensionHandling_isSuspended ? YES : asyncFlag];
     }
-    return [self swizzled_queueLogMessage:logMessage asynchronously:isSuspended ? YES : asyncFlag];
 }
 
 //see https://stackoverflow.com/a/13326633 and https://fek.io/blog/method-swizzling-in-obj-c-and-swift/
@@ -1895,36 +1867,31 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //construct json dictionary
     (*counter)++;
-    NSDictionary* tag = @{
-        @"queueThreadLabel": nilWrapper([self getQueueThreadLabelFor:logMessage]),
+    NSDictionary* representedObject = @{
+        @"queueThreadLabel": [self getQueueThreadLabelFor:logMessage],
         @"processType": [self isAppExtension] ? @"appex" : @"mainapp",
-        @"processName": nilWrapper([[[NSBundle mainBundle] executablePath] lastPathComponent]),
+        @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
         @"counter": [NSNumber numberWithUnsignedLongLong:*counter],
-        @"processID": nilWrapper(_processID),
-        @"qosName": nilWrapper(qos2name(logMessage.qos)),
-        @"loggingQueueSuspended": bool2str(_suspensionHandling_isSuspended),
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        @"tag": nilWrapper(logMessage.tag),
-#pragma clang diagnostic pop
+        @"processID": _processID,
+        @"qosName": qos2name(logMessage.qos),
+        @"representedObject": logMessage.representedObject ? logMessage.representedObject : [NSNull null],
     };
     NSDictionary* msgDict = @{
-        @"messageFormat": nilWrapper(logMessage.messageFormat),
-        @"message": nilWrapper(logMessage.message),
+        @"messageFormat": logMessage.messageFormat,
+        @"message": logMessage.message,
         @"level": [NSNumber numberWithInteger:logMessage.level],
         @"flag": [NSNumber numberWithInteger:logMessage.flag],
         @"context": [NSNumber numberWithInteger:logMessage.context],
-        @"file": nilWrapper(logMessage.file),
-        @"fileName": nilWrapper(logMessage.fileName),
-        @"function": nilWrapper(logMessage.function),
+        @"file": logMessage.file,
+        @"fileName": logMessage.fileName,
+        @"function": logMessage.function,
         @"line": [NSNumber numberWithInteger:logMessage.line],
-        @"representedObject": nilWrapper(logMessage.representedObject),
-        @"tag": nilWrapper(tag),
+        @"tag": representedObject,
         @"options": [NSNumber numberWithInteger:logMessage.options],
         @"timestamp": [dateFormatter stringFromDate:logMessage.timestamp],
-        @"threadID": nilWrapper(logMessage.threadID),
-        @"threadName": nilWrapper(logMessage.threadName),
-        @"queueLabel": nilWrapper(logMessage.queueLabel),
+        @"threadID": logMessage.threadID,
+        @"threadName": logMessage.threadName,
+        @"queueLabel": logMessage.queueLabel,
         @"qos": [NSNumber numberWithInteger:logMessage.qos],
     };
     

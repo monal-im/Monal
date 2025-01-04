@@ -220,7 +220,10 @@
 		C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7AB2777621B0001F295 /* ContactResources.swift */; };
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
 		D02192F32C89BB3800202A59 /* BlockedUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D02192F22C89BB3800202A59 /* BlockedUsers.swift */; };
+		D06DCE862CF0F5CB00EDB010 /* AccountList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D06DCE852CF0F5CA00EDB010 /* AccountList.swift */; };
 		D09B51F62C7F30DD008D725B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
+		D0C7F9432CFB563B00F3562D /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C7F9422CFB563B00F3562D /* WebView.swift */; };
+		D0E9996A2CEDF2CB00D9D63A /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E999692CEDF2CB00D9D63A /* Settings.swift */; };
 		D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */; };
 		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
 		E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */; };
@@ -766,6 +769,9 @@
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
 		C1F5C7AB2777621B0001F295 /* ContactResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactResources.swift; sourceTree = "<group>"; };
 		D02192F22C89BB3800202A59 /* BlockedUsers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockedUsers.swift; sourceTree = "<group>"; };
+		D06DCE852CF0F5CA00EDB010 /* AccountList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountList.swift; sourceTree = "<group>"; };
+		D0C7F9422CFB563B00F3562D /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		D0E999692CEDF2CB00D9D63A /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDetails.swift; sourceTree = "<group>"; };
 		D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
 		D8D2595B2BE453296E59F1AF /* Pods-MonalUITests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1036,6 +1042,7 @@
 				E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */,
 				8441EFF82921B53500E851E9 /* BackgroundSettings.swift */,
 				20ED55842BADDA5C0005783E /* GeneralSettings.swift */,
+				D0E999692CEDF2CB00D9D63A /* Settings.swift */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -1066,6 +1073,7 @@
 				26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */,
 				D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */,
 				D02192F22C89BB3800202A59 /* BlockedUsers.swift */,
+				D06DCE852CF0F5CA00EDB010 /* AccountList.swift */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -1095,6 +1103,7 @@
 				C114D13C2B15B903000FB99F /* ContactEntry.swift */,
 				952EBC7F2BAF72F300183DBF /* DebugView.swift */,
 				34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */,
+				D0C7F9422CFB563B00F3562D /* WebView.swift */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -2080,7 +2089,9 @@
 				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
 				C18967C72B81F61B0073C7C5 /* ChannelMemberList.swift in Sources */,
 				C114D13D2B15B903000FB99F /* ContactEntry.swift in Sources */,
+				D06DCE862CF0F5CB00EDB010 /* AccountList.swift in Sources */,
 				841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */,
+				D0E9996A2CEDF2CB00D9D63A /* Settings.swift in Sources */,
 				3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */,
 				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
 				C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */,
@@ -2097,6 +2108,7 @@
 				E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */,
 				E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */,
 				84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */,
+				D0C7F9432CFB563B00F3562D /* WebView.swift in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,

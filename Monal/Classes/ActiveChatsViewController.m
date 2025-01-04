@@ -263,6 +263,17 @@ static NSMutableSet* _pushWarningDisplayed;
     [self.composeButton setAccessibilityTraits:UIAccessibilityTraitButton];
 }
 
+-(void) configureSettingsButton
+{
+    UIImageView* image = [[UIImageView alloc] initWithImage:[[UIImage systemImageNamed:@"gearshape.fill"] imageWithTintColor:UIColor.tintColor]];
+    UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showSettings)];
+    [image addGestureRecognizer:tapRecognizer];
+    self.settingsButton.customView = image;
+    [self.settingsButton setIsAccessibilityElement:YES];
+    [self.settingsButton setAccessibilityLabel:NSLocalizedString(@"Open the settings", @"")];
+    [self.settingsButton setAccessibilityTraits:UIAccessibilityTraitButton];
+}
+
 -(void) viewDidLoad
 {
     DDLogDebug(@"active chats view did load");

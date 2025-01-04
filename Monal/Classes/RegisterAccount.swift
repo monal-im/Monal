@@ -6,25 +6,7 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import SafariServices
-import WebKit
 import FrameUp
-
-struct WebView: UIViewRepresentable {
-    var url: URL
- 
-    func makeUIView(context: Context) -> WKWebView {
-        return WKWebView()
-    }
- 
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        var request = URLRequest(url: url)
-        if HelperTools.defaultsDB().bool(forKey:"useDnssecForAllConnections") {
-            request.requiresDNSSECValidation = true;
-        }
-        webView.load(request)
-    }
-}
 
 struct RegisterAccount: View {
     static private let xmppFaultyPattern = ".+\\..{2,}$"
@@ -57,7 +39,6 @@ struct RegisterAccount: View {
     @StateObject private var overlay = LoadingOverlayState()
     @State private var currentTimeout : DispatchTime? = nil
 
-    @State private var showWebView = false
     @State private var errorObserverEnabled = false
 
     var delegate: SheetDismisserProtocol
@@ -428,29 +409,14 @@ struct RegisterAccount: View {
                             .padding(.vertical, 8)
 
                             if(selectedServerIndex != 0) {
-                                Button (action: {
-                                    showWebView.toggle()
-                                }){
+                                NavigationLink(destination: LazyClosureView(WebView(url: termsSiteForCurrentLanguage()))) {
                                     Text("Terms of use for \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)")
                                         .font(.system(size: 10))
-                                }
-                                .frame(maxWidth: .infinity)
-                                .sheet(isPresented: $showWebView) {
-                                    NavigationStack {
-                                        WebView(url: termsSiteForCurrentLanguage())
-                                            .navigationBarTitle(Text("Terms of \(RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!)"), displayMode: .inline)
-                                            .toolbar(content: {
-                                                ToolbarItem(placement: .bottomBar) {
-                                                    Button (action: {
-                                                        showWebView.toggle()
-                                                    }){
-                                                        Text("Close")
-                                                    }
-                                                }
-                                            })
-                                    }
+                                        .foregroundStyle(Color.accentColor)
+                                        .frame(maxWidth: .infinity, alignment: .center)
                                 }
                             }
+
                         }
                         .textFieldStyle(.roundedBorder)
                     }

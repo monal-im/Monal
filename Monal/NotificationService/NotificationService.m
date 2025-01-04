@@ -133,7 +133,6 @@
     [NotificationService setAppexCleanShutdownStatus:YES];
     
     DDLogInfo(@"Now killing appex process, goodbye...");
-    [HelperTools flushLogsWithTimeout:0.100];
     exit(0);
 }
 
@@ -605,7 +604,6 @@ static BOOL warnUnclean = NO;
 #endif
 
         DDLogInfo(@"Committing suicide...");
-        [DDLog flushLog];
         exit(0);
 
 /*

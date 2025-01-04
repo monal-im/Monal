@@ -1263,13 +1263,14 @@ $$
 #endif
 }
 
--(void) applicationWillTerminate:(UIApplication *)application
+-(void) applicationWillTerminate:(UIApplication*) application
 {
     @synchronized(self) {
+        [HelperTools activateTerminationLogging];       //activate logging during shutdown
         DDLogVerbose(@"Setting _shutdownPending to YES...");
         _shutdownPending = YES;
         DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
-        [HelperTools scheduleBackgroundTask:YES];        //make sure delivery will be attempted, if needed (force as soon as possible)
+        [HelperTools scheduleBackgroundTask:YES];       //make sure delivery will be attempted, if needed (force as soon as possible)
         DDLogInfo(@"|~~| 33%% |~~|");
         [[MLXMPPManager sharedInstance] nowBackgrounded];
         DDLogInfo(@"|~~| 66%% |~~|");
@@ -1277,9 +1278,8 @@ $$
         DDLogInfo(@"|~~| 99%% |~~|");
         [[MLXMPPManager sharedInstance] disconnectAll];
         DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
-        [DDLog flushLog];
+        [HelperTools activateTerminationLogging];       //ensure our flush is really successful
         [HelperTools flushLogsWithTimeout:0.025];
-        [DDLog flushLog];
     }
 }
 

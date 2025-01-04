@@ -235,10 +235,6 @@ enum msgSentState {
 #endif
     
     [self updateCallButtonImage];
-    
-    //ping this muc on open, to make sure we are still joined
-    if([[[DataLayer sharedInstance] listMucsForAccount:self.contact.accountID] containsObject:self.contact.contactJid])
-        [self.xmppAccount.mucProcessor ping:self.contact.contactJid];
 }
 
 -(void) updateCallButtonImage

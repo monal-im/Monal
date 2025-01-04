@@ -2107,7 +2107,7 @@ void swizzle(Class c, SEL orig, SEL new)
     handler.maxReportCount = 4;
     handler.deadlockWatchdogInterval = 0;       // no main thread watchdog
     handler.userInfo = @{
-        @"isAppex": bool2str([self isAppExtension]),
+        @"isAppex": @([self isAppExtension]),
         @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
         @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
         @"appVersion": [self appBuildVersionInfoFor:MLVersionTypeLog],

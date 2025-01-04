@@ -1279,6 +1279,7 @@ $$
         DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
         [DDLog flushLog];
         [HelperTools flushLogsWithTimeout:0.025];
+        [DDLog flushLog];
     }
 }
 
@@ -1440,7 +1441,6 @@ $$
             if(background)
             {
                 DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
-                [DDLog flushLog];
                 DDLogVerbose(@"Setting _shutdownPending to YES...");
                 _shutdownPending = YES;
                 [HelperTools scheduleBackgroundTask:NO];            //request bg fetch execution in BGFETCH_DEFAULT_INTERVAL seconds
@@ -1483,7 +1483,7 @@ $$
                     }
                     if(!stopped)
                     {
-                        DDLogDebug(@"no background tasks running, nothing to stop");
+                        DDLogError(@"no background tasks running, nothing to stop");
                         [DDLog flushLog];
                     }
                     else

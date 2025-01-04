@@ -142,7 +142,6 @@
     DDLogVerbose(@"Waiting for flush of fd %d to complete...", fileno(self->_stream));
     waitBlock();
     DDLogVerbose(@"Flush on fd %d completed...", fileno(self->_stream));
-    [DDLog flushLog];
 }
 
 -(void) flushAndCloseWithWaitBlock:(monal_void_block_t) waitBlock
@@ -163,7 +162,6 @@
     
     //wait for this eof signal and flush our DDLog afterwards to make sure everything reached the log sinks
     waitBlock();
-    [DDLog flushLog];
 }
 
 -(void) signalFlushCompleted

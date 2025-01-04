@@ -182,11 +182,9 @@ static volatile MLUDPLogger* _self;
     if(_connection != NULL)
         nw_connection_force_cancel(_connection);
     _connection = NULL;
-    @synchronized(_send_condition) {
-        [_send_condition lock];
-        [_send_condition signal];
-        [_send_condition unlock];
-    }
+    [_send_condition lock];
+    [_send_condition signal];
+    [_send_condition unlock];
 }
 
 -(void) createConnectionIfNeeded
@@ -225,11 +223,9 @@ static volatile MLUDPLogger* _self;
                 [condition lock];
                 [condition signal];
                 [condition unlock];
-                @synchronized(self->_send_condition) {
-                    [self->_send_condition lock];
-                    [self->_send_condition signal];
-                    [self->_send_condition unlock];
-                }
+                [self->_send_condition lock];
+                [self->_send_condition signal];
+                [self->_send_condition unlock];
             }
         });
         [condition lock];
@@ -294,11 +290,9 @@ static volatile MLUDPLogger* _self;
             
         }
         //[[self class] logError:@"unlocking send condition (%@)...", [NSNumber numberWithUnsignedLongLong:self->_counter]];
-        @synchronized(self->_send_condition) {
-            [self->_send_condition lock];
-            [self->_send_condition signal];
-            [self->_send_condition unlock];
-        }
+        [self->_send_condition lock];
+        [self->_send_condition signal];
+        [self->_send_condition unlock];
     });
     //block this queue until our udp message was sent or an error occured
     [_send_condition wait];

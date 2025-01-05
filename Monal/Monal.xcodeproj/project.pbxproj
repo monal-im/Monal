@@ -112,10 +112,10 @@
 		3DC5035C2822F5220064C8A7 /* OmemoKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC5035B2822F5220064C8A7 /* OmemoKeys.swift */; };
 		43A92B80C8CD5E04074B5A3E /* Pods_MonalXMPPUnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
-		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; };
+		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		540BD0D424D8D2000087A743 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 540BD0D324D8D1FF0087A743 /* IPC.m */; };
 		540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */ = {isa = PBXBuildFile; fileRef = 540E139F24CDCDB30038FDA0 /* MLProcessLock.m */; };
-		540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */ = {isa = PBXBuildFile; fileRef = 540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */; };
+		540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */ = {isa = PBXBuildFile; fileRef = 540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		540E13A524CF6A8C0038FDA0 /* MLNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */; };
 		540F625F24BA951E0008A6D8 /* HelperTools.m in Sources */ = {isa = PBXBuildFile; fileRef = C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */; };
 		54179CC0251CBAFA008F398E /* XMPPStanza.m in Sources */ = {isa = PBXBuildFile; fileRef = 54179CBF251CBAF9008F398E /* XMPPStanza.m */; };
@@ -127,19 +127,19 @@
 		541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CBF254AA0E700FD7B28 /* MLHandler.m */; };
 		541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */; };
 		541E4CC7254D370200FD7B28 /* MLPubSubProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */; };
-		5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */ = {isa = PBXBuildFile; fileRef = 54391BB9273499E80050DAFB /* UIColor+Extension.h */; };
+		5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */ = {isa = PBXBuildFile; fileRef = 54391BB9273499E80050DAFB /* UIColor+Extension.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5427C94E276A6BE1003217D5 /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		542CF3FF2763314F002C3710 /* hsluv.c in Sources */ = {isa = PBXBuildFile; fileRef = 542CF3FD2763314E002C3710 /* hsluv.c */; };
 		542CF4002763314F002C3710 /* hsluv.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF3FE2763314F002C3710 /* hsluv.h */; };
 		54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 544656BA2534910D006B2953 /* XMPPDataForm.m */; };
-		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; };
+		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = 54507CE4255D8C14007092F4 /* MLFiletransfer.m */; };
-		54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = 54507CE7255D8C47007092F4 /* MLFiletransfer.h */; };
+		54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = 54507CE7255D8C47007092F4 /* MLFiletransfer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5455BC3324EB776F0024D80F /* MLUDPLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 5455BC3024EB776B0024D80F /* MLUDPLogger.m */; };
-		5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 5455BC3224EB776E0024D80F /* MLUDPLogger.h */; };
+		5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 5455BC3224EB776E0024D80F /* MLUDPLogger.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		54A22D2526185C2900B56EAD /* MLNotificationQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A22D2426185C2900B56EAD /* MLNotificationQueue.m */; };
-		54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */; };
+		54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
 		54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E594BA2523C34900E4172B /* MLPubSub.h */; };
@@ -1563,25 +1563,25 @@
 				844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */,
 				C16D18352792A4AF00F869A0 /* DataLayerMigrations.h in Headers */,
 				340F0CA62D24267B006224D0 /* MLXMLNode.h in Headers */,
+				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
+				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
+				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
+				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
 				5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
+				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
 				544656BD25349133006B2953 /* XMPPDataForm.h in Headers */,
-				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
 				541B6AB5262BC9040038B936 /* MLStream.h in Headers */,
-				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */,
 				C1613B5A2520723D0062C0C2 /* MLBasePaser.h in Headers */,
 				542CF4002763314F002C3710 /* hsluv.h in Headers */,
 				54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */,
-				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
-				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
 				84E55E8029644279003E191A /* ActiveChatsViewController.h in Headers */,
 				541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */,
 				84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */,
 				84CAED6E2ECAC5F700F4FCBF /* XMPPMessage.h in Headers */,
 				84CAED6D2ECAC5E500F4FCBF /* XMPPIQ.h in Headers */,
 				389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */,
-				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

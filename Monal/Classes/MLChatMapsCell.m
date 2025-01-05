@@ -7,7 +7,7 @@
 //
 
 #import "MLChatMapsCell.h"
-#import "MLImageManager.h"
+#import <monalxmpp/MLImageManager.h>
 @import QuartzCore;
 
 @implementation MLChatMapsCell

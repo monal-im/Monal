@@ -7,13 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLXMLNode.h"
+#import <monalxmpp/MLXMLNode.h>
 
 //stanzas
-#import "XMPPIQ.h"
-#import "XMPPPresence.h"
-#import "XMPPMessage.h"
-#import "XMPPDataForm.h"
+#import <monalxmpp/XMPPIQ.h>
+#import <monalxmpp/XMPPPresence.h>
+#import <monalxmpp/XMPPMessage.h>
+#import <monalxmpp/XMPPDataForm.h>
 
 
 NS_ASSUME_NONNULL_BEGIN

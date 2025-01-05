@@ -7,7 +7,7 @@
 //
 
 #import "MLSearchViewController.h"
-#import "DataLayer.h"
+#import <monalxmpp/DataLayer.h>
 
 @interface MLSearchViewController ()
 @property (nonatomic, strong) NSMutableArray* searchResultMessageList;

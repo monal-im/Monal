@@ -6,11 +6,11 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-#import "MLSQLite.h"
-#import "DataLayerMigrations.h"
-#import "DataLayer.h"
-#import "HelperTools.h"
-#import "MLImageManager.h"
+#import <monalxmpp/MLSQLite.h>
+#import <monalxmpp/DataLayerMigrations.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLImageManager.h>
 
 @implementation DataLayerMigrations
 

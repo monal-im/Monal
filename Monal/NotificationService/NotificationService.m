@@ -7,14 +7,14 @@
 //
 
 #import "NotificationService.h"
-#import "MLConstants.h"
-#import "HelperTools.h"
-#import "IPC.h"
-#import "MLProcessLock.h"
-#import "MLXMPPManager.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/IPC.h>
+#import <monalxmpp/MLProcessLock.h>
+#import <monalxmpp/MLXMPPManager.h>
 #import "MLNotificationManager.h"
-#import "MLFiletransfer.h"
-#import "xmpp.h"
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/xmpp.h>
 
 @import CallKit;
 

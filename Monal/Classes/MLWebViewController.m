@@ -7,7 +7,7 @@
 //
 
 #import "MLWebViewController.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 @interface MLWebViewController ()
 @property (weak, nonatomic) IBOutlet WKWebView* webview;

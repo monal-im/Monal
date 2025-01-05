@@ -8,10 +8,10 @@
 
 #import "FLAnimatedImage.h"
 #import "MLChatImageCell.h"
-#import "MLImageManager.h"
-#import "MLFiletransfer.h"
-#import "MLMessage.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/MLMessage.h>
+#import <monalxmpp/HelperTools.h>
 
 @import QuartzCore;
 @import UIKit;

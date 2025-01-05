@@ -7,9 +7,9 @@
 //
 
 #import <Network/Network.h>
-#import "MLConstants.h"
-#import "MLStream.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLStream.h>
+#import <monalxmpp/HelperTools.h>
 #import <monalxmpp/monalxmpp-Swift.h>
 
 @class MLCrypto;

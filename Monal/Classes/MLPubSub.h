@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -9,7 +9,7 @@
 #import "MLLinkCell.h"
 #import "UIImageView+WebCache.h"
 #import "MonalAppDelegate.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 @import SafariServices;
 

@@ -6,9 +6,9 @@
 //
 //
 
-#import "XMPPPresence.h"
-#import "HelperTools.h"
-#import "MLContact.h"
+#import <monalxmpp/XMPPPresence.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLContact.h>
 
 @class MLContact;
 

@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
 #import <monalxmpp/monalxmpp-Swift.h>
-#import <../Monal/MLConstants.h>
-#import <../Monal/HelperTools.h>
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/HelperTools.h>
 #import "MLBasePaser.h"
 
 static NSMutableArray<MLXMLNode*>* _parsedStanzas;

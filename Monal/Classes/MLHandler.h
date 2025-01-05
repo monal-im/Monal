@@ -14,7 +14,7 @@ https://github.com/monal-im/Monal/wiki/Handler-Framework
 
 **************************** </USAGE> ****************************/
 
-#include "metamacros.h"
+#include <monalxmpp/metamacros.h>
 
 //we need this in here, even if MLConstants.h was not included
 #ifndef STRIP_PARENTHESES

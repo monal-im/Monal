@@ -10,7 +10,7 @@
 #define XMPPDataForm_h
 
 #import <Foundation/Foundation.h>
-#import "MLXMLNode.h"
+#import <monalxmpp/MLXMLNode.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

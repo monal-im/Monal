@@ -17,22 +17,22 @@
 
 #import "ActiveChatsViewController.h"
 #import "AESGcm.h"
-#import "DataLayer.h"
-#import "HelperTools.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/HelperTools.h>
 #import "MBProgressHUD.h"
 #import "MLChatInputContainer.h"
 #import "MLChatViewHelper.h"
-#import "MLConstants.h"
-#import "MLFiletransfer.h"
-#import "MLImageManager.h"
-#import "MLMucProcessor.h"
-#import "MLVoIPProcessor.h"
-#import "MLNotificationQueue.h"
-#import "MLOMEMO.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLMucProcessor.h>
+#import <monalxmpp/MLVoIPProcessor.h>
+#import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLOMEMO.h>
 #import "MLSearchViewController.h"
 #import "MLXEPSlashMeHandler.h"
 #import "MonalAppDelegate.h"
-#import "xmpp.h"
+#import <monalxmpp/xmpp.h>
 #import "XMPPMessage.h"
 
 #import <Monal-Swift.h>

@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
-#import "MLHandler.h"
-#import "HelperTools.h"
-#import "MLDelayedDealloc.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLHandler.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLDelayedDealloc.h>
 
 #define HANDLER_VERSION 1
 

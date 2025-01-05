@@ -7,7 +7,7 @@
 //
 
 #import "MLEncryptedPayload.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 @interface MLEncryptedPayload ()
 @property (nonatomic, strong) NSData* body;

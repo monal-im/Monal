@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 
 #define kGet @"GET"
 #define kPost @"POST"

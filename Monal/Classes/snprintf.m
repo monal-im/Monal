@@ -100,7 +100,7 @@
 #import <Foundation/Foundation.h>
 
 //swap comments here to print debug statements
-//#import "MLConstants.h"
+//#import <monalxmpp/MLConstants.h>
 #define DDLogError(...)
 
 //make sure we always use the code from this file

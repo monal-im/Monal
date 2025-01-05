@@ -6,16 +6,16 @@
 //
 //
 
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 #import "MLNotificationManager.h"
-#import "MLImageManager.h"
-#import "MLMessage.h"
+#import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLMessage.h>
 #import "MLXEPSlashMeHandler.h"
-#import "MLConstants.h"
-#import "xmpp.h"
-#import "MLFiletransfer.h"
-#import "MLNotificationQueue.h"
-#import "MLXMPPManager.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/monalxmpp-Swift.h>
 
 @import UserNotifications;

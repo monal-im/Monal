@@ -15,8 +15,8 @@
 #import <KSCrash/KSCrashReportFields.h>
 #import <KSCrash/NSError+SimpleConstructor.h>
 #import <MessageUI/MessageUI.h>
-#import "MLConstants.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/HelperTools.h>
 #import "MonalAppDelegate.h"
 #import "MLCrashReporter.h"
 

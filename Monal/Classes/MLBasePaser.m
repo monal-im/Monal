@@ -6,7 +6,7 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 #import "MLBasePaser.h"
 
 // #define DebugParser(...)    DDLogDebug(__VA_ARGS__)

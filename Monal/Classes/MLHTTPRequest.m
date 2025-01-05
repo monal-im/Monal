@@ -7,7 +7,7 @@
 //
 
 #import "MLHTTPRequest.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 
 @interface MLHTTPRequest ()

@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "xmpp.h"
+#import <monalxmpp/xmpp.h>
 
 @interface MLMAMPrefTableViewController : UITableViewController
 

@@ -7,9 +7,9 @@
 //
 
 #import <stdint.h>
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 #import "MLDNSLookup.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 @import Darwin.POSIX.sys.time; 
 
 #import <nameser.h>

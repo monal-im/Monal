@@ -8,38 +8,38 @@
 
 #import <BackgroundTasks/BackgroundTasks.h>
 #import "MonalAppDelegate.h"
-#import "MLConstants.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/HelperTools.h>
 #import "MLNotificationManager.h"
-#import "DataLayer.h"
-#import "MLImageManager.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLImageManager.h>
 #import "ActiveChatsViewController.h"
-#import "IPC.h"
-#import "MLProcessLock.h"
-#import "MLFiletransfer.h"
-#import "xmpp.h"
-#import "MLNotificationQueue.h"
+#import <monalxmpp/IPC.h>
+#import <monalxmpp/MLProcessLock.h>
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLNotificationQueue.h>
 #import "MLSettingsAboutViewController.h"
-#import "MLMucProcessor.h"
+#import <monalxmpp/MLMucProcessor.h>
 #import "MBProgressHUD.h"
-#import "MLVoIPProcessor.h"
-#import "MLUDPLogger.h"
+#import <monalxmpp/MLVoIPProcessor.h>
+#import <monalxmpp/MLUDPLogger.h>
 #import "MLCrashReporter.h"
 
 @import NotificationBannerSwift;
 @import UserNotifications;
 
-#import "MLXMPPManager.h"
+#import <monalxmpp/MLXMPPManager.h>
 #import "UIColor+Theme.h"
 
 #import <AVKit/AVKit.h>
 
 #import "MLBasePaser.h"
-#import "MLXMLNode.h"
-#import "XMPPStanza.h"
-#import "XMPPDataForm.h"
+#import <monalxmpp/MLXMLNode.h>
+#import <monalxmpp/XMPPStanza.h>
+#import <monalxmpp/XMPPDataForm.h>
 #import "XMPPIQ.h"
-#import "XMPPPresence.h"
+#import <monalxmpp/XMPPPresence.h>
 #import "XMPPMessage.h"
 #import "chatViewController.h"
 

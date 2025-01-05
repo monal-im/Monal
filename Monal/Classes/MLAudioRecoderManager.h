@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -7,9 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
-#import "XMPPStanza.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/XMPPStanza.h>
+#import <monalxmpp/HelperTools.h>
 
 @implementation XMPPStanza
 

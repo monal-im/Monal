@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
-#import "MLDelayableTimer.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLDelayableTimer.h>
 
-#include "metamacros.h"
+#include <monalxmpp/metamacros.h>
 
 #define createDelayableTimer(timeout, handler, ...)                                     createDelayableQueuedTimer(timeout, nil, handler, __VA_ARGS__)
 #define createDelayableQueuedTimer(timeout, queue, handler, ...)                        metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startDelayableQueuedTimer:timeout withHandler:handler andCancelHandler:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue])(_createDelayableQueuedTimer(timeout, queue, handler, __VA_ARGS__))

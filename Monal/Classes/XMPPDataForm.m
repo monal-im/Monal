@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XMPPDataForm.h"
-#import "HelperTools.h"
+#import <monalxmpp/XMPPDataForm.h>
+#import <monalxmpp/HelperTools.h>
 
 @interface MLXMLNode()
 @property (atomic, strong, readwrite) NSString* element;

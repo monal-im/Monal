@@ -8,21 +8,21 @@
 #import <UserNotifications/UserNotifications.h>
 #import <stdlib.h>
 
-#import "MLOMEMO.h"
-#import "MLXMPPConnection.h"
-#import "MLHandler.h"
-#import "xmpp.h"
+#import <monalxmpp/MLOMEMO.h>
+#import <monalxmpp/MLXMPPConnection.h>
+#import <monalxmpp/MLHandler.h>
+#import <monalxmpp/xmpp.h>
 #import "XMPPMessage.h"
 #import "SignalAddress.h"
-#import "MLSignalStore.h"
+#import <monalxmpp/MLSignalStore.h>
 #import "SignalContext.h"
 #import "AESGcm.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 #import "XMPPIQ.h"
-#import "xmpp.h"
-#import "MLPubSub.h"
-#import "DataLayer.h"
-#import "MLNotificationQueue.h"
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLPubSub.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLNotificationQueue.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

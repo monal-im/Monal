@@ -7,8 +7,8 @@
 //
 
 #import "MLXEPSlashMeHandler.h"
-#import "MLMessage.h"
-#import "MLXMPPManager.h"
+#import <monalxmpp/MLMessage.h>
+#import <monalxmpp/MLXMPPManager.h>
 
 @import UIKit.NSAttributedString;
 

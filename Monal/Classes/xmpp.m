@@ -14,37 +14,37 @@
 #import <Security/SecureTransport.h>
 
 #import <monalxmpp/monalxmpp-Swift.h>
-#import "xmpp.h"
+#import <monalxmpp/xmpp.h>
 #import "MLDNSLookup.h"
-#import "MLSignalStore.h"
-#import "MLPubSub.h"
-#import "MLOMEMO.h"
+#import <monalxmpp/MLSignalStore.h>
+#import <monalxmpp/MLPubSub.h>
+#import <monalxmpp/MLOMEMO.h>
 
-#import "MLStream.h"
-#import "MLPipe.h"
-#import "MLDelayedDealloc.h"
-#import "MLProcessLock.h"
-#import "DataLayer.h"
-#import "HelperTools.h"
-#import "MLXMPPManager.h"
-#import "MLNotificationQueue.h"
+#import <monalxmpp/MLStream.h>
+#import <monalxmpp/MLPipe.h>
+#import <monalxmpp/MLDelayedDealloc.h>
+#import <monalxmpp/MLProcessLock.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/MLNotificationQueue.h>
 #import "SCRAM.h"
-#import "MLImageManager.h"
+#import <monalxmpp/MLImageManager.h>
 
 //XMPP objects
 #import "MLBasePaser.h"
-#import "MLXMLNode.h"
-#import "XMPPStanza.h"
-#import "XMPPDataForm.h"
+#import <monalxmpp/MLXMLNode.h>
+#import <monalxmpp/XMPPStanza.h>
+#import <monalxmpp/XMPPDataForm.h>
 #import "XMPPIQ.h"
-#import "XMPPPresence.h"
+#import <monalxmpp/XMPPPresence.h>
 #import "XMPPMessage.h"
 
 //processors
 #import "MLMessageProcessor.h"
 #import "MLIQProcessor.h"
-#import "MLPubSubProcessor.h"
-#import "MLMucProcessor.h"
+#import <monalxmpp/MLPubSubProcessor.h>
+#import <monalxmpp/MLMucProcessor.h>
 
 #import "MLHTTPRequest.h"
 #import "AESGcm.h"

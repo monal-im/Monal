@@ -7,8 +7,8 @@
 //
 
 #import "MLAccountPickerViewController.h"
-#import "MLXMPPManager.h"
-#import "xmpp.h"
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/xmpp.h>
 
 @interface MLAccountPickerViewController ()
 

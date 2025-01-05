@@ -6,18 +6,18 @@
 //  Copyright © 2019 Monal.im. All rights reserved.
 //
 
-#import "MLContact.h"
-#import "MLMessage.h"
-#import "HelperTools.h"
-#import "DataLayer.h"
-#import "xmpp.h"
-#import "MLXMPPManager.h"
-#import "MLOMEMO.h"
-#import "MLNotificationQueue.h"
-#import "MLImageManager.h"
-#import "MLVoIPProcessor.h"
+#import <monalxmpp/MLContact.h>
+#import <monalxmpp/MLMessage.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/MLOMEMO.h>
+#import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLVoIPProcessor.h>
 #import "MonalAppDelegate.h"
-#import "MLMucProcessor.h"
+#import <monalxmpp/MLMucProcessor.h>
 
 @import Intents;
 

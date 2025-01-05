@@ -8,20 +8,20 @@
 
 #import <Foundation/Foundation.h>
 
-#import "MLConstants.h"
-#import "MLMucProcessor.h"
-#import "MLHandler.h"
-#import "xmpp.h"
-#import "DataLayer.h"
-#import "XMPPDataForm.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLMucProcessor.h>
+#import <monalxmpp/MLHandler.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/XMPPDataForm.h>
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
-#import "XMPPPresence.h"
-#import "MLNotificationQueue.h"
-#import "MLPubSub.h"
-#import "MLPubSubProcessor.h"
-#import "MLOMEMO.h"
-#import "MLImageManager.h"
+#import <monalxmpp/XMPPPresence.h>
+#import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLPubSub.h>
+#import <monalxmpp/MLPubSubProcessor.h>
+#import <monalxmpp/MLOMEMO.h>
+#import <monalxmpp/MLImageManager.h>
 
 #define CURRENT_MUC_STATE_VERSION @10
 

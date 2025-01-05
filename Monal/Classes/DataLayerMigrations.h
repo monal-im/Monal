@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLSQLite.h"
-#import "DataLayer.h"
+#import <monalxmpp/MLSQLite.h>
+#import <monalxmpp/DataLayer.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

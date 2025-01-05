@@ -7,17 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 #import "Monal-Swift.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
-#import "xmpp.h"
-#import "MLXMPPManager.h"
-#import "MLVoIPProcessor.h"
-#import "MLCall.h"
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/MLVoIPProcessor.h>
+#import <monalxmpp/MLCall.h>
 #import "MonalAppDelegate.h"
-#import "MLOMEMO.h"
+#import <monalxmpp/MLOMEMO.h>
 
 @import CallKit;
 @import WebRTC;

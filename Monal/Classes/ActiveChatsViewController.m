@@ -10,18 +10,18 @@
 
 #import <Contacts/Contacts.h>
 #import "ActiveChatsViewController.h"
-#import "DataLayer.h"
-#import "xmpp.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/xmpp.h>
 #import "MLContactCell.h"
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
-#import "MLImageManager.h"
+#import <monalxmpp/MLImageManager.h>
 #import "ContactsViewController.h"
 #import "MLXEPSlashMeHandler.h"
-#import "MLNotificationQueue.h"
+#import <monalxmpp/MLNotificationQueue.h>
 #import "MLSettingsAboutViewController.h"
-#import "MLVoIPProcessor.h"
-#import "MLCall.h"      //for MLCallType
+#import <monalxmpp/MLVoIPProcessor.h>
+#import <monalxmpp/MLCall.h>      //for MLCallType
 #import "XMPPIQ.h"
 #import "MLIQProcessor.h"
 #import "UIColor+Theme.h"

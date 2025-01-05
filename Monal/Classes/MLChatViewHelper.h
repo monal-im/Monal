@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLContact.h"
+#import <monalxmpp/MLContact.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

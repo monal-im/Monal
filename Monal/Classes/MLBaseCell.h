@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "MLConstants.h"
-#import "MLMessage.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLMessage.h>
 
 #define kDefaultTextHeight 20
 #define kDefaultTextOffset 5

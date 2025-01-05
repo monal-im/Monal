@@ -7,18 +7,18 @@
 //
 
 #import "MLMessageProcessor.h"
-#import "DataLayer.h"
+#import <monalxmpp/DataLayer.h>
 #import "SignalAddress.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 #import "AESGcm.h"
-#import "MLConstants.h"
-#import "MLImageManager.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLImageManager.h>
 #import "XMPPIQ.h"
-#import "MLPubSub.h"
-#import "MLOMEMO.h"
-#import "MLFiletransfer.h"
-#import "MLMucProcessor.h"
-#import "MLNotificationQueue.h"
+#import <monalxmpp/MLPubSub.h>
+#import <monalxmpp/MLOMEMO.h>
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/MLMucProcessor.h>
+#import <monalxmpp/MLNotificationQueue.h>
 #import "MonalAppDelegate.h"
 
 @interface MLPubSub ()

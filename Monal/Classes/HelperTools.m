@@ -128,7 +128,7 @@ void exitLogging(void)
 {
     DDLogInfo(@"exit() was called...");
     //make sure to unfreeze logging before flushing everything and terminating
-    [self activateTerminationLogging];
+    [HelperTools activateTerminationLogging];
     [HelperTools flushLogsWithTimeout:0.025];
     return;
 }

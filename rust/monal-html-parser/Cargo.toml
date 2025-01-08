@@ -9,5 +9,5 @@ edition = "2021"
 crate-type = ["staticlib", "lib"]
 
 [dependencies]
-clap = {version = "4.5.23", features = ["derive"]}
+clap = {version = "4.5.24", features = ["derive"]}
 scraper = "0.22.0"

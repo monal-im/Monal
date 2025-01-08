@@ -124,6 +124,15 @@ static struct {
 #pragma pack()
 
 
+void exitLogging(void)
+{
+    DDLogInfo(@"exit() was called...");
+    //make sure to unfreeze logging before flushing everything and terminating
+    [self activateTerminationLogging];
+    [HelperTools flushLogsWithTimeout:0.025];
+    return;
+}
+
 // see: https://developer.apple.com/library/archive/qa/qa1361/_index.html
 // Returns true if the current process is being debugged (either 
 // running under the debugger or has a debugger attached post facto).
@@ -422,10 +431,8 @@ void swizzle(Class c, SEL orig, SEL new)
     _crash_info.backtrace = backtrace.UTF8String;
     
     //log error and flush all logs
-    [DDLog flushLog];
     DDLogError(@"*****************\n%@\n%@", abort_msg, backtrace);
-    [DDLog flushLog];
-    [HelperTools flushLogsWithTimeout:0.250];
+    [HelperTools flushLogsWithTimeout:0.025];
     
     //now abort everything
     abort();
@@ -1985,6 +1992,18 @@ void swizzle(Class c, SEL orig, SEL new)
             
             DDLogVerbose(@"Posting kMonalUnfrozen notification now...");
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUnfrozen object:nil];
+        }
+    }
+}
+
++(void) activateTerminationLogging
+{
+    @synchronized(_suspensionHandling_lock) {
+        if(_suspensionHandling_isSuspended)
+        {
+            DDLogVerbose(@"Activating logging for app termination...");
+            dispatch_resume([DDLog loggingQueue]);
+            _suspensionHandling_isSuspended = NO;
         }
     }
 }

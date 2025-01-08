@@ -104,6 +104,15 @@ jobs:
                 body: `${{ steps.get_commits.outputs.description }}`,
               });
               console.log(`Created pull request #${pullRequest.data.number}`);
+              //update pr after creation to trigger our pr-semver-title workflow
+              pullRequest = await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: pullRequest.data.number,
+                title: `${{ steps.get_commits.outputs.buildVersion }}`,
+                body: `${{ steps.get_commits.outputs.description }}`,
+              });
+              console.log(`Updated pull request #${pullRequest.data.number}`);
             }
             return pullRequest.data.number;
       - name: Add Label to Pull Request

@@ -7,10 +7,11 @@
 //
 
 struct ContactEntry<AdditionalContent: View>: View {
-    let contact: ObservableKVOWrapper<MLContact>
     let selfnotesPrefix: Bool
     let fallback: String?
     @ViewBuilder let additionalContent: () -> AdditionalContent
+    
+    @StateObject var contact: ObservableKVOWrapper<MLContact>
     
     init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool = true, fallback: String? = nil) where AdditionalContent == EmptyView {
         self.init(contact:contact, selfnotesPrefix:selfnotesPrefix, fallback:fallback, additionalContent:{ EmptyView() })
@@ -33,7 +34,7 @@ struct ContactEntry<AdditionalContent: View>: View {
     }
     
     init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool, fallback: String?, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
-        self.contact = contact
+        _contact = StateObject(wrappedValue: contact)
         self.selfnotesPrefix = selfnotesPrefix
         self.fallback = fallback
         self.additionalContent = additionalContent

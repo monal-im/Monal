@@ -19,6 +19,8 @@
 #import "MLContact.h"
 #import "xmpp.h"
 
+DDLoggerName const DDLoggerNameUDP = @"monal.loggger.udp.mainQueue";
+
 static NSData* _key;
 static volatile MLUDPLogger* _self;
 
@@ -78,6 +80,22 @@ static volatile MLUDPLogger* _self;
     }
 }
 
++(void) directlyWriteLogMessage:(DDLogMessage*) logMessage
+{
+    if(_self == nil)
+    {
+        [[self class] logError:@"Ignoring call to directlySyncWriteLogMessage: _self still nil!"];
+        return;
+    }
+    return [_self realLogMessage:logMessage isDirect:YES];
+}
+
++(instancetype) getCurrentInstance
+{
+    return (MLUDPLogger*)_self;
+    
+}
+
 -(void) dealloc
 {
     _self = nil;
@@ -87,12 +105,18 @@ static volatile MLUDPLogger* _self;
 {
     _self = self;
     _send_condition = [NSCondition new];
-    _send_queue = dispatch_queue_create("MLUDPLoggerSendQueue", dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0));
+    _send_queue = dispatch_queue_create("MLUDPLoggerInternalSendQueue", dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0));
 }
 
 -(void) willRemoveLogger
 {
     _self = nil;
+}
+
+
+-(DDLoggerName) loggerName
+{
+    return DDLoggerNameUDP;
 }
 
 +(void) logError:(NSString*) format, ... NS_FORMAT_FUNCTION(1, 2)
@@ -164,9 +188,11 @@ static volatile MLUDPLogger* _self;
     if(_connection != NULL)
         nw_connection_force_cancel(_connection);
     _connection = NULL;
-    [_send_condition lock];
-    [_send_condition signal];
-    [_send_condition unlock];
+    @synchronized(_send_condition) {
+        [_send_condition lock];
+        [_send_condition signal];
+        [_send_condition unlock];
+    }
 }
 
 -(void) createConnectionIfNeeded
@@ -205,9 +231,11 @@ static volatile MLUDPLogger* _self;
                 [condition lock];
                 [condition signal];
                 [condition unlock];
-                [self->_send_condition lock];
-                [self->_send_condition signal];
-                [self->_send_condition unlock];
+                @synchronized(self->_send_condition) {
+                    [self->_send_condition lock];
+                    [self->_send_condition signal];
+                    [self->_send_condition unlock];
+                }
             }
         });
         [condition lock];
@@ -226,12 +254,21 @@ static volatile MLUDPLogger* _self;
 
 -(void) logMessage:(DDLogMessage*) logMessage
 {
+    return [self realLogMessage:logMessage isDirect:NO];
+}
+
+-(void) realLogMessage:(DDLogMessage*) logMessage isDirect:(BOOL) direct
+{
     static uint64_t counter = 0;
     
     //early return if deactivated
     if(![[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"])
         return;
     
+    //ignore log messages already udp-logged as direct messages when handling queued messages
+    if(!direct && logMessage.ml_isDirect)
+       return;
+        
     NSError* error = nil; 
     NSData* rawData = [HelperTools convertLogmessageToJsonData:logMessage counter:&counter andError:&error];
     if(error != nil || rawData == nil)
@@ -272,9 +309,11 @@ static volatile MLUDPLogger* _self;
             
         }
         //[[self class] logError:@"unlocking send condition (%@)...", [NSNumber numberWithUnsignedLongLong:self->_counter]];
-        [self->_send_condition lock];
-        [self->_send_condition signal];
-        [self->_send_condition unlock];
+        @synchronized(self->_send_condition) {
+            [self->_send_condition lock];
+            [self->_send_condition signal];
+            [self->_send_condition unlock];
+        }
     });
     //block this queue until our udp message was sent or an error occured
     [_send_condition wait];

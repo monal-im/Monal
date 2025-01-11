@@ -31,6 +31,17 @@ struct ContactRequestsMenuEntry: View {
                 Button {
                     // deny request
                     MLXMPPManager.sharedInstance().remove(contact)
+                    MLXMPPManager.sharedInstance().block(true, contact:contact)
+                } label: {
+                    Image(systemName: "xmark.circle")
+                        .accentColor(.red)
+                }
+                //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
+                .buttonStyle(BorderlessButtonStyle())
+                
+                Button {
+                    // deny request
+                    MLXMPPManager.sharedInstance().remove(contact)
                 } label: {
                     Image(systemName: "trash.circle")
                         .accentColor(.red)

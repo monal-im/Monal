@@ -60,7 +60,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     MLContact* _contactToOpen;
     monal_id_block_t _completionToCall;
     BOOL _shutdownPending;
-    BOOL _wasFreezed;
+    BOOL _wasFrozen;
 }
 @end
 
@@ -319,7 +319,12 @@ $$
     _wakeupCompletions = [NSMutableDictionary new];
     DDLogVerbose(@"Setting _shutdownPending to NO...");
     _shutdownPending = NO;
-    _wasFreezed = NO;
+    _wasFrozen = NO;
+    
+    //register BGTasks as early as possible to make sure a subsequent app termination
+    //without proper "bootup" won't crash on unknown bgtask identifiers
+    DDLogInfo(@"calling MonalAppDelegate configureBackgroundTasks");
+    [self configureBackgroundTasks];
     
     //[self runParserTests];
     //[self runSDPTests];
@@ -443,6 +448,11 @@ $$
         title:NSLocalizedString(@"Deny new contact", @"")
         options:UNNotificationActionOptionNone
     ];
+    UNNotificationAction* blockSubscriptionAction = [UNNotificationAction
+        actionWithIdentifier:@"BLOCK_SUBSCRIPTION_ACTION"
+        title:NSLocalizedString(@"Block new contact", @"")
+        options:UNNotificationActionOptionNone
+    ];
     if(@available(iOS 15.0, macCatalyst 15.0, *))
     {
         replyAction = [UNTextInputNotificationAction
@@ -469,6 +479,12 @@ $$
             actionWithIdentifier:@"DENY_SUBSCRIPTION_ACTION"
             title:NSLocalizedString(@"Deny new contact", @"")
             options:UNNotificationActionOptionNone
+            icon:[UNNotificationActionIcon iconWithSystemImageName:@"person.crop.circle.badge.minus"]
+        ];
+        blockSubscriptionAction = [UNNotificationAction
+            actionWithIdentifier:@"BLOCK_SUBSCRIPTION_ACTION"
+            title:NSLocalizedString(@"Block new contact", @"")
+            options:UNNotificationActionOptionNone
             icon:[UNNotificationActionIcon iconWithSystemImageName:@"person.crop.circle.badge.xmark"]
         ];
     }
@@ -484,7 +500,7 @@ $$
     ];
     UNNotificationCategory* subscriptionCategory = [UNNotificationCategory
         categoryWithIdentifier:@"subscription"
-        actions:@[approveSubscriptionAction, denySubscriptionAction]
+        actions:@[approveSubscriptionAction, denySubscriptionAction, blockSubscriptionAction]
         intentIdentifiers:@[]
         options:UNNotificationCategoryOptionCustomDismissAction
     ];
@@ -551,10 +567,6 @@ $$
 
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];
-    
-    //register BGTask
-    DDLogInfo(@"calling MonalAppDelegate configureBackgroundTasks");
-    [self configureBackgroundTasks];
     
     // Play audio even if phone is in silent mode
     [HelperTools configureDefaultAudioSession];
@@ -1012,6 +1024,12 @@ $$
             DDLogInfo(@"DENY_SUBSCRIPTION_ACTION triggered...");
             [[MLXMPPManager sharedInstance] removeContact:fromContact];
         }
+        else if([response.actionIdentifier isEqualToString:@"BLOCK_SUBSCRIPTION_ACTION"])
+        {
+            DDLogInfo(@"BLOCK_SUBSCRIPTION_ACTION triggered...");
+            [[MLXMPPManager sharedInstance] removeContact:fromContact];
+            [[MLXMPPManager sharedInstance] block:YES contact:fromContact];
+        }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
                 while(self.activeChats == nil)
@@ -1148,11 +1166,7 @@ $$
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         [account freeze];
     [MLProcessLock unlock];
-    _wasFreezed = YES;
-    @synchronized(self) {
-        DDLogVerbose(@"Setting _shutdownPending to NO...");
-        _shutdownPending = NO;
-    }
+    _wasFrozen = YES;
 }
 
 -(void) applicationWillEnterForeground:(UIApplication*) application
@@ -1170,14 +1184,14 @@ $$
     
     //only show loading HUD if we really got freezed before
     MBProgressHUD* loadingHUD;
-    if(_wasFreezed)
+    if(_wasFrozen)
     {
         loadingHUD = [MBProgressHUD showHUDAddedTo:[self getTopViewController].view animated:YES];
         loadingHUD.label.text = NSLocalizedString(@"Refreshing...", @"");
         loadingHUD.mode = MBProgressHUDModeIndeterminate;
         loadingHUD.removeFromSuperViewOnHide = YES;
         
-        _wasFreezed = NO;
+        _wasFrozen = NO;
     }
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -1250,13 +1264,14 @@ $$
 #endif
 }
 
--(void) applicationWillTerminate:(UIApplication *)application
+-(void) applicationWillTerminate:(UIApplication*) application
 {
     @synchronized(self) {
+        [HelperTools activateTerminationLogging];       //activate logging during shutdown
         DDLogVerbose(@"Setting _shutdownPending to YES...");
         _shutdownPending = YES;
         DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
-        [HelperTools scheduleBackgroundTask:YES];        //make sure delivery will be attempted, if needed (force as soon as possible)
+        [HelperTools scheduleBackgroundTask:YES];       //make sure delivery will be attempted, if needed (force as soon as possible)
         DDLogInfo(@"|~~| 33%% |~~|");
         [[MLXMPPManager sharedInstance] nowBackgrounded];
         DDLogInfo(@"|~~| 66%% |~~|");
@@ -1264,7 +1279,7 @@ $$
         DDLogInfo(@"|~~| 99%% |~~|");
         [[MLXMPPManager sharedInstance] disconnectAll];
         DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
-        [DDLog flushLog];
+        [HelperTools activateTerminationLogging];       //ensure our flush is really successful
         [HelperTools flushLogsWithTimeout:0.025];
     }
 }
@@ -1427,11 +1442,10 @@ $$
             if(background)
             {
                 DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
-                [DDLog flushLog];
                 DDLogVerbose(@"Setting _shutdownPending to YES...");
                 _shutdownPending = YES;
-                [[MLXMPPManager sharedInstance] disconnectAll];     //disconnect all accounts to prevent TCP buffer leaking
                 [HelperTools scheduleBackgroundTask:NO];            //request bg fetch execution in BGFETCH_DEFAULT_INTERVAL seconds
+                [[MLXMPPManager sharedInstance] disconnectAll];     //disconnect all accounts to prevent TCP buffer leaking
                 [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
                     BOOL stopped = NO;
                     //make sure this will be done only once, even if we have an uikit bgtask and a bg fetch running simultaneously
@@ -1470,7 +1484,7 @@ $$
                     }
                     if(!stopped)
                     {
-                        DDLogDebug(@"no background tasks running, nothing to stop");
+                        DDLogError(@"no background tasks running, nothing to stop");
                         [DDLog flushLog];
                     }
                     else
@@ -1508,12 +1522,12 @@ $$
                         //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                         
-                        //disconnect all accounts to prevent TCP buffer leaking
-                        [[MLXMPPManager sharedInstance] disconnectAll];
-                        
                         //schedule a BGProcessingTaskRequest to process this further as soon as possible
                         //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                         [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
+                        
+                        //disconnect all accounts to prevent TCP buffer leaking
+                        [[MLXMPPManager sharedInstance] disconnectAll];
                         
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1567,12 +1581,12 @@ $$
                     //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
                     [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:YES];
                     
-                    //disconnect all accounts to prevent TCP buffer leaking
-                    [[MLXMPPManager sharedInstance] disconnectAll];
-                    
                     //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                     //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                     [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
+                    
+                    //disconnect all accounts to prevent TCP buffer leaking
+                    [[MLXMPPManager sharedInstance] disconnectAll];
                     
                     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                     DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1671,12 +1685,12 @@ $$
                     //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
                     [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:YES];
                     
-                    //disconnect all accounts to prevent TCP buffer leaking
-                    [[MLXMPPManager sharedInstance] disconnectAll];
-                    
                     //schedule a new BGProcessingTaskRequest to process this further as soon as possible
                     //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                     [HelperTools scheduleBackgroundTask:YES];      //force as soon as possible
+                    
+                    //disconnect all accounts to prevent TCP buffer leaking
+                    [[MLXMPPManager sharedInstance] disconnectAll];
                     
                     //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                     DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1898,12 +1912,12 @@ $$
                             BOOL wasIdle = [[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle];
                             [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
                             
-                            //disconnect all accounts to prevent TCP buffer leaking
-                            [[MLXMPPManager sharedInstance] disconnectAll];
-                            
                             //schedule a new BGProcessingTaskRequest to process this further as soon as possible, if we are not idle
                             //(if we end up here, the graceful shuttdown did not work out because we are not idle --> we need more cpu time)
                             [HelperTools scheduleBackgroundTask:!wasIdle];
+                            
+                            //disconnect all accounts to prevent TCP buffer leaking
+                            [[MLXMPPManager sharedInstance] disconnectAll];
                             
                             //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                             DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");

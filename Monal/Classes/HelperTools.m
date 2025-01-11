@@ -124,6 +124,15 @@ static struct {
 #pragma pack()
 
 
+void exitLogging(void)
+{
+    DDLogInfo(@"exit() was called...");
+    //make sure to unfreeze logging before flushing everything and terminating
+    [HelperTools activateTerminationLogging];
+    [HelperTools flushLogsWithTimeout:0.025];
+    return;
+}
+
 // see: https://developer.apple.com/library/archive/qa/qa1361/_index.html
 // Returns true if the current process is being debugged (either 
 // running under the debugger or has a debugger attached post facto).
@@ -302,14 +311,45 @@ void swizzle(Class c, SEL orig, SEL new)
 }
 @end
 
+@implementation DDLogMessage(TaggedMessage)
+@dynamic ml_isDirect;
+-(void) setMl_isDirect:(BOOL) value
+{
+    objc_setAssociatedObject(self, @selector(ml_isDirect), @(value), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+-(BOOL) ml_isDirect
+{
+    return ((NSNumber*)objc_getAssociatedObject(self, @selector(ml_isDirect))).boolValue;
+}
+@end
+
 @implementation DDLog (AllowQueueFreeze)
 
 -(void) swizzled_queueLogMessage:(DDLogMessage*) logMessage asynchronously:(BOOL) asyncFlag
 {
-    //don't do sync logging for any message (usually ERROR), while the global logging queue is suspended
-    @synchronized(_suspensionHandling_lock) {
-        return [self swizzled_queueLogMessage:logMessage asynchronously:_suspensionHandling_isSuspended ? YES : asyncFlag];
+    //make sure this method remains performant even when checking for udp logging presence
+    static BOOL udpLoggerEnabled = NO;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        udpLoggerEnabled = [[HelperTools defaultsDB] boolForKey:@"udpLoggerEnabled"];
+    });
+    
+    //use udp logger to log all messages, even if the loggging queue is in suspended state
+    //this hopefully enables us to catch strange bugs sometimes hanging and then watchdog-killing the app when resuming from resumption
+    if(udpLoggerEnabled && _suspensionHandling_isSuspended)
+    {
+        //this marks a message as already directly logged to allow the udp logger to later ignore the queued log request for the same message
+        logMessage.ml_isDirect = YES;
+        //make sure all udp log messages are still logged chronologically and prevent race conditions with our static counter var
+        dispatch_async([MLUDPLogger getCurrentInstance].loggerQueue, ^{
+            [MLUDPLogger directlyWriteLogMessage:logMessage];
+        });
     }
+    
+    //don't do sync logging for any message (usually ERROR), while the global logging queue is suspended
+    //don't use _suspensionHandling_lock here because that can introduce deadlocks
+    //(for example if we have log statements in our MLLogFileManager code rotating the logfile and creating a new one)
+    return [self swizzled_queueLogMessage:logMessage asynchronously:_suspensionHandling_isSuspended ? YES : asyncFlag];
 }
 
 //see https://stackoverflow.com/a/13326633 and https://fek.io/blog/method-swizzling-in-obj-c-and-swift/
@@ -391,10 +431,8 @@ void swizzle(Class c, SEL orig, SEL new)
     _crash_info.backtrace = backtrace.UTF8String;
     
     //log error and flush all logs
-    [DDLog flushLog];
     DDLogError(@"*****************\n%@\n%@", abort_msg, backtrace);
-    [DDLog flushLog];
-    [HelperTools flushLogsWithTimeout:0.250];
+    [HelperTools flushLogsWithTimeout:0.025];
     
     //now abort everything
     abort();
@@ -1867,32 +1905,37 @@ void swizzle(Class c, SEL orig, SEL new)
     
     //construct json dictionary
     (*counter)++;
-    NSDictionary* representedObject = @{
-        @"queueThreadLabel": [self getQueueThreadLabelFor:logMessage],
+    NSDictionary* tag = @{
+        @"queueThreadLabel": nilWrapper([self getQueueThreadLabelFor:logMessage]),
         @"processType": [self isAppExtension] ? @"appex" : @"mainapp",
-        @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
-        @"counter": [NSNumber numberWithUnsignedLongLong:*counter],
-        @"processID": _processID,
-        @"qosName": qos2name(logMessage.qos),
-        @"representedObject": logMessage.representedObject ? logMessage.representedObject : [NSNull null],
+        @"processName": nilWrapper([[[NSBundle mainBundle] executablePath] lastPathComponent]),
+        @"counter": @(*counter),
+        @"processID": nilWrapper(_processID),
+        @"qosName": nilWrapper(qos2name(logMessage.qos)),
+        @"loggingQueueSuspended": @(_suspensionHandling_isSuspended),
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        @"tag": nilWrapper(logMessage.tag),
+#pragma clang diagnostic pop
     };
     NSDictionary* msgDict = @{
-        @"messageFormat": logMessage.messageFormat,
-        @"message": logMessage.message,
-        @"level": [NSNumber numberWithInteger:logMessage.level],
-        @"flag": [NSNumber numberWithInteger:logMessage.flag],
-        @"context": [NSNumber numberWithInteger:logMessage.context],
-        @"file": logMessage.file,
-        @"fileName": logMessage.fileName,
-        @"function": logMessage.function,
-        @"line": [NSNumber numberWithInteger:logMessage.line],
-        @"tag": representedObject,
-        @"options": [NSNumber numberWithInteger:logMessage.options],
+        @"messageFormat": nilWrapper(logMessage.messageFormat),
+        @"message": nilWrapper(logMessage.message),
+        @"level": @(logMessage.level),
+        @"flag": @(logMessage.flag),
+        @"context": @(logMessage.context),
+        @"file": nilWrapper(logMessage.file),
+        @"fileName": nilWrapper(logMessage.fileName),
+        @"function": nilWrapper(logMessage.function),
+        @"line": @(logMessage.line),
+        @"representedObject": nilWrapper(logMessage.representedObject),
+        @"tag": nilWrapper(tag),
+        @"options": @(logMessage.options),
         @"timestamp": [dateFormatter stringFromDate:logMessage.timestamp],
-        @"threadID": logMessage.threadID,
-        @"threadName": logMessage.threadName,
-        @"queueLabel": logMessage.queueLabel,
-        @"qos": [NSNumber numberWithInteger:logMessage.qos],
+        @"threadID": nilWrapper(logMessage.threadID),
+        @"threadName": nilWrapper(logMessage.threadName),
+        @"queueLabel": nilWrapper(logMessage.queueLabel),
+        @"qos": @(logMessage.qos),
     };
     
     //encode json into NSData
@@ -1913,6 +1956,13 @@ void swizzle(Class c, SEL orig, SEL new)
     [_stdoutRedirector flushWithTimeout:timeout];
     [DDLog flushLog];
     [MLUDPLogger flushWithTimeout:timeout];
+}
+
++(BOOL) isAppSuspended
+{
+    @synchronized(_suspensionHandling_lock) {
+        return _suspensionHandling_isSuspended;
+    }
 }
 
 +(void) signalSuspension
@@ -1942,6 +1992,18 @@ void swizzle(Class c, SEL orig, SEL new)
             
             DDLogVerbose(@"Posting kMonalUnfrozen notification now...");
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUnfrozen object:nil];
+        }
+    }
+}
+
++(void) activateTerminationLogging
+{
+    @synchronized(_suspensionHandling_lock) {
+        if(_suspensionHandling_isSuspended)
+        {
+            DDLogVerbose(@"Activating logging for app termination...");
+            dispatch_resume([DDLog loggingQueue]);
+            _suspensionHandling_isSuspended = NO;
         }
     }
 }
@@ -2074,7 +2136,7 @@ void swizzle(Class c, SEL orig, SEL new)
     handler.maxReportCount = 4;
     handler.deadlockWatchdogInterval = 0;       // no main thread watchdog
     handler.userInfo = @{
-        @"isAppex": @([self isAppExtension]),
+        @"isAppex": bool2str([self isAppExtension]),
         @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
         @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
         @"appVersion": [self appBuildVersionInfoFor:MLVersionTypeLog],

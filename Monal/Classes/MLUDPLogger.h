@@ -11,9 +11,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+FOUNDATION_EXPORT DDLoggerName const DDLoggerNameUDP NS_SWIFT_NAME(DDLoggerName.udp); // MLUDPLogger
+
 @interface MLUDPLogger : DDAbstractLogger <DDLogger>
 
 +(void) flushWithTimeout:(double) timeout;
++(void) directlyWriteLogMessage:(DDLogMessage*) logMessage;
++(instancetype) getCurrentInstance;
 
 @end
 

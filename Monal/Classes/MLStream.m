@@ -470,26 +470,35 @@
                 return YES;
             });
             
-            /*
             //some weird apple stuff creates the framer twice: once directly when starting the tcp handshake
-            //and again later after the tcp connection was established successfully --> ignore the first one
+            //and once a few milliseconds later, presumably after the tcp connection was established successfully
+            //--> ignore all but the first one
             if(framerId < 1)
             {
-                nw_framer_set_input_handler(framer, ^size_t(nw_framer_t framer) {
-                    nw_framer_parse_input(framer, 1, BUFFER_SIZE, nil, ^size_t(uint8_t* buffer, size_t buffer_length, bool is_complete) {
-                        MLAssert(NO, @"Unexpected incoming bytes in first framer!", (@{
-                            @"logtag": nilWrapper(logtag),
-                            @"framer": framer,
-                            @"buffer": [NSData dataWithBytes:buffer length:buffer_length],
-                            @"buffer_length": @(buffer_length),
-                            @"is_complete": bool2str(is_complete),
-                        }));
-                        return buffer_length;
+                DDLogVerbose(@"Framer is the first one, using it...");
+                //we have to simulate nw_connection_state_ready because the connection state will not reflect that while our framer is active
+                //--> use framer start as "connection active" signal
+                //first framer start is allowed to directly send data which will be used as tcp early data
+                if(!wasOpenOnce)
+                {
+                    wasOpenOnce = YES;
+                    @synchronized(shared_state) {
+                        shared_state.open = YES;
+                    }
+                    //make sure to not do this inside the framer thread to not cause any deadlocks
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        [input generateEvent:NSStreamEventOpenCompleted];
+                        [output generateEvent:NSStreamEventOpenCompleted];
                     });
-                    return 0;       //why that?
+                }
+                
+                nw_framer_set_input_handler(framer, ^size_t(nw_framer_t framer) {
+                    DDLogDebug(@"Got new input for framer: %@", framer);
+                    [input schedule_read];
+                    return 0;       //why that??
                 });
                 nw_framer_set_output_handler(framer, ^(nw_framer_t framer, nw_framer_message_t message, size_t message_length, bool is_complete) {
-                    MLAssert(NO, @"Unexpected outgoing bytes in first framer!", (@{
+                    MLAssert(NO, @"Unexpected outgoing bytes in framer!", (@{
                         @"logtag": nilWrapper(logtag),
                         @"framer": framer,
                         @"message": message,
@@ -497,32 +506,12 @@
                         @"is_complete": bool2str(is_complete),
                     }));
                 });
-                return nw_framer_start_result_will_mark_ready;
+                
+                shared_state.framer = framer;
             }
-            */
+            else
+                DDLogVerbose(@"Ignoring subsequent framer...");
             
-            //we have to simulate nw_connection_state_ready because the connection state will not reflect that while our framer is active
-            //--> use framer start as "connection active" signal
-            //first framer start is allowed to directly send data which will be used as tcp early data
-            if(!wasOpenOnce)
-            {
-                wasOpenOnce = YES;
-                @synchronized(shared_state) {
-                    shared_state.open = YES;
-                }
-                //make sure to not do this inside the framer thread to not cause any deadlocks
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                    [input generateEvent:NSStreamEventOpenCompleted];
-                    [output generateEvent:NSStreamEventOpenCompleted];
-                });
-            }
-            
-            nw_framer_set_input_handler(framer, ^size_t(nw_framer_t framer) {
-                [input schedule_read];
-                return 0;       //why that??
-            });
-            
-            shared_state.framer = framer;
             return nw_framer_start_result_will_mark_ready;
         });
         DDLogInfo(@"%@: Not doing direct TLS: appending framer to protocol stack...", logtag);

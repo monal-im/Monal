@@ -1,0 +1,39 @@
+name: Run automated tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - beta
+      - stable
+  push:
+    branches:
+      - develop
+
+permissions: {}
+
+jobs:
+  run_tests:
+    runs-on: macos-latest
+    name: Run automated tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build rust
+        run: ./rust/build-rust.sh
+      - name: Install pods
+        working-directory: Monal
+        run: pod install --repo-update
+      - name: Run tests
+        working-directory: Monal
+        run: |
+          set -o pipefail && \
+          NSUnbufferedIO=YES xcodebuild \
+            -workspace Monal.xcworkspace \
+            -scheme Monal \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            test \
+            2>&1 | \
+          xcbeautify --renderer github-actions

@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C1850EB425F38A2D003D506A"
-               BuildableName = ".xctest"
+               BuildableName = "MonalUITests.xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C1850EB425F38A2D003D506A"
-               BuildableName = ".xctest"
+               BuildableName = "MonalUITests.xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
@@ -53,7 +53,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C1850EB425F38A2D003D506A"
-               BuildableName = ".xctest"
+               BuildableName = "MonalUITests.xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
@@ -63,7 +63,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C1850EB425F38A2D003D506A"
-               BuildableName = ".xctest"
+               BuildableName = "MonalUITests.xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>

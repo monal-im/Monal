@@ -2,6 +2,7 @@ name: Publish Quicksy release
 on:
   repository_dispatch:
     types: [quicksy_release]
+permissions: {}
 jobs:
   extractChangelog:
     runs-on: self-hosted

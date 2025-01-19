@@ -5,13 +5,15 @@ on:
   #  - cron: '17 13 * * *'
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   dependencies:
     runs-on: self-hosted
+
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v2

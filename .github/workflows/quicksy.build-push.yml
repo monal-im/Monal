@@ -9,6 +9,8 @@ on:
 
   workflow_dispatch:
 
+permissions: {}
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -20,6 +22,9 @@ jobs:
       BUILD_SCHEME: "Quicksy"
       BUILD_TYPE: "AppStore-Quicksy"
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Quicksy_Stable_iOS_ExportOptions.plist"
+    permissions:
+      actions: write # needed to upload artifacts
+      contents: write # needed for git push
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v4

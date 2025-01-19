@@ -2,6 +2,7 @@ name: Publish release
 on:
   repository_dispatch:
     types: [monal_release]
+permissions: {}
 jobs:
   extractChangelog:
     runs-on: self-hosted
@@ -34,6 +35,8 @@ jobs:
     name: Promote draft release to live release
     runs-on: ubuntu-latest
     needs: [extractChangelog]
+    permissions:
+      contents: write
     steps:
       - name: Promote draft release to live release
         run: |

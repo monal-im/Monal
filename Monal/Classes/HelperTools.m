@@ -102,6 +102,7 @@ static NSObject* _isAppExtensionLock = nil;
 static NSObject* _suspensionHandling_lock = nil;
 static BOOL _suspensionHandling_isSuspended = NO;
 static NSMutableDictionary* _versionInfoCache;
+static NSCharacterSet* _validXMLCharacters;
 static MLStreamRedirect* _stdoutRedirector = nil;
 static MLStreamRedirect* _stderrRedirector = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
@@ -458,6 +459,25 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     u_int32_t i = arc4random();
     _processID = [self hexadecimalString:[NSData dataWithBytes:&i length:sizeof(i)]];
     
+    //values taken from https://www.w3.org/TR/2008/REC-xml-20081126/#charsets
+    NSMutableCharacterSet* validXMLCharacters = [NSMutableCharacterSet characterSetWithCharactersInString:@"\t\n\r"]; // #x9, #xA, #xD
+    [validXMLCharacters formUnionWithCharacterSet:[NSCharacterSet characterSetWithRange:NSMakeRange(0x20, 0xD7FF - 0x20 + 1)]];
+    [validXMLCharacters formUnionWithCharacterSet:[NSCharacterSet characterSetWithRange:NSMakeRange(0xE000, 0xFFFD - 0xE000 + 1)]];
+    [validXMLCharacters formUnionWithCharacterSet:[NSCharacterSet characterSetWithRange:NSMakeRange(0x10000, 0x10FFFF - 0x10000 + 1)]];
+
+    NSMutableString* notRecommendedXMLCharacters = [NSMutableString new];
+    for (unichar i = 0x007F; i <= 0x0084; i++)
+        [notRecommendedXMLCharacters appendFormat:@"%C", i];
+
+    for (unichar i = 0x0086; i <= 0x009F; i++)
+        [notRecommendedXMLCharacters appendFormat:@"%C", i];
+
+    for (unichar i = 0xFDD0; i <= 0xFDEF; i++)
+        [notRecommendedXMLCharacters appendFormat:@"%C", i];
+
+    [validXMLCharacters removeCharactersInString:notRecommendedXMLCharacters];
+    _validXMLCharacters = [validXMLCharacters copy];
+
     //shamelessly stolen from utils.ip in conversations source
     IPV4 = [NSRegularExpression regularExpressionWithPattern:@"\\A(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
     IPV6_HEX4DECCOMPRESSED = [NSRegularExpression regularExpressionWithPattern:@"\\A((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?) ::((?:[0-9A-Fa-f]{1,4}:)*)(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
@@ -3156,6 +3176,17 @@ a=%@\r\n", mid, candidate];
     [result addObject:[lastItem substringToIndex:lastItem.length - 1]];
 
     return result;
+}
+
++(NSString*) removeInvalidXMLCharactersFromString:(NSString*) inputString
+{
+    NSMutableString* result = [NSMutableString new];
+    for (NSUInteger i = 0; i < inputString.length; i++) {
+        unichar character = [inputString characterAtIndex:i];
+        if([_validXMLCharacters characterIsMember:character])
+          [result appendFormat:@"%C", character];
+    }
+    return [result copy];
 }
 
 //see https://nachtimwald.com/2017/04/02/constant-time-string-comparison-in-c/

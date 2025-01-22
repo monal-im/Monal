@@ -625,6 +625,19 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     DDLogVerbose(@"manager disconnecAll done");
 }
 
+-(void) resetAllAccountStates
+{
+    NSArray* allAccounts = [[DataLayer sharedInstance] accountList];
+    NSMutableDictionary* dic = [xmpp invalidateState:nil];
+    //reset disabled accounts
+    for(NSDictionary* account in allAccounts)
+        if(![[account objectForKey:kEnabled] boolValue])
+            [[DataLayer sharedInstance] persistState:dic forAccount:[account objectForKey:kAccountID]];
+
+    //reset enabled accounts
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        [xmppAccount resetAccountState];
+}
 -(void) connectIfNecessary
 {
     DDLogVerbose(@"manager connectIfNecessary");

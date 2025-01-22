@@ -1308,6 +1308,22 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
+-(void) resetAccountState
+{
+    NSMutableDictionary* dic = [xmpp invalidateState:nil];
+    if ([[DataLayer sharedInstance] isAccountEnabled:self.accountID])
+    {
+        [self dispatchAsyncOnReceiveQueue: ^{
+            [[DataLayer sharedInstance] persistState:dic forAccount:self.accountID];
+            [self readState];
+        }];
+    }
+    else
+    {
+        [[DataLayer sharedInstance] persistState:dic forAccount:self.accountID];
+    }
+}
+
 #pragma mark XMPP
 
 -(void) prepareXMPPParser

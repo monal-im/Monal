@@ -464,13 +464,15 @@ static NSMutableDictionary* _typingNotifications;
     {
         NSString* idToRetract = [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract@id"];
         NSNumber* historyIdToRetract = nil;
-        if(possiblyUnknownContact.isMuc && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"] && [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract/{urn:xmpp:message-moderate:1}moderated"])
+        if(idToRetract!=nil && possiblyUnknownContact.isMuc && [[account.mucProcessor getRoomFeaturesForMuc:possiblyUnknownContact.contactJid] containsObject:@"urn:xmpp:message-moderate:1"] && [messageNode findFirst:@"{urn:xmpp:message-retract:1}retract/{urn:xmpp:message-moderate:1}moderated"])
         {
+            DDLogInfo(@"Moderated retraction of muc message having stanza id %@ in muc %@", idToRetract, messageNode.fromUser);
             historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForModeratedStanzaId:idToRetract from:messageNode.fromUser andAccount:account.accountID];
         }
-        else
+        else if(idToRetract!=nil)
         {
             //this checks for everything spelled out in the business rules of XEP-0424
+            DDLogInfo(@"Message retraction of message having message id %@ for jid %@", idToRetract, messageNode.fromUser);
             historyIdToRetract = [[DataLayer sharedInstance] getRetractionHistoryIDForMessageId:idToRetract from:messageNode.fromUser participantJid:participantJid occupantId:occupantId andAccount:account.accountID];
         }
         

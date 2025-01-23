@@ -48,6 +48,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(void) connectAccount:(NSNumber*) accountNo;
 
+/**
+ does a full reset for every account, as if they were freshly created
+*/
+-(void) resetAllAccountStates;
+
 #pragma mark XMPP commands
 /**
  Remove a contact from an account

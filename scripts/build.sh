@@ -4,12 +4,13 @@ function exportMacOS {
     local EXPORT_OPTIONS_CATALYST="$1"
     local BUILD_TYPE="$2"
 
-    xcodebuild -exportArchive \
+    NSUnbufferedIO=YES xcodebuild -exportArchive \
         -archivePath "build/macos_$APP_NAME.xcarchive" \
         -exportPath "build/app" \
         -exportOptionsPlist "$EXPORT_OPTIONS_CATALYST" \
         -allowProvisioningUpdates \
-        -configuration $BUILD_TYPE
+        -configuration $BUILD_TYPE \
+        2>&1 | xcbeautify
 
     echo "build dir:"
     ls -l "build"
@@ -17,6 +18,9 @@ function exportMacOS {
 
 # Abort on Error
 set -e
+
+# Needed for xcbeautify
+set -o pipefail
 
 cd Monal
 
@@ -47,7 +51,7 @@ if [ "$BUILD_SCHEME" != "Quicksy" ]; then
     echo "***************************"
     echo "*     Archiving macOS     *"
     echo "***************************"
-    xcrun xcodebuild \
+    NSUnbufferedIO=YES xcrun xcodebuild \
         -workspace "Monal.xcworkspace" \
         -scheme "$BUILD_SCHEME" \
         -sdk macosx \
@@ -57,7 +61,8 @@ if [ "$BUILD_SCHEME" != "Quicksy" ]; then
         -allowProvisioningUpdates \
         archive \
         BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
-        SUPPORTS_MACCATALYST=YES
+        SUPPORTS_MACCATALYST=YES \
+        2>&1 | xcbeautify
 
     echo ""
     echo "****************************"
@@ -97,14 +102,15 @@ echo ""
 echo "*************************"
 echo "*     Archiving iOS     *"
 echo "*************************"
-xcrun xcodebuild \
+NSUnbufferedIO=YES xcrun xcodebuild \
     -workspace "Monal.xcworkspace" \
     -scheme "$BUILD_SCHEME" \
     -sdk iphoneos \
     -configuration $BUILD_TYPE \
     -archivePath "build/ios_$APP_NAME.xcarchive" \
     -allowProvisioningUpdates \
-    archive
+    archive \
+    2>&1 | xcbeautify
 
 echo ""
 echo "*************************"
@@ -112,14 +118,15 @@ echo "*     Exporting iOS     *"
 echo "*************************"
 # see: https://gist.github.com/cocoaNib/502900f24846eb17bb29
 # and: https://forums.developer.apple.com/thread/100065
-xcodebuild \
+NSUnbufferedIO=YES xcodebuild \
     -exportArchive \
     -archivePath "build/ios_$APP_NAME.xcarchive" \
     -exportPath "build/ipa" \
     -exportOptionsPlist $EXPORT_OPTIONS_IOS \
     -configuration $BUILD_TYPE \
     -allowProvisioningUpdates \
-    -allowProvisioningDeviceRegistration
+    -allowProvisioningDeviceRegistration \
+    2>&1 | xcbeautify
 
 echo "build dir:"
 find build

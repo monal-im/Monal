@@ -5,9 +5,13 @@ on:
     branches: [ beta ]
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - name: Checkout Beta Branch
         uses: actions/checkout@v4

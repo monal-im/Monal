@@ -13,6 +13,8 @@ on:
         required: true
         type: number
 
+permissions: {}
+
 jobs:
   check-pr-semver-title:
     runs-on: ubuntu-latest

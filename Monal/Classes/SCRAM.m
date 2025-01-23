@@ -71,11 +71,11 @@
     MLAssert(!_serverFirstMessageParsed, @"SCRAM handler already parsed server-first-message!");
     DDLogVerbose(@"Creating SDDP string: %@\n%@", mechanisms, cbTypes);
     NSMutableString* ssdpString = [NSMutableString new];
-    [ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
+    [ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@"\x1e"]];
     if(cbTypes != nil)
     {
-        [ssdpString appendString:@"|"];
-        [ssdpString appendString:[[cbTypes sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
+        [ssdpString appendString:@"\x1f"];
+        [ssdpString appendString:[[cbTypes sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@"\x1e"]];
     }
     _ssdpString = [ssdpString copy];
     DDLogVerbose(@"SDDP string is now: %@", _ssdpString);
@@ -114,12 +114,12 @@
     _salt = [HelperTools dataWithBase64EncodedString:msg[@"s"]];
     _iterationCount = (uint32_t)[msg[@"i"] integerValue];
     //check if SSDP downgrade protection triggered, if provided
-    if(msg[@"d"] != nil && _ssdpString != nil)
+    if(msg[@"h"] != nil && _ssdpString != nil)
     {
         _ssdpSupported = YES;
         //calculate base64 encoded SSDP hash and compare it to server sent value
         NSString* ssdpHash =[HelperTools encodeBase64WithData:[self hash:[_ssdpString dataUsingEncoding:NSUTF8StringEncoding]]];
-        if(![HelperTools constantTimeCompareAttackerString:msg[@"d"] withKnownString:ssdpHash])
+        if(![HelperTools constantTimeCompareAttackerString:msg[@"h"] withKnownString:ssdpHash])
             return MLScramStatusSSDPTriggered;
     }
     if(_iterationCount < 4096)

@@ -2,6 +2,9 @@
 
 set -e
 
+# Needed for xcbeautify
+set -o pipefail
+
 cd "$(dirname "$0")"
 cd ../Monal
 
@@ -116,7 +119,7 @@ dummy="DON'T TRANSLATE: $(head /dev/urandom | LC_ALL=C tr -dc A-Za-z0-9 | head -
 x=$((1))
 while [[ $x -lt 16 ]]; do
     echo "STARTING RUN $x..."
-    while ! xcrun xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphoneos -configuration "Beta" -allowProvisioningUpdates -exportLocalizations -localizationPath localization.tmp -exportLanguage base SWIFT_EMIT_LOC_STRINGS="$compile_swift"; do
+    while ! NSUnbufferedIO=YES xcrun xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphoneos -configuration "Beta" -allowProvisioningUpdates -exportLocalizations -localizationPath localization.tmp -exportLanguage base SWIFT_EMIT_LOC_STRINGS="$compile_swift" 2>&1 | xcbeautify; do
         echo "ERROR, TRYING AGAIN..."
     done
     echo "RUN $x SUCCEEDED, EXTRACTING STRINGS FROM XLIFF!"

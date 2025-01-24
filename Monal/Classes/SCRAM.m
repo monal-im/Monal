@@ -891,10 +891,11 @@
     s->_clientFirstMessageBare = @"n=user,r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6";
     s->_gssHeader = @"p=tls-exporter,,";
     
-    s->_serverFirstMessage = @"r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6,s=QSXCR+Q6sek8bf92,i=4096,d=dRc3RenuSY9ypgPpERowoaySQZY=";
+    s->_serverFirstMessage = @"r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6,s=QSXCR+Q6sek8bf92,i=4096,h=G6k/rBLDqgOhRRaCuuatSDFkJ08=";
     s->_nonce = @"12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6";
     s->_salt = [HelperTools dataWithBase64EncodedString:@"QSXCR+Q6sek8bf92"];
     s->_iterationCount = 4096;
+    s->_serverFirstMessageParsed = YES;
     
     NSString* client_final_msg = [s clientFinalMessageWithChannelBindingData:[@"THIS IS FAKE CB DATA" dataUsingEncoding:NSUTF8StringEncoding]];
     DDLogError(@"client_final_msg: %@", client_final_msg);

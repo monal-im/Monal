@@ -1308,17 +1308,19 @@ NSString* const kStanza = @"stanza";
 
 -(void) resetAccountState
 {
-    NSMutableDictionary* dic = [xmpp invalidateState:nil];
-    if ([[DataLayer sharedInstance] isAccountEnabled:self.accountNo])
+    NSMutableDictionary* newState = [xmpp invalidateState:nil];
+    if([[DataLayer sharedInstance] isAccountEnabled:self.accountNo])
     {
         [self dispatchAsyncOnReceiveQueue: ^{
-            [[DataLayer sharedInstance] persistState:dic forAccount:self.accountNo];
-            [self readState];
+            [self disconnect:YES];      //make sure we are in a safe state before resetting our state
+            [[DataLayer sharedInstance] persistState:newState forAccount:self.accountNo];
+            [self connect];             //this will reread persisted state saved above
         }];
     }
     else
     {
         [[DataLayer sharedInstance] persistState:dic forAccount:self.accountNo];
+        [self readState];               //better safe than sorry
     }
 }
 

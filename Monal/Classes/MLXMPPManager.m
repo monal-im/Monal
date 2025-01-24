@@ -627,17 +627,21 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) resetAllAccountStates
 {
-    NSArray* allAccounts = [[DataLayer sharedInstance] accountList];
-    NSMutableDictionary* dic = [xmpp invalidateState:nil];
-    //reset disabled accounts
-    for(NSDictionary* account in allAccounts)
-        if(![[account objectForKey:kEnabled] boolValue])
-            [[DataLayer sharedInstance] persistState:dic forAccount:[account objectForKey:kAccountID]];
+    //make sure now account transitions from enabled to disabled while resetting everything
+    //(accounts transitioned, will still be present in connectedXMPP and thus resetted by [xmppAccount resetAccountState], too)
+    @synchronized(_connectedXMPP) {
+        //reset disabled accounts
+        NSMutableDictionary* newState = [xmpp invalidateState:nil];
+        for(NSDictionary* account in [[DataLayer sharedInstance] accountList])
+            if(![account[kEnabled] boolValue])
+                [[DataLayer sharedInstance] persistState:newState forAccount:account[kAccountID]];
 
-    //reset enabled accounts
-    for(xmpp* xmppAccount in [self connectedXMPP])
-        [xmppAccount resetAccountState];
+        //reset enabled accounts
+        for(xmpp* xmppAccount in [self connectedXMPP])
+            [xmppAccount resetAccountState];
+    }
 }
+
 -(void) connectIfNecessary
 {
     DDLogVerbose(@"manager connectIfNecessary");

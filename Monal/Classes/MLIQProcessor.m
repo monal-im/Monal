@@ -461,14 +461,7 @@ $$class_handler(handleAccountDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNo
             account.connectionProperties.supportsPubSubMax = YES;
         }
     }
-    
-    //bookmarks2 needs modern pubsub features
-    if(account.connectionProperties.supportsModernPubSub && [features containsObject:@"urn:xmpp:bookmarks:1#compat-pep"])
-    {
-        DDLogInfo(@"supports XEP-0402 compat-pep");
-        account.connectionProperties.supportsBookmarksCompat = YES;
-    }
-    
+        
     if([features containsObject:@"urn:xmpp:push:0"])
     {
         DDLogInfo(@"supports push");

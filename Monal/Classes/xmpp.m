@@ -1319,7 +1319,7 @@ NSString* const kStanza = @"stanza";
     }
     else
     {
-        [[DataLayer sharedInstance] persistState:dic forAccount:self.accountNo];
+        [[DataLayer sharedInstance] persistState:newState forAccount:self.accountNo];
         [self readState];               //better safe than sorry
     }
 }

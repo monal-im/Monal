@@ -262,6 +262,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
             NSNumber* autojoin = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference@autojoin|bool"];
             if(autojoin == nil)
                 autojoin = @NO;     //default value specified in xep
+            BOOL pinned = [data[itemId] check:@"{urn:xmpp:bookmarks:1}conference/extensions/{urn:xmpp:bookmarks-pinning:0}pinned"];
             
             //check if this is a new entry with autojoin=true
             if(![ownFavorites containsObject:room] && [autojoin boolValue])
@@ -299,6 +300,12 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
                     //(only real mucs are part of our local favorites list and this list is joined automatically)
                     [account.mucProcessor sendJoinPresenceFor:room];
                 }
+            }
+            //check if pinned status changed (the check is done inside of [MLContact togglePinnedChat:]
+            else if([ownFavorites containsObject:room])
+            {
+                MLContact* contact = [MLContact createContactFromJid:room andAccountID:account.accountID];
+                [contact togglePinnedChat:pinned];
             }
         }
     }
@@ -382,6 +389,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
         NSNumber* autojoin = [item findFirst:@"{urn:xmpp:bookmarks:1}conference@autojoin|bool"];
         if(autojoin == nil)
             autojoin = @NO;     //default value specified in xep
+        BOOL pinned = [item check:@"{urn:xmpp:bookmarks:1}conference/extensions/{urn:xmpp:bookmarks-pinning:0}pinned"];
         
         //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
         if([ownFavorites containsObject:room] && ![autojoin boolValue])
@@ -407,6 +415,12 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
                 @"pubsub#max_items": max_items,
             } andHandler:$newHandler(self, bookmarks2Published, $ID(room))];
         }
+        //check if pinned status changed (the check is done inside of [MLContact togglePinnedChat:]
+        else if([ownFavorites containsObject:room])
+        {
+            MLContact* contact = [MLContact createContactFromJid:room andAccountID:account.accountID];
+            [contact togglePinnedChat:pinned];
+        }
     }
         
     //add all mucs not yet listed in bookmarks
@@ -414,6 +428,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     [toAdd  minusSet:[NSSet setWithArray:[_data allKeys]]];
     for(NSString* room in toAdd)
     {
+        MLContact* contact = [MLContact createContactFromJid:room andAccountID:account.accountID];
         DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountID);
         NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
         [account.pubsub publishItem:
@@ -423,6 +438,7 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
                 } andChildren:@[
                     nilWrapper(nick != nil ? [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick] : nil),
                     [[MLXMLNode alloc] initWithElement:@"extensions" withAttributes:@{} andChildren:@[
+                        nilWrapper(contact.isPinned ? [[MLXMLNode alloc] initWithElement:@"pinned" andNamespace:@"urn:xmpp:bookmarks-pinning:0" withAttributes:@{} andChildren:@[] andData:nil] : nil),
                         [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:monal.im:bookmarks:info" withAttributes:@{
                             @"name": @"Monal",
                             @"version": infoDict[@"CFBundleShortVersionString"],

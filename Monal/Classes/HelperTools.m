@@ -102,7 +102,7 @@ static NSObject* _isAppExtensionLock = nil;
 static NSObject* _suspensionHandling_lock = nil;
 static BOOL _suspensionHandling_isSuspended = NO;
 static NSMutableDictionary* _versionInfoCache;
-static NSCharacterSet* _validXMLCharacters;
+static NSCharacterSet* _invalidXMLCharacters;
 static MLStreamRedirect* _stdoutRedirector = nil;
 static MLStreamRedirect* _stderrRedirector = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
@@ -466,17 +466,17 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     [validXMLCharacters formUnionWithCharacterSet:[NSCharacterSet characterSetWithRange:NSMakeRange(0x10000, 0x10FFFF - 0x10000 + 1)]];
 
     NSMutableString* notRecommendedXMLCharacters = [NSMutableString new];
-    for (unichar i = 0x007F; i <= 0x0084; i++)
+    for(unichar i = 0x007F; i <= 0x0084; i++)
         [notRecommendedXMLCharacters appendFormat:@"%C", i];
 
-    for (unichar i = 0x0086; i <= 0x009F; i++)
+    for(unichar i = 0x0086; i <= 0x009F; i++)
         [notRecommendedXMLCharacters appendFormat:@"%C", i];
 
-    for (unichar i = 0xFDD0; i <= 0xFDEF; i++)
+    for(unichar i = 0xFDD0; i <= 0xFDEF; i++)
         [notRecommendedXMLCharacters appendFormat:@"%C", i];
 
     [validXMLCharacters removeCharactersInString:notRecommendedXMLCharacters];
-    _validXMLCharacters = [validXMLCharacters copy];
+    _invalidXMLCharacters = [validXMLCharacters invertedSet];
 
     //shamelessly stolen from utils.ip in conversations source
     IPV4 = [NSRegularExpression regularExpressionWithPattern:@"\\A(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
@@ -3180,13 +3180,7 @@ a=%@\r\n", mid, candidate];
 
 +(NSString*) removeInvalidXMLCharactersFromString:(NSString*) inputString
 {
-    NSMutableString* result = [NSMutableString new];
-    for (NSUInteger i = 0; i < inputString.length; i++) {
-        unichar character = [inputString characterAtIndex:i];
-        if([_validXMLCharacters characterIsMember:character])
-          [result appendFormat:@"%C", character];
-    }
-    return [result copy];
+    return [[inputString componentsSeparatedByCharactersInSet:_invalidXMLCharacters] componentsJoinedByString:@""];
 }
 
 //see https://nachtimwald.com/2017/04/02/constant-time-string-comparison-in-c/

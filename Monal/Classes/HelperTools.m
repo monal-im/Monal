@@ -386,13 +386,13 @@ void swizzle(Class c, SEL orig, SEL new)
     [validXMLCharacters formUnionWithCharacterSet:[NSCharacterSet characterSetWithRange:NSMakeRange(0x10000, 0x10FFFF - 0x10000 + 1)]];
 
     NSMutableString* notRecommendedXMLCharacters = [NSMutableString new];
-    for (unichar i = 0x007F; i <= 0x0084; i++)
+    for(unichar i = 0x007F; i <= 0x0084; i++)
         [notRecommendedXMLCharacters appendFormat:@"%C", i];
 
-    for (unichar i = 0x0086; i <= 0x009F; i++)
+    for(unichar i = 0x0086; i <= 0x009F; i++)
         [notRecommendedXMLCharacters appendFormat:@"%C", i];
 
-    for (unichar i = 0xFDD0; i <= 0xFDEF; i++)
+    for(unichar i = 0xFDD0; i <= 0xFDEF; i++)
         [notRecommendedXMLCharacters appendFormat:@"%C", i];
 
     [validXMLCharacters removeCharactersInString:notRecommendedXMLCharacters];
@@ -2936,10 +2936,12 @@ a=%@\r\n", mid, candidate];
 +(NSString*) removeInvalidXMLCharactersFromString:(NSString*) inputString
 {
     NSMutableString* result = [NSMutableString new];
-    for (NSUInteger i = 0; i < inputString.length; i++) {
+    for(NSUInteger i = 0; i < inputString.length; i++)
+    {
         unichar character = [inputString characterAtIndex:i];
-        if([_validXMLCharacters characterIsMember:character])
-          [result appendFormat:@"%C", character];
+        //allow everything above 0x10FFFF
+        if(character > 0x10FFFF || [_validXMLCharacters characterIsMember:character])
+            [result appendFormat:@"%C", character];
     }
     return [result copy];
 }

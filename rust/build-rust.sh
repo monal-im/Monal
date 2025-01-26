@@ -15,7 +15,7 @@ fi
 echo "Installing required components"
 
 rustup +nightly component add rust-src
-cargo install swift-bridge-cli
+cargo install swift-bridge-cli --color always
 #rustup component add rust-src --toolchain x86_64-apple-ios-macabi
 #rustup component add rust-src --toolchain darwin-apple-ios-macabi
 
@@ -24,8 +24,8 @@ rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
 echo "Building stdlib for the desired platforms..."
 #cargo build --target x86_64-apple-darwin
 #cargo build --target aarch64-apple-darwin
-cargo +nightly build --verbose -Z build-std --target x86_64-apple-ios-macabi
-cargo +nightly build --verbose -Z build-std --target aarch64-apple-ios-macabi
+cargo +nightly build -Z build-std --target x86_64-apple-ios-macabi --color always
+cargo +nightly build -Z build-std --target aarch64-apple-ios-macabi --color always
 
 BRIDGE_NAME=libmonal_rust_swift_bridge.a
 
@@ -38,9 +38,9 @@ lipo \
     ./target/catalyst-macos/debug/$BRIDGE_NAME
 
 echo "Building rust code for all targets..."
-cargo build --target aarch64-apple-ios
-cargo build --target x86_64-apple-ios
-cargo build --target aarch64-apple-ios-sim
+cargo build --target aarch64-apple-ios --color always
+cargo build --target x86_64-apple-ios --color always
+cargo build --target aarch64-apple-ios-sim --color always
 
 echo "Creating ios target universal lib..."
 mkdir -p ./target/universal-ios/debug

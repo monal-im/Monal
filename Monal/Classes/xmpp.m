@@ -1306,6 +1306,24 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
+-(void) resetAccountState
+{
+    NSMutableDictionary* newState = [xmpp invalidateState:nil];
+    if([[DataLayer sharedInstance] isAccountEnabled:self.accountNo])
+    {
+        [self dispatchAsyncOnReceiveQueue: ^{
+            [self disconnect:YES];      //make sure we are in a safe state before resetting our state
+            [[DataLayer sharedInstance] persistState:newState forAccount:self.accountNo];
+            [self connect];             //this will reread persisted state saved above
+        }];
+    }
+    else
+    {
+        [[DataLayer sharedInstance] persistState:newState forAccount:self.accountNo];
+        [self readState];               //better safe than sorry
+    }
+}
+
 #pragma mark XMPP
 
 -(void) prepareXMPPParser

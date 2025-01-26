@@ -5,6 +5,8 @@ name: update-translations
 on:
   workflow_dispatch:
 
+permissions: {}
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -18,6 +20,8 @@ jobs:
       EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
       EXPORT_OPTIONS_CATALYST_APP_EXPORT: "../scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Beta_iOS_ExportOptions.plist"
+    permissions:
+      contents: write # needed for git push in updateLocalization
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v4

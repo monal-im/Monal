@@ -144,6 +144,10 @@ struct CrashTestingView: View {
                     Toggle(isOn: $defaultDB.hasCompletedOnboarding) {
                         Text("Don't show onboarding")
                     }
+
+                    Button("Reset the state of all accounts") {
+                        MLXMPPManager.sharedInstance().resetAllAccountStates()
+                    }
                 }
                 
                 Text("The following buttons allow you to forcefully crash the app using several different methods to test the crash handling.")

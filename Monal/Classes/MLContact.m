@@ -30,6 +30,10 @@ NSString* const kAskSubscribe = @"subscribe";
 
 static NSMutableDictionary* _singletonCache;
 
+@interface MLMucProcessor ()
+-(void) updateBookmarks;
+@end
+
 @interface MLContact ()
 {
     NSInteger _unreadCount;
@@ -677,6 +681,8 @@ static NSMutableDictionary* _singletonCache;
     if(account == nil)
         return;
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact":self, @"pinningChanged": @YES}];
+    if(self.isMuc)
+        [account.mucProcessor updateBookmarks];
 }
 
 -(BOOL) toggleBlocked:(BOOL) block

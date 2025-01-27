@@ -82,4 +82,9 @@ static NSString* appName = @"Monal";
     return (hasProperPrefix && hasProperSuffix);
 }
 
+-(BOOL) shouldLockLogFile:(NSString*) filePath
+{
+    return YES;
+}
+
 @end

@@ -54,19 +54,20 @@ jobs:
           echo "#define ALPHA_COMMIT_HASH \"$(git show-ref --hash --abbrev refs/heads/develop)\"" > Monal/Classes/commitHash.h
       - name: Make our build scripts executable
         run: chmod +x ./scripts/build.sh
-      - name: Cache Rust build artifacts
-        uses: actions/cache@v4
-        with:
-          key: rust-cache-target-${{ github.workflow }}-${{ github.sha }}
-          restore-keys: rust-cache-target-${{ github.workflow }}-
-          path: |
-            ./rust/target
-      - name: Cache XCode derived data
-        uses: irgaly/xcode-cache@v1
-        with:
-          delete-used-deriveddata-cache: true
-          key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
-          restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-
+      # use https://gha-cache-server.falcondev.io/getting-started to cache locally
+      # - name: Cache Rust build artifacts
+      #   uses: actions/cache@v4
+      #   with:
+      #     key: rust-cache-target-${{ github.workflow }}-${{ github.sha }}
+      #     restore-keys: rust-cache-target-${{ github.workflow }}-
+      #     path: |
+      #       ./rust/target
+      # - name: Cache XCode derived data
+      #   uses: irgaly/xcode-cache@v1
+      #   with:
+      #     delete-used-deriveddata-cache: true
+      #     key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
+      #     restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-
       - name: Run build
         run: ./scripts/build.sh
       - run: |

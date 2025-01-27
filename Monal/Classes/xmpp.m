@@ -1942,6 +1942,21 @@ NSString* const kStanza = @"stanza";
                         }];
                     }));
                 }
+                
+                if([presenceNode check:@"/<type=unsubscribed>"])
+                {
+                    // check if we need a contact request
+                    NSDictionary* contactSub = [[DataLayer sharedInstance] getSubscriptionForContact:contact.contactJid andAccount:contact.accountID];
+                    DDLogVerbose(@"Got unsubscribed/contact deny request of contact %@ having subscription status: %@", presenceNode.fromUser, contactSub);
+                    
+                    //wait 1 sec for nickname and profile image to be processed, then send out kMonalContactRefresh notification
+                    createTimer(1.0, (^{
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+                            @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountID:self.accountID],
+                            @"unsubscribed": @YES,
+                        }];
+                    }));
+                }
 
                 if(contact.isMuc || [presenceNode check:@"{http://jabber.org/protocol/muc#user}x"] || [presenceNode check:@"{http://jabber.org/protocol/muc}x"])
                 {

@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) ActiveChatsViewController* _Nullable activeChats;
 @property (nonatomic, strong) MLVoIPProcessor* _Nullable voipProcessor;
 @property (nonatomic, assign) MLAudioState audioState;
-@property (nonatomic) UIInterfaceOrientationMask orientationLock;
+@property (nonatomic, assign) UIInterfaceOrientationMask orientationLock;
 
 -(UIViewController*) getTopViewController;
 -(void) updateUnread;

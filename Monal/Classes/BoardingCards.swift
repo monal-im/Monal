@@ -131,6 +131,8 @@ struct OnboardingView: View {
                             /// Sets the minimum frame height to the available height of the scrollview and the maxHeight to infinity
                             .frame(minHeight: proxy.size.height, maxHeight: .infinity)
                         }
+                        .id(proxy.size.width)
+                        .id(proxy.size.height)
                     }
                     .accessibilityAddTraits(.isModal)
                 }

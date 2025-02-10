@@ -270,7 +270,7 @@ struct ChatView: View {
                     let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
                     let voipProcessor = (UIApplication.shared.delegate as! MonalAppDelegate).voipProcessor!
                     Button {
-                        if let activeCall = voipProcessor.getActiveCall(with:contact.obj) {
+                        if voipProcessor.getActiveCall(with:contact.obj) != nil {
                             if !DataLayer.sharedInstance().checkCap("urn:xmpp:jingle-message:0", forUser:contact.contactJid, onAccountID:contact.accountID) {
                                 confirmationPrompt = ConfirmationPrompt(
                                     title: Text("Missing Call Support"),
@@ -293,7 +293,7 @@ struct ChatView: View {
                                 activeChats.call(contact.obj, withUIKitSender:nil)
                         }
                     } label: {
-                        if let activeCall = voipProcessor.getActiveCall(with:contact.obj) {
+                        if voipProcessor.getActiveCall(with:contact.obj) != nil {
                             Image(systemName: "phone.connection.fill")
                         } else {
                             Image(systemName: "phone.fill")

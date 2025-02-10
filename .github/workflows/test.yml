@@ -17,12 +17,18 @@ jobs:
     runs-on: macos-latest
     name: Run automated tests
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
+          clean: true
           submodules: true
+          fetch-depth: 100
+          fetch-tags: true
+          show-progress: true
+          lfs: true
+      - name: Checkout submodules
+        run: git submodule update -f --init --remote
       - name: Build rust
-        run: ./rust/build-rust.sh
+        run: bash ./rust/build-rust.sh
       - name: Install pods
         working-directory: Monal
         run: pod install --repo-update

@@ -77,8 +77,6 @@
 		26E8462824EABAED00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462A24EABAED00ECE419 /* Main.storyboard */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
-		341F44662CAF427500AA6C7D /* MLPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = 341F44642CAF427500AA6C7D /* MLPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		341F44672CAF427500AA6C7D /* MLPromise.m in Sources */ = {isa = PBXBuildFile; fileRef = 341F44652CAF427500AA6C7D /* MLPromise.m */; };
 		340F0CA02D2425A4006224D0 /* MLMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 26611024238F17B20030A4EE /* MLMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		340F0CA12D2425AA006224D0 /* MLXMPPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 26611015238F08AC0030A4EE /* MLXMPPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		340F0CA22D2425C4006224D0 /* XMPPPresence.h in Headers */ = {isa = PBXBuildFile; fileRef = 264E34591787BAB100BC7BD0 /* XMPPPresence.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -86,6 +84,8 @@
 		340F0CA42D2425D9006224D0 /* MLXMPPIdentity.h in Headers */ = {isa = PBXBuildFile; fileRef = 26611010238F08980030A4EE /* MLXMPPIdentity.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		340F0CA52D2425E1006224D0 /* MLLogFileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C15D504824C727CC002F75BB /* MLLogFileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		340F0CA62D24267B006224D0 /* MLXMLNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 260C51D2177F44AD0039634B /* MLXMLNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		341F44662CAF427500AA6C7D /* MLPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = 341F44642CAF427500AA6C7D /* MLPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		341F44672CAF427500AA6C7D /* MLPromise.m in Sources */ = {isa = PBXBuildFile; fileRef = 341F44652CAF427500AA6C7D /* MLPromise.m */; };
 		3424B4E72D232BE2009F6503 /* MLContact.h in Headers */ = {isa = PBXBuildFile; fileRef = 26611029238F17CA0030A4EE /* MLContact.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4E82D232BE7009F6503 /* DataLayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 2601D9A80FBF255D004DB939 /* DataLayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4E92D232BEB009F6503 /* xmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 260C51CF177F08F50039634B /* xmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -188,6 +188,9 @@
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
 		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; };
+		84C6F6032D597FB20015575E /* ParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C6F6022D597FB20015575E /* ParserTest.m */; };
+		84C6F6052D597FD10015575E /* SDPTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C6F6042D597FD10015575E /* SDPTest.m */; };
+		84C6F6072D597FF40015575E /* HandlerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C6F6062D597FF40015575E /* HandlerTest.m */; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
 		84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 84E231F22C16A9CE00735FB7 /* SVGView */; };
 		84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
@@ -626,6 +629,9 @@
 		84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftHelpers.swift; sourceTree = "<group>"; };
 		84C1CD512A8F617F007076ED /* MLStreamRedirect.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLStreamRedirect.m; sourceTree = "<group>"; };
 		84C1CD532A8F6196007076ED /* MLStreamRedirect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLStreamRedirect.h; sourceTree = "<group>"; };
+		84C6F6022D597FB20015575E /* ParserTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ParserTest.m; sourceTree = "<group>"; };
+		84C6F6042D597FD10015575E /* SDPTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SDPTest.m; sourceTree = "<group>"; };
+		84C6F6062D597FF40015575E /* HandlerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HandlerTest.m; sourceTree = "<group>"; };
 		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
 		84F194C32C0FE70900F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Main.strings"; sourceTree = "<group>"; };
 		84F194C42C0FE74500F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Settings.strings"; sourceTree = "<group>"; };
@@ -1461,6 +1467,9 @@
 				C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */,
 				C104918A261301530054AC9E /* Info.plist */,
 				C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */,
+				84C6F6022D597FB20015575E /* ParserTest.m */,
+				84C6F6042D597FD10015575E /* SDPTest.m */,
+				84C6F6062D597FF40015575E /* HandlerTest.m */,
 			);
 			path = MonalXMPPUnitTests;
 			sourceTree = "<group>";
@@ -2272,8 +2281,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84C6F6072D597FF40015575E /* HandlerTest.m in Sources */,
+				84C6F6032D597FB20015575E /* ParserTest.m in Sources */,
 				C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */,
 				C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */,
+				84C6F6052D597FD10015575E /* SDPTest.m in Sources */,
 				C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -80,6 +80,46 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     MLContact* contact = notification.userInfo[@"contact"];
     NSString* idval = [NSString stringWithFormat:@"subscription(%@, %@)", contact.accountID, contact.contactJid];
     
+    //contact request denial or unsubscribe
+    if(notification.userInfo[@"unsubscribed"] != nil && [notification.userInfo[@"unsubscribed"] boolValue] == YES)
+    {
+        idval = [NSString stringWithFormat:@"unsubscription(%@, %@)", contact.accountID, contact.contactJid];
+        
+        //unsubscribe
+        if(contact.isSubscribedTo)
+        {
+            UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+            content.title = xmppAccount.connectionProperties.identity.jid;
+            content.body = [NSString stringWithFormat:NSLocalizedString(@"The user %@ (%@) removed you from their contact list. You can send out a new contact request, if you think this was a mistake.", @""), contact.contactDisplayName, contact.contactJid];
+            content.threadIdentifier = [self threadIdentifierWithContact:contact];
+            //don't simply use contact directly to make sure we always use a freshly created up to date contact when unpacking the userInfo dict
+            content.userInfo = @{
+                @"fromContactJid": contact.contactJid,
+                @"fromContactAccountID": contact.accountID,
+            };
+            
+            DDLogDebug(@"Publishing notification with id %@", idval);
+            [self publishNotificationContent:content withID:idval];
+        }
+        //contact request denial
+        else
+        {
+            UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+            content.title = xmppAccount.connectionProperties.identity.jid;
+            content.body = [NSString stringWithFormat:NSLocalizedString(@"The user %@ (%@) denied your contact request. You can try again, if you think this was a mistake.", @""), contact.contactDisplayName, contact.contactJid];
+            content.threadIdentifier = [self threadIdentifierWithContact:contact];
+            //don't simply use contact directly to make sure we always use a freshly created up to date contact when unpacking the userInfo dict
+            content.userInfo = @{
+                @"fromContactJid": contact.contactJid,
+                @"fromContactAccountID": contact.accountID,
+            };
+            
+            DDLogDebug(@"Publishing notification with id %@", idval);
+            [self publishNotificationContent:content withID:idval];
+        }
+        return;
+    }
+    
     //remove contact requests notification once the contact request has been accepted
     if(!contact.hasIncomingContactRequest)
     {

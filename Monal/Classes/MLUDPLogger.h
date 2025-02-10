@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <monalxmpp/MLConstants.h>
+#import <CocoaLumberjack/DDLoggerNames.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

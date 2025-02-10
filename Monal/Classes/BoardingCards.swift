@@ -126,6 +126,8 @@ struct OnboardingView: View {
                             /// Sets the minimum frame height to the available height of the scrollview and the maxHeight to infinity
                             .frame(minHeight: proxy.size.height, maxHeight: .infinity)
                         }
+                        .id(proxy.size.width)
+                        .id(proxy.size.height)
                     }
                     .accessibilityAddTraits(.isModal)
                 }
@@ -134,8 +136,13 @@ struct OnboardingView: View {
         .onAppear {
             if UIDevice.current.userInterfaceIdiom != .pad {
                 //force portrait mode and lock ui there
-                UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
                 (UIApplication.shared.delegate as! MonalAppDelegate).orientationLock = .portrait
+            }
+        }
+        .onDisappear {
+            if UIDevice.current.userInterfaceIdiom != .pad {
+                //undo orientation lock
+                (UIApplication.shared.delegate as! MonalAppDelegate).orientationLock = .all
             }
         }
     }

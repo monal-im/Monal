@@ -89,19 +89,19 @@ typedef NS_ENUM(NSUInteger, MLAudioState) {
 //some useful macros
 #define weakify(var)                        __weak __typeof__(var) AHKWeak_##var = var
 #define strongify(var)                      _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
-#define nilWrapper(var)                     (var == nil ? (id)[NSNull null] : (id)var)
-#define nilExtractor(var)                   ((id)var == [NSNull null] ? nil : var)
-#define nilDefault(var, def)                (var == nil || (id)var == [NSNull null] ? def : var)
+#define nilWrapper(var)                     ({id _var=(id)(var); _var == nil ? [NSNull null] : _var;})
+#define nilExtractor(var)                   ({id _var=(id)(var); _var == [NSNull null] ? nil : _var;})
+#define nilDefault(var, def)                ({id _var=(id)(var); _var == nil || _var == [NSNull null] ? (id)(def) : _var;})
 #define nilDefaultEnum(var, def)            (((NSNumber*)nilDefault(var, def)).integerValue)
 #define nilDefaultBool(var, def)            (((NSNumber*)nilDefault(var, def)).boolValue)
 #define nilDefaultInt(var, def)             (((NSNumber*)nilDefault(var, def)).intValue)
 #define nilDefaultDouble(var, def)          (((NSNumber*)nilDefault(var, def)).doubleValue)
-#define emptyDefault(var, eq, def)          (var == nil || (id)var == [NSNull null] || [var isEqual:eq] ? def : var)
-#define updateIfIdNotEqual(a, b)            if(a != b && ![a isEqual:b]) a = b
-#define updateIfPrimitiveNotEqual(a, b)     if(a != b) a = b
+#define emptyDefault(var, eq, def)          ({id _var=(id)(var); _var == nil || _var == [NSNull null] || [_var isEqual:(eq)] ? (def) : _var;})
+#define updateIfIdNotEqual(a, b)            if((a) != (b) && ![(a) isEqual:(b)]) (a) = (b)
+#define updateIfPrimitiveNotEqual(a, b)     if((a) != (b)) (a) = (b)
 #define var                                 __auto_type 
 #define let                                 const __auto_type
-#define bool2str(b)                         (b ? @"YES" : @"NO")
+#define bool2str(b)                         ((b) ? @"YES" : @"NO")
 
 #define min(a, b) \
     ({ __typeof__ (a) _a = (a); \

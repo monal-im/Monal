@@ -49,7 +49,7 @@
 @import AVFoundation;
 @import SAMKeychain;
 
-#define STATE_VERSION 18
+#define STATE_VERSION 19
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -211,12 +211,7 @@ NSString* const kStanza = @"stanza";
     //we want to get automatic roster name updates (XEP-0172)
     [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:$newHandler(MLPubSubProcessor, rosterNameHandler)];
     
-    //we want to get automatic bookmark updates (XEP-0048)
-    //this will only be used/handled, if the account disco feature urn:xmpp:bookmarks:1#compat-pep is not set by the server and ignored otherwise
-    //(it will be automatically headline-pushed nevertheless --> TODO: remove this once all modern servers support XEP-0402 compat)
-    [self.pubsub registerForNode:@"storage:bookmarks" withHandler:$newHandler(MLPubSubProcessor, bookmarksHandler)];
-    
-    //we now support the modern bookmarks protocol (XEP-0402)
+    //we want to get automatic bookmarks2 updates (XEP-0402)    
     [self.pubsub registerForNode:@"urn:xmpp:bookmarks:1" withHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler)];
     
     //we support mds
@@ -1308,6 +1303,24 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
+-(void) resetAccountState
+{
+    NSMutableDictionary* newState = [xmpp invalidateState:nil];
+    if([[DataLayer sharedInstance] isAccountEnabled:self.accountID])
+    {
+        [self dispatchAsyncOnReceiveQueue: ^{
+            [self disconnect:YES];      //make sure we are in a safe state before resetting our state
+            [[DataLayer sharedInstance] persistState:newState forAccount:self.accountID];
+            [self connect];             //this will reread persisted state saved above
+        }];
+    }
+    else
+    {
+        [[DataLayer sharedInstance] persistState:newState forAccount:self.accountID];
+        [self readState];               //better safe than sorry
+    }
+}
+
 #pragma mark XMPP
 
 -(void) prepareXMPPParser
@@ -1926,6 +1939,21 @@ NSString* const kStanza = @"stanza";
                     createTimer(1.0, (^{
                         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
                             @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountID:self.accountID]
+                        }];
+                    }));
+                }
+                
+                if([presenceNode check:@"/<type=unsubscribed>"])
+                {
+                    // check if we need a contact request
+                    NSDictionary* contactSub = [[DataLayer sharedInstance] getSubscriptionForContact:contact.contactJid andAccount:contact.accountID];
+                    DDLogVerbose(@"Got unsubscribed/contact deny request of contact %@ having subscription status: %@", presenceNode.fromUser, contactSub);
+                    
+                    //wait 1 sec for nickname and profile image to be processed, then send out kMonalContactRefresh notification
+                    createTimer(1.0, (^{
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+                            @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountID:self.accountID],
+                            @"unsubscribed": @YES,
                         }];
                     }));
                 }
@@ -3579,7 +3607,6 @@ NSString* const kStanza = @"stanza";
             [values setObject:[self->_runningMamQueries copy] forKey:@"runningMamQueries"];
             [values setObject:[NSNumber numberWithBool:self->_loggedInOnce] forKey:@"loggedInOnce"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
-            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBookmarksCompat] forKey:@"supportsBookmarksCompat"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSubMax] forKey:@"supportsPubSubMax"];
@@ -3619,7 +3646,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountID];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
                 self.accountID,
                 values[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3635,7 +3662,6 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPubSub,
                 self.connectionProperties.supportsModernPubSub,
                 self.connectionProperties.supportsPubSubMax,
-                self.connectionProperties.supportsBookmarksCompat,
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
                 self.omemo.state,
@@ -3744,12 +3770,6 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.usingCarbons2 = carbonsNumber.boolValue;
             }
             
-            if([dic objectForKey:@"supportsBookmarksCompat"])
-            {
-                NSNumber* compatNumber = [dic objectForKey:@"supportsBookmarksCompat"];
-                self.connectionProperties.supportsBookmarksCompat = compatNumber.boolValue;
-            }
-            
             if([dic objectForKey:@"pushEnabled"])
             {
                 NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
@@ -3822,7 +3842,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
                 self.accountID,
                 dic[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3838,7 +3858,6 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsPubSub,
                 self.connectionProperties.supportsModernPubSub,
                 self.connectionProperties.supportsPubSubMax,
-                self.connectionProperties.supportsBookmarksCompat,
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
                 self.omemo.state,
@@ -3972,7 +3991,6 @@ NSString* const kStanza = @"stanza";
     self.connectionProperties.uploadServer = nil;
     //self.connectionProperties.supportsSM3 = NO;                   //already set by stream feature parsing
     self.connectionProperties.pushEnabled = NO;
-    self.connectionProperties.supportsBookmarksCompat = NO;
     self.connectionProperties.usingCarbons2 = NO;
     //self.connectionProperties.serverIdentity = @"";               //already set by stream feature parsing
     self.connectionProperties.supportsPubSub = NO;

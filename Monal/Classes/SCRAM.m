@@ -71,11 +71,11 @@
     MLAssert(!_serverFirstMessageParsed, @"SCRAM handler already parsed server-first-message!");
     DDLogVerbose(@"Creating SDDP string: %@\n%@", mechanisms, cbTypes);
     NSMutableString* ssdpString = [NSMutableString new];
-    [ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
+    [ssdpString appendString:[[mechanisms sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@"\x1e"]];
     if(cbTypes != nil)
     {
-        [ssdpString appendString:@"|"];
-        [ssdpString appendString:[[cbTypes sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@","]];
+        [ssdpString appendString:@"\x1f"];
+        [ssdpString appendString:[[cbTypes sortedArrayUsingSelector:@selector(compare:)] componentsJoinedByString:@"\x1e"]];
     }
     _ssdpString = [ssdpString copy];
     DDLogVerbose(@"SDDP string is now: %@", _ssdpString);
@@ -114,12 +114,12 @@
     _salt = [HelperTools dataWithBase64EncodedString:msg[@"s"]];
     _iterationCount = (uint32_t)[msg[@"i"] integerValue];
     //check if SSDP downgrade protection triggered, if provided
-    if(msg[@"d"] != nil && _ssdpString != nil)
+    if(msg[@"h"] != nil && _ssdpString != nil)
     {
         _ssdpSupported = YES;
         //calculate base64 encoded SSDP hash and compare it to server sent value
         NSString* ssdpHash =[HelperTools encodeBase64WithData:[self hash:[_ssdpString dataUsingEncoding:NSUTF8StringEncoding]]];
-        if(![HelperTools constantTimeCompareAttackerString:msg[@"d"] withKnownString:ssdpHash])
+        if(![HelperTools constantTimeCompareAttackerString:msg[@"h"] withKnownString:ssdpHash])
             return MLScramStatusSSDPTriggered;
     }
     if(_iterationCount < 4096)
@@ -891,10 +891,11 @@
     s->_clientFirstMessageBare = @"n=user,r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6";
     s->_gssHeader = @"p=tls-exporter,,";
     
-    s->_serverFirstMessage = @"r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6,s=QSXCR+Q6sek8bf92,i=4096,d=dRc3RenuSY9ypgPpERowoaySQZY=";
+    s->_serverFirstMessage = @"r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6,s=QSXCR+Q6sek8bf92,i=4096,h=G6k/rBLDqgOhRRaCuuatSDFkJ08=";
     s->_nonce = @"12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6";
     s->_salt = [HelperTools dataWithBase64EncodedString:@"QSXCR+Q6sek8bf92"];
     s->_iterationCount = 4096;
+    s->_serverFirstMessageParsed = YES;
     
     NSString* client_final_msg = [s clientFinalMessageWithChannelBindingData:[@"THIS IS FAKE CB DATA" dataUsingEncoding:NSUTF8StringEncoding]];
     DDLogError(@"client_final_msg: %@", client_final_msg);

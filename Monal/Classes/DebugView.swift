@@ -122,13 +122,17 @@ struct CrashTestingView: View {
     
     var body: some View {
             VStack(alignment:.leading, spacing: 25) {
-                Section(header: Text("Some debug settings.")) {
+                Section(header: Text("Some debug settings:")) {
                     Toggle(isOn: $defaultDB.hasCompletedOnboarding) {
                         Text("Don't show onboarding")
                     }
                     
                     Toggle(isOn: $defaultDB.showNewChatView) {
                         Text("Show new SwiftUI ChatView")
+                    }
+
+                    Button("Reset the state of all accounts") {
+                        MLXMPPManager.sharedInstance().resetAllAccountStates()
                     }
                 }
                 

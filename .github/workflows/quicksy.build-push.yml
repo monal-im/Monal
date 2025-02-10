@@ -9,6 +9,8 @@ on:
 
   workflow_dispatch:
 
+permissions: {}
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -20,6 +22,9 @@ jobs:
       BUILD_SCHEME: "Quicksy"
       BUILD_TYPE: "AppStore-Quicksy"
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Quicksy_Stable_iOS_ExportOptions.plist"
+    permissions:
+      actions: write # needed to upload artifacts
+      contents: write # needed for git push
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v4
@@ -33,10 +38,12 @@ jobs:
       - name: Checkout submodules
         run: git submodule update -f --init --remote
       - name: Check for proper semantic versioning
+        env:
+          GITHUB_REF: ${{ github.ref }}
         run: |
           buildNumber="$(git tag --sort="v:refname" | grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')"
           version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
-          if [ "${{ github.ref }}" != "refs/heads/stable" ]; then
+          if [ "${GITHUB_REF}" != "refs/heads/stable" ]; then
             version="1.$buildNumber.0"
           fi
           
@@ -51,6 +58,8 @@ jobs:
           echo "New buildNumber is $buildNumber"
           git tag Quicksy_Build_iOS_$buildNumber
       - name: Extract version number and changelog from newest merge commit
+        env:
+          GITHUB_REF: ${{ github.ref }}
         id: releasenotes
         run: |
           function repairNotes {
@@ -74,7 +83,7 @@ jobs:
           }
           buildNumber="$(git tag --sort="v:refname" | grep "Quicksy_Build_iOS" | tail -n1 | sed 's/Quicksy_Build_iOS_//g')"
           version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
-          if [ "${{ github.ref }}" != "refs/heads/stable" ]; then
+          if [ "${GITHUB_REF}" != "refs/heads/stable" ]; then
             version="1.$buildNumber.0"
           fi
           mkdir -p /Users/ci/quicksy_releases
@@ -150,9 +159,11 @@ jobs:
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app --file ./Monal/build/ipa/Quicksy.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
+          APP_VERSION: ${{ steps.releasenotes.outputs.version }}
           DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path_ios }}
+          FASTLANE_METADATA_DIRECTORY: ${{ steps.metadata.outputs.path }}
         run: |
-          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Quicksy.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" platform:ios reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Quicksy.ipa" app_version:"${APP_VERSION}" platform:ios reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
       - name: Remove fastlane metadata directory
         run: |
-          rm -rf "${{ steps.metadata.outputs.path }}"
+          rm -rf "${FASTLANE_METADATA_DIRECTORY}"

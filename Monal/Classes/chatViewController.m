@@ -1138,6 +1138,8 @@ enum msgSentState {
 
     // Trim leading spaces
     NSString* cleanString = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    cleanString = [HelperTools removeInvalidXMLCharactersFromString:cleanString];
+
     // Only send msg that have at least one character
     if(cleanString.length > 0)
     {

@@ -9,6 +9,8 @@ on:
 
   workflow_dispatch:
 
+permissions: {}
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -23,6 +25,9 @@ jobs:
       EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
       EXPORT_OPTIONS_CATALYST_APP_EXPORT: "../scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
       EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Stable_iOS_ExportOptions.plist"
+    permissions:
+      actions: write # needed to upload artifacts
+      contents: write # needed for git push
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v4
@@ -162,9 +167,10 @@ jobs:
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app --file ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
+          APP_VERSION: ${{ steps.releasenotes.outputs.version }}
           DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path_ios }}
         run: |
-          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" app_version:"${APP_VERSION}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
       - name: Notarize catalyst
         run: xcrun notarytool submit ./Monal/build/app/Monal.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
       - name: Staple notarisation
@@ -192,15 +198,19 @@ jobs:
       - name: Publish catalyst to appstore connect
         #run: xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id maccatalyst.G7YU7X7KRJ.SworIM
         env:
+          APP_VERSION: ${{ steps.releasenotes.outputs.version }}
           DELIVER_METADATA_PATH: ${{ steps.metadata.outputs.path_macos }}
         run: |
-          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" app_version:"${{ steps.releasenotes.outputs.version }}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
+          fastlane run upload_to_app_store api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" app_version:"${APP_VERSION}" reject_if_possible:true submit_for_review:true automatic_release:true skip_metadata:false skip_screenshots:true precheck_include_in_app_purchases:false version_check_wait_retry_limit:10 force:true
       # - name: Update xmpp.org client list with new timestamp
       #   run: ./scripts/push_xmpp.org.sh
       - name: Remove fastlane metadata directory
+        env:
+          METADATA_IOS: ${{ steps.metadata.outputs.path_ios }}
+          METADATA_MACOS: ${{ steps.metadata.outputs.path_macos }}
         run: |
-          rm -rf "${{ steps.metadata.outputs.path_ios }}"
-          rm -rf "${{ steps.metadata.outputs.path_macos }}"
+          rm -rf "${METADATA_IOS}"
+          rm -rf "${METADATA_MACOS}"
       - name: Create Draft Release
         id: draftrelease
         uses: softprops/action-gh-release@v2
@@ -219,5 +229,8 @@ jobs:
           prerelease: false
           draft: true
       - name: Write draft release id to build env
+        env:
+          RELEASE_ID: ${{ steps.draftrelease.outputs.id }}
+          OUTPUT_FILE: ${{ steps.releasenotes.outputs.OUTPUT_FILE }}
         run: |
-          echo "releaseID=${{ steps.draftrelease.outputs.id }}" | tee /dev/stderr >> "${{ steps.releasenotes.outputs.OUTPUT_FILE }}"
+          echo "releaseID=${RELEASE_ID}" | tee /dev/stderr >> "${OUTPUT_FILE}"

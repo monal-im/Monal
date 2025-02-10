@@ -29,11 +29,11 @@ struct ContactRequestsMenuEntry: View {
                 .buttonStyle(BorderlessButtonStyle())
                 
                 Button {
-                    // deny request
+                    // deny request and block contact
                     MLXMPPManager.sharedInstance().remove(contact)
                     MLXMPPManager.sharedInstance().block(true, contact:contact)
                 } label: {
-                    Image(systemName: "xmark.circle")
+                    Image(systemName: "person.crop.circle.badge.checkmark")
                         .foregroundStyle(Color.red)
                 }
                 //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
@@ -43,7 +43,7 @@ struct ContactRequestsMenuEntry: View {
                     // deny request
                     MLXMPPManager.sharedInstance().remove(contact)
                 } label: {
-                    Image(systemName: "trash.circle")
+                    Image(systemName: "person.crop.circle.badge.minus")
                         .foregroundStyle(Color.red)
                 }
                 //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
@@ -55,7 +55,7 @@ struct ContactRequestsMenuEntry: View {
                     let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                     appDelegate.openChat(of:contact)
                 } label: {
-                    Image(systemName: "checkmark.circle")
+                    Image(systemName: "person.crop.circle.badge.checkmark")
                         .foregroundStyle(Color.green)
                 }
                 //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952

@@ -116,6 +116,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) disconnect:(BOOL) explicitLogout;
 -(void) reconnect;
 -(void) reconnect:(double) wait;
+-(void) resetAccountState;
 
 -(void) setPubSubNotificationsForNodes:(NSArray* _Nonnull) nodes persistState:(BOOL) persistState;
 
@@ -235,7 +236,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) publishStatusMessage:(NSString*) message;
 -(void) delayIncomingMessageStanzasForArchiveJid:(NSString*) archiveJid;
 
-+(NSMutableDictionary*) invalidateState:(NSDictionary*) dic;
++(NSMutableDictionary*) invalidateState:(NSDictionary* _Nullable) dic;
 -(void) updateIqHandlerTimeouts;
 
 -(void) addReconnectionHandler:(MLHandler*) handler;

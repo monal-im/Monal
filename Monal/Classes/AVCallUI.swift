@@ -545,7 +545,6 @@ struct AVCallUI: View {
         }
         .onAppear {
             //force portrait mode and lock ui there
-            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
             self.appDelegate.obj.orientationLock = .portrait
             UIApplication.shared.isIdleTimerDisabled = true
             

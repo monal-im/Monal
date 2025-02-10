@@ -221,6 +221,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSNumber*) currentTimestampInSeconds;
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date;
 
++(NSString*) removeInvalidXMLCharactersFromString:(NSString*) inputString;
 +(BOOL) constantTimeCompareAttackerString:(NSString* _Nonnull) str1 withKnownString:(NSString* _Nonnull) str2;
 
 +(BOOL) isIP:(NSString*) host;

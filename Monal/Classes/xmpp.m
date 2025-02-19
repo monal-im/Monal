@@ -4551,6 +4551,8 @@ NSString* const kStanza = @"stanza";
             //this means the jid is an account which can not be queried if not subscribed
             if([error check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}service-unavailable"])
                 return resolve(@"account");
+            else if([error check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}feature-not-implemented"])
+                return resolve(@"account");
             else if([error check:@"/<type=error>/error<type=auth>/{urn:ietf:params:xml:ns:xmpp-stanzas}subscription-required"])
                 return resolve(@"account");
             //any other error probably means the remote server is not reachable or (even more likely) the jid is incorrect

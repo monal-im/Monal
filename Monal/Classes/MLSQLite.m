@@ -19,12 +19,38 @@
 @end
 
 static NSMutableDictionary* currentTransactions;
+static dispatch_queue_t walCheckpointingQueue;
+static NSMutableArray* dbFilesList;
+
+static int wal_hook(void* arg, sqlite3* database, const char* dbname, int numberOfPages)
+{
+    if(numberOfPages < 1000)
+        return SQLITE_OK;
+    
+    DDLogVerbose(@"Triggering db checkpoint...");
+    dispatch_async(walCheckpointingQueue, ^{
+        DDLogDebug(@"Checkpointing database: %@", (__bridge NSString*)arg);
+        int walLogFrames;
+        int checkpointedFrames;
+        if(sqlite3_wal_checkpoint_v2(database, dbname, SQLITE_CHECKPOINT_PASSIVE, &walLogFrames, &checkpointedFrames) == SQLITE_OK)
+            DDLogDebug(@"Checkpointed %d frames with wal log size %d in database: %@", checkpointedFrames, walLogFrames, (__bridge NSString*)arg);
+        else
+        {
+            int errcode = sqlite3_extended_errcode(database);
+            NSString* error = [NSString stringWithUTF8String:sqlite3_errmsg(database)];
+            DDLogError(@"Error checkpointing wal log: %d %@, database %@", errcode, error, (__bridge NSString*)arg);
+        }
+    });
+    return SQLITE_OK;
+}
 
 @implementation MLSQLite
 
 +(void) initialize
 {
     currentTransactions = [NSMutableDictionary new];
+    walCheckpointingQueue = dispatch_queue_create_with_target("im.monal.walCheckpointingQueue", DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0));
+    dbFilesList = [NSMutableArray new];
     
     if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
         DDLogInfo(@"sqlite initialize: sqlite3 configured ok");
@@ -104,13 +130,25 @@ static NSMutableDictionary* currentTransactions;
     //some settings (e.g. truncate is faster than delete)
     //this uses the private api because we have no thread local instance added to the threadData dictionary yet and we don't use a transaction either (and public apis check both)
     //--> we must use the internal api because it does not call testThreadInstanceForQuery: testTransactionsForQuery:
-    sqlite3_busy_timeout(self->_database, 2000);        //set the busy time as early as possible to make sure the pragma states don't trigger a retry too often
+    sqlite3_busy_timeout(self->_database, 1000);        //set the busy time as early as possible to make sure the pragma states don't trigger a retry too often
+    
+    //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
+    //this is a special case because it can not be done while in a transaction!!!
+    [self enableWAL];
+    
+    //some settings for faster sqlite, see https://hg.prosody.im/trunk/file/df32fff0963d/plugins/mod_storage_sql.lua#l943
+    //synchronous NORMALE versus OFF don't have any differences in WAL mode, see: https://sqlite.org/pragma.html#pragma_synchronous
+    while([self executeNonQuery:@"PRAGMA secure_delete=FAST;" andArguments:@[] withException:NO] != YES)
+        DDLogError(@"Database locked, while calling 'PRAGMA secure_delete=FAST;', retrying...");
     while([self executeNonQuery:@"PRAGMA synchronous=NORMAL;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA synchronous=NORMAL;', retrying...");
     while([self executeNonQuery:@"PRAGMA truncate;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA truncate;', retrying...");
+    
+    //this is needed because we use foreign keys to cascade deletes
     while([self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA foreign_keys=on;', retrying...");
+    
     //this seems to provide *slightly* better security
     //see https://sqlite.org/pragma.html#pragma_trusted_schema
     while([self executeNonQuery:@"PRAGMA trusted_schema = off;" andArguments:@[] withException:NO] != YES)
@@ -639,17 +677,32 @@ static NSMutableDictionary* currentTransactions;
     MLAssert([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0, @"Could not enable wal, inside transaction!", (@{
         @"threadDictionary": threadData
     }));
+    
     NSString* mode = [self internalExecuteScalar:@"PRAGMA journal_mode;" andArguments:@[]];
-    if([mode isEqualToString:@"wal"])
-        return;
-    mode = [self internalExecuteScalar:@"PRAGMA journal_mode=WAL;" andArguments:@[]];
-    if([mode isEqualToString:@"wal"])
-        DDLogWarn(@"Transaction mode set to WAL");
-    else
-        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Failed to enable sqlite WAL mode" userInfo:@{
-            @"file": _dbFile,
-            @"mode": mode
-        }];
+    if(![mode isEqualToString:@"wal"])
+    {
+        mode = [self internalExecuteScalar:@"PRAGMA journal_mode=WAL;" andArguments:@[]];
+        if([mode isEqualToString:@"wal"])
+            DDLogWarn(@"Transaction mode set to WAL");
+        else
+            @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Failed to enable sqlite WAL mode" userInfo:@{
+                @"file": _dbFile,
+                @"mode": mode
+            }];
+    }
+    
+    @synchronized(dbFilesList) {
+        //we collect all db names ever opened, but store every name only once to prevent memory leaks
+        //this is neccessary to make ARC keep the db name in memory so that we can safely pass a pointer to this object to our sqlite hook below
+        NSUInteger index = [dbFilesList indexOfObject:_dbFile];
+        if(index == NSNotFound)
+        {
+            [dbFilesList addObject:_dbFile];
+            index = dbFilesList.count - 1;
+        }
+        //this makes sure to run the checkpointing in a background thread to not block the main thread or any other important thread
+        sqlite3_wal_hook(self->_database, wal_hook, (__bridge_retained void*)dbFilesList[index]);
+    }
 }
 
 -(void) checkpointWal

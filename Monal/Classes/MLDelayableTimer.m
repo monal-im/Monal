@@ -81,7 +81,7 @@
             return;
         }
         NSTimeInterval remaining = _wrappedTimer.fireDate.timeIntervalSinceNow;
-        if(remaining == 0)
+        if(remaining < 0.001)
         {
             DDLogWarn(@"Tried to pause timer the exact second its firing: %@", self);
             return;
@@ -121,8 +121,11 @@
         }
         DDLogDebug(@"Canceling timer: %@", self);
         [self invalidate];
+        [self scheduleBlockInRunLoop:^{
+            if(_cancelHandler != nil)
+                _cancelHandler(self);
+        }];
     }
-    _cancelHandler(self);
 }
 
 -(void) invalidate

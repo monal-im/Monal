@@ -93,19 +93,10 @@ static NSDateFormatter* dbFormatter;
     
     //checking db version and upgrading if necessary
     DDLogInfo(@"Database version check");
-    
-    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
-    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
-    [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
 
     //do db upgrades and vacuum db afterwards
     if([DataLayerMigrations migrateDB:self.db withDataLayer:self])
         [self.db vacuum];
-
-    //turn foreign keys on again
-    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
-    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
-    [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
     
     DDLogInfo(@"Database version check completed");
     

@@ -65,6 +65,10 @@
     }];
 
     return [db boolWriteTransaction:^{
+        //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+        [db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
+        [db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        
         NSNumber* dbversion = [self readDBVersion:db];
         DDLogInfo(@"Got db version %@", dbversion);
 
@@ -1185,6 +1189,11 @@
                 [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id';" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
             }
         }
+        
+        //turn foreign keys on again
+        //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+        [db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
+        [db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         
         //check if db version changed and invalidate state, if so
         NSNumber* newdbversion = [self readDBVersion:db];

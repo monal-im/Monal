@@ -93,6 +93,11 @@ allow subscription. Called in response to a remote request.
  */
 -(void) leaveRoom:(NSString*) room withNick:(NSString*) nick;
 
+/**
+ change nickname in the room
+ */
+-(void) changeNickname:(NSString*) room withNick:(NSString*) nick;
+
 @end
 
 NS_ASSUME_NONNULL_END

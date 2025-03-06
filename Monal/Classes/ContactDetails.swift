@@ -28,6 +28,8 @@ struct ContactDetails: View {
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
     @State private var showAlert = false
     @State private var success = false
+    @State private var groupNickname = ""
+    @State private var isEditingGroupNickname = false
     @State private var successCallback: monal_void_block_t?
     @StateObject private var overlay = LoadingOverlayState()
     var delegate: SheetDismisserProtocol?
@@ -358,6 +360,17 @@ struct ContactDetails: View {
                     })
                     .accessibilityLabel(Text("Nickname"))
                     .addClearButton(isEditing: isEditingNickname, text: $contact.nickNameView)
+                }
+                if contact.isMuc {
+                    TextField("", text: $groupNickname , onEditingChanged: { EditingGroupNickname in
+                        isEditingGroupNickname = EditingGroupNickname
+                    })
+                    .onSubmit {
+                        let presence = XMPPPresence()
+                        presence.changeNickname(contact.contactJid as String, withNick: groupNickname)
+                        account.send(presence)
+                    }
+                    .addClearButton(isEditing: isEditingGroupNickname, text: $groupNickname)
                 }
                 
                 Toggle(isOn: Binding(get: {

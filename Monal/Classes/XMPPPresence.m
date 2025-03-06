@@ -89,6 +89,11 @@
     self.attributes[@"type"] = @"unavailable";
 }
 
+-(void) changeNickname:(NSString*) room withNick:(NSString*) nick
+{
+    [self.attributes setObject:[NSString stringWithFormat:@"%@/%@", room, nick] forKey:@"to"];
+}
+
 #pragma mark subscription
 
 -(void) unsubscribeContact:(MLContact*) contact

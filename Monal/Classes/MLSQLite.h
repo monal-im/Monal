@@ -42,7 +42,8 @@ typedef BOOL (^monal_sqlite_bool_operations_t)(void);
 
 -(void) checkpointWal;
 -(void) enableWAL;
--(void) vacuum;
+-(BOOL) vacuum;
+-(BOOL) vacuumInto:(NSString*) newFile;
 
 @end
 

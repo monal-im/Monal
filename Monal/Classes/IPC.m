@@ -105,23 +105,8 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
     NSString* temporaryFilename = [NSString stringWithFormat:@"ipc_%@.db", [[NSProcessInfo processInfo] globallyUniqueString]];
     NSString* temporaryFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:temporaryFilename];
     
-    //checkpoint db before copying db file
-    [self.db checkpointWal];
-    
-    //this transaction creates a new wal log and makes sure the file copy is atomic/consistent
-    BOOL success = [self.db boolWriteTransaction:^{
-        //copy db file to temp file
-        NSError* error;
-        [fileManager copyItemAtPath:self->_dbFile toPath:temporaryFilePath error:&error];
-        if(error)
-        {
-            DDLogError(@"Could not copy database to export location!");
-            return NO;
-        }
-        return YES;
-    }];
-    
-    if(success)
+    [self.db vacuumInto:temporaryFilePath];
+    if([fileManager fileExistsAtPath:temporaryFilePath])
         return temporaryFilePath;
     return nil;
 }

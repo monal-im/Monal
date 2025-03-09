@@ -97,6 +97,7 @@ static NSDateFormatter* dbFormatter;
     //do db upgrades and vacuum db afterwards
     if([DataLayerMigrations migrateDB:self.db withDataLayer:self])
         [self.db vacuum];
+    [self.db checkpointWal];
     
     DDLogInfo(@"Database version check completed");
     
@@ -116,23 +117,8 @@ static NSDateFormatter* dbFormatter;
     NSString* temporaryFilename = [NSString stringWithFormat:@"sworim_%@.db", [[NSProcessInfo processInfo] globallyUniqueString]];
     NSString* temporaryFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:temporaryFilename];
     
-    //checkpoint db before copying db file
-    [self.db checkpointWal];
-    
-    //this transaction creates a new wal log and makes sure the file copy is atomic/consistent
-    BOOL success = [self.db boolWriteTransaction:^{
-        //copy db file to temp file
-        NSError* error;
-        [fileManager copyItemAtPath:dbPath toPath:temporaryFilePath error:&error];
-        if(error)
-        {
-            DDLogError(@"Could not copy database to export location!");
-            return NO;
-        }
-        return YES;
-    }];
-    
-    if(success)
+    [self.db vacuumInto:temporaryFilePath];
+    if([fileManager fileExistsAtPath:temporaryFilePath])
         return temporaryFilePath;
     return nil;
 }
@@ -142,7 +128,7 @@ static NSDateFormatter* dbFormatter;
     [self.db voidWriteTransaction:block];
 }
 
--(void) vacuum
+-(BOOL) vacuum
 {
     return [self.db vacuum];
 }

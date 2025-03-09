@@ -16,31 +16,33 @@
     NSString* _dbFile;
     sqlite3* _database;
 }
+-(void) beginWriteTransaction;
+-(void) endWriteTransaction;
 @end
 
 static NSMutableDictionary* currentTransactions;
-static dispatch_queue_t walCheckpointingQueue;
+static NSOperationQueue* walCheckpointingQueue;
 static NSMutableArray* dbFilesList;
 
 static int wal_hook(void* arg, sqlite3* database, const char* dbname, int numberOfPages)
 {
-    if(numberOfPages < 1000)
+    //checkpoint after 4 MiB worth of data written to the wal file
+    if(numberOfPages < 1024)
         return SQLITE_OK;
     
-    DDLogVerbose(@"Triggering db checkpoint...");
-    dispatch_async(walCheckpointingQueue, ^{
-        DDLogDebug(@"Checkpointing database: %@", (__bridge NSString*)arg);
-        int walLogFrames;
-        int checkpointedFrames;
-        if(sqlite3_wal_checkpoint_v2(database, dbname, SQLITE_CHECKPOINT_PASSIVE, &walLogFrames, &checkpointedFrames) == SQLITE_OK)
-            DDLogDebug(@"Checkpointed %d frames with wal log size %d in database: %@", checkpointedFrames, walLogFrames, (__bridge NSString*)arg);
-        else
-        {
-            int errcode = sqlite3_extended_errcode(database);
-            NSString* error = [NSString stringWithUTF8String:sqlite3_errmsg(database)];
-            DDLogError(@"Error checkpointing wal log: %d %@, database %@", errcode, error, (__bridge NSString*)arg);
-        }
-    });
+    NSString* dbFile = (__bridge NSString*)arg;
+    DDLogVerbose(@"Triggering db checkpoint at %d for: %@", numberOfPages, dbFile);
+    [walCheckpointingQueue addOperationWithBlock:^{
+        MLSQLite* db = [MLSQLite sharedInstanceForFile:dbFile];
+        DDLogDebug(@"Checkpointing database: %@", dbFile);
+        NSDictionary* checkpointResult = [db executeReader:@"PRAGMA wal_checkpoint(PASSIVE);"][0];
+        DDLogDebug(@"Chekpointing returned: %@", checkpointResult);
+#ifdef IS_ALPHA
+        if(((NSNumber*)checkpointResult[@"busy"]).integerValue != 0)
+            DDLogWarn(@"Alpha debug: Checkpointing returned busy: %@", checkpointResult);
+#endif
+        [walCheckpointingQueue cancelAllOperations];                //stop all other queued checkpointing operations (we only need one in a row)
+    }];
     return SQLITE_OK;
 }
 
@@ -48,8 +50,12 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
 
 +(void) initialize
 {
+    walCheckpointingQueue = [NSOperationQueue new];
+    walCheckpointingQueue.name = @"im.monal.walCheckpointingQueue";
+    walCheckpointingQueue.qualityOfService = NSQualityOfServiceBackground;
+    walCheckpointingQueue.maxConcurrentOperationCount = 1;
+
     currentTransactions = [NSMutableDictionary new];
-    walCheckpointingQueue = dispatch_queue_create_with_target("im.monal.walCheckpointingQueue", DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0));
     dbFilesList = [NSMutableArray new];
     
     if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
@@ -711,7 +717,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     //being inside a transaction is non-fatal, the db file will just not be up to date then
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
     {
-        NSArray* result = [self executeReader:@"PRAGMA wal_checkpoint(TRUNCATE);"];
+        NSDictionary* result = [self executeReader:@"PRAGMA wal_checkpoint(TRUNCATE);"][0];
         DDLogInfo(@"Chekpointing returned: %@", result);
     }
     else
@@ -719,7 +725,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
 }
 
 // optimize db
--(void) vacuum
+-(BOOL) vacuum
 {
     //trying to vaccum the db inside a transaction is non-fatal, the db file will just not be shrinked then
     DDLogDebug(@"Vacuum DB");
@@ -728,9 +734,25 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     {
         [self executeNonQuery:@"VACUUM;" andArguments:@[] withException:YES];
         DDLogDebug(@"Vacuum DB success");
+        return YES;
     }
-    else
-        DDLogError(@"Could not vaccum db, inside transaction: %@", threadData);
+    DDLogError(@"Could not vaccum db, inside transaction: %@", threadData);
+    return NO;
+}
+
+-(BOOL) vacuumInto:(NSString*) newFile
+{
+    //trying to vaccum the db inside a transaction is non-fatal, the db file will just not be shrinked then
+    DDLogDebug(@"Vacuum DB");
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    {
+        [self executeNonQuery:@"VACUUM INTO ?;" andArguments:@[newFile] withException:YES];
+        DDLogDebug(@"Vacuum DB success");
+        return YES;
+    }
+    DDLogError(@"Could not vaccum db, inside transaction: %@", threadData);
+    return NO;
 }
 
 @end

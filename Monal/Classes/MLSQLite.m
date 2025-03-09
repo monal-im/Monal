@@ -136,14 +136,14 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     //some settings (e.g. truncate is faster than delete)
     //this uses the private api because we have no thread local instance added to the threadData dictionary yet and we don't use a transaction either (and public apis check both)
     //--> we must use the internal api because it does not call testThreadInstanceForQuery: testTransactionsForQuery:
-    sqlite3_busy_timeout(self->_database, 1000);        //set the busy time as early as possible to make sure the pragma states don't trigger a retry too often
+    sqlite3_busy_timeout(self->_database, 1000);        //set the busy time as early as possible to make sure the pragma statements below don't trigger a retry too often
     
     //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
     //this is a special case because it can not be done while in a transaction!!!
     [self enableWAL];
     
     //some settings for faster sqlite, see https://hg.prosody.im/trunk/file/df32fff0963d/plugins/mod_storage_sql.lua#l943
-    //synchronous NORMALE versus OFF don't have any differences in WAL mode, see: https://sqlite.org/pragma.html#pragma_synchronous
+    //synchronous NORMAL versus OFF don't have any differences in WAL mode, see: https://sqlite.org/pragma.html#pragma_synchronous
     while([self executeNonQuery:@"PRAGMA secure_delete=FAST;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA secure_delete=FAST;', retrying...");
     while([self executeNonQuery:@"PRAGMA synchronous=NORMAL;" andArguments:@[] withException:NO] != YES)
@@ -159,6 +159,10 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     //see https://sqlite.org/pragma.html#pragma_trusted_schema
     while([self executeNonQuery:@"PRAGMA trusted_schema = off;" andArguments:@[] withException:NO] != YES)
         DDLogError(@"Database locked, while calling 'PRAGMA trusted_schema = off;', retrying...");
+    
+    //use modern recursive triggers
+    while([self executeNonQuery:@"PRAGMA recursive_triggers=on;" andArguments:@[] withException:NO] != YES)
+        DDLogError(@"Database locked, while calling 'PRAGMA recursive_triggers=on;', retrying...");
 
     return self;
 }

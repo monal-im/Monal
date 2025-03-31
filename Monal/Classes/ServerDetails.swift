@@ -219,8 +219,8 @@ struct ServerDetails: View {
             result.append(
                 EntryData(
                     title: String(format: NSLocalizedString("Server: %@", comment: ""), entry["jid"] ?? "error"),
-                    description: String(format: NSLocalizedString("%@ (type '%@', category '%@')", comment: ""), entry["name"]!, entry["type"]!, entry["category"]!),
-                    status: entry["type"] == "text" ? .success : .normal
+                    description: String(format: NSLocalizedString("%@ (type '%@', category '%@')", comment: ""), entry["name"] ?? "<unknown name>", entry["type"] ?? "<unknown>", entry["category"] ?? "<unknown>"),
+                    status: entry["type"] ?? "<unknown>" == "text" ? .success : .normal
                 )
             )
         }

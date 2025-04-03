@@ -198,8 +198,6 @@ struct ChatView: View {
     var body: some View {
         ExyteChatView(messages: messages, chatType: .conversation, replyMode: .quote) { draft in
             print("sending draft: \(String(describing:draft))")
-        } messageBuilder: { message, positionInUserGroup, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
-            MessageView(message: ObservableKVOWrapper((message as! ChatViewMessage).message))
         }
 //         .enableLoadMore(pageSize: 3) { message in
 //             print("load more messages before: \(String(describing:message))")
@@ -383,30 +381,13 @@ struct ChatView: View {
     }
 }
 
-struct MessageView: View {
-    @StateObject var message: ObservableKVOWrapper<MLMessage>
-    
-    var body: some View {
-        let radius = 12.0
-        VStack(alignment: .leading, spacing: 0) {
-            Text(message.messageText as String)
-                .foregroundColor(.black)
-                .background {
-                    RoundedRectangle(cornerRadius: radius)
-                        .foregroundColor(.blue)
-                        //.opacity(isReply ? 0.5 : 1)
-                }
-                .cornerRadius(radius)
-        }
-    }
-}
-
 class ChatViewMessage: ExyteChat.Message {
     @Published public var message: MLMessage
     
     init(_ message: MLMessage) {
         self.message = message
-        super.init(id: message.id, user: ExyteChat.User(id: message.contact.id, name: "", avatarURL: nil, isCurrentUser: false))
+        let user = ExyteChat.User(id: message.senderID, name: message.contactDisplayName, avatarURL: nil, isCurrentUser: !message.inbound)
+        super.init(id: message.id, user: user, createdAt: message.timestamp, text: message.messageText)
     }
 }
 

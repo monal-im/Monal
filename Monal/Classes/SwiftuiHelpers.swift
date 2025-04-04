@@ -655,10 +655,12 @@ class SwiftuiInterface : NSObject {
     @objc
     func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
+        let delegate = SheetDismisserProtocol()
+        delegate.host = host
         if(ownContact == nil) {
-            host.rootView = AnyView(UIKitWorkaround(OmemoKeys(contact: nil)))
+            host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:OmemoKeys(contact: nil)))
         } else {
-            host.rootView = AnyView(UIKitWorkaround(OmemoKeys(contact: ObservableKVOWrapper<MLContact>(ownContact!))))
+            host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:OmemoKeys(contact: ObservableKVOWrapper<MLContact>(ownContact!))))
         }
         return host
     }

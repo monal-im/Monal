@@ -736,18 +736,23 @@ class SwiftuiInterface : NSObject {
     @objc
     func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        if(ownContact == nil) {
-            host.rootView = AnyView(UIKitWorkaround(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: nil))))
-        } else {
-            host.rootView = AnyView(UIKitWorkaround(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: ObservableKVOWrapper<MLContact>(ownContact!)))))
+
+        @ViewBuilder
+        var omemoKeysView: some View {
+            if(ownContact == nil) {
+                OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: nil))
+            } else {
+                OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: ObservableKVOWrapper<MLContact>(ownContact!)))
+            }
         }
+        host.rootView = AnyView(UIKitWorkaround(omemoKeysView))
         return host
     }
 
     @objc
     func makeChangePasswordView(for accountID: NSNumber) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-            host.rootView = AnyView(ChangePassword(accountID: accountID))
+            host.rootView = AnyView(UIKitWorkaround(ChangePassword(accountID: accountID)))
         return host
     }
 
@@ -767,14 +772,14 @@ class SwiftuiInterface : NSObject {
     @objc
     func makeServerDetailsView(for xmppAccount: xmpp) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-            host.rootView = AnyView(ServerDetails(xmppAccount: xmppAccount))
+            host.rootView = AnyView(UIKitWorkaround(ServerDetails(xmppAccount: xmppAccount)))
         return host
     }
 
     @objc
     func makeBlockedUsersView(for xmppAccount: xmpp) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-            host.rootView = AnyView(BlockedUsers(xmppAccount: xmppAccount))
+            host.rootView = AnyView(UIKitWorkaround(BlockedUsers(xmppAccount: xmppAccount)))
         return host
     }
 

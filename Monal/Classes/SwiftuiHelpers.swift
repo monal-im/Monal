@@ -657,10 +657,20 @@ class SwiftuiInterface : NSObject {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         let delegate = SheetDismisserProtocol()
         delegate.host = host
-        if(ownContact == nil) {
-            host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:OmemoKeys(contact: nil)))
+
+        @ViewBuilder
+        var omemoKeysView: some View {
+            if(ownContact == nil) {
+                OmemoKeys(contact: nil)
+            } else {
+                OmemoKeys(contact: ObservableKVOWrapper<MLContact>(ownContact!))
+            }
+        }
+        if (UIDevice.current.userInterfaceIdiom == .phone) || ProcessInfo().isMacCatalystApp {
+            host.rootView = AnyView(UIKitWorkaround(omemoKeysView))
         } else {
-            host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:OmemoKeys(contact: ObservableKVOWrapper<MLContact>(ownContact!))))
+            // The app is running on an iPad
+            host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:omemoKeysView))
         }
         return host
     }

@@ -12,7 +12,7 @@ func sendSMSRequest(to number:String) -> Promise<(data: Data, response: URLRespo
     var rq = URLRequest(url: URL(string: "\(QUICKSY_BASE_URL)/authentication/\(number)")!)
     rq.httpMethod = "GET"
     rq.addValue(Locale.current.languageCode ?? "en", forHTTPHeaderField: "Accept-Language")
-    rq.addValue(UIDevice.current.identifierForVendor?.uuidString.lowercased() ?? UUID().uuidString.lowercased(), forHTTPHeaderField: "Installation-Id")
+    rq.addValue(HelperTools.deviceUUID().uuidString.lowercased(), forHTTPHeaderField: "Installation-Id")
     rq.addValue("Quicksy/2.10.0", forHTTPHeaderField: "User-Agent")
     DDLogDebug("Request: \(String(describing:rq))")
     if let headers = rq.allHTTPHeaderFields {

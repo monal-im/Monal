@@ -1097,10 +1097,8 @@
         if(![[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"])
         {
             NSString* stored_id = (NSString*)[db executeScalar:@"SELECT value FROM flags WHERE name='device_id';"];
-            NSString* current_id = UIDevice.currentDevice.identifierForVendor.UUIDString;
-            if(current_id == nil)
-                DDLogWarn(@"Deviceid is nil, not checking for deviceid change");
-            else if(![current_id isEqualToString:stored_id])
+            NSString* current_id = [[HelperTools deviceUUID] UUIDString];
+            if(![current_id isEqualToString:stored_id])
             {
                 DDLogWarn(@"Device id has changed (%@ --> %@), invalidating state AND omemo identity keys!", stored_id, current_id);
                 //invalidate account state because the app was migrated to a new device
@@ -1117,7 +1115,7 @@
                 [db executeNonQuery:@"DELETE FROM signalPreKey;"];
                 [db executeNonQuery:@"DELETE FROM signalSignedPreKey;"];
                 //update device id in db
-                [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id';" andArguments:@[UIDevice.currentDevice.identifierForVendor.UUIDString]];
+                [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id';" andArguments:@[current_id]];
             }
         }
         

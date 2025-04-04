@@ -3090,7 +3090,7 @@ NSString* const kStanza = @"stanza";
                         andChildren:@[
                             [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithChannelBinding:[self channelBindingToUse]]]],
                             [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
-                                @"id":[[[UIDevice currentDevice] identifierForVendor] UUIDString],
+                                @"id":[[HelperTools deviceUUID] UUIDString],
                             } andChildren:@[
                                 [[MLXMLNode alloc] initWithElement:@"software" andData:@"Monal IM"],
                                 [[MLXMLNode alloc] initWithElement:@"device" andData:[[UIDevice currentDevice] name]],

@@ -47,6 +47,8 @@ static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
 
 #define kMonalKeychainName @"Monal"
 #define kMonalTmpKeychainName @"Monal.tmp"
+#define kMonalDeviceUUIDKeychainName @"Monal.deviceUUID"
+#define kDeviceUUIDKeychainAccount @"deviceUUIDKeychainAccount"
 
 //this is in seconds
 #if TARGET_OS_MACCATALYST

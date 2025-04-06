@@ -122,8 +122,8 @@
         DDLogDebug(@"Canceling timer: %@", self);
         [self invalidate];
         [self scheduleBlockInRunLoop:^{
-            if(_cancelHandler != nil)
-                _cancelHandler(self);
+            if(self->_cancelHandler != nil)
+                self->_cancelHandler(self);
         }];
     }
 }

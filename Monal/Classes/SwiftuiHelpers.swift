@@ -616,6 +616,11 @@ public extension UIViewController {
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {
+    @StateObject private var sizeClass: ObservableKVOWrapper<SizeClassWrapper>
+    override init() {
+        let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
+        self._sizeClass = StateObject(wrappedValue: ObservableKVOWrapper<SizeClassWrapper>(activeChats.sizeClass))
+    }
     @objc(makeAccountPickerForContacts:andCallType:)
     func makeAccountPicker(for contacts: [MLContact], and callType: UInt) -> UIViewController {
         let delegate = SheetDismisserProtocol()
@@ -666,10 +671,11 @@ class SwiftuiInterface : NSObject {
                 OmemoKeys(contact: ObservableKVOWrapper<MLContact>(ownContact!))
             }
         }
-        if (UIDevice.current.userInterfaceIdiom == .phone) || ProcessInfo().isMacCatalystApp {
+        let isCompact = UIUserInterfaceSizeClass(rawValue: sizeClass.horizontal) == .compact
+        if isCompact || ProcessInfo().isMacCatalystApp {
             host.rootView = AnyView(UIKitWorkaround(omemoKeysView))
         } else {
-            // The app is running on an iPad
+            // The app is running on an iPad or a big iPhone in landscape mode
             host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:omemoKeysView))
         }
         return host

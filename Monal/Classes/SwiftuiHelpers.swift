@@ -602,25 +602,28 @@ struct AddTopLevelNavigation<Content: View>: View {
 // TODO: fix those workarounds as soon as we have no storyboards anymore
 struct UIKitWorkaround<Content: View>: View {
     let build: () -> Content
+    @StateObject private var sizeClass: ObservableKVOWrapper<SizeClassWrapper>
     init(_ build: @autoclosure @escaping () -> Content) {
         self.build = build
+        let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
+        self._sizeClass = StateObject(wrappedValue: ObservableKVOWrapper<SizeClassWrapper>(activeChats.sizeClass))
     }
     init(withClosure build: @escaping () -> Content) {
         self.build = build
+        let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
+        self._sizeClass = StateObject(wrappedValue: ObservableKVOWrapper<SizeClassWrapper>(activeChats.sizeClass))
     }
     var body: some View {
-        if(UIDevice.current.userInterfaceIdiom == .phone) {
+        let isCompact = UIUserInterfaceSizeClass(rawValue: sizeClass.horizontal) == .compact
+        if isCompact || ProcessInfo().isMacCatalystApp {
+            // The app is running on an iPhone in portrait mode, or on a Mac
             build().navigationBarTitleDisplayMode(.inline)
         } else {
-#if targetEnvironment(macCatalyst)
-            build().navigationBarTitleDisplayMode(.inline)
-#else
+            // The app is running on an iPad or a big iPhone in landscape mode
             NavigationStack {
                 build()
                 .navigationBarTitleDisplayMode(.automatic)
             }
-
-#endif
         }
     }
 }

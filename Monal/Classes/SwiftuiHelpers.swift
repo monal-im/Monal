@@ -736,25 +736,11 @@ class SwiftuiInterface : NSObject {
     @objc
     func makeOwnOmemoKeyView(_ ownContact: MLContact?) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        let delegate = SheetDismisserProtocol()
-        delegate.host = host
-        
-        @ViewBuilder
-        var omemoKeysView: some View {
-            if(ownContact == nil) {
-                OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: nil))
-            } else {
-                OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: ObservableKVOWrapper<MLContact>(ownContact!)))
-            }
-        }
-        
-        if (UIDevice.current.userInterfaceIdiom == .phone) || ProcessInfo().isMacCatalystApp {
-            host.rootView = AnyView(UIKitWorkaround(omemoKeysView))
+        if(ownContact == nil) {
+            host.rootView = AnyView(UIKitWorkaround(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: nil))))
         } else {
-            // The app is running on an iPad
-            host.rootView = AnyView(AddTopLevelNavigation(withDelegate:delegate, to:omemoKeysView))
+            host.rootView = AnyView(UIKitWorkaround(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: ObservableKVOWrapper<MLContact>(ownContact!)))))
         }
-        
         return host
     }
 

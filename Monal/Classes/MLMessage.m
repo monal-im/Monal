@@ -218,6 +218,16 @@
     return [NSString stringWithFormat:@"%@|%@", self.accountID, self.messageDBId];
 }
 
+-(NSString*) senderID
+{
+    if(self.isMuc && self.participantJid.length == 0)
+        return self.contactDisplayName;
+    else if(self.isMuc)
+        return self.participantJid;
+    else
+        return self.contact.contactJid;
+}
+
 -(NSString*) description
 {
     return [NSString stringWithFormat:@"%@: %@ {%@messageID: %@, stanzaID: %@} --> %@",

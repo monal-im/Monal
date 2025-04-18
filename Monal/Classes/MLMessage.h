@@ -32,6 +32,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSString* buddyName;
 
 /**
+  Unique identifier of the message sender (even in MUCs)
+ */
+@property (nonatomic, readonly) NSString* senderID;
+
+/**
   indicating if the message was send from buddyName
  */
 @property (nonatomic, assign) BOOL inbound;

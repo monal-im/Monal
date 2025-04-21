@@ -244,7 +244,7 @@ struct ChatView: View {
                                     Text(contact.contactDisplayName as String)
                                         .fontWeight(.semibold)
                                         .font(.headline)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(.primary)
                                     
                                     if (contact.isTyping as Bool) {
                                         Text("Typing...")

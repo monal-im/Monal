@@ -116,7 +116,7 @@ struct ImageViewer: View {
     
     private func loadPreviewAndConfigurePlayer() async {
         if (info["mimeType"] as! String).hasPrefix("image/svg") {
-            previewImage = await HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info["cacheFile"] as! String)).toGuarantee().asyncOnMainActor()
+            previewImage = await HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info["cacheFile"] as! String)).toTypedGuarantee().asyncOnMainActor()
         } else if (info["mimeType"] as! String).hasPrefix("image/") {
             previewImage = UIImage(contentsOfFile:info["cacheFile"] as! String)
         } else if (info["mimeType"] as! String).hasPrefix("video/") {

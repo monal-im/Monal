@@ -95,30 +95,17 @@ class MediaItem: Identifiable, ObservableObject {
         let moviePath = URL(fileURLWithPath: fileInfo["cacheFile"] as! String)
         DDLogInfo("Trying to generate video thumbnail for: \(String(describing:fileInfo))")
         
-        var payload: NSMutableDictionary = [:]
-        HelperTools.addUploadItemPreview(forItem:moviePath, provider:nil, andPayload:payload) { newPayload in
-            payload = newPayload ?? [:]
-        }
-
-        
-//         let payload: NSMutableDictionary = await MainActor.assumeIsolated {
-//             return try! await Task { @MainActor in
-//                 return await HelperTools.addUploadItemPreview(forItem:moviePath, provider:nil, andPayload:NSMutableDictionary()) ?? [:]
-//             }.result.get() as! NSMutableDictionary
-//         }
-        
-//         let payload: NSMutableDictionary = try! await HelperTools.addUploadItemPreview(
-//             forItem:moviePath,
-//             provider:nil,
-//             andPayload:NSMutableDictionary()
-//         ).toPromise().asyncOnMainActor() ?? [:]
-        
-        guard let image = payload["preview"] as? UIImage else {
+        let payload: NSDictionary? = try? await HelperTools.addUploadItemPreview(
+            forItem:moviePath,
+            provider:nil,
+            andPayload:[:]
+        ).toTypedPromise().asyncOnMainActor()
+        guard let image = payload?["preview"] as? UIImage else {
             return try? await HelperTools.generateVideoThumbnail(
                 fromFile:fileInfo["cacheFile"] as! String,
                 havingMimeType:fileInfo["mimeType"] as! String,
                 andFileExtension:fileInfo["fileExtension"] as? String
-            ).toPromise().asyncOnMainActor()
+            ).toTypedPromise().asyncOnMainActor()
         }
         return image
     }

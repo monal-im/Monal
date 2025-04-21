@@ -172,44 +172,42 @@
 //             continue;
         DDLogVerbose(@"handling(%u) %@", loading, provider);
         loading++;
-        [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* payload) {
+        [HelperTools handleUploadItemProvider:provider].then(^(NSMutableDictionary* payload) {
             DDLogVerbose(@"Got handleUploadItemProvider callback with payload: %@", payload);
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(payload == nil || payload[@"error"] != nil)
-                {
-                    DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
-                    NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
-                    if(payload[@"error"] != nil)
-                        message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
-                    UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
-                                                                                message:message preferredStyle:UIAlertControllerStyleAlert];
-                    [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                        [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
-                        loading--;
-                        checkIfDone();
-                    }]];
-                    [self presentViewController:unknownItemWarning animated:YES completion:nil];
-                    return;
-                }
-                
-                //text shares are also shared via comment field, so ignore them, if they contain the same contents
-                if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier] && self.contentText && [self.contentText length] > 0 && [payload[@"data"] isKindOfClass:[NSString class]] && [self.contentText isEqualToString:payload[@"data"]])
-                {
-                    DDLogWarn(@"Ignoring text payload because already sent via comment field");
+            if(payload == nil || payload[@"error"] != nil)
+            {
+                DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
+                NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
+                if(payload[@"error"] != nil)
+                    message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
+                UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                            message:message preferredStyle:UIAlertControllerStyleAlert];
+                [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
                     loading--;
                     checkIfDone();
-                    return;
-                }
-                
-                payload[@"account_id"] = self.recipient.accountID;
-                payload[@"recipient"] = self.recipient.contactJid;
-                DDLogDebug(@"Adding shareSheet payload(%u): %@", loading, payload);
-                [[DataLayer sharedInstance] addShareSheetPayload:payload];
-                saved++;
+                }]];
+                [self presentViewController:unknownItemWarning animated:YES completion:nil];
+                return;
+            }
+            
+            //text shares are also shared via comment field, so ignore them, if they contain the same contents
+            if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier] && self.contentText && [self.contentText length] > 0 && [payload[@"data"] isKindOfClass:[NSString class]] && [self.contentText isEqualToString:payload[@"data"]])
+            {
+                DDLogWarn(@"Ignoring text payload because already sent via comment field");
                 loading--;
                 checkIfDone();
-            });
-        }];
+                return;
+            }
+            
+            payload[@"account_id"] = self.recipient.accountID;
+            payload[@"recipient"] = self.recipient.contactJid;
+            DDLogDebug(@"Adding shareSheet payload(%u): %@", loading, payload);
+            [[DataLayer sharedInstance] addShareSheetPayload:payload];
+            saved++;
+            loading--;
+            checkIfDone();
+        });
     }
     checkIfDone();
 }

@@ -1279,9 +1279,9 @@ enum msgSentState {
             @"type": @"file",
             @"filename": [url lastPathComponent],
             @"data": [MLFiletransfer prepareFileUpload:url],
-        } mutableCopy] withCompletionHandler:^(NSMutableDictionary* payload) {
+        } mutableCopy]].then(^(NSMutableDictionary* payload) {
             [self addToUIQueue:@[payload]];
-        }];
+        });
     }
 }
 
@@ -1541,29 +1541,27 @@ enum msgSentState {
         DDLogDebug(@"Handling asset with identifier: %@", userSelection.assetIdentifier);
         NSItemProvider* provider = userSelection.itemProvider;
         MLAssert(provider != nil, @"Expected a NSItemProvider");
-        [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* payload) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(payload == nil || payload[@"error"] != nil)
-                {
-                    DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
-                    NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
-                    if(payload[@"error"] != nil)
-                        message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
-                    UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
-                                                                                message:message preferredStyle:UIAlertControllerStyleAlert];
-                    [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                        [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
-                        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
-                    }]];
-                    [self presentViewController:unknownItemWarning animated:YES completion:nil];
-                }
-                else
-                {
-                    DDLogDebug(@"Adding payload to UI upload queue: %@", payload);
-                    [self addToUIQueue:@[payload]];
-                }
-            });
-        }];
+        [HelperTools handleUploadItemProvider:provider].then(^(NSMutableDictionary* payload) {
+            if(payload == nil || payload[@"error"] != nil)
+            {
+                DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
+                NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
+                if(payload[@"error"] != nil)
+                    message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
+                UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                            message:message preferredStyle:UIAlertControllerStyleAlert];
+                [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
+                    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                }]];
+                [self presentViewController:unknownItemWarning animated:YES completion:nil];
+            }
+            else
+            {
+                DDLogDebug(@"Adding payload to UI upload queue: %@", payload);
+                [self addToUIQueue:@[payload]];
+            }
+        });
     }
 }
 
@@ -1592,9 +1590,9 @@ enum msgSentState {
             @"type": @"audiovisual",
             @"filename": [url lastPathComponent],
             @"data": [MLFiletransfer prepareFileUpload:url],
-        } mutableCopy] withCompletionHandler:^(NSMutableDictionary* payload) {
+        } mutableCopy]].then(^(NSMutableDictionary* payload) {
             [self addToUIQueue:@[payload]];
-        }];
+        });
     }
     else
     {
@@ -3606,26 +3604,24 @@ enum msgSentState {
         NSItemProvider* provider = item.itemProvider;
         MLAssert(provider != nil, @"provider must not be nil");
         MLAssert([provider hasItemConformingToTypeIdentifier:UTTypeItem.identifier], @"provider must supply item conforming to kUTTypeItem");
-        [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* _Nullable payload) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(payload == nil || payload[@"error"] != nil)
-                {
-                    DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
-                    NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
-                    if(payload[@"error"] != nil)
-                        message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
-                    UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
-                                                                                message:message preferredStyle:UIAlertControllerStyleAlert];
-                    [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                        [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
-                        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
-                    }]];
-                    [self presentViewController:unknownItemWarning animated:YES completion:nil];
-                }
-                else
-                    [self addToUIQueue:@[payload]];
-            });
-        }];
+        [HelperTools handleUploadItemProvider:provider].then(^(NSMutableDictionary* _Nullable payload) {
+            if(payload == nil || payload[@"error"] != nil)
+            {
+                DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
+                NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
+                if(payload[@"error"] != nil)
+                    message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
+                UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                            message:message preferredStyle:UIAlertControllerStyleAlert];
+                [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
+                    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                }]];
+                [self presentViewController:unknownItemWarning animated:YES completion:nil];
+            }
+            else
+                [self addToUIQueue:@[payload]];
+        });
     }
 }
 

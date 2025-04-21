@@ -55,7 +55,7 @@ class MediaItem: Identifiable, ObservableObject {
     init(fileInfo: [String: Any]) {
         self.fileInfo = fileInfo
         self.thumbnail = nil
-        Task {
+        Task { @MainActor in
             await generateThumbnail()
         }
     }
@@ -99,6 +99,20 @@ class MediaItem: Identifiable, ObservableObject {
         HelperTools.addUploadItemPreview(forItem:moviePath, provider:nil, andPayload:payload) { newPayload in
             payload = newPayload ?? [:]
         }
+
+        
+//         let payload: NSMutableDictionary = await MainActor.assumeIsolated {
+//             return try! await Task { @MainActor in
+//                 return await HelperTools.addUploadItemPreview(forItem:moviePath, provider:nil, andPayload:NSMutableDictionary()) ?? [:]
+//             }.result.get() as! NSMutableDictionary
+//         }
+        
+//         let payload: NSMutableDictionary = try! await HelperTools.addUploadItemPreview(
+//             forItem:moviePath,
+//             provider:nil,
+//             andPayload:NSMutableDictionary()
+//         ).toPromise().asyncOnMainActor() ?? [:]
+        
         guard let image = payload["preview"] as? UIImage else {
             return try? await HelperTools.generateVideoThumbnail(
                 fromFile:fileInfo["cacheFile"] as! String,
@@ -158,7 +172,8 @@ struct MediaItemDetailView: View {
     var body: some View {
         ImageViewerWrapper(info: item.fileInfo as [String: AnyObject], dismisser: dismisser)
             .onAppear {
-                if let hostingController = UIApplication.shared.windows.first?.rootViewController?.presentedViewController as? UIHostingController<AnyView> {
+                let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+                if let hostingController = appDelegate.getTopViewController() as? UIHostingController<AnyView> {
                     dismisser.host = hostingController
                 }
             }

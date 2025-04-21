@@ -28,9 +28,10 @@
 #import <MapKit/MapKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <KSCrash.h>
+#import <KSCrashConfiguration.h>
 #import <KSCrashC.h>
 //can not be imported, use extern declaration instead
-//#import <KSCrash/Recording/KSCrashReportStore.h>
+//#import <KSCrashReportStoreC+Private.h>
 extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import <monalxmpp/monalxmpp-Swift.h>
 #import <monalxmpp/hsluv.h>
@@ -244,7 +245,7 @@ out_error:
     return -1;
 }
 
-static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, char* filePath)
+static void addFilePathWithSize(const struct KSCrashReportWriter* _Nonnull writer, char* name, char* filePath)
 {
     struct stat st;
     char name_size[64];
@@ -258,7 +259,7 @@ static void addFilePathWithSize(const KSCrashReportWriter* writer, char* name, c
     writer->addIntegerElement(writer, name_size, st.st_size);
 }
 
-static void crash_callback(const KSCrashReportWriter* writer)
+static void crash_callback(const struct KSCrashReportWriter* _Nonnull writer)
 {
     //copy current logfile
     int logfileCopyRetval = asyncSafeCopyFile(_origLogfilePath, _logfilePath);
@@ -683,10 +684,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     {
         [self configureLogging];
         //don't install KSCrash if the debugger is active
-        if(!isDebugerActive())
-            [self installCrashHandler];
-        else
-            DDLogWarn(@"Not installing crash handler: debugger is active!");
+        [self installCrashHandlerWithRecording:!isDebugerActive()];
         [self installExceptionHandler];
     }
     else
@@ -2384,17 +2382,21 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         DDLogVerbose(@"File %@/%@", containerUrl, file);
 }
 
-+(int) pendingCrashreportCount
++(NSInteger) pendingCrashreportCount
 {
     KSCrash* handler = [KSCrash sharedInstance];
-    return handler.reportCount;
+    if(handler.reportStore == nil)
+        return 0;
+    return handler.reportStore.reportCount;
 }
 
 +(void) cleanupRawlogCrashcopies
 {
     NSError* error;
     KSCrash* handler = [KSCrash sharedInstance];
-    NSSet* reportIds = [NSSet setWithArray:[handler reportIDs]];
+    if(handler.reportStore == nil)
+        return;
+    NSSet* reportIds = [NSSet setWithArray:[handler.reportStore reportIDs]];
     NSString* reportpath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports", @"Reports"]] path];
     NSArray* directoryContentsReports = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:reportpath error:&error];
     if(error != nil)
@@ -2428,42 +2430,52 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     }
 }
 
-+(void) installCrashHandler
++(void) installCrashHandlerWithRecording:(BOOL) recordCrashes
 {
-    
+    NSError* error = nil;
     DDLogVerbose(@"KSCrash installing handler with callback: %p", crash_callback);
-    KSCrash* handler = [KSCrash sharedInstance];
-    handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
-    handler.monitoring = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
+    KSCrashConfiguration* config = [KSCrashConfiguration new];
+    config.installPath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
+    config.monitors = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
     //don't try to debug zombies if not in debug mode
 #ifndef DEBUG
-    handler.monitoring = handler.monitoring & (~KSCrashMonitorTypeZombie);
+    config.monitors = config.monitors & (~KSCrashMonitorTypeZombie);
 #endif
-    handler.onCrash = crash_callback;
+    if(!recordCrashes)
+    {
+        DDLogWarn(@"Not installing crash handler: debugger is active!");
+        config.monitors = KSCrashMonitorTypeManual;
+    }
+    config.crashNotifyCallback = ^(const struct KSCrashReportWriter* _Nonnull writer) {
+        crash_callback(writer);
+    };
     //this can trigger crashes on macos < 13 (e.g. mac catalyst < 16) (and possibly ios < 16)
-#if !TARGET_OS_MACCATALYST
-    [handler enableSwapOfCxaThrow];
-#endif
-    handler.searchQueueNames = NO;      //this is not async safe and can crash :(
-    handler.introspectMemory = YES;
-    handler.addConsoleLogToReport = YES;
-    handler.printPreviousLog = NO;     //debug kscrash itself?
-    handler.demangleLanguages = KSCrashDemangleLanguageAll;
-    handler.maxReportCount = 4;
-    handler.deadlockWatchdogInterval = 0;       // no main thread watchdog
-    handler.userInfo = @{
+    config.enableSwapCxaThrow = YES;
+    config.enableQueueNameSearch = NO;      //this is not async safe and can crash :(
+    config.enableMemoryIntrospection = YES;
+    config.addConsoleLogToReport = YES;
+    config.printPreviousLogOnStartup = NO;     //debug kscrash itself?
+    config.enableSigTermMonitoring = YES;
+    config.deadlockWatchdogInterval = 0;       // no main thread watchdog
+    config.reportStoreConfiguration.maxReportCount = 4;
+    config.reportStoreConfiguration.reportCleanupPolicy = KSCrashReportCleanupPolicyAlways;     //KSCrashReportCleanupPolicyOnSuccess;
+    //don't use the bundle names to store our crash reports which are different
+    //in appex and mainapp use the lowlevel C api with dummy bundle name "UnifiedReport" instead
+    config.reportStoreConfiguration.appName = [NSString stringWithFormat:@"%s", _crashBundleName];
+    config.userInfoJSON = @{
         @"isAppex": bool2str([self isAppExtension]),
         @"processName": [[[NSBundle mainBundle] executablePath] lastPathComponent],
         @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
         @"appVersion": [self appBuildVersionInfoFor:MLVersionTypeLog],
     };
-    //we can not use [KSCrash install] because this uses the bundle names to store our crash reports which are different
-    //in appex and mainapp use the lowlevel C api with dummy bundle name "UnifiedReport" instead
-    handler.monitoring = kscrash_install(_crashBundleName, handler.basePath.UTF8String);
-    if(handler.monitoring == KSCrashMonitorTypeNone)
+    
+    if([KSCrash.sharedInstance installWithConfiguration:config error:&error] == NO)
+    {
         DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");
+        DDLogError(@"KSCrash reported install error: %@", error);
+    }
     else
-        DDLogInfo(@"Crash monitoring active now: %d", handler.monitoring);
+        DDLogInfo(@"Crash monitoring active now...");
     
     //KSCrash increments the id by one every new crash --> the next id used by kscrash will be this one
     _nextCrashId = kscrs_getNextCrashReport(NULL) + 1;
@@ -2475,7 +2487,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     strncpy(_origProfilePath, profrawFilePath.UTF8String, sizeof(_profilePath)-1);
     _origProfilePath[sizeof(_origProfilePath)-1] = '\0';
     //use the same id for our logfile copy as for the main report (allows to delete all logfile copies for which no crash report exists)
-    snprintf(_profilePath, sizeof(_profilePath)-1, "%s/Reports/%s-profile-%016llx.profraw", handler.basePath.UTF8String, _crashBundleName, _nextCrashId);
+    snprintf(_profilePath, sizeof(_profilePath)-1, "%s/Reports/%s-profile-%016llx.profraw", config.installPath.UTF8String, _crashBundleName, _nextCrashId);
     _profilePath[sizeof(_profilePath)-1] = '\0';
     DDLogVerbose(@"KSCrash: _origProfilePath=%s, _profilePath=%s", _origProfilePath, _profilePath);
     
@@ -2492,13 +2504,13 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 
 +(void) updateCurrentLogfilePath:(NSString*) logfilePath
 {
-    KSCrash* handler = [KSCrash sharedInstance];
+    NSString* basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
     
     //store data globally for later retrieval by our crash_callback() (_origLogfilePath and _logfilePath)
     strncpy(_origLogfilePath, logfilePath.UTF8String, sizeof(_logfilePath)-1);
     _origLogfilePath[sizeof(_origLogfilePath)-1] = '\0';
     //use the same id for our logfile copy as for the main report (allows to delete all logfile copies for which no crash report exists)
-    snprintf(_logfilePath, sizeof(_logfilePath)-1, "%s/Reports/%s-log-%016llx.rawlog", handler.basePath.UTF8String, _crashBundleName, _nextCrashId);
+    snprintf(_logfilePath, sizeof(_logfilePath)-1, "%s/Reports/%s-log-%016llx.rawlog", basePath.UTF8String, _crashBundleName, _nextCrashId);
     _logfilePath[sizeof(_logfilePath)-1] = '\0';
     DDLogVerbose(@"KSCrash: _origLogfilePath=%s, _logfilePath=%s", _origLogfilePath, _logfilePath);
 }

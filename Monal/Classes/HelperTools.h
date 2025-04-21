@@ -96,7 +96,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSData* _Nullable) convertLogmessageToJsonData:(DDLogMessage*) logMessage counter:(uint64_t*) counter andError:(NSError** _Nullable) error;
 +(void) initSystem;
 +(void) installExceptionHandler;
-+(int) pendingCrashreportCount;
++(NSInteger) pendingCrashreportCount;
 +(void) flushLogsWithTimeout:(double) timeout;
 +(BOOL) isAppSuspended;
 +(void) signalSuspension;

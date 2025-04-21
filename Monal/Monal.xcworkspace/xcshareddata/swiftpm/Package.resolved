@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/exyte/ActivityIndicatorView",
         "state": {
           "branch": null,
-          "revision": "9970fd0bb7a05dad0b6566ae1f56937716686b24",
-          "version": "1.1.1"
+          "revision": "36140867802ae4a1d2b11490bcbbefe058001d14",
+          "version": "1.2.1"
         }
       },
       {
@@ -23,7 +23,7 @@
         "package": "Chat",
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
-          "branch": "main",
+          "branch": "old-main",
           "revision": "b52d2cb406add00fdc482930122d0a64bb833469",
           "version": null
         }
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/exyte/FloatingButton",
         "state": {
           "branch": null,
-          "revision": "cf77c2f124df1423d90a9a1985e9b9ccfa4b9b3e",
-          "version": "1.3.0"
+          "revision": "c1e3e6a641ef5bacbcbc2b2c80db54793f75f974",
+          "version": "1.4.0"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/ryanlintott/FrameUp",
         "state": {
           "branch": null,
-          "revision": "3b46ddcfc02a85ed060bb0c9e7ab14a7f90f415a",
-          "version": "0.9.7"
+          "revision": "b88973341a99ac96b1833fa8b138e338b1cc3161",
+          "version": "0.9.9"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/exyte/MediaPicker.git",
         "state": {
           "branch": null,
-          "revision": "88769b1b69c2b5e5fa5b65522c08bc7b667a6cb8",
-          "version": "2.2.3"
+          "revision": "6f8745755530209462b60445ec4ba332c3058474",
+          "version": "2.2.4"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "96a2f8a0fa41e9e09af4585e2724c4e825410b91",
-          "version": "1.6.2"
+          "revision": "3d8596ed08bd13520157f0355e35caed215ffbfa",
+          "version": "1.6.3"
         }
       },
       {

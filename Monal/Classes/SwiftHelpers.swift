@@ -285,7 +285,7 @@ public extension Promise {
     @MainActor
     func asyncOnMainActor() async throws -> T {
         try await withCheckedThrowingContinuation { continuation in
-            done { value in
+            self.done { value in
                 continuation.resume(returning: value)
             }.catch(policy: .allErrors) { error in
                 continuation.resume(throwing: error)
@@ -297,10 +297,25 @@ public extension Guarantee {
     @MainActor
     func asyncOnMainActor() async -> T {
         await withCheckedContinuation { continuation in
-            done { value in
+            self.done { value in
                 continuation.resume(returning: value)
             }
         }
+    }
+}
+
+public extension MainActor {
+    @MainActor static func runOnMainThread<T>(action: @MainActor @Sendable () throws -> T) rethrows -> T {
+        try action()
+    }
+}
+
+public extension Actor {
+    /// Adds a general `perform` method for any actor to access its isolation domain to perform
+    /// multiple operations in one go using the closure.
+    @discardableResult
+    func performInIsolation<T: Sendable>(_ block: @Sendable (_ actor: isolated Self) throws -> T) async rethrows -> T {
+        try block(self)
     }
 }
 

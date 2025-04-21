@@ -2,7 +2,7 @@ project 'Monal.xcodeproj'
 #source 'https://cdn.cocoapods.org/'
 
 # Uncomment the next line to define a global platform for your project
-platform :ios, '14.0'
+platform :ios, '16.1'
 
 # ignore all warnings from all pods
 inhibit_all_warnings!
@@ -34,7 +34,8 @@ def monalxmpp
   #later versions of the webrtc lib trigger the following app review error:
   pod 'WebRTC-lib'
   #pod 'GoogleWebRTC'
-  pod 'KSCrash', subspecs:['Recording', 'Reporting/Filters/Sets', 'Reporting/Filters/Tools', 'Reporting/Tools', 'Core']
+  pod 'KSCrash', subspecs:['Recording', 'Filters', 'DemangleFilter']
+# pod 'KSCrash', subspecs:['Recording', 'Reporting/Filters/Sets', 'Reporting/Filters/Tools', 'Reporting/Tools', 'Core'], '~> 1.0'
   signalDeps
   pod "PromiseKit"
 end
@@ -78,7 +79,7 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |configuration|
       # see https://stackoverflow.com/a/30038120
-      configuration.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', 'DD_NSLOG_LEVEL=5', 'KSLogger_Level=INFO']
+      configuration.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', 'DD_NSLOG_LEVEL=5', 'KSLogger_Level=INFO', 'KSCRASH_NO_UI=1']
       configuration.build_settings.delete('ARCHS')
       if target.name == "TOCropViewController-TOCropViewControllerBundle"
         configuration.build_settings['CODE_SIGN_IDENTITY[sdk=macosx*]'] = '-'

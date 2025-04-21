@@ -8,12 +8,17 @@
 
 #import <Foundation/Foundation.h>
 #import <KSCrash/KSCrash.h>
+#import <KSCrash/KSNSErrorHelper.h>
+#import <KSCrash/KSCrashReport.h>
 #import <KSCrash/KSCrashReportFilterBasic.h>
 #import <KSCrash/KSCrashReportFilterJSON.h>
+#import <KSCrash/KSCrashReportFilterStringify.h>
 #import <KSCrash/KSCrashReportFilterAppleFmt.h>
 #import <KSCrash/KSCrashReportFilterGZip.h>
 #import <KSCrash/KSCrashReportFields.h>
-#import <KSCrash/NSError+SimpleConstructor.h>
+#import <KSCrash/KSCrashReportFilterDemangle.h>
+#import <KSCrash/KSCrashReportFilterDoctor.h>
+#import <KSCrash/KSCrashReportFilterAlert.h>
 #import <MessageUI/MessageUI.h>
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/HelperTools.h>
@@ -22,24 +27,16 @@
 
 #define PART_SEPARATOR_FORMAT "\n\n-------- d049d576-9bf0-47dd-839f-dee6b07c1df9 -------- %@ -------- d049d576-9bf0-47dd-839f-dee6b07c1df9 --------\n\n"
 
-@interface KSCrashReportFilterAlert: NSObject <KSCrashReportFilter>
-+(instancetype) filter;
+@interface KSCrashReportFilterMLEmpty: NSObject <KSCrashReportFilter>
 @end
 
-@interface KSCrashReportFilterEmpty: NSObject <KSCrashReportFilter>
-+(instancetype) filter;
+@interface KSCrashReportFilterMLAddAuxInfo : NSObject <KSCrashReportFilter>
 @end
 
-@interface KSCrashReportFilterAddAuxInfo : NSObject <KSCrashReportFilter>
-+(instancetype) filter;
+@interface KSCrashReportFilterMLAddMLLogfile : NSObject <KSCrashReportFilter>
 @end
 
-@interface KSCrashReportFilterAddMLLogfile : NSObject <KSCrashReportFilter>
-+(instancetype) filter;
-@end
-
-@interface KSCrashReportFilterAddProfraw : NSObject <KSCrashReportFilter>
-+(instancetype) filter;
+@interface KSCrashReportFilterMLAddProfraw : NSObject <KSCrashReportFilter>
 @end
 
 
@@ -54,48 +51,54 @@
 +(void) reportPendingCrashes
 {
     //send out pending KSCrash reports
-    KSCrash* handler = [KSCrash sharedInstance];
-    handler.deleteBehaviorAfterSendAll = KSCDeleteAlways;       //KSCDeleteNever
-    id<KSCrashReportFilter> dummyFilter = [KSCrashReportFilterEmpty filter];
+    id<KSCrashReportFilter> alertFilter = [[KSCrashReportFilterAlert alloc]
+        initWithTitle:NSLocalizedString(@"Crash Detected", @"Crash reporting")
+        message:NSLocalizedString(@"The app crashed last time it was launched. Send a crash report? This crash report will contain privacy related data. We will only use it to debug your crash and delete it afterwards!", @"Crash reporting")
+        yesAnswer:NSLocalizedString(@"Sure, send it!", @"Crash reporting")
+        noAnswer:NSLocalizedString(@"No, thanks", @"Crash reporting")
+    ];
+    id<KSCrashReportFilter> dummyFilter = [KSCrashReportFilterMLEmpty new];
     NSString* dummyFilterName = @"dummy not printed";
-    id<KSCrashReportFilter> auxInfoFilter = [KSCrashReportFilterAddAuxInfo filter];
+    id<KSCrashReportFilter> auxInfoFilter = [KSCrashReportFilterMLAddAuxInfo new];
     NSString* auxInfoName = @"AUX Info (*.txt)";
-    id<KSCrashReportFilter> appleFilter = [KSCrashReportFilterAppleFmt filterWithReportStyle:KSAppleReportStyleSymbolicatedSideBySide];
+    id<KSCrashReportFilter> appleFilter = [[KSCrashReportFilterAppleFmt alloc] initWithReportStyle:KSAppleReportStyleSymbolicatedSideBySide];
     NSString* appleName = @"Apple Report (*.crash)";
-    NSArray<id<KSCrashReportFilter>>* jsonFilter = @[[KSCrashReportFilterJSONEncode filterWithOptions:KSJSONEncodeOptionPretty], [KSCrashReportFilterDataToString filter]];
+    id<KSCrashReportFilter> jsonFilter = [[KSCrashReportFilterPipeline alloc] initWithFilters:@[
+        [[KSCrashReportFilterJSONEncode alloc] initWithOptions:KSJSONEncodeOptionSorted | KSJSONEncodeOptionPretty],
+        [KSCrashReportFilterStringify new]
+    ]];
     NSString* jsonName = @"JSON Report (*.json)";
-    id<KSCrashReportFilter> logfileFilter = [KSCrashReportFilterAddMLLogfile filter];
+    id<KSCrashReportFilter> logfileFilter = [KSCrashReportFilterMLAddMLLogfile new];
     NSString* logfileName = @"Logfile (*.rawlog.gz)";
-    id<KSCrashReportFilter> profrawFilter = [KSCrashReportFilterAddProfraw filter];
+    id<KSCrashReportFilter> profrawFilter = [KSCrashReportFilterMLAddProfraw new];
     NSString* profrawName = @"Profile (*.profraw)";
-    handler.sink = [KSCrashReportFilterPipeline filterWithFilters:
-                        [KSCrashReportFilterAlert filter],
-                        [KSCrashReportFilterCombine filterWithFiltersAndKeys:
-                            dummyFilter, dummyFilterName,       //this dummy is needed to make the filter framework print the title of our aux data
-                            auxInfoFilter, auxInfoName,
-                            appleFilter, appleName,
-                            jsonFilter, jsonName,
-                            logfileFilter, logfileName,
-                            profrawFilter, profrawName,
-                            nil
-                        ],
-                        [KSCrashReportFilterConcatenate filterWithSeparatorFmt:@PART_SEPARATOR_FORMAT keys:
-                            dummyFilterName,
-                            auxInfoName,
-                            appleName,
-                            jsonName,
-                            logfileName,
-                            profrawName,
-                            nil
-                        ],
-                        [KSCrashReportFilterStringToData filter],
-                        [KSCrashReportFilterGZipCompress filterWithCompressionLevel:-1],
-                        [[self alloc] init],           //add this class as filter to send out all stuff via mail
-                        nil
-                   ];
+    KSCrash.sharedInstance.reportStore.sink = [[KSCrashReportFilterPipeline alloc] initWithFilters:@[
+        alertFilter,
+        [KSCrashReportFilterDemangle new],
+        [KSCrashReportFilterDoctor new],
+        [[KSCrashReportFilterCombine alloc] initWithFilters:@{
+            dummyFilterName: dummyFilter,       //this dummy is needed to make the filter framework print the title of our aux data
+            auxInfoName: auxInfoFilter,
+            appleName: appleFilter,
+            jsonName: jsonFilter,
+            logfileName: logfileFilter,
+            profrawName: profrawFilter,
+        }],
+        [[KSCrashReportFilterConcatenate alloc] initWithSeparatorFmt:@PART_SEPARATOR_FORMAT keys:@[
+            dummyFilterName,
+            auxInfoName,
+            appleName,
+            jsonName,
+            logfileName,
+            profrawName,
+        ]],
+        [KSCrashReportFilterStringToData new],
+        [[KSCrashReportFilterGZipCompress alloc] initWithCompressionLevel:KSCrashReportCompressionLevelDefault],
+        [self new],                             //add this class as filter to send out all stuff via mail
+    ]];
     DDLogVerbose(@"Trying to send crash reports...");
-    [handler sendAllReportsWithCompletion:^(NSArray* reports, BOOL completed, NSError* error){
-        if(completed)
+    [KSCrash.sharedInstance.reportStore sendAllReportsWithCompletion:^(NSArray* reports, NSError* error) {
+        if(error == nil)
             DDLogWarn(@"Sent %d reports", (int)[reports count]);
         else
             DDLogError(@"Failed to send reports: %@", error);
@@ -119,10 +122,7 @@
                 DDLogWarn(@"Writing report %d to file: %@", i, path);
                 [report writeToFile:path atomically:YES];
             }
-        kscrash_callCompletion(onCompletion, reports, YES,
-                                 [NSError errorWithDomain:[[self class] description]
-                                                     code:0
-                                              description:@"Crashreports written to simulator container..."]);
+        kscrash_callCompletion(onCompletion, reports, nil);
         return;
 #else
         UIAlertController* alertController = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Email Error", @"Crash report error dialog")
@@ -134,8 +134,8 @@
         [alertController addAction:okAction];
         [[(MonalAppDelegate*)[[UIApplication sharedApplication] delegate] getTopViewController] presentViewController:alertController animated:YES completion:NULL];
 
-        kscrash_callCompletion(onCompletion, reports, NO,
-                                 [NSError errorWithDomain:[[self class] description]
+        kscrash_callCompletion(onCompletion, reports,
+                                 [KSNSErrorHelper errorWithDomain:[[self class] description]
                                                      code:0
                                               description:NSLocalizedString(@"E-Mail not enabled on device", @"Crash report error dialog")]);
         return;
@@ -150,16 +150,18 @@
     mailController.mailComposeDelegate = self;
     [mailController setToRecipients:@[@"crash@monal-im.org"]];
     [mailController setSubject:@"Crash Reports"];
-    [mailController setMessageBody:@"> Please fill in your last actions that led to this crash:\n" isHTML:NO];
+    [mailController setMessageBody:@"Please fill in your last actions that led to this crash:\n" isHTML:NO];
     int i = 1;
-    for(NSData* report in reports)
-        if(![report isKindOfClass:[NSData class]])
-            DDLogError(@"Report was of unsupported data type %@", [report class]);
+    for(id<KSCrashReport> report_ in reports)
+    {
+        if(![report_ isKindOfClass:[KSCrashReportData class]])
+            DDLogError(@"Report was of unsupported data type %@", [report_ class]);
         else
         {
             DDLogVerbose(@"Adding mail attachment...");
-            [mailController addAttachmentData:report mimeType:@"binary" fileName:[NSString stringWithFormat:@"CrashReport-%d.mcrash.gz", i++]];
+            [mailController addAttachmentData:[report_ untypedValue] mimeType:@"binary" fileName:[NSString stringWithFormat:@"CrashReport-%d.mcrash.gz", i++]];
         }
+    }
     
     dispatch_async(dispatch_get_main_queue(), ^{
         DDLogVerbose(@"Presenting MFMailComposeViewController...");
@@ -182,28 +184,28 @@
         {
             case MFMailComposeResultSent:
                 DDLogInfo(@"Crash report send result: MFMailComposeResultSent");
-                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports, YES, nil);
+                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports, nil);
                 break;
             case MFMailComposeResultSaved:
                 DDLogInfo(@"Crash report send result: MFMailComposeResultSaved");
-                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports, YES, nil);
+                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports, nil);
                 break;
             case MFMailComposeResultCancelled:
                 DDLogInfo(@"Crash report send result: MFMailComposeResultCancelled");
-                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports, NO,
-                                        [NSError errorWithDomain:[[self class] description]
+                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports,
+                                        [KSNSErrorHelper errorWithDomain:[[self class] description]
                                                             code:0
                                                     description:@"User cancelled"]);
                 break;
             case MFMailComposeResultFailed:
                 DDLogInfo(@"Crash report send result: MFMailComposeResultFailed");
-                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports, NO, error);
+                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports, error);
                 break;
             default:
             {
                 DDLogInfo(@"Crash report send result: unknown");
-                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports, NO,
-                                        [NSError errorWithDomain:[[self class] description]
+                kscrash_callCompletion(self.kscrashCompletion, self.kscrashReports,
+                                        [KSNSErrorHelper errorWithDomain:[[self class] description]
                                                             code:0
                                                     description:@"Unknown MFMailComposeResult: %d", result]);
             }
@@ -216,70 +218,29 @@
 
 @end
 
-@implementation KSCrashReportFilterAlert
-
-+(instancetype) filter
-{
-    return [[self alloc] init];
-}
+@implementation KSCrashReportFilterMLEmpty
 
 -(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
 {
-    NSString* title = NSLocalizedString(@"Crash Detected", @"Crash reporting");
-    NSString* message = NSLocalizedString(@"The app crashed last time it was launched. Send a crash report? This crash report will contain privacy related data. We will only use it to debug your crash and delete it afterwards!", @"Crash reporting");
-    NSString* yesAnswer = NSLocalizedString(@"Sure, send it!", @"Crash reporting");
-    NSString* noAnswer = NSLocalizedString(@"No, thanks", @"Crash reporting");
-    
-    DDLogVerbose(@"KSCrashReportFilterAlert started...");
-    dispatch_async(dispatch_get_main_queue(), ^{
-        UIAlertController* alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* yesAction = [UIAlertAction actionWithTitle:yesAnswer style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction* _Nonnull action) {
-            kscrash_callCompletion(onCompletion, reports, YES, nil);
-        }];
-        UIAlertAction* noAction = [UIAlertAction actionWithTitle:noAnswer style:UIAlertActionStyleCancel handler:^(__unused UIAlertAction* _Nonnull action) {
-            kscrash_callCompletion(onCompletion, reports, NO, nil);
-        }];
-        [alertController addAction:yesAction];
-        [alertController addAction:noAction];
-        [[(MonalAppDelegate*)[[UIApplication sharedApplication] delegate] getTopViewController] presentViewController:alertController animated:YES completion:NULL];
-    });
-    DDLogVerbose(@"KSCrashReportFilterAlert finished...");
-}
-
-@end
-
-@implementation KSCrashReportFilterEmpty
-
-+(instancetype) filter
-{
-    return [[self alloc] init];
-}
-
--(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
-{
-    DDLogVerbose(@"KSCrashReportFilterEmpty started...");
+    DDLogVerbose(@"KSCrashReportFilterMLEmpty started...");
     NSMutableArray* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
     for(NSUInteger i = 0; i < reports.count; i++)
-        [filteredReports addObject:@""];
-    DDLogVerbose(@"KSCrashReportFilterEmpty finished...");
-    kscrash_callCompletion(onCompletion, filteredReports, YES, nil);
+        [filteredReports addObject:[KSCrashReportString reportWithValue:@""]];
+    DDLogVerbose(@"KSCrashReportFilterMLEmpty finished...");
+    kscrash_callCompletion(onCompletion, filteredReports, nil);
 }
 
 @end
 
-@implementation KSCrashReportFilterAddAuxInfo
-
-+(instancetype) filter
-{
-    return [[self alloc] init];
-}
+@implementation KSCrashReportFilterMLAddAuxInfo
 
 -(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
 {
-    DDLogVerbose(@"KSCrashReportFilterAddAuxInfo started...");
-    NSMutableArray* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
-    for(NSDictionary* report in reports)
+    DDLogVerbose(@"KSCrashReportFilterMLAddAuxInfo started...");
+    NSMutableArray<id<KSCrashReport>>* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
+    for(id<KSCrashReport> report_ in reports)
     {
+        NSDictionary* report = [report_ untypedValue];
         NSMutableString* auxData = [NSMutableString new];
         
         //add version of monal reporting this crash
@@ -305,27 +266,23 @@
         if([crashInfos length] > 0)
             [auxData appendString:[NSString stringWithFormat:@"\nAvailable crash info messages:\n\n%@", crashInfos]];
         
-        [filteredReports addObject:auxData];
+        [filteredReports addObject:[KSCrashReportString reportWithValue:auxData]];
     }
-    DDLogVerbose(@"KSCrashReportFilterAddAuxInfo finished...");
-    kscrash_callCompletion(onCompletion, filteredReports, YES, nil);
+    DDLogVerbose(@"KSCrashReportFilterMLAddAuxInfo finished...");
+    kscrash_callCompletion(onCompletion, filteredReports, nil);
 }
 
 @end
 
-@implementation KSCrashReportFilterAddMLLogfile
-
-+(instancetype) filter
-{
-    return [[self alloc] init];
-}
+@implementation KSCrashReportFilterMLAddMLLogfile
 
 -(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
 {
-    DDLogVerbose(@"KSCrashReportFilterAddMLLogfile started...");
-    NSMutableArray* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
-    for(NSDictionary* report in reports)
+    DDLogVerbose(@"KSCrashReportFilterMLAddMLLogfile started...");
+    NSMutableArray<id<KSCrashReport>>* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
+    for(id<KSCrashReport> report_ in reports)
     {
+        NSDictionary* report = [report_ untypedValue];
         NSString* logfileCopy = report[@"user"][@"logfileCopy"];
         NSData* logfileData = [NSData new];
         if(logfileCopy != nil)
@@ -341,27 +298,23 @@
                 logfileData = [NSData new];
         }
         DDLogVerbose(@"Converting logfile data to hex...");
-        [filteredReports addObject:[HelperTools hexadecimalString:logfileData]];
+        [filteredReports addObject:[KSCrashReportString reportWithValue:[HelperTools hexadecimalString:logfileData]]];
     }
-    DDLogVerbose(@"KSCrashReportFilterAddMLLogfile finished...");
-    kscrash_callCompletion(onCompletion, filteredReports, YES, nil);
+    DDLogVerbose(@"KSCrashReportFilterMLAddMLLogfile finished...");
+    kscrash_callCompletion(onCompletion, filteredReports, nil);
 }
 
 @end
 
-@implementation KSCrashReportFilterAddProfraw
-
-+(instancetype) filter
-{
-    return [[self alloc] init];
-}
+@implementation KSCrashReportFilterMLAddProfraw
 
 -(void) filterReports:(NSArray*) reports onCompletion:(KSCrashReportFilterCompletion) onCompletion
 {
-    DDLogVerbose(@"KSCrashReportFilterAddProfraw started...");
-    NSMutableArray* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
-    for(NSDictionary* report in reports)
+    DDLogVerbose(@"KSCrashReportFilterMLAddProfraw started...");
+    NSMutableArray<id<KSCrashReport>>* filteredReports = [NSMutableArray arrayWithCapacity:[reports count]];
+    for(id<KSCrashReport> report_ in reports)
     {
+        NSDictionary* report = [report_ untypedValue];
         NSString* profileCopy = report[@"user"][@"profileCopy"];
         NSData* profileData = [NSData new];
         if(profileCopy != nil)
@@ -377,10 +330,10 @@
                 profileData = [NSData new];
         }
         DDLogVerbose(@"Converting profile data to hex...");
-        [filteredReports addObject:[HelperTools hexadecimalString:profileData]];
+        [filteredReports addObject:[KSCrashReportString reportWithValue:[HelperTools hexadecimalString:profileData]]];
     }
     DDLogVerbose(@"KSCrashReportFilterAddProfile finished...");
-    kscrash_callCompletion(onCompletion, filteredReports, YES, nil);
+    kscrash_callCompletion(onCompletion, filteredReports, nil);
 }
 
 @end

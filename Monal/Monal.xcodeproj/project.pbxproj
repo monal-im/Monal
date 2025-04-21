@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		08CAF17FA202CF3CB760D93C /* Pods_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7A5555D807EE78C95217FD /* Pods_NotificationService.framework */; };
 		1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* MonalAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		20D3611C2C10E12500E46587 /* BoardingCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D3611B2C10E12500E46587 /* BoardingCards.swift */; };
@@ -109,7 +108,6 @@
 		3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7D352228626CB80042C5E5 /* LoadingOverlay.swift */; };
 		3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */; };
 		3DC5035C2822F5220064C8A7 /* OmemoKeysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC5035B2822F5220064C8A7 /* OmemoKeysView.swift */; };
-		43A92B80C8CD5E04074B5A3E /* Pods_MonalXMPPUnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
 		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		540BD0D424D8D2000087A743 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 540BD0D324D8D1FF0087A743 /* IPC.m */; };
@@ -145,7 +143,6 @@
 		54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E594BC2523C34A00E4172B /* MLPubSub.m */; };
 		54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81828231690003664BD /* WelcomeLogIn.swift */; };
 		54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81B282316F5003664BD /* RegisterAccount.swift */; };
-		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
 		840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */; };
 		8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */; };
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
@@ -161,7 +158,6 @@
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
 		842790852A32D16D005C18CC /* CallSounds in Resources */ = {isa = PBXBuildFile; fileRef = 842790842A32D16C005C18CC /* CallSounds */; };
 		843AD3AB2AA55CE20036844D /* MLOgHtmlParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */; };
-		843DC1B22C8E51E3002724FE /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 843DC1B12C8E51E3002724FE /* ExyteChat */; };
 		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
 		844921EA2C29F9A000B99A9C /* MLDelayableTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 844921E92C29F9A000B99A9C /* MLDelayableTimer.m */; };
 		844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -171,8 +167,6 @@
 		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		846DF27C2937FAA600AAB9C0 /* ChatPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */; };
 		847311232C893D2600739CC6 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847311222C893D2600739CC6 /* ChatView.swift */; };
-		84774DF52D1A935000B15E51 /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 84774DF42D1A935000B15E51 /* ExyteChat */; };
-		84774DFB2D1A956400B15E51 /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 84774DFA2D1A956400B15E51 /* ExyteChat */; };
 		848227912C4A6194003CCA33 /* MLPlaceholderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 848227902C4A6194003CCA33 /* MLPlaceholderViewController.m */; };
 		848717F3295ED64600B8D288 /* MLCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 848717F1295ED64500B8D288 /* MLCall.m */; };
 		848904A9289C82C30097E19C /* SCRAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 848904A8289C82C30097E19C /* SCRAM.m */; };
@@ -184,6 +178,8 @@
 		849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */; };
 		849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF402BACF0360009BCD7 /* CocoaLumberjackSwift */; };
 		849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF422BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend */; };
+		84BB91A02DB1F9290041AF3D /* KSCrash.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BB919F2DB1F9290041AF3D /* KSCrash.framework */; };
+		84BB91A62DB207D50041AF3D /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 84BB91A52DB207D50041AF3D /* ExyteChat */; };
 		84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */; };
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
@@ -198,8 +194,11 @@
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
+		9220B67E60C8A87C98BEC15D /* Pods_NotificationService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FF9691CB23FD9C5FFA9B3AC /* Pods_NotificationService.framework */; };
 		952EBC802BAF72F300183DBF /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 952EBC7F2BAF72F300183DBF /* DebugView.swift */; };
-		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
+		A737443D3809312A04049430 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4A16336ABAF01A642AAC323 /* Pods_Monal.framework */; };
+		AA30D3CDB9374E750861487C /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86FE5CFB6536E74EC5B90FC7 /* Pods_MonalUITests.framework */; };
+		B1586EC79FD3AA499218E8D7 /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62801878C2AFB8AEAF586B92 /* Pods_monalxmpp.framework */; };
 		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490E22612F3D00054AC9E /* MLCrypto.swift */; };
 		C10490EB2612F3E00054AC9E /* EncryptedPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */; };
@@ -237,18 +236,18 @@
 		C1F5C7AA2775DA000001F295 /* MLContactSoftwareVersionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */; };
 		C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F5C7AB2777621B0001F295 /* ContactResources.swift */; };
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
+		CF621F0B38C607877DD6E0AC /* Pods_MonalXMPPUnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A77E6055523EFB43BDDEB3FA /* Pods_MonalXMPPUnitTests.framework */; };
 		D02192F32C89BB3800202A59 /* BlockedUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D02192F22C89BB3800202A59 /* BlockedUsers.swift */; };
 		D09B51F62C7F30DD008D725B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */; };
 		D0FE3F542C5C56ED007AAD23 /* ChangePassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FE3F532C5C56ED007AAD23 /* ChangePassword.swift */; };
-		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
+		E751CF27AF7AF877460FF8D5 /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 864B0F5C873723012E69DEE0 /* Pods_shareSheet.framework */; };
 		E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */; };
 		E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */; };
 		E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32225C6626300925F62 /* MLFileTransferFileViewController.m */; };
 		E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32425C6626400925F62 /* MLFileTransferTextCell.m */; };
 		E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */; };
 		E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8DED06125388BE8003167FF /* MLSearchViewController.m */; };
-		F9C277F46F5157194744C491 /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -330,21 +329,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		061EF1BEDEE7A71FDF9AB402 /* Pods-shareSheet.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore.xcconfig"; sourceTree = "<group>"; };
-		0D0362F6B26B9407BE313F36 /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.debug.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
-		0EC0A5305E72C0F7F9E1CDEF /* Pods-shareSheet.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.adhoc.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.adhoc.xcconfig"; sourceTree = "<group>"; };
-		1059D059522057BFA830995B /* Pods-shareSheet.alpha-catalyst.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.alpha-catalyst.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.alpha-catalyst.xcconfig"; sourceTree = "<group>"; };
-		140EC3B65541FD42B8A9A3C4 /* Pods-MonalXMPPUnitTests.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.alpha-ios.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.alpha-ios.xcconfig"; sourceTree = "<group>"; };
+		026DDEBD2F45F54A36BDD00A /* Pods-MonalUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.debug.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		08B40189E1F67BC26A6BD77C /* Pods-shareSheet.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.alpha.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.alpha.xcconfig"; sourceTree = "<group>"; };
+		184DF21C5323A2062B3820A5 /* Pods-NotificationService.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
+		18824EEF0F708CDE998547AF /* Pods-monalxmpp.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.beta.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.beta.xcconfig"; sourceTree = "<group>"; };
+		1D10162FAC0FE643D98AA045 /* Pods-MonalXMPPUnitTests.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.alpha.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.alpha.xcconfig"; sourceTree = "<group>"; };
 		1D3623240D0F684500981E51 /* MonalAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MonalAppDelegate.h; path = Classes/MonalAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* MonalAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MonalAppDelegate.m; path = Classes/MonalAppDelegate.m; sourceTree = "<group>"; };
-		1D46F251C198E3D8FA55692F /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
 		20D3611B2C10E12500E46587 /* BoardingCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardingCards.swift; sourceTree = "<group>"; };
 		20D8C65D2C3C37FE00E6BDA2 /* MediaGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaGallery.swift; sourceTree = "<group>"; };
 		20ED55842BADDA5C0005783E /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
-		213F5BFD4599EC9317B99E97 /* Pods-Monal.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
-		21E99538324C14220843F325 /* Pods-shareSheet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.debug.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.debug.xcconfig"; sourceTree = "<group>"; };
-		222F09C97CFF93A2CF1007F3 /* Pods-MonalUITests.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.alpha-ios.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.alpha-ios.xcconfig"; sourceTree = "<group>"; };
-		2369191B3FCB2E941169A093 /* Pods-MonalXMPPUnitTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.appstore.xcconfig"; sourceTree = "<group>"; };
 		2601D9A70FBF255D004DB939 /* DataLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataLayer.m; sourceTree = "<group>"; };
 		2601D9A80FBF255D004DB939 /* DataLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataLayer.h; sourceTree = "<group>"; };
 		2601D9CA0FBF25EF004DB939 /* sworim.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sworim.sqlite; sourceTree = "<group>"; };
@@ -436,7 +430,6 @@
 		26AA70222146E2B900598605 /* shareSheet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shareSheet.entitlements; sourceTree = "<group>"; };
 		26AAE283179F7B0200271345 /* MLSettingCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSettingCell.h; sourceTree = "<group>"; };
 		26AAE284179F7B0200271345 /* MLSettingCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingCell.m; sourceTree = "<group>"; };
-		26ABE9FB494A9E7F3044C695 /* Pods-MonalUITests.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
 		26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSoundsTableViewController.h; sourceTree = "<group>"; };
 		26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSoundsTableViewController.m; sourceTree = "<group>"; };
 		26B0CA8A21AE410E0080B133 /* AlertSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = AlertSounds; sourceTree = "<group>"; };
@@ -514,22 +507,22 @@
 		26FC619524EB6C270094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/iosShare.strings; sourceTree = "<group>"; };
 		26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLResizingTextView.h; sourceTree = "<group>"; };
 		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
-		29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		2B7A5555D807EE78C95217FD /* Pods_NotificationService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificationService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalXMPPUnitTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		2E5021A8D40FCC591D952104 /* Pods-NotificaionService.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.alpha-ios.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.alpha-ios.xcconfig"; sourceTree = "<group>"; };
+		30FD34B4823D9268543A99DC /* Pods-MonalUITests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.beta.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.beta.xcconfig"; sourceTree = "<group>"; };
+		31658DCBDB5FA520EE5044D8 /* Pods-monalxmpp.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha.xcconfig"; sourceTree = "<group>"; };
+		31EFD76CD09E1F87AD48B0AD /* Pods-MonalUITests.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.alpha.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.alpha.xcconfig"; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* MonalSourceCodePrefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonalSourceCodePrefix.pch; sourceTree = "<group>"; };
 		341F44642CAF427500AA6C7D /* MLPromise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPromise.h; sourceTree = "<group>"; };
 		341F44652CAF427500AA6C7D /* MLPromise.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPromise.m; sourceTree = "<group>"; };
 		34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentUnavailableShimView.swift; sourceTree = "<group>"; };
 		34E58B4A2C68E7BC009A1634 /* ContactsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
+		35D7010448304257354C0E4F /* Pods-shareSheet.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
+		35F907F564F8D1249025771B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXEPSlashMeHandler.h; sourceTree = "<group>"; };
 		38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXEPSlashMeHandler.m; sourceTree = "<group>"; };
 		389E298925E901CA009A5268 /* MLAudioRecoderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAudioRecoderManager.m; sourceTree = "<group>"; };
 		389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAudioRecoderManager.h; sourceTree = "<group>"; };
-		39B989B9775C0725A810D271 /* Pods-MonalUITests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.adhoc.xcconfig"; sourceTree = "<group>"; };
-		39DB4C9159DA578D1A34990D /* Pods-monalxmpp.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha.xcconfig"; sourceTree = "<group>"; };
+		39A33887D147A70AF7715A47 /* Pods-MonalXMPPUnitTests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.beta.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.beta.xcconfig"; sourceTree = "<group>"; };
 		3D06A514281FFCC000DDAE90 /* NotificationDebugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDebugging.swift; sourceTree = "<group>"; };
 		3D27D955290B0BB60014748B /* AddContactMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddContactMenu.swift; sourceTree = "<group>"; };
 		3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactRequestsMenu.swift; sourceTree = "<group>"; };
@@ -541,12 +534,10 @@
 		3D85E586282AE523006F5B3A /* OmemoQrCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmemoQrCodeView.swift; sourceTree = "<group>"; };
 		3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateGroupMenu.swift; sourceTree = "<group>"; };
 		3DC5035B2822F5220064C8A7 /* OmemoKeysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmemoKeysView.swift; sourceTree = "<group>"; };
-		3EB7A7084FA9A8F68A3D251C /* Pods-MonalXMPPUnitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.debug.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.debug.xcconfig"; sourceTree = "<group>"; };
-		4049F81F60EA5B7A57A4E9C6 /* Pods-NotificationService.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.beta.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.beta.xcconfig"; sourceTree = "<group>"; };
-		43FFAD161EF5A0B1CB149814 /* Pods-shareSheet.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.alpha-ios.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.alpha-ios.xcconfig"; sourceTree = "<group>"; };
-		4862C3A0242FB4F709B8F3FF /* Pods-MonalXMPPUnitTests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.beta.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.beta.xcconfig"; sourceTree = "<group>"; };
-		4A614910EEF29D66DD4B37E3 /* Pods-NotificaionService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.adhoc.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.adhoc.xcconfig"; sourceTree = "<group>"; };
-		4E53581DEF864B229A09FA61 /* Pods-MonalXMPPUnitTests.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.alpha.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.alpha.xcconfig"; sourceTree = "<group>"; };
+		404313D425CE7DDB0D428333 /* Pods-MonalUITests.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
+		442AED39F948AA722757FEF8 /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
+		4CE9417F08D5D06376BF50B5 /* Pods-monalxmpp.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.adhoc.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.adhoc.xcconfig"; sourceTree = "<group>"; };
+		51048E06AE396A4193CB79C8 /* Pods-NotificationService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.appstore.xcconfig"; sourceTree = "<group>"; };
 		540A3FAC24D674BD0008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
 		540BD0D124D8D1F20087A743 /* IPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPC.h; sourceTree = "<group>"; };
 		540BD0D324D8D1FF0087A743 /* IPC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPC.m; sourceTree = "<group>"; };
@@ -577,21 +568,16 @@
 		54E594BC2523C34A00E4172B /* MLPubSub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPubSub.m; sourceTree = "<group>"; };
 		54F0B81828231690003664BD /* WelcomeLogIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeLogIn.swift; sourceTree = "<group>"; };
 		54F0B81B282316F5003664BD /* RegisterAccount.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterAccount.swift; sourceTree = "<group>"; };
-		59F4A459FBC6040A0F8CCAF3 /* Pods-NotificaionService.alpha-catalyst.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.alpha-catalyst.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.alpha-catalyst.xcconfig"; sourceTree = "<group>"; };
-		5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_monalxmpp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		5BACDACCFE405FE0C903C897 /* Pods-MonalUITests.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.alpha.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.alpha.xcconfig"; sourceTree = "<group>"; };
-		6015D382ABCE0D788029D7A3 /* Pods-shareSheet.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.alpha.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.alpha.xcconfig"; sourceTree = "<group>"; };
-		6142E73A9912F6E327A8CD14 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
-		66387B079AB74C687D46FD0A /* Pods-Monal.alpha-catalyst.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.alpha-catalyst.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.alpha-catalyst.xcconfig"; sourceTree = "<group>"; };
-		671D139EE64DB6AD9E1D8108 /* Pods-NotificationService.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.alpha.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.alpha.xcconfig"; sourceTree = "<group>"; };
-		681C751BDE486C4E3A43CF72 /* Pods-MonalXMPPUnitTests.alpha-catalyst.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.alpha-catalyst.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.alpha-catalyst.xcconfig"; sourceTree = "<group>"; };
-		6A6D58F695CDFAF204F3B3EB /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.appstore.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
-		6BCB9FB4EBEA3735D24A44DF /* Pods-shareSheet.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.beta.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.beta.xcconfig"; sourceTree = "<group>"; };
-		72CBE47E31AF93F7357B1202 /* Pods-monalxmpp.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha-ios.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha-ios.xcconfig"; sourceTree = "<group>"; };
-		797F93A1B3C6B4735F2ABE7D /* Pods-NotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.debug.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.debug.xcconfig"; sourceTree = "<group>"; };
-		79A6AA4819B69B5FFFA28236 /* Pods-NotificationService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.appstore.xcconfig"; sourceTree = "<group>"; };
-		7D6715099247A9CCC180EE30 /* Pods-MonalUITests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.beta.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.beta.xcconfig"; sourceTree = "<group>"; };
-		7FA9582E4CC566FE5466C557 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
+		5932BA1C241EF771880D82D2 /* Pods-shareSheet.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.adhoc.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.adhoc.xcconfig"; sourceTree = "<group>"; };
+		5A04CB86873706E3A3F507A0 /* Pods-MonalXMPPUnitTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.appstore.xcconfig"; sourceTree = "<group>"; };
+		5C5E45D5B7F86AF7BC933482 /* Pods-shareSheet.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore.xcconfig"; sourceTree = "<group>"; };
+		5CBDF095BF023593C763DC95 /* Pods-NotificationService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.debug.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.debug.xcconfig"; sourceTree = "<group>"; };
+		603F90E5DC31A5309EC361F5 /* Pods-shareSheet.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.beta.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.beta.xcconfig"; sourceTree = "<group>"; };
+		62801878C2AFB8AEAF586B92 /* Pods_monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_monalxmpp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		667A4141502CE749BBF944B3 /* Pods-shareSheet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.debug.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.debug.xcconfig"; sourceTree = "<group>"; };
+		73171F7CFD69EB873FEC4117 /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
+		77FF585EC5B1768A94AF49CC /* Pods-NotificationService.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.alpha.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.alpha.xcconfig"; sourceTree = "<group>"; };
+		81E613641D725D09CBA149AF /* Pods-monalxmpp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.debug.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.debug.xcconfig"; sourceTree = "<group>"; };
 		840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueCell.m; sourceTree = "<group>"; };
 		840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueCell.h; sourceTree = "<group>"; };
 		8414ADFA2A7ABAC900EFFCCC /* LibMonalRustSwiftBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LibMonalRustSwiftBridge; path = ../rust/LibMonalRustSwiftBridge; sourceTree = "<group>"; };
@@ -625,6 +611,7 @@
 		849248482AD4CEC400986C1A /* ZoomableContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZoomableContainer.swift; sourceTree = "<group>"; };
 		849A53E3287135B2007E941A /* MLVoIPProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLVoIPProcessor.m; path = Classes/MLVoIPProcessor.m; sourceTree = SOURCE_ROOT; };
 		849A53E5287135D7007E941A /* MLVoIPProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLVoIPProcessor.h; path = Classes/MLVoIPProcessor.h; sourceTree = SOURCE_ROOT; };
+		84BB919F2DB1F9290041AF3D /* KSCrash.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KSCrash.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quicksy_RegisterAccount.swift; sourceTree = "<group>"; };
 		84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftHelpers.swift; sourceTree = "<group>"; };
 		84C1CD512A8F617F007076ED /* MLStreamRedirect.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLStreamRedirect.m; sourceTree = "<group>"; };
@@ -640,24 +627,19 @@
 		84FC37542897521400634E3E /* snprintf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = snprintf.m; sourceTree = "<group>"; };
 		84FC37562897523500634E3E /* metamacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
 		84FC375828981A5600634E3E /* PasswordMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordMigration.swift; sourceTree = "<group>"; };
-		86CF04FDE084C646CA14B774 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
-		8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		864B0F5C873723012E69DEE0 /* Pods_shareSheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shareSheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		86FE5CFB6536E74EC5B90FC7 /* Pods_MonalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8AEF2D7769BD453A972810B8 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
-		8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shareSheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		9162E3E9FCE2280BF75F5102 /* Pods-Monal.alpha-ios.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.alpha-ios.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.alpha-ios.xcconfig"; sourceTree = "<group>"; };
+		93FC184F0E9D7470B1012251 /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
 		952EBC7F2BAF72F300183DBF /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
-		9705AFFB59AF72A9B79C1D7B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.adhoc.xcconfig"; sourceTree = "<group>"; };
-		9760CF4718351300C4256921 /* Pods-shareSheet.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
-		9899D670570190DCBE9EEDDB /* Pods-monalxmpp.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
-		A2ED40D3515305509E3E166C /* Pods-MonalUITests.alpha-catalyst.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.alpha-catalyst.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.alpha-catalyst.xcconfig"; sourceTree = "<group>"; };
-		A4C686567AC126CDDFB1BE44 /* Pods-NotificaionService.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.beta.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.beta.xcconfig"; sourceTree = "<group>"; };
-		AA697C1F9B9637B86665DFF1 /* Pods-NotificationService.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
-		AAFC73E987D41BA8D91E9F95 /* Pods-monalxmpp.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore.xcconfig"; sourceTree = "<group>"; };
-		AD0E234056402EE91A36D628 /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
-		B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.debug.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.debug.xcconfig"; sourceTree = "<group>"; };
-		B58835E4BBDCCB6BE1E8F0AE /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
-		B8155E63F8DE80FF36D0B3B7 /* Pods-NotificationService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.adhoc.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.adhoc.xcconfig"; sourceTree = "<group>"; };
-		BFA9EFD7A8064201C81F52CF /* Pods-Monal.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.alpha.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.alpha.xcconfig"; sourceTree = "<group>"; };
+		97680E1D4848CBFEE0FE8239 /* Pods-MonalUITests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.adhoc.xcconfig"; sourceTree = "<group>"; };
+		9AD6F3439BE58620304C04F5 /* Pods-NotificationService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.adhoc.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.adhoc.xcconfig"; sourceTree = "<group>"; };
+		9FF9691CB23FD9C5FFA9B3AC /* Pods_NotificationService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificationService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A62D1058F159ADB3E3607851 /* Pods-monalxmpp.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
+		A77E6055523EFB43BDDEB3FA /* Pods_MonalXMPPUnitTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalXMPPUnitTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B21359B0C2F0CC6842B18034 /* Pods-Monal.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.alpha.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.alpha.xcconfig"; sourceTree = "<group>"; };
+		B4A16336ABAF01A642AAC323 /* Pods_Monal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10490482612ED2F0054AC9E /* MLEmoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLEmoji.swift; sourceTree = "<group>"; };
 		C10490E22612F3D00054AC9E /* MLCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCrypto.swift; sourceTree = "<group>"; };
 		C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptedPayload.swift; sourceTree = "<group>"; };
@@ -788,10 +770,9 @@
 		D02192F22C89BB3800202A59 /* BlockedUsers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockedUsers.swift; sourceTree = "<group>"; };
 		D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDetails.swift; sourceTree = "<group>"; };
 		D0FE3F532C5C56ED007AAD23 /* ChangePassword.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePassword.swift; sourceTree = "<group>"; };
-		D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
-		D8D2595B2BE453296E59F1AF /* Pods-MonalUITests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore.xcconfig"; sourceTree = "<group>"; };
-		DC5DA2C9782510B3433FD50D /* Pods-monalxmpp.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.beta.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.beta.xcconfig"; sourceTree = "<group>"; };
-		E06DB4446BAE2F9C0192D055 /* Pods-monalxmpp.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.adhoc.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.adhoc.xcconfig"; sourceTree = "<group>"; };
+		D97753FC5D7592F1BCD5D6D4 /* Pods-NotificationService.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.beta.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.beta.xcconfig"; sourceTree = "<group>"; };
+		DD91E611730F9A4C6C2EF42B /* Pods-monalxmpp.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore.xcconfig"; sourceTree = "<group>"; };
+		E05CB06458C2CA2AFA0FBA5C /* Pods-MonalUITests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore.xcconfig"; sourceTree = "<group>"; };
 		E89DD31C25C6626300925F62 /* MLFileTransferFileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferFileViewController.h; sourceTree = "<group>"; };
 		E89DD31E25C6626300925F62 /* MLFileTransferDataCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferDataCell.h; sourceTree = "<group>"; };
 		E89DD31F25C6626300925F62 /* MLFileTransferVideoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferVideoCell.h; sourceTree = "<group>"; };
@@ -804,9 +785,9 @@
 		E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingsAboutViewController.m; sourceTree = "<group>"; };
 		E8DED05F25388BE8003167FF /* MLSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSearchViewController.h; sourceTree = "<group>"; };
 		E8DED06125388BE8003167FF /* MLSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSearchViewController.m; sourceTree = "<group>"; };
-		F04FE24284F1563D80523B52 /* Pods-monalxmpp.alpha-catalyst.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha-catalyst.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha-catalyst.xcconfig"; sourceTree = "<group>"; };
-		F7506FDE7A78EB0CAB14FF60 /* Pods-MonalUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.debug.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.debug.xcconfig"; sourceTree = "<group>"; };
-		FCADB10208409DD462AC921F /* Pods-Monal.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.beta.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.beta.xcconfig"; sourceTree = "<group>"; };
+		EE3838A6EA9ABC3196D6C314 /* Pods-Monal.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
+		F57CBA88643C8C6903F558B3 /* Pods-Monal.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.beta.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.beta.xcconfig"; sourceTree = "<group>"; };
+		FF7C4C68978FF5949D2EC51B /* Pods-MonalXMPPUnitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.debug.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -814,15 +795,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84774DF52D1A935000B15E51 /* ExyteChat in Frameworks */,
-				843DC1B22C8E51E3002724FE /* ExyteChat in Frameworks */,
+				84BB91A62DB207D50041AF3D /* ExyteChat in Frameworks */,
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
 				84F194D12C15197200F0A994 /* FrameUp in Frameworks */,
 				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
-				84774DFB2D1A956400B15E51 /* ExyteChat in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
 				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
-				7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */,
+				A737443D3809312A04049430 /* Pods_Monal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -831,7 +810,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */,
-				08CAF17FA202CF3CB760D93C /* Pods_NotificationService.framework in Frameworks */,
+				9220B67E60C8A87C98BEC15D /* Pods_NotificationService.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -840,7 +819,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */,
-				F9C277F46F5157194744C491 /* Pods_shareSheet.framework in Frameworks */,
+				E751CF27AF7AF877460FF8D5 /* Pods_shareSheet.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -849,11 +828,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */,
-				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
 				849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */,
 				84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */,
 				849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
+				84BB91A02DB1F9290041AF3D /* KSCrash.framework in Frameworks */,
 				8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */,
+				B1586EC79FD3AA499218E8D7 /* Pods_monalxmpp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -862,7 +842,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */,
-				43A92B80C8CD5E04074B5A3E /* Pods_MonalXMPPUnitTests.framework in Frameworks */,
+				CF621F0B38C607877DD6E0AC /* Pods_MonalXMPPUnitTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -870,7 +850,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */,
+				AA30D3CDB9374E750861487C /* Pods_MonalUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1312,7 +1292,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+		29B97314FDCFA39411CA2CEA = {
 			isa = PBXGroup;
 			children = (
 				8414ADF92A7ABAC900EFFCCC /* Packages */,
@@ -1361,61 +1341,42 @@
 		82B5509417C9F86AAC2B4FA1 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				7FA9582E4CC566FE5466C557 /* Pods-Monal.debug.xcconfig */,
-				AD0E234056402EE91A36D628 /* Pods-Monal.adhoc.xcconfig */,
-				1D46F251C198E3D8FA55692F /* Pods-Monal.appstore.xcconfig */,
-				86CF04FDE084C646CA14B774 /* Pods-Monal Tests.debug.xcconfig */,
-				6142E73A9912F6E327A8CD14 /* Pods-Monal Tests.adhoc.xcconfig */,
-				6A6D58F695CDFAF204F3B3EB /* Pods-Monal Tests.appstore.xcconfig */,
-				0D0362F6B26B9407BE313F36 /* Pods-NotificaionService.debug.xcconfig */,
-				4A614910EEF29D66DD4B37E3 /* Pods-NotificaionService.adhoc.xcconfig */,
-				D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */,
-				B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */,
-				E06DB4446BAE2F9C0192D055 /* Pods-monalxmpp.adhoc.xcconfig */,
-				AAFC73E987D41BA8D91E9F95 /* Pods-monalxmpp.appstore.xcconfig */,
-				21E99538324C14220843F325 /* Pods-shareSheet.debug.xcconfig */,
-				0EC0A5305E72C0F7F9E1CDEF /* Pods-shareSheet.adhoc.xcconfig */,
-				061EF1BEDEE7A71FDF9AB402 /* Pods-shareSheet.appstore.xcconfig */,
-				F7506FDE7A78EB0CAB14FF60 /* Pods-MonalUITests.debug.xcconfig */,
-				39B989B9775C0725A810D271 /* Pods-MonalUITests.adhoc.xcconfig */,
-				D8D2595B2BE453296E59F1AF /* Pods-MonalUITests.appstore.xcconfig */,
-				3EB7A7084FA9A8F68A3D251C /* Pods-MonalXMPPUnitTests.debug.xcconfig */,
-				9705AFFB59AF72A9B79C1D7B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */,
-				2369191B3FCB2E941169A093 /* Pods-MonalXMPPUnitTests.appstore.xcconfig */,
-				FCADB10208409DD462AC921F /* Pods-Monal.beta.xcconfig */,
-				7D6715099247A9CCC180EE30 /* Pods-MonalUITests.beta.xcconfig */,
-				4862C3A0242FB4F709B8F3FF /* Pods-MonalXMPPUnitTests.beta.xcconfig */,
-				A4C686567AC126CDDFB1BE44 /* Pods-NotificaionService.beta.xcconfig */,
-				DC5DA2C9782510B3433FD50D /* Pods-monalxmpp.beta.xcconfig */,
-				6BCB9FB4EBEA3735D24A44DF /* Pods-shareSheet.beta.xcconfig */,
-				9162E3E9FCE2280BF75F5102 /* Pods-Monal.alpha-ios.xcconfig */,
-				66387B079AB74C687D46FD0A /* Pods-Monal.alpha-catalyst.xcconfig */,
-				222F09C97CFF93A2CF1007F3 /* Pods-MonalUITests.alpha-ios.xcconfig */,
-				A2ED40D3515305509E3E166C /* Pods-MonalUITests.alpha-catalyst.xcconfig */,
-				140EC3B65541FD42B8A9A3C4 /* Pods-MonalXMPPUnitTests.alpha-ios.xcconfig */,
-				681C751BDE486C4E3A43CF72 /* Pods-MonalXMPPUnitTests.alpha-catalyst.xcconfig */,
-				2E5021A8D40FCC591D952104 /* Pods-NotificaionService.alpha-ios.xcconfig */,
-				59F4A459FBC6040A0F8CCAF3 /* Pods-NotificaionService.alpha-catalyst.xcconfig */,
-				72CBE47E31AF93F7357B1202 /* Pods-monalxmpp.alpha-ios.xcconfig */,
-				F04FE24284F1563D80523B52 /* Pods-monalxmpp.alpha-catalyst.xcconfig */,
-				43FFAD161EF5A0B1CB149814 /* Pods-shareSheet.alpha-ios.xcconfig */,
-				1059D059522057BFA830995B /* Pods-shareSheet.alpha-catalyst.xcconfig */,
-				BFA9EFD7A8064201C81F52CF /* Pods-Monal.alpha.xcconfig */,
-				5BACDACCFE405FE0C903C897 /* Pods-MonalUITests.alpha.xcconfig */,
-				4E53581DEF864B229A09FA61 /* Pods-MonalXMPPUnitTests.alpha.xcconfig */,
-				797F93A1B3C6B4735F2ABE7D /* Pods-NotificationService.debug.xcconfig */,
-				B8155E63F8DE80FF36D0B3B7 /* Pods-NotificationService.adhoc.xcconfig */,
-				671D139EE64DB6AD9E1D8108 /* Pods-NotificationService.alpha.xcconfig */,
-				79A6AA4819B69B5FFFA28236 /* Pods-NotificationService.appstore.xcconfig */,
-				4049F81F60EA5B7A57A4E9C6 /* Pods-NotificationService.beta.xcconfig */,
-				39DB4C9159DA578D1A34990D /* Pods-monalxmpp.alpha.xcconfig */,
-				6015D382ABCE0D788029D7A3 /* Pods-shareSheet.alpha.xcconfig */,
-				213F5BFD4599EC9317B99E97 /* Pods-Monal.appstore-quicksy.xcconfig */,
-				26ABE9FB494A9E7F3044C695 /* Pods-MonalUITests.appstore-quicksy.xcconfig */,
-				B58835E4BBDCCB6BE1E8F0AE /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */,
-				AA697C1F9B9637B86665DFF1 /* Pods-NotificationService.appstore-quicksy.xcconfig */,
-				9899D670570190DCBE9EEDDB /* Pods-monalxmpp.appstore-quicksy.xcconfig */,
-				9760CF4718351300C4256921 /* Pods-shareSheet.appstore-quicksy.xcconfig */,
+				8AEF2D7769BD453A972810B8 /* Pods-Monal.debug.xcconfig */,
+				93FC184F0E9D7470B1012251 /* Pods-Monal.adhoc.xcconfig */,
+				B21359B0C2F0CC6842B18034 /* Pods-Monal.alpha.xcconfig */,
+				442AED39F948AA722757FEF8 /* Pods-Monal.appstore.xcconfig */,
+				EE3838A6EA9ABC3196D6C314 /* Pods-Monal.appstore-quicksy.xcconfig */,
+				F57CBA88643C8C6903F558B3 /* Pods-Monal.beta.xcconfig */,
+				026DDEBD2F45F54A36BDD00A /* Pods-MonalUITests.debug.xcconfig */,
+				97680E1D4848CBFEE0FE8239 /* Pods-MonalUITests.adhoc.xcconfig */,
+				31EFD76CD09E1F87AD48B0AD /* Pods-MonalUITests.alpha.xcconfig */,
+				E05CB06458C2CA2AFA0FBA5C /* Pods-MonalUITests.appstore.xcconfig */,
+				404313D425CE7DDB0D428333 /* Pods-MonalUITests.appstore-quicksy.xcconfig */,
+				30FD34B4823D9268543A99DC /* Pods-MonalUITests.beta.xcconfig */,
+				FF7C4C68978FF5949D2EC51B /* Pods-MonalXMPPUnitTests.debug.xcconfig */,
+				35F907F564F8D1249025771B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */,
+				1D10162FAC0FE643D98AA045 /* Pods-MonalXMPPUnitTests.alpha.xcconfig */,
+				5A04CB86873706E3A3F507A0 /* Pods-MonalXMPPUnitTests.appstore.xcconfig */,
+				73171F7CFD69EB873FEC4117 /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */,
+				39A33887D147A70AF7715A47 /* Pods-MonalXMPPUnitTests.beta.xcconfig */,
+				5CBDF095BF023593C763DC95 /* Pods-NotificationService.debug.xcconfig */,
+				9AD6F3439BE58620304C04F5 /* Pods-NotificationService.adhoc.xcconfig */,
+				77FF585EC5B1768A94AF49CC /* Pods-NotificationService.alpha.xcconfig */,
+				51048E06AE396A4193CB79C8 /* Pods-NotificationService.appstore.xcconfig */,
+				184DF21C5323A2062B3820A5 /* Pods-NotificationService.appstore-quicksy.xcconfig */,
+				D97753FC5D7592F1BCD5D6D4 /* Pods-NotificationService.beta.xcconfig */,
+				81E613641D725D09CBA149AF /* Pods-monalxmpp.debug.xcconfig */,
+				4CE9417F08D5D06376BF50B5 /* Pods-monalxmpp.adhoc.xcconfig */,
+				31658DCBDB5FA520EE5044D8 /* Pods-monalxmpp.alpha.xcconfig */,
+				DD91E611730F9A4C6C2EF42B /* Pods-monalxmpp.appstore.xcconfig */,
+				A62D1058F159ADB3E3607851 /* Pods-monalxmpp.appstore-quicksy.xcconfig */,
+				18824EEF0F708CDE998547AF /* Pods-monalxmpp.beta.xcconfig */,
+				667A4141502CE749BBF944B3 /* Pods-shareSheet.debug.xcconfig */,
+				5932BA1C241EF771880D82D2 /* Pods-shareSheet.adhoc.xcconfig */,
+				08B40189E1F67BC26A6BD77C /* Pods-shareSheet.alpha.xcconfig */,
+				5C5E45D5B7F86AF7BC933482 /* Pods-shareSheet.appstore.xcconfig */,
+				35D7010448304257354C0E4F /* Pods-shareSheet.appstore-quicksy.xcconfig */,
+				603F90E5DC31A5309EC361F5 /* Pods-shareSheet.beta.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -1505,13 +1466,14 @@
 		D91581D0612C23AB5B3F867C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				84BB919F2DB1F9290041AF3D /* KSCrash.framework */,
 				C176F1EB2AF11C31002034E5 /* UserNotifications.framework */,
-				8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */,
-				29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */,
-				2C59BAF969550DFAC27E5F2B /* Pods_MonalXMPPUnitTests.framework */,
-				5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */,
-				8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */,
-				2B7A5555D807EE78C95217FD /* Pods_NotificationService.framework */,
+				B4A16336ABAF01A642AAC323 /* Pods_Monal.framework */,
+				86FE5CFB6536E74EC5B90FC7 /* Pods_MonalUITests.framework */,
+				A77E6055523EFB43BDDEB3FA /* Pods_MonalXMPPUnitTests.framework */,
+				9FF9691CB23FD9C5FFA9B3AC /* Pods_NotificationService.framework */,
+				62801878C2AFB8AEAF586B92 /* Pods_monalxmpp.framework */,
+				864B0F5C873723012E69DEE0 /* Pods_shareSheet.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1579,14 +1541,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "Monal" */;
 			buildPhases = (
-				0105BB524F492059A59FAB32 /* [CP] Check Pods Manifest.lock */,
+				10304647C174E98CCB3DB652 /* [CP] Check Pods Manifest.lock */,
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
 				26AA70212146BBB900598605 /* Embed Foundation Extensions */,
 				261E542723A0A1D300394F59 /* Embed Frameworks */,
 				C19CC5E028E85527007AD33E /* Fix catalyst aps-enviromnent */,
-				E09BC3B194F91D0DE538C310 /* [CP] Embed Pods Frameworks */,
+				EA7824E2A782C6D8C6C970AB /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1600,9 +1562,7 @@
 				C1F5C7AE2777638B0001F295 /* OrderedCollections */,
 				841898A92957712000FEC77D /* ViewExtractor */,
 				84F194D02C15197200F0A994 /* FrameUp */,
-				843DC1B12C8E51E3002724FE /* ExyteChat */,
-				84774DF42D1A935000B15E51 /* ExyteChat */,
-				84774DFA2D1A956400B15E51 /* ExyteChat */,
+				84BB91A52DB207D50041AF3D /* ExyteChat */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1612,7 +1572,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 260773CC232FC4E800BFD50F /* Build configuration list for PBXNativeTarget "NotificationService" */;
 			buildPhases = (
-				E29F37602913131122522B1F /* [CP] Check Pods Manifest.lock */,
+				B7CB34F4F67E90315DDBFF29 /* [CP] Check Pods Manifest.lock */,
 				260773BC232FC4E800BFD50F /* Sources */,
 				260773BD232FC4E800BFD50F /* Frameworks */,
 				260773BE232FC4E800BFD50F /* Resources */,
@@ -1631,7 +1591,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 26AA70202146BBB900598605 /* Build configuration list for PBXNativeTarget "shareSheet" */;
 			buildPhases = (
-				AEFD0BBC538F58642A554A94 /* [CP] Check Pods Manifest.lock */,
+				B8A19F99EA0C42E630B6CEA5 /* [CP] Check Pods Manifest.lock */,
 				26AA700D2146BBB800598605 /* Sources */,
 				26AA700E2146BBB800598605 /* Frameworks */,
 				26AA700F2146BBB800598605 /* Resources */,
@@ -1650,7 +1610,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 26CC579F23A0867400ABB92A /* Build configuration list for PBXNativeTarget "monalxmpp" */;
 			buildPhases = (
-				D180E765B155419143F176E9 /* [CP] Check Pods Manifest.lock */,
+				BC92177CF73417A3541955BD /* [CP] Check Pods Manifest.lock */,
 				26CC578D23A0867400ABB92A /* Headers */,
 				26CC578E23A0867400ABB92A /* Sources */,
 				26CC578F23A0867400ABB92A /* Frameworks */,
@@ -1676,11 +1636,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C104918E261301530054AC9E /* Build configuration list for PBXNativeTarget "MonalXMPPUnitTests" */;
 			buildPhases = (
-				EF65EEAA25C8D7FEE6305039 /* [CP] Check Pods Manifest.lock */,
+				B914B785881F1499585F086E /* [CP] Check Pods Manifest.lock */,
 				C1049182261301530054AC9E /* Sources */,
 				C1049183261301530054AC9E /* Frameworks */,
 				C1049184261301530054AC9E /* Resources */,
-				B79D5724FB4B51022BCFD6E9 /* [CP] Embed Pods Frameworks */,
+				33C0C757BADB50583378F26A /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1696,11 +1656,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C1850EBC25F38A2D003D506A /* Build configuration list for PBXNativeTarget "MonalUITests" */;
 			buildPhases = (
-				A0AAAD1CC9A02DA53A59DF82 /* [CP] Check Pods Manifest.lock */,
+				C10D3FFA45C026EC3D71FD5B /* [CP] Check Pods Manifest.lock */,
 				C1850EB125F38A2D003D506A /* Sources */,
 				C1850EB225F38A2D003D506A /* Frameworks */,
 				C1850EB325F38A2D003D506A /* Resources */,
-				8FC0217E357D67979CAFB523 /* [CP] Embed Pods Frameworks */,
+				0E154F5A89319C096453DF69 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1812,14 +1772,14 @@
 				eu,
 				"es-AR",
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			mainGroup = 29B97314FDCFA39411CA2CEA;
 			packageReferences = (
 				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
 				849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */,
 				84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */,
 				84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */,
-				84774DF92D1A956400B15E51 /* XCRemoteSwiftPackageReference "ExyteChat" */,
+				84BB91A42DB207D50041AF3D /* XCRemoteSwiftPackageReference "ExyteChat" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -1905,7 +1865,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		0105BB524F492059A59FAB32 /* [CP] Check Pods Manifest.lock */ = {
+		0E154F5A89319C096453DF69 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		10304647C174E98CCB3DB652 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1927,68 +1904,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		8FC0217E357D67979CAFB523 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		A0AAAD1CC9A02DA53A59DF82 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MonalUITests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		AEFD0BBC538F58642A554A94 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-shareSheet-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B79D5724FB4B51022BCFD6E9 /* [CP] Embed Pods Frameworks */ = {
+		33C0C757BADB50583378F26A /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2005,65 +1921,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C19CC5E028E85527007AD33E /* Fix catalyst aps-enviromnent */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 8;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Fix catalyst aps-enviromnent";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-			shellPath = /bin/sh;
-			shellScript = "# https://developer.apple.com/forums/thread/714011\nentry=$(/usr/libexec/PlistBuddy -c \"Print :aps-environment\" \"$TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\")\nif [ \"$entry\" == \"\" ]; then\n    /usr/libexec/PlistBuddy -c \"Add :aps-environment string production\" \"$TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\"\n    echo \"Added aps-environment in $TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\"\nelse\n    echo \"aps-environment was present in $TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\"\nfi\n";
-		};
-		D180E765B155419143F176E9 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-monalxmpp-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E09BC3B194F91D0DE538C310 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E29F37602913131122522B1F /* [CP] Check Pods Manifest.lock */ = {
+		B7CB34F4F67E90315DDBFF29 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2085,7 +1943,29 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		EF65EEAA25C8D7FEE6305039 /* [CP] Check Pods Manifest.lock */ = {
+		B8A19F99EA0C42E630B6CEA5 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-shareSheet-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B914B785881F1499585F086E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2105,6 +1985,86 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BC92177CF73417A3541955BD /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-monalxmpp-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C10D3FFA45C026EC3D71FD5B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MonalUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C19CC5E028E85527007AD33E /* Fix catalyst aps-enviromnent */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 8;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Fix catalyst aps-enviromnent";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "# https://developer.apple.com/forums/thread/714011\nentry=$(/usr/libexec/PlistBuddy -c \"Print :aps-environment\" \"$TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\")\nif [ \"$entry\" == \"\" ]; then\n    /usr/libexec/PlistBuddy -c \"Add :aps-environment string production\" \"$TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\"\n    echo \"Added aps-environment in $TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\"\nelse\n    echo \"aps-environment was present in $TARGET_TEMP_DIR/$FULL_PRODUCT_NAME.xcent\"\nfi\n";
+		};
+		EA7824E2A782C6D8C6C970AB /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -2513,7 +2473,7 @@
 /* Begin XCBuildConfiguration section */
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7FA9582E4CC566FE5466C557 /* Pods-Monal.debug.xcconfig */;
+			baseConfigurationReference = 8AEF2D7769BD453A972810B8 /* Pods-Monal.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2590,7 +2550,7 @@
 		};
 		260773C9232FC4E800BFD50F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 797F93A1B3C6B4735F2ABE7D /* Pods-NotificationService.debug.xcconfig */;
+			baseConfigurationReference = 5CBDF095BF023593C763DC95 /* Pods-NotificationService.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = "";
@@ -2622,7 +2582,7 @@
 		};
 		260773CA232FC4E800BFD50F /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B8155E63F8DE80FF36D0B3B7 /* Pods-NotificationService.adhoc.xcconfig */;
+			baseConfigurationReference = 9AD6F3439BE58620304C04F5 /* Pods-NotificationService.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = "";
@@ -2654,7 +2614,7 @@
 		};
 		260773CB232FC4E800BFD50F /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 79A6AA4819B69B5FFFA28236 /* Pods-NotificationService.appstore.xcconfig */;
+			baseConfigurationReference = 51048E06AE396A4193CB79C8 /* Pods-NotificationService.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = "";
@@ -2767,7 +2727,7 @@
 		};
 		2675EF5A18B98C2D0059C5C3 /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1D46F251C198E3D8FA55692F /* Pods-Monal.appstore.xcconfig */;
+			baseConfigurationReference = 442AED39F948AA722757FEF8 /* Pods-Monal.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -2844,7 +2804,7 @@
 		};
 		26AA701D2146BBB900598605 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 21E99538324C14220843F325 /* Pods-shareSheet.debug.xcconfig */;
+			baseConfigurationReference = 667A4141502CE749BBF944B3 /* Pods-shareSheet.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
 				CURRENT_PROJECT_VERSION = 0;
@@ -2872,7 +2832,7 @@
 		};
 		26AA701E2146BBB900598605 /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0EC0A5305E72C0F7F9E1CDEF /* Pods-shareSheet.adhoc.xcconfig */;
+			baseConfigurationReference = 5932BA1C241EF771880D82D2 /* Pods-shareSheet.adhoc.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
 				CURRENT_PROJECT_VERSION = 0;
@@ -2900,7 +2860,7 @@
 		};
 		26AA701F2146BBB900598605 /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 061EF1BEDEE7A71FDF9AB402 /* Pods-shareSheet.appstore.xcconfig */;
+			baseConfigurationReference = 5C5E45D5B7F86AF7BC933482 /* Pods-shareSheet.appstore.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
 				CURRENT_PROJECT_VERSION = 0;
@@ -2928,7 +2888,7 @@
 		};
 		26CC579C23A0867400ABB92A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */;
+			baseConfigurationReference = 81E613641D725D09CBA149AF /* Pods-monalxmpp.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -2969,7 +2929,7 @@
 		};
 		26CC579D23A0867400ABB92A /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E06DB4446BAE2F9C0192D055 /* Pods-monalxmpp.adhoc.xcconfig */;
+			baseConfigurationReference = 4CE9417F08D5D06376BF50B5 /* Pods-monalxmpp.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -3009,7 +2969,7 @@
 		};
 		26CC579E23A0867400ABB92A /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AAFC73E987D41BA8D91E9F95 /* Pods-monalxmpp.appstore.xcconfig */;
+			baseConfigurationReference = DD91E611730F9A4C6C2EF42B /* Pods-monalxmpp.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -3133,7 +3093,7 @@
 		};
 		26E74FBE17B06D2200FD91AE /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AD0E234056402EE91A36D628 /* Pods-Monal.adhoc.xcconfig */;
+			baseConfigurationReference = 93FC184F0E9D7470B1012251 /* Pods-Monal.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -3301,7 +3261,7 @@
 		};
 		C104918F261301530054AC9E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3EB7A7084FA9A8F68A3D251C /* Pods-MonalXMPPUnitTests.debug.xcconfig */;
+			baseConfigurationReference = FF7C4C68978FF5949D2EC51B /* Pods-MonalXMPPUnitTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -3346,7 +3306,7 @@
 		};
 		C1049190261301530054AC9E /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9705AFFB59AF72A9B79C1D7B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */;
+			baseConfigurationReference = 35F907F564F8D1249025771B /* Pods-MonalXMPPUnitTests.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -3418,7 +3378,7 @@
 		};
 		C1049191261301530054AC9E /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2369191B3FCB2E941169A093 /* Pods-MonalXMPPUnitTests.appstore.xcconfig */;
+			baseConfigurationReference = 5A04CB86873706E3A3F507A0 /* Pods-MonalXMPPUnitTests.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -3576,7 +3536,7 @@
 		};
 		C11C870D26A83C1D00B8DEA5 /* Beta */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FCADB10208409DD462AC921F /* Pods-Monal.beta.xcconfig */;
+			baseConfigurationReference = F57CBA88643C8C6903F558B3 /* Pods-Monal.beta.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -3653,7 +3613,7 @@
 		};
 		C11C870E26A83C1D00B8DEA5 /* Beta */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6BCB9FB4EBEA3735D24A44DF /* Pods-shareSheet.beta.xcconfig */;
+			baseConfigurationReference = 603F90E5DC31A5309EC361F5 /* Pods-shareSheet.beta.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
 				CURRENT_PROJECT_VERSION = 0;
@@ -3681,7 +3641,7 @@
 		};
 		C11C870F26A83C1D00B8DEA5 /* Beta */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4049F81F60EA5B7A57A4E9C6 /* Pods-NotificationService.beta.xcconfig */;
+			baseConfigurationReference = D97753FC5D7592F1BCD5D6D4 /* Pods-NotificationService.beta.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = "";
@@ -3713,7 +3673,7 @@
 		};
 		C11C871026A83C1D00B8DEA5 /* Beta */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DC5DA2C9782510B3433FD50D /* Pods-monalxmpp.beta.xcconfig */;
+			baseConfigurationReference = 18824EEF0F708CDE998547AF /* Pods-monalxmpp.beta.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -3753,7 +3713,7 @@
 		};
 		C11C871126A83C1D00B8DEA5 /* Beta */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7D6715099247A9CCC180EE30 /* Pods-MonalUITests.beta.xcconfig */;
+			baseConfigurationReference = 30FD34B4823D9268543A99DC /* Pods-MonalUITests.beta.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEAD_CODE_STRIPPING = NO;
@@ -3773,7 +3733,7 @@
 		};
 		C11C871226A83C1D00B8DEA5 /* Beta */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4862C3A0242FB4F709B8F3FF /* Pods-MonalXMPPUnitTests.beta.xcconfig */;
+			baseConfigurationReference = 39A33887D147A70AF7715A47 /* Pods-MonalXMPPUnitTests.beta.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -3930,7 +3890,7 @@
 		};
 		C15D0B0E2B3EF70E00845061 /* AppStore-Quicksy */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 213F5BFD4599EC9317B99E97 /* Pods-Monal.appstore-quicksy.xcconfig */;
+			baseConfigurationReference = EE3838A6EA9ABC3196D6C314 /* Pods-Monal.appstore-quicksy.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = QuicksyAppIcon;
@@ -4011,7 +3971,7 @@
 		};
 		C15D0B0F2B3EF70E00845061 /* AppStore-Quicksy */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9760CF4718351300C4256921 /* Pods-shareSheet.appstore-quicksy.xcconfig */;
+			baseConfigurationReference = 35D7010448304257354C0E4F /* Pods-shareSheet.appstore-quicksy.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Quicksy.sharesheet.entitlements;
 				CURRENT_PROJECT_VERSION = 0;
@@ -4039,7 +3999,7 @@
 		};
 		C15D0B102B3EF70E00845061 /* AppStore-Quicksy */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AA697C1F9B9637B86665DFF1 /* Pods-NotificationService.appstore-quicksy.xcconfig */;
+			baseConfigurationReference = 184DF21C5323A2062B3820A5 /* Pods-NotificationService.appstore-quicksy.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = "";
@@ -4071,7 +4031,7 @@
 		};
 		C15D0B112B3EF70E00845061 /* AppStore-Quicksy */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9899D670570190DCBE9EEDDB /* Pods-monalxmpp.appstore-quicksy.xcconfig */;
+			baseConfigurationReference = A62D1058F159ADB3E3607851 /* Pods-monalxmpp.appstore-quicksy.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -4111,7 +4071,7 @@
 		};
 		C15D0B122B3EF70E00845061 /* AppStore-Quicksy */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 26ABE9FB494A9E7F3044C695 /* Pods-MonalUITests.appstore-quicksy.xcconfig */;
+			baseConfigurationReference = 404313D425CE7DDB0D428333 /* Pods-MonalUITests.appstore-quicksy.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEAD_CODE_STRIPPING = NO;
@@ -4131,7 +4091,7 @@
 		};
 		C15D0B132B3EF70E00845061 /* AppStore-Quicksy */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B58835E4BBDCCB6BE1E8F0AE /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */;
+			baseConfigurationReference = 73171F7CFD69EB873FEC4117 /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -4203,7 +4163,7 @@
 		};
 		C1850EBD25F38A2D003D506A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F7506FDE7A78EB0CAB14FF60 /* Pods-MonalUITests.debug.xcconfig */;
+			baseConfigurationReference = 026DDEBD2F45F54A36BDD00A /* Pods-MonalUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEAD_CODE_STRIPPING = NO;
@@ -4222,7 +4182,7 @@
 		};
 		C1850EBE25F38A2D003D506A /* Adhoc */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 39B989B9775C0725A810D271 /* Pods-MonalUITests.adhoc.xcconfig */;
+			baseConfigurationReference = 97680E1D4848CBFEE0FE8239 /* Pods-MonalUITests.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEAD_CODE_STRIPPING = NO;
@@ -4242,7 +4202,7 @@
 		};
 		C1850EBF25F38A2D003D506A /* AppStore */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D8D2595B2BE453296E59F1AF /* Pods-MonalUITests.appstore.xcconfig */;
+			baseConfigurationReference = E05CB06458C2CA2AFA0FBA5C /* Pods-MonalUITests.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEAD_CODE_STRIPPING = NO;
@@ -4351,7 +4311,7 @@
 		};
 		C1E1BCAF288BBAB00046AB47 /* Alpha */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BFA9EFD7A8064201C81F52CF /* Pods-Monal.alpha.xcconfig */;
+			baseConfigurationReference = B21359B0C2F0CC6842B18034 /* Pods-Monal.alpha.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AlphaAppIcon;
@@ -4429,7 +4389,7 @@
 		};
 		C1E1BCB0288BBAB00046AB47 /* Alpha */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6015D382ABCE0D788029D7A3 /* Pods-shareSheet.alpha.xcconfig */;
+			baseConfigurationReference = 08B40189E1F67BC26A6BD77C /* Pods-shareSheet.alpha.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Alpha.shareSheet.entitlements;
 				CURRENT_PROJECT_VERSION = 0;
@@ -4456,7 +4416,7 @@
 		};
 		C1E1BCB1288BBAB00046AB47 /* Alpha */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 671D139EE64DB6AD9E1D8108 /* Pods-NotificationService.alpha.xcconfig */;
+			baseConfigurationReference = 77FF585EC5B1768A94AF49CC /* Pods-NotificationService.alpha.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = "";
@@ -4487,7 +4447,7 @@
 		};
 		C1E1BCB2288BBAB00046AB47 /* Alpha */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 39DB4C9159DA578D1A34990D /* Pods-monalxmpp.alpha.xcconfig */;
+			baseConfigurationReference = 31658DCBDB5FA520EE5044D8 /* Pods-monalxmpp.alpha.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
@@ -4527,7 +4487,7 @@
 		};
 		C1E1BCB3288BBAB00046AB47 /* Alpha */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5BACDACCFE405FE0C903C897 /* Pods-MonalUITests.alpha.xcconfig */;
+			baseConfigurationReference = 31EFD76CD09E1F87AD48B0AD /* Pods-MonalUITests.alpha.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEAD_CODE_STRIPPING = NO;
@@ -4547,7 +4507,7 @@
 		};
 		C1E1BCB4288BBAB00046AB47 /* Alpha */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4E53581DEF864B229A09FA61 /* Pods-MonalXMPPUnitTests.alpha.xcconfig */;
+			baseConfigurationReference = 1D10162FAC0FE643D98AA045 /* Pods-MonalXMPPUnitTests.alpha.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -4722,20 +4682,20 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		84774DF92D1A956400B15E51 /* XCRemoteSwiftPackageReference "ExyteChat" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/monal-im/ExyteChat";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 		849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/cocoalumberjack/cocoalumberjack";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 3.8.5;
+			};
+		};
+		84BB91A42DB207D50041AF3D /* XCRemoteSwiftPackageReference "ExyteChat" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/monal-im/ExyteChat";
+			requirement = {
+				branch = "old-main";
+				kind = branch;
 			};
 		};
 		84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */ = {
@@ -4774,19 +4734,6 @@
 			package = 841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */;
 			productName = ViewExtractor;
 		};
-		843DC1B12C8E51E3002724FE /* ExyteChat */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = ExyteChat;
-		};
-		84774DF42D1A935000B15E51 /* ExyteChat */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = ExyteChat;
-		};
-		84774DFA2D1A956400B15E51 /* ExyteChat */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 84774DF92D1A956400B15E51 /* XCRemoteSwiftPackageReference "ExyteChat" */;
-			productName = ExyteChat;
-		};
 		849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
@@ -4801,6 +4748,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
+		};
+		84BB91A52DB207D50041AF3D /* ExyteChat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84BB91A42DB207D50041AF3D /* XCRemoteSwiftPackageReference "ExyteChat" */;
+			productName = ExyteChat;
 		};
 		84E231F22C16A9CE00735FB7 /* SVGView */ = {
 			isa = XCSwiftPackageProductDependency;

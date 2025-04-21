@@ -1566,19 +1566,19 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     //this method is called by didFinishLaunchingWithOptions: and our ipc handler (but this is currently unused)
     //we block the reconnect while the crash reports have not been processed yet, to avoid a crash loop preventing
     //the user from sending the crash report
-    int count = [HelperTools pendingCrashreportCount];
+    NSInteger count = [HelperTools pendingCrashreportCount];
     if(count > 0 && options == nil && applicationState != UIApplicationStateBackground)
     {
         [MLXMPPManager sharedInstance].isConnectBlocked = YES;
-        DDLogWarn(@"Blocking connect of connectIfNecessary: crash reports still pending: %d, retrying in 1 second...", count);
+        DDLogWarn(@"Blocking connect of connectIfNecessary: crash reports still pending: %ld, retrying in 1 second...", (long)count);
         cancelCurrentTimer = createTimer(1.0, (^{ [self connectIfNecessaryWithOptions:options]; }));
     }
     else
     {
         [MLXMPPManager sharedInstance].isConnectBlocked = NO;
-        DDLogInfo(@"Now unblocking connect of connectIfNecessary (applicationState%@UIApplicationStateBackground, count=%d, options=%@)...",
+        DDLogInfo(@"Now unblocking connect of connectIfNecessary (applicationState%@UIApplicationStateBackground, count=%ld, options=%@)...",
                     applicationState == UIApplicationStateBackground ? @"==" : @"!=",
-                    count,
+                    (long)count,
                     options
         );
         cancelEmergencyTimer();

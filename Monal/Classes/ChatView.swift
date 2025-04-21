@@ -335,6 +335,7 @@ struct ChatView: View {
         }
         .toolbarRole(.editor)       //make sure to never show the title of the previous view in the back bar button
         .addLoadingOverlay(overlay)
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             checkOmemoSupport(withAlert:false)
             

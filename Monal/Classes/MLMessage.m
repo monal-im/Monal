@@ -9,6 +9,7 @@
 #import <monalxmpp/MLMessage.h>
 #import <monalxmpp/MLContact.h>
 #import <monalxmpp/MLConstants.h>
+#import <monalxmpp/xmpp.h>
 
 @implementation MLMessage
 {
@@ -225,7 +226,7 @@
     else if(self.isMuc)
         return self.participantJid;
     else
-        return self.contact.contactJid;
+        return self.inbound ? self.contact.contactJid : self.contact.account.connectionProperties.identity.jid;
 }
 
 -(NSString*) description

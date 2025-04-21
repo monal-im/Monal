@@ -224,7 +224,7 @@ struct RuntimeError: LocalizedError {
 }
 
 extension AnyPromise {
-    public func toGuarantee<T>() -> Guarantee<T> {
+    public func toTypedGuarantee<T>() -> Guarantee<T> {
         return Guarantee<T> { seal in
             self.done { value in
                 if let value = value as? T {
@@ -244,7 +244,7 @@ extension AnyPromise {
         }
     }
 
-    public func toPromise<T>() -> Promise<T> {
+    public func toTypedPromise<T>() -> Promise<T> {
         return Promise<T> { seal in
             self.done { value in
                 if let value = value as? T {

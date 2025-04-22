@@ -137,6 +137,26 @@
 
 #pragma mark - public interface
 
+-(BOOL) canSendDtmf
+{
+    return self.webRTCClient != nil && self.webRTCClient.canSendDtmf;
+}
++(NSSet*) keyPathsForValuesAffectingCanSendDtmf
+{
+    return [NSSet setWithObjects:@"webRTCClient", @"webRTCClient.canSendDtmf", nil];
+}
+
+-(void) sendDtmf:(NSString*) tones
+{
+    if(!self.canSendDtmf)
+    {
+        DDLogError(@"Called sendDtmf: while canSendDtmf property was NO!");
+        return;
+    }
+    //self.canSendDtmf will be false, if self.webRTCClient is nil
+    [self.webRTCClient sendDTMF:tones duration:0.150 interToneGap:0.070];
+}
+
 -(void) startCaptureLocalVideoWithRenderer:(id<RTCVideoRenderer>) renderer andCameraPosition:(AVCaptureDevicePosition) position
 {
     MLAssert(self.callType == MLCallTypeVideo, @"startCaptureLocalVideoWithRenderer:andCameraPosition: can only be called for video calls!");
@@ -326,6 +346,11 @@
             }
             else
                 self.durationTime++;
+            
+#ifdef IS_ALPHA
+            if([[HelperTools defaultsDB] boolForKey:@"debugDtmfSending"] && self.canSendDtmf && self.durationTime%8 == 0)
+                [self sendDtmf:@"*0123456789#"];
+#endif
         }];
     });
 }

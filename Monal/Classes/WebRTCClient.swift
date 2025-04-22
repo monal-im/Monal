@@ -432,3 +432,41 @@ extension WebRTCClient: RTCDataChannelDelegate {
         self.delegate?.webRTCClient(self, didReceiveData: buffer.data)
     }
 }
+
+extension WebRTCClient {
+    private var dtmfSender: RTCDtmfSender? {
+        guard let audioSender = peerConnection.senders.first(where: { $0.track is RTCAudioTrack }) else {
+            DDLogDebug("No audio sender available for DTMF")
+            return nil
+        }
+        return audioSender.dtmfSender
+    }
+    
+    @objc
+    public var canSendDtmf: Bool {
+        guard let dtmfSender = self.dtmfSender else {
+            DDLogInfo("DTMF sender not available")
+            return false
+        }
+        return dtmfSender.canInsertDtmf
+    }
+
+    @objc
+    func sendDTMF(_ tones: String, duration: TimeInterval = 0.1, interToneGap: TimeInterval = 0.07) {
+        guard let dtmfSender = self.dtmfSender else {
+            DDLogError("DTMF sender not available")
+            return
+        }
+
+        if dtmfSender.canInsertDtmf {
+            let success = dtmfSender.insertDtmf(tones, duration: duration, interToneGap: interToneGap)
+            if success {
+                DDLogInfo("DTMF tones sent: \(tones)")
+            } else {
+                DDLogError("Failed to send DTMF tones: \(tones)")
+            }
+        } else {
+            DDLogError("Cannot insert DTMF at this time")
+        }
+    }
+}

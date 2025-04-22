@@ -77,6 +77,7 @@ typedef NS_ENUM(NSUInteger, MLCallEncryptionState) {
 @property (nonatomic, readonly) BOOL wasConnectedOnce;
 @property (nonatomic, assign) BOOL muted;
 @property (nonatomic, assign) BOOL speaker;
+@property (nonatomic, readonly) BOOL canSendDtmf;
 
 +(instancetype) makeDummyCall:(int) type;
 -(void) end;
@@ -89,6 +90,7 @@ typedef NS_ENUM(NSUInteger, MLCallEncryptionState) {
 -(void) renderRemoteVideoWithRenderer:(id) renderer;
 -(void) hideVideo;
 -(void) showVideo;
+-(void) sendDtmf:(NSString*) tones;
 
 -(BOOL) isEqualToContact:(MLContact*) contact;
 -(BOOL) isEqualToCall:(MLCall*) call;

@@ -24,6 +24,9 @@ class DebugDefaultDB: ObservableObject {
     
     @defaultsDB("showNewChatView")
     var showNewChatView: Bool
+    
+    @defaultsDB("debugDtmfSending")
+    var debugDtmfSending: Bool
 }
 
 struct LogFilesView: View {
@@ -129,6 +132,10 @@ struct CrashTestingView: View {
                     
                     Toggle(isOn: $defaultDB.showNewChatView) {
                         Text("Show new SwiftUI ChatView")
+                    }
+                    
+                    Toggle(isOn: $defaultDB.debugDtmfSending) {
+                        Text("Automatically play DTMF tones in all calls")
                     }
 
                     Button("Reset the state of all accounts") {

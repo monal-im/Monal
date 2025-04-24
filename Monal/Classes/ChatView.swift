@@ -199,6 +199,7 @@ struct ChatView: View {
         ExyteChatView(messages: messages, chatType: .conversation, replyMode: .quote) { draft in
             print("sending draft: \(String(describing:draft))")
         }
+        .showNetworkConnectionProblem(false)
 //         .enableLoadMore(pageSize: 3) { message in
 //             print("load more messages before: \(String(describing:message))")
 //         }

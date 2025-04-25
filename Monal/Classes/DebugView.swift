@@ -48,21 +48,21 @@ struct LogFilesView: View {
                 Section(header: Text("Logfiles")) {
                     ForEach(sortedLogFileInfos, id: \.self) { logFileInfo in
                         Button(logFileInfo.fileName) {
-                            fileURL = URL(fileURLWithPath: logFileInfo.filePath)
+                            self.fileURL = HelperTools.compressFile(atPath:logFileInfo.filePath, withLevel:9)
                         }
                     }
                 }
                 Section(header: Text("Database Files")) {
                     Button("Main Database") {
                         if let dbFile = DataLayer.sharedInstance().exportDB() {
-                            self.fileURL = URL(fileURLWithPath: dbFile)
+                            self.fileURL = HelperTools.compressFile(atPath:dbFile, withLevel:4)
                         } else {
                             showingDBExportFailedAlert = true
                         }
                     }
                     Button("IPC Database") {
                         if let dbFile = HelperTools.exportIPCDatabase() {
-                            self.fileURL = URL(fileURLWithPath: dbFile)
+                            self.fileURL = HelperTools.compressFile(atPath:dbFile, withLevel:4)
                         } else {
                             showingDBExportFailedAlert = true
                         }

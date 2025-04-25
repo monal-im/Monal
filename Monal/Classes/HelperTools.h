@@ -231,6 +231,8 @@ void swizzle(Class c, SEL orig, SEL new);
 
 +(void) updateCurrentLogfilePath:(NSString*) logfilePath;
 
++(NSURL* _Nullable) compressFileAtPath:(NSString*) path withLevel:(NSInteger) level;
+
 @end
 
 NS_ASSUME_NONNULL_END

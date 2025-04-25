@@ -20,6 +20,7 @@
 #include <objc/runtime.h> 
 #include <objc/message.h>
 #include <objc/objc-exception.h>
+#import <zlib.h>
 #import <sys/qos.h>
 #import <BackgroundTasks/BackgroundTasks.h>
 #import <CommonCrypto/CommonDigest.h>
@@ -3301,6 +3302,69 @@ a=%@\r\n", mid, candidate];
     if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
         sessionConfig.requiresDNSSECValidation = YES;
     return [NSURLSession sessionWithConfiguration:sessionConfig];
+}
+
++(NSURL* _Nullable) compressFileAtPath:(NSString*) path withLevel:(NSInteger) level
+{
+    uint8_t buffer[65536];
+    
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSString* filename = path.lastPathComponent;
+    NSString* gzipPath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.gz", filename]];
+    
+    DDLogInfo(@"Compressing file at '%@' into '%@'...", path, gzipPath);
+    
+    NSError* error = nil;
+    if([fileManager fileExistsAtPath:gzipPath])
+        [fileManager removeItemAtPath:gzipPath error:&error];
+    if(error != nil)
+    {
+        DDLogError(@"Could not delete old leftover gzip file at '%@': %@", gzipPath, error);
+        return nil;
+    }
+    
+    NSInputStream* input = [NSInputStream inputStreamWithFileAtPath:path];
+    if(!input)
+    {
+        DDLogError(@"Could not open file to compress: %@", path);
+        return nil;
+    }
+    [input open];
+    
+    FILE* outputFile = fopen([gzipPath fileSystemRepresentation], "wb");
+    if(!outputFile)
+    {
+        DDLogError(@"Could not open gzip output file: %@", gzipPath);
+        [input close];
+        return nil;
+    }
+    
+    gzFile gzOutput = gzdopen(fileno(outputFile), [NSString stringWithFormat:@"%ldwb", (long)level].UTF8String);
+    if(!gzOutput)
+    {
+        DDLogError(@"Could not create gzip stream for output file: %@", gzipPath);
+        fclose(outputFile);
+        [input close];
+        return nil;
+    }
+    
+    NSInteger bytesRead;
+    while((bytesRead = [input read:buffer maxLength:sizeof(buffer)]) > 0)
+    {
+        if(gzwrite(gzOutput, buffer, (unsigned int)bytesRead) != bytesRead)
+        {
+            DDLogError(@"Failed to write gzip data to output file: %@", gzipPath);
+            gzclose(gzOutput);
+            [input close];
+            return nil;
+        }
+    }
+    
+    gzclose(gzOutput);
+    [input close];
+    
+    return [NSURL fileURLWithPath:gzipPath];
+    
 }
 
 @end

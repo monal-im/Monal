@@ -674,7 +674,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 #pragma mark -  XMPP commands
--(void) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion
+-(MLMessage*) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo
 {
     NSString* msgid = [[NSUUID UUID] UUIDString];
     xmpp* account = contact.account;
@@ -699,20 +699,30 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     // Send message
     if(messageDBId != nil)
     {
-        DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
-        [self sendMessage:message toContact:contact isEncrypted:encrypted isUpload:(uploadInfo != nil) messageId:msgid withCompletionHandler:^(BOOL successSend, NSString* messageIdSend) {
-            completion(successSend, messageIdSend);
-        }];
+        DDLogVerbose(@"Message added to history with id %ld", (long)[messageDBId intValue]);
+
+        // MLMessage object that will be returned by the method
+        MLMessage* newMLMessage = [[DataLayer sharedInstance] messageForHistoryID:messageDBId];
+        if (!newMLMessage)
+        {
+            DDLogError(@"Could not find message for history ID %@!", messageDBId);
+            return nil;
+        }
+
+        DDLogInfo(@"Sending message...");
+        [self sendMessage:message toContact:contact isEncrypted:encrypted isUpload:(uploadInfo != nil) messageId:msgid withCompletionHandler:nil];
         DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
         [[MLNotificationQueue currentQueue] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
         
         //create and donate interaction to allow for share suggestions
         [[MLNotificationManager sharedInstance] donateInteractionForOutgoingDBId:messageDBId];
+
+        return newMLMessage;
     }
     else
     {
         DDLogError(@"Could not add message to history!");
-        completion(false, nil);
+        return nil;
     }
 }
 

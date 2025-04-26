@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class xmpp;
 @class MLContact;
+@class MLMessage;
 
 /**
  A singleton to control all of the active XMPP connections
@@ -104,9 +105,10 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountID;
 
 /**
-Sends a message to a specified contact in account. Calls completion handler on success or failure.
+ Sends a message to a specified contact in account.
+ It returns an MLMessage object (corresponding to the sent message) on success, and nil on failure.
  */
--(void) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
+-(MLMessage* _Nullable) sendMessageAndAddToHistory:(NSString*) message havingType:(NSString*) messageType toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted uploadInfo:(NSDictionary* _Nullable) uploadInfo NS_SWIFT_NAME(sendMessageAndAddToHistory(message:havingType:toContact:isEncrypted:uploadInfo:));
 -(void)sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypted isUpload:(BOOL) isUpload messageId:(NSString*) messageId withCompletionHandler:(void (^ _Nullable)(BOOL success, NSString* messageId)) completion;
 -(void) sendChatState:(BOOL) isTyping toContact:(MLContact*) contact;
 

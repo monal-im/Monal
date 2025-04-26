@@ -695,9 +695,11 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             }];
             
             BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:fromContact.contactJid andAccountID:fromContact.accountID];
-            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText havingType:kMessageTypeText toContact:fromContact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", bool2str(successSendObject), messageIdSentObject);
-            }];
+            MLMessage* newMLMessage = [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText havingType:kMessageTypeText toContact:fromContact isEncrypted:encrypted uploadInfo:nil];
+            if(newMLMessage)
+                DDLogInfo(@"REPLY_ACTION success=YES, messageIdSentObject=%@", newMLMessage.messageDBId);
+            else
+                DDLogInfo(@"REPLY_ACTION success=NO");
         }
         else if([response.actionIdentifier isEqualToString:@"MARK_AS_READ_ACTION"])
         {
@@ -1725,29 +1727,33 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             
             monal_id_block_t sendItem = ^(id dummy __unused){
                 BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountID:contact.accountID];
-                if([payload[@"type"] isEqualToString:@"text"])
+                NSDictionary* mapping = @{
+                    @"text": kMessageTypeText,
+                    @"url": kMessageTypeUrl,
+                    @"geo": kMessageTypeGeo,
+                    @"image": kMessageTypeFiletransfer,
+                    @"file": kMessageTypeFiletransfer,
+                    @"contact":kMessageTypeFiletransfer,
+                    @"audiovisual":kMessageTypeFiletransfer,
+                };
+                NSString* messageType = mapping[nilDefault(payload[@"type"], @"<type key not present>")];
+
+                if(!messageType)
+                    unreachable(@"Outbox payload type unknown", payload);
+                else if(![messageType isEqual:kMessageTypeFiletransfer])
                 {
-                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeText toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountID, messageIdSentObject);
-                        cleanup(payload);
-                    }];
+                    //the payload type is either "text", "url" or "geo"
+                    MLMessage* newMLMessage = [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:messageType toContact:contact isEncrypted:encrypted uploadInfo:nil];
+                    if(newMLMessage)
+                        DDLogInfo(@"SHARESHEET_SEND_DATA success=YES, account=%@, messageIdSentObject=%@", account.accountID, newMLMessage.messageDBId);
+                    else
+                        DDLogInfo(@"SHARESHEET_SEND_DATA success=NO, account=%@", account.accountID);
+
+                    cleanup(payload);
                 }
-                else if([payload[@"type"] isEqualToString:@"url"])
+                else
                 {
-                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeUrl toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountID, messageIdSentObject);
-                        cleanup(payload);
-                    }];
-                }
-                else if([payload[@"type"] isEqualToString:@"geo"])
-                {
-                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:payload[@"data"] havingType:kMessageTypeGeo toContact:contact isEncrypted:encrypted uploadInfo:nil withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountID, messageIdSentObject);
-                        cleanup(payload);
-                    }];
-                }
-                else if([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"contact"] || [payload[@"type"] isEqualToString:@"audiovisual"])
-                {
+                    //the payload type is either "image", "file", "contact" or "audiovisual"
                     DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
                     [self.activeChats.currentChatView showUploadHUD];
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -1765,16 +1771,19 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                                     [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
                                 }
                                 else
-                                    [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url havingType:kMessageTypeFiletransfer toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size} withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                                        DDLogInfo(@"SHARESHEET_SEND_DATA success=%@, account=%@, messageIdSentObject=%@", bool2str(successSendObject), account.accountID, messageIdSentObject);
-                                        cleanup(payload);
-                                    }];
+                                {
+                                    MLMessage* newMLMessage = [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url havingType:messageType toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size}];
+                                    if(newMLMessage)
+                                        DDLogInfo(@"SHARESHEET_SEND_DATA success=YES, account=%@, messageIdSentObject=%@", account.accountID, newMLMessage.messageDBId);
+                                    else
+                                        DDLogInfo(@"SHARESHEET_SEND_DATA success=NO, account=%@", account.accountID);
+
+                                    cleanup(payload);
+                                }
                             });
                         })));
                     });
                 }
-                else
-                    unreachable(@"Outbox payload type unknown", payload);
             };
             
             DDLogVerbose(@"Trying to open chat of outbox receiver: %@", contact);

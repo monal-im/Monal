@@ -197,7 +197,10 @@ struct ChatView: View {
     
     var body: some View {
         ExyteChatView(messages: messages, chatType: .conversation, replyMode: .quote) { draft in
-            print("sending draft: \(String(describing:draft))")
+            guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: draft.text, havingType: kMessageTypeText, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: nil) else {
+                return
+            }
+            messages.append(ChatViewMessage(newMLMessage))
         }
         .showNetworkConnectionProblem(false)
 //         .enableLoadMore(pageSize: 3) { message in
@@ -378,6 +381,19 @@ struct ChatView: View {
                         checkOmemoSupport(withAlert:true)
                     }
                 }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalNewMessageNotice")).receive(on: RunLoop.main)) { notification in
+            DDLogVerbose("chat view got new message notice \(String(describing:notification.userInfo))")
+
+            guard let message = notification.userInfo?["message"] as? MLMessage else {
+                DDLogError("Notification without message");
+                return
+            }
+            if message.isEqual(to: self.contact.obj) {
+                // Do not insert based on delay timestamp because that
+                // would make it possible to fake history entries.
+                messages.append(ChatViewMessage(message))
             }
         }
     }

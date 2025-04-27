@@ -344,9 +344,12 @@ struct ChatView: View {
             checkOmemoSupport(withAlert:false)
             
             //TODO: load messages from db
-            let dbMessages = DataLayer.sharedInstance().messages(forContact:contact.contactJid, forAccount:contact.accountID) as! [MLMessage]
-            for msg in dbMessages {
-                messages.append(ChatViewMessage(msg))
+            // In some scenarios, onAppear can be executed more than once without the state variables being cleared.
+            if messages.isEmpty {
+                let dbMessages = DataLayer.sharedInstance().messages(forContact:contact.contactJid, forAccount:contact.accountID) as! [MLMessage]
+                for msg in dbMessages {
+                    messages.append(ChatViewMessage(msg))
+                }
             }
 //             messages = [
 //                 ExyteChat.Message(

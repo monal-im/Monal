@@ -239,6 +239,7 @@
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
 		D02192F32C89BB3800202A59 /* BlockedUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D02192F22C89BB3800202A59 /* BlockedUsers.swift */; };
 		D09B51F62C7F30DD008D725B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
+		D0E0497A2DB3A7FA002783A3 /* ChatViewHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = D0E049792DB3A7FA002783A3 /* ChatViewHelpers.m */; };
 		D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */; };
 		D0FE3F542C5C56ED007AAD23 /* ChangePassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FE3F532C5C56ED007AAD23 /* ChangePassword.swift */; };
 		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
@@ -786,6 +787,8 @@
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
 		C1F5C7AB2777621B0001F295 /* ContactResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactResources.swift; sourceTree = "<group>"; };
 		D02192F22C89BB3800202A59 /* BlockedUsers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockedUsers.swift; sourceTree = "<group>"; };
+		D0E049792DB3A7FA002783A3 /* ChatViewHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ChatViewHelpers.m; sourceTree = "<group>"; };
+		D0E0497C2DB3A862002783A3 /* ChatViewHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChatViewHelpers.h; sourceTree = "<group>"; };
 		D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDetails.swift; sourceTree = "<group>"; };
 		D0FE3F532C5C56ED007AAD23 /* ChangePassword.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePassword.swift; sourceTree = "<group>"; };
 		D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1041,6 +1044,8 @@
 				E89DD31F25C6626300925F62 /* MLFileTransferVideoCell.h */,
 				E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */,
 				847311222C893D2600739CC6 /* ChatView.swift */,
+				D0E049792DB3A7FA002783A3 /* ChatViewHelpers.m */,
+				D0E0497C2DB3A862002783A3 /* ChatViewHelpers.h */,
 			);
 			name = ChatViews;
 			sourceTree = "<group>";
@@ -2140,6 +2145,7 @@
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
+				D0E0497A2DB3A7FA002783A3 /* ChatViewHelpers.m in Sources */,
 				841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,

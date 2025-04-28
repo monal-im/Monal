@@ -341,6 +341,8 @@ struct ChatView: View {
         .addLoadingOverlay(overlay)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
+            MLNotificationManager.sharedInstance().currentContact = self.contact.obj
+
             checkOmemoSupport(withAlert:false)
             
             //TODO: load messages from db
@@ -351,6 +353,7 @@ struct ChatView: View {
                     messages.append(ChatViewMessage(msg))
                 }
             }
+            ChatViewHelpers.refreshCounter(for: self.contact.obj)
 //             messages = [
 //                 ExyteChat.Message(
 //                     id: "123",
@@ -373,6 +376,15 @@ struct ChatView: View {
 //                     replyMessage: nil
 //                 )
 //             ]
+        }
+        .onDisappear {
+            // When the split view is active, selecting different chats results in the old
+            // view's onDisappear executing after the new view's onAppear, thus erroneously
+            // making currentContact always nil.
+            // This if statement ensures currentContact has the correct value.
+            if MLNotificationManager.sharedInstance().currentContact == self.contact.obj {
+                MLNotificationManager.sharedInstance().currentContact = nil
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalOmemoFetchingStateUpdate")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let notificationJid = notification.userInfo?["jid"] as? String {
@@ -398,6 +410,10 @@ struct ChatView: View {
                 // would make it possible to fake history entries.
                 messages.append(ChatViewMessage(message))
             }
+            ChatViewHelpers.refreshCounter(for: self.contact.obj)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalRefresh")).receive(on: RunLoop.main)) { notification in
+            ChatViewHelpers.refreshCounter(for: self.contact.obj)
         }
     }
 }

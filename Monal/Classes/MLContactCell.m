@@ -109,7 +109,10 @@
             self.time.hidden = YES;
     }
     else
+    {
         [self showStatusText:nil inboundDir:NO fromUser:nil];
+        self.time.hidden = YES;
+    }
 }
 
 -(void) showStatusText:(NSString *) text inboundDir:(BOOL) inboundDir fromUser:(NSString* _Nullable) fromUser

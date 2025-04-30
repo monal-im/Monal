@@ -56,7 +56,7 @@
             [self.parent presentViewController:safariView animated:YES completion:nil];
         }
         else
-            [[UIApplication sharedApplication] performSelector:@selector(openURL:) withObject:url];
+            [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
     }
 }
 

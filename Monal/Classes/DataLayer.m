@@ -1289,7 +1289,7 @@ static NSDateFormatter* dbFormatter;
             if(!success)
                 return (NSNumber*)nil;
             NSNumber* historyId = [self.db lastInsertId];
-            [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
+            [self updateActiveBuddy:buddyName setTime:dateString forAccount:accountNo];
             return historyId;
         }
         else

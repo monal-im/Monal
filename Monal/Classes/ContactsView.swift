@@ -200,10 +200,10 @@ class Contacts: ObservableObject {
         self.contacts = Set(DataLayer.sharedInstance().contactList())
         self.requestCount = DataLayer.sharedInstance().allContactRequests().count
         subscriptions = [
-            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh"))
+            NotificationCenter.default.publisher(for: NSNotification.Name(kMonalContactRefresh))
                 .receive(on: DispatchQueue.main)
                 .sink() { _ in self.refreshContacts() },
-            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRemoved"))
+            NotificationCenter.default.publisher(for: NSNotification.Name(kMonalContactRemoved))
                 .receive(on: DispatchQueue.main)
                 .sink() { _ in self.refreshContacts() },
         ]

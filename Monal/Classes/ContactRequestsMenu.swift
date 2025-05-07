@@ -112,10 +112,10 @@ struct ContactRequestsMenu: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalContactRefresh)).receive(on: RunLoop.main)) { notification in
             updateRequests()
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRemoved")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalContactRemoved)).receive(on: RunLoop.main)) { notification in
             updateRequests()
         }
         .onAppear {

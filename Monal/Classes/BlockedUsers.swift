@@ -51,7 +51,7 @@ struct BlockedUsers: View {
                 showBlockingUnsupportedPlaceholder = blockingUnsupported
                 reloadBlocksFromDB()
             }
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalAccountDiscoDone")).receive(on: RunLoop.main)) { notification in
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalAccountDiscoDone)).receive(on: RunLoop.main)) { notification in
                 guard let notificationAccountID = notification.userInfo?["accountID"] as? NSNumber,
                       notificationAccountID.intValue == xmppAccount.accountID.intValue else {
                     return
@@ -62,7 +62,7 @@ struct BlockedUsers: View {
                 reloadBlocksFromDB()
                 hideLoadingOverlay(overlay)
             }
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalBlockListRefresh")).receive(on: RunLoop.main)) { notification in
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalBlockListRefresh)).receive(on: RunLoop.main)) { notification in
                 guard let notificationAccountID = notification.userInfo?["accountID"] as? NSNumber,
                       notificationAccountID.intValue == xmppAccount.accountID.intValue else {
                     return

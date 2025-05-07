@@ -452,7 +452,7 @@ struct RegisterAccount: View {
         }
         .addLoadingOverlay(overlay)
         .navigationBarTitle(Text("Register"), displayMode:.large)
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kXMPPError)).receive(on: RunLoop.main)) { notification in
             DDLogDebug("Got xmpp error")
             if(self.errorObserverEnabled == false) {
                 return
@@ -473,7 +473,7 @@ struct RegisterAccount: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLResourceBoundNotice")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMLResourceBoundNotice)).receive(on: RunLoop.main)) { notification in
             if(self.registerComplete == true) {
                 return
             }

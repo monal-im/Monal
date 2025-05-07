@@ -333,6 +333,7 @@ static NSMutableSet* _pushWarningDisplayed;
     [nc addObserver:self selector:@selector(handleRefreshDisplayNotification:) name:kMonalMessageFiletransferUpdateNotice object:nil];
     [nc addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalUpdatedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
     [nc addObserver:self selector:@selector(handleDeviceRotation) name:UIDeviceOrientationDidChangeNotification object:nil];

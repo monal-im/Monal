@@ -693,13 +693,25 @@ static NSMutableDictionary* _typingNotifications;
                 
                 [[DataLayer sharedInstance] addActiveBuddies:buddyName forAccount:account.accountID];
                 
-                DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
-                    @"message": message,
-                    @"showAlert": @(showAlert),
-                    @"contact": possiblyUnknownContact,
-                    @"LMCReplaced": @(LMCReplaced),
-                }];
+                if (LMCReplaced)
+                {
+                    DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", historyId);
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{
+                        @"message": message,
+                        @"showAlert": @(showAlert),
+                        @"contact": possiblyUnknownContact,
+                        @"LMCReplaced": @YES,
+                    }];
+                }
+                else
+                {
+                    DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
+                        @"message": message,
+                        @"showAlert": @(showAlert),
+                        @"contact": possiblyUnknownContact,
+                    }];
+                }
                 
                 //try to automatically determine content type of filetransfers
                 if(messageType == kMessageTypeFiletransfer && [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"])
@@ -716,11 +728,12 @@ static NSMutableDictionary* _typingNotifications;
         {
             message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
             DDLogDebug(@"Managed to update stanzaid of message (or stanzaid already known): %@", message);
-            DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
+            DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", historyId);
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{
                     @"message": message,
                     @"showAlert": @(NO),
                     @"contact": possiblyUnknownContact,
+                    @"LMCReplaced": @NO,
                 }];
         }
     }

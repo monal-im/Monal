@@ -274,6 +274,7 @@ static NSMutableDictionary* _singletonCache;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRemoved object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMucSubjectChange:) name:kMonalMucSubjectChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMonalUpdatedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMonalDeletedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMLMessageSentToContact object:nil];
     return self;

@@ -116,7 +116,7 @@ struct PasswordMigration: View {
                                 DataLayer.sharedInstance().updateAccoun(with:dic)
                             }
                         }
-                        NotificationCenter.default.post(name:Notification.Name("kMonalRefresh"), object:nil);
+                        NotificationCenter.default.post(name:Notification.Name(kMonalRefresh), object:nil);
                         self.delegate.dismiss()
                     }, label: {
                         Text("Done")

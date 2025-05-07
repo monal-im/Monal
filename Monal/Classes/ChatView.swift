@@ -386,7 +386,7 @@ struct ChatView: View {
                 MLNotificationManager.sharedInstance().currentContact = nil
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalOmemoFetchingStateUpdate")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalOmemoFetchingStateUpdate)).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let notificationJid = notification.userInfo?["jid"] as? String {
                 if xmppAccount.accountID == contact.accountID && notificationJid == contact.contactJid {
                     DDLogDebug("Got omemo fetching update: \(contact) --> \(String(describing:notification.userInfo))")
@@ -398,7 +398,7 @@ struct ChatView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalNewMessageNotice")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalNewMessageNotice)).receive(on: RunLoop.main)) { notification in
             DDLogVerbose("chat view got new message notice \(String(describing:notification.userInfo))")
 
             guard let message = notification.userInfo?["message"] as? MLMessage else {
@@ -412,7 +412,7 @@ struct ChatView: View {
             }
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalRefresh")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalRefresh)).receive(on: RunLoop.main)) { notification in
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
         }
     }

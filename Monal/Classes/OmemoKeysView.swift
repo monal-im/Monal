@@ -453,10 +453,10 @@ class OmemoKeysForChat: ObservableObject {
         self.viewContact = viewContact
         self.contacts = OmemoKeysForChat.knownDevices(viewContact: self.viewContact)
         subscriptions = [
-            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalOmemoStateUpdated"))
+            NotificationCenter.default.publisher(for: NSNotification.Name(kMonalOmemoStateUpdated))
                 .receive(on: DispatchQueue.main)
                 .sink() { _ in self.updateContactDevices() },
-            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalMucParticipantsAndMembersUpdated"))
+            NotificationCenter.default.publisher(for: NSNotification.Name(kMonalMucParticipantsAndMembersUpdated))
                 .receive(on: DispatchQueue.main)
                 .sink() { _ in self.updateContactDevices() },
         ]

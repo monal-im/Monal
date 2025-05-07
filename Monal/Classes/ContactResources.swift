@@ -88,7 +88,7 @@ struct ContactResources: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalXmppUserSoftWareVersionRefresh")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalXmppUserSoftWareVersionRefresh)).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let softwareInfo = notification.userInfo?["versionInfo"] as? MLContactSoftwareVersionInfo {
                 DDLogVerbose("Got software version info from account \(xmppAccount)...")
                 if softwareInfo.fromJid == contact.obj.contactJid && xmppAccount.accountID == contact.obj.accountID {
@@ -99,7 +99,7 @@ struct ContactResources: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalNewPresenceNotice")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalNewPresenceNotice)).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let jid = notification.userInfo?["jid"] as? String, let resource = notification.userInfo?["resource"] as? String, let available = notification.userInfo?["available"] as? NSNumber {
                 DDLogVerbose("Got presence update from account \(xmppAccount)...")
                 if jid == contact.obj.contactJid && xmppAccount.accountID == contact.obj.accountID {
@@ -118,7 +118,7 @@ struct ContactResources: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalLastInteractionUpdatedNotice")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalLastInteractionUpdatedNotice)).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let jid = notification.userInfo?["jid"] as? String, let resource = notification.userInfo?["resource"] as? String, notification.userInfo?["lastInteraction"] as? NSDate != nil {
                 DDLogVerbose("Got lastInteraction update from account \(xmppAccount)...")
                 if jid == contact.obj.contactJid && xmppAccount.accountID == contact.obj.accountID {

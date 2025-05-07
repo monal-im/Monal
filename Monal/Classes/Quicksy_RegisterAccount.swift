@@ -447,7 +447,7 @@ struct Quicksy_RegisterAccount: View {
         })
         .padding()
         .addLoadingOverlay(overlay)
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kXMPPError)).receive(on: RunLoop.main)) { notification in
             if(self.errorObserverEnabled == false) {
                 return
             }
@@ -463,7 +463,7 @@ struct Quicksy_RegisterAccount: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLResourceBoundNotice")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMLResourceBoundNotice)).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountID : NSNumber = self.newAccountID {
                 if(xmppAccount.accountID.intValue == newAccountID.intValue) {
                     DispatchQueue.main.async {
@@ -474,7 +474,7 @@ struct Quicksy_RegisterAccount: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalUpdateBundleFetchStatus")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalUpdateBundleFetchStatus)).receive(on: RunLoop.main)) { notification in
             if let notificationAccountID = notification.userInfo?["accountID"] as? NSNumber, let completed = notification.userInfo?["completed"] as? NSNumber, let all = notification.userInfo?["all"] as? NSNumber, let newAccountID : NSNumber = self.newAccountID {
                 if(notificationAccountID.intValue == newAccountID.intValue) {
                     isLoadingOmemoBundles = true
@@ -486,7 +486,7 @@ struct Quicksy_RegisterAccount: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedOmemoBundleFetch")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalFinishedOmemoBundleFetch)).receive(on: RunLoop.main)) { notification in
             if let notificationAccountID = notification.userInfo?["accountID"] as? NSNumber, let newAccountID : NSNumber = self.newAccountID {
                 if(notificationAccountID.intValue == newAccountID.intValue && isLoadingOmemoBundles) {
                     DispatchQueue.main.async {
@@ -496,7 +496,7 @@ struct Quicksy_RegisterAccount: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMonalFinishedCatchup")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalFinishedCatchup)).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountID : NSNumber = self.newAccountID {
                 if(xmppAccount.accountID.intValue == newAccountID.intValue && !isLoadingOmemoBundles) {
                     DispatchQueue.main.async {

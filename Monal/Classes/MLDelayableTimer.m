@@ -68,7 +68,9 @@
             return;
         }
         DDLogDebug(@"Triggering timer: %@", self);
-        [_wrappedTimer fire];
+        [self scheduleBlockInRunLoop:^{
+            [self->_wrappedTimer fire];
+        }];
     }
 }
 

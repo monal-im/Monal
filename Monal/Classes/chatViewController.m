@@ -1698,9 +1698,6 @@ enum msgSentState {
                 MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
                 if([msgInList.messageDBId intValue] == [message.messageDBId intValue])
                 {
-                    //update message in our list
-                    [msgInList updateWithMessage:message];
-
                     //update table entry
                     NSIndexPath* indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
                     dispatch_async(dispatch_get_main_queue(), ^{
@@ -1755,9 +1752,6 @@ enum msgSentState {
         MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
         if([msgInList.messageDBId intValue] == [msg.messageDBId intValue])
         {
-            //update message in our list
-            [msgInList updateWithMessage:msg];
-            
             //update table entry
             NSIndexPath* indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -1779,33 +1773,6 @@ enum msgSentState {
         MLMessage* msg = [self.messageList objectAtIndex:(msgIdx - 1)];
         if([msg.messageId isEqualToString:messageId])
         {
-            // Set correct flags
-            if(event == msgSent) {
-                DDLogVerbose(@"got msgSent event for messageid: %@", messageId);
-                msg.hasBeenSent = YES;
-            } else if(event == msgRecevied) {
-                DDLogVerbose(@"got msgRecevied event for messageid: %@", messageId);
-                msg.hasBeenSent = YES;
-                msg.hasBeenReceived = YES;
-            } else if(event == msgDisplayed) {
-                DDLogVerbose(@"got msgDisplayed event for messageid: %@", messageId);
-                msg.hasBeenSent = YES;
-                msg.hasBeenReceived = YES;
-                msg.hasBeenDisplayed = YES;
-            } else if(event == msgErrorAfterSent) {
-                DDLogVerbose(@"got msgErrorAfterSent event for messageid: %@", messageId);
-                //we don't want to show errors if the message has been received at least once
-                if(!msg.hasBeenReceived)
-                {
-                    msg.errorType = [dic objectForKey:@"errorType"];
-                    msg.errorReason = [dic objectForKey:@"errorReason"];
-
-                    //ping muc to self-heal cases where we aren't joined anymore without noticing it
-                    if(self.contact.isMuc)
-                        [self.xmppAccount.mucProcessor ping:self.contact.contactJid];
-                }
-            }
-
             indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
 
             //update table entry
@@ -1862,9 +1829,6 @@ enum msgSentState {
         MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
         if([msgInList.messageDBId intValue] == [msg.messageDBId intValue])
         {
-            //update message in our list (this will copy filetransferMimeType and filetransferSize fields)
-            [msgInList updateWithMessage:msg];
-
             //update table entry
             indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -2511,15 +2475,10 @@ enum msgSentState {
         {
             [self.xmppAccount retractMessage:message];
             [[DataLayer sharedInstance] retractMessageHistory:message.messageDBId];
-            [message updateWithMessage:[MLMessage createMessageFromHistoryID:message.messageDBId]];
-
-            //update table entry
-            [self->_messageTable beginUpdates];
-            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-            [self->_messageTable endUpdates];
-            
-            //update active chats if necessary
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:self.xmppAccount userInfo:@{
+                @"message": message,
+                @"contact": self.contact
+            }];
         }
         else
         {

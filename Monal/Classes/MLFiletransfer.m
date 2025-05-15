@@ -116,12 +116,14 @@ static NSObject* _hardlinkingSyncObject;
             //update db with content type and size
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:contentLength];
 
-            //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
-            msg.filetransferMimeType = mimeType;
-            msg.filetransferSize = contentLength;
+            //send out update notification
             xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
             if(account != nil)      //don't send out update notices for already deleted accounts
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{
+                    @"message": msg,
+                    @"mimeType": mimeType,
+                    @"filetransferSize": contentLength
+                }];
             else
                 return;             //abort here without autodownloading if account was already deleted
             
@@ -274,21 +276,22 @@ static NSObject* _hardlinkingSyncObject;
                 [HelperTools configureFileProtectionFor:cacheFile];
             }
             
-            //update MLMessage object with mime type and size
-            NSNumber* filetransferSize = @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]);
-            msg.filetransferMimeType = mimeType;
-            msg.filetransferSize = filetransferSize;
-            
             //hardlink cache file if possible
             [self hardlinkFileForMessage:msg];
             
+            NSNumber* filetransferSize = @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]);
             DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
             //update db with content type and size
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:filetransferSize];
-            //send out update notification (using our directly update MLMessage object instead of reloading it from db after updating the db)
+            //send out update notification
             xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
             if(account != nil)      //don't send out update notices for already deleted accounts
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{@"message": msg}];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{
+                    @"message": msg,
+                    @"mimeType": mimeType,
+                    @"filetransferSize": filetransferSize
+                }];
+
             else
                 [_fileManager removeItemAtPath:cacheFile error:nil];
             

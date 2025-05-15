@@ -706,6 +706,7 @@ static NSMutableDictionary* _typingNotifications;
                         @"showAlert": @(showAlert),
                         @"contact": possiblyUnknownContact,
                         @"LMCReplaced": @YES,
+                        @"correctedText": body,
                     }];
                 }
                 else
@@ -739,6 +740,7 @@ static NSMutableDictionary* _typingNotifications;
                     @"showAlert": @(NO),
                     @"contact": possiblyUnknownContact,
                     @"LMCReplaced": @NO,
+                    @"stanzaId": stanzaid,
                 }];
         }
     }

@@ -11,6 +11,7 @@
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/xmpp.h>
+#import "XMPPMessage.h"
 
 static NSMutableDictionary* _singletonCache;
 
@@ -168,34 +169,134 @@ static NSMutableDictionary* _singletonCache;
     return self;
 }
 
--(void) updateWithMessage:(MLMessage*) msg
+-(instancetype) init
 {
-    self.accountID = msg.accountID;
-    self.buddyName = msg.buddyName;
-    self.inbound = msg.inbound;
-    self.actualFrom = msg.actualFrom;
-    self.messageText = msg.messageText;
-    self.isMuc = msg.isMuc;
-    self.messageId = msg.messageId;
-    self.stanzaId = msg.stanzaId;
-    self.messageDBId = msg.messageDBId;
-    self.timestamp = msg.timestamp;
-    self.messageType = msg.messageType;
-    self.mucType = msg.mucType;
-    self.participantJid = msg.participantJid;
-    self.hasBeenDisplayed = msg.hasBeenDisplayed;
-    self.hasBeenReceived = msg.hasBeenReceived;
-    self.hasBeenSent = msg.hasBeenSent;
-    self.encrypted = msg.encrypted;
-    self.unread = msg.unread;
-    self.displayMarkerWanted = msg.displayMarkerWanted;
-    self.previewText = msg.previewText;
-    self.previewImage = msg.previewImage;
-    self.errorType = msg.errorType;
-    self.errorReason = msg.errorReason;
-    self.filetransferMimeType = msg.filetransferMimeType;
-    self.filetransferSize = msg.filetransferSize;
-    self.retracted = msg.retracted;
+    self = [super init];
+    //watch for all sorts of changes and update our singleton dynamically
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageUpdate:) name:kMonalUpdatedMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageDeletion:) name:kMonalDeletedMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFiletransferUpdate:) name:kMonalMessageFiletransferUpdateNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageSent:) name:kMonalSentMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageReceived:) name:kMonalMessageReceivedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageDisplayed:) name:kMonalMessageDisplayedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
+    return self;
+}
+
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) handleMessageUpdate:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    MLMessage* message = data[@"message"];
+    MLAssert(message != nil, @"Notification without message");
+    if(self.messageDBId.integerValue != message.messageDBId.integerValue)
+        return;         //ignore updates of other messages
+    NSNumber* LMCReplaced = data[@"LMCReplaced"];
+    MLAssert(LMCReplaced != nil, @"Message update notification without LMCReplaced object");
+    if(LMCReplaced.boolValue)
+    {
+        // Message correction
+        NSString* correctedText = data[@"correctedText"];
+        MLAssert(correctedText != nil, @"Message correction notification without the corrected text");
+        self.messageText = correctedText;
+    }
+    else
+    {
+        // MUC reflection
+        NSString* stanzaId = data[@"stanzaId"];
+        MLAssert(stanzaId != nil, @"MUC reflection notification without the new stanzaId");
+        self.stanzaId = stanzaId;
+    }
+}
+
+// Handle message retraction and moderation
+-(void) handleMessageDeletion:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    MLMessage* message = data[@"message"];
+    MLAssert(message != nil, @"Notification without message");
+    if(self.messageDBId.integerValue != message.messageDBId.integerValue)
+        return;         //ignore deletions of other messages
+
+    self.messageText = @"";
+    self.messageType = kMessageTypeText;
+    self.filetransferMimeType = @"";
+    self.filetransferSize = @0;
+    self.retracted = YES;
+}
+
+-(void) handleFiletransferUpdate:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    MLMessage* message = data[@"message"];
+    MLAssert(message != nil, @"Notification without message");
+    if(self.messageDBId.integerValue != message.messageDBId.integerValue)
+        return;         //ignore filetransfer updates of other messages
+
+    NSString* mimeType = data[@"mimeType"];
+    NSNumber* filetransferSize = data[@"filetransferSize"];
+    MLAssert(mimeType != nil && filetransferSize != nil, @"Notification without mimeType and/or filetransferSize");
+    self.filetransferMimeType = mimeType;
+    self.filetransferSize = filetransferSize;
+}
+
+-(void) handleMessageSent:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    XMPPMessage* messageNode = data[@"message"];
+    MLAssert(messageNode != nil, @"Notification without message node");
+    if([messageNode.id isEqualToString:self.messageId])
+        self.hasBeenSent = YES;
+}
+
+-(void) handleMessageReceived:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    NSString* messageId = data[kMessageId];
+    NSString* jid = data[@"jid"];
+    MLAssert(messageId != nil && jid != nil, @"Notification without jid and/or messageId");
+    if([messageId isEqualToString:self.messageId] && [jid isEqualToString:self.buddyName])
+    {
+        self.hasBeenSent = YES;
+        self.hasBeenReceived = YES;
+    }
+}
+
+-(void) handleMessageDisplayed:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    MLMessage* message = data[@"message"];
+    MLAssert(message != nil, @"Notification without message");
+    if(self.messageDBId.integerValue != message.messageDBId.integerValue)
+        return;         //ignore displayed notices of other messages
+
+    self.hasBeenSent = YES;
+    self.hasBeenReceived = YES;
+    self.hasBeenDisplayed = YES;
+}
+
+-(void) handleMessageError:(NSNotification*) notification
+{
+    NSDictionary* data = notification.userInfo;
+    NSString* jid = data[@"jid"];
+    NSString* messageId = data[kMessageId];
+    NSString* errorType = data[@"errorType"];
+    NSString* errorReason = data[@"errorReason"];
+    MLAssert(jid != nil && messageId != nil && errorType != nil && errorReason != nil, @"Notification is missing data");
+
+    if([messageId isEqualToString:self.messageId] && [jid isEqualToString:self.buddyName])
+    {
+        //we don't want to show errors if the message has been received at least once
+        if(!self.hasBeenReceived)
+        {
+            self.errorType = errorType;
+            self.errorReason = errorReason;
+        }
+    }
 }
 
 -(NSString*) contactDisplayName

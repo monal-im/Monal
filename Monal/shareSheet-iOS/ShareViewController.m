@@ -290,7 +290,7 @@
             UIApplication* app = (UIApplication*)responder;
             if(app != nil)
             {
-                [app performSelector:@selector(openURL:) withObject:url];
+                [app openURL:url options:@{} completionHandler:nil];
                 break;
             }
         }

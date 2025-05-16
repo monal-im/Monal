@@ -62,6 +62,9 @@ typedef void (^view_queue_block_t)(PMKResolver _Nonnull);
 @property (atomic, strong) NSMutableArray* pinnedContacts;
 @end
 
+@implementation SizeClassWrapper
+@end
+
 @implementation ActiveChatsViewController
 
 enum activeChatsControllerSections {
@@ -282,6 +285,9 @@ static NSMutableSet* _pushWarningDisplayed;
     
     self.view = self.chatListTable;
     
+    self.sizeClass = [SizeClassWrapper new];
+    [self updateSizeClass];
+
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleRefreshDisplayNotification:) name:kMonalRefresh object:nil];
     [nc addObserver:self selector:@selector(handleContactRemoved:) name:kMonalContactRemoved object:nil];
@@ -328,16 +334,6 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) refreshDisplay
 {
-    size_t unpinnedConCntBefore = self.unpinnedContacts.count;
-    size_t pinnedConCntBefore = self.pinnedContacts.count;
-    NSMutableArray<MLContact*>* newUnpinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:NO];
-    NSMutableArray<MLContact*>* newPinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
-    if(!newUnpinnedContacts || ! newPinnedContacts)
-        return;
-
-    int unpinnedCntDiff = (int)unpinnedConCntBefore - (int)newUnpinnedContacts.count;
-    int pinnedCntDiff = (int)pinnedConCntBefore - (int)newPinnedContacts.count;
-
     void (^resizeSections)(UITableView*, size_t, int) = ^void(UITableView* table, size_t section, int diff){
         if(diff > 0)
         {
@@ -360,6 +356,16 @@ static NSMutableSet* _pushWarningDisplayed;
     };
 
     dispatch_async(dispatch_get_main_queue(), ^{
+        size_t unpinnedConCntBefore = self.unpinnedContacts.count;
+        size_t pinnedConCntBefore = self.pinnedContacts.count;
+        NSMutableArray<MLContact*>* newUnpinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:NO];
+        NSMutableArray<MLContact*>* newPinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
+        if(!newUnpinnedContacts || ! newPinnedContacts)
+            return;
+
+        int unpinnedCntDiff = (int)unpinnedConCntBefore - (int)newUnpinnedContacts.count;
+        int pinnedCntDiff = (int)pinnedConCntBefore - (int)newPinnedContacts.count;
+        
         //make sure we don't display a chat view for a disabled account
         if([MLNotificationManager sharedInstance].currentContact != nil)
         {
@@ -1118,6 +1124,10 @@ static NSMutableSet* _pushWarningDisplayed;
             [self presentChatWithContact:selectedContact];
         };
     }
+}
+
+-(void) updateSizeClass {
+    self.sizeClass.horizontal = self.view.traitCollection.horizontalSizeClass;
 }
 
 -(NSMutableArray*) getChatArrayForSection:(size_t) section

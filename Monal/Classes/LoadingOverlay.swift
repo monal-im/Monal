@@ -42,6 +42,7 @@ struct LoadingOverlay: ViewModifier {
                 .transaction { transaction in transaction.animation = nil}
             }
         }
+        .interactiveDismissDisabled(state.enabled)
     }
 }
 

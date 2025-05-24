@@ -286,12 +286,18 @@ static volatile MLUDPLogger* _self;
         [[self class] logError:@"not sending message, too big: %lu", (unsigned long)data.length];
     else
         dispatch_async(_send_queue, ^{
-            [self sendData:data withOriginalMessage:logMessage->_message];
+            [self sendData:data withOriginalMessage:logMessage->_message andRetryCounter:0];
         });
 }
 
--(void) sendData:(NSData*) data withOriginalMessage:(NSString*) msg
+-(void) sendData:(NSData*) data withOriginalMessage:(NSString*) msg andRetryCounter:(int) retryCounter
 {
+    if(retryCounter>8)
+    {
+        [[self class] logError:@"not retrying send, retry counter reached: %@", msg];
+        return;
+    }
+    
     [self createConnectionIfNeeded];
     
     //the call to dispatch_get_main_queue() is a dummy because we are using DISPATCH_DATA_DESTRUCTOR_DEFAULT which is performed inline
@@ -320,7 +326,7 @@ static volatile MLUDPLogger* _self;
         //retry
         //[self disconnect];
         [[self class] logError:@"retrying sendData with error: %@", _last_error];
-        [self sendData:data withOriginalMessage:msg];
+        [self sendData:data withOriginalMessage:msg andRetryCounter:retryCounter+1];
     }
 }
 

@@ -953,6 +953,21 @@ $$
     }
 }
 
+$$instance_handler(omemoBundlePublished, account.omemo, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(success)
+    {
+        DDLogInfo(@"Successfully published own omemo bundle...");
+        [self.monalSignalStore deleteUsedPrekeys];
+    }
+    else
+        DDLogError(@"Unable to published own omemo bundle: %@; %@", errorReason, errorIq);
+    
+    
+$$
+$$instance_handler(omemoBundlePublishedInvalidation, account.omemo, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    DDLogInfo(@"Failed to publish own omemo bundle, publish was invalidated");
+$$
+
 -(void) sendOMEMOBundle
 {
     MLAssert(self.monalSignalStore.deviceid > 0, @"Tried to publish own bundle without knowing my own deviceid!");
@@ -976,7 +991,7 @@ $$
     ] andData:nil] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", self.monalSignalStore.deviceid] withConfigOptions:@{
         @"pubsub#persist_items": @"true",
         @"pubsub#access_model": @"open"
-    }];
+    } andHandler:$newHandlerWithInvalidation(self, omemoBundlePublished, omemoBundlePublishedInvalidation)];
 }
 
 /*
@@ -987,12 +1002,13 @@ $$
 {
     // generate new keys if less than MIN_OMEMO_KEYS are available
     unsigned int preKeyCount = [self.monalSignalStore getPreKeyCount];
+    int lastPreyKedId = [self.monalSignalStore getHighestPreyKeyId];
+    DDLogDebug(@"Current prekey count: %u, lastPreyKedId=%d", preKeyCount, lastPreyKedId);
     if(preKeyCount < MIN_OMEMO_KEYS)
     {
         SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
 
         // Generate new keys so that we have a total of MAX_OMEMO_KEYS keys again
-        int lastPreyKedId = [self.monalSignalStore getHighestPreyKeyId];
         if(MAX_OMEMO_KEYS < preKeyCount)
         {
             DDLogWarn(@"OMEMO MAX_OMEMO_KEYs has changed: MAX: %zu current: %u", MAX_OMEMO_KEYS, preKeyCount);
@@ -1391,6 +1407,9 @@ $$
                     [self.state.queuedSessionRepairs[senderJid] removeObject:sid];
                 }
             }
+            
+            //mark used prekeys for removal
+            [self.monalSignalStore deletePreKeyWithId:devicePreKey];
 
             //key transport elements have an empty payload --> nothing to return as decrypted
             if(isKeyTransportElement)

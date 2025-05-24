@@ -312,15 +312,25 @@
     return prekey ? YES : NO;
 }
 
-/**
- * Delete a PreKey record from local storage.
- */
+
 -(BOOL) deletePreKeyWithId:(uint32_t) preKeyId
 {
     DDLogDebug(@"Marking prekey %lu as deleted", (unsigned long)preKeyId);
     // only mark the key for deletion -> key should be removed from pubSub
     return [self.sqliteDatabase boolWriteTransaction:^{
         BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP, keyUsed=1 WHERE account_id=? AND prekeyid=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+        [self reloadCachedPrekeys];
+        return ret;
+    }];
+}
+
+/**
+ * Delete a PreKey record from local storage.
+ */
+-(BOOL) deleteUsedPrekeys
+{
+    return [self.sqliteDatabase boolWriteTransaction:^{
+        BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=1 AND pubSubRemovalTimestamp IS NULL;" andArguments:@[self.accountId]];
         [self reloadCachedPrekeys];
         return ret;
     }];

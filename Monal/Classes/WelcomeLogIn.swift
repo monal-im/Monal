@@ -325,6 +325,7 @@ struct WelcomeLogIn: View {
                 }
             }
         }
+        .interactiveDismissDisabled(overlay.enabled)
         .addLoadingOverlay(overlay)
         .navigationTitle(advancedMode ? Text("Add Account (advanced)") : Text("Welcome"))
         .navigationBarTitleDisplayMode(advancedMode ? .inline : .large)

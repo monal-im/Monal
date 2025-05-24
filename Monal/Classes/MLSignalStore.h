@@ -73,4 +73,8 @@
 
 -(void) cleanupKeys;
 -(void) reloadCachedPrekeys;
+
+-(BOOL) deletePreKeyWithId:(uint32_t) preKeyId;
+-(BOOL) deleteUsedPrekeys;
+
 @end

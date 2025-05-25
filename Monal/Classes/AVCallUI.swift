@@ -40,6 +40,7 @@ struct AVCallUI: View {
     )
     @State private var cameraPosition: AVCaptureDevice.Position = .front
     @State private var sendingVideo = true
+    @State private var videoRenderingStarted = false
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -72,11 +73,17 @@ struct AVCallUI: View {
     }
     
     func maybeStartRenderer() {
-        if MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
+        if !videoRenderingStarted && MLCallType(rawValue:call.callType) == .video && (MLCallState(rawValue:call.state) == .connecting || MLCallState(rawValue:call.state) == .connected) {
             DDLogInfo("Starting local and remote video renderers...")
             call.obj.startCaptureLocalVideo(withRenderer: self.localRenderer, andCameraPosition:cameraPosition)
             call.obj.renderRemoteVideo(withRenderer: self.remoteRenderer)
+            videoRenderingStarted = true
         }
+    }
+    
+    func stopRenderer() {
+        call.obj.stopCaptureLocalVideo()
+        videoRenderingStarted = false
     }
     
     func handleStateChange(_ state:MLCallState, _ audioState:MLAudioState) {
@@ -189,7 +196,7 @@ struct AVCallUI: View {
                             } else {
                                 cameraPosition = .front
                             }
-                            call.obj.stopCaptureLocalVideo()
+                            stopRenderer()
                             maybeStartRenderer()
                         }, label: {
                             Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
@@ -571,7 +578,7 @@ struct AVCallUI: View {
             errorPlayer.stop()
             
             if MLCallType(rawValue:call.callType) == .video {
-                call.obj.stopCaptureLocalVideo()
+                stopRenderer()
             }
         }
         .onChange(of: MLCallState(rawValue:call.state)) { state in

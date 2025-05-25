@@ -160,35 +160,40 @@
 -(void) startCaptureLocalVideoWithRenderer:(id<RTCVideoRenderer>) renderer andCameraPosition:(AVCaptureDevicePosition) position
 {
     MLAssert(self.callType == MLCallTypeVideo, @"startCaptureLocalVideoWithRenderer:andCameraPosition: can only be called for video calls!");
-    MLAssert(self.webRTCClient != nil, @"startCaptureLocalVideoWithRenderer:andCameraPosition: can only be called if self.webRTCClient is not nil!");
+    if(self.webRTCClient==nil)
+        DDLogWarn(@"startCaptureLocalVideoWithRenderer:andCameraPosition: can only be called if self.webRTCClient is not nil!");
     [self.webRTCClient startCaptureLocalVideoWithRenderer:renderer andCameraPosition:position];
 }
 
 -(void) stopCaptureLocalVideo
 {
     MLAssert(self.callType == MLCallTypeVideo, @"stopCaptureLocalVideo: can only be called for video calls!");
-    MLAssert(self.webRTCClient != nil, @"stopCaptureLocalVideo: can only be called if self.webRTCClient is not nil!");
+    if(self.webRTCClient==nil)
+        DDLogWarn(@"stopCaptureLocalVideo: can only be called if self.webRTCClient is not nil!");
     [self.webRTCClient stopCaptureLocalVideo];
 }
 
 -(void) renderRemoteVideoWithRenderer:(id<RTCVideoRenderer>) renderer
 {
     MLAssert(self.callType == MLCallTypeVideo, @"renderRemoteVideoWithRenderer: can only be called for video calls!");
-    MLAssert(self.webRTCClient != nil, @"renderRemoteVideoWithRenderer: can only be called if self.webRTCClient is not nil!");
+    if(self.webRTCClient==nil)
+        DDLogWarn(@"renderRemoteVideoWithRenderer: can only be called if self.webRTCClient is not nil!");
     [self.webRTCClient renderRemoteVideoTo:renderer];
 }
 
 -(void) hideVideo
 {
     MLAssert(self.callType == MLCallTypeVideo, @"hideVideo: can only be called for video calls!");
-    MLAssert(self.webRTCClient != nil, @"hideVideo: can only be called if self.webRTCClient is not nil!");
+    if(self.webRTCClient==nil)
+        DDLogWarn(@"hideVideo: can only be called if self.webRTCClient is not nil!");
     [self.webRTCClient hideVideo];
 }
 
 -(void) showVideo
 {
     MLAssert(self.callType == MLCallTypeVideo, @"showVideo: can only be called for video calls!");
-    MLAssert(self.webRTCClient != nil, @"showVideo: can only be called if self.webRTCClient is not nil!");
+    if(self.webRTCClient==nil)
+        DDLogWarn(@"showVideo: can only be called if self.webRTCClient is not nil!");
     [self.webRTCClient showVideo];
 }
 

@@ -549,8 +549,8 @@ struct AVCallUI: View {
             UIApplication.shared.isIdleTimerDisabled = true
             
             self.ringingPlayer.numberOfLoops = -1
-            self.busyPlayer.numberOfLoops = -1
-            self.errorPlayer.numberOfLoops = -1
+            self.busyPlayer.numberOfLoops = 6
+            self.errorPlayer.numberOfLoops = 6
             
             //ask for mic permissions
             AVAudioSession.sharedInstance().requestRecordPermission { granted in

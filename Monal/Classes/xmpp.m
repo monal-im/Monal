@@ -4687,7 +4687,7 @@ NSString* const kStanza = @"stanza";
     //this is a registration submission
     _registration = NO;
     _registrationSubmission = YES;
-    self.regUser = username;
+    self.regUser = [username lowercaseString];
     self.regPass = password;
     self.regCode = captcha;
     self.regHidden = hiddenFields;

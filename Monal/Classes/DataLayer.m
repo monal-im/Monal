@@ -249,13 +249,13 @@ static NSDateFormatter* dbFormatter;
         if ([port isEqual:@""])
             port = nil;
         NSArray* params = @[
-            nilDefault(server, @""),
+            [nilDefault(server, @"") lowercaseString],
             nilDefault(port, @"5222"),
             ((NSString *)[dictionary objectForKey:kResource]),
-            ((NSString *)[dictionary objectForKey:kDomain]),
+            [((NSString *)[dictionary objectForKey:kDomain]) lowercaseString],
             [dictionary objectForKey:kEnabled] ,
             [dictionary objectForKey:kDirectTLS],
-            ((NSString *)[dictionary objectForKey:kUsername]),
+            [((NSString *)[dictionary objectForKey:kUsername]) lowercaseString],
             [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
             [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
             [dictionary objectForKey:kPlainActivated] != nil ? [dictionary objectForKey:kPlainActivated] : [NSNumber numberWithBool:NO],

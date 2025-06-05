@@ -6,42 +6,81 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-
 struct ContentUnavailableShimView: View {
     private var reason: String
-    private var systemImage: String
+    private var image: String?
+    private var systemImage: String?
     private var description: Text
 
-    init(_ reason: String, systemImage: String, description: Text) {
+    init(_ reason: String, image: String, description: Text) {
+        self.image = image
         self.reason = reason
+        self.description = description
+    }
+    
+    init(_ reason: String, systemImage: String, description: Text) {
         self.systemImage = systemImage
+        self.reason = reason
         self.description = description
     }
 
     var body: some View {
-        if #available(iOS 17, *) {
-            ContentUnavailableView(reason, systemImage: systemImage, description: description)
-        } else {
-            VStack {
-                Image(systemName: systemImage)
-                    .foregroundStyle(.secondary)
-                    .font(.largeTitle)
-                    .padding(.bottom, 4)
-                Text(reason)
-                    .fontWeight(.bold)
-                    .font(.title3)
-                description
-                    .foregroundStyle(.secondary)
-                    .font(.footnote)
-                    .multilineTextAlignment(.center)
+        //this won't show "bigger" images and is rather useless
+//         if #available(iOS 17, *) {
+//             if let systemImage = systemImage {
+//                 ContentUnavailableView(reason, systemImage: systemImage, description: description)
+//             } else if let image = image {
+//                 ContentUnavailableView(reason, image: "friends_dark", description: description)
+//             }
+//         } else {
+        VStack(alignment: .center) {
+            HStack {
+                if let systemImage = systemImage {
+                    Image(systemName: systemImage)
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundStyle(.secondary)
+                        .font(.largeTitle)
+                        .padding(.bottom, 32)
+                } else if let image = image {
+                    Image(decorative: image)
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundStyle(.secondary)
+                        .font(.largeTitle)
+                        .padding(.bottom, 32)
+                }
+            }
+            Text(reason)
+                .fontWeight(.bold)
+                .font(.title3)
+            description
+                .foregroundStyle(.secondary)
+                .font(.footnote)
+                .multilineTextAlignment(.center)
+                .padding(.bottom, 20)
+        }
+        .applyClosure {view in
+            if #available(iOS 17, *) {
+                view.containerRelativeFrame(.horizontal) { size, axis in
+                    size * 0.8
+                }
+            } else {
+                HStack {
+                    Spacer().frame(width: 32)
+                    view
+                    Spacer().frame(width: 32)
+                }
             }
         }
     }
 }
 
 extension ContentUnavailableShimView {
-    static var search: ContentUnavailableShimView = ContentUnavailableShimView("No Results", systemImage: "magnifyingglass", description: Text("Check the spelling or try a new search."))
+    static var search: ContentUnavailableShimView = ContentUnavailableShimView(NSLocalizedString("No Results", comment:"empty search"), systemImage: "magnifyingglass", description: Text("Check the spelling or try a new search."))
+    static func search(text: String) -> ContentUnavailableShimView {
+        return ContentUnavailableShimView(NSLocalizedString("No Results for \"\(text)\"", comment:"empty search"), systemImage: "magnifyingglass", description: Text("Check the spelling or try a new search."))
+    }
 }
 
 #Preview {

@@ -4572,14 +4572,6 @@ NSString* const kStanza = @"stanza";
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
     
-    XMPPPresence* presence = [XMPPPresence new];
-    [presence unsubscribeContact:contact];
-    [self send:presence];
-    
-    XMPPPresence* presence2 = [XMPPPresence new];
-    [presence2 unsubscribedContact:contact];
-    [self send:presence2];
-    
     XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setRemoveFromRoster:contact];
     [self send:iq];

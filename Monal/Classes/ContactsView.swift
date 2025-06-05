@@ -86,12 +86,12 @@ struct ContactViewEntry: View {
 }
 
 struct ContactsView: View {
+    @Environment(\.colorScheme) var colorScheme
     @ObservedObject private var contacts: Contacts
-    private let delegate: SheetDismisserProtocol
-    private let dismissWithContact: (MLContact) -> ()
-
     @State private var searchText: String = ""
     @State private var selectedContactForContactDetails: ObservableKVOWrapper<MLContact>? = nil
+    private let delegate: SheetDismisserProtocol
+    private let dismissWithContact: (MLContact) -> ()
 
     init(contacts: Contacts, delegate: SheetDismisserProtocol, dismissWithContact: @escaping (MLContact) -> ()) {
         self.contacts = contacts
@@ -99,14 +99,25 @@ struct ContactsView: View {
         self.dismissWithContact = dismissWithContact
     }
 
+    private static func isNotSelfChatContact(contact: MLContact) -> Bool {
+        return !contact.isSelfChat && ContactsView.shouldDisplayContact(contact)
+    }
+    
     private static func shouldDisplayContact(contact: MLContact) -> Bool {
 #if IS_QUICKSY
         return true
 #endif
+        
         return contact.isSubscribedTo || contact.hasOutgoingContactRequest || contact.isSubscribedFrom
     }
 
     private var contactList: [MLContact] {
+        // we want to display an empty contact list if we only have a self-chat
+        // that way the image and text explaining how to add contacts will be visible
+        let withoutSelfChats = contacts.contacts.filter(ContactsView.isNotSelfChatContact)
+        if withoutSelfChats.count == 0 {
+            return []
+        }
         return contacts.contacts
             .filter(ContactsView.shouldDisplayContact)
             .sorted { ContactsView.sortingCriteria($0) < ContactsView.sortingCriteria($1) }
@@ -138,15 +149,15 @@ struct ContactsView: View {
         .animation(.default, value: contactList)
         .navigationTitle(Text("Contacts"))
         .listStyle(.plain)
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
         .keyboardType(.emailAddress)
         .overlay {
             if contactList.isEmpty {
-                ContentUnavailableShimView("You need friends for this ride", systemImage: "figure.wave", description: Text("Add new contacts with the + button above. Your friends will pop up here when they can talk"))
+                ContentUnavailableShimView(NSLocalizedString("You need friends for this ride", comment:"empty contacts view"), image: colorScheme == .dark ? "friends_dark" : "friends", description: Text("Add new contacts with the + button above. Your friends will pop up here when they can talk"))
             } else if searchResults.isEmpty {
-                ContentUnavailableShimView.search
+                ContentUnavailableShimView.search(text:searchText)
             }
         }
         .toolbar {

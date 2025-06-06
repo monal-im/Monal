@@ -52,11 +52,11 @@ body = [s.strip() for s in str(body, 'UTF-8').split("\n")]
 properties = {to_camel_case(k.strip()): v.strip() for k, v in [line.split(": ", 1) for line in body if len(line.split(": ", 1)) > 1]}
 
 # sanity checks and state extraction
-match = re.match(r"^The status of your \((?P<platform>.+)\) app, (?P<app_name>.+), is now \"(?P<state>.+)\"$", subject)
+match = re.match(r"^(The status of your \((?P<platform>.+)\)|Your) app, (?P<app_name>.+), is (now )?\"(?P<state>.+)\"\.?$", subject)
 if match == None:
     print(f"Mail subject does not contain proper state: '{subject}'", file=sys.stderr)
     sys.exit(0)
-state = {"_"+to_camel_case(k.strip()): v.strip() for k, v in match.groupdict().items()}
+state = {"_"+to_camel_case(str(k).strip()): str(v).strip() for k, v in match.groupdict().items()}
 state["_state"] = to_camel_case(state["_state"].strip())
 if state["_appName"] != properties["appName"]:
     print(f"Mail subject states different app name than properties in mail body: stateAppName='{state['_appName']}', appName='{properties['appName']}'", file=sys.stderr)

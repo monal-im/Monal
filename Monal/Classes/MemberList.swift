@@ -272,7 +272,7 @@ struct MemberList: View {
                     if !contact.isSelfChat {
                         HStack {
                             HStack {
-                                ContactEntry(contact:contact, fallback:nicknames[contact]) {
+                                ContactEntry(contact:contact.obj, fallback:nicknames[contact]) {
                                     Text("Affiliation: \(mucAffiliationToString(affiliations[contact]))\(!(online[contact] ?? false) ? Text(" (offline)") : Text(""))")
                                         //.foregroundColor(Color(UIColor.secondaryLabel))
                                         .font(.footnote)

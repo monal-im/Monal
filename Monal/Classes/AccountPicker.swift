@@ -46,7 +46,7 @@ struct AccountPicker: View {
                             Button {
                                 (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!.call(contact, with:callType)
                             } label: {
-                                ContactEntry(contact:ObservableKVOWrapper(accountContact), selfnotesPrefix:false)
+                                ContactEntry(contact:accountContact, selfnotesPrefix:false)
                             }
                         }
                     }

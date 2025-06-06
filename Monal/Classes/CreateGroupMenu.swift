@@ -115,7 +115,7 @@ struct CreateGroupMenu: View {
                         Text("Change Group Members")
                     }
                     ForEach(self.selectedContacts, id: \.obj.contactJid) { contact in
-                        ContactEntry(contact: contact)
+                        ContactEntry(contact: contact.obj)
                     }
                     .onDelete(perform: { indexSet in
                         self.selectedContacts.remove(at: indexSet.first!)

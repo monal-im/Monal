@@ -6,35 +6,34 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
-import SwiftUI
-
 struct ContactViewEntry: View {
     private let contact: MLContact
-    @Binding private var selectedContactForContactDetails: ObservableKVOWrapper<MLContact>?
+    @Binding private var selectedContactForContactDetails: MLContact?
     private let dismissWithContact: (MLContact) -> ()
 
     @State private var shouldPresentRemoveContactAlert: Bool = false
 
     private var removeContactButtonText: String {
         if (!isDeletable) {
-            return "Cannot delete notes to self"
+            return NSLocalizedString("Cannot delete notes to self", comment:"contact list")
         }
-        return contact.isMuc ? "Remove Conversation" : "Remove Contact"
+        return contact.isMuc ? NSLocalizedString("Remove Conversation", comment:"contact list") : NSLocalizedString("Remove Contact", comment:"contact list")
     }
 
     private var removeContactConfirmationTitle: String {
-        contact.isMuc ? "Leave this converstion?" : "Remove \(contact.contactJid) from contacts?"
+        contact.isMuc ? NSLocalizedString("Leave this converstion?", comment:"contact list") : NSLocalizedString("Remove \(contact.contactJid) from contacts?", comment:"contact list")
     }
 
     private var removeContactConfirmationDetail: String {
-        contact.isMuc ? "" : "They will no longer see when you are online. They may not be able to access your encryption keys."
+        contact.isMuc ? "" : NSLocalizedString("They will no longer see when you are online. They may not be able to access your encryption keys.", comment:"contact list")
     }
 
     private var isDeletable: Bool {
+        //we don't need the kvo observer here, because the selfchat status won't ever change for a given MLContact singleton
         !contact.isSelfChat
     }
 
-    init (contact: MLContact, selectedContactForContactDetails: Binding<ObservableKVOWrapper<MLContact>?>, dismissWithContact: @escaping (MLContact) -> ()) {
+    init (contact: MLContact, selectedContactForContactDetails: Binding<MLContact?>, dismissWithContact: @escaping (MLContact) -> ()) {
         self.contact = contact
         self._selectedContactForContactDetails = selectedContactForContactDetails
         self.dismissWithContact = dismissWithContact
@@ -49,10 +48,10 @@ struct ContactViewEntry: View {
             Text("").frame(maxWidth: 0)
             Button(action: { dismissWithContact(contact) }) {
                 HStack {
-                    ContactEntry(contact: ObservableKVOWrapper<MLContact>(contact))
+                    ContactEntry(contact: contact)
                     Spacer()
                     Button {
-                        selectedContactForContactDetails = ObservableKVOWrapper<MLContact>(contact)
+                        selectedContactForContactDetails = contact
                     } label: {
                         Image(systemName: "info.circle")
                             .imageScale(.large)
@@ -89,7 +88,7 @@ struct ContactsView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject private var contacts: Contacts
     @State private var searchText: String = ""
-    @State private var selectedContactForContactDetails: ObservableKVOWrapper<MLContact>? = nil
+    @State private var selectedContactForContactDetails: MLContact? = nil
     private let delegate: SheetDismisserProtocol
     private let dismissWithContact: (MLContact) -> ()
 
@@ -103,7 +102,7 @@ struct ContactsView: View {
         return !contact.isSelfChat && ContactsView.shouldDisplayContact(contact)
     }
     
-    private static func shouldDisplayContact(contact: MLContact) -> Bool {
+    private static func shouldDisplayContact(_ contact: MLContact) -> Bool {
 #if IS_QUICKSY
         return true
 #endif
@@ -175,7 +174,7 @@ struct ContactsView: View {
             }
         }
         .sheet(item: $selectedContactForContactDetails) { selectedContact in
-            AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactDetails(delegate:delegate, contact:selectedContact)))
+            AnyView(AddTopLevelNavigation(withDelegate: delegate, to: ContactDetails(delegate:delegate, contact:ObservableKVOWrapper<MLContact>(selectedContact))))
         }
     }
 }
@@ -189,15 +188,15 @@ class Contacts: ObservableObject {
         self.contacts = Set(DataLayer.sharedInstance().contactList())
         self.requestCount = DataLayer.sharedInstance().allContactRequests().count
         subscriptions = [
+            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh"))
+                .receive(on: DispatchQueue.main)
+                .sink() { _ in self.refreshContacts() },
             NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRemoved"))
                 .receive(on: DispatchQueue.main)
                 .sink() { _ in self.refreshContacts() },
-            NotificationCenter.default.publisher(for: NSNotification.Name("kMonalContactRefresh"))
-                .receive(on: DispatchQueue.main)
-                .sink() { _ in self.refreshContacts() }
         ]
     }
-
+    
     private func refreshContacts() {
         self.contacts = Set(DataLayer.sharedInstance().contactList())
         self.requestCount = DataLayer.sharedInstance().allContactRequests().count

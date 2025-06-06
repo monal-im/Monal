@@ -25,7 +25,7 @@ struct ContactPickerEntry: View {
                 } else {
                     Image(systemName: "circle")
                 }
-                ContactEntry(contact: contact)
+                ContactEntry(contact: contact.obj)
             }
         }
     }

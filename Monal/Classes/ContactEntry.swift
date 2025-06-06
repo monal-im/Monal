@@ -13,28 +13,29 @@ struct ContactEntry<AdditionalContent: View>: View {
     
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     
-    init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool = true, fallback: String? = nil) where AdditionalContent == EmptyView {
+    init(contact:MLContact, selfnotesPrefix: Bool = true, fallback: String? = nil) where AdditionalContent == EmptyView {
         self.init(contact:contact, selfnotesPrefix:selfnotesPrefix, fallback:fallback, additionalContent:{ EmptyView() })
     }
     
-    init(contact:ObservableKVOWrapper<MLContact>, fallback: String?) where AdditionalContent == EmptyView {
+    init(contact:MLContact, fallback: String?) where AdditionalContent == EmptyView {
         self.init(contact:contact, selfnotesPrefix:true, fallback:fallback, additionalContent:{ EmptyView() })
     }
     
-    init(contact:ObservableKVOWrapper<MLContact>, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
+    init(contact:MLContact, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
         self.init(contact:contact, selfnotesPrefix:true, additionalContent:additionalContent)
     }
     
-    init(contact:ObservableKVOWrapper<MLContact>, fallback: String?, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
+    init(contact:MLContact, fallback: String?, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
         self.init(contact:contact, selfnotesPrefix:true, fallback:fallback, additionalContent:additionalContent)
     }
     
-    init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
+    init(contact:MLContact, selfnotesPrefix: Bool, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
         self.init(contact:contact, selfnotesPrefix:selfnotesPrefix, fallback:nil, additionalContent:additionalContent)
     }
     
-    init(contact:ObservableKVOWrapper<MLContact>, selfnotesPrefix: Bool, fallback: String?, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
-        _contact = StateObject(wrappedValue: contact)
+    init(contact:MLContact, selfnotesPrefix: Bool, fallback: String?, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
+        //create our own observable object to not trigger rendering for changes, not observed by us, but by an outer view
+        _contact = StateObject(wrappedValue: ObservableKVOWrapper<MLContact>(contact))
         self.selfnotesPrefix = selfnotesPrefix
         self.fallback = fallback
         self.additionalContent = additionalContent
@@ -71,17 +72,17 @@ struct ContactEntry<AdditionalContent: View>: View {
 }
 
 #Preview {
-    ContactEntry(contact:ObservableKVOWrapper(MLContact.makeDummyContact(0)))
+    ContactEntry(contact:MLContact.makeDummyContact(0))
 }
 
 #Preview {
-    ContactEntry(contact:ObservableKVOWrapper(MLContact.makeDummyContact(1)))
+    ContactEntry(contact:MLContact.makeDummyContact(1))
 }
 
 #Preview {
-    ContactEntry(contact:ObservableKVOWrapper(MLContact.makeDummyContact(2)))
+    ContactEntry(contact:MLContact.makeDummyContact(2))
 }
 
 #Preview {
-    ContactEntry(contact:ObservableKVOWrapper(MLContact.makeDummyContact(3)))
+    ContactEntry(contact:MLContact.makeDummyContact(3))
 }

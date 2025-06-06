@@ -1918,7 +1918,7 @@ NSString* const kStanza = @"stanza";
                     // check if we need a contact request
                     NSDictionary* contactSub = [[DataLayer sharedInstance] getSubscriptionForContact:contact.contactJid andAccount:contact.accountId];
                     DDLogVerbose(@"Got subscription request for contact %@ having subscription status: %@", presenceNode.fromUser, contactSub);
-                    if(!contactSub || !([[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo] || [[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth]))
+                    if(!contactSub || !([[contactSub objectForKey:@"subscription"] isEqualToString:kSubFrom] || [[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth]))
                         [[DataLayer sharedInstance] addContactRequest:contact];
                     else if(contactSub && [[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo])
                         [self addToRoster:contact withPreauthToken:nil];

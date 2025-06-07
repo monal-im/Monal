@@ -20,7 +20,7 @@ struct OnboardingCard: Identifiable {
     let imageName: String?
     let articleText: Text?
     let customView: AnyView?
-    let nextText: String?
+    let nextText: LocalizedStringKey?
 }
 
 struct OnboardingView: View {
@@ -116,7 +116,7 @@ struct OnboardingView: View {
                                             delegate.dismissWithoutAnimation()
                                             onboardingState.hasCompletedOnboarding = true
                                         } label: {
-                                            Text(card.nextText ?? NSLocalizedString("Take me to 1-Click registration", comment:"onboarding"))
+                                            Text(card.nextText ?? "Take me to 1-Click registration")
                                         }
                                     }
 #endif
@@ -126,7 +126,7 @@ struct OnboardingView: View {
                                             currentIndex += 1
                                         } label: {
                                             HStack {
-                                                Text(card.nextText ?? NSLocalizedString("Next", comment:"onboarding"))
+                                                Text(card.nextText ?? "Next")
                                                     .fontWeight(.bold)
                                                 Image(systemName: "chevron.right")
                                             }
@@ -136,7 +136,7 @@ struct OnboardingView: View {
                                             onboardingState.hasCompletedOnboarding = true
                                             delegate.dismissWithoutAnimation()
                                         } label: {
-                                            Text(card.nextText ?? NSLocalizedString("Close", comment:"onboarding"))
+                                            Text(card.nextText ?? "Close")
                                         }
                                         .buttonStyle(MonalProminentButtonStyle())
                                     }

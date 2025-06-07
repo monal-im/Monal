@@ -18,6 +18,8 @@ import PhotosUI
 import FLAnimatedImage
 import OrderedCollections
 import CropViewController
+import SafariServices
+import WebKit
 
 //see https://stackoverflow.com/a/62207329/3528174
 //and https://www.hackingwithswift.com/forums/100-days-of-swiftui/extending-shapestyle-for-adding-colors-instead-of-extending-color/12324
@@ -403,6 +405,22 @@ struct ActivityViewController: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: UIViewControllerRepresentableContext<ActivityViewController>) {
         
+    }
+}
+
+struct WebView: UIViewRepresentable {
+    var url: URL
+ 
+    func makeUIView(context: Context) -> WKWebView {
+        return WKWebView()
+    }
+ 
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        var request = URLRequest(url: url)
+        if HelperTools.defaultsDB().bool(forKey:"useDnssecForAllConnections") {
+            request.requiresDNSSECValidation = true;
+        }
+        webView.load(request)
     }
 }
 
@@ -868,6 +886,8 @@ class SwiftuiInterface : NSObject {
                 host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate: delegate, to: NotificationSettings())))
             case "OnboardingView":
                 host = UIHostingController(rootView:AnyView(createOnboardingView(delegate:delegate)))
+            case "OneClickRegistration":
+               host = UIHostingController(rootView:AnyView(AddTopLevelNavigation(withDelegate:delegate, to:OneClickRegistration(delegate:delegate))))
             
             default:
                 unreachable()

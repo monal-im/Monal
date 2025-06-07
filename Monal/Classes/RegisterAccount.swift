@@ -6,25 +6,7 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import SafariServices
-import WebKit
 import FrameUp
-
-struct WebView: UIViewRepresentable {
-    var url: URL
- 
-    func makeUIView(context: Context) -> WKWebView {
-        return WKWebView()
-    }
- 
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        var request = URLRequest(url: url)
-        if HelperTools.defaultsDB().bool(forKey:"useDnssecForAllConnections") {
-            request.requiresDNSSECValidation = true;
-        }
-        webView.load(request)
-    }
-}
 
 struct RegisterAccount: View {
     static private let xmppFaultyPattern = ".+\\..{2,}$"

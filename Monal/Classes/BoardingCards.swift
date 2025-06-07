@@ -28,6 +28,13 @@ struct OnboardingView: View {
     let cards: [OnboardingCard]
     @ObservedObject var onboardingState = OnboardingState()
     @State private var currentIndex = 0
+    @StateObject private var appDelegate: ObservableKVOWrapper<MonalAppDelegate>
+    
+    init(delegate: SheetDismisserProtocol, cards: [OnboardingCard]) {
+        self.delegate = delegate
+        self.cards = cards
+        _appDelegate = StateObject(wrappedValue: ObservableKVOWrapper<MonalAppDelegate>(UIApplication.shared.delegate as! MonalAppDelegate))
+    }
     
     var body: some View {
         ZStack {
@@ -98,7 +105,22 @@ struct OnboardingView: View {
                                 
                                 Spacer()
                                 
-                                Group {
+                                HStack {
+#if !IS_QUICKSY
+                                    if index == 0 && self.appDelegate.showOneClickButton {
+                                        Button {
+                                            let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
+                                            if let activeChats = appDelegate.activeChats {
+                                                activeChats.prependOneClickRegistration()
+                                            }
+                                            delegate.dismissWithoutAnimation()
+                                            onboardingState.hasCompletedOnboarding = true
+                                        } label: {
+                                            Text(card.nextText ?? NSLocalizedString("Take me to 1-Click registration", comment:"onboarding"))
+                                        }
+                                    }
+#endif
+                                    Spacer()
                                     if index < cards.count - 1 {
                                         Button {
                                             currentIndex += 1

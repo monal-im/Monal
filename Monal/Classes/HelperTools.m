@@ -2785,7 +2785,13 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 +(NSString*) generateRandomPassword
 {
     u_int32_t i=arc4random();
-    return [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
+    u_int32_t k=arc4random();
+    NSData* di = [NSData dataWithBytes:&i length:sizeof(i)];
+    NSData* dk = [NSData dataWithBytes:&k length:sizeof(k)];
+    NSMutableData* retval = [di mutableCopy];
+    [retval appendData:dk];
+    //use base64 and strip off the trailing '=' if present
+    return [[self encodeBase64WithData:retval] componentsSeparatedByString:@"="][0];
 }
 
 +(NSString*) encodeRandomResource

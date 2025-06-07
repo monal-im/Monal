@@ -10,7 +10,7 @@
 #import <monalxmpp/MLConstants.h>
 
 @interface Quicksy_Country()
-    @property (nonatomic, strong) NSString* _Nullable name;      //has to be optional because we don't want to have NSLocalizedString() if we know the alpha-2 code
+    @property (nonatomic, strong) NSString* _Nullable name;      //has to be optional because we don't want to have NSLocalizedString if we know the alpha-2 code
     @property (nonatomic, strong) NSString* _Nullable alpha2;    //has to be optional because the alpha-2 mapping can fail
     @property (nonatomic, strong) NSString* code;
     @property (nonatomic, strong) NSString* pattern;

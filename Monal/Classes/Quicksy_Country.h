@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Quicksy_Country : NSObject <NSSecureCoding>
     @property (readonly) NSString* id;                  //for Identifiable protocol
-    @property (readonly) NSString* _Nullable name;      //has to be optional because we don't want to have NSLocalizedString() if we know the alpha-2 code
+    @property (readonly) NSString* _Nullable name;      //has to be optional because we don't want to have NSLocalizedString if we know the alpha-2 code
     @property (readonly) NSString* _Nullable alpha2;    //has to be optional because the alpha-2 mapping can fail
     @property (readonly) NSString* code;
     @property (readonly) NSString* pattern;

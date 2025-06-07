@@ -76,6 +76,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     DDLogVerbose(@"Setting _shutdownPending to NO...");
     _shutdownPending = NO;
     _wasFrozen = NO;
+    _showOneClickButton = YES;
     
     //register BGTasks as early as possible to make sure a subsequent app termination
     //without proper "bootup" won't crash on unknown bgtask identifiers
@@ -550,6 +551,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                             host = @"";
                     }
                     
+                    //make sure we don't show the 1-click button if we got a dedicated host and/or username to register on/with
+                    self.showOneClickButton = ![@"" isEqualToString:host];
+                        
                     //show register view and, if isRoster, add contact as usual after register (e.g. call this method again)
                     weakify(self);
                     [self.activeChats showRegisterWithUsername:username onHost:host withToken:preauthToken usingCompletion:^(NSNumber* accountID) {

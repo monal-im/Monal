@@ -47,6 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) showSettings;
 -(void) showGeneralSettings;
 -(void) prependGeneralSettings;
+-(void) prependOneClickRegistration;
 -(void) showNotificationSettings;
 -(void) showDetails;
 -(void) showRegisterWithUsername:(NSString*) username onHost:(NSString*) host withToken:(NSString* _Nullable) token usingCompletion:(monal_id_block_t _Nullable) callback;

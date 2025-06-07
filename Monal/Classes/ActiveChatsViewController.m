@@ -664,7 +664,7 @@ static NSMutableSet* _pushWarningDisplayed;
             if([[[DataLayer sharedInstance] accountList] count] == 0)
             {
                 DDLogDebug(@"Showing account registration view...");
-                UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:@{}];
+                UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:nil];
                 if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
                     view.modalPresentationStyle = UIModalPresentationFullScreen;
                 else
@@ -722,7 +722,7 @@ static NSMutableSet* _pushWarningDisplayed;
             {
 #ifdef IS_QUICKSY
                 DDLogDebug(@"Showing account registration view to do password migration...");
-                UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:@{}];
+                UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:nil];
                 if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
                     view.modalPresentationStyle = UIModalPresentationFullScreen;
                 else
@@ -919,6 +919,19 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     prependToViewQueue((^(PMKResolver resolve) {
         UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"ActiveChatsGeneralSettings"];
+        view.ml_disposeCallback = ^{
+            [self sheetDismissed];
+        };
+        [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+            [self presentViewController:view animated:YES completion:^{resolve(nil);}];
+        }];
+    }));
+}
+
+-(void) prependOneClickRegistration
+{
+    prependToViewQueue((^(PMKResolver resolve) {
+        UIViewController* view = [[SwiftuiInterface new] makeViewWithName:@"OneClickRegistration"];
         view.ml_disposeCallback = ^{
             [self sheetDismissed];
         };

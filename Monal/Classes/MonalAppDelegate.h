@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) MLVoIPProcessor* _Nullable voipProcessor;
 @property (nonatomic, assign) MLAudioState audioState;
 @property (nonatomic, assign) UIInterfaceOrientationMask orientationLock;
+@property (nonatomic, assign) BOOL showOneClickButton;
 
 -(UIViewController*) getTopViewController;
 -(void) updateUnread;

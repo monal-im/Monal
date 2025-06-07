@@ -31,9 +31,6 @@ def monalxmpp
   pod 'SAMKeychain'
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
   pod 'ASN1Decoder'
-  #later versions of the webrtc lib trigger the following app review error:
-  pod 'WebRTC-lib'
-  #pod 'GoogleWebRTC'
   pod 'KSCrash', subspecs:['Recording', 'Reporting/Filters/Sets', 'Reporting/Filters/Tools', 'Reporting/Tools', 'Core']
   signalDeps
   pod "PromiseKit"

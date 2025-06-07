@@ -184,6 +184,7 @@
 		849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */; };
 		849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF402BACF0360009BCD7 /* CocoaLumberjackSwift */; };
 		849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF422BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend */; };
+		84AF79BF2DF36DA400FE3818 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79BE2DF36DA400FE3818 /* WebRTC */; };
 		84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */; };
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
@@ -822,6 +823,7 @@
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
 				84F194D12C15197200F0A994 /* FrameUp in Frameworks */,
 				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
+				84AF79BF2DF36DA400FE3818 /* WebRTC in Frameworks */,
 				84774DFB2D1A956400B15E51 /* ExyteChat in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
 				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
@@ -893,13 +895,10 @@
 				262D9EAB17924532009292B4 /* MLConstants.h */,
 				26EC411117BDE39E0031304D /* MLImageManager.h */,
 				26EC411217BDE39E0031304D /* MLImageManager.m */,
-				341F44642CAF427500AA6C7D /* MLPromise.h */,
-				341F44652CAF427500AA6C7D /* MLPromise.m */,
 				263AFDFA209B3B35007F9CEE /* MLSignalStore.h */,
 				263AFDFB209B3B35007F9CEE /* MLSignalStore.m */,
 				C16D18332792A4AF00F869A0 /* DataLayerMigrations.h */,
 				C16D18342792A4AF00F869A0 /* DataLayerMigrations.m */,
-				84FC37542897521400634E3E /* snprintf.m */,
 			);
 			name = Shared;
 			path = Classes;
@@ -1313,6 +1312,9 @@
 				84C1CD532A8F6196007076ED /* MLStreamRedirect.h */,
 				844921E92C29F9A000B99A9C /* MLDelayableTimer.m */,
 				844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */,
+				341F44652CAF427500AA6C7D /* MLPromise.m */,
+				341F44642CAF427500AA6C7D /* MLPromise.h */,
+				84FC37542897521400634E3E /* snprintf.m */,
 			);
 			name = tools;
 			sourceTree = "<group>";
@@ -1608,6 +1610,7 @@
 				843DC1B12C8E51E3002724FE /* ExyteChat */,
 				84774DF42D1A935000B15E51 /* ExyteChat */,
 				84774DFA2D1A956400B15E51 /* ExyteChat */,
+				84AF79BE2DF36DA400FE3818 /* WebRTC */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1825,6 +1828,7 @@
 				84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */,
 				84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */,
 				84774DF92D1A956400B15E51 /* XCRemoteSwiftPackageReference "ExyteChat" */,
+				84AF79BD2DF36DA400FE3818 /* XCRemoteSwiftPackageReference "WebRTC" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4744,6 +4748,14 @@
 				minimumVersion = 3.8.5;
 			};
 		};
+		84AF79BD2DF36DA400FE3818 /* XCRemoteSwiftPackageReference "WebRTC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Stasel/WebRTC";
+			requirement = {
+				branch = latest;
+				kind = branch;
+			};
+		};
 		84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/exyte/SVGView";
@@ -4807,6 +4819,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
+		};
+		84AF79BE2DF36DA400FE3818 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84AF79BD2DF36DA400FE3818 /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
 		};
 		84E231F22C16A9CE00735FB7 /* SVGView */ = {
 			isa = XCSwiftPackageProductDependency;

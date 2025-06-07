@@ -251,10 +251,6 @@ jobs:
     name: Update Translations using Beta-Branch
     runs-on: self-hosted
     needs: [buildAndPublishBeta]
-    env:
-      APP_NAME: "Monal"
-      APP_DIR: "Monal.app"
-      BUILD_TYPE: "Beta"
     permissions:
       contents: write # needed for git push in updateLocalization
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -269,7 +265,7 @@ jobs:
         run: |
           chmod +x ./scripts/updateLocalization.sh
           chmod +x ./scripts/xliff_extractor.py
-          ./scripts/updateLocalization.sh BUILDSERVER
+          ./scripts/updateLocalization.sh BUILDSERVER COMMIT YES
   
   notifyMuc:
     name: Notify support MUC about new Betarelease

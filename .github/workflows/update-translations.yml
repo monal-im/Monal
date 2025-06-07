@@ -4,6 +4,15 @@ name: update-translations
 # Controls when the action will run.
 on:
   workflow_dispatch:
+    inputs:
+      arg2:
+        description: 'Commit changes?'     
+        required: true
+        default: 'NOCOMMIT'
+      arg3:
+        description: 'Compile Swift (YES/NO)'
+        required: true
+        default: 'YES'
 
 permissions: {}
 
@@ -13,13 +22,6 @@ jobs:
   updateTranslations:
     # The type of runner that the job will run on
     runs-on: self-hosted
-    env:
-      APP_NAME: "Monal"
-      APP_DIR: "Monal.app"
-      BUILD_TYPE: "Beta"
-      EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
-      EXPORT_OPTIONS_CATALYST_APP_EXPORT: "../scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
-      EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Beta_iOS_ExportOptions.plist"
     permissions:
       contents: write # needed for git push in updateLocalization
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -38,4 +40,4 @@ jobs:
         run: |
           chmod +x ./scripts/updateLocalization.sh
           chmod +x ./scripts/xliff_extractor.py
-          ./scripts/updateLocalization.sh BUILDSERVER
+          ./scripts/updateLocalization.sh BUILDSERVER "${{ github.event.inputs.arg2 }}" "${{ github.event.inputs.arg3 }}"

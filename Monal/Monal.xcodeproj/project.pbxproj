@@ -185,6 +185,8 @@
 		849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF402BACF0360009BCD7 /* CocoaLumberjackSwift */; };
 		849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF422BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend */; };
 		84AF79BF2DF36DA400FE3818 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79BE2DF36DA400FE3818 /* WebRTC */; };
+		84AF79C22DF3C0A900FE3818 /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79C12DF3C0A900FE3818 /* CropViewController */; };
+		84AF79C42DF3C0A900FE3818 /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79C32DF3C0A900FE3818 /* TOCropViewController */; };
 		84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */; };
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
@@ -824,9 +826,11 @@
 				84F194D12C15197200F0A994 /* FrameUp in Frameworks */,
 				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
 				84AF79BF2DF36DA400FE3818 /* WebRTC in Frameworks */,
+				84AF79C22DF3C0A900FE3818 /* CropViewController in Frameworks */,
 				84774DFB2D1A956400B15E51 /* ExyteChat in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
 				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
+				84AF79C42DF3C0A900FE3818 /* TOCropViewController in Frameworks */,
 				7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1611,6 +1615,8 @@
 				84774DF42D1A935000B15E51 /* ExyteChat */,
 				84774DFA2D1A956400B15E51 /* ExyteChat */,
 				84AF79BE2DF36DA400FE3818 /* WebRTC */,
+				84AF79C12DF3C0A900FE3818 /* CropViewController */,
+				84AF79C32DF3C0A900FE3818 /* TOCropViewController */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1829,6 +1835,7 @@
 				84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */,
 				84774DF92D1A956400B15E51 /* XCRemoteSwiftPackageReference "ExyteChat" */,
 				84AF79BD2DF36DA400FE3818 /* XCRemoteSwiftPackageReference "WebRTC" */,
+				84AF79C02DF3C0A900FE3818 /* XCRemoteSwiftPackageReference "TOCropViewController" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4756,6 +4763,14 @@
 				kind = branch;
 			};
 		};
+		84AF79C02DF3C0A900FE3818 /* XCRemoteSwiftPackageReference "TOCropViewController" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TimOliver/TOCropViewController";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.4;
+			};
+		};
 		84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/exyte/SVGView";
@@ -4824,6 +4839,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84AF79BD2DF36DA400FE3818 /* XCRemoteSwiftPackageReference "WebRTC" */;
 			productName = WebRTC;
+		};
+		84AF79C12DF3C0A900FE3818 /* CropViewController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84AF79C02DF3C0A900FE3818 /* XCRemoteSwiftPackageReference "TOCropViewController" */;
+			productName = CropViewController;
+		};
+		84AF79C32DF3C0A900FE3818 /* TOCropViewController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84AF79C02DF3C0A900FE3818 /* XCRemoteSwiftPackageReference "TOCropViewController" */;
+			productName = TOCropViewController;
 		};
 		84E231F22C16A9CE00735FB7 /* SVGView */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -27,7 +27,7 @@ struct BlockedUsers: View {
 
     var body: some View {
         if showBlockingUnsupportedPlaceholder {
-            ContentUnavailableShimView(NSLocalizedString("Blocking unsupported", comment: ""), systemImage: "iphone.homebutton.slash", description: Text("Your server does not support blocking (XEP-0191)."))
+            ContentUnavailableShimView("Blocking unsupported", systemImage: "iphone.homebutton.slash", description: Text("Your server does not support blocking (XEP-0191)."))
         } else {
             List {
                 ForEach(blockedJids, id: \.self) { blockedJid in

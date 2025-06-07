@@ -1,6 +1,5 @@
 PODS:
   - ASN1Decoder (1.10.0)
-  - CropViewController (2.7.4)
   - DZNEmptyDataSet (1.8.1)
   - FLAnimatedImage (1.0.17)
   - KSCrash/Core (1.17.7):
@@ -65,7 +64,6 @@ PODS:
 
 DEPENDENCIES:
   - ASN1Decoder
-  - CropViewController
   - DZNEmptyDataSet
   - FLAnimatedImage (~> 1.0)
   - KSCrash/Core
@@ -85,7 +83,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - ASN1Decoder
-    - CropViewController
     - DZNEmptyDataSet
     - FLAnimatedImage
     - KSCrash
@@ -116,7 +113,6 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   ASN1Decoder: 91cb1d781b5a178ea7375b2f1519e2bdaaa4c427
-  CropViewController: 3489bbf95a3e11c654382b0bae08ac645cdf1b93
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
   KSCrash: ea6fc545b7dbb916a141aaadd4343fb891141290
@@ -131,6 +127,6 @@ SPEC CHECKSUMS:
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   sqlite3: 7559e33dae4c78538df563795af3a86fc887ee71
 
-PODFILE CHECKSUM: 3674e2fdadf0433047d93770c5c5769b66363b40
+PODFILE CHECKSUM: 2437cd240c9d74a625dcde7810f7388523db351d
 
 COCOAPODS: 1.16.2

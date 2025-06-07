@@ -92,12 +92,30 @@
         }
       },
       {
+        "package": "TOCropViewController",
+        "repositoryURL": "https://github.com/TimOliver/TOCropViewController",
+        "state": {
+          "branch": null,
+          "revision": "a634cb7cdfd580006e79a6e74e64417fe9e9783b",
+          "version": "2.7.4"
+        }
+      },
+      {
         "package": "ViewExtractor",
         "repositoryURL": "https://github.com/GeorgeElsham/ViewExtractor",
         "state": {
           "branch": null,
           "revision": "e20b1944524d4454c2a65c0054ce345c2c5d0185",
           "version": "2.0.0"
+        }
+      },
+      {
+        "package": "WebRTC",
+        "repositoryURL": "https://github.com/Stasel/WebRTC",
+        "state": {
+          "branch": "latest",
+          "revision": "b85669f32ffb3f48ce3a8f18ad828c6f559a8a0c",
+          "version": null
         }
       }
     ]

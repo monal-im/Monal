@@ -7,7 +7,7 @@ import logging
 import xml.etree.ElementTree as ElementTree
 
 ns = {"def": "urn:oasis:names:tc:xliff:document:1.2"}
-regex = re.compile('^"(.*)" = "(.*)";$')
+regex = re.compile(r'^[ \t]*"(.*)"[ \t]*=[ \t]*"(.*)"[ \t]*;$')
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stderr, format="%(asctime)s [%(levelname)-7s] %(module)s: %(message)s")
 logger = logging.getLogger("__main__")
@@ -39,7 +39,10 @@ for file in xliff.findall("./def:file", ns):
         logger.info("Adding missing strings data to '%s'...", path)
         with open(path, mode="a+", encoding="utf-8") as output:
             for unit in file.findall("./def:body/def:trans-unit", ns):
-                string = unit.attrib["id"].replace("\n", "\\n")
+                if len(unit.find("./def:source", ns).text):
+                    string = unit.find("./def:source", ns).text.replace("\n", "\\n").replace('"', '\\"')
+                else:
+                    string = unit.attrib["id"].replace("\n", "\\n").replace('"', '\\"')
                 if string not in strings:
                     comment = "No comment provided by engineer."
                     if len(unit.find("./def:note", ns).text):

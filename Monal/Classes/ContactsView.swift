@@ -13,19 +13,19 @@ struct ContactViewEntry: View {
 
     @State private var shouldPresentRemoveContactAlert: Bool = false
 
-    private var removeContactButtonText: String {
+    private var removeContactButtonText: LocalizedStringKey {
         if (!isDeletable) {
-            return NSLocalizedString("Cannot delete notes to self", comment:"contact list")
+            return "Cannot delete notes to self"
         }
-        return contact.isMuc ? NSLocalizedString("Remove Conversation", comment:"contact list") : NSLocalizedString("Remove Contact", comment:"contact list")
+        return contact.isMuc ? "Remove Conversation" : "Remove Contact"
     }
 
-    private var removeContactConfirmationTitle: String {
-        contact.isMuc ? NSLocalizedString("Leave this converstion?", comment:"contact list") : NSLocalizedString("Remove \(contact.contactJid) from contacts?", comment:"contact list")
+    private var removeContactConfirmationTitle: LocalizedStringKey {
+        contact.isMuc ? "Leave this converstion?" : "Remove \(contact.contactJid) from contacts?"
     }
 
-    private var removeContactConfirmationDetail: String {
-        contact.isMuc ? "" : NSLocalizedString("They will no longer see when you are online. They may not be able to access your encryption keys.", comment:"contact list")
+    private var removeContactConfirmationDetail: LocalizedStringKey {
+        contact.isMuc ? "" : "They will no longer see when you are online. They may not be able to access your encryption keys."
     }
 
     private var isDeletable: Bool {
@@ -154,7 +154,7 @@ struct ContactsView: View {
         .keyboardType(.emailAddress)
         .overlay {
             if contactList.isEmpty {
-                ContentUnavailableShimView(NSLocalizedString("You need friends for this ride", comment:"empty contacts view"), image: colorScheme == .dark ? "friends_dark" : "friends", description: Text("Add new contacts with the + button above. Your friends will pop up here when they can talk"))
+                ContentUnavailableShimView("You need friends for this ride", image: colorScheme == .dark ? "friends_dark" : "friends", description: Text("Add new contacts with the + button above. Your friends will pop up here when they can talk"))
             } else if searchResults.isEmpty {
                 ContentUnavailableShimView.search(text:searchText)
             }

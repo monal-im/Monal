@@ -7,18 +7,18 @@
 //
 
 struct ContentUnavailableShimView: View {
-    private var reason: String
+    private var reason: LocalizedStringKey
     private var image: String?
     private var systemImage: String?
     private var description: Text
 
-    init(_ reason: String, image: String, description: Text) {
+    init(_ reason: LocalizedStringKey, image: String, description: Text) {
         self.image = image
         self.reason = reason
         self.description = description
     }
     
-    init(_ reason: String, systemImage: String, description: Text) {
+    init(_ reason: LocalizedStringKey, systemImage: String, description: Text) {
         self.systemImage = systemImage
         self.reason = reason
         self.description = description
@@ -77,9 +77,9 @@ struct ContentUnavailableShimView: View {
 }
 
 extension ContentUnavailableShimView {
-    static var search: ContentUnavailableShimView = ContentUnavailableShimView(NSLocalizedString("No Results", comment:"empty search"), systemImage: "magnifyingglass", description: Text("Check the spelling or try a new search."))
+    static var search: ContentUnavailableShimView = ContentUnavailableShimView("No Results", systemImage: "magnifyingglass", description: Text("Check the spelling or try a new search."))
     static func search(text: String) -> ContentUnavailableShimView {
-        return ContentUnavailableShimView(NSLocalizedString("No Results for \"\(text)\"", comment:"empty search"), systemImage: "magnifyingglass", description: Text("Check the spelling or try a new search."))
+        return ContentUnavailableShimView("No Results for \"\(text)\"", systemImage: "magnifyingglass", description: Text("Check the spelling or try a new search."))
     }
 }
 

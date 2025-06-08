@@ -186,7 +186,8 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             Find more Information in our [Privacy Policy](https://quicksy.im/privacy.htm).
             """),
             customView: nil,
-            nextText: "Accept and continue"
+            //this is needed because the `#if IS_QUICKSY` blocks the compiler extraction of this LocalizedStringKey based string
+            nextText: NSLocalizedString("Accept and continue", comment:"Quicksy privacy policy")
         ),
     ]
 #else

@@ -134,6 +134,27 @@ struct WelcomeLogIn: View {
             }
         }
     }
+    
+    private func submit() {
+        showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
+
+        if (!showAlert) {
+            startLoginTimeout()
+            showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
+            self.errorObserverEnabled = true
+            if advancedMode {
+                self.newAccountID = MLXMPPManager.sharedInstance().login(self.jid, password: self.password, hardcodedServer:self.hardcodedServer, hardcodedPort:self.hardcodedPort, forceDirectTLS: self.forceDirectTLS, allowPlainAuth: self.allowPlainAuth)
+            } else {
+                self.newAccountID = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
+            }
+            if(self.newAccountID == nil) {
+                currentTimeout = nil // <- disable timeout on error
+                errorObserverEnabled = false
+                showLoginErrorAlert(errorMessage:NSLocalizedString("Account already configured in Monal!", comment: ""))
+                self.newAccountID = nil
+            }
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -173,10 +194,13 @@ struct WelcomeLogIn: View {
                             .autocapitalization(.none)
                             .autocorrectionDisabled()
                             .keyboardType(.emailAddress)
+                            .submitLabel(.continue)
                             .addClearButton(isEditing: isEditingJid, text: $jid)
                             .listRowSeparator(.hidden)
                             
                             SecureField(NSLocalizedString("Password", comment: "placeholder when adding account"), text: $password)
+                                .submitLabel(.go)
+                                .onSubmit(submit)
                                 .addClearButton(isEditing:  password.count > 0, text: $password)
                                 .listRowSeparator(.hidden)
 
@@ -185,6 +209,8 @@ struct WelcomeLogIn: View {
                                     .textInputAutocapitalization(.never)
                                     .autocorrectionDisabled()
                                     .keyboardType(.URL)
+                                    .submitLabel(.go)
+                                    .onSubmit(submit)
                                     .addClearButton(isEditing:  hardcodedServer.count > 0, text: $hardcodedServer)
                                     .listRowSeparator(.hidden)
 
@@ -194,6 +220,8 @@ struct WelcomeLogIn: View {
                                         Spacer()
                                         TextField(NSLocalizedString("Optional Hardcoded Port", comment: "advanced account settings"), text: $hardcodedPort)
                                             .keyboardType(.numberPad)
+                                            .submitLabel(.go)
+                                            .onSubmit(submit)
                                             .addClearButton(isEditing:  hardcodedPort.count > 0, text: $hardcodedPort)
                                             .onDisappear {
                                                 hardcodedPort = "5222"
@@ -227,26 +255,7 @@ struct WelcomeLogIn: View {
                             }
 
                             HStack() {
-                                Button(action: {
-                                    showAlert = !credentialsEnteredAlert || credentialsFaultyAlert || credentialsExistAlert
-
-                                    if (!showAlert) {
-                                        startLoginTimeout()
-                                        showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
-                                        self.errorObserverEnabled = true
-                                        if advancedMode {
-                                            self.newAccountID = MLXMPPManager.sharedInstance().login(self.jid, password: self.password, hardcodedServer:self.hardcodedServer, hardcodedPort:self.hardcodedPort, forceDirectTLS: self.forceDirectTLS, allowPlainAuth: self.allowPlainAuth)
-                                        } else {
-                                            self.newAccountID = MLXMPPManager.sharedInstance().login(self.jid, password: self.password)
-                                        }
-                                        if(self.newAccountID == nil) {
-                                            currentTimeout = nil // <- disable timeout on error
-                                            errorObserverEnabled = false
-                                            showLoginErrorAlert(errorMessage:NSLocalizedString("Account already configured in Monal!", comment: ""))
-                                            self.newAccountID = nil
-                                        }
-                                    }
-                                }){
+                                Button(action: submit) {
                                     Text("Login")
                                         .frame(maxWidth: .infinity)
                                         .padding(9.0)

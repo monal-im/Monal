@@ -265,6 +265,19 @@ struct RegisterAccount: View {
         let chosenServer = RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]
         return URL(string: (chosenServer["TermsSite_\(languageCode ?? "default")"] ?? chosenServer["TermsSite_default"])!)!
     }
+    
+    private func submit() {
+        showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || !passwordsMatchAlert || credentialsFaultyAlert || credentialsExistAlert)
+
+        if(!showAlert) {
+            self.errorObserverEnabled = true
+            if(self.captchaImg == nil) {
+                fetchRequestForm()
+            } else {
+                register()
+            }
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -334,6 +347,7 @@ struct RegisterAccount: View {
                                     .autocorrectionDisabled()
                                     .foregroundColor(self.registerToken != nil ? .secondary : .primary)
                                     .disabled(self.registerToken != nil)
+                                    .submitLabel(.continue)
                                     .listRowSeparator(.hidden)
                                 }
 
@@ -344,11 +358,15 @@ struct RegisterAccount: View {
                                 .textInputAutocapitalization(.never)
                                 .autocapitalization(.none)
                                 .autocorrectionDisabled()
+                                .submitLabel(.continue)
                                 .listRowSeparator(.hidden)
                             
                                 SecureField(NSLocalizedString("Password", comment: "placeholder when creating account"), text: $password)
+                                    .submitLabel(.continue)
                                     .listRowSeparator(.hidden)
                                 SecureField(NSLocalizedString("Password (repeated)", comment: "placeholder when creating account"), text: $repeatedPassword)
+                                    .submitLabel(.go)
+                                    .onSubmit(submit)
                                     .listRowSeparator(.hidden)
                             }
                             
@@ -369,21 +387,12 @@ struct RegisterAccount: View {
                                     .textInputAutocapitalization(.never)
                                     .autocapitalization(.none)
                                     .autocorrectionDisabled()
+                                    .submitLabel(.go)
+                                    .onSubmit(submit)
                                     .listRowSeparator(.hidden)
                             }
 
-                            Button(action: {
-                                showAlert = (!serverSelectedAlert && (!serverProvidedAlert || xmppServerFaultyAlert)) || (!credentialsEnteredAlert || !passwordsMatchAlert || credentialsFaultyAlert || credentialsExistAlert)
-
-                                if(!showAlert) {
-                                    self.errorObserverEnabled = true
-                                    if(self.captchaImg == nil) {
-                                        fetchRequestForm()
-                                    } else {
-                                        register()
-                                    }
-                                }
-                            }){
+                            Button(action: submit) {
                                 Text("Register with \(actualServer)")
                                     .frame(maxWidth: .infinity)
                                     .padding(9.0)

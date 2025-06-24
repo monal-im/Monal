@@ -20,6 +20,7 @@ import OrderedCollections
 import CropViewController
 import SafariServices
 import WebKit
+import NotificationBannerSwift
 
 //see https://stackoverflow.com/a/62207329/3528174
 //and https://www.hackingwithswift.com/forums/100-days-of-swiftui/extending-shapestyle-for-adding-colors-instead-of-extending-color/12324
@@ -30,6 +31,22 @@ public extension ShapeStyle where Self == Color {
     static var tertiaryBackground: Color { Color(UIColor.tertiarySystemBackground) }
 }
 
+@objcMembers
+class MonalFloatingNotificationBanner: FloatingNotificationBanner {
+    public init(title: String? = nil, subtitle: String? = nil, style: BannerStyle = .info, colors: BannerColorsProtocol? = nil) {
+        super.init(
+            title: title,
+            subtitle: subtitle,
+            style: style,
+            colors: colors
+        )
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+        
 class SheetDismisserProtocol: ObservableObject {
     weak var host: UIHostingController<AnyView>? = nil
     func dismiss() {

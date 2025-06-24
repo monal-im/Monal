@@ -25,6 +25,7 @@
 #import <monalxmpp/MLVoIPProcessor.h>
 #import <monalxmpp/MLUDPLogger.h>
 #import "MLCrashReporter.h"
+#import <Monal-Swift.h>
 
 @import NotificationBannerSwift;
 @import UserNotifications;
@@ -60,6 +61,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     monal_id_block_t _completionToCall;
     BOOL _shutdownPending;
     BOOL _wasFrozen;
+    NotificationBannerQueue* _bannerQueue;
 }
 @end
 
@@ -77,6 +79,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     _shutdownPending = NO;
     _wasFrozen = NO;
     _showOneClickButton = YES;
+    _bannerQueue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:1];
     
     //register BGTasks as early as possible to make sure a subsequent app termination
     //without proper "bootup" won't crash on unknown bgtask identifiers
@@ -1035,10 +1038,19 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 return;
             if(![notification.userInfo[@"isSevere"] boolValue])
                 DDLogError(@"Minor XMPP Error(%@): %@", xmppAccount.connectionProperties.identity.jid, notification.userInfo[@"message"]);
-            NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:notification.userInfo[@"message"] leftView:nil rightView:nil style:([notification.userInfo[@"isSevere"] boolValue] ? BannerStyleDanger : BannerStyleWarning) colors:nil];
+            FloatingNotificationBanner* banner = [[MonalFloatingNotificationBanner alloc]
+                initWithTitle:xmppAccount.connectionProperties.identity.jid
+                subtitle:notification.userInfo[@"message"]
+                style:([notification.userInfo[@"isSevere"] boolValue] ? BannerStyleDanger : BannerStyleWarning)
+                colors:nil
+            ];
             banner.duration = 10.0;     //show for 10 seconds to make sure users can read it
-            NotificationBannerQueue* queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
-            [banner showWithQueuePosition:QueuePositionBack bannerPosition:BannerPositionTop queue:queue on:nil];
+            BannerPosition position = BannerPositionTop;
+#if TARGET_OS_MACCATALYST
+            //move to bottom, because otherwise the window chrome will cover our text
+            position = BannerPositionBottom;
+#endif
+            [banner showWithQueuePosition:QueuePositionBack bannerPosition:position queue:self->_bannerQueue on:nil];
         });
     }
     else

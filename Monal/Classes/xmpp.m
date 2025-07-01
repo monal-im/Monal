@@ -2463,7 +2463,7 @@ NSString* const kStanza = @"stanza";
                 return [self invalidXMLError];
             
             //record TLS version
-            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             NSString* message = [parsedStanza findFirst:@"text#"];;
             if([parsedStanza check:@"not-authorized"])
@@ -2506,7 +2506,7 @@ NSString* const kStanza = @"stanza";
                 return [self invalidXMLError];
             
             //record TLS version
-            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
@@ -2604,7 +2604,9 @@ NSString* const kStanza = @"stanza";
                 return;
             }
             
-            NSData* channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];
+            NSData* channelBindingData = nil;
+            if([((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen)
+                channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];
             MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessageWithChannelBindingData:channelBindingData]]];
             [self send:responseXML];
             
@@ -2684,7 +2686,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
                 
                 //record TLS version
-                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
@@ -2721,7 +2723,7 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
             //record TLS version
-            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary

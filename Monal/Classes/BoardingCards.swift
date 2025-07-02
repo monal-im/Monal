@@ -114,7 +114,6 @@ struct OnboardingView: View {
                                                 activeChats.prependOneClickRegistration()
                                             }
                                             delegate.dismissWithoutAnimation()
-                                            onboardingState.hasCompletedOnboarding = true
                                         } label: {
                                             Text(card.nextText ?? "Take me to 1-Click registration")
                                         }

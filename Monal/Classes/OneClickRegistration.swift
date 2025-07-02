@@ -8,6 +8,11 @@
 
 import FrameUp
 
+class OneClickState: ObservableObject {
+    @defaultsDB("hasCompletedOnboarding")
+    var hasCompletedOnboarding: Bool
+}
+
 struct OneClickRegistration: View {
     static private let xmppFaultyPattern = ".+\\..{2,}$"
     static private let credFaultyPattern = ".*@.*"
@@ -24,6 +29,7 @@ struct OneClickRegistration: View {
     let appLogoId = "AppLogo"
 #endif
 
+    @ObservedObject var oneClickState = OneClickState()
     @State private var selectedServerIndex = Int.random(in: 0 ..< XMPPServer.count)
     private var actualServer: String {
         return OneClickRegistration.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!
@@ -116,6 +122,7 @@ struct OneClickRegistration: View {
                         self.registeredAccountID = accountID!.intValue
                         MLXMPPManager.sharedInstance().addNewAccountToKeychainAndConnect(withPassword:self.password, andAccountID:accountID!)
                         cleanupXMPPInstance()
+                        oneClickState.hasCompletedOnboarding = true
                     } else {
                         cleanupXMPPInstance()
                         showRegistrationAlert(alertMessage:NSLocalizedString("Account already configured in Monal!", comment: ""))

@@ -91,6 +91,26 @@ public func nilExtractor(_ value: Any?) -> Any? {
     }
 }
 
+public extension Binding {
+    func optionalMappedToBool<Wrapped>() -> Binding<Bool> where Value == Wrapped? {
+        Binding<Bool>(
+            get: { self.wrappedValue != nil },
+            set: { newValue in
+                MLAssert(!newValue, "New value should never be true when writing to a binding created by optionalMappedToBool()")
+                self.wrappedValue = nil
+            }
+        )
+    }
+}
+public extension Binding {
+    func bytecount(mappedTo: Double) -> Binding<Double> where Value == UInt {
+        Binding<Double>(
+            get: { Double(self.wrappedValue) / mappedTo },
+            set: { newValue in self.wrappedValue = UInt(newValue * mappedTo) }
+        )
+    }
+}
+
 @objc public enum NotificationPrivacySettingOption: Int, CaseIterable, RawRepresentable {
     case DisplayNameAndMessage
     case DisplayOnlyName
@@ -242,7 +262,7 @@ struct RuntimeError: LocalizedError {
     }
 }
 
-extension AnyPromise {
+public extension AnyPromise {
     public func toTypedGuarantee<T>() -> Guarantee<T> {
         return Guarantee<T> { seal in
             self.done { value in
@@ -450,7 +470,7 @@ public class SwiftHelpers: NSObject {
 }
 
 //TODO: remove this
-extension UIImage {
+public extension UIImage {
     public func thumbnail(size: CGSize) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
         defer { UIGraphicsEndImageContext() }
@@ -473,7 +493,7 @@ fileprivate extension RustVec {
     }
 }
 
-extension RustString: Error {}
+extension RustString: @retroactive Error {}
 
 @objcMembers
 public class JingleSDPBridge : NSObject {

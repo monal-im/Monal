@@ -30,26 +30,6 @@ public extension ShapeStyle where Self == Color {
     static var tertiaryBackground: Color { Color(UIColor.tertiarySystemBackground) }
 }
 
-extension Binding {
-    func optionalMappedToBool<Wrapped>() -> Binding<Bool> where Value == Wrapped? {
-        Binding<Bool>(
-            get: { self.wrappedValue != nil },
-            set: { newValue in
-                MLAssert(!newValue, "New value should never be true when writing to a binding created by optionalMappedToBool()")
-                self.wrappedValue = nil
-            }
-        )
-    }
-}
-extension Binding {
-    func bytecount(mappedTo: Double) -> Binding<Double> where Value == UInt {
-        Binding<Double>(
-            get: { Double(self.wrappedValue) / mappedTo },
-            set: { newValue in self.wrappedValue = UInt(newValue * mappedTo) }
-        )
-    }
-}
-
 class SheetDismisserProtocol: ObservableObject {
     weak var host: UIHostingController<AnyView>? = nil
     func dismiss() {

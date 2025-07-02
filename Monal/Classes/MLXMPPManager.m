@@ -789,13 +789,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     domain = ((NSString*)[elements objectAtIndex:1]).lowercaseString;
 
     if([[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain])
-    {
-        [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:nil userInfo:@{
-            @"title": NSLocalizedString(@"Duplicate Account", @""),
-            @"description": NSLocalizedString(@"This account already exists on this instance", @"")
-        }];
         return nil;
-    }
 
     NSMutableDictionary* dic  = [NSMutableDictionary new];
     [dic setObject:domain forKey:kDomain];

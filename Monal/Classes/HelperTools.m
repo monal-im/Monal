@@ -2788,10 +2788,10 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     u_int32_t k=arc4random();
     NSData* di = [NSData dataWithBytes:&i length:sizeof(i)];
     NSData* dk = [NSData dataWithBytes:&k length:sizeof(k)];
-    NSMutableData* retval = [di mutableCopy];
-    [retval appendData:dk];
-    //use base64 and strip off the trailing '=' if present
-    return [[self encodeBase64WithData:retval] componentsSeparatedByString:@"="][0];
+    NSMutableData* data = [di mutableCopy];
+    [data appendData:dk];
+    //use base64, strip off the trailing '=' if present and replace '/' by '-' because it isn't allowed in the userpart of a jid
+    return [[[self encodeBase64WithData:data] componentsSeparatedByString:@"="][0] stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
 }
 
 +(NSString*) encodeRandomResource

@@ -55,7 +55,7 @@ extension MLContact : Identifiable {}               //make MLContact be usable i
 extension Quicksy_Country : Identifiable {}         //make Quicksy_Country be usable in swiftui ForEach clauses etc.
 
 //see https://stackoverflow.com/a/40629365/3528174
-extension String: Error {}
+extension String: @retroactive Error {}
 
 //see https://stackoverflow.com/a/40592109/3528174
 public func objcCast<T>(_ obj: Any) -> T {
@@ -263,7 +263,7 @@ struct RuntimeError: LocalizedError {
 }
 
 public extension AnyPromise {
-    public func toTypedGuarantee<T>() -> Guarantee<T> {
+    func toTypedGuarantee<T>() -> Guarantee<T> {
         return Guarantee<T> { seal in
             self.done { value in
                 if let value = nilExtractor(value) as? T {
@@ -284,7 +284,7 @@ public extension AnyPromise {
         }
     }
     
-    public func toTypedPromise<T>() -> Promise<T> {
+    func toTypedPromise<T>() -> Promise<T> {
         return Promise<T> { seal in
             self.done { value in
                 if let value = nilExtractor(value) as? T {
@@ -471,7 +471,7 @@ public class SwiftHelpers: NSObject {
 
 //TODO: remove this
 public extension UIImage {
-    public func thumbnail(size: CGSize) -> UIImage? {
+    func thumbnail(size: CGSize) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
         defer { UIGraphicsEndImageContext() }
         draw(in: CGRect(origin: .zero, size: size))

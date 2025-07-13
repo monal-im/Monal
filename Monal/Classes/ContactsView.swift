@@ -148,15 +148,27 @@ struct ContactsView: View {
         .animation(.default, value: contactList)
         .navigationTitle(Text("Contacts"))
         .listStyle(.plain)
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+        .applyClosure { view in
+            if contactList.isEmpty {
+                view
+            } else {
+                view.searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+            }
+        }
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
         .keyboardType(.emailAddress)
         .overlay {
             if contactList.isEmpty {
-                ContentUnavailableShimView("You need friends for this ride", image: colorScheme == .dark ? "friends_dark" : "friends", description: Text("Add new contacts with the + button above. Your friends will pop up here when they can talk"))
+                ZStack {
+                    Color.contactsBackground
+                    ContentUnavailableShimView("You need friends for this ride", image: colorScheme == .dark ? "friends_dark" : "friends", description: Text("Add new contacts with the + button above. Your friends will pop up here when they can talk"))
+                }
             } else if searchResults.isEmpty {
-                ContentUnavailableShimView.search(text:searchText)
+                ZStack {
+                    Color.contactsBackground
+                    ContentUnavailableShimView.search(text:searchText)
+                }
             }
         }
         .toolbar {

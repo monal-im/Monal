@@ -30,7 +30,7 @@ struct ContentUnavailableShimView: View {
 //             if let systemImage = systemImage {
 //                 ContentUnavailableView(reason, systemImage: systemImage, description: description)
 //             } else if let image = image {
-//                 ContentUnavailableView(reason, image: "friends_dark", description: description)
+//                 ContentUnavailableView(reason, image: image, description: description)
 //             }
 //         } else {
         VStack(alignment: .center) {
@@ -39,6 +39,7 @@ struct ContentUnavailableShimView: View {
                     Image(systemName: systemImage)
                         .resizable()
                         .scaledToFit()
+                        .frame(width: 64.0, height: 64.0)
                         .foregroundStyle(.secondary)
                         .font(.largeTitle)
                         .padding(.bottom, 32)

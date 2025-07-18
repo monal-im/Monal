@@ -1427,16 +1427,29 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         }*/
         else if([provider hasItemConformingToTypeIdentifier:UTTypeContact.identifier])
         {
-            [provider loadItemForTypeIdentifier:UTTypeContact.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
-                if(error != nil || item == nil)
+            [provider loadDataRepresentationForTypeIdentifier:UTTypeContact.identifier completionHandler:^(NSData* data, NSError* error) {
+                if(error != nil || data == nil)
                 {
-                    DDLogError(@"Error extracting item from NSItemProvider: %@", error);
-                    payload[@"error"] = error;
-                    return resolve(payload);
+                    DDLogWarn(@"Got error, retrying with NSURL: %@", error);
+                    [provider loadItemForTypeIdentifier:UTTypeContact.identifier options:nil completionHandler:^(NSURL* _Nullable item, NSError* _Null_unspecified error) {
+                        if(error != nil || item == nil)
+                        {
+                            DDLogError(@"Error extracting contact item from NSItemProvider: %@", error);
+                            payload[@"error"] = error;
+                            return resolve(payload);
+                        }
+                        DDLogInfo(@"Got contact item NSURL: %@", item);
+                        payload[@"type"] = @"contact";
+                        prepareFile(item).then(^(NSMutableDictionary* payload) {
+                            resolve(payload);
+                        });
+                        return;
+                    }];
                 }
-                DDLogInfo(@"Got contact item: %@", item);
+                DDLogInfo(@"Got contact item NSData: %@", data);
                 payload[@"type"] = @"contact";
-                prepareFile(item).then(^(NSMutableDictionary* payload) {
+                payload[@"data"] = [MLFiletransfer prepareDataUpload:data withFileExtension:@"vcf"];
+                [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
                     resolve(payload);
                 });
                 return;

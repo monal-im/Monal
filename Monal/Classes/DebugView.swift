@@ -141,6 +141,14 @@ struct CrashTestingView: View {
                     Button("Reset the state of all accounts") {
                         MLXMPPManager.sharedInstance().resetAllAccountStates()
                     }
+                    
+                    Button("Change app icon to christmas") {
+                        UIApplication.shared.setAlternateIconName("AlphaAppIcon-Christmas")
+                    }
+                    
+                    Button("Change app icon to default") {
+                        UIApplication.shared.setAlternateIconName(nil)
+                    }
                 }
                 
                 Text("The following buttons allow you to forcefully crash the app using several different methods to test the crash handling.")

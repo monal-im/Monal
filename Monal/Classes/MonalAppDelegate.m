@@ -342,6 +342,25 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     return YES;
 }
 
+-(void) updateAppIconIfNeeded
+{
+    if([UIApplication sharedApplication].supportsAlternateIcons)
+    {
+        NSString* iconName = nil;
+        if([UIApplication sharedApplication].alternateIconName == nil)
+            iconName = @"AlphaAppIcon-Christmas";
+        DDLogInfo(@"We support alternating app icon sets, switching from '%@' to '%@'...", [UIApplication sharedApplication].alternateIconName, iconName);
+        [[UIApplication sharedApplication] setAlternateIconName:iconName completionHandler:^(NSError* _Nullable error) {
+            if(error == nil)
+                DDLogInfo(@"Successfully switched app icon to '%@'", iconName);
+            else
+                DDLogError(@"Error switching app icon to '%@': %@", iconName, error);
+        }];
+    }
+    else
+        DDLogWarn(@"Can not switch app icon: not supported!");
+}
+
 -(BOOL) application:(UIApplication*) application continueUserActivity:(NSUserActivity*) userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* restorableObjects)) restorationHandler
 {
     DDLogDebug(@"Got continueUserActivity call...");
@@ -440,6 +459,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 -(void) applicationDidBecomeActive:(UIApplication*) application
 {
+    [self updateAppIconIfNeeded];
+    
     if([[MLXMPPManager sharedInstance] connectedXMPP].count > 0)
         [self handleSpinner];
     else

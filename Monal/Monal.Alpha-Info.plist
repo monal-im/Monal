@@ -148,5 +148,29 @@
 	</array>
 	<key>SRResearchDataGeneration</key>
 	<false/>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconFiles</key>
+			<array>
+				<string>AlphaAppIcon</string>
+			</array>
+			<key>UIPrerenderedIcon</key>
+			<false/>
+		</dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>AlphaAppIcon-Christmas</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>AlphaAppIcon-Christmas</string>
+				</array>
+				<key>UIPrerenderedIcon</key>
+				<false/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>

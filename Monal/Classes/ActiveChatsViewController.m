@@ -51,6 +51,44 @@ typedef void (^view_queue_block_t)(PMKResolver _Nonnull);
 @property (nonatomic, readonly) DZNEmptyDataSetView* emptyDataSetView;
 @end
 
+
+//prevent display of _UIAlternateApplicationIconsAlertContentViewController
+@interface UISplitViewController (nopresent)
+-(void) swizzled_presentViewController:(UIViewController*) viewControllerToPresent animated:(BOOL) flag completion:(void (^)(void))completion;
+@end
+@implementation UISplitViewController (nopresent)
+-(void) swizzled_presentViewController:(UIViewController*) viewControllerToPresent animated:(BOOL) flag completion:(void (^)(void))completion
+{
+    UIViewController* contentVC = [viewControllerToPresent valueForKey:@"contentViewController"];
+    if(contentVC)
+    {
+        NSString* className = NSStringFromClass([contentVC class]);
+        if([className isEqualToString:@"_UIAlternateApplicationIconsAlertContentViewController"])
+        {
+            DDLogWarn(@"Ignoring _UIAlternateApplicationIconsAlertContentViewController...");
+            if(completion)
+                completion();
+            return;     //ignore this alert view (don't show it)
+        }
+    }
+    
+    //call original method we swizzled
+    [self swizzled_presentViewController:viewControllerToPresent animated:flag completion:completion];
+}
+//see https://stackoverflow.com/a/13326633 and https://fek.io/blog/method-swizzling-in-obj-c-and-swift/
++(void) load
+{
+    if(self == UISplitViewController.self)
+    {
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            swizzle([self class], @selector(presentViewController:animated:completion:), @selector(swizzled_presentViewController:animated:completion:));
+        });
+    }
+}
+@end
+
+
 @interface ActiveChatsViewController() {
     int _startedOrientation;
     double _portraitTop;

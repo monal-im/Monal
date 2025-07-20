@@ -1315,23 +1315,23 @@ $$
 {
     [super buildMenuWithBuilder:builder];
     //monal
-    UIKeyCommand* preferencesCommand = [UIKeyCommand commandWithTitle:@"Preferences..." image:nil action:@selector(showSettings) input:@"," modifierFlags:UIKeyModifierCommand propertyList:nil];
+    UIKeyCommand* preferencesCommand = [UIKeyCommand commandWithTitle:NSLocalizedString(@"Preferences...", @"") image:nil action:@selector(showSettings) input:@"," modifierFlags:UIKeyModifierCommand propertyList:nil];
 
     UIMenu* preferencesMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.preferences" options:UIMenuOptionsDisplayInline children:@[preferencesCommand]];
     [builder insertSiblingMenu:preferencesMenu afterMenuForIdentifier:UIMenuAbout];
 
     //file
-    UIKeyCommand* newCommand = [UIKeyCommand commandWithTitle:@"New Message" image:nil action:@selector(showNew) input:@"N" modifierFlags:UIKeyModifierCommand propertyList:nil];
+    UIKeyCommand* newCommand = [UIKeyCommand commandWithTitle:NSLocalizedString(@"New Message", @"") image:nil action:@selector(showNew) input:@"N" modifierFlags:UIKeyModifierCommand propertyList:nil];
 
     UIMenu* newMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.new" options:UIMenuOptionsDisplayInline children:@[newCommand]];
     [builder insertChildMenu:newMenu atStartOfMenuForIdentifier:UIMenuFile];
 
-    UIKeyCommand* detailsCommand = [UIKeyCommand commandWithTitle:@"Details..." image:nil action:@selector(showDetails) input:@"I" modifierFlags:UIKeyModifierCommand propertyList:nil];
+    UIKeyCommand* detailsCommand = [UIKeyCommand commandWithTitle:NSLocalizedString(@"Details...", @"") image:nil action:@selector(showDetails) input:@"I" modifierFlags:UIKeyModifierCommand propertyList:nil];
 
     UIMenu* detailsMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.detail" options:UIMenuOptionsDisplayInline children:@[detailsCommand]];
     [builder insertSiblingMenu:detailsMenu afterMenuForIdentifier:@"im.monal.new"];
 
-    UICommand* deleteCommand = [UICommand commandWithTitle:@"Archive Conversation" image:nil action:@selector(deleteConversation) propertyList:nil];
+    UICommand* deleteCommand = [UICommand commandWithTitle:NSLocalizedString(@"Archive Conversation", @"") image:nil action:@selector(deleteConversation) propertyList:nil];
 
     UIMenu* deleteMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.delete" options:UIMenuOptionsDisplayInline children:@[deleteCommand]];
     [builder insertSiblingMenu:deleteMenu afterMenuForIdentifier:@"im.monal.detail"];

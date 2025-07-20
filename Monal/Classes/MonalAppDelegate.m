@@ -1099,7 +1099,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     UIMenu* detailsMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.detail" options:UIMenuOptionsDisplayInline children:@[detailsCommand]];
     [builder insertSiblingMenu:detailsMenu afterMenuForIdentifier:@"im.monal.new"];
 
-    UIKeyCommand* deleteCommand = [UIKeyCommand commandWithTitle:@"Delete Conversation" image:nil action:@selector(deleteConversation) input:@"\b" modifierFlags:UIKeyModifierCommand propertyList:nil];
+    UICommand* deleteCommand = [UICommand commandWithTitle:@"Archive Conversation" image:nil action:@selector(deleteConversation) propertyList:nil];
 
     UIMenu* deleteMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.delete" options:UIMenuOptionsDisplayInline children:@[deleteCommand]];
     [builder insertSiblingMenu:deleteMenu afterMenuForIdentifier:@"im.monal.detail"];

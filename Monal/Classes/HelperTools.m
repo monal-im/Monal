@@ -1187,16 +1187,27 @@ void swizzle(Class c, SEL orig, SEL new)
     }*/
     else if([provider hasItemConformingToTypeIdentifier:UTTypeContact.identifier])
     {
-        [provider loadItemForTypeIdentifier:UTTypeContact.identifier options:nil completionHandler:^(NSURL*  _Nullable item, NSError* _Null_unspecified error) {
-            if(error != nil || item == nil)
+        [provider loadDataRepresentationForTypeIdentifier:UTTypeContact.identifier completionHandler:^(NSData* data, NSError* error) {
+            if(error != nil || data == nil)
             {
-                DDLogError(@"Error extracting item from NSItemProvider: %@", error);
-                payload[@"error"] = error;
-                return completion(payload);
+                DDLogWarn(@"Got error, retrying with NSURL: %@", error);
+                [provider loadItemForTypeIdentifier:UTTypeContact.identifier options:nil completionHandler:^(NSURL* _Nullable item, NSError* _Null_unspecified error) {
+                    if(error != nil || item == nil)
+                    {
+                        DDLogError(@"Error extracting contact item from NSItemProvider: %@", error);
+                        payload[@"error"] = error;
+                        return completion(payload);
+                    }
+                    DDLogInfo(@"Got contact item NSURL: %@", item);
+                    payload[@"type"] = @"contact";
+                    return prepareFile(item);
+                }];
+                return;
             }
-            DDLogInfo(@"Got contact item: %@", item);
+            DDLogInfo(@"Got contact item NSData: %@", data);
             payload[@"type"] = @"contact";
-            return prepareFile(item);
+            payload[@"data"] = [MLFiletransfer prepareDataUpload:data withFileExtension:@"vcf"];
+            return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
         }];
     }
     else if([provider hasItemConformingToTypeIdentifier:UTTypeFileURL.identifier])

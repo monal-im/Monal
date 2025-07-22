@@ -2905,6 +2905,54 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     return retval;
 }
 
++ (NSArray<MLXMLNode*>*) ensureSSRCInJingleContent:(NSArray<MLXMLNode*>*)children
+{
+    NSMutableArray<MLXMLNode*>* processedChildren = [NSMutableArray arrayWithArray:children];
+    
+    for(MLXMLNode* child in processedChildren) {
+        if([child check:@"/{urn:xmpp:jingle:1}content"]) {
+            MLXMLNode* description = [child findFirst:@"{urn:xmpp:jingle:apps:rtp:1}description"];
+            if(description) {
+                NSString* mediaType = [description findFirst:@"@media"];
+                
+                // Check if SSRC source element is missing
+                if(![description check:@"{urn:xmpp:jingle:apps:rtp:ssma:0}source"]) {
+                    DDLogInfo(@"Adding missing SSRC for media type: %@", mediaType);
+                    
+                    // Generate SSRC and create source element
+                    NSString* ssrc = [NSString stringWithFormat:@"%u", arc4random()];
+                    NSString* cname = [NSString stringWithFormat:@"monal-%@", mediaType];
+                    NSString* msid = [NSString stringWithFormat:@"stream %@", mediaType];
+                    
+                    MLXMLNode* sourceNode = [[MLXMLNode alloc] initWithElement:@"source" 
+                                                                  andNamespace:@"urn:xmpp:jingle:apps:rtp:ssma:0" 
+                                                                withAttributes:@{@"ssrc": ssrc} 
+                                                                   andChildren:@[
+                        [[MLXMLNode alloc] initWithElement:@"parameter" 
+                                            withAttributes:@{@"name": @"cname", @"value": cname} 
+                                               andChildren:@[] 
+                                                   andData:nil],
+                        [[MLXMLNode alloc] initWithElement:@"parameter" 
+                                            withAttributes:@{@"name": @"msid", @"value": msid} 
+                                               andChildren:@[] 
+                                                   andData:nil]
+                    ] andData:nil];
+                    
+                    [description addChild:sourceNode];
+                    
+                    DDLogInfo(@"Added SSRC source for %@ media: ssrc=%@, cname=%@, msid=%@", 
+                              mediaType, ssrc, cname, msid);
+                }
+            }
+        }
+    }
+    
+    return processedChildren;
+}
+
+
+
+
 +(NSString* _Nullable) xml2sdp:(MLXMLNode*) xml withInitiator:(BOOL) initiator
 {
     NSString* xmlstr = [[[MLXMLNode alloc] initWithElement:@"root" withAttributes:@{} andChildren:xml.children andData:nil] XMLString];

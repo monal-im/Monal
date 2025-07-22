@@ -233,6 +233,8 @@ void swizzle(Class c, SEL orig, SEL new);
 
 +(NSURL* _Nullable) compressFileAtPath:(NSString*) path withLevel:(NSInteger) level;
 
++ (NSArray<MLXMLNode*>*) ensureSSRCInJingleContent:(NSArray<MLXMLNode*>*)children;
+
 @end
 
 NS_ASSUME_NONNULL_END

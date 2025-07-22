@@ -906,6 +906,8 @@
         DDLogDebug(@"WebRTC reported local SDP '%@', sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:sdp.sdp withInitiator:YES];
+// Ensure SSRC elements are present for all media types
+        children = [HelperTools ensureSSRCInJingleContent:children];
         if(children.count == 0)
         {
             DDLogError(@"Could not serialize local SDP to XML!");
@@ -927,6 +929,8 @@
             @"action": @"session-initiate",
             @"sid": self.jmiid,
         } andChildren:children andData:nil]];
+        DDLogInfo(@"Sending session-initiate with SSRC for call type: %@", 
+            self.callType == MLCallTypeVideo ? @"video" : @"audio");
         @synchronized(self.candidateQueueLock) {
             self.localSDP = sdpIQ;
         }
@@ -1680,6 +1684,8 @@
                 [self.webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
                     DDLogDebug(@"Sending SDP answer back...");
                     NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:localSdp.sdp withInitiator:NO];
+// Ensure SSRC elements are present in session-accept as well
+                    children = [HelperTools ensureSSRCInJingleContent:children];
                     //we got a session-initiate jingle iq
                     //--> self.encryptionState will NOT be MLCallEncryptionStateClear, if that iq contained an encrypted fingerprint,
                     //--> self.encryptionState WILL be MLCallEncryptionStateClear, if it did not contain such an encrypted fingerprint

@@ -15,20 +15,35 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
       
+    - name: Debug - Show Directory Structure
+      run: |
+        echo "Current directory:"
+        pwd
+        echo "Contents:"
+        ls -la
+        echo "Looking for Xcode projects:"
+        find . -name "*.xcodeproj" -type d
+        echo "Monal directory contents:"
+        ls -la Monal/ || echo "Monal directory not found"
+      
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: '15.2'
     
     - name: Show Project Info
+      working-directory: ./Monal
       run: |
-        echo "Project path: Monal/Monal.xcodeproj"
-        xcodebuild -list -project Monal/Monal.xcodeproj
+        echo "Current directory: $(pwd)"
+        echo "Contents:"
+        ls -la
+        xcodebuild -list -project Monal.xcodeproj
       
     - name: Build for iOS Simulator
+      working-directory: ./Monal
       run: |
         xcodebuild \
-          -project Monal/Monal.xcodeproj \
+          -project Monal.xcodeproj \
           -scheme Monal \
           -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
           -configuration Debug \

@@ -1445,6 +1445,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                         });
                         return;
                     }];
+                    return;
                 }
                 DDLogInfo(@"Got contact item NSData: %@", data);
                 payload[@"type"] = @"contact";

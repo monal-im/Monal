@@ -25,52 +25,16 @@
       "size" : "256x256"
     },
     {
-      "filename" : "Monal-macos-512_dark.png",
-      "idiom" : "mac",
-      "scale" : "2x",
-      "size" : "256x256",
-      "appearances": [
-        {
-          "appearance": "luminosity",
-          "value": "dark"
-        }
-      ]
-    },
-    {
       "filename" : "Monal-macos-512.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "Monal-macos-512_dark.png",
-      "idiom" : "mac",
-      "scale" : "1x",
-      "size" : "512x512",
-      "appearances": [
-        {
-          "appearance": "luminosity",
-          "value": "dark"
-        }
-      ]
-    },
-    {
       "filename" : "Monal-macos-1024.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"
-    },
-    {
-      "filename" : "Monal-macos-1024_dark.png",
-      "idiom" : "mac",
-      "scale" : "2x",
-      "size" : "512x512",
-      "appearances": [
-        {
-          "appearance": "luminosity",
-          "value": "dark"
-        }
-      ]
     }
   ],
   "info" : {

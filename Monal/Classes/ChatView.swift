@@ -200,7 +200,9 @@ struct ChatView: View {
             guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: draft.text, havingType: kMessageTypeText, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: nil) else {
                 return
             }
-            messages.append(ChatViewMessage(newMLMessage))
+            messages.append(ChatViewMessage(ObservableKVOWrapper(newMLMessage)))
+        } messageBuilder: { message, viewModel, positionInUserGroup, positionInMessagesSection, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
+            MessageView(message: (message as! ChatViewMessage).message, viewModel: viewModel, positionInUserGroup: positionInUserGroup, positionInMessagesSection: positionInMessagesSection)
         }
         .showNetworkConnectionProblem(false)
 //         .enableLoadMore(pageSize: 3) { message in
@@ -350,7 +352,7 @@ struct ChatView: View {
             if messages.isEmpty {
                 let dbMessages = DataLayer.sharedInstance().messages(forContact:contact.contactJid, forAccount:contact.accountID) as! [MLMessage]
                 for msg in dbMessages {
-                    messages.append(ChatViewMessage(msg))
+                    messages.append(ChatViewMessage(ObservableKVOWrapper(msg)))
                 }
             }
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
@@ -408,7 +410,7 @@ struct ChatView: View {
             if message.isEqual(to: self.contact.obj) {
                 // Do not insert based on delay timestamp because that
                 // would make it possible to fake history entries.
-                messages.append(ChatViewMessage(message))
+                messages.append(ChatViewMessage(ObservableKVOWrapper(message)))
             }
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
         }
@@ -419,9 +421,9 @@ struct ChatView: View {
 }
 
 class ChatViewMessage: ExyteChat.Message {
-    @Published public var message: MLMessage
-    
-    init(_ message: MLMessage) {
+    let message: ObservableKVOWrapper<MLMessage>
+
+    init(_ message: ObservableKVOWrapper<MLMessage>) {
         self.message = message
         let user = ExyteChat.User(id: message.senderID, name: message.contactDisplayName, avatarURL: nil, isCurrentUser: !message.inbound)
         super.init(id: message.id, user: user, createdAt: message.timestamp, text: message.messageText)
@@ -481,3 +483,32 @@ public extension ExyteChat.MessageView {
 //         }
     }
 }*/
+struct MessageView: View {
+    @StateObject var message: ObservableKVOWrapper<MLMessage>
+    @ObservedObject var viewModel: ExyteChat.ChatViewModel
+    let positionInUserGroup: PositionInUserGroup
+    let positionInMessagesSection: PositionInMessagesSection
+    init(message: ObservableKVOWrapper<MLMessage>, viewModel: ChatViewModel, positionInUserGroup: PositionInUserGroup, positionInMessagesSection: PositionInMessagesSection) {
+        _message = StateObject(wrappedValue: message)
+        self.viewModel = viewModel
+        self.positionInUserGroup = positionInUserGroup
+        self.positionInMessagesSection = positionInMessagesSection
+    }
+    var body: some View {
+        ExyteChat.MessageView(
+            viewModel: viewModel,
+            message: ChatViewMessage(message),
+            positionInUserGroup: positionInUserGroup,
+            positionInMessagesSection: positionInMessagesSection,
+            chatType: .conversation,
+            avatarSize: 32,
+            tapAvatarClosure: nil,
+            messageStyler: AttributedString.init,
+            shouldShowLinkPreview: { _ in true },
+            isDisplayingMessageMenu: false,
+            showMessageTimeView: true,
+            messageLinkPreviewLimit: 8,
+            font: UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
+        )
+    }
+}

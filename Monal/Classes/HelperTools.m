@@ -1202,6 +1202,7 @@ void swizzle(Class c, SEL orig, SEL new)
                     payload[@"type"] = @"contact";
                     return prepareFile(item);
                 }];
+                return;
             }
             DDLogInfo(@"Got contact item NSData: %@", data);
             payload[@"type"] = @"contact";

@@ -2134,6 +2134,27 @@ NSString* const kStanza = @"stanza";
                 //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
                 messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
                 
+                //sanity check: if mam query is not our own archive, this is a muc archive and the fromUser or toUser of
+                //the inner stanza should always match the bare jid of our muc we queried the archive of
+                XMPPIQ* mamQueryNode = _runningMamQueries[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]];  //we already checked for existence above
+                if(
+                    //not queried our own archive
+                    !(
+                        mamQueryNode.toUser==nil ||
+                        [@"" isEqualToString:mamQueryNode.toUser] ||
+                        [self.connectionProperties.identity.jid isEqualToString:mamQueryNode.toUser]
+                    //but fromUser or toUser is not the bare jid we queried the archive from
+                    ) && (
+                        ![messageNode.fromUser isEqualToString:mamQueryNode.toUser] ||
+                        ![messageNode.toUser isEqualToString:mamQueryNode.toUser]
+                    )
+                ) {
+                    DDLogError(@"muc mam results must not contain 1:1 message stanzas, ignoring this spoofed mam result having queryid: %@!", [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]);
+                    //even these stanzas have to be counted by smacks
+                    [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
+                    return;
+                }
+                
                 //move mam:2 delay timestamp into forwarded message stanza if the forwarded stanza does not have one already
                 //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
                 if([outerMessageNode check:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])

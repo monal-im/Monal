@@ -1918,7 +1918,7 @@ NSString* const kStanza = @"stanza";
                     // check if we need a contact request
                     NSDictionary* contactSub = [[DataLayer sharedInstance] getSubscriptionForContact:contact.contactJid andAccount:contact.accountId];
                     DDLogVerbose(@"Got subscription request for contact %@ having subscription status: %@", presenceNode.fromUser, contactSub);
-                    if(!contactSub || !([[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo] || [[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth]))
+                    if(!contactSub || !([[contactSub objectForKey:@"subscription"] isEqualToString:kSubFrom] || [[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth]))
                         [[DataLayer sharedInstance] addContactRequest:contact];
                     else if(contactSub && [[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo])
                         [self addToRoster:contact withPreauthToken:nil];
@@ -2133,6 +2133,27 @@ NSString* const kStanza = @"stanza";
                 
                 //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
                 messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
+                
+                //sanity check: if mam query is not our own archive, this is a muc archive and the fromUser or toUser of
+                //the inner stanza should always match the bare jid of our muc we queried the archive of
+                XMPPIQ* mamQueryNode = _runningMamQueries[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]];  //we already checked for existence above
+                if(
+                    //not queried our own archive
+                    !(
+                        mamQueryNode.toUser==nil ||
+                        [@"" isEqualToString:mamQueryNode.toUser] ||
+                        [self.connectionProperties.identity.jid isEqualToString:mamQueryNode.toUser]
+                    //but fromUser or toUser is not the bare jid we queried the archive from
+                    ) && (
+                        ![messageNode.fromUser isEqualToString:mamQueryNode.toUser] ||
+                        ![messageNode.toUser isEqualToString:mamQueryNode.toUser]
+                    )
+                ) {
+                    DDLogError(@"muc mam results must not contain 1:1 message stanzas, ignoring this spoofed mam result having queryid: %@!", [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]);
+                    //even these stanzas have to be counted by smacks
+                    [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
+                    return;
+                }
                 
                 //move mam:2 delay timestamp into forwarded message stanza if the forwarded stanza does not have one already
                 //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
@@ -2463,7 +2484,7 @@ NSString* const kStanza = @"stanza";
                 return [self invalidXMLError];
             
             //record TLS version
-            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             NSString* message = [parsedStanza findFirst:@"text#"];;
             if([parsedStanza check:@"not-authorized"])
@@ -2506,7 +2527,7 @@ NSString* const kStanza = @"stanza";
                 return [self invalidXMLError];
             
             //record TLS version
-            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
@@ -2604,7 +2625,9 @@ NSString* const kStanza = @"stanza";
                 return;
             }
             
-            NSData* channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];
+            NSData* channelBindingData = nil;
+            if([((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen)
+                channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];
             MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessageWithChannelBindingData:channelBindingData]]];
             [self send:responseXML];
             
@@ -2684,7 +2707,7 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
                 
                 //record TLS version
-                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
@@ -2721,7 +2744,7 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
             //record TLS version
-            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2";
+            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
@@ -4563,14 +4586,6 @@ NSString* const kStanza = @"stanza";
     
     //delete contact request if it exists
     [[DataLayer sharedInstance] deleteContactRequest:contact];
-    
-    XMPPPresence* presence = [XMPPPresence new];
-    [presence unsubscribeContact:contact];
-    [self send:presence];
-    
-    XMPPPresence* presence2 = [XMPPPresence new];
-    [presence2 unsubscribedContact:contact];
-    [self send:presence2];
     
     XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setRemoveFromRoster:contact];

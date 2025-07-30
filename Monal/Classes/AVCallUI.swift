@@ -65,7 +65,6 @@ struct AVCallUI: View {
         
         self.localRenderer = RTCMTLVideoView(frame: UIScreen.main.bounds)
         self.localRenderer.videoContentMode = .scaleAspectFill
-        self.localRenderer.transform = CGAffineTransformMakeScale(-1.0, 1.0)        //local video should be displayed as "mirrored"
         
         self.ringingPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"ringing", withExtension:"wav", subdirectory:"CallSounds")!)
         self.busyPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"busy", withExtension:"wav", subdirectory:"CallSounds")!)
@@ -75,6 +74,8 @@ struct AVCallUI: View {
     func maybeStartRenderer() {
         if !videoRenderingStarted && MLCallType(rawValue:call.callType) == .video && (MLCallState(rawValue:call.state) == .connecting || MLCallState(rawValue:call.state) == .connected) {
             DDLogInfo("Starting local and remote video renderers...")
+            //local video should be displayed as "mirrored", if front camera is used
+            self.localRenderer.transform = CGAffineTransformMakeScale(cameraPosition == .front ? -1.0 : 1.0, 1.0)
             call.obj.startCaptureLocalVideo(withRenderer: self.localRenderer, andCameraPosition:cameraPosition)
             call.obj.renderRemoteVideo(withRenderer: self.remoteRenderer)
             videoRenderingStarted = true

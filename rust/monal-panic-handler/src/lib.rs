@@ -1,4 +1,4 @@
-use std::{backtrace::Backtrace, panic, thread}; // TODO: move this into its own rust lib?
+use std::{backtrace::Backtrace, panic, thread};
 
 pub fn install_panic_handler<F: Fn(String, String) + Send + Sync + 'static>(rust_panic_handler: F) {
     let old_handler = panic::take_hook();

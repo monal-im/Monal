@@ -113,6 +113,7 @@ final class WebRTCClient: NSObject {
         self.createMediaSenders(audioOnly: audioOnly)
         self.peerConnection.delegate = self
         
+        // see https://stackoverflow.com/a/43765394
         if audioOnly {
             self.mediaConstrains = [
                 kRTCMediaConstraintsOfferToReceiveAudio: kRTCMediaConstraintsValueTrue,

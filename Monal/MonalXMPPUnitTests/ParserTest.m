@@ -280,11 +280,11 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
     for(unsigned long i=0; i<_parsedStanzas.count; i++)
     {
         //stanza 3 should match
-        NSArray* result = [_parsedStanzas[i] find:@"/<type=%@>/{http://jabber.org/protocol/pubsub}pubsub/subscription<node=%@><subscription=%s><jid=%@>", @"result", @"eu.siacs.conversations.axolotl.devicelist", "subscribed", @"user@example.com"];
+        NSArray* result = [_parsedStanzas[i] find:@"/<type=%@>/{http://jabber.org/protocol/pubsub}pubsub/subscription<node=eu.siacs.conversations.axolotl.%@><subscription=%s><jid=user@%@.com>", @"result", @"devicelist", "subscribed", @"example"];
         if(i == 3)
         {
             XCTAssertEqual(result.count, 1, "we expect exactly one match");
-            XCTAssertEqualObjects([result[0] XMLString], @"<subscription node='eu.siacs.conversations.axolotl.devicelist' subid='6795F13596465' subscription='subscribed' jid='user@example.com'/>", "failed to properly extract and stringify MLXMLNode");
+            XCTAssertEqualObjects([result[0] XMLString], @"<subscription jid='user@example.com' node='eu.siacs.conversations.axolotl.devicelist' subid='6795F13596465' subscription='subscribed'/>", "failed to properly extract and stringify MLXMLNode");
         }
         else
             XCTAssertEqualObjects(result, @[], "all other stanzas should not match: %lu", i);

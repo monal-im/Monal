@@ -803,9 +803,9 @@ static NSRegularExpression* attributeFilterRegex;
     NSMutableString* outputString = [NSMutableString new];
     [outputString appendString:[NSString stringWithFormat:@"<%@", _element]];
     
-    //set attributes
+    //set attributes (sort them to stabilize xml output)
     MLXMLNode* parent = self.parent;
-    for(NSString* key in [_attributes allKeys])
+    for(NSString* key in [[_attributes allKeys] sortedArrayUsingSelector:@selector(compare:)])
     {
         //handle xmlns inheritance (don't add namespace to childs if it should be the same like the parent's one)
         if([key isEqualToString:@"xmlns"] && parent && [[NSString stringWithFormat:@"%@", _attributes[@"xmlns"]] isEqualToString:[NSString stringWithFormat:@"%@", parent.attributes[@"xmlns"]]])

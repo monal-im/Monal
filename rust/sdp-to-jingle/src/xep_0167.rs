@@ -762,7 +762,7 @@ impl JingleRtpSessions {
         let sdp_origin = SdpOrigin {
             //TODO: really hardcode these??
             username: "-".to_string(),
-            session_id: 2005859539484728435,
+            session_id: 8770656990916039506,
             session_version: 2,
             unicast_addr: ExplicitlyTypedAddress::Ip(std::net::IpAddr::V4(Ipv4Addr::LOCALHOST)),
         };
@@ -781,7 +781,7 @@ impl JingleRtpSessions {
                         //only add this if we use xep-0338 content groups
                         sdp.add_attribute(SdpAttribute::MsidSemantic(SdpAttributeMsidSemantic {
                             semantic: " WMS".to_string(),
-                            msids: vec!["stream".to_string()],
+                            msids: vec!["my-media-stream".to_string()],
                         }))?;
                     }
                 }
@@ -820,7 +820,7 @@ impl JingleRtpSessions {
                             port: 9, //port hardcoded by xep?
                             //hardcoded by xep? see also https://codeberg.org/iNPUTmice/Conversations/src/branch/master/src/main/java/eu/siacs/conversations/xmpp/jingle/SessionDescription.java#L28
                             port_count: 0, // hardcoded
-                            proto: SdpProtocolValue::UdpTlsRtpSavp,
+                            proto: SdpProtocolValue::UdpTlsRtpSavpf,
                             formats: SdpFormatList::Integers(Vec::new()),
                         });
 

@@ -37,15 +37,15 @@
     self.password = newPassword;
 }
 
--(void) bindJid:(NSString*) jid
+-(void) bindJid:(NSString*) jid onAccount:(xmpp*) account
 {
     NSDictionary* parts = [HelperTools splitJid:jid];
     
     //we don't allow this because several parts in monal rely on stable bare jids not changing after login/bind
-    MLAssert([self.jid isEqualToString:parts[@"user"]], @"trying to bind to different bare jid!", (@{
-        @"bind_to_jid": jid,
-        @"current_bare_jid": self.jid
-    }));
+    if(![self.jid isEqualToString:parts[@"user"]])
+    {
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"The server tried to bind you to jid '%@', but you configured '%@', disabling account!", @""), parts[@"user"], self.jid] withNode:nil andAccount:account andIsSevere:YES andDisableAccount:YES];
+    }
     
     //don't set new full jid if we don't have a resource
     if(parts[@"resource"] != nil)

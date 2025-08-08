@@ -548,15 +548,17 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere andDisableAccount:(BOOL) disableAccount
 {
     [self postError:description withNode:node andAccount:account andIsSevere:isSevere];
-    
-    //disconnect and reset state (including pipelined auth etc.)
-    //this has to be done before disabling the account to not trigger an assertion
-    [[MLXMPPManager sharedInstance] disconnectAccount:account.accountID withExplicitLogout:YES];
+    if(disableAccount)
+    {
+        //disconnect and reset state (including pipelined auth etc.)
+        //this has to be done before disabling the account to not trigger an assertion
+        [[MLXMPPManager sharedInstance] disconnectAccount:account.accountID withExplicitLogout:YES];
 
-    //make sure we don't try this again even when the mainapp/appex gets restarted
-    NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountID] copyItems:YES];
-    accountDic[kEnabled] = @NO;
-    [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];    
+        //make sure we don't try this again even when the mainapp/appex gets restarted
+        NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountID] copyItems:YES];
+        accountDic[kEnabled] = @NO;
+        [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
+    }
 }
 
 +(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere

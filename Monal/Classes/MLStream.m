@@ -734,7 +734,10 @@
                 self.shared_state.error = st_error;
             }
             [self generateEvent:NSStreamEventErrorOccurred];
+            nw_connection_force_cancel(connection);
         }
+        else
+            nw_connection_cancel(connection);
     });
     @synchronized(self.shared_state) {
         self.closed = YES;

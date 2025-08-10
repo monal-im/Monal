@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class xmpp;
+
 /**
  Imutable class to contain the specifics of an XMPP user
  */
@@ -33,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(void) updatPassword:(NSString *) newPassword;
 
--(void) bindJid:(NSString*) jid;
+-(void) bindJid:(NSString*) jid onAccount:(xmpp*) account;
 
 @end
 

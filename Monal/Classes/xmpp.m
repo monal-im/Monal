@@ -2146,8 +2146,8 @@ NSString* const kStanza = @"stanza";
                 //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
                 messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
                 
-                //sanity check: if mam query is not our own archive, this is a muc archive and the fromUser or toUser of
-                //the inner stanza should always match the bare jid of our muc we queried the archive of
+                //sanity check: if mam query is not our own archive, this is a muc archive and the fromUser
+                //of the inner stanza should always match the bare jid of our muc we queried the archive of
                 XMPPIQ* mamQueryNode = _runningMamQueries[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]];  //we already checked for existence above
                 if(
                     //not queried our own archive

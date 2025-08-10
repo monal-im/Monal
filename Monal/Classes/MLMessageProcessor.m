@@ -170,20 +170,15 @@ static NSMutableDictionary* _typingNotifications;
                 return nil;
             }
             
-            //only allow audio calls for now
-            if([messageNode check:@"{urn:xmpp:jingle-message:0}propose/{urn:xmpp:jingle:apps:rtp:1}description<media=audio>"])
-            {
-                DDLogInfo(@"Got incoming JMI propose");
-                NSDictionary* callData = @{
-                    @"messageNode": messageNode,
-                    @"accountID": account.accountID,
-                };
-                //this is needed because this file resides in the monalxmpp compilation unit while the MLVoipProcessor resides
-                //in the monal compilation unit (the ui unit), the NSE resides in yet another compilation unit (the nse-appex unit)
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:account userInfo:callData];
-            }
-            else
-                DDLogWarn(@"Ignoring incoming non-audio JMI call, not implemented yet");
+            DDLogInfo(@"Got incoming JMI propose");
+            NSDictionary* callData = @{
+                @"messageNode": messageNode,
+                @"accountID": account.accountID,
+            };
+            //this is needed because this file resides in the monalxmpp compilation unit while the MLVoipProcessor resides
+            //in the monal compilation unit (the ui unit), the NSE resides in yet another compilation unit (the nse-appex unit)
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalIncomingVoipCall object:account userInfo:callData];
+            
             return nil;
         }
         //handle all other JMI events (TODO: add entry to local history, once the UI for this is implemented)

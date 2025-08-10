@@ -2143,11 +2143,9 @@ NSString* const kStanza = @"stanza";
                         mamQueryNode.toUser==nil ||
                         [@"" isEqualToString:mamQueryNode.toUser] ||
                         [self.connectionProperties.identity.jid isEqualToString:mamQueryNode.toUser]
-                    //but fromUser or toUser is not the bare jid we queried the archive from
-                    ) && (
-                        ![messageNode.fromUser isEqualToString:mamQueryNode.toUser] ||
-                        ![messageNode.toUser isEqualToString:mamQueryNode.toUser]
-                    )
+                    //but fromUser is not the bare jid we queried the archive from
+                    ) && 
+                    ![messageNode.fromUser isEqualToString:mamQueryNode.toUser]
                 ) {
                     DDLogError(@"muc mam results must not contain 1:1 message stanzas, ignoring this spoofed mam result having queryid: %@!", [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]);
                     //even these stanzas have to be counted by smacks
@@ -2738,7 +2736,7 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.channelBindingTypes = channelBindings;
             
             //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
-            [self.connectionProperties.identity bindJid:[parsedStanza findFirst:@"authorization-identifier#"]];
+            [self.connectionProperties.identity bindJid:[parsedStanza findFirst:@"authorization-identifier#"] onAccount:self];
             
             //record SDDP support
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;

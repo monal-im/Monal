@@ -425,8 +425,9 @@ class ChatViewMessage: ExyteChat.Message {
 
     init(_ message: ObservableKVOWrapper<MLMessage>) {
         self.message = message
+        let messageText = message.retracted ? NSLocalizedString("This message got retracted", comment: "") : message.messageText
         let user = ExyteChat.User(id: message.senderID, name: message.contactDisplayName, avatarURL: nil, isCurrentUser: !message.inbound)
-        super.init(id: message.id, user: user, createdAt: message.timestamp, text: message.messageText)
+        super.init(id: message.id, user: user, createdAt: message.timestamp, text: messageText)
     }
 }
 

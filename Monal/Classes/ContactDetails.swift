@@ -159,7 +159,8 @@ struct ContactDetails: View {
                     }
                     
                     Button {
-                        UIPasteboard.general.setValue(contact.contactJid as String, forPasteboardType:UTType.utf8PlainText.identifier as String)
+                        let contactAddressLink = "xmpp:" + contact.contactJid as String + (contact.isMuc ? "?join" : "")
+                        UIPasteboard.general.setValue(contactAddressLink, forPasteboardType:UTType.utf8PlainText.identifier as String)
                         UIAccessibility.post(notification: .announcement, argument: "JID Copied")
                     } label: {
                         HStack {

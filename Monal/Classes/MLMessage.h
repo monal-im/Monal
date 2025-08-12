@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MLMessage : NSObject <NSSecureCoding>
 
++(MLMessage* _Nullable) createMessageFromHistoryID:(NSNumber* _Nullable) historyID;
 +(BOOL) supportsSecureCoding;
 
 @property (readonly) NSString* id;     //for Identifiable protocol

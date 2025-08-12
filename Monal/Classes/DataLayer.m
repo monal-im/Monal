@@ -283,7 +283,7 @@ static NSDateFormatter* dbFormatter;
         // delete transfered files from local device
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=?;" andArguments:@[kMessageTypeFiletransfer, accountID]];
         for(NSNumber* historyId in messageHistoryIDs)
-            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
+            [MLFiletransfer deleteFileForMessage:[MLMessage createMessageFromHistoryID:historyId]];
 
         // delete account and all entries with the same account_id (CASCADE DELETE)
         BOOL accountDeleted = [self.db executeNonQuery:@"DELETE FROM account WHERE account_id=?;" andArguments:@[accountID]];
@@ -1243,16 +1243,6 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(MLMessage*) messageForHistoryID:(NSNumber*) historyID
-{
-    if(historyID == nil)
-        return nil;
-    NSArray<MLMessage*>* result = [self messagesForHistoryIDs:@[historyID]];
-    if(![result count])
-        return nil;
-    return result[0];
-}
-
 -(NSNumber*) getSmallestHistoryId
 {
     return [self.db idReadTransaction:^{
@@ -1475,7 +1465,7 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=?;" andArguments:@[kMessageTypeFiletransfer, accountID]];
         for(NSNumber* historyId in messageHistoryIDs)
-            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
+            [MLFiletransfer deleteFileForMessage:[MLMessage createMessageFromHistoryID:historyId]];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=?;" andArguments:@[accountID]];
         
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountID]];
@@ -1489,7 +1479,7 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=?;" andArguments:@[kMessageTypeFiletransfer, accountID, buddy]];
         for(NSNumber* historyId in messageHistoryIDs)
-            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
+            [MLFiletransfer deleteFileForMessage:[MLMessage createMessageFromHistoryID:historyId]];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND buddy_name=?;" andArguments:@[accountID, buddy]];
         
         //better UX without deleting the active chat
@@ -1510,7 +1500,7 @@ static NSDateFormatter* dbFormatter;
         //if they are filetransfers and delete those files
         NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<? AND messageType=?;" andArguments:@[pastDateString, kMessageTypeFiletransfer]];
         for(NSNumber* historyId in messageHistoryIDs)
-            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
+            [MLFiletransfer deleteFileForMessage:[MLMessage createMessageFromHistoryID:historyId]];
 
         //delete inbound read messages or outgoing messages being old enough
         NSNumber* deletionCount = [self.db executeScalar:@"SELECT COUNT(*) FROM message_history WHERE (inbound=0 OR unread=0) AND timestamp<?;" andArguments:@[pastDateString]];
@@ -1529,7 +1519,7 @@ static NSDateFormatter* dbFormatter;
 {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
-        MLMessage* msg = [self messageForHistoryID:messageNo];
+        MLMessage* msg = [MLMessage createMessageFromHistoryID:messageNo];
         if([msg.messageType isEqualToString:kMessageTypeFiletransfer])
             [MLFiletransfer deleteFileForMessage:msg];
         [self.db executeNonQuery:@"UPDATE message_history SET message='', messageType=?, filetransferMimeType='', filetransferSize=0, retracted=1 WHERE message_history_id=?;" andArguments:@[kMessageTypeText, messageNo]];
@@ -1541,7 +1531,7 @@ static NSDateFormatter* dbFormatter;
 {
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
-        MLMessage* msg = [self messageForHistoryID:messageNo];
+        MLMessage* msg = [MLMessage createMessageFromHistoryID:messageNo];
         if([msg.messageType isEqualToString:kMessageTypeFiletransfer])
             [MLFiletransfer deleteFileForMessage:msg];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE message_history_id=?;" andArguments:@[messageNo]];
@@ -1594,7 +1584,7 @@ static NSDateFormatter* dbFormatter;
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID
 {
     return [self.db idReadTransaction:^{
-        MLMessage* msg = [self messageForHistoryID:historyID];
+        MLMessage* msg = [MLMessage createMessageFromHistoryID:historyID];
         
         //timestamp not needed if we can't find the message we are quoting
         if(msg == nil)
@@ -1621,7 +1611,7 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted historyBaseID:(NSNumber* _Nullable) historyBaseID
 {
     return [self.db boolReadTransaction:^{
-        MLMessage* msg = [self messageForHistoryID:historyID];
+        MLMessage* msg = [MLMessage createMessageFromHistoryID:historyID];
         NSNumber* editAllowed;
         
         //corretion not allowed if we can't find the message the correction was for
@@ -1730,7 +1720,7 @@ static NSDateFormatter* dbFormatter;
         NSNumber* historyID = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountID, contact]];
         if(historyID == nil)
             return (MLMessage*)nil;
-        return [self messageForHistoryID:historyID];
+        return [MLMessage createMessageFromHistoryID:historyID];
     }];
 }
 

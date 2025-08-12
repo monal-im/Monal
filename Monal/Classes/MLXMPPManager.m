@@ -711,7 +711,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         DDLogVerbose(@"Message added to history with id %ld", (long)[messageDBId intValue]);
 
         // MLMessage object that will be returned by the method
-        MLMessage* newMLMessage = [[DataLayer sharedInstance] messageForHistoryID:messageDBId];
+        MLMessage* newMLMessage = [MLMessage createMessageFromHistoryID:messageDBId];
         if (!newMLMessage)
         {
             DDLogError(@"Could not find message for history ID %@!", messageDBId);

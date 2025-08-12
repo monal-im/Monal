@@ -184,7 +184,7 @@ $$class_handler(handleCatchup, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$BO
         {
             //latestMessage can be nil, thus [latestMessage timestamp] will return nil and setMAMQueryAfterTimestamp:nil
             //will query the whole archive since dawn of time
-            MLMessage* latestMessage = [[DataLayer sharedInstance] messageForHistoryID:[[DataLayer sharedInstance] getBiggestHistoryId]];
+            MLMessage* latestMessage = [MLMessage createMessageFromHistoryID:[[DataLayer sharedInstance] getBiggestHistoryId]];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive at %@ after timestamp %@ for catchup", account.connectionProperties.identity.jid, [latestMessage timestamp]);
             XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
             [mamQuery setMAMQueryAfterTimestamp:[latestMessage timestamp]];
@@ -783,7 +783,6 @@ $$class_handler(handleVersionResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
 $$
 
 $$class_handler(handleModerationResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLMessage*, msg))
-    [msg updateWithMessage:[[DataLayer sharedInstance] messageForHistoryID:msg.messageDBId]];       //make sure our msg is up to date
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Moderating message %@ returned an error: %@", msg, [iqNode findFirst:@"error"]);

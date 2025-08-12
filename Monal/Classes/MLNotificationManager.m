@@ -614,7 +614,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
 
 -(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId
 {
-    MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:messageDBId];
+    MLMessage* message = [MLMessage createMessageFromHistoryID:messageDBId];
     INSendMessageIntent* intent = [self makeIntentForMessage:message usingText:@"dummyText" andAudioAttachment:nil direction:INInteractionDirectionOutgoing];
     INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
     interaction.direction = INInteractionDirectionOutgoing;

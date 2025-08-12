@@ -54,7 +54,7 @@ static NSObject* _hardlinkingSyncObject;
 +(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId
 {
     NSString* url;
-    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+    MLMessage* msg = [MLMessage createMessageFromHistoryID:historyId];
     if(!msg)
     {
         DDLogError(@"historyId %@ does not yield an MLMessage object, aborting", historyId);
@@ -155,7 +155,7 @@ static NSObject* _hardlinkingSyncObject;
 
 +(void) downloadFileForHistoryID:(NSNumber*) historyId andForceDownload:(BOOL) forceDownload
 {
-    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+    MLMessage* msg = [MLMessage createMessageFromHistoryID:historyId];
     if(!msg)
     {
         DDLogError(@"historyId %@ does not yield an MLMessage object, aborting", historyId);

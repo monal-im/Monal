@@ -9,52 +9,96 @@
 #import <monalxmpp/MLMessage.h>
 #import <monalxmpp/MLContact.h>
 #import <monalxmpp/MLConstants.h>
+#import <monalxmpp/DataLayer.h>
 #import <monalxmpp/xmpp.h>
+
+static NSMutableDictionary* _singletonCache;
 
 @implementation MLMessage
 {
     MLContact* _contact;
 }
 
++(void) initialize
+{
+    _singletonCache = [NSMutableDictionary new];
+}
+
++(MLMessage*) createMessageFromHistoryID:(NSNumber*) historyID
+{
+    if(historyID == nil)
+        return nil;
+    NSArray<MLMessage*>* result = [[DataLayer sharedInstance] messagesForHistoryIDs:@[historyID]];
+    if(![result count])
+        return nil;
+    return result[0];
+}
+
 +(MLMessage*) messageFromDictionary:(NSDictionary*) dic
 {
-    MLMessage* message = [MLMessage new];
-    message.accountID = [dic objectForKey:@"account_id"];
-    
-    message.buddyName = [dic objectForKey:@"buddy_name"];
-    message.inbound = [(NSNumber*)[dic objectForKey:@"inbound"] boolValue];
-    message.actualFrom = [dic objectForKey:@"af"];
-    message.messageText = [dic objectForKey:@"message"];
-    message.isMuc = [(NSNumber*)[dic objectForKey:@"Muc"] boolValue];
-    
-    message.messageId = [dic objectForKey:@"messageid"];
-    message.stanzaId = [dic objectForKey:@"stanzaid"];
-    message.messageDBId = [dic objectForKey:@"message_history_id"];
-    message.timestamp = [dic objectForKey:@"thetime"];
-    message.messageType = [dic objectForKey:@"messageType"];
-    message.mucType = [dic objectForKey:@"muc_type"];
-    message.participantJid = [dic objectForKey:@"participant_jid"];
-    
-    message.hasBeenDisplayed = [(NSNumber*)[dic objectForKey:@"displayed"] boolValue];
-    message.hasBeenReceived = [(NSNumber*)[dic objectForKey:@"received"] boolValue];
-    message.hasBeenSent = [(NSNumber*)[dic objectForKey:@"sent"] boolValue];
-    message.encrypted = [(NSNumber*)[dic objectForKey:@"encrypted"] boolValue];
-    
-    message.unread = [(NSNumber*)[dic objectForKey:@"unread"] boolValue];
-    message.displayMarkerWanted = [(NSNumber*)[dic objectForKey:@"displayMarkerWanted"] boolValue];
-    
-    message.previewText = [dic objectForKey:@"previewText"];
-    message.previewImage = [NSURL URLWithString:[dic objectForKey:@"previewImage"]];
-    
-    message.errorType = [dic objectForKey:@"errorType"];
-    message.errorReason = [dic objectForKey:@"errorReason"];
-    
-    message.filetransferMimeType = [dic objectForKey:@"filetransferMimeType"];
-    message.filetransferSize = [dic objectForKey:@"filetransferSize"];
-    
-    message.retracted = [(NSNumber*)[dic objectForKey:@"retracted"] boolValue];
-    
-    return message;
+    // Draft messages don't have a historyID and shouldn't be cached
+    if ([[dic objectForKey:@"messageType"] isEqualToString:kMessageTypeMessageDraft])
+    {
+        MLMessage* message = [MLMessage new];
+        // Fill only the properties useful for a draft message
+        // The timestamp is used when rendering MLContactCell, among other things
+        message.messageText = [dic objectForKey:@"message"];
+        message.messageType = [dic objectForKey:@"messageType"];
+        message.timestamp = [dic objectForKey:@"thetime"];
+        return message;
+    }
+
+    NSNumber* cacheKey = [dic objectForKey:@"message_history_id"];
+    MLAssert(cacheKey != nil, @"A non-draft message can't have a nil historyID!");
+    @synchronized(_singletonCache) {
+        if(_singletonCache[cacheKey] != nil)
+        {
+            MLMessage* obj = ((WeakContainer*)_singletonCache[cacheKey]).obj;
+            if(obj != nil)
+                return obj;
+            else
+                [_singletonCache removeObjectForKey:cacheKey];
+        }
+
+        MLMessage* message = [MLMessage new];
+        message.accountID = [dic objectForKey:@"account_id"];
+
+        message.buddyName = [dic objectForKey:@"buddy_name"];
+        message.inbound = [(NSNumber*)[dic objectForKey:@"inbound"] boolValue];
+        message.actualFrom = [dic objectForKey:@"af"];
+        message.messageText = [dic objectForKey:@"message"];
+        message.isMuc = [(NSNumber*)[dic objectForKey:@"Muc"] boolValue];
+
+        message.messageId = [dic objectForKey:@"messageid"];
+        message.stanzaId = [dic objectForKey:@"stanzaid"];
+        message.messageDBId = [dic objectForKey:@"message_history_id"];
+        message.timestamp = [dic objectForKey:@"thetime"];
+        message.messageType = [dic objectForKey:@"messageType"];
+        message.mucType = [dic objectForKey:@"muc_type"];
+        message.participantJid = [dic objectForKey:@"participant_jid"];
+
+        message.hasBeenDisplayed = [(NSNumber*)[dic objectForKey:@"displayed"] boolValue];
+        message.hasBeenReceived = [(NSNumber*)[dic objectForKey:@"received"] boolValue];
+        message.hasBeenSent = [(NSNumber*)[dic objectForKey:@"sent"] boolValue];
+        message.encrypted = [(NSNumber*)[dic objectForKey:@"encrypted"] boolValue];
+
+        message.unread = [(NSNumber*)[dic objectForKey:@"unread"] boolValue];
+        message.displayMarkerWanted = [(NSNumber*)[dic objectForKey:@"displayMarkerWanted"] boolValue];
+
+        message.previewText = [dic objectForKey:@"previewText"];
+        message.previewImage = [NSURL URLWithString:[dic objectForKey:@"previewImage"]];
+
+        message.errorType = [dic objectForKey:@"errorType"];
+        message.errorReason = [dic objectForKey:@"errorReason"];
+
+        message.filetransferMimeType = [dic objectForKey:@"filetransferMimeType"];
+        message.filetransferSize = [dic objectForKey:@"filetransferSize"];
+
+        message.retracted = [(NSNumber*)[dic objectForKey:@"retracted"] boolValue];
+
+        _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:message];
+        return message;
+    }
 }
 
 +(BOOL) supportsSecureCoding

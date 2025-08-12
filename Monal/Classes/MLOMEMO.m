@@ -444,7 +444,7 @@ $$
     NSString* newMessageID = [[NSUUID UUID] UUIDString];
     NSNumber* historyId = [[DataLayer sharedInstance] addMessageHistoryTo:jid forAccount:self.account.accountID withMessage:omemoMessage actuallyFrom:jid withId:newMessageID encrypted:NO messageType:kMessageTypeStatus mimeType:nil size:nil];
 
-    MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+    MLMessage* message = [MLMessage createMessageFromHistoryID:historyId];
     MLContact* contact = [MLContact createContactFromJid:jid andAccountID:self.account.accountID];
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:self.account userInfo:@{
         @"message": message,

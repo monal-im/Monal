@@ -91,6 +91,7 @@ struct ChatView: View {
     @StateObject private var overlay = LoadingOverlayState()
     @State var messages: [ChatViewMessage] = []
     private var account: xmpp
+    @State private var isLoadingMamHistory = false
     
     init(contact: ObservableKVOWrapper<MLContact>) {
         _contact = StateObject(wrappedValue: contact)
@@ -194,7 +195,85 @@ struct ChatView: View {
         }
 #endif
     }
-    
+
+    private func findOldestStanzaId() -> String? {
+        //not all messages in history db have a stanzaId (messages sent by this monal instance won't have one for example)
+        //--> search for the oldest message having a stanzaId and use that one
+        for msg in self.messages {
+            if !msg.innerMessage.obj.stanzaId.isEmpty {
+                DDLogVerbose("Found oldest stanzaId in currently displayed messages: \(msg.innerMessage.obj.stanzaId)")
+                return msg.innerMessage.stanzaId
+            }
+        }
+
+        //history database for this contact is completely empty, use global last stanza id for this mam archive
+        if self.contact.isMuc {
+            return DataLayer.sharedInstance().lastStanzaId(forMuc:self.contact.contactJid, andAccount:self.account.accountID)
+        }
+        else {
+            return DataLayer.sharedInstance().lastStanzaId(forAccount:self.account.accountID);
+        }
+    }
+
+    private func loadHistory() {
+        guard !self.isLoadingMamHistory else {
+            DDLogDebug("Not going to load more history because a backscrolling mam query is ongoing for this chat")
+            // Don't allow concurrent backscrolling mam fetches.
+            // And don't allow loading history from the DB while an mam query is ongoing;
+            // this prevents potential message duplication: if a DB history fetch is triggered after the mam query
+            // has written some messages to the DB but before it has returned the results, those messages will be
+            // inserted twice in the ChatView.
+            return
+        }
+        var beforeId: NSNumber? = nil
+        if !messages.isEmpty {
+            beforeId = messages[0].innerMessage.messageDBId
+        }
+        let oldMessages: [ChatViewMessage] = (DataLayer.sharedInstance().messages(forContact:contact.contactJid, forAccount:contact.accountID, beforeMsgHistoryID:beforeId) as! [MLMessage]).map {ChatViewMessage($0)}
+        //insert what we got from the db
+        if !oldMessages.isEmpty {
+            messages.insert(contentsOf: oldMessages, at:0)
+        }
+
+        // if we didn't get enough (or any) messages from the DB, try to get some from MAM
+        if oldMessages.count < kMonalBackscrollingMsgCount && !contact.hasReachedMamArchiveTop {
+            self.isLoadingMamHistory = true
+
+            guard let oldestStanzaId = self.findOldestStanzaId() else {
+                DDLogError("Couldn't find a stanzaId to perform a mam query with! (oldestStanzaId is nil)")
+                return
+            }
+            // now try to load more (older) messages from mam
+            DDLogVerbose("Loading more messages from mam before stanzaId \(oldestStanzaId)")
+            firstly {
+                self.account.setMAMQueryMostRecentFor(self.contact.obj, before: oldestStanzaId)
+            }
+            .done { returnedMessages in
+                let returnedMessages = returnedMessages as! [MLMessage]
+                if returnedMessages.isEmpty {
+                    DDLogVerbose("Reached the top of the mam archive for \(self.contact.obj.contactJid)")
+                    // Don't block the main thread while writing to the db
+                    DispatchQueue.global(qos: .default).async {
+                        contact.obj.markReachedMamArchiveTop()
+                    }
+                } else {
+                    DDLogVerbose("Got backscrolling mam response: \(returnedMessages.count) messages")
+                    self.messages.insert(contentsOf: returnedMessages.map {ChatViewMessage($0)}, at: 0)
+                }
+            }
+            .catch { error in
+                alertPrompt = AlertPrompt(
+                    title: Text("Could not fetch messages"),
+                    message: Text(error.localizedDescription),
+                    dismissLabel: Text("Close")
+                )
+            }
+            .finally {
+                self.isLoadingMamHistory = false
+            }
+        }
+    }
+
     var body: some View {
         ExyteChatView(messages: messages, chatType: .conversation, replyMode: .quote) { draft in
             guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: draft.text, havingType: kMessageTypeText, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: nil) else {
@@ -205,9 +284,11 @@ struct ChatView: View {
             MessageView(message: (message as! ChatViewMessage), viewModel: viewModel, positionInUserGroup: positionInUserGroup, positionInMessagesSection: positionInMessagesSection)
         }
         .showNetworkConnectionProblem(false)
-//         .enableLoadMore(pageSize: 3) { message in
-//             print("load more messages before: \(String(describing:message))")
-//         }
+        .enableLoadMore(pageSize: 10) { message in
+            await MainActor.run {
+                loadHistory()
+            }
+        }
 //         .messageUseMarkdown(messageUseMarkdown: true)
         .sheet(item: $selectedContactForContactDetails) { selectedContact in
             AnyView(AddTopLevelNavigation(withDelegate:nil, to:ContactDetails(delegate:nil, contact:selectedContact)))
@@ -270,6 +351,9 @@ struct ChatView: View {
             }
             
             ToolbarItemGroup(placement: .topBarTrailing) {
+                ProgressView()
+                    .opacity(isLoadingMamHistory ? 1 : 0)
+
                 if !(contact.isMuc || contact.isSelfChat) {
                     let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
                     let voipProcessor = (UIApplication.shared.delegate as! MonalAppDelegate).voipProcessor!
@@ -346,15 +430,7 @@ struct ChatView: View {
             MLNotificationManager.sharedInstance().currentContact = self.contact.obj
 
             checkOmemoSupport(withAlert:false)
-            
-            //TODO: load messages from db
-            // In some scenarios, onAppear can be executed more than once without the state variables being cleared.
-            if messages.isEmpty {
-                let dbMessages = DataLayer.sharedInstance().messages(forContact:contact.contactJid, forAccount:contact.accountID) as! [MLMessage]
-                for msg in dbMessages {
-                    messages.append(ChatViewMessage(msg))
-                }
-            }
+            loadHistory()
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
 //             messages = [
 //                 ExyteChat.Message(

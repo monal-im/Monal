@@ -483,7 +483,7 @@ static NSMutableDictionary* _typingNotifications;
             //update ui
             DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
-                @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
+                @"message": [MLMessage createMessageFromHistoryID:historyIdToRetract],
                 @"contact": possiblyUnknownContact,
             }];
             
@@ -532,7 +532,7 @@ static NSMutableDictionary* _typingNotifications;
             //update ui
             DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
-                @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
+                @"message": [MLMessage createMessageFromHistoryID:historyIdToRetract],
                 @"historyId": historyIdToRetract,
                 @"contact": possiblyUnknownContact,
             }];
@@ -642,7 +642,7 @@ static NSMutableDictionary* _typingNotifications;
                 ];
             }
             
-            message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+            message = [MLMessage createMessageFromHistoryID:historyId];
             if(message != nil && historyId != nil)      //check historyId to make static analyzer happy
             {
                 //send receive markers if requested, but DON'T do so for MLhistory messages (and don't do so for channel type mucs)
@@ -731,7 +731,7 @@ static NSMutableDictionary* _typingNotifications;
         NSNumber* historyId = [[DataLayer sharedInstance] hasMessageForStanzaId:stanzaid orMessageID:messageId withInboundDir:inbound occupantId:occupantId andJid:buddyName onAccount:account.accountID];
         if(historyId != nil)
         {
-            message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+            message = [MLMessage createMessageFromHistoryID:historyId];
             DDLogDebug(@"Managed to update stanzaid of message (or stanzaid already known): %@", message);
             DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", historyId);
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{

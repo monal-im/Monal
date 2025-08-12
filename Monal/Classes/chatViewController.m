@@ -1629,13 +1629,12 @@ enum msgSentState {
     if(messageDBId != nil)
     {
         DDLogVerbose(@"added message");
-        NSArray* msgList = [[DataLayer sharedInstance] messagesForHistoryIDs:@[messageDBId]];
-        if(![msgList count])
+        MLMessage* messageObj = [MLMessage createMessageFromHistoryID:messageDBId];
+        if(!messageObj)
         {
             DDLogError(@"Could not find msg for history ID %@!", messageDBId);
             return nil;
         }
-        MLMessage* messageObj = msgList[0];
 
         [self tempfreezeAutoloading];
 
@@ -1982,13 +1981,12 @@ enum msgSentState {
 -(void) retry:(id) sender
 {
     NSInteger msgHistoryID = ((UIButton*) sender).tag;
-    NSArray* msgArray = [[DataLayer sharedInstance] messagesForHistoryIDs:@[[NSNumber numberWithInteger:msgHistoryID]]];
-    if(![msgArray count])
+    MLMessage* msg = [MLMessage createMessageFromHistoryID:@(msgHistoryID)];
+    if(!msg)
     {
         DDLogError(@"Called retry for non existing message with history id %ld", (long)msgHistoryID);
         return;
     }
-    MLMessage* msg = msgArray[0];
     DDLogDebug(@"Called retry for message with history id %ld: %@", (long)msgHistoryID, msg);
 
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?", @"") message:[NSString stringWithFormat:NSLocalizedString(@"This message failed to send (%@): %@", @""), msg.errorType, msg.errorReason] preferredStyle:UIAlertControllerStyleActionSheet];
@@ -2513,7 +2511,7 @@ enum msgSentState {
         {
             [self.xmppAccount retractMessage:message];
             [[DataLayer sharedInstance] retractMessageHistory:message.messageDBId];
-            [message updateWithMessage:[[[DataLayer sharedInstance] messagesForHistoryIDs:@[message.messageDBId]] firstObject]];
+            [message updateWithMessage:[MLMessage createMessageFromHistoryID:message.messageDBId]];
 
             //update table entry
             [self->_messageTable beginUpdates];

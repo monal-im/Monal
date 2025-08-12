@@ -179,7 +179,6 @@ extern NSString* const kMessageTypeFiletransfer;
  returns messages with the provided local id number
  */
 -(NSArray<MLMessage*>*) messagesForHistoryIDs:(NSArray<NSNumber*>*) historyIDs;
--(MLMessage* _Nullable) messageForHistoryID:(NSNumber* _Nullable) historyID;
 -(NSNumber*) getSmallestHistoryId;
 -(NSNumber*) getBiggestHistoryId;
 

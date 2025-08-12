@@ -1705,7 +1705,7 @@ static NSDateFormatter* dbFormatter;
     
     return [self.db idReadTransaction:^{
         //return message draft (if any)
-        NSString* query = @"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType, '' AS af, '' AS filetransferMimeType, 0 AS filetransferSize, bl.Muc, bl.muc_type, bl.buddy_name FROM buddylist AS bl INNER JOIN activechats AS ac ON bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name WHERE ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';";
+        NSString* query = @"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType FROM buddylist AS bl INNER JOIN activechats AS ac ON bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name WHERE ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';";
         NSArray* params = @[accountID, contact];
         NSArray* results = [self.db executeReader:query andArguments:params];
         if([results count])

@@ -46,31 +46,6 @@ typedef NS_ENUM(NSUInteger, MLVersionType) {
     MLVersionTypeLog,
 };
 
-typedef NS_ENUM(NSUInteger, MLDefinedIdentifier) {
-    MLDefinedIdentifier_kAppGroup,
-    MLDefinedIdentifier_kMonalOpenURL,
-    MLDefinedIdentifier_kBackgroundProcessingTask,
-    MLDefinedIdentifier_kBackgroundRefreshingTask,
-    MLDefinedIdentifier_kMonalKeychainName,
-    MLDefinedIdentifier_kMucTypeGroup,
-    MLDefinedIdentifier_kMucTypeChannel,
-    MLDefinedIdentifier_kMucRoleModerator,
-    MLDefinedIdentifier_kMucRoleNone,
-    MLDefinedIdentifier_kMucRoleParticipant,
-    MLDefinedIdentifier_kMucRoleVisitor,
-    MLDefinedIdentifier_kMucAffiliationOwner,
-    MLDefinedIdentifier_kMucAffiliationAdmin,
-    MLDefinedIdentifier_kMucAffiliationMember,
-    MLDefinedIdentifier_kMucAffiliationOutcast,
-    MLDefinedIdentifier_kMucAffiliationNone,
-    MLDefinedIdentifier_kMucActionShowProfile,
-    MLDefinedIdentifier_kMucActionReinvite,
-    MLDefinedIdentifier_SHORT_PING,
-    MLDefinedIdentifier_LONG_PING,
-    MLDefinedIdentifier_MUC_PING,
-    MLDefinedIdentifier_BGFETCH_DEFAULT_INTERVAL,
-};
-
 typedef NS_ENUM(NSUInteger, MLRunLoopIdentifier) {
     MLRunLoopIdentifierNetwork,
     MLRunLoopIdentifierTimer,
@@ -126,7 +101,6 @@ void swizzle(Class c, SEL orig, SEL new);
 +(AnyPromise*) renderUIImageFromSVGURL:(NSURL* _Nullable) url;
 +(AnyPromise*) renderUIImageFromSVGData:(NSData* _Nullable) data;
 +(void) busyWaitForOperationQueue:(NSOperationQueue*) queue;
-+(id) getObjcDefinedValue:(MLDefinedIdentifier) identifier;
 +(NSRunLoop*) getExtraRunloopWithIdentifier:(MLRunLoopIdentifier) identifier;
 +(NSError* _Nullable) hardLinkOrCopyFile:(NSString*) from to:(NSString*) to;
 +(NSString*) getQueueThreadLabelFor:(DDLogMessage*) logMessage;

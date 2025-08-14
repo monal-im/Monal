@@ -836,7 +836,7 @@ $$
     
     //inform chatview of error
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
-        @"MessageID": msg.messageId,
+        kMessageId: msg.messageId,
         @"jid": msg.buddyName,
         @"errorType": errorType,
         @"errorReason": errorText

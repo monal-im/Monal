@@ -136,64 +136,64 @@ struct ChatView: View {
     
     private func checkOmemoSupport(withAlert showWarning: Bool) {
 #if !DISABLE_OMEMO
-    if DataLayer.sharedInstance().isAccountEnabled(contact.accountID) {
-        var omemoDeviceForContactFound = false
-        if !contact.isMuc {
-            omemoDeviceForContactFound = account.omemo.knownDevices(forAddressName:contact.contactJid).count > 0
-        } else {
-            omemoDeviceForContactFound = false
-            for participant in DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:contact.contactJid, forAccountID:contact.accountID) {
-                if let participant_jid = participant["participant_jid"] as? String {
-                    omemoDeviceForContactFound = omemoDeviceForContactFound || account.omemo.knownDevices(forAddressName:participant_jid).count > 0
-                } else if let participant_jid = participant["member_jid"] as? String {
-                    omemoDeviceForContactFound = omemoDeviceForContactFound || account.omemo.knownDevices(forAddressName:participant_jid).count > 0
-                }
-                if omemoDeviceForContactFound {
-                    break
+        if DataLayer.sharedInstance().isAccountEnabled(contact.accountID) {
+            var omemoDeviceForContactFound = false
+            if !contact.isMuc {
+                omemoDeviceForContactFound = account.omemo.knownDevices(forAddressName:contact.contactJid).count > 0
+            } else {
+                omemoDeviceForContactFound = false
+                for participant in DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:contact.contactJid, forAccountID:contact.accountID) {
+                    if let participant_jid = participant["participant_jid"] as? String {
+                        omemoDeviceForContactFound = omemoDeviceForContactFound || account.omemo.knownDevices(forAddressName:participant_jid).count > 0
+                    } else if let participant_jid = participant["member_jid"] as? String {
+                        omemoDeviceForContactFound = omemoDeviceForContactFound || account.omemo.knownDevices(forAddressName:participant_jid).count > 0
+                    }
+                    if omemoDeviceForContactFound {
+                        break
+                    }
                 }
             }
-        }
-        if !omemoDeviceForContactFound && contact.isEncrypted {
-            if HelperTools.isContactBlacklistedForEncryption(contact.obj) {
-                // this contact was blacklisted for encryption
-                // --> disable it
-                contact.isEncrypted = false
-                DataLayer.sharedInstance().disableEncrypt(forJid:contact.contactJid, andAccountID:contact.accountID)
-            } else if contact.isMuc && contact.mucType != kMucTypeGroup {
-                // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
-                // --> disable it
-                contact.isEncrypted = false
-                DataLayer.sharedInstance().disableEncrypt(forJid:contact.contactJid, andAccountID:contact.accountID)
-            } else if !contact.isMuc || (contact.isMuc && contact.mucType == kMucTypeGroup) {
+            if !omemoDeviceForContactFound && contact.isEncrypted {
+                if HelperTools.isContactBlacklistedForEncryption(contact.obj) {
+                    // this contact was blacklisted for encryption
+                    // --> disable it
+                    contact.isEncrypted = false
+                    DataLayer.sharedInstance().disableEncrypt(forJid:contact.contactJid, andAccountID:contact.accountID)
+                } else if contact.isMuc && contact.mucType != kMucTypeGroup {
+                    // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
+                    // --> disable it
+                    contact.isEncrypted = false
+                    DataLayer.sharedInstance().disableEncrypt(forJid:contact.contactJid, andAccountID:contact.accountID)
+                } else if !contact.isMuc || (contact.isMuc && contact.mucType == kMucTypeGroup) {
+                    hideLoadingOverlay(overlay)
+
+                    if showWarning {
+                        DDLogWarn("Showing omemo not supported alert for: \(self.contact)")
+                        alertPrompt = AlertPrompt(
+                            title: Text("No OMEMO keys found"),
+                            message: Text("This contact may not support OMEMO encrypted messages. Please try to enable encryption again in a few seconds, if you think this is wrong."),
+                            dismissLabel: Text("Disable Encryption")
+                        ) {
+                            contact.isEncrypted = false
+                            DataLayer.sharedInstance().disableEncrypt(forJid:contact.contactJid, andAccountID:contact.accountID)
+                        }
+                    } else {
+                        DDLogInfo("Trying to fetch omemo keys for: \(self.contact)")
+
+                        // we won't do this twice, because the user won't be able to change isEncrypted to YES,
+                        // unless we have omemo devices for that contact
+                        showPromisingLoadingOverlay(overlay, headlineView:Text("Loading OMEMO keys"), descriptionView:Text("")).done {
+                            // request omemo devicelist
+                            account.omemo.subscribeAndFetchDevicelistIfNoSessionExists(forJid:contact.contactJid)
+                        }
+                    }
+                }
+            } else {
                 hideLoadingOverlay(overlay)
-                
-                if showWarning {
-                    DDLogWarn("Showing omemo not supported alert for: \(self.contact)")
-                    alertPrompt = AlertPrompt(
-                        title: Text("No OMEMO keys found"),
-                        message: Text("This contact may not support OMEMO encrypted messages. Please try to enable encryption again in a few seconds, if you think this is wrong."),
-                        dismissLabel: Text("Disable Encryption")
-                    ) {
-                        contact.isEncrypted = false
-                        DataLayer.sharedInstance().disableEncrypt(forJid:contact.contactJid, andAccountID:contact.accountID)
-                    }
-                } else {
-                    DDLogInfo("Trying to fetch omemo keys for: \(self.contact)")
-                    
-                    // we won't do this twice, because the user won't be able to change isEncrypted to YES,
-                    // unless we have omemo devices for that contact
-                    showPromisingLoadingOverlay(overlay, headlineView:Text("Loading OMEMO keys"), descriptionView:Text("")).done {
-                        // request omemo devicelist
-                        account.omemo.subscribeAndFetchDevicelistIfNoSessionExists(forJid:contact.contactJid)
-                    }
-                }
             }
-        } else {
-            hideLoadingOverlay(overlay)
         }
-    }
 #endif
-}
+    }
     
     var body: some View {
         ExyteChatView(messages: messages, chatType: .conversation, replyMode: .quote) { draft in

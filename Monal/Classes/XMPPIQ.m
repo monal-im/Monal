@@ -200,7 +200,7 @@ NSString* const kiqErrorType = @"error";
     } andChildren:@[
         form,
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"max" andData:@"50"],
+            [[MLXMLNode alloc] initWithElement:@"max" andData:@(kMonalBackscrollingMsgCount).stringValue],
             [[MLXMLNode alloc] initWithElement:@"before" andData:uid]
         ] andData:nil]
     ] andData:nil];

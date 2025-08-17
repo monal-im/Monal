@@ -477,7 +477,7 @@ struct ChatView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalNewMessageNotice)).receive(on: RunLoop.main)) { notification in
-            DDLogVerbose("chat view got new message notice \(String(describing:notification.userInfo))")
+            DDLogVerbose("ChatView got new message notice \(String(describing:notification.userInfo))")
 
             guard let message = notification.userInfo?["message"] as? MLMessage else {
                 DDLogError("Notification without message");
@@ -492,6 +492,16 @@ struct ChatView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalRefresh)).receive(on: RunLoop.main)) { notification in
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalContactHistoryCleared)).receive(on: RunLoop.main)) { notification in
+            DDLogVerbose("ChatView got history cleared notice \(String(describing:notification.userInfo))")
+            guard let contact = notification.userInfo?["contact"] as? MLContact else {
+                MLAssert(false, "Notification without contact")
+                return
+            }
+            if contact.isEqual(to: self.contact.obj) {
+                self.messages = []
+            }
         }
     }
 }

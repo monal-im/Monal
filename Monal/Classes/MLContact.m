@@ -723,7 +723,9 @@ static NSMutableDictionary* _singletonCache;
 -(void) clearHistory
 {
     [[DataLayer sharedInstance] clearMessagesWithBuddy:self.contactJid onAccount:self.accountID];
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactHistoryCleared object:self.account userInfo:@{
+        @"contact": self,
+    }];
 }
 
 -(void) markReachedMamArchiveTop

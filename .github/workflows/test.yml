@@ -14,7 +14,7 @@ permissions: {}
 
 jobs:
   run_tests:
-    runs-on: macos-latest
+    runs-on: macos-14
     name: Run automated tests
     steps:
       - uses: actions/checkout@v4

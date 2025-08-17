@@ -16,6 +16,7 @@
 #import <monalxmpp/MLNotificationQueue.h>
 #import "MonalAppDelegate.h"
 #import "ActiveChatsViewController.h"
+#import "MLNotificationManager.h"
 #import "Monal-Swift.h"
 
 @import MobileCoreServices;
@@ -564,6 +565,13 @@ enum DummySettingsRows {
     UIAlertAction *yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
 
         [self.db clearMessages:self.accountID];
+
+        // display the splitView placeholder, if the currently displayed chat belongs to this account
+        MLContact* currentContact = [MLNotificationManager sharedInstance].currentContact;
+        if (currentContact && currentContact.accountID == self.accountID)
+            [((MonalAppDelegate*)UIApplication.sharedApplication.delegate).activeChats presentSplitPlaceholder];
+
+         // clearing the history of an account deletes entries from ActiveChats
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];

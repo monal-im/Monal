@@ -296,7 +296,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
                 }
             }
             //check if pinned status changed (the check is done inside of [MLContact togglePinnedChat:]
-            else if([ownFavorites containsObject:room])
+            if([ownFavorites containsObject:room])
             {
                 MLContact* contact = [MLContact createContactFromJid:room andAccountID:account.accountID];
                 [contact togglePinnedChat:pinned];
@@ -378,36 +378,54 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
         if(autojoin == nil)
             autojoin = @NO;     //default value specified in xep
         BOOL pinned = [item check:@"{urn:xmpp:bookmarks:1}conference/extensions/{urn:xmpp:bookmarks-pinning:0}pinned"];
-        
-        //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
-        if([ownFavorites containsObject:room] && ![autojoin boolValue])
+
+        if([ownFavorites containsObject:room])
         {
-            DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountID);
-            
-            //add or update nickname
-            NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
-            if(nick != nil)
+            //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
+            if(![autojoin boolValue])
             {
-                if(![item check:@"{urn:xmpp:bookmarks:1}conference/nick"])
-                    [[item findFirst:@"{urn:xmpp:bookmarks:1}conference"] addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
-                ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference/nick"]).data = nick;
+                DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountID);
+
+                //add or update nickname
+                NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
+                if(nick != nil)
+                {
+                    if(![item check:@"{urn:xmpp:bookmarks:1}conference/nick"])
+                        [[item findFirst:@"{urn:xmpp:bookmarks:1}conference"] addChildNode:[[MLXMLNode alloc] initWithElement:@"nick"]];
+                    ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference/nick"]).data = nick;
+                }
+
+                //update autojoin value to true
+                ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference"]).attributes[@"autojoin"] = @"true";
             }
             
-            //update autojoin value to true
-            ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference"]).attributes[@"autojoin"] = @"true";
-            
+            //sync the bookmark with the local pinned status, if they differ
+            MLContact* contact = [MLContact createContactFromJid:room andAccountID:account.accountID];
+            if(pinned != contact.isPinned)
+            {
+                if(contact.isPinned)
+                {
+                    DDLogVerbose(@"Adding <pinned> element to the bookmark of the room %@", room);
+                    if([item check:@"{urn:xmpp:bookmarks:1}conference/extensions"])
+                        [[item findFirst:@"{urn:xmpp:bookmarks:1}conference/extensions"] addChildNode:[[MLXMLNode alloc] initWithElement:@"pinned" andNamespace:@"urn:xmpp:bookmarks-pinning:0"]];
+                    else
+                        [[item findFirst:@"{urn:xmpp:bookmarks:1}conference"] addChildNode: [[MLXMLNode alloc] initWithElement:@"extensions" withAttributes:@{} andChildren:@[
+                            [[MLXMLNode alloc] initWithElement:@"pinned" andNamespace:@"urn:xmpp:bookmarks-pinning:0" withAttributes:@{} andChildren:@[] andData:nil],
+                        ] andData:nil]];
+                }
+                else
+                {
+                    DDLogVerbose(@"Removing <pinned> element from the bookmark of the room %@", room);
+                    [[item findFirst:@"{urn:xmpp:bookmarks:1}conference/extensions"] removeChildNode:[item findFirst:@"{urn:xmpp:bookmarks:1}conference/extensions/{urn:xmpp:bookmarks-pinning:0}pinned"]];
+                }
+            }
+
             //publish this bookmark item again
             [account.pubsub publishItem:item onNode:@"urn:xmpp:bookmarks:1" withConfigOptions:@{
                 @"pubsub#persist_items": @"true",
                 @"pubsub#access_model": @"whitelist",
                 @"pubsub#max_items": max_items,
             } andHandler:$newHandler(self, bookmarks2Published, $ID(room))];
-        }
-        //check if pinned status changed (the check is done inside of [MLContact togglePinnedChat:]
-        else if([ownFavorites containsObject:room])
-        {
-            MLContact* contact = [MLContact createContactFromJid:room andAccountID:account.accountID];
-            [contact togglePinnedChat:pinned];
         }
     }
         

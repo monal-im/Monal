@@ -59,7 +59,7 @@ static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
 #else
 	#define SHORT_PING 4.0
 	#define LONG_PING 8.0
-    #define MUC_PING 3600
+    #define MUC_PING 1800
     #define BGFETCH_DEFAULT_INTERVAL 3600*3
 #endif
 

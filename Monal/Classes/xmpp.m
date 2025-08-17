@@ -1537,14 +1537,15 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"ping already sent, ignoring second ping request.");
             return;
         }
-        else if([self->_parseQueue operationCount] > 4)
+        else if([self->_parseQueue operationCount] > 0)
         {
             if(delayTimer != nil)
                 DDLogWarn(@"Ping already delayed, ignoring additional ping...");
             else
             {
+                NSUInteger delayBy = min((NSUInteger)timeout, [self->_parseQueue operationCount]);
                 DDLogWarn(@"parseQueue overflow, delaying ping by 4 seconds.");
-                delayTimer = createTimer(4.0, (^{
+                delayTimer = createTimer(delayBy, (^{
                     [self removeTimerToCancelOnDisconnect:delayTimer];
                     delayTimer = nil;
                     DDLogDebug(@"ping delay expired, retrying ping.");

@@ -1314,7 +1314,7 @@ $$
 $$instance_handler(handleAvatarPublishResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room), $$ID(MLPromise*, promise))
     NSString* errorString = [NSString stringWithFormat:NSLocalizedString(@"Failed to publish avatar image for group/channel %@: please try again", @""), room];
     NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}];
-    [promise reject:error];
+    [promise rejectWithError:error andNode:nil forAccountWithID:account.accountID];
 $$
 
 $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLPromise*, promise))
@@ -1323,7 +1323,7 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, 
         DDLogError(@"Publishing avatar for muc '%@' returned error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);
         NSString* errorString = [NSString stringWithFormat:NSLocalizedString(@"Failed to publish avatar image for group/channel %@", @""), iqNode.fromUser];
         NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}];
-        [promise reject:error];
+        [promise rejectWithError:error andNode:iqNode forAccountWithID:account.accountID];
         return;
     }
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);

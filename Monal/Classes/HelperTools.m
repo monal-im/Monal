@@ -1011,6 +1011,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         [NSUUID class],
         [MLPromise class],
         [NSError class],
+        [MLPromiseRejection class],
     ]] fromData:data error:&error];
     if(error)
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];

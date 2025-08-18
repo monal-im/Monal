@@ -2523,15 +2523,6 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) removeAllPromises
-{
-    DDLogDebug(@"Removing all promises from the DB");
-    [self.db voidWriteTransaction:^{
-        NSString* query = @"DELETE FROM promises;";
-        [self.db executeNonQuery:query];
-    }];
-}
-
 -(MLPromise*) getPromise:(MLPromise*) promise
 {
     DDLogDebug(@"Getting promise %@ with uuid %@ from DB", promise, promise.uuid);
@@ -2542,6 +2533,21 @@ static NSDateFormatter* dbFormatter;
         NSData* data = results[0];
         MLPromise* retrieved = [HelperTools unserializeData:data];
         return retrieved;
+    }];
+}
+
+-(NSSet<MLPromise*>*) getAllPromises
+{
+    DDLogDebug(@"Getting all promises from the DB");
+    return [self.db idReadTransaction:^{
+        NSString* query = @"SELECT promise FROM promises;";
+        NSArray<NSData*>* results = [self.db executeScalarReader:query];
+        NSMutableSet<MLPromise*>* promises = [NSMutableSet new];
+        for(NSData* data in results)
+        {
+            [promises addObject:[HelperTools unserializeData:data]];
+        }
+        return promises;
     }];
 }
 

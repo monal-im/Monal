@@ -97,6 +97,10 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, readonly) NSString* contactDisplayName;
 @property (nonatomic, readonly) NSString* contactDisplayNameWithoutSelfnotesPrefix;
 
+// This property is used to avoid querying MAM if the top of the archive
+// was already reached in a previous query
+@property (nonatomic, readonly) BOOL hasReachedMamArchiveTop;
+
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName;
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName andSelfnotesPrefix:(BOOL) hasSelfnotesPrefix;
 -(void) updateWithContact:(MLContact*) contact;
@@ -116,6 +120,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(void) removeFromRoster;
 -(void) addToRoster;
 -(void) clearHistory;
+-(void) markReachedMamArchiveTop;
 -(void) removeShareInteractions;
 
 -(NSUInteger) hash;

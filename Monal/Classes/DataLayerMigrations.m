@@ -963,6 +963,10 @@
             );"];
         }];
 
+        // Keep track of when the full MAM archive has been fetched, so we don't query it again
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.001 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN reached_mam_archive_top BOOL DEFAULT FALSE;"];
+        }];
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

@@ -439,7 +439,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
 
     return [self.db idReadTransaction:^{
-        NSArray* results = [self.db executeReader:@"SELECT b.buddy_id, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, mentionOnly, b.account_id, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', encrypt, muted, \
+        NSArray* results = [self.db executeReader:@"SELECT b.buddy_id, b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, mentionOnly, b.account_id, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', encrypt, muted, reached_mam_archive_top, \
             CASE \
                 WHEN a.buddy_name IS NOT NULL THEN 1 \
                 ELSE 0 \
@@ -1470,6 +1470,9 @@ static NSDateFormatter* dbFormatter;
         
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountID]];
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
+
+        //allow fetching history from MAM again, for chats that fetched the whole archive previously
+        [self.db executeNonQuery:@"UPDATE buddylist SET reached_mam_archive_top=0 WHERE account_id=?;" andArguments:@[accountID]];
     }];
 }
 
@@ -1485,6 +1488,9 @@ static NSDateFormatter* dbFormatter;
         //better UX without deleting the active chat
         //[self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=? AND buddy_name=?;" andArguments:@[accountID, buddy]];
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
+
+        //allow fetching history from MAM again, in case the whole archive was fetched previously
+        [self.db executeNonQuery:@"UPDATE buddylist SET reached_mam_archive_top=0 WHERE account_id=? AND buddy_name=?;" andArguments:@[accountID, buddy]];
     }];
 }
 
@@ -1998,6 +2004,13 @@ static NSDateFormatter* dbFormatter;
 {
     [self.db voidWriteTransaction:^{
         [self.db executeScalarReader:@"UPDATE account SET registeredPushServer=? WHERE account_id=?;" andArguments:@[pushServer, accountID]];
+    }];
+}
+
+-(void) markReachedMamArchiveTopForContact:(MLContact*) contact
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"UPDATE buddylist SET reached_mam_archive_top=1 WHERE account_id=? AND buddy_name=?;" andArguments:@[contact.accountID, contact.contactJid]];
     }];
 }
 

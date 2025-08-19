@@ -74,6 +74,7 @@ static NSMutableDictionary* _singletonCache;
 @property (nonatomic, strong) NSString* ask;
 
 @property (nonatomic, strong) NSString* contactDisplayName;
+@property (nonatomic, assign) BOOL hasReachedMamArchiveTop;
 @end
 
 @implementation MLContact
@@ -106,6 +107,7 @@ static NSMutableDictionary* _singletonCache;
             @"isActiveChat": @YES,
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],
             @"rosterGroups": [NSSet new],
+            @"reached_mam_archive_top": @NO,
         }];
     }
     else if(type == 2)
@@ -130,6 +132,7 @@ static NSMutableDictionary* _singletonCache;
             @"isActiveChat": @YES,
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640153174],
             @"rosterGroups": [NSSet new],
+            @"reached_mam_archive_top": @NO,
         }];
     }
     else if(type == 3)
@@ -154,6 +157,7 @@ static NSMutableDictionary* _singletonCache;
             @"isActiveChat": @YES,
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640157074],
             @"rosterGroups": [NSSet new],
+            @"reached_mam_archive_top": @NO,
         }];
     }
     else
@@ -177,6 +181,7 @@ static NSMutableDictionary* _singletonCache;
             @"isActiveChat": @YES,
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640157174],
             @"rosterGroups": [NSSet new],
+            @"reached_mam_archive_top": @NO,
         }];
     }
 }
@@ -229,6 +234,7 @@ static NSMutableDictionary* _singletonCache;
             @"isActiveChat": @NO,
             @"lastInteraction": nilWrapper(nil),
             @"rosterGroups": [NSSet set],
+            @"reached_mam_archive_top": @NO,
         }];
     }
     else
@@ -720,6 +726,12 @@ static NSMutableDictionary* _singletonCache;
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 }
 
+-(void) markReachedMamArchiveTop
+{
+    [[DataLayer sharedInstance] markReachedMamArchiveTopForContact:self];
+    self.hasReachedMamArchiveTop = YES;
+}
+
 #pragma mark - NSCoding
 
 -(void) encodeWithCoder:(NSCoder*) coder
@@ -745,6 +757,7 @@ static NSMutableDictionary* _singletonCache;
     [coder encodeBool:self.isMuted forKey:@"isMuted"];
     [coder encodeObject:self.lastInteractionTime forKey:@"lastInteractionTime"];
     [coder encodeObject:self.rosterGroups forKey:@"rosterGroups"];
+    [coder encodeBool:self.hasReachedMamArchiveTop forKey:@"hasReachedMamArchiveTop"];
 }
 
 -(instancetype) initWithCoder:(NSCoder*) coder
@@ -771,6 +784,7 @@ static NSMutableDictionary* _singletonCache;
     self.isMuted = [coder decodeBoolForKey:@"isMuted"];
     self.lastInteractionTime = [coder decodeObjectForKey:@"lastInteractionTime"];
     self.rosterGroups = [coder decodeObjectForKey:@"rosterGroups"];
+    self.hasReachedMamArchiveTop = [coder decodeBoolForKey:@"hasReachedMamArchiveTop"];
     return self;
 }
 
@@ -799,6 +813,7 @@ static NSMutableDictionary* _singletonCache;
     //don't update lastInteractionTime from contact, we dynamically update ourselves by handling kMonalLastInteractionUpdatedNotice
     //updateIfIdNotEqual(self.lastInteractionTime, contact.lastInteractionTime);
     updateIfIdNotEqual(self.rosterGroups, contact.rosterGroups);
+    updateIfPrimitiveNotEqual(self.hasReachedMamArchiveTop, contact.hasReachedMamArchiveTop);
 }
 
 -(BOOL) isEqualToMessage:(MLMessage*) message
@@ -869,6 +884,7 @@ static NSMutableDictionary* _singletonCache;
     // initial value comes from db, all other values get updated by our kMonalLastInteractionUpdatedNotice handler
     contact.lastInteractionTime = nilExtractor([dic objectForKey:@"lastInteraction"]);        //no default needed, already done in DataLayer
     contact.rosterGroups = [dic objectForKey:@"rosterGroups"];
+    contact.hasReachedMamArchiveTop = [[dic objectForKey:@"reached_mam_archive_top"] boolValue];
     contact->_avatar = nil;
 
     MLAssert(contact.rosterGroups != nil, @"rosterGroups must be non-nil (if a user is in no groups, it should be empty set)");

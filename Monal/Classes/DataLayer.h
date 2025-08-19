@@ -308,6 +308,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(NSString*) lastUsedPushServerForAccount:(NSNumber*) accountID;
 -(void) updateUsedPushServer:(NSString*) pushServer forAccount:(NSNumber*) accountID;
+-(void) markReachedMamArchiveTopForContact:(MLContact*) contact;
 
 
 

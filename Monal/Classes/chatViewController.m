@@ -2699,54 +2699,33 @@ enum msgSentState {
 
         //now load more (older) messages from mam
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);
-        weakify(self);
-        [self.xmppAccount setMAMQueryMostRecentForContact:self.contact before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages, NSString* _Nullable error) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                strongify(self);
-                if(!messages && !error)
-                {
-                    //xmpp account got reconnected
-                    DDLogError(@"Got backscrolling mam error: nil (possible reconnect while querying)");
-                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not fetch messages", @"") message:NSLocalizedString(@"The connection to the server was interrupted and no old messages could be fetched for this chat. Please try again later.", @"") preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                        [alert dismissViewControllerAnimated:YES completion:nil];
-                    }]];
-                    [self presentViewController:alert animated:YES completion:nil];
-                }
-                else if(!messages)
-                {
-                    NSString* errorText = error;
-                    if(!error)
-                        errorText = NSLocalizedString(@"Unknown error!", @"");
-                    DDLogError(@"Got backscrolling mam error: %@", errorText);
-                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not fetch messages", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Could not fetch (all) old messages for this chat from your server archive. Please try again later. %@", @""), errorText] preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                        [alert dismissViewControllerAnimated:YES completion:nil];
-                    }]];
-                    [self presentViewController:alert animated:YES completion:nil];
-                }
-                else
-                {
-                    DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
-                    if([messages count] == 0)
-                    {
-                        self.moreMessagesAvailable = NO;
-                        
-                        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Finished fetching messages", @"") message:NSLocalizedString(@"All messages fetched successfully, there are no more left on the server!", @"") preferredStyle:UIAlertControllerStyleAlert];
-                        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                            [alert dismissViewControllerAnimated:YES completion:nil];
-                        }]];
-                        [self presentViewController:alert animated:YES completion:nil];
-                    }
-                    else
-                        [self insertOldMessages:[[messages reverseObjectEnumerator] allObjects]];
-                }
-                //allow next mam fetch
-                self.isLoadingMam = NO;
-                if(sender)
-                    [(UIRefreshControl*)sender endRefreshing];
-            });
-        }];
+        [self.xmppAccount setMAMQueryMostRecentForContact:self.contact before:oldestStanzaId]
+        .then(^(NSArray<MLMessage*>* messages) {
+            DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
+            if([messages count] == 0)
+            {
+                self.moreMessagesAvailable = NO;
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Finished fetching messages", @"") message:NSLocalizedString(@"All messages fetched successfully, there are no more left on the server!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    [alert dismissViewControllerAnimated:YES completion:nil];
+                }]];
+                [self presentViewController:alert animated:YES completion:nil];
+            }
+            else
+                [self insertOldMessages:[[messages reverseObjectEnumerator] allObjects]];
+        }).catch(^(NSError *error) {
+            DDLogError(@"Got backscrolling mam error: %@", error.localizedDescription);
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not fetch messages", @"") message:error.localizedDescription preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:alert animated:YES completion:nil];
+        }).ensure(^{
+            //allow next mam fetch
+            self.isLoadingMam = NO;
+            if(sender)
+                [(UIRefreshControl*)sender endRefreshing];
+        });
     }
     else if(!self.isLoadingMam && [oldMessages count] >= kMonalBackscrollingMsgCount)
     {

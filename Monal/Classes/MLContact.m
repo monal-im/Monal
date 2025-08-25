@@ -628,6 +628,10 @@ static NSMutableDictionary* _singletonCache;
     self.isMuted = mute;
     if(self.isMuc)
         [self.account.mucProcessor updateBookmarks];
+    // update active chats
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.account userInfo:@{
+        @"contact":self,
+    }];
 }
 
 -(void) toggleMentionOnly:(BOOL) mentionOnly
@@ -641,6 +645,10 @@ static NSMutableDictionary* _singletonCache;
     self.isMentionOnly = mentionOnly;
     if(self.isMuc)
         [self.account.mucProcessor updateBookmarks];
+    // update active chats
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.account userInfo:@{
+        @"contact":self,
+    }];
 }
 
 -(BOOL) toggleEncryption:(BOOL) encrypt

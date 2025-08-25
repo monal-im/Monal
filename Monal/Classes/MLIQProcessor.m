@@ -17,6 +17,7 @@
 #import <monalxmpp/MLNotificationQueue.h>
 #import <monalxmpp/MLContactSoftwareVersionInfo.h>
 #import <monalxmpp/MLOMEMO.h>
+#import "MLMessageProcessor.h"
 
 @import SAMKeychain;
 
@@ -230,6 +231,131 @@ $$class_handler(handleMamResponseWithLatestId, $$ID(xmpp*, account), $$ID(XMPPIQ
     if([iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
         [[DataLayer sharedInstance] setLastStanzaId:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"] forAccount:account.accountID];
     [account mamFinishedFor:account.connectionProperties.identity.jid];
+$$
+
+$$class_handler(handleMAMBackscrollingResultInvalidation, $$ID(xmpp*, account), $$ID(MLContact*, contact), $$ID(MLPromise*, promise))
+    DDLogError(@"Got backscrolling mam error for %@", contact.contactJid);
+    NSString* errorMessage = [NSString stringWithFormat:NSLocalizedString(@"Could not fetch more old chat history for '%@' from the server archive. Please try again.", @""), contact.contactJid];
+    NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+    [promise reject:error];
+$$
+
+$$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLContact*, contact), $_ID(NSArray*, historyIdsOfAlreadyRetreivedMessages), $$ID(MLPromise*, promise))
+    //the promise will be rejected if an error prevented us to get any messages.
+    //it will resolve an empty array, if the upper end of our archive was reached
+    //and it will resolve an array of newly loaded mlmessages in all other cases
+
+    //if we get less than half kMonalBackscrollingMsgCount message bodies,
+    //recursively send another query, passing it the promise and the historyIds of processed messages,
+    //and let the new query resolve the promise.
+    NSUInteger retrievedBodiesOverall = 0;
+    NSUInteger retrievedBodiesInThisQuery = 0;
+    if(historyIdsOfAlreadyRetreivedMessages)
+        retrievedBodiesOverall = historyIdsOfAlreadyRetreivedMessages.count;
+    NSMutableArray* mamPage = [account getOrderedMamPageFor:[iqNode findFirst:@"/@id"]];
+
+    //count new bodies
+    for(NSDictionary* data in mamPage)
+        if([data[@"messageNode"] check:@"body#"])
+            retrievedBodiesInThisQuery++;
+
+    retrievedBodiesOverall += retrievedBodiesInThisQuery;
+
+    // If we had an error but we got some bodies, the promise will resolve the messages containing those bodies.
+    // `item-not-found` means the stanzaId used in the query is unknown to the server, due to its retention policy.
+    // => item-not-found indicates that the top of the mam archive was reached
+    if([iqNode check:@"/<type=error>"] && retrievedBodiesOverall == 0
+        && ![iqNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+    {
+        NSString* errorMessage = [HelperTools extractXMPPError:iqNode withDescription:NSLocalizedString(@"Could not fetch more old history for this chat from the server archive. Please try again later.", @"")];
+        NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        [promise reject:error];
+    }
+    else
+    {
+        if(retrievedBodiesOverall == 0)
+        {
+            //if we did not retrieve any body messages we don't need to process metadata sanzas (if any), but signal we reached the end of our archive
+            DDLogDebug(@"Reached upper end of mam:2 archive");
+            [promise fulfill:@[]];
+            return;
+        }
+
+        NSMutableArray* historyIdList = [NSMutableArray new];
+
+        //ignore all notifications generated while processing the queued stanzas
+        [MLNotificationQueue queueNotificationsInBlock:^{
+            //process received message stanzas and manipulate the db accordingly
+            //if a new message got added to the history db, the message processor will return a MLMessage instance containing the history id of the newly created entry
+            DDLogDebug(@"Handling %lu entries in mam page...", mamPage.count);
+            //the handler is already called inside a db write transaction.
+            //this means we're safe from mam holes if the app crashes while processing messages.
+            //benchmarks reveal that processing 50 message stanzas takes ~58ms.
+            //=> no risk of blocking the main thread for db write access for too long.
+            NSNumber* historyId = @([[[DataLayer sharedInstance] getSmallestHistoryId] integerValue] - (NSInteger)retrievedBodiesInThisQuery);
+            uint32_t entryNo = 0;
+            for(NSDictionary* data in mamPage)
+            {
+                DDLogVerbose(@"Handling mam page entry[%u(%lu)]): %@", entryNo, mamPage.count, data);
+                MLMessage* msg = [MLMessageProcessor processMessage:data[@"messageNode"] andOuterMessage:data[@"outerMessageNode"] forAccount:account withHistoryId:historyId];
+                DDLogVerbose(@"Got message processor result: %@", msg);
+                //add successfully added messages to our display list
+                //stanzas not transporting a body will be processed, too, but the message processor will return nil for these
+                if(msg != nil)
+                {
+                    [historyIdList addObject:msg.messageDBId];      //we only need the history id to fetch a fresh copy later
+                    historyId = @([historyId intValue] + 1);      //calculate next history id
+                }
+                entryNo++;
+            }
+
+            //throw away all queued notifications before leaving this context
+            [(MLNotificationQueue*)[MLNotificationQueue currentQueue] clear];
+        } onQueue:@"MLhistoryIgnoreQueue"];
+
+        DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", historyIdList.count);
+        MLAssert(historyIdList.count <= retrievedBodiesInThisQuery, @"did add more messages to historydb table than bodies collected!", (@{
+            @"historyIdList": historyIdList,
+            @"retrievedBodies": @(retrievedBodiesInThisQuery),
+        }));
+        if(historyIdList.count < retrievedBodiesInThisQuery)
+            DDLogWarn(@"Got %lu mam history messages already contained in history db, possibly ougoing messages that did not have a stanzaid yet!", retrievedBodiesInThisQuery - historyIdList.count);
+
+        NSArray* overallHistoryIdList;
+        if(historyIdsOfAlreadyRetreivedMessages)
+            overallHistoryIdList = [historyIdList arrayByAddingObjectsFromArray:historyIdsOfAlreadyRetreivedMessages];
+        else
+            overallHistoryIdList = [historyIdList copy];
+
+        //check if we need to load more messages
+        if(retrievedBodiesOverall > kMonalBackscrollingMsgCount / 2)
+        {
+            //query db for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
+            [promise fulfill:[[DataLayer sharedInstance] messagesForHistoryIDs:overallHistoryIdList]];
+        }
+        else
+        {
+            if(
+                ![[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] &&
+                [iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/first#"]
+            )
+            {
+                //page through to get more messages, and pass the current promise and overallHistoryIdList
+                //to the new query's handler
+                DDLogVerbose(@"Going to send another mam backscrolling query because we didn't get enough message bodies. We got %lu bodies in this query and %lu bodies in all the queries since the user scrolled up to fetch more.", retrievedBodiesInThisQuery, retrievedBodiesOverall);
+                NSString* earliestStanzaId = [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/first#"];
+                XMPPIQ* newQuery = [account prepareIQForMAMQueryMostRecentForContact:contact before:earliestStanzaId];
+                [account sendIq:newQuery withHandler:$newHandlerWithInvalidation(MLIQProcessor, handleMAMBackscrollingResult, handleMAMBackscrollingResultInvalidation, $ID(contact), $ID(historyIdsOfAlreadyRetreivedMessages, overallHistoryIdList), $ID(promise))];
+            }
+            else
+            {
+                // Either the top of the mam archive was reached, or we got an error after receiving some bodies.
+
+                //query db for the real MLMessages to account for changes in history table by non-body metadata messages received after the body-message
+                [promise fulfill:[[DataLayer sharedInstance] messagesForHistoryIDs:overallHistoryIdList]];
+            }
+        }
+    }
 $$
 
 $$class_handler(handleCarbonsEnabled, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))

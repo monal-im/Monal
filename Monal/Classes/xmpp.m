@@ -4445,151 +4445,32 @@ NSString* const kStanza = @"stanza";
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleMamPrefs)];
 }
 
--(void) setMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable, NSString* _Nullable error)) completion
+-(XMPPIQ*) prepareIQForMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString*) before
 {
-    //the completion handler will get nil, if an error prevented us toget any messaes, an empty array, if the upper end of our archive was reached or an array
-    //of newly loaded mlmessages in all other cases
-    unsigned int __block retrievedBodies = 0;
-    NSMutableArray* __block pageList = [NSMutableArray new];
-    void __block (^query)(NSString* before);
-    monal_iq_handler_t __block responseHandler;
-    monal_void_block_t callUI = ^{
-        //if we did not retrieve any body messages we don't need to process metadata sanzas (if any), but signal we reached the end of our archive
-        //callUI() will only be called with retrievedBodies == 0 if we reached the upper end of our mam archive, because iq errors have already been
-        //handled in the iq error handler below
-        if(retrievedBodies == 0)
-        {
-            completion(@[], nil);
-            return;
-        }
-        
-        NSMutableArray* __block historyIdList = [NSMutableArray new];
-        NSNumber* __block historyId = [NSNumber numberWithInt:[[[DataLayer sharedInstance] getSmallestHistoryId] intValue] - retrievedBodies];
-        
-        //ignore all notifications generated while processing the queued stanzas
-        [MLNotificationQueue queueNotificationsInBlock:^{
-            uint32_t pageNo = 0;
-            //iterate through all pages and their messages forward in time (pages have already been sorted forward in time internally)
-            DDLogDebug(@"Handling %@ mam pages...", @([pageList count]));
-            for(NSArray* page in [[pageList reverseObjectEnumerator] allObjects])
-            {
-                //process received message stanzas and manipulate the db accordingly
-                //if a new message got added to the history db, the message processor will return a MLMessage instance containing the history id of the newly created entry
-                DDLogDebug(@"Handling %@ entries in mam page...", @([page count]));
-                uint32_t entryNo = 0;
-                for(NSDictionary* data in page)
-                {
-                    //don't write data to our tcp stream while inside this db transaction
-                    //(all effects to the outside world should be transactional, too)
-                    [self freezeSendQueue];
-                    //process all queued mam stanzas in a dedicated db write transaction
-                    [[DataLayer sharedInstance] createTransaction:^{
-                        DDLogVerbose(@"Handling mam page entry[%u(%@).%u(%@)]): %@", pageNo, @([pageList count]), entryNo, @([page count]), data);
-                        MLMessage* msg = [MLMessageProcessor processMessage:data[@"messageNode"] andOuterMessage:data[@"outerMessageNode"] forAccount:self withHistoryId:historyId];
-                        DDLogVerbose(@"Got message processor result: %@", msg);
-                        //add successfully added messages to our display list
-                        //stanzas not transporting a body will be processed, too, but the message processor will return nil for these
-                        if(msg != nil)
-                        {
-                            [historyIdList addObject:msg.messageDBId];      //we only need the history id to fetch a fresh copy later
-                            historyId = [NSNumber numberWithInt:[historyId intValue] + 1];      //calculate next history id
-                        }
-                    }];
-                    [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
-                    entryNo++;
-                }
-                pageNo++;
-            }
-            
-            //throw away all queued notifications before leaving this context
-            [(MLNotificationQueue*)[MLNotificationQueue currentQueue] clear];
-        } onQueue:@"MLhistoryIgnoreQueue"];
-        
-        DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[historyIdList count]);
-        MLAssert([historyIdList count] <= retrievedBodies, @"did add more messages to historydb table than bodies collected!", (@{
-            @"historyIdList": historyIdList,
-            @"retrievedBodies": @(retrievedBodies),
-        }));
-        if([historyIdList count] < retrievedBodies)
-            DDLogWarn(@"Got %lu mam history messages already contained in history db, possibly ougoing messages that did not have a stanzaid yet!", (unsigned long)(retrievedBodies - [historyIdList count]));
-        //query db (again) for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
-        completion([[DataLayer sharedInstance] messagesForHistoryIDs:historyIdList], nil);
-    };
-    responseHandler = ^(XMPPIQ* response) {
-        NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"/@id"]];
-        
-        //count new bodies
-        for(NSDictionary* data in mamPage)
-            if([data[@"messageNode"] check:@"body#"])
-                retrievedBodies++;
-        
-        //add new mam page to page list
-        [pageList addObject:mamPage];
-        
-        //check if we need to load more messages
-        if(retrievedBodies > 25)
-        {
-            //call completion to display all messages saved in db
-            callUI();
-        }
-        //query fo more messages or call completion to display all messages saved in db if we reached the end of our mam archive
-        else
-        {
-            //page through to get more messages (a page possibly contains fewer than 25 messages having a body)
-            //but because we query for 50 stanzas we could easily get more than 25 messages having a body, too
-            if(
-                ![[response findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] &&
-                [response check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/first#"]
-            )
-            {
-                query([response findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/first#"]);
-            }
-            else
-            {
-                DDLogDebug(@"Reached upper end of mam:2 archive, returning %lu messages to ui", (unsigned long)retrievedBodies);
-                //can be fewer than 25 messages because we reached the upper end of the mam archive
-                //even zero body-messages could be true
-                callUI();
-            }
-        }
-    };
-    query = ^(NSString* _Nullable before) {
-        XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
-        if(contact.isMuc)
-        {
-            if(!before)
-                before = [[DataLayer sharedInstance] lastStanzaIdForMuc:contact.contactJid andAccount:self.accountID];
-            [query setiqTo:contact.contactJid];
-            [query setMAMQueryLatestMessagesForJid:nil before:before];
-        }
-        else
-        {
-            if(!before)
-                before = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.accountID];
-            [query setMAMQueryLatestMessagesForJid:contact.contactJid before:before];
-        }
-        DDLogDebug(@"Loading (next) mam:2 page before: %@", before);
-        //we always want to use blocks here because we want to make sure we get not interrupted by an app crash/restart
-        //which would make us use incomplete mam pages that would produce holes in history (those are very hard to remove/fill afterwards)
-        [self sendIq:query withResponseHandler:responseHandler andErrorHandler:^(XMPPIQ* error) {
-            DDLogWarn(@"Got mam:2 before-query error, returning %lu messages to ui", (unsigned long)retrievedBodies);
-            if(retrievedBodies == 0)
-            {
-                //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any body-messages
-                //but only for non-item-not-found errors (and internal-server-error errors sent by one of ejabberd or prosody instead [don't know which one it was])
-                if(error == nil || ([error check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}internal-server-error"] && [@"item-not-found" isEqualToString:[error findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]]))
-                    completion(nil, nil);
-                else
-                    completion(nil, [HelperTools extractXMPPError:error withDescription:nil]);
-            }
-            else
-            {
-                //we had an error but we did already load some body-messages --> update ui anyways
-                callUI();
-            }
-        }];
-    };
-    query(uid);
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
+    if(contact.isMuc)
+    {
+        if(!before)
+            before = [[DataLayer sharedInstance] lastStanzaIdForMuc:contact.contactJid andAccount:self.accountID];
+        [query setiqTo:contact.contactJid];
+        [query setMAMQueryLatestMessagesForJid:nil before:before];
+    }
+    else
+    {
+        if(!before)
+            before = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.accountID];
+        [query setMAMQueryLatestMessagesForJid:contact.contactJid before:before];
+    }
+    return query;
+}
+
+-(AnyPromise*) setMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString*) before
+{
+    MLPromise* promise = [MLPromise new];
+    XMPPIQ* query = [self prepareIQForMAMQueryMostRecentForContact:contact before:before];
+    DDLogDebug(@"Loading mam:2 page before stanzaId %@", before);
+    [self sendIq:query withHandler:$newHandlerWithInvalidation(MLIQProcessor, handleMAMBackscrollingResult, handleMAMBackscrollingResultInvalidation, $ID(contact), $ID(promise))];
+    return [promise toAnyPromise];
 }
 
 #pragma mark - MUC

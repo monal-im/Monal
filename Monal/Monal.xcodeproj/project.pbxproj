@@ -1828,6 +1828,7 @@
 				ko,
 				eu,
 				"es-AR",
+				te,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (

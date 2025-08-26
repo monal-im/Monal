@@ -212,7 +212,7 @@ struct DebugView: View {
         .padding()
         .addLoadingOverlay(overlay)
         .navigationBarItems(trailing:Button("Reconnect All") {
-            showLoadingOverlay(overlay, headline: "Reconnecting", description: "Will log out and reconnect all (connected) accounts.") {
+            showLoadingOverlay(overlay, headline: "Reconnecting", description: "Will log out and reconnect all (enabled) accounts.") {
                 MLXMPPManager.sharedInstance().reconnectAll()
                 return after(seconds:3.0)
             }

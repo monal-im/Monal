@@ -186,7 +186,9 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             """),
             customView: nil,
             //this is needed because the `#if IS_QUICKSY` blocks the compiler extraction of this LocalizedStringKey based string
-            nextText: NSLocalizedString("Accept and continue", comment:"Quicksy privacy policy")
+            //during runtime, the localized string will be used as a localization key.
+            //no translation will be found. So, the key (which is already a translation) will be used as is.
+            nextText: LocalizedStringKey(stringLiteral: NSLocalizedString("Accept and continue", comment:"Quicksy privacy policy"))
         ),
     ]
 #else

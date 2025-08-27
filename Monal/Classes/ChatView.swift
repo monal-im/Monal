@@ -202,7 +202,7 @@ struct ChatView: View {
             }
             messages.append(ChatViewMessage(ObservableKVOWrapper(newMLMessage)))
         } messageBuilder: { message, viewModel, positionInUserGroup, positionInMessagesSection, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
-            MessageView(message: (message as! ChatViewMessage).message, viewModel: viewModel, positionInUserGroup: positionInUserGroup, positionInMessagesSection: positionInMessagesSection)
+            MessageView(message: (message as! ChatViewMessage), viewModel: viewModel, positionInUserGroup: positionInUserGroup, positionInMessagesSection: positionInMessagesSection)
         }
         .showNetworkConnectionProblem(false)
 //         .enableLoadMore(pageSize: 3) { message in
@@ -421,13 +421,26 @@ struct ChatView: View {
 }
 
 class ChatViewMessage: ExyteChat.Message {
-    let message: ObservableKVOWrapper<MLMessage>
-
+    let innerMessage: ObservableKVOWrapper<MLMessage>
+    private var subscriptions: Set<AnyCancellable> = Set()
+    override var text: String {
+        get {
+            return innerMessage.retracted ? "This message got retracted" : innerMessage.messageText
+        }
+        set {}
+    }
     init(_ message: ObservableKVOWrapper<MLMessage>) {
-        self.message = message
-        let messageText = message.retracted ? NSLocalizedString("This message got retracted", comment: "") : message.messageText
+        self.innerMessage = message
         let user = ExyteChat.User(id: message.senderID, name: message.contactDisplayName, avatarURL: nil, isCurrentUser: !message.inbound)
-        super.init(id: message.id, user: user, createdAt: message.timestamp, text: messageText)
+        // We don't need to initialize the properties that we overrode with computed properties
+        super.init(id: message.id, user: user, createdAt: message.timestamp, text: "")
+
+        // Forward innerMessage changes as ChatViewMessage changes
+        innerMessage.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &subscriptions)
     }
 }
 
@@ -484,12 +497,13 @@ public extension ExyteChat.MessageView {
 //         }
     }
 }*/
+
 struct MessageView: View {
-    @StateObject var message: ObservableKVOWrapper<MLMessage>
+    @StateObject var message: ChatViewMessage
     @ObservedObject var viewModel: ExyteChat.ChatViewModel
     let positionInUserGroup: PositionInUserGroup
     let positionInMessagesSection: PositionInMessagesSection
-    init(message: ObservableKVOWrapper<MLMessage>, viewModel: ChatViewModel, positionInUserGroup: PositionInUserGroup, positionInMessagesSection: PositionInMessagesSection) {
+    init(message: ChatViewMessage, viewModel: ChatViewModel, positionInUserGroup: PositionInUserGroup, positionInMessagesSection: PositionInMessagesSection) {
         _message = StateObject(wrappedValue: message)
         self.viewModel = viewModel
         self.positionInUserGroup = positionInUserGroup
@@ -498,7 +512,7 @@ struct MessageView: View {
     var body: some View {
         ExyteChat.MessageView(
             viewModel: viewModel,
-            message: ChatViewMessage(message),
+            message: message,
             positionInUserGroup: positionInUserGroup,
             positionInMessagesSection: positionInMessagesSection,
             chatType: .conversation,

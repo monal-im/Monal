@@ -200,7 +200,7 @@ struct ChatView: View {
             guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: draft.text, havingType: kMessageTypeText, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: nil) else {
                 return
             }
-            messages.append(ChatViewMessage(ObservableKVOWrapper(newMLMessage)))
+            messages.append(ChatViewMessage(newMLMessage))
         } messageBuilder: { message, viewModel, positionInUserGroup, positionInMessagesSection, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
             MessageView(message: (message as! ChatViewMessage), viewModel: viewModel, positionInUserGroup: positionInUserGroup, positionInMessagesSection: positionInMessagesSection)
         }
@@ -352,7 +352,7 @@ struct ChatView: View {
             if messages.isEmpty {
                 let dbMessages = DataLayer.sharedInstance().messages(forContact:contact.contactJid, forAccount:contact.accountID) as! [MLMessage]
                 for msg in dbMessages {
-                    messages.append(ChatViewMessage(ObservableKVOWrapper(msg)))
+                    messages.append(ChatViewMessage(msg))
                 }
             }
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
@@ -410,7 +410,7 @@ struct ChatView: View {
             if message.isEqual(to: self.contact.obj) {
                 // Do not insert based on delay timestamp because that
                 // would make it possible to fake history entries.
-                messages.append(ChatViewMessage(ObservableKVOWrapper(message)))
+                messages.append(ChatViewMessage(message))
             }
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
         }
@@ -429,8 +429,8 @@ class ChatViewMessage: ExyteChat.Message {
         }
         set {}
     }
-    init(_ message: ObservableKVOWrapper<MLMessage>) {
-        self.innerMessage = message
+    init(_ message: MLMessage) {
+        self.innerMessage = ObservableKVOWrapper(message)
         let user = ExyteChat.User(id: message.senderID, name: message.contactDisplayName, avatarURL: nil, isCurrentUser: !message.inbound)
         // We don't need to initialize the properties that we overrode with computed properties
         super.init(id: message.id, user: user, createdAt: message.timestamp, text: "")

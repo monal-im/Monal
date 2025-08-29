@@ -522,7 +522,7 @@ class ChatViewMessage: ExyteChat.Message {
     private var subscriptions: Set<AnyCancellable> = Set()
     override var text: String {
         get {
-            return innerMessage.retracted ? "This message got retracted" : innerMessage.messageText
+            return innerMessage.retracted ? NSLocalizedString("This message got retracted", comment: "") : innerMessage.messageText
         }
         set {}
     }

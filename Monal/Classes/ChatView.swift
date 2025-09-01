@@ -89,6 +89,8 @@ struct ChatView: View {
     @State private var alertPrompt: AlertPrompt?
     @State private var confirmationPrompt: ConfirmationPrompt?
     @StateObject private var overlay = LoadingOverlayState()
+    @State private var moderationReason = "Spam"
+    @State private var messageToModerate: MLMessage?
     @State var messages: [ChatViewMessage] = []
     private var account: xmpp
     
@@ -298,7 +300,7 @@ struct ChatView: View {
                 case .retract:
                     self.account.retractMessage(mlMessage)
                 case .moderate:
-                    self.account.moderateMessage(mlMessage, withReason: "This message contains inappropriate content for this forum.")
+                    messageToModerate = mlMessage
                 case .delete:
                     Task { @MainActor in
                         await Task.detached(priority: .userInitiated) {
@@ -339,6 +341,20 @@ struct ChatView: View {
                 }
             }))
         }
+        .alert("Moderating message", isPresented: $messageToModerate.optionalMappedToBool(), actions: {
+            TextField("Reason", text: $moderationReason)
+            Button("Moderate", role: .destructive) {
+                MLAssert(messageToModerate != nil, "messageToModerate must not be nil during moderation!")
+                self.account.moderateMessage(messageToModerate!, withReason: moderationReason)
+                // Reset the State variables to their default values, as the alert is dismissed
+                messageToModerate = nil
+                moderationReason = "Spam"
+            }
+            Button("Cancel", role: .cancel) {
+                messageToModerate = nil
+                moderationReason = "Spam"
+            }
+        }, message: { Text("Enter the moderation reason") })
         .toolbar {
             ToolbarItem(placement: .principal) {
                 //make sure to take all space available, otherwise we'll get aligned to the center

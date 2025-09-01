@@ -100,7 +100,7 @@ struct ChatView: View {
     }
 
     enum MessageAction: MessageMenuAction {
-        case copy, edit, retract, moderate, delete
+        case copy, edit, retract, moderate, delete, resend
 
         func title() -> String {
             switch self {
@@ -114,6 +114,8 @@ struct ChatView: View {
                     "Moderate"
                 case .delete:
                     "Delete Locally"
+                case .resend:
+                    "Resend"
             }
         }
 
@@ -131,6 +133,8 @@ struct ChatView: View {
                     Image(systemName: "arrow.uturn.backward.circle")
                 case .delete:
                     Image(systemName: "trash")
+                case .resend:
+                    Image(systemName: "paperplane")
             }
         }
 
@@ -140,6 +144,9 @@ struct ChatView: View {
             let account = contact.account!
             if mlMessage.retracted {
                 return [.delete]
+            }
+            if case .error = message.status {
+                return [.resend, .delete]
             }
             var availableActions: [MessageAction] = [.copy]
             if !mlMessage.inbound && DataLayer.sharedInstance().checkLMCEligible(mlMessage.messageDBId, encrypted: mlMessage.encrypted || contact.isEncrypted, historyBaseID: nil) {
@@ -315,6 +322,42 @@ struct ChatView: View {
                             userInfo: ["contact": self.contact.obj]
                         )
                     }
+                case .resend:
+                    confirmationPrompt = ConfirmationPrompt(
+                        title: Text("Retry sending message?"),
+                        message: Text("This message failed to send (\(mlMessage.errorType)): \(mlMessage.errorReason)"),
+                        buttons: [
+                            .default(
+                                Text("Retry"),
+                                action: {
+                                    Task { @MainActor in
+                                        await Task.detached(priority: .userInitiated) {
+                                            DataLayer.sharedInstance().clearError(ofMessageId: mlMessage.messageId)
+                                        }.value
+
+                                        mlMessage.errorType = ""
+                                        mlMessage.errorReason = ""
+                                        let isUpload = mlMessage.messageType == kMessageTypeFiletransfer
+                                        let isEncrypted = mlMessage.encrypted || self.contact.isEncrypted
+                                        self.account.sendMessage(mlMessage.messageText,
+                                                                 to: self.contact.obj,
+                                                                 isEncrypted: isEncrypted,
+                                                                 isUpload: isUpload,
+                                                                 andMessageId: mlMessage.messageId)
+                                        MLNotificationQueue.current().post(
+                                            name: Notification.Name(kMLMessageSentToContact),
+                                            object: self.account,
+                                            userInfo: ["contact": self.contact.obj]
+                                        )
+                                    }
+                                }
+                            ),
+                            .cancel(
+                                Text("Cancel"),
+                                action: { }
+                            )
+                        ]
+                    )
             }
         }
         .showNetworkConnectionProblem(false)
@@ -553,6 +596,29 @@ class ChatViewMessage: ExyteChat.Message {
     override var text: String {
         get {
             return innerMessage.retracted ? NSLocalizedString("This message got retracted", comment: "") : innerMessage.messageText
+        }
+        set {}
+    }
+    override var status: Status? {
+        get {
+            // Incoming messages shouldn't have a status
+            if innerMessage.inbound {
+                return nil
+            }
+            let errorType = innerMessage.errorType as String?
+            let isError = errorType != nil && !errorType!.isEmpty
+            switch(innerMessage) {
+                case let message where isError && !message.hasBeenReceived:
+                    return .error(DraftMessage(id: id, text: text, medias: [], recording: recording, replyMessage: replyMessage, createdAt: createdAt))
+                case let message where message.hasBeenDisplayed:
+                    return .read
+                case let message where message.hasBeenReceived:
+                    return .received
+                case let message where message.hasBeenSent:
+                    return .sent
+                default:
+                    return .sending
+            }
         }
         set {}
     }

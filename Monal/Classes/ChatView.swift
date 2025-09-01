@@ -99,7 +99,67 @@ struct ChatView: View {
         _contact = StateObject(wrappedValue: contact)
         account = contact.obj.account!
     }
-    
+
+    enum MessageAction: MessageMenuAction {
+        case copy, edit, retract, moderate, delete
+
+        func title() -> String {
+            switch self {
+                case .copy:
+                    "Copy"
+                case .edit:
+                    "Edit"
+                case .retract:
+                    "Retract"
+                case .moderate:
+                    "Moderate"
+                case .delete:
+                    "Delete Locally"
+            }
+        }
+
+        func icon() -> Image {
+            switch self {
+                case .copy:
+                    Image(systemName: "doc.on.doc")
+                case .edit:
+                    if #available(iOS 18.0, macCatalyst 18.0, *) {
+                        Image(systemName: "bubble.and.pencil")
+                    } else {
+                        Image(systemName: "square.and.pencil")
+                    }
+                case .retract, .moderate:
+                    Image(systemName: "arrow.uturn.backward.circle")
+                case .delete:
+                    Image(systemName: "trash")
+            }
+        }
+
+        static func menuItems(for message: ExyteChat.Message) -> [MessageAction] {
+            let mlMessage = (message as! ChatViewMessage).innerMessage.obj
+            let contact = mlMessage.contact
+            let account = contact.account!
+            if mlMessage.retracted {
+                return [.delete]
+            }
+            var availableActions: [MessageAction] = [.copy]
+            if !mlMessage.inbound && DataLayer.sharedInstance().checkLMCEligible(mlMessage.messageDBId, encrypted: mlMessage.encrypted || contact.isEncrypted, historyBaseID: nil) {
+                availableActions.append(.edit)
+            }
+
+            if !mlMessage.inbound && (!mlMessage.isMuc || (mlMessage.isMuc && !mlMessage.stanzaId.isEmpty)) {
+                availableActions.append(.retract)
+            }
+            else if mlMessage.isMuc && !mlMessage.stanzaId.isEmpty && DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact) == kMucRoleModerator && account.mucProcessor.getRoomFeatures(forMuc: contact.contactJid).contains("urn:xmpp:message-moderate:1") {
+                availableActions.append(.moderate)
+            } else {
+                availableActions.append(.delete)
+            }
+
+            return availableActions
+        }
+    }
+
     private func showCannotEncryptAlert(_ show: Bool) {
         if show {
             DDLogVerbose("Showing cannot encrypt alert...")
@@ -284,6 +344,57 @@ struct ChatView: View {
             messages.append(ChatViewMessage(newMLMessage))
         } messageBuilder: { message, viewModel, positionInUserGroup, positionInMessagesSection, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
             MessageView(message: (message as! ChatViewMessage), viewModel: viewModel, positionInUserGroup: positionInUserGroup, positionInMessagesSection: positionInMessagesSection)
+        } messageMenuAction: { (action: MessageAction, defaultActionClosure, message) in
+            let mlMessage = (message as! ChatViewMessage).innerMessage.obj
+            let messageDBId = mlMessage.messageDBId
+            switch action {
+                case .copy:
+                    defaultActionClosure(message, .copy)
+                case .edit:
+                    defaultActionClosure(message, .edit { editedText in
+                        Task { @MainActor in
+                            self.account.sendMessage(editedText,
+                                                     to: self.contact.obj,
+                                                     isEncrypted: self.contact.isEncrypted || mlMessage.encrypted,
+                                                     isUpload: false,
+                                                     andMessageId: UUID().uuidString,
+                                                     withLMCId: mlMessage.messageId)
+
+                            // Don't block the main thread while writing to the DB
+                            await Task.detached(priority: .userInitiated) {
+                                DataLayer.sharedInstance().updateMessageHistory(messageDBId, withText: editedText)
+                            }.value
+
+                            MLNotificationQueue.current().post(
+                                name: Notification.Name(kMonalUpdatedMessageNotice),
+                                object: self.account,
+                                userInfo: ["message": mlMessage,
+                                           "contact": self.contact.obj,
+                                           "LMCReplaced": true,
+                                           "correctedText": editedText,
+                                          ]
+                            )
+                        }
+                    })
+                case .retract:
+                    self.account.retractMessage(mlMessage)
+                case .moderate:
+                    self.account.moderateMessage(mlMessage, withReason: "This message contains inappropriate content for this forum.")
+                case .delete:
+                    Task { @MainActor in
+                        await Task.detached(priority: .userInitiated) {
+                            DataLayer.sharedInstance().deleteMessageHistoryLocally(mlMessage.messageDBId)
+                        }.value
+
+                        self.messages.removeAll(where: {$0.id == message.id})
+                        // Update active chats if necessary
+                        MLNotificationQueue.current().post(
+                            name: Notification.Name(kMonalContactRefresh),
+                            object: self.account,
+                            userInfo: ["contact": self.contact.obj]
+                        )
+                    }
+            }
         }
         .showNetworkConnectionProblem(false)
         .enableLoadMore(pageSize: 10) { message in

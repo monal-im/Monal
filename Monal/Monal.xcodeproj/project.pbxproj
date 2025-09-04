@@ -613,6 +613,8 @@
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		842790842A32D16C005C18CC /* CallSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CallSounds; sourceTree = "<group>"; };
+		8430EB382E5D6CDC007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = te.lproj/Main.strings; sourceTree = "<group>"; };
+		8430EB392E5D6D68007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = te.lproj/Settings.strings; sourceTree = "<group>"; };
 		843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MLOgHtmlParser.swift; path = Classes/MLOgHtmlParser.swift; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
 		844921E92C29F9A000B99A9C /* MLDelayableTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDelayableTimer.m; sourceTree = "<group>"; };
@@ -2443,6 +2445,7 @@
 				C15A4E5D279D2AC70055CD11 /* ko */,
 				C1E856A728DECF5F00B104E9 /* eu */,
 				84F194C42C0FE74500F0A994 /* es-AR */,
+				8430EB392E5D6D68007A2B1F /* te */,
 			);
 			name = Settings.storyboard;
 			sourceTree = "<group>";
@@ -2485,6 +2488,7 @@
 				C15A4E5B279D2AC60055CD11 /* ko */,
 				C1E856A628DECF5F00B104E9 /* eu */,
 				84F194C32C0FE70900F0A994 /* es-AR */,
+				8430EB382E5D6CDC007A2B1F /* te */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";

@@ -1,8 +1,22 @@
 use crate::ffi::rust_panic_handler;
 use monal_html_parser::MonalHtmlParser;
+use monal_xml_parser::{MonalXmlStreamParser, MonalXmlStreamParserResult};
+
+// #[swift_bridge::bridge]
+// mod ffi_i {
+//     pub enum MonalXmlStreamParserResultX {
+//         // Start((String, String, Vec<(String, String)>)),
+//         // End((String, String)),
+//         Text(String),
+//         CData(String),
+//         NeedMoreData,
+//     }
+// }
+// 
+// use ffi_i::MonalXmlStreamParserResultX;
 
 #[swift_bridge::bridge]
-mod ffi {
+pub mod ffi {
     //simple functions exported from rust to swift
     extern "Rust" {
         pub fn install_panichandler();
@@ -22,12 +36,44 @@ mod ffi {
             atrribute: Option<String>,
         ) -> Vec<String>;
     }
-
+    
+    #[swift_bridge(already_declared)]
+    enum MonalXmlStreamParserResult {}
+    
+    //rust struct exported from rust to swift
+    extern "Rust" {
+        type MonalXmlStreamParser;
+        #[swift_bridge(init)]
+        pub fn new() -> MonalXmlStreamParser;
+        pub fn feed(&mut self, chunk: &str);
+        pub fn poll(&mut self) -> Result<MonalXmlStreamParserResult, String>;
+    }
+    // extern "Rust" {
+    //     type MonalXmlStreamParserResult;
+    // }
+    
+    // extern "Rust" {
+    //     enum MonalEnum {
+    //         // Start((String, String, Vec<(String, String)>)),
+    //         // End((String, String)),
+    //         Text(String),
+    //         CData(String),
+    //         NeedMoreData,
+    //     }
+    // }
+    
     //exported from our internal swift helper to rust
     extern "Swift" {
         fn rust_panic_handler(text: String, backtrace: String);
     }
 }
+
+// impl XmlStreamParserDelegateTrait for XmlStreamParserDelegate {
+// }
+
+// pub fn call_delegate(d: &mut XmlStreamParserDelegate) {
+//     d.text("bla".to_string());
+// }
 
 pub fn install_panichandler() {
     monal_panic_handler::install_panic_handler(rust_panic_handler);

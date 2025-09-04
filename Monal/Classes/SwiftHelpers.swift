@@ -466,8 +466,6 @@ fileprivate extension RustVec {
     }
 }
 
-extension RustString: @retroactive Error {}
-
 @objcMembers
 public class JingleSDPBridge : NSObject {
     @objc(getJingleStringForSDPString:withInitiator:)
@@ -504,5 +502,53 @@ public class HtmlParserBridge : NSObject {
     
     public func select(_ selector: String, attribute: String? = nil) throws -> [String] {
         return self.document.select(selector, attribute).intoArray().map { $0.toString() }
+    }
+}
+
+@objcMembers
+public class XmlParserBridge : NSObject {
+    var wrapped: MonalXmlStreamParser
+    var delegate: MLBasePaser
+    
+    public init(with delegate: MLBasePaser) {
+        self.wrapped = MonalXmlStreamParser()
+        self.delegate = delegate
+    }
+    
+    /*
+    Start((String, String, Vec<(String, String)>)),
+    End((String, String)),
+    Text(String),
+    CData(String),
+    Error(String),
+    NeedMoreData,
+    */
+    public func feed(data chunk: String) {
+        do {
+            self.wrapped.feed(chunk)
+            var notDoneYet = true
+            while notDoneYet {
+                switch try self.wrapped.poll() {
+                    case MonalXmlStreamParserResultStart((name, ns, attrs)):
+                        var attributes: [String:String]
+                        for (key, value) in attrs/*.intoArray()*/ {
+                            attributes[key.toString()] = value.toString()
+                        }
+                        self.delegate.parserDidStartElement(name.toString(), namespaceURI:ns.toString(), attributes:attributes)
+                    case MonalXmlStreamParserResultEnd((name, ns)):
+                        self.delegate.parserDidEndElement(name.toString(), namespaceURI:ns.toString())
+                    case MonalXmlStreamParserResultText(text):
+                        self.delegate.parserFoundCharacters(text.toString())
+                    case MonalXmlStreamParserResultCData(cdata):
+                        self.delegate.parserFoundCharacters(cdata.toString())
+                    case MonalXmlStreamParserResultNeedMoreData:
+                        notDoneYet = false
+                }
+            }
+        } catch let err {
+            errorText = String(describing:err)
+            DDLogError("XML parser returned error: \(errorText)")
+            self.delegate.parserErrorOccurred(errorText)
+        }
     }
 }

@@ -6,12 +6,14 @@
 //
 //
 
+#import <stdint.h>
 #include <os/proc.h>
 
 #import <CommonCrypto/CommonCrypto.h>
 #import <CFNetwork/CFSocketStream.h>
 #import <Security/SecureTransport.h>
 
+#import <monalxmpp/monalxmpp-Swift.h>
 #import "xmpp.h"
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"
@@ -49,6 +51,7 @@
 
 @import AVFoundation;
 
+#define kInputChunkSize 4096
 #define STATE_VERSION 604019
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
@@ -77,16 +80,17 @@ NSString* const kStanza = @"stanza";
 @interface xmpp()
 {
     //network (stream) related stuff
-    MLPipe* _iPipe;
+    NSInputStream* _iStream;
     NSOutputStream* _oStream;
     NSMutableArray* _outputQueue;
+    dispatch_queue_t _xmlParserFeedingQueue;
     // buffer for stanzas we can not (completely) write to the tcp socket
     uint8_t* _outputBuffer;
     size_t _outputBufferByteCount;
     BOOL _streamHasSpace;
 
     //parser and queue related stuff
-    NSXMLParser* _xmlParser;
+    XmlParserBridge* _xmlParser;
     MLBasePaser* _baseParserDelegate;
     NSOperationQueue* _parseQueue;
     NSOperationQueue* _receiveQueue;
@@ -278,6 +282,8 @@ NSString* const kStanza = @"stanza";
         _usableServersList = [NSMutableArray new];
     _reconnectBackoffTime = 0;
     
+    //do the stanza parsing in the low priority (=utility) global queue
+    _xmlParserFeedingQueue = dispatch_queue_create_with_target([NSString stringWithFormat:@"im.monal.xmlparser%@", self->_logtag].UTF8String, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0));
     _parseQueue = [NSOperationQueue new];
     _parseQueue.name = [NSString stringWithFormat:@"parseQueue[%@:%@]", self.accountNo, _internalID];
     _parseQueue.qualityOfService = NSQualityOfServiceUtility;
@@ -576,9 +582,6 @@ NSString* const kStanza = @"stanza";
         [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort tls:NO inputStream:&localIStream outputStream:&localOStream logtag:self->_logtag];
     }
     
-    if(localOStream)
-        _oStream = localOStream;
-    
     if((localIStream == nil) || (localOStream == nil))
     {
         DDLogError(@"failed to create streams");
@@ -589,13 +592,19 @@ NSString* const kStanza = @"stanza";
     else
         DDLogInfo(@"streams created ok");
     
-    //open sockets, init pipe and start connecting (including TLS handshake if isDirectTLS==YES)
+    if(localOStream)
+        _oStream = localOStream;
+    if(localIStream)
+        _iStream = localIStream;
+    
+    //open sockets and start connecting (including TLS handshake if isDirectTLS==YES)
     DDLogInfo(@"opening TCP streams");
     _pipeliningState = kPipelinedNothing;
+    [_iStream setDelegate:self];
     [_oStream setDelegate:self];
+    [_iStream scheduleInRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
     [_oStream scheduleInRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
-    _iPipe = [[MLPipe alloc] initWithInputStream:localIStream andOuterDelegate:self];
-    [localIStream open];
+    [_iStream open];
     [_oStream open];
     DDLogInfo(@"TCP streams opened");
     
@@ -1235,13 +1244,8 @@ NSString* const kStanza = @"stanza";
 
         //prevent any new read or write
         if(self->_xmlParser != nil)
-        {
-            [self->_xmlParser setDelegate:nil];
-            [self->_xmlParser abortParsing];
             self->_xmlParser = nil;
-        }
-        [self->_iPipe close];
-        self->_iPipe = nil;
+        [self->_iStream setDelegate:nil];
         [self->_oStream setDelegate:nil];
         
         //sadly closing the output stream does not unblock a hanging [_oStream write:maxLength:] call
@@ -1256,10 +1260,22 @@ NSString* const kStanza = @"stanza";
             DDLogError(@"Exception in ostream close");
         }
         
+        DDLogInfo(@"closing input stream");
+        @try
+        {
+            [self->_iStream close];
+        }
+        @catch(id theException)
+        {
+            DDLogError(@"Exception in istream close");
+        }
+        self->_iStream=nil;
+        
         //clean up send queue now that the delegate was removed (_streamHasSpace can not switch to YES now)
         [self cleanupSendQueue];
         
         //remove from runloop *after* cleaning up sendQueue (maybe this fixes a rare crash)
+        [self->_iStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
         [self->_oStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
 
         DDLogInfo(@"resetting internal stream state to disconnected");
@@ -1385,11 +1401,10 @@ NSString* const kStanza = @"stanza";
 -(void) prepareXMPPParser
 {
     BOOL appex = [HelperTools isAppExtension];
-    if(_xmlParser!=nil)
+    if(_xmlParser != nil)
     {
         DDLogInfo(@"%@: resetting old xml parser", self->_logtag);
-        [_xmlParser setDelegate:nil];
-        [_xmlParser abortParsing];
+        _xmlParser = nil;
         [_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we aborted the parser right now)
     }
     if(!_baseParserDelegate)
@@ -1499,20 +1514,8 @@ NSString* const kStanza = @"stanza";
         [_baseParserDelegate reset];
     }
     
-    // create (new) pipe and attach a (new) streaming parser
-    _xmlParser = [[NSXMLParser alloc] initWithStream:[_iPipe getNewOutputStream]];
-    [_xmlParser setShouldProcessNamespaces:YES];
-    [_xmlParser setShouldReportNamespacePrefixes:NO];
-    //[_xmlParser setShouldReportNamespacePrefixes:YES];        //for debugging only
-    [_xmlParser setShouldResolveExternalEntities:NO];
-    [_xmlParser setDelegate:_baseParserDelegate];
-    
-    // do the stanza parsing in the low priority (=utility) global queue
-    dispatch_async(dispatch_queue_create_with_target([NSString stringWithFormat:@"im.monal.xmlparser%@", self->_logtag].UTF8String, DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)), ^{
-        DDLogInfo(@"%@: calling parse", self->_logtag);
-        [self->_xmlParser parse];     //blocking operation
-        DDLogInfo(@"%@: parse ended", self->_logtag);
-    });
+    //create streaming parser
+    _xmlParser = [[XmlParserBridge alloc] initWith:_baseParserDelegate];
 }
 
 -(void) startXMPPStreamWithXMLOpening:(BOOL) withXMLOpening
@@ -3011,8 +3014,6 @@ NSString* const kStanza = @"stanza";
             if(_xmlParser!=nil)
             {
                 DDLogInfo(@"stopping old xml parser");
-                [_xmlParser setDelegate:nil];
-                [_xmlParser abortParsing];
                 _xmlParser = nil;
                 //throw away all parsed but not processed stanzas (we aborted the parser right now)
                 //the xml parser will fill the parse queue synchronously while < kStateInitStarted
@@ -3020,7 +3021,7 @@ NSString* const kStanza = @"stanza";
                 [_parseQueue cancelAllOperations];
             }
             //prepare input/output streams
-            [_iPipe drainInputStreamAndCloseOutputStream];      //remove all pending data before starting tls handshake
+            [self drainInputStream];      //remove all pending data before starting tls handshake
             self->_streamHasSpace = NO;     //make sure we do not try to send any data while the tls handshake is still performed
             
             //dispatch async to not block the db transaction of the proceed stanza inside the receive queue
@@ -4985,7 +4986,7 @@ NSString* const kStanza = @"stanza";
     }];
 }
 
-#pragma mark - nsstream delegate
+#pragma mark network I/O
 
 -(void)stream:(NSStream*) stream handleEvent:(NSStreamEvent) eventCode
 {
@@ -5023,7 +5024,7 @@ NSString* const kStanza = @"stanza";
         {
             if(stream != _oStream)
             {
-                DDLogDebug(@"Ignoring NSStreamEventHasSpaceAvailable event on wrong stream %@", stream);
+                DDLogWarn(@"Ignoring NSStreamEventHasSpaceAvailable event on wrong stream %@", stream);
                 break;
             }
             [_sendQueue addOperationWithBlock: ^{
@@ -5037,7 +5038,27 @@ NSString* const kStanza = @"stanza";
         //for reading
         case NSStreamEventHasBytesAvailable:
         {
-            DDLogError(@"Stream %@ has bytes to read (should not be called!)", stream);
+            if(stream != _iStream)
+            {
+                DDLogWarn(@"Ignoring NSStreamEventHasBytesAvailable event on wrong stream %@", stream);
+                break;
+            }
+            dispatch_async(_xmlParserFeedingQueue, ^{
+                DDLogVerbose(@"Stream %@ has bytes to read", stream);
+                uint8_t buffer[kInputChunkSize+1];      //+1 for '\0' needed for logging the received raw bytes
+                NSInteger readLen = [self->_iStream read:buffer maxLength:kInputChunkSize];
+                if(readLen <= 0)
+                {
+                    DDLogWarn(@"Did not receive anything in NSStreamEventHasBytesAvailable event!");
+                    return;
+                }
+                buffer[readLen] = '\0';      //null termination for log output of raw string
+                DDLogVerbose(@"RECV(%ld): %s", (long)readLen, buffer);
+                //this is zero-copy (but only valid for the lifetime of this function call)
+                //only a single copy is made, when the VecDequeue buffer gets extended on the rust side
+                [self->_xmlParser feedData:buffer withLength:readLen];
+                DDLogVerbose(@"XML parser returned...");
+            });
             break;
         }
         
@@ -5045,13 +5066,6 @@ NSString* const kStanza = @"stanza";
         {
             NSError* st_error = [stream streamError];
             DDLogError(@"Stream %@ error code=%ld domain=%@ local desc:%@", stream, (long)st_error.code,st_error.domain, st_error.localizedDescription);
-            /*
-            if(stream != _oStream)      //check for _oStream here, because we don't have any _iStream (the mlpipe input stream was directly handed over to the xml parser)
-            {
-                DDLogInfo(@"Ignoring error in iStream (will already be handled in oStream error handler");
-                break;
-            }
-            */
             
             //check accountState to make sure we don't swallow any errors thrown while [self connect] was already called,
             //but the _reconnectInProgress flag not reset yet
@@ -5134,7 +5148,26 @@ NSString* const kStanza = @"stanza";
     }
 }
 
-#pragma mark network I/O
+-(void) drainInputStream
+{
+    uint8_t buffer[kInputChunkSize+1];      //+1 for '\0' needed for logging the received raw bytes
+    NSInteger drainedBytes = 0;
+    NSInteger len = 0;
+    do
+    {
+        if(![_iStream hasBytesAvailable])
+            break;
+        len = [_iStream read:buffer maxLength:kInputChunkSize];
+        DDLogDebug(@"iStream drained %ld bytes", (long)len);
+        if(len > 0)
+        {
+            drainedBytes += len;
+            buffer[len] = '\0';      //null termination for log output of raw string
+            DDLogDebug(@"iStream got raw drained string '%s'", buffer);
+        }
+    } while(len > 0 && [_iStream hasBytesAvailable]);
+    DDLogDebug(@"iStream done draining %ld bytes", (long)drainedBytes);
+}
 
 -(void) writeFromQueue
 {

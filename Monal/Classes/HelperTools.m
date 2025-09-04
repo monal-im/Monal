@@ -2762,12 +2762,9 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
     if(xmlString == nil)
         return nil;
     DDLogVerbose(@"Parsing XML string produced by rust sdp parser(withInitiator=%@): %@", bool2str(initiator), xmlString);
-    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
-    [xmlParser setShouldProcessNamespaces:YES];
-    [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
-    [xmlParser setShouldResolveExternalEntities:NO];
-    [xmlParser setDelegate:delegate];
-    [xmlParser parse];     //blocking operation
+    XmlParserBridge* xmlParser = [[XmlParserBridge alloc] initWith:delegate];
+    NSData* xmlData = [xmlString dataUsingEncoding:NSUTF8StringEncoding];
+    [xmlParser feedData:xmlData.bytes withLength:xmlData.length];     //blocking operation
     return retval;
 }
 

@@ -35,3 +35,4 @@ FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 #import <monalxmpp/UIColor+Extension.h>
 #import <monalxmpp/MLUDPLogger.h>
 #import <monalxmpp/XMPPDataForm.h>
+#import <monalxmpp/MLBasePaser.h>

@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
+#import <monalxmpp/monalxmpp-Swift.h>
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/HelperTools.h>
 #import "MLBasePaser.h"
@@ -16,9 +17,9 @@ static NSMutableArray<MLXMLNode*>* _parsedStanzas;
 static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         <stream:stream xmlns:stream='http://etherx.jabber.org/streams' version='1.0' xmlns='jabber:client' xml:lang='en' from='example.org' id='a344b8bb-518e-4456-9140-d15f66c1d2db'>\n\
 \
-        <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl' someEmptyAttribute=''><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism></mechanisms></stream:features>\n\
+        <stream:features><utf8-multibyte-example1 xmlns='ex:1' comment='should survive byte-level chunking'>ÄÄÄÄ#ÜÜÜÜ#ÖÖÖÖ~ääääääää#üüüüüüüü#öööööööö</utf8-multibyte-example1><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl' someEmptyAttribute=''><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism></mechanisms></stream:features>\n\
 \
-        <message from='test@example.org' id='some_id' xmlns='jabber:client'>\n\
+        <message from='test@example.org' id='some_id' xmlns='jabber:client' utf8-multibyte-example2='ÄÄÄÄ#ÜÜÜÜ#ÖÖÖÖ~ääääääää#üüüüüüüü#öööööööö'>\n\
             <body>Message text</body>\n\
             <body xmlns='urn:some:different:namespace'>This will NOT be used</body>\n\
             <some xmlns='urn:some:different:namespace' fin='true' hello='0' world='1' number='42' uuid='18382ACA-EF9D-4BC9-8779-7901C63B6631' id='18382ACA' when='2002-09-10T23:08:25Z'>aGVsbG8gd29ybGQh</some>\n\
@@ -81,19 +82,23 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
     MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
         if(parsedStanza != nil)
         {
-            DDLogInfo(@"Got new parsed stanza: %@", parsedStanza);
+            NSLog(@"Got new parsed stanza: %@", parsedStanza);
             [_parsedStanzas addObject:parsedStanza];
         }
     }];
 #pragma clang diagnostic pop
     
-    //create xml parser, configure our delegate and feed it with data
-    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[_rawXML dataUsingEncoding:NSUTF8StringEncoding]];
-    [xmlParser setShouldProcessNamespaces:YES];
-    [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
-    [xmlParser setShouldResolveExternalEntities:NO];
-    [xmlParser setDelegate:delegate];
-    [xmlParser parse];     //blocking operation
+    //create xml parser, configure our delegate and feed it with data in 3 byte chunks to make sure the parser works with incomplete data, too
+    //(don't use 1 byte chunks because we want to test excess data handling, too)
+    XmlParserBridge* xmlParser = [[XmlParserBridge alloc] initWith:delegate];
+    
+    NSUInteger chunkSize = 3;
+    NSData* data = [_rawXML dataUsingEncoding:NSUTF8StringEncoding];
+    for(NSUInteger offset=0; offset<[data length]; offset+=chunkSize)
+    {
+        NSData* chunk = [data subdataWithRange:NSMakeRange(offset, MIN(chunkSize, [data length] - offset))];
+        [xmlParser feedData:chunk.bytes withLength:chunk.length];     //blocking operation
+    }
 }
 
 -(void) setUp
@@ -104,6 +109,25 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
 -(void) tearDown
 {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
+}
+
+-(void) testUtf8MultibyteChunking
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //stanzas 0 and 1 should match
+        id result0 = [_parsedStanzas[i] findFirst:@"/{http://etherx.jabber.org/streams}features/{ex:1}utf8-multibyte-example1#"];
+        id result1 = [_parsedStanzas[i] findFirst:@"/{jabber:client}message@utf8-multibyte-example2"];
+        if(i == 0)
+            XCTAssertEqualObjects(result0, @"ÄÄÄÄ#ÜÜÜÜ#ÖÖÖÖ~ääääääää#üüüüüüüü#öööööööö", "stanza 0 should match and return the correct multibyte utf-8 umlauts in text contents");
+        else if(i == 1)
+            XCTAssertEqualObjects(result1, @"ÄÄÄÄ#ÜÜÜÜ#ÖÖÖÖ~ääääääää#üüüüüüüü#öööööööö", "stanza 1 should match and return the correct multibyte utf-8 umlauts in attribute value");
+        else
+        {
+            XCTAssertNil(result0, "all other stanzas should not match: %lu", i);
+            XCTAssertNil(result1, "all other stanzas should not match: %lu", i);
+        }
+    }
 }
 
 -(void) testParseConversionBase64
@@ -581,7 +605,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
     NSSet* features = [NSSet setWithArray:[_parsedStanzas[i] find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
     NSArray* forms = [_parsedStanzas[i] find:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"];
     NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features andForms:forms];
-    DDLogDebug(@"Caps hash calculated: %@", ver);
+    NSLog(@"Caps hash calculated: %@", ver);
     XCTAssertEqualObjects(ver, @"q07IKJEyjvHSyhy//CH0CxmKi8w=", "Caps hash NOT equal to testcase hash 'q07IKJEyjvHSyhy//CH0CxmKi8w='!");
 }
 

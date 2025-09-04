@@ -26,3 +26,4 @@ FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 #import "MLCall.h"
 #import "HelperTools.h"
 #import "MLDelayableTimer.h"
+#import "MLBasePaser.h"

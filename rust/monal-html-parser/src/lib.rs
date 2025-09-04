@@ -10,11 +10,7 @@ impl MonalHtmlParser {
         MonalHtmlParser { document }
     }
 
-    pub fn select(
-        &self,
-        selector: String,
-        atrribute: Option<String>,
-    ) -> Vec<String> {
+    pub fn select(&self, selector: String, atrribute: Option<String>) -> Vec<String> {
         let mut retval = Vec::new();
         let sel = match Selector::parse(&selector) {
             Ok(value) => value,

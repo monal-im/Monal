@@ -466,8 +466,6 @@ fileprivate extension RustVec {
     }
 }
 
-extension RustString: @retroactive Error {}
-
 @objcMembers
 public class JingleSDPBridge : NSObject {
     @objc(getJingleStringForSDPString:withInitiator:)
@@ -504,5 +502,56 @@ public class HtmlParserBridge : NSObject {
     
     public func select(_ selector: String, attribute: String? = nil) throws -> [String] {
         return self.document.select(selector, attribute).intoArray().map { $0.toString() }
+    }
+}
+
+@objcMembers
+public class XmlParserBridge : NSObject {
+    var wrapped: MonalXmlStreamParserWrapper
+    var delegate: MLBasePaser
+    
+    public init(with delegate: MLBasePaser) {
+        //never buffer more than 8192 bytes inside the rust parser and limit maximum
+        //token length (attribute value, attribute name, element name) to 1024
+        self.wrapped = MonalXmlStreamParserWrapper(8192, 1024)
+        self.delegate = delegate
+    }
+    
+    @objc(feedString:)
+    public func feed(string chunk: String) {
+        do {
+            self.wrapped.feed(chunk)
+            var notDoneYet = true
+            while notDoneYet {
+                switch try self.wrapped.poll() {
+                    case .XmlDeclaration(let version):
+                        self.delegate.parserDidStartDocument(version.toString())
+                    case .Start(let element):
+                        let keys: [String] = element.attr_keys!.intoArray().map { $0.toString() }
+                        let values: [String] = element.attr_values!.intoArray().map { $0.toString() }
+                        MLAssert(keys.count == values.count, "Atrribute vectors coming from rust should have the same sizes!", [
+                            "keys": keys as NSArray,
+                            "values": values as NSArray,
+                        ])
+                        var attributes: [String:String] = [:]
+                        for i in 0..<keys.count {
+                            attributes[keys[i]] = values[i]
+                        }
+                        self.delegate.parserDidStartElement(element.name.toString(), namespaceURI:element.ns.toString(), attributes:attributes)
+                    case .End:
+                        self.delegate.parserDidEndInnermostElement()
+                    case .Text(let text):
+                        self.delegate.parserFoundCharacters(text.toString())
+                    case .NeedMoreData:
+                        notDoneYet = false
+                }
+            }
+        } catch let err as RustString {
+            DDLogError("XML parser returned error: \(err.toString())")
+            self.delegate.parserErrorOccurred(err.toString())
+        } catch let err {
+            DDLogError("XML parser returned UNEXPECTED error: \(String(describing:err))")
+            unreachable("xml parser should never return non-string errors!")
+        }
     }
 }

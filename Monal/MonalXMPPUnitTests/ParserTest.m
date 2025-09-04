@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
+#import <monalxmpp/monalxmpp-Swift.h>
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/HelperTools.h>
 #import "MLBasePaser.h"
@@ -87,13 +88,17 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
     }];
 #pragma clang diagnostic pop
     
-    //create xml parser, configure our delegate and feed it with data
-    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[_rawXML dataUsingEncoding:NSUTF8StringEncoding]];
-    [xmlParser setShouldProcessNamespaces:YES];
-    [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
-    [xmlParser setShouldResolveExternalEntities:NO];
-    [xmlParser setDelegate:delegate];
-    [xmlParser parse];     //blocking operation
+    //create xml parser, configure our delegate and feed it with data in 3 byte chunks to make sure the parser works with incomplete data, too
+    //(don't use 1 byte chunks because we want to test excess data handling, too)
+    XmlParserBridge* xmlParser = [[XmlParserBridge alloc] initWith:delegate];
+    
+    NSUInteger chunkSize = 3;
+    NSData* data = [_rawXML dataUsingEncoding:NSUTF8StringEncoding];
+    for(NSUInteger offset=0; offset<[data length]; offset+=chunkSize)
+    {
+        NSData* chunk = [data subdataWithRange:NSMakeRange(offset, MIN(chunkSize, [data length] - offset))];
+        [xmlParser feedString:chunk];     //blocking operation
+    }
 }
 
 -(void) setUp

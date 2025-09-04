@@ -59,17 +59,22 @@ typedef void (^view_queue_block_t)(PMKResolver _Nonnull);
 @implementation UISplitViewController (nopresent)
 -(void) swizzled_presentViewController:(UIViewController*) viewControllerToPresent animated:(BOOL) flag completion:(void (^)(void))completion
 {
-    UIViewController* contentVC = [viewControllerToPresent valueForKey:@"contentViewController"];
-    if(contentVC)
-    {
-        NSString* className = NSStringFromClass([contentVC class]);
-        if([className isEqualToString:@"_UIAlternateApplicationIconsAlertContentViewController"])
+    //ignore errors when trying to access key contentViewController if it is not existing
+    @try {
+        UIViewController* contentVC = [viewControllerToPresent valueForKey:@"contentViewController"];
+        if(contentVC)
         {
-            DDLogWarn(@"Ignoring _UIAlternateApplicationIconsAlertContentViewController...");
-            if(completion)
-                completion();
-            return;     //ignore this alert view (don't show it)
+            NSString* className = NSStringFromClass([contentVC class]);
+            if([className isEqualToString:@"_UIAlternateApplicationIconsAlertContentViewController"])
+            {
+                DDLogWarn(@"Ignoring _UIAlternateApplicationIconsAlertContentViewController...");
+                if(completion)
+                    completion();
+                return;     //ignore this alert view (don't show it)
+            }
         }
+    } @catch(id ignoredException) {
+        DDLogDebug(@"Ignoring exception while trying to prevent _UIAlternateApplicationIconsAlertContentViewController: %@", ignoredException);
     }
     
     //call original method we swizzled

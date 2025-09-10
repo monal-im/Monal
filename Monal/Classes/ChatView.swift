@@ -90,8 +90,10 @@ struct ChatView: View {
     @State private var confirmationPrompt: ConfirmationPrompt?
     @StateObject private var overlay = LoadingOverlayState()
     @State var messages: [ChatViewMessage] = []
+    @State var queuedNewMessages: [ChatViewMessage] = []
     private var account: xmpp
     @State private var isLoadingMamHistory = false
+    @State private var messageInsertionTimer: Timer?
     
     init(contact: ObservableKVOWrapper<MLContact>) {
         _contact = StateObject(wrappedValue: contact)
@@ -463,6 +465,7 @@ struct ChatView: View {
             if MLNotificationManager.sharedInstance().currentContact == self.contact.obj {
                 MLNotificationManager.sharedInstance().currentContact = nil
             }
+            messageInsertionTimer?.invalidate()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalOmemoFetchingStateUpdate)).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let notificationJid = notification.userInfo?["jid"] as? String {
@@ -484,9 +487,17 @@ struct ChatView: View {
                 return
             }
             if message.isEqual(to: self.contact.obj) {
-                // Do not insert based on delay timestamp because that
-                // would make it possible to fake history entries.
-                messages.append(ChatViewMessage(message))
+                // Don't insert based on delay timestamp because that would make it possible to fake history entries.
+                // Insert new messages in batches to work around https://github.com/exyte/Chat/issues/223
+                queuedNewMessages.append(ChatViewMessage(message))
+                if messageInsertionTimer == nil {
+                    messageInsertionTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
+                        messages.append(contentsOf: queuedNewMessages)
+                        queuedNewMessages.removeAll(keepingCapacity: true)
+                        messageInsertionTimer = nil
+                    }
+                    messageInsertionTimer?.tolerance = 0.04
+                }
             }
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
         }

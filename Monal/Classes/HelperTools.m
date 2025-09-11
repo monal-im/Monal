@@ -3352,6 +3352,7 @@ a=%@\r\n", mid, candidate];
     }
     
     gzclose(gzOutput);
+    fclose(outputFile);
     [input close];
     
     return [NSURL fileURLWithPath:gzipPath];

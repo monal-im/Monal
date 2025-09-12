@@ -331,7 +331,7 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"New caps hash: %@", hash);
         _capsHash = hash;
         //broadcast new version hash (will be ignored if we are not bound)
-        if(_accountState >= kStateBound)
+        if(_accountState >= kStateInitStarted)
             [self sendPresence];
     }
 }
@@ -1096,7 +1096,7 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"doing explicit logout (xmpp stream close)");
             self->_reconnectBackoffTime = 0.0;
             [self unfreezeSendQueue];      //make sure the queue is operational again
-            if(self.accountState>=kStateBound)
+            if(self.accountState >= kStateInitStarted)
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
                     if([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
@@ -1171,7 +1171,7 @@ NSString* const kStanza = @"stanza";
             else
             {
                 //send one last ack before closing the stream (xep version 1.5.2)
-                if(self.accountState>=kStateBound)
+                if(self.accountState >= kStateInitStarted)
                 {
                     [self->_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                         [self sendLastAck];
@@ -1430,7 +1430,7 @@ NSString* const kStanza = @"stanza";
                 }]] waitUntilFinished:YES];
             //we have to wait for the stanza/nonza to be handled before parsing the next one to not introduce race conditions
             //between the response to our pipelined stream restart and the parser reset in the sasl success handler
-            }]] waitUntilFinished:(self->_accountState < kStateBound ? YES : NO)];
+            }]] waitUntilFinished:(self->_accountState < kStateInitStarted ? YES : NO)];
         }];
     }
     else
@@ -1527,7 +1527,7 @@ NSString* const kStanza = @"stanza";
             return;
         }
         
-        if(self.accountState<kStateBound)
+        if(self.accountState < kStateInitStarted)
         {
             DDLogInfo(@"ping attempted before logged in and bound, ignoring ping.");
             return;
@@ -1561,8 +1561,8 @@ NSString* const kStanza = @"stanza";
                 self->_pingTimer = nil;
                 [self dispatchAsyncOnReceiveQueue: ^{
                     //check if someone already called reconnect or disconnect while we were waiting for the ping
-                    //(which was called while we still were >= kStateBound)
-                    if(self.accountState<kStateBound)
+                    //(which was called while we still were >= kStateInitStarted)
+                    if(self.accountState < kStateInitStarted)
                         DDLogInfo(@"ping took too long, but reconnect or disconnect already in progress, ignoring");
                     else
                     {
@@ -1800,7 +1800,7 @@ NSString* const kStanza = @"stanza";
     MLXMLNode* rNode;
     @synchronized(_stateLockObject) {
         unsigned long unackedCount = (unsigned long)[self.unAckedStanzas count];
-        if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
+        if(self.accountState >= kStateInitStarted && self.connectionProperties.supportsSM3 &&
             ((!self.smacksRequestInFlight && unackedCount>0) || force)
         ) {
             DDLogVerbose(@"requesting smacks ack...");
@@ -1826,8 +1826,8 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendSMAck:(BOOL) queuedSend
 {
-    //don't send anything before a resource is bound
-    if(self.accountState<kStateBound || !self.connectionProperties.supportsSM3)
+    //don't send anything before a resource is bound and smacks was enabled
+    if(self.accountState < kStateInitStarted || !self.connectionProperties.supportsSM3)
         return;
     
     NSDictionary* dic;
@@ -1862,11 +1862,11 @@ NSString* const kStanza = @"stanza";
     //only process most stanzas/nonzas after having a secure context
     if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
     {
-        if([parsedStanza check:@"/{urn:xmpp:sm:3}r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
+        if([parsedStanza check:@"/{urn:xmpp:sm:3}r"] && self.connectionProperties.supportsSM3 && self.accountState >= kStateInitStarted)
         {
             [self sendSMAck:YES];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState >= kStateInitStarted)
         {
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
             if(h==nil)
@@ -2393,7 +2393,7 @@ NSString* const kStanza = @"stanza";
             //message duplicates are possible in this scenario, but that's better than dropping messages
             [self resendUnackedMessageStanzasOnly:stanzas];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}resumed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound)
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}resumed"] && self.connectionProperties.supportsSM3 && self.accountState < kStateBound)
         {
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
             if(h==nil)
@@ -2401,10 +2401,12 @@ NSString* const kStanza = @"stanza";
             self.resuming = NO;
             self.isDoingFullReconnect = NO;
 
-            //now we are bound again
-            _accountState = kStateBound;
+            //now we are initialized again (the following block is *largely* taken from earlyInitSession
+            DDLogInfo(@"Session resumed, initializing state...");
+            self.isDoingFullReconnect = YES;
             _connectedTime = [NSDate date];
             _reconnectBackoffTime = 0;
+            _accountState = kStateInitStarted;
             [self accountStatusChanged];
 
             @synchronized(_stateLockObject) {
@@ -2467,7 +2469,7 @@ NSString* const kStanza = @"stanza";
             //initialize stanza counter for statistics
             [self initCatchupStats];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound && self.resuming)
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState < kStateBound && self.resuming)
         {
             //we landed here because smacks resume failed
             
@@ -2492,7 +2494,7 @@ NSString* const kStanza = @"stanza";
                 [self bindResource:self.connectionProperties.identity.resource];
             }
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound && !self.resuming)
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState >= kStateBound && !self.resuming)
         {
             //we landed here because smacks enable failed
             
@@ -2931,7 +2933,7 @@ NSString* const kStanza = @"stanza";
                 [_xmlParser abortParsing];
                 _xmlParser = nil;
                 //throw away all parsed but not processed stanzas (we aborted the parser right now)
-                //the xml parser will fill the parse queue synchronously while < kStateBound
+                //the xml parser will fill the parse queue synchronously while < kStateInitStarted
                 //--> no stanzas/nonzas will leak into the parse queue after resetting the parser and clearing the parse queue
                 [_parseQueue cancelAllOperations];
             }
@@ -3414,13 +3416,13 @@ NSString* const kStanza = @"stanza";
             }
         }
         
-        //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateBound
+        //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateInitStarted
         //only exceptions: an outgoing bind request or jabber:iq:register stanza (this is allowed before binding a resource)
         BOOL isBindRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/resource"];
         BOOL isRegisterRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{jabber:iq:register}query"];
         BOOL isPreauthRegisterRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"/<type=set>/{urn:xmpp:pars:0}preauth"];
         if(
-            self.accountState>=kStateBound ||
+            self.accountState>=kStateInitStarted ||
             (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest || isRegisterRequest || isPreauthRegisterRequest))
         )
         {
@@ -3566,7 +3568,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendChatState:(BOOL) isTyping toContact:(nonnull MLContact*) contact
 {
-    if(self.accountState < kStateBound)
+    if(self.accountState < kStateInitStarted)
         return;
 
     XMPPMessage* messageNode = [[XMPPMessage alloc] initToContact:contact];
@@ -3948,7 +3950,7 @@ NSString* const kStanza = @"stanza";
         {
             //this will count any stanza between our bind result and smacks enable result but gets reset to sane values
             //once the smacks enable result surfaces (e.g. the wrong counting will be ignored later)
-            if(self.accountState>=kStateBound)
+            if(self.accountState >= kStateInitStarted)
                 self.lastHandledInboundStanza = [NSNumber numberWithInteger:[self.lastHandledInboundStanza integerValue] + 1];
         }
         [self persistState];        //make sure we persist our state, even if smacks is not supported
@@ -4117,8 +4119,8 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendPresence
 {
-    //don't send presences if we are not bound
-    if(_accountState < kStateBound)
+    //don't send presences if we are not bound and smacks enabled
+    if(_accountState < kStateInitStarted)
         return;
     
     XMPPPresence* presence = [[XMPPPresence alloc] initWithHash:_capsHash];
@@ -4143,9 +4145,9 @@ NSString* const kStanza = @"stanza";
     [self sendIq:roster withHandler:$newHandler(MLIQProcessor, handleRoster)];
 }
 
--(void) initSession
+-(void) earlyInitSession
 {
-    DDLogInfo(@"Now bound, initializing new xmpp session");
+    DDLogInfo(@"Now bound, resetting state...");
     self.isDoingFullReconnect = YES;
     
     //we are now bound
@@ -4157,6 +4159,18 @@ NSString* const kStanza = @"stanza";
     
     //inform other parts of monal about our new state
     [[MLNotificationQueue currentQueue] postNotificationName:kMLResourceBoundNotice object:self];
+    [self accountStatusChanged];
+}
+
+-(void) initSession
+{
+    DDLogInfo(@"Now bound and past smacks enable, initializing new xmpp session...");
+    
+    //indicate we are bound and smacks enabled now
+    _accountState = kStateInitStarted;
+    
+    //inform other parts of monal about our new state
+    [[MLNotificationQueue currentQueue] postNotificationName:kMLSessionInitNotice object:self];
     [self accountStatusChanged];
     
     //now fetch roster, request disco and send initial presence
@@ -4367,9 +4381,9 @@ NSString* const kStanza = @"stanza";
 {
     [self dispatchOnReceiveQueue: ^{
         //don't send anything before a resource is bound
-        if(self.accountState<kStateBound || ![self.connectionProperties.serverFeatures check:@"{urn:xmpp:csi:0}csi"])
+        if(self.accountState < kStateInitStarted || ![self.connectionProperties.serverFeatures check:@"{urn:xmpp:csi:0}csi"])
         {
-            DDLogVerbose(@"NOT sending csi state, because we are not bound yet (or csi is not supported)");
+            DDLogVerbose(@"NOT sending csi state, because we are not bound and smacks enabled yet (or csi is not supported)");
             return;
         }
         
@@ -5023,7 +5037,7 @@ NSString* const kStanza = @"stanza";
         //*after* processing an incoming burst of stanzas (which is potentially causing an outgoing burst of stanzas)
         //this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
         //for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
-        if(_accountState>=kStateBound)
+        if(_accountState >= kStateInitStarted)
             [_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                 [self requestSMAck:NO];
             }]] waitUntilFinished:NO];
@@ -5140,7 +5154,7 @@ NSString* const kStanza = @"stanza";
 #else
     NSString* pushToken = [MLXMPPManager sharedInstance].pushToken;
     NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
-    if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateBound)
+    if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateInitStarted)
     {
         DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, bool2str([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"]));
         return;
@@ -5235,7 +5249,7 @@ NSString* const kStanza = @"stanza";
 {
     //only handle iq timeouts while the parseQueue is almost empty
     //(a long backlog in the parse queue could trigger spurious iq timeouts for iqs we already received an answer to, but didn't process it yet)
-    if([_parseQueue operationCount] > 4 || _accountState < kStateBound || !_catchupDone)
+    if([_parseQueue operationCount] > 4 || _accountState < kStateInitStarted || !_catchupDone)
         return;
     
     //update idle timers, too
@@ -5323,9 +5337,9 @@ NSString* const kStanza = @"stanza";
 //this method is needed to not have a retain cycle (happens when using a block instead of this method in mamFinishedFor:)
 -(void) _handleInternalMamFinishedFor:(NSString*) archiveJid
 {
-    if(self.accountState < kStateBound)
+    if(self.accountState < kStateInitStarted)
     {
-        DDLogWarn(@"Aborting delayed replay because not >= kStateBound anymore! Remaining stanzas will be kept in DB and be handled after next smacks reconnect.");
+        DDLogWarn(@"Aborting delayed replay because not >= kStateInitStarted anymore! Remaining stanzas will be kept in DB and be handled after next smacks reconnect.");
         return;
     }
     

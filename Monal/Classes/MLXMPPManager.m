@@ -276,7 +276,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     dispatch_source_set_event_handler(_pinger, ^{
         for(xmpp* xmppAccount in [self connectedXMPP])
         {
-            if(xmppAccount.accountState>=kStateBound) {
+            if(xmppAccount.accountState >= kStateInitStarted)
+            {
                 DDLogInfo(@"began a idle ping");
                 [xmppAccount sendPing:LONG_PING];        //long ping timeout because this is a background/interval ping
             }
@@ -467,7 +468,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(BOOL) isAccountForIdConnected:(NSNumber*) accountID
 {
     xmpp* account = [self getEnabledAccountForID:accountID];
-    if(account.accountState>=kStateBound) return YES;
+    if(account.accountState >= kStateInitStarted)
+        return YES;
     return NO;
 }
 
@@ -855,7 +857,7 @@ $$
     if(account)
     {
         //queue remove contact for execution once bound (e.g. on catchup done)
-        if(account.accountState < kStateBound)
+        if(account.accountState < kStateInitStarted)
         {
             [account addReconnectionHandler:$newHandler(self, handleRemoveContact, $ID(contact))];
             return;
@@ -892,7 +894,7 @@ $$
     if(account)
     {
         //queue add contact for execution once bound (e.g. on catchup done)
-        if(account.accountState < kStateBound)
+        if(account.accountState < kStateInitStarted)
         {
             [account addReconnectionHandler:$newHandler(self, handleAddContact, $ID(contact), $ID(preauthToken))];
             return;

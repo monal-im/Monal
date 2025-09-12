@@ -171,6 +171,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 
 #define kMLIsLoggedInNotice @"kMLIsLoggedInNotice"
 #define kMLResourceBoundNotice @"kMLResourceBoundNotice"
+#define kMLSessionInitNotice @"kMLSessionInitNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
 #define kMonalFinishedOmemoBundleFetch @"kMonalFinishedOmemoBundleFetch"
 #define kMonalOmemoStateUpdated @"kMonalOmemoStateUpdated"

@@ -267,9 +267,11 @@ $$class_handler(handleBind, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     accountDict[kResource] = account.connectionProperties.identity.resource;
     [[DataLayer sharedInstance] updateAccounWithDictionary:accountDict];
     
+    [account earlyInitSession];
+    
     if(account.connectionProperties.supportsSM3)
     {
-        MLXMLNode *enableNode = [[MLXMLNode alloc]
+        MLXMLNode* enableNode = [[MLXMLNode alloc]
             initWithElement:@"enable"
             andNamespace:@"urn:xmpp:sm:3"
             withAttributes:@{@"resume": @"true"}

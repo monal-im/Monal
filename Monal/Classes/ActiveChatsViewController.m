@@ -860,7 +860,7 @@ static NSMutableSet* _pushWarningDisplayed;
             @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Connected xmpp* object for accountID is nil!" userInfo:accountDict];
         
         prependToViewQueue((^(PMKResolver resolve) {
-            if(![_mamWarningDisplayed containsObject:accountID] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
+            if(![_mamWarningDisplayed containsObject:accountID] && account.accountState >= kStateInitStarted && account.connectionProperties.accountDiscoDone)
             {
                 if(![account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:mam:2"])
                 {
@@ -885,7 +885,7 @@ static NSMutableSet* _pushWarningDisplayed;
         }));
         
         prependToViewQueue((^(PMKResolver resolve) {
-            if(![_smacksWarningDisplayed containsObject:accountID] && account.accountState >= kStateBound)
+            if(![_smacksWarningDisplayed containsObject:accountID] && account.accountState >= kStateInitStarted)
             {
                 if(!account.connectionProperties.supportsSM3)
                 {
@@ -910,7 +910,7 @@ static NSMutableSet* _pushWarningDisplayed;
         }));
         
         prependToViewQueue((^(PMKResolver resolve) {
-            if(![_pushWarningDisplayed containsObject:accountID] && account.accountState >= kStateBound && account.connectionProperties.accountDiscoDone)
+            if(![_pushWarningDisplayed containsObject:accountID] && account.accountState >= kStateInitStarted && account.connectionProperties.accountDiscoDone)
             {
                 if(![account.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
                 {

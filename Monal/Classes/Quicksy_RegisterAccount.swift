@@ -450,7 +450,7 @@ struct Quicksy_RegisterAccount: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLResourceBoundNotice")).receive(on: RunLoop.main)) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kMLSessionInitNotice")).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let newAccountNo : NSNumber = self.newAccountNo {
                 if(xmppAccount.accountNo.intValue == newAccountNo.intValue) {
                     DispatchQueue.main.async {

@@ -476,6 +476,11 @@ $$class_handler(bookmarks2Retracted, $$ID(xmpp*, account), $$ID(NSString*, room)
     
     if(!success)
     {
+        if([errorIq check:@"/<type=error>/error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+        {
+            DDLogDebug(@"Ignoring item-not-found error while retracting bookmark for muc '%@' from pep", room);
+            return;
+        }
         DDLogWarn(@"Could not retract bookmark for muc '%@' from pep!", room);
         [self handleErrorWithDescription:[NSString stringWithFormat:NSLocalizedString(@"Failed to remove bookmark for Group/Channel: %@", @""), room] andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
         return;

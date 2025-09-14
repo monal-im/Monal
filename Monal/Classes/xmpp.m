@@ -1694,11 +1694,23 @@ NSString* const kStanza = @"stanza";
 {
     NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     @synchronized(_stateLockObject) {
+        //sanity check
+        MLAssert(([self.unAckedStanzas count]+[self.lastHandledOutboundStanza unsignedIntValue])==[self.lastOutboundStanza unsignedIntValue], @"Calculated outgoing stanza count and counted one differ!", (@{
+            @"calculated:unAckedStanzas+lastHandledOutboundStanza": @([self.unAckedStanzas count] + [self.lastHandledOutboundStanza unsignedIntValue]),
+            @"counted:lastOutboundStanza": self.lastOutboundStanza,
+        }));
         //stanza counting bugs on the server are fatal
         if(([hvalue unsignedIntValue] - [self.lastHandledOutboundStanza unsignedIntValue]) > [self.unAckedStanzas count])
         {
             self.streamID = nil;        //we don't ever want to resume this
-            NSString* message = @"Server acknowledged more stanzas than sent by client";
+            NSString* message = [NSString stringWithFormat:
+                @"Server acknowledged more stanzas (%@) than sent by client (%@, %@), %@ still waiting to be acked, %@ acked last time",
+                hvalue,
+                @([self.unAckedStanzas count] + [self.lastHandledOutboundStanza unsignedIntValue]),
+                self.lastHandledOutboundStanza,
+                @([self.unAckedStanzas count]),
+                self.lastHandledOutboundStanza
+            ];
             DDLogError(@"Stream error: %@", message);
             [self postError:message withIsSevere:NO];
             MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
@@ -1716,7 +1728,7 @@ NSString* const kStanza = @"stanza";
         if([hvalue unsignedIntValue] < [self.lastHandledOutboundStanza unsignedIntValue])
         {
             self.streamID = nil;        //we don't ever want to resume this
-            NSString* message = @"Server acknowledged less stanzas than last time";
+            NSString* message = [NSString stringWithFormat:@"Server acknowledged less stanzas (%@) than last time (%@)", hvalue, self.lastHandledOutboundStanza];
             DDLogError(@"Stream error: %@", message);
             [self postError:message withIsSevere:NO];
             MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[

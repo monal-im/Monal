@@ -137,8 +137,6 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kId @"id"
 #define kMessageId @"kMessageId"
 
-#define kRegisterNameSpace @"jabber:iq:register"
-
 //all other constants needed
 #define kMonalConnectivityChange @"kMonalConnectivityChange"
 #define kMonalCallRemoved @"kMonalCallRemoved"

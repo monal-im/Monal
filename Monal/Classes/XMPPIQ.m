@@ -400,7 +400,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) getRegistrationFields
 {
-    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace]];
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:register"]];
 }
 
 /*
@@ -418,13 +418,13 @@ NSString* const kiqErrorType = @"error";
         if(captcha)
             fields[@"ocr"] = captcha;
         [fields addEntriesFromDictionary:hiddenFields];
-        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
-            [[XMPPDataForm alloc] initWithType:@"submit" formType:kRegisterNameSpace andDictionary:fields]
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:register" withAttributes:@{} andChildren:@[
+            [[XMPPDataForm alloc] initWithType:@"submit" formType:@"jabber:iq:register" andDictionary:fields]
         ] andData:nil]];
     }
     else
     {
-        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
+        [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:register" withAttributes:@{} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"username" andData:user],
             [[MLXMLNode alloc] initWithElement:@"password" andData:newPass],
         ] andData:nil]];
@@ -433,7 +433,7 @@ NSString* const kiqErrorType = @"error";
 
 -(void) changePasswordForUser:(NSString*) user newPassword:(NSString*) newPass
 {
-    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:kRegisterNameSpace withAttributes:@{} andChildren:@[
+    [self addChildNode:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:register" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"username" andData:user],
         [[MLXMLNode alloc] initWithElement:@"password" andData:newPass],
     ] andData:nil]];

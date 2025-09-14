@@ -1880,7 +1880,7 @@ NSString* const kStanza = @"stanza";
                 [self requestSMAck:NO];                 //request ack again (will only happen if queue is not empty)
             }
         }
-        else if([parsedStanza check:@"/{jabber:client}presence"])
+        else if([parsedStanza check:@"/{jabber:client}presence"] && self.accountState >= kStateInitStarted)
         {
             XMPPPresence* presenceNode = (XMPPPresence*)parsedStanza;
             
@@ -2108,7 +2108,7 @@ NSString* const kStanza = @"stanza";
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
         }
-        else if([parsedStanza check:@"/{jabber:client}message"])
+        else if([parsedStanza check:@"/{jabber:client}message"] && self.accountState >= kStateInitStarted)
         {
             //outerMessageNode and messageNode are the same for messages not carrying a carbon copy or mam result
             XMPPMessage* originalParsedStanza = (XMPPMessage*)[parsedStanza copy];
@@ -2300,6 +2300,9 @@ NSString* const kStanza = @"stanza";
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
         }
+        //nearly all iqs accepted must be a response to something requested
+        //--> no kStateInitStarted, kStateBound or kStateBinding gatekeeping needed
+        //see processUnboundIq:forAccount: in MLIQProcessor.m for more information
         else if([parsedStanza check:@"/{jabber:client}iq"])
         {
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
@@ -2364,7 +2367,7 @@ NSString* const kStanza = @"stanza";
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"])
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"] && self.accountState == kStateBound)
         {
             NSMutableArray* stanzas;
             @synchronized(_stateLockObject) {
@@ -2494,7 +2497,7 @@ NSString* const kStanza = @"stanza";
                 [self bindResource:self.connectionProperties.identity.resource];
             }
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState >= kStateBound && !self.resuming)
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState == kStateBound && !self.resuming)
         {
             //we landed here because smacks enable failed
             
@@ -2885,6 +2888,7 @@ NSString* const kStanza = @"stanza";
         }
         else
         {
+            //this includes spurious message/presence errors generated on bind by prosody's *broken smacks module* on and reflected by MUCs
             DDLogWarn(@"Ignoring unhandled top-level xml element <%@>: %@", parsedStanza.element, parsedStanza);
         }
     }

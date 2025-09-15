@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2025 Thilo Molitor <info@monal-im.org>, 2024
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 if [[ "$1" == "" || "$2" == "" ]]; then
     echo "Usage: $(basename "$0") <original_logo.png> <original_dark_logo.png> [type, for example: 'Alpha'] [alternate suffix, for example: '-Christmas']"
     exit 1

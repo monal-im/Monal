@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2025 Thilo Molitor <info@monal-im.org>, 2024
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 import re
 
 # Function to generate the NSMakeRange output from the table of code points

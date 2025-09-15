@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Thilo Molitor <info@monal-im.org>, 2024
+#
+# SPDX-License-Identifier: CC0-1.0
+
 [submodule "Monal/localization/external"]
 	path = Monal/localization/external
 	url = https://github.com/monal-im/Monal-localization-main.git

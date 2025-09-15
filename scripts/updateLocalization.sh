@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Thilo Molitor <info@monal-im.org>, 2024
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 #/bin/bash
 
 # commandline ./updateLocalization.sh BUILDSERVER|OTHER NOCOMMIT|COMMIT [YES|NO]

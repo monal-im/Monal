@@ -88,7 +88,6 @@ static NSDictionary* _optionalGroupConfigOptions;
     _hasFetchedBookmarks = NO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleResourceBound:) name:kMLResourceBoundNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSessionInit:) name:kMLSessionInitNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleCatchupDone:) name:kMonalFinishedCatchup object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     return self;
@@ -172,18 +171,6 @@ static NSDictionary* _optionalGroupConfigOptions;
             //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
             _hasFetchedBookmarks = NO;
         }
-    }
-}
-
--(void) handleSessionInit:(NSNotification*) notification
-{
-    //this event will be called as soon as we are starting to initialize our session, but BEFORE mam catchup happens
-    //NOTE: this event won't be called for smacks resumes!
-    if(_account == ((xmpp*)notification.object))
-    {
-        //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
-        for(NSString* room in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
-            [self join:room];
     }
 }
 

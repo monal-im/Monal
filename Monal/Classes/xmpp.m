@@ -49,7 +49,7 @@
 @import AVFoundation;
 @import SAMKeychain;
 
-#define STATE_VERSION 19
+#define STATE_VERSION 20
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -2404,12 +2404,13 @@ NSString* const kStanza = @"stanza";
             self.resuming = NO;
             self.isDoingFullReconnect = NO;
 
-            //now we are initialized again (the following block is *largely* taken from earlyInitSession
+            //now we are initialized again (the following block is *largely* taken from earlyInitSession)
             DDLogInfo(@"Session resumed, initializing state...");
             self.isDoingFullReconnect = YES;
             _connectedTime = [NSDate date];
             _reconnectBackoffTime = 0;
             _accountState = kStateInitStarted;
+            [[MLNotificationQueue currentQueue] postNotificationName:kMLSessionInitNotice object:self];
             [self accountStatusChanged];
 
             @synchronized(_stateLockObject) {
@@ -4211,6 +4212,10 @@ NSString* const kStanza = @"stanza";
     //fetch current mds state
     [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
     
+    //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
+    for(NSString* room in [[DataLayer sharedInstance] listMucsForAccount:self.accountID])
+        [self.mucProcessor join:room];
+    
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
     
     //initialize stanza counter for statistics
@@ -5443,8 +5448,10 @@ NSString* const kStanza = @"stanza";
     }
     [self persistState];
     
+    _accountState = kStateCatchupDone;
     //don't queue this notification because it should be handled INLINE inside the receive queue
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+    [self accountStatusChanged];
 }
 
 -(void) updateMdsData:(NSDictionary*) mdsData

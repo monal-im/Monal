@@ -1833,7 +1833,10 @@ NSString* const kStanza = @"stanza";
 {
     //don't send anything before a resource is bound and smacks was enabled
     if(self.accountState < kStateInitStarted || !self.connectionProperties.supportsSM3)
+    {
+        DDLogError(@"DEBUG: self.accountState[%@] < kStateInitStarted[%@] || !self.connectionProperties.supportsSM3[%@]", @(self.accountState), @(kStateInitStarted), bool2str(!self.connectionProperties.supportsSM3));
         return;
+    }
     
     NSDictionary* dic;
     @synchronized(_stateLockObject) {
@@ -1869,6 +1872,7 @@ NSString* const kStanza = @"stanza";
     {
         if([parsedStanza check:@"/{urn:xmpp:sm:3}r"] && self.connectionProperties.supportsSM3 && self.accountState >= kStateInitStarted)
         {
+            DDLogVerbose(@"Got smacks request...");
             [self sendSMAck:YES];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState >= kStateInitStarted)

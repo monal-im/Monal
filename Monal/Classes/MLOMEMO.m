@@ -173,7 +173,7 @@ static const int KEY_SIZE = 16;
 #ifndef DISABLE_OMEMO
     if(self.account.accountID.intValue == ((xmpp*)notification.object).accountID.intValue)
     {
-        DDLogInfo(@"We did a non-smacks-resume reconnect, resetting some of our state...");
+        DDLogInfo(@"We did a non-smacks-resume reconnect, resetting some of our state (MLOMEMO instance=%@)...", self);
         DDLogVerbose(@"Current state: %@", self.state);
         
         //we bound a new xmpp session --> reset our whole state

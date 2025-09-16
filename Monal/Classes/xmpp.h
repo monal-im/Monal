@@ -27,7 +27,8 @@ typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedIn,
     kStateBinding,
     kStateBound,
-    kStateInitStarted,		//is operating normally
+    kStateInitStarted,		//initializing session (smacks resume and non-smacks resume)
+    kStateCatchupDone,		//is operating normally
 };
 
 typedef NS_ENUM (NSInteger, xmppRegistrationState) {

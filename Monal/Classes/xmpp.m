@@ -921,6 +921,7 @@ NSString* const kStanza = @"stanza";
         
         //mark this account as currently connecting
         self->_accountState = kStateReconnecting;
+        [self accountStatusChanged];
         
         //only proceed with connection if not concurrent with other processes
         DDLogVerbose(@"Checking remote process lock...");
@@ -933,6 +934,7 @@ NSString* const kStanza = @"stanza";
         {
             DDLogInfo(@"MainApp is running, not connecting (this should transition us into idle state again which will terminate this extension)");
             self->_accountState = kStateDisconnected;
+            [self accountStatusChanged];
             return;
         }
         
@@ -952,6 +954,7 @@ NSString* const kStanza = @"stanza";
         {
             DDLogError(@"Server disallows xmpp connections for account '%@', ignoring login", self.accountID);
             self->_accountState = kStateDisconnected;
+            [self accountStatusChanged];
             return;
         }
         
@@ -1236,6 +1239,8 @@ NSString* const kStanza = @"stanza";
         //we don't throw away operations in the receive queue because they could be more than just stanzas
         //(for example outgoing messages that should be written to the smacks queue instead of just vanishing in a void)
         //all incoming stanzas in the receive queue will honor the _accountState being lower than kStateReconnecting and be dropped
+        
+        [self accountStatusChanged];
     }];
 }
 
@@ -2563,6 +2568,7 @@ NSString* const kStanza = @"stanza";
             
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
+            [self accountStatusChanged];
             
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
@@ -2794,6 +2800,8 @@ NSString* const kStanza = @"stanza";
             //NOTE: we don't have any stream restart when using SASL2
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
             _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
+            
+            [self accountStatusChanged];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}continue"])
         {
@@ -2844,7 +2852,10 @@ NSString* const kStanza = @"stanza";
         {
             //prevent reconnect attempt
             if(_accountState < kStateHasStream)
+            {
                 _accountState = kStateHasStream;
+                [self accountStatusChanged];
+            }
             
             //perform logic to handle stream
             if(self.accountState < kStateLoggedIn)
@@ -2868,7 +2879,7 @@ NSString* const kStanza = @"stanza";
                     [self handleFeaturesAfterAuth:parsedStanza];
                 }
                 else
-                    DDLogDebug(@"Stream features (after auth) already read from cache, ignoring incoming stream features (but refreshing cache).\n Cached: %@\nIncoming: %@", _cachedStreamFeaturesAfterAuth, parsedStanza);
+                    DDLogDebug(@"Stream features (after auth) already read from cache, ignoring incoming stream features (but refreshing cache).\nCached: %@\nIncoming: %@", _cachedStreamFeaturesAfterAuth, parsedStanza);
                 _cachedStreamFeaturesAfterAuth = parsedStanza;
             }
         }
@@ -3687,7 +3698,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountID];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\t_cachedStreamFeaturesBeforeAuth=%@\n\t_cachedStreamFeaturesAfterAuth=%@\n",
                 self.accountID,
                 values[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3706,7 +3717,9 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
                 self.omemo.state,
-                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid)
+                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid),
+                bool2str(self->_cachedStreamFeaturesBeforeAuth!=nil),
+                bool2str(self->_cachedStreamFeaturesAfterAuth!=nil)
             );
             DDLogVerbose(@"%@ --> realPersistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountID, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
@@ -3883,7 +3896,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\t_cachedStreamFeaturesBeforeAuth=%@\n\t_cachedStreamFeaturesAfterAuth=%@\n",
                 self.accountID,
                 dic[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3902,7 +3915,9 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
                 self.omemo.state,
-                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid)
+                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid),
+                bool2str(self->_cachedStreamFeaturesBeforeAuth!=nil),
+                bool2str(self->_cachedStreamFeaturesAfterAuth!=nil)
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -3988,6 +4003,7 @@ NSString* const kStanza = @"stanza";
     
     self.isDoingFullReconnect = YES;
     _accountState = kStateBinding;
+    [self accountStatusChanged];
     
     //delete old resources because we get new presences once we're done initializing the session
     [[DataLayer sharedInstance] resetContactsForAccount:self.accountID];
@@ -4859,6 +4875,7 @@ NSString* const kStanza = @"stanza";
                         self->_blockToCallOnTCPOpen();
                         self->_blockToCallOnTCPOpen = nil;     //don't call this twice
                     }
+                    [self accountStatusChanged];
                 }];
             }
             break;

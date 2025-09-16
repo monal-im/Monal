@@ -1776,7 +1776,6 @@
 					26CC579123A0867400ABB92A = {
 						CreatedOnToolsVersion = 11.2.1;
 						LastSwiftMigration = 1240;
-						ProvisioningStyle = Manual;
 					};
 					C1049185261301530054AC9E = {
 						CreatedOnToolsVersion = 12.4;
@@ -2557,9 +2556,12 @@
 				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -2595,6 +2597,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -2811,9 +2814,12 @@
 				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -2849,6 +2855,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -2954,6 +2961,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = YES;
@@ -2974,6 +2983,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
@@ -2995,6 +3005,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = YES;
@@ -3014,6 +3026,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
@@ -3035,6 +3048,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = YES;
@@ -3054,6 +3069,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
@@ -3177,9 +3193,12 @@
 				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -3216,6 +3235,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -3620,9 +3640,12 @@
 				CODE_SIGN_ENTITLEMENTS = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -3658,6 +3681,7 @@
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -3739,6 +3763,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = YES;
@@ -3758,6 +3784,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
@@ -4097,6 +4124,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = YES;
@@ -4116,6 +4145,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
@@ -4454,8 +4484,11 @@
 			baseConfigurationReference = 6015D382ABCE0D788029D7A3 /* Pods-shareSheet.alpha.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Alpha.shareSheet.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
@@ -4466,6 +4499,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -4484,9 +4518,12 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificationService/Alpha.NotificationService.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificationService/Alpha.NotificationService.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				INFOPLIST_FILE = NotificationService/Alpha.Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4496,6 +4533,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -4513,6 +4551,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = YES;
@@ -4532,6 +4572,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
@@ -4653,7 +4694,7 @@
 				C11C870D26A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Alpha;
 		};
 		260773CC232FC4E800BFD50F /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
 			isa = XCConfigurationList;
@@ -4666,7 +4707,7 @@
 				C11C870F26A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Alpha;
 		};
 		26AA70202146BBB900598605 /* Build configuration list for PBXNativeTarget "shareSheet" */ = {
 			isa = XCConfigurationList;
@@ -4679,7 +4720,7 @@
 				C11C870E26A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Alpha;
 		};
 		26CC579F23A0867400ABB92A /* Build configuration list for PBXNativeTarget "monalxmpp" */ = {
 			isa = XCConfigurationList;
@@ -4692,7 +4733,7 @@
 				C11C871026A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Alpha;
 		};
 		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Monal" */ = {
 			isa = XCConfigurationList;
@@ -4705,7 +4746,7 @@
 				C11C870B26A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Alpha;
 		};
 		C104918E261301530054AC9E /* Build configuration list for PBXNativeTarget "MonalXMPPUnitTests" */ = {
 			isa = XCConfigurationList;
@@ -4718,7 +4759,7 @@
 				C11C871226A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Alpha;
 		};
 		C1850EBC25F38A2D003D506A /* Build configuration list for PBXNativeTarget "MonalUITests" */ = {
 			isa = XCConfigurationList;
@@ -4731,7 +4772,7 @@
 				C11C871126A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Alpha;
 		};
 /* End XCConfigurationList section */
 

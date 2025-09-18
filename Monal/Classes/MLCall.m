@@ -59,6 +59,7 @@
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelRingingTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelConnectingTimeout;
 @property (nonatomic, strong) monal_void_block_t _Nullable cancelWaitUntilIceRestart;
+@property (nonatomic, strong) monal_void_block_t _Nullable cancelDelayVideoConnectionTimer;
 @property (nonatomic, strong) MLXMLNode* localSDP;
 @property (nonatomic, strong) MLXMLNode* remoteSDP;
 @property (nonatomic, strong) NSNumber* remoteOmemoDeviceId;
@@ -108,6 +109,7 @@
     self.cancelDiscoveringTimeout = nil;
     self.cancelRingingTimeout = nil;
     self.cancelConnectingTimeout = nil;
+    self.cancelDelayVideoConnectionTimer = nil;
     self.localSDP = nil;
     self.remoteSDP = nil;
     self.remoteOmemoDeviceId = nil;
@@ -859,8 +861,11 @@
     DDLogInfo(@"Now connecting incoming VoIP call: %@", self);
     [self.webRTCClient configureAudioSession];
     [self createConnectingTimeoutTimer];
-    //the remote (e.g. "initiator") will send a jingle "session-initiate" as soon as it receives our jmi proceed
-    [self sendJmiProceed];
+    
+    [self delayVideoConnectionAction:^{
+        //the remote (e.g. "initiator") will send a jingle "session-initiate" as soon as it receives our jmi proceed
+        [self sendJmiProceed];
+    }];
 }
 
 -(void) establishOutgoingConnection
@@ -869,7 +874,24 @@
     [self.webRTCClient configureAudioSession];
     [self.voipProcessor.cxProvider reportOutgoingCallWithUUID:self.uuid startedConnectingAtDate:nil];
     [self createConnectingTimeoutTimer];
-    [self offerSDP];
+    
+    [self delayVideoConnectionAction:^{
+        [self offerSDP];
+    }];
+}
+
+-(void) delayVideoConnectionAction:(monal_void_block_t) action
+{
+    //only delay when doing video calls
+    if(self.callType != MLCallTypeVideo)
+        return action();
+    
+    if(self.cancelDelayVideoConnectionTimer != nil)
+        self.cancelDelayVideoConnectionTimer();
+    self.cancelDelayVideoConnectionTimer = createTimer(8.0, (^{
+        self.cancelDelayVideoConnectionTimer = nil;
+        action();
+    }));
 }
 
 /*

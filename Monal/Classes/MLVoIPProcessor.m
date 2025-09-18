@@ -704,6 +704,25 @@ static NSMutableDictionary* _pendingCalls;
     [appDelegate.activeChats presentCall:call];
 }
 
+-(void) provider:(CXProvider*) provider performPlayDTMFCallAction:(CXPlayDTMFCallAction*) action
+{
+    MLCall* call = [self getCallForUUID:action.callUUID];
+    DDLogDebug(@"CXProvider: performPlayDTMFCallAction with provider=%@, performPlayDTMFCallAction=%@, pendingCallsInfo: %@", provider, action, call);
+    if(call == nil)
+    {
+        DDLogWarn(@"Pending call not present anymore: %@", (@{
+            @"provider": provider,
+            @"action": action,
+            @"uuid": action.callUUID,
+        }));
+        [action fail];
+        return;
+    }
+    
+    [call sendDtmf:action.digits];
+    [action fulfill];
+}
+
 -(void) provider:(CXProvider*) provider performEndCallAction:(CXEndCallAction*) action
 {
     MLCall* call = [self getCallForUUID:action.callUUID];
@@ -804,7 +823,7 @@ static NSMutableDictionary* _pendingCalls;
     CXCallUpdate* update = [CXCallUpdate new];
     update.remoteHandle = [[CXHandle alloc] initWithType:CXHandleTypeGeneric value:call.contact.contactJid];
     update.localizedCallerName = call.contact.contactDisplayName;
-    update.supportsDTMF = NO;
+    update.supportsDTMF = call.canSendDtmf;
     update.hasVideo = call.callType == MLCallTypeVideo;
     update.supportsHolding = NO;
     update.supportsGrouping = NO;

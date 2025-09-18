@@ -77,6 +77,7 @@
 -(void) removeCall:(MLCall*) call;
 -(void) initWebRTCForPendingCall:(MLCall*) call;
 -(void) handleIncomingJMIStanza:(MLXMLNode*) messageNode onAccount:(xmpp*) account;
+-(CXCallUpdate*) constructUpdateForCall:(MLCall*) call;
 @end
 
 @implementation MLCall
@@ -432,7 +433,13 @@
         
         //start timer once we are fully connected
         if(self.isConnected && self.audioSession != nil)
+        {
             [self startCallDuartionTimer];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //update call info to include the right info about dtmf support
+                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid updated:[self.voipProcessor constructUpdateForCall:self]];
+            });
+        }
     }
     
 #ifdef IS_ALPHA
@@ -481,7 +488,13 @@
         
         //start timer once we are fully connected
         if(self.isConnected && self.audioSession != nil)
+        {
             [self startCallDuartionTimer];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //update call info to include the right info about dtmf support
+                [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid updated:[self.voipProcessor constructUpdateForCall:self]];
+            });
+        }
     }
 }
 -(AVAudioSession*) audioSession

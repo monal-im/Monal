@@ -26,7 +26,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-static const size_t MIN_OMEMO_KEYS = 99;
+static const size_t MIN_OMEMO_KEYS = 80;
 static const size_t MAX_OMEMO_KEYS = 100;
 static const int KEY_SIZE = 16;
 

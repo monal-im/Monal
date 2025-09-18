@@ -23,7 +23,8 @@
 #import <monalxmpp/MLOMEMO.h>
 #import <monalxmpp/MLImageManager.h>
 
-#define CURRENT_MUC_STATE_VERSION @10
+//monal version 7.x state counter: 010
+#define CURRENT_MUC_STATE_VERSION @7010
 
 @interface MLMucProcessor()
 {

@@ -49,7 +49,8 @@
 @import AVFoundation;
 @import SAMKeychain;
 
-#define STATE_VERSION 20
+//monal version 7.x, state counter: 020
+#define STATE_VERSION 7020
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";

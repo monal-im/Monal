@@ -16,7 +16,8 @@
 #import "XMPPMessage.h"
 #import <monalxmpp/HelperTools.h>
 
-#define CURRENT_PUBSUB_DATA_VERSION @6
+//monal version 7.x, state counter: 006
+#define CURRENT_PUBSUB_DATA_VERSION @7006
 
 @interface MLPubSub ()
 {

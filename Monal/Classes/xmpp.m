@@ -226,7 +226,11 @@ NSString* const kStanza = @"stanza";
     //initialize _capsIdentity, _capsFeatures and _capsHash
     _capsIdentity = [[MLXMLNode alloc] initWithElement:@"identity" withAttributes:@{
         @"category": @"client",
+#if TARGET_OS_MACCATALYST
+        @"type": @"pc",
+#else
         @"type": @"phone",
+#endif
         @"name": [NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]]
     } andChildren:@[] andData:nil];
     _capsFeatures = [HelperTools getOwnFeatureSet];

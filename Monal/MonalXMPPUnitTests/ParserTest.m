@@ -110,7 +110,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         //stanza 1 should match
         id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some#|base64"];
         if(i == 1)
-            XCTAssertEqualObjects(result, [@"hello world!" dataUsingEncoding:NSUTF8StringEncoding]);
+            XCTAssertEqualObjects(result, [@"hello world!" dataUsingEncoding:NSUTF8StringEncoding], "stanza 1 should match and convert 'some' element text from base64 to @'hello world!'");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
@@ -123,7 +123,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         //stanza 1 should match
         id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some@fin|bool"];
         if(i == 1)
-            XCTAssertEqualObjects(result, @YES);
+            XCTAssertEqualObjects(result, @YES, "stanza 1 should match and convert 'fin' attr to bool @YES");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
@@ -136,7 +136,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         //stanza 1 should match
         id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some@hello|bool"];
         if(i == 1)
-            XCTAssertEqualObjects(result, @NO);
+            XCTAssertEqualObjects(result, @NO, "stanza 1 should match and convert 'hello' attr to bool @NO");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
@@ -149,7 +149,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         //stanza 1 should match
         id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some@world|bool"];
         if(i == 1)
-            XCTAssertEqualObjects(result, @YES);
+            XCTAssertEqualObjects(result, @YES, "stanza 1 should match and convert 'wold' attr to bool @YES");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
@@ -163,7 +163,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         //stanza 1 should match
         id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some@number|int"];
         if(i == 1)
-            XCTAssertEqualObjects(result, @42);
+            XCTAssertEqualObjects(result, @42, "stanza 1 should match and convert 'number' attr to int @42");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
@@ -176,7 +176,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         //stanza 1 should match
         id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some@uuid|uuid"];
         if(i == 1)
-            XCTAssertEqualObjects([result UUIDString], @"18382ACA-EF9D-4BC9-8779-7901C63B6631");
+            XCTAssertEqualObjects([result UUIDString], @"18382ACA-EF9D-4BC9-8779-7901C63B6631", "stanza 1 should match and convert 'uuid' attr to uuid 18382ACA-EF9D-4BC9-8779-7901C63B6631");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
@@ -189,7 +189,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         //stanza 1 should match
         id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some@uuid|uuidcast"];
         if(i == 1)
-            XCTAssertEqualObjects([result UUIDString], @"18382ACA-EF9D-4BC9-8779-7901C63B6631");
+            XCTAssertEqualObjects([result UUIDString], @"18382ACA-EF9D-4BC9-8779-7901C63B6631", "stanza 1 should match and identity-cast 'uuid' attr to uuid 18382ACA-EF9D-4BC9-8779-7901C63B6631");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
@@ -202,7 +202,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         //stanza 1 should match
         id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some@id|uuidcast"];
         if(i == 1)
-            XCTAssertEqualObjects([result UUIDString], @"43363852-14A2-D540-E8CE-6BEA040CD228");
+            XCTAssertEqualObjects([result UUIDString], @"43363852-14A2-D540-E8CE-6BEA040CD228", "stanza 1 should match and cast 'id' attr to uuid 43363852-14A2-D540-E8CE-6BEA040CD228");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
@@ -220,19 +220,45 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         //stanza 1 should match
         id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some@when|datetime"];
         if(i == 1)
-            XCTAssertEqualObjects(result, expectedDate);
+            XCTAssertEqualObjects(result, expectedDate, "stanza 1 should match and convert 'when' attr to datetime %@", expectedDate);
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
 }
 
--(void) testParseNoMatch
+-(void) testParseAttributeRegexNoMatch01
 {
     for(unsigned long i=0; i<_parsedStanzas.count; i++)
     {
         //no stanza should match
         id result = [_parsedStanzas[i] find:@"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node~eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node"];
         XCTAssertEqualObjects(result, @[], "no stanzas should match this");
+    }
+}
+
+-(void) testParseAttributeRegexNoMatch02
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //stanza 1 should match
+        BOOL result = [_parsedStanzas[i] check:@"{urn:some:different:namespace}some<number~^4[^2]$>@number|int"];
+        if(i == 1)
+            XCTAssertFalse(result, "stanza 1 should not match 'number' attr regex '^4[^2]$'");
+        else
+            XCTAssertFalse(result, "all other stanzas should not match: %lu", i);
+    }
+}
+
+-(void) testParseAttributeRegexMatch
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //stanza 1 should match
+        id result = [_parsedStanzas[i] findFirst:@"{urn:some:different:namespace}some<number~^4[0-9]$>@number|int"];
+        if(i == 1)
+            XCTAssertEqualObjects(result, @42, "stanza 1 should match 'number' attr regex ^4[0-9]$");
+        else
+            XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
 }
 

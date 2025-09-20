@@ -532,13 +532,17 @@ $$class_handler(handleServerDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
     if([features containsObject:@"urn:xmpp:blocking"])
         [account fetchBlocklist];
     
-    if(!account.connectionProperties.supportsHTTPUpload && [features containsObject:@"urn:xmpp:http:upload:0"])
+    if([features containsObject:@"urn:xmpp:http:upload:0"])
     {
         DDLogInfo(@"supports http upload with server: %@", iqNode.from);
-        account.connectionProperties.supportsHTTPUpload = YES;
-        account.connectionProperties.uploadServer = iqNode.from;
-        account.connectionProperties.uploadSize = [[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{urn:xmpp:http:upload:0}result@max-file-size\\|int"] integerValue];
-        DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
+        NSInteger maxFilesize = [[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{urn:xmpp:http:upload:0}result@max-file-size\\|int"] integerValue];
+        if(!account.connectionProperties.supportsHTTPUpload || maxFilesize > account.connectionProperties.uploadSize)
+        {
+            account.connectionProperties.supportsHTTPUpload = YES;
+            account.connectionProperties.uploadServer = iqNode.from;
+            account.connectionProperties.uploadSize = maxFilesize;
+            DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
+        }
     }
     
     //query external services to learn stun/turn servers
@@ -548,12 +552,12 @@ $$class_handler(handleServerDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNod
     //get the server's contact addresses (XEP-0157)
     XMPPDataForm* dataForm = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/network/serverinfo}result\\"];
     NSMutableDictionary<NSString*, NSArray*>* resultDictionary = [NSMutableDictionary dictionary];
-    for (NSString* fieldName in dataForm.allKeys)
+    for(NSString* fieldName in dataForm.allKeys)
     {
-        if ([fieldName hasSuffix:@"-addresses"])
+        if([fieldName hasSuffix:@"-addresses"])
         {
             NSArray* addresses = [dataForm getField:fieldName][@"allValues"];
-            if (addresses != nil && addresses.count > 0)
+            if(addresses != nil && addresses.count > 0)
                 resultDictionary[fieldName] = addresses;
         }
     }
@@ -563,13 +567,18 @@ $$
 $$class_handler(handleServiceDiscoInfo, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
     
-    if(!account.connectionProperties.supportsHTTPUpload && [features containsObject:@"urn:xmpp:http:upload:0"])
+    //don't use http upload on muc services as general upload server for 1:1 communication
+    if([features containsObject:@"urn:xmpp:http:upload:0"] && ![features containsObject:@"http://jabber.org/protocol/muc"])
     {
         DDLogInfo(@"supports http upload with server: %@", iqNode.from);
-        account.connectionProperties.supportsHTTPUpload = YES;
-        account.connectionProperties.uploadServer = iqNode.from;
-        account.connectionProperties.uploadSize = [[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{urn:xmpp:http:upload:0}result@max-file-size\\|int"] integerValue];
-        DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
+        NSInteger maxFilesize = [[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{urn:xmpp:http:upload:0}result@max-file-size\\|int"] integerValue];
+        if(!account.connectionProperties.supportsHTTPUpload || maxFilesize > account.connectionProperties.uploadSize)
+        {
+            account.connectionProperties.supportsHTTPUpload = YES;
+            account.connectionProperties.uploadServer = iqNode.from;
+            account.connectionProperties.uploadSize = maxFilesize;
+            DDLogInfo(@"Upload max filesize: %lu", account.connectionProperties.uploadSize);
+        }
     }
     
     if([features containsObject:@"http://jabber.org/protocol/muc"])

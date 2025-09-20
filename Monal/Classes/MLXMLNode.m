@@ -56,9 +56,9 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
-    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
-    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
-    attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~]+)([=~])([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
+    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+[=~!][^>]*\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+[=~!][^>]*\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+[=~!][^>]*\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~!]+)([=~!])(([^>]+)|)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 
 //     testcases for stanza
 //     <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism><mechanism>SCRAM-SHA-1-PLUS</mechanism></mechanisms></stream:features>
@@ -515,19 +515,30 @@ static NSRegularExpression* attributeFilterRegex;
                 BOOL ok = YES;
                 for(NSDictionary* filter in parsedEntry[@"attributeFilters"])
                 {
-                    if(node.attributes[filter[@"name"]])
+                    if([filter[@"type"] isEqualToString:@"!"])
                     {
-                        NSArray* matches = [filter[@"value"] matchesInString:node.attributes[filter[@"name"]] options:0 range:NSMakeRange(0, [node.attributes[filter[@"name"]] length])];
-                        if(![matches count])
+                        if(node.attributes[filter[@"name"]] == nil)
                         {
-                            ok = NO;        //this node does *not* fullfill the attribute filter regex
+                            ok = NO;
                             break;
                         }
                     }
                     else
                     {
-                        ok = NO;
-                        break;
+                        if(node.attributes[filter[@"name"]])
+                        {
+                            NSArray* matches = [filter[@"value"] matchesInString:node.attributes[filter[@"name"]] options:0 range:NSMakeRange(0, [node.attributes[filter[@"name"]] length])];
+                            if(![matches count])
+                            {
+                                ok = NO;        //this node does *not* fullfill the attribute filter regex
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            ok = NO;
+                            break;
+                        }
                     }
                 }
                 if(!ok)
@@ -702,19 +713,27 @@ static NSRegularExpression* attributeFilterRegex;
         {
             NSRange attributeFilterNameRange = [attributeFilterMatch rangeAtIndex:1];
             NSRange attributeFilterTypeRange = [attributeFilterMatch rangeAtIndex:2];
-            NSRange attributeFilterValueRange = [attributeFilterMatch rangeAtIndex:3];
-            if(attributeFilterNameRange.location == NSNotFound || attributeFilterTypeRange.location == NSNotFound || attributeFilterValueRange.location == NSNotFound)
+            if(attributeFilterNameRange.location == NSNotFound || attributeFilterTypeRange.location == NSNotFound)
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter not complete!" userInfo:@{
                     @"self": self,
                     @"queryEntry": entry,
                     @"attributeFilters": attributeFilters
                 }];
-            
             NSString* attributeFilterName = [attributeFilters substringWithRange:attributeFilterNameRange];
             unichar attributeFilterType = [[attributeFilters substringWithRange:attributeFilterTypeRange] characterAtIndex:0];
-            NSString* attributeFilterValue = [attributeFilters substringWithRange:attributeFilterValueRange];
             
-            NSString* attributeFilterValueRegexPattern;
+            NSRange attributeFilterValueRange = [attributeFilterMatch rangeAtIndex:4];
+            if(attributeFilterType != '!' && attributeFilterValueRange.location == NSNotFound)
+                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter not complete!" userInfo:@{
+                    @"self": self,
+                    @"queryEntry": entry,
+                    @"attributeFilters": attributeFilters
+                }];
+            NSString* attributeFilterValue = nil;
+            if(attributeFilterValueRange.location != NSNotFound)
+                attributeFilterValue = [attributeFilters substringWithRange:attributeFilterValueRange];
+            
+            NSString* attributeFilterValueRegexPattern = nil;
             if(attributeFilterType == '=')      //verbatim comparison using format string interpolation
             {
                 //substitute format string specifiers inside of our attribute filter string.
@@ -738,8 +757,12 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
             }
             else if(attributeFilterType == '~')      //raw regex comparison *without* format string interpolation
+            {
                 //you will have to include sring-start and string-end markers yourself as well as all other regex stuff
                 attributeFilterValueRegexPattern = attributeFilterValue;
+            }
+            else if(attributeFilterType == '!')
+                ;       //no attributeFilterValueRegexPattern needed for attribute presence check
             else
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Internal attribute filter bug, this should never happen!" userInfo:@{
                     @"self": self,
@@ -747,19 +770,27 @@ static NSRegularExpression* attributeFilterRegex;
                     @"attributeFilters": attributeFilters
                 }];
                 
-            NSError* error;
-            [retval[@"attributeFilters"] addObject:@{
-                @"name": attributeFilterName,
-                //this regex will be cached in parsed form in the local cache of this method
-                @"value": [NSRegularExpression regularExpressionWithPattern:attributeFilterValueRegexPattern options:NSRegularExpressionCaseInsensitive error:&error]
-            }];
+            NSError* error = nil;
+            if(attributeFilterValueRegexPattern == nil)
+                [retval[@"attributeFilters"] addObject:@{
+                    @"name": attributeFilterName,
+                    @"type": [NSString stringWithCharacters:&attributeFilterType length:1],
+                }];
+            else
+                [retval[@"attributeFilters"] addObject:@{
+                    @"name": attributeFilterName,
+                    @"type": [NSString stringWithCharacters:&attributeFilterType length:1],
+                    //this regex will be cached in parsed form in the local cache of this method
+                    @"value": [NSRegularExpression regularExpressionWithPattern:attributeFilterValueRegexPattern options:NSRegularExpressionCaseInsensitive error:&error],
+                }];
             if(error)
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
                     @"self": self,
                     @"queryEntry": entry,
-                    @"filterType": @(attributeFilterType),
+                    @"filterType": [NSString stringWithCharacters:&attributeFilterType length:1],
                     @"filterName": attributeFilterName,
-                    @"filterValue": attributeFilterValue,
+                    @"filterValue": nilWrapper(attributeFilterValue),
+                    @"filterRegex": nilWrapper(attributeFilterValueRegexPattern),
                     @"error": error
                 }];
         }

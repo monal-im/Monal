@@ -778,7 +778,7 @@ static NSRegularExpression* attributeFilterRegex;
                 }];
             else
             {
-                NSRegularExpression* compiledRegex = [NSRegularExpression regularExpressionWithPattern:attributeFilterValueRegexPattern options:NSRegularExpressionCaseInsensitive error:&error];
+                NSRegularExpression* compiledRegex = [NSRegularExpression regularExpressionWithPattern:attributeFilterValueRegexPattern options:0 error:&error];
                 if(error || compiledRegex == nil)
                     @throw [XMLQueryBrokenException exceptionWithName:@"AttributeFilterRegexException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
                         @"self": self,

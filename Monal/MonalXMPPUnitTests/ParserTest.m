@@ -22,6 +22,9 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
             <body>Message text</body>\n\
             <body xmlns='urn:some:different:namespace'>This will NOT be used</body>\n\
             <some xmlns='urn:some:different:namespace' fin='true' hello='0' world='1' number='42' uuid='18382ACA-EF9D-4BC9-8779-7901C63B6631' id='18382ACA' when='2002-09-10T23:08:25Z'>aGVsbG8gd29ybGQh</some>\n\
+            <attr-presence xmlns='urn:checker:0' test1='yellow'/>\n\
+            <attr-presence xmlns='urn:checker:1' test2='green'/>\n\
+            <attr-presence xmlns='urn:checker:2' test1='blue' test2='red'/>\n\
         </message>\n\
 \
         <iq id='18382ACA-EF9D-4BC9-8779-7901C63B6631' to='user1@example.org/Monal-iOS.ef313600' xmlns='jabber:client' type='result' from='luloku@conference.example.org'><query xmlns='http://jabber.org/protocol/disco#info'><feature var='http://jabber.org/protocol/muc#request'/><feature var='muc_hidden'/><feature var='muc_unsecured'/><feature var='muc_membersonly'/><feature var='muc_unmoderated'/><feature var='muc_persistent'/><identity type='text' name='testchat gruppe' category='conference'/><feature var='urn:xmpp:mam:2'/><feature var='urn:xmpp:sid:0'/><feature var='muc_nonanonymous'/><feature var='http://jabber.org/protocol/muc'/><feature var='http://jabber.org/protocol/muc#stable_id'/><feature var='http://jabber.org/protocol/muc#self-ping-optimization'/><feature var='jabber:iq:register'/><feature var='vcard-temp'/><x type='result' xmlns='jabber:x:data'><field type='hidden' var='FORM_TYPE'><value>http://jabber.org/protocol/muc#roominfo</value></field><field label='Description' var='muc#roominfo_description' type='text-single'><value/></field><field label='Number of occupants' var='muc#roominfo_occupants' type='text-single'><value>2</value></field><field label='Allow members to invite new members' var='{http://prosody.im/protocol/muc}roomconfig_allowmemberinvites' type='boolean'><value>0</value></field><field label='Allow users to invite other users' var='muc#roomconfig_allowinvites' type='boolean'><value>0</value></field><field label='Title' var='muc#roomconfig_roomname' type='text-single'><value>testchat gruppe</value></field><field type='boolean' var='muc#roomconfig_changesubject'/><field type='text-single' var='{http://modules.prosody.im/mod_vcard_muc}avatar#sha1'/><field type='text-single' var='muc#roominfo_lang'><value/></field></x></query></iq>\n\
@@ -259,6 +262,65 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
             XCTAssertEqualObjects(result, @42, "stanza 1 should match 'number' attr regex ^4[0-9]$");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
+    }
+}
+
+-(void) testParseAttributePresence01
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //only stanza 1 should match
+        NSArray<MLXMLNode*>* result = [_parsedStanzas[i] find:@"/{jabber:client}message<id=some_id>/{*}attr-presence<xmlns~^urn:checker:[0-9]$>"];
+        if(i == 1)
+        {
+            XCTAssertNotEqualObjects(result, @[], "stanza 1 should match id=some_id attr equality and all attr-presence elements matching the xmlns regex pattern: %@", result);
+            XCTAssertEqual(result.count, 3, "stanza 1 should exactly match 3 attr-presence elements: %@", result);
+            
+            for(unsigned long j=0; j<result.count; j++)
+            {
+                id innerResult1 = [result[j] findFirst:@"/{*}attr-presence@test1"];
+                id innerResult2 = [result[j] findFirst:@"/{*}attr-presence@test2"];
+                
+                if(j == 0)
+                {
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:0}attr-presence"], "attr-presence element 0 should have namespace urn:checker:0");
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:0}attr-presence<test1!>"], "attr-presence element 0 should match 'test1!' attr check");
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:0}attr-presence<test2!>"], "attr-presence element 0 should not match 'test2!' attr check");
+                    
+                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:0}attr-presence<test1!>"];
+                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 0 should match 'test1!' attr check and be an idempotent match");
+                    
+                    XCTAssertEqualObjects(innerResult1, @"yellow", "attr-presence element 0 should have 'test1' attr with value 'yellow': %@", innerResult1);
+                    XCTAssertNil(innerResult2, "attr-presence element 0 should not have 'test2' attr: %@", innerResult2);
+                }
+                else if(j == 1)
+                {
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:1}attr-presence"], "attr-presence element 1 should have namespace urn:checker:1: %@", result[j]);
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:1}attr-presence<test1!>"], "attr-presence element 1 should not match 'test1!' attr check: %@", result[j]);
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:1}attr-presence<test2!>"], "attr-presence element 1 should match 'test2!' attr check: %@", result[j]);
+                    
+                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:1}attr-presence<test2!>"];
+                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 1 should match 'test2!' attr check and be an idempotent match");
+                    
+                    XCTAssertNil(innerResult1, "attr-presence element 1 should not have 'test1' attr: %@", innerResult1);
+                    XCTAssertEqualObjects(innerResult2, @"green", "attr-presence element 1 should have 'test2' attr with value 'green': %@", innerResult2);
+                }
+                else if(j == 2)
+                {
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence"], "attr-presence element 0 should have namespace urn:checker:2: %@", result[j]);
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test1!>"], "attr-presence element 2 should match 'test1!' attr check: %@", result[j]);
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test2!>"], "attr-presence element 2 should match 'test2!' attr check: %@", result[j]);
+                    
+                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:2}attr-presence<test1!><test2!>"];
+                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 2 should match 'test1!' and 'test2!' attr checks and be an idempotent match");
+                    
+                    XCTAssertEqualObjects(innerResult1, @"blue", "attr-presence element 0 should have 'test1' attr with value 'blue': %@", innerResult1);
+                    XCTAssertEqualObjects(innerResult2, @"red", "attr-presence element 0 should have 'test2' attr with value 'red': %@", innerResult2);
+                }
+            }
+        }
+        else
+            XCTAssertEqualObjects(result, @[], "all other stanzas should not match: %lu: %@", i, result);
     }
 }
 

@@ -27,6 +27,8 @@ jobs:
           lfs: true
       - name: Checkout submodules
         run: git submodule update -f --init --remote
+      - name: Install coreutils
+        run: brew install coreutils
       - name: Build rust
         run: bash ./rust/build-rust.sh
       - name: Install pods
@@ -42,4 +44,10 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             test \
             2>&1 | \
-          xcbeautify --renderer github-actions
+          stdbuf -oL -eL xcbeautify --renderer github-actions | \
+          while IFS= read -r line; do \
+            echo "$line"; \
+            if [[ "$line" =~ "✔" ]]; then \
+              echo "::notice ::${line}"; \
+            fi; \
+          done

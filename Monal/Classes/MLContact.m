@@ -620,6 +620,8 @@ static NSMutableDictionary* _singletonCache;
     else
         [[DataLayer sharedInstance] unMuteContact:self];
     self.isMuted = mute;
+    if(self.isMuc)
+        [self.account.mucProcessor updateBookmarks];
 }
 
 -(void) toggleMentionOnly:(BOOL) mentionOnly
@@ -631,6 +633,8 @@ static NSMutableDictionary* _singletonCache;
     else
         [[DataLayer sharedInstance] setMucAlertOnAll:self.contactJid onAccount:self.accountID];
     self.isMentionOnly = mentionOnly;
+    if(self.isMuc)
+        [self.account.mucProcessor updateBookmarks];
 }
 
 -(BOOL) toggleEncryption:(BOOL) encrypt

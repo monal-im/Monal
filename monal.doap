@@ -711,6 +711,14 @@
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0490.html" />
         <xmpp:status>complete</xmpp:status>
         <xmpp:since>6.3</xmpp:since>
+        <xmpp:version>1.0.1</xmpp:version>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0492.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:since>7.0</xmpp:since>
         <xmpp:version>0.1.0</xmpp:version>
       </xmpp:SupportedXep>
     </implements>

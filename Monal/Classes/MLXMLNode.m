@@ -56,9 +56,9 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
-    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+[=~!][^>]*\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+[=~!][^>]*\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
-    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+[=~!][^>]*\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
-    attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~!]+)([=~!])(([^>]+)|)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
+    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+!?[=~][^>]*\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+!?[=~][^>]*\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+!?[=~][^>]*\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~!]+)(!)?([=~])([^>]*)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 
 //     testcases for stanza
 //     <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism><mechanism>SCRAM-SHA-1-PLUS</mechanism></mechanisms></stream:features>
@@ -515,30 +515,20 @@ static NSRegularExpression* attributeFilterRegex;
                 BOOL ok = YES;
                 for(NSDictionary* filter in parsedEntry[@"attributeFilters"])
                 {
-                    if([filter[@"type"] isEqualToString:@"!"])
+                    NSString* attributeValue = node.attributes[filter[@"name"]];
+                    if(attributeValue)
                     {
-                        if(node.attributes[filter[@"name"]] == nil)
+                        NSArray* matches = [filter[@"value"] matchesInString:attributeValue options:0 range:NSMakeRange(0, attributeValue.length)];
+                        if((BOOL)[matches count] == [filter[@"negated"] boolValue])
                         {
-                            ok = NO;
+                            ok = NO;        //this node does *not* fullfill the (possibly negated) attribute filter regex
                             break;
                         }
                     }
-                    else
+                    if(attributeValue == nil && ![filter[@"negated"] boolValue])
                     {
-                        if(node.attributes[filter[@"name"]])
-                        {
-                            NSArray* matches = [filter[@"value"] matchesInString:node.attributes[filter[@"name"]] options:0 range:NSMakeRange(0, [node.attributes[filter[@"name"]] length])];
-                            if(![matches count])
-                            {
-                                ok = NO;        //this node does *not* fullfill the attribute filter regex
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            ok = NO;
-                            break;
-                        }
+                        ok = NO;
+                        break;
                     }
                 }
                 if(!ok)
@@ -712,26 +702,19 @@ static NSRegularExpression* attributeFilterRegex;
         for(NSTextCheckingResult* attributeFilterMatch in attributeFilterMatches)
         {
             NSRange attributeFilterNameRange = [attributeFilterMatch rangeAtIndex:1];
-            NSRange attributeFilterTypeRange = [attributeFilterMatch rangeAtIndex:2];
-            if(attributeFilterNameRange.location == NSNotFound || attributeFilterTypeRange.location == NSNotFound)
+            NSRange attributeFilterNegationRange = [attributeFilterMatch rangeAtIndex:2];
+            NSRange attributeFilterTypeRange = [attributeFilterMatch rangeAtIndex:3];
+            NSRange attributeFilterValueRange = [attributeFilterMatch rangeAtIndex:4];
+            if(attributeFilterNameRange.location == NSNotFound || attributeFilterTypeRange.location == NSNotFound || attributeFilterValueRange.location == NSNotFound)
                 @throw [XMLQueryBrokenException exceptionWithName:@"AttributeFilterIncompleteException" reason:@"Attribute filter not complete!" userInfo:@{
                     @"self": self,
                     @"queryEntry": entry,
                     @"attributeFilters": attributeFilters
                 }];
             NSString* attributeFilterName = [attributeFilters substringWithRange:attributeFilterNameRange];
+            BOOL attributeFilterNegation = attributeFilterNegationRange.location != NSNotFound;
             unichar attributeFilterType = [[attributeFilters substringWithRange:attributeFilterTypeRange] characterAtIndex:0];
-            
-            NSRange attributeFilterValueRange = [attributeFilterMatch rangeAtIndex:4];
-            if(attributeFilterType != '!' && attributeFilterValueRange.location == NSNotFound)
-                @throw [XMLQueryBrokenException exceptionWithName:@"AttributeFilterIncompleteException" reason:@"Attribute filter not complete!" userInfo:@{
-                    @"self": self,
-                    @"queryEntry": entry,
-                    @"attributeFilters": attributeFilters
-                }];
-            NSString* attributeFilterValue = nil;
-            if(attributeFilterValueRange.location != NSNotFound)
-                attributeFilterValue = [attributeFilters substringWithRange:attributeFilterValueRange];
+            NSString* attributeFilterValue = [attributeFilters substringWithRange:attributeFilterValueRange];
             
             NSString* attributeFilterValueRegexPattern = nil;
             if(attributeFilterType == '=')      //verbatim comparison using format string interpolation
@@ -761,8 +744,6 @@ static NSRegularExpression* attributeFilterRegex;
                 //you will have to include sring-start and string-end markers yourself as well as all other regex stuff
                 attributeFilterValueRegexPattern = attributeFilterValue;
             }
-            else if(attributeFilterType == '!')
-                ;       //no attributeFilterValueRegexPattern needed for attribute presence check
             else
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Internal attribute filter bug, this should never happen!" userInfo:@{
                     @"self": self,
@@ -771,33 +752,25 @@ static NSRegularExpression* attributeFilterRegex;
                 }];
                 
             NSError* error = nil;
-            if(attributeFilterValueRegexPattern == nil)
-                [retval[@"attributeFilters"] addObject:@{
-                    @"name": attributeFilterName,
-                    @"type": [NSString stringWithCharacters:&attributeFilterType length:1],
+            NSRegularExpression* compiledRegex = [NSRegularExpression regularExpressionWithPattern:attributeFilterValueRegexPattern options:0 error:&error];
+            if(error || compiledRegex == nil)
+                @throw [XMLQueryBrokenException exceptionWithName:@"AttributeFilterRegexException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
+                    @"self": self,
+                    @"queryEntry": entry,
+                    @"filterType": [NSString stringWithCharacters:&attributeFilterType length:1],
+                    @"filterName": attributeFilterName,
+                    @"filterValue": nilWrapper(attributeFilterValue),
+                    @"filterRegex": nilWrapper(attributeFilterValueRegexPattern),
+                    @"compiledFilterRegex": nilWrapper(compiledRegex),
+                    @"error": nilWrapper(error),
                 }];
-            else
-            {
-                NSRegularExpression* compiledRegex = [NSRegularExpression regularExpressionWithPattern:attributeFilterValueRegexPattern options:0 error:&error];
-                if(error || compiledRegex == nil)
-                    @throw [XMLQueryBrokenException exceptionWithName:@"AttributeFilterRegexException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
-                        @"self": self,
-                        @"queryEntry": entry,
-                        @"filterType": [NSString stringWithCharacters:&attributeFilterType length:1],
-                        @"filterName": attributeFilterName,
-                        @"filterValue": nilWrapper(attributeFilterValue),
-                        @"filterRegex": nilWrapper(attributeFilterValueRegexPattern),
-                        @"compiledFilterRegex": nilWrapper(compiledRegex),
-                        @"error": nilWrapper(error),
-                    }];
-                else
-                    [retval[@"attributeFilters"] addObject:@{
-                        @"name": attributeFilterName,
-                        @"type": [NSString stringWithCharacters:&attributeFilterType length:1],
-                        //this regex will be cached in parsed form in the local cache of this method
-                        @"value": compiledRegex,
-                    }];
-            }
+            [retval[@"attributeFilters"] addObject:@{
+                @"name": attributeFilterName,
+                @"type": [NSString stringWithCharacters:&attributeFilterType length:1],
+                @"negated": @(attributeFilterNegation),
+                //this regex will be cached in parsed form in the local cache of this method
+                @"value": compiledRegex,
+            }];
         }
 #ifdef DEBUG_XMLQueryLanguage
         DDLogDebug(@"Done extracting, attributeFilters are now: %@", retval[@"attributeFilters"]);

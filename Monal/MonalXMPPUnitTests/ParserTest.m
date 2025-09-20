@@ -16,7 +16,7 @@ static NSMutableArray<MLXMLNode*>* _parsedStanzas;
 static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         <stream:stream xmlns:stream='http://etherx.jabber.org/streams' version='1.0' xmlns='jabber:client' xml:lang='en' from='example.org' id='a344b8bb-518e-4456-9140-d15f66c1d2db'>\n\
 \
-        <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism></mechanisms></stream:features>\n\
+        <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl' someEmptyAttribute=''><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism></mechanisms></stream:features>\n\
 \
         <message from='test@example.org' id='some_id' xmlns='jabber:client'>\n\
             <body>Message text</body>\n\
@@ -279,16 +279,20 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
     for(unsigned long i=0; i<_parsedStanzas.count; i++)
     {
         //all stanzas should give that error
-        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/<someUnknownAttribute~>"], XMLQueryBrokenException, @"AttributeFilterIncompleteException", "all stanzas should throw an exception");
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/<someUnknownAttribute~>"], XMLQueryBrokenException, @"AttributeFilterRegexException", "all stanzas should throw an exception");
     }
 }
 
--(void) testParseBrokenQueryAttributeFilterEmptyVerbatimValue
+-(void) testParseAttributeFilterEmptyVerbatimValue
 {
     for(unsigned long i=0; i<_parsedStanzas.count; i++)
     {
         //all stanzas should give that error
-        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/<someUnknownAttribute=>"], XMLQueryBrokenException, @"AttributeFilterIncompleteException", "all stanzas should throw an exception");
+        BOOL result = [_parsedStanzas[i] check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms<someEmptyAttribute=>"];
+        if(i == 0)
+            XCTAssertTrue(result, "stanza 0 should match the empty but present attribute");
+        else
+            XCTAssertFalse(result, "all other stanzas should not match: %lu", i);
     }
 }
 
@@ -477,11 +481,11 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
                 if(j == 0)
                 {
                     XCTAssertTrue([result[j] check:@"/{urn:checker:0}attr-presence"], "attr-presence element 0 should have namespace urn:checker:0");
-                    XCTAssertTrue([result[j] check:@"/{urn:checker:0}attr-presence<test1!>"], "attr-presence element 0 should match 'test1!' attr check");
-                    XCTAssertFalse([result[j] check:@"/{urn:checker:0}attr-presence<test2!>"], "attr-presence element 0 should not match 'test2!' attr check");
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:0}attr-presence<test1!~.*>"], "attr-presence element 0 should not match 'test1!~.*' attr check");
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:0}attr-presence<test2!~.*>"], "attr-presence element 0 should match 'test2!~.*' attr check");
                     
-                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:0}attr-presence<test1!>"];
-                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 0 should match 'test1!' attr check and be an idempotent match");
+                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:0}attr-presence<test1~.*>"];
+                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 0 should match 'test1~.*' attr check and be an idempotent match");
                     
                     XCTAssertEqualObjects(innerResult1, @"yellow", "attr-presence element 0 should have 'test1' attr with value 'yellow': %@", innerResult1);
                     XCTAssertNil(innerResult2, "attr-presence element 0 should not have 'test2' attr: %@", innerResult2);
@@ -489,11 +493,11 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
                 else if(j == 1)
                 {
                     XCTAssertTrue([result[j] check:@"/{urn:checker:1}attr-presence"], "attr-presence element 1 should have namespace urn:checker:1: %@", result[j]);
-                    XCTAssertFalse([result[j] check:@"/{urn:checker:1}attr-presence<test1!>"], "attr-presence element 1 should not match 'test1!' attr check: %@", result[j]);
-                    XCTAssertTrue([result[j] check:@"/{urn:checker:1}attr-presence<test2!>"], "attr-presence element 1 should match 'test2!' attr check: %@", result[j]);
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:1}attr-presence<test1!~.*>"], "attr-presence element 1 should match 'test1!~.*' attr check: %@", result[j]);
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:1}attr-presence<test2!~.*>"], "attr-presence element 1 should not match 'test2!~.*' attr check: %@", result[j]);
                     
-                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:1}attr-presence<test2!>"];
-                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 1 should match 'test2!' attr check and be an idempotent match");
+                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:1}attr-presence<test2~.*>"];
+                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 1 should match 'test2~.*' attr check and be an idempotent match");
                     
                     XCTAssertNil(innerResult1, "attr-presence element 1 should not have 'test1' attr: %@", innerResult1);
                     XCTAssertEqualObjects(innerResult2, @"green", "attr-presence element 1 should have 'test2' attr with value 'green': %@", innerResult2);
@@ -501,14 +505,17 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
                 else if(j == 2)
                 {
                     XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence"], "attr-presence element 0 should have namespace urn:checker:2: %@", result[j]);
-                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test1!>"], "attr-presence element 2 should match 'test1!' attr check: %@", result[j]);
-                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test2!>"], "attr-presence element 2 should match 'test2!' attr check: %@", result[j]);
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:2}attr-presence<test1!~.*>"], "attr-presence element 2 should not match 'test1!~.*' attr check: %@", result[j]);
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:2}attr-presence<test2!~.*>"], "attr-presence element 2 should not match 'test2!~.*' attr check: %@", result[j]);
                     
-                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:2}attr-presence<test1!><test2!>"];
-                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 2 should match 'test1!' and 'test2!' attr checks and be an idempotent match");
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test1~.*>"], "attr-presence element 2 should match 'test1~.*' attr check: %@", result[j]);
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test2~.*>"], "attr-presence element 2 should match 'test2~.*' attr check: %@", result[j]);
                     
-                    XCTAssertEqualObjects(innerResult1, @"blue", "attr-presence element 0 should have 'test1' attr with value 'blue': %@", innerResult1);
-                    XCTAssertEqualObjects(innerResult2, @"red", "attr-presence element 0 should have 'test2' attr with value 'red': %@", innerResult2);
+                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:2}attr-presence<test1~.*><test2~.*>"];
+                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 2 should match 'test1~.*' and 'test2~.*' attr checks and be an idempotent match");
+                    
+                    XCTAssertEqualObjects(innerResult1, @"blue", "attr-presence element 2 should have 'test1' attr with value 'blue': %@", innerResult1);
+                    XCTAssertEqualObjects(innerResult2, @"red", "attr-presence element 2 should have 'test2' attr with value 'red': %@", innerResult2);
                 }
             }
         }

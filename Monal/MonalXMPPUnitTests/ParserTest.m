@@ -265,7 +265,200 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
     }
 }
 
--(void) testParseAttributePresence01
+-(void) testParseBrokenQueryAttributeFilterRegexBroken
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/<someUnknownAttribute~[]bro[ken[^regex$>"], XMLQueryBrokenException, @"AttributeFilterRegexException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryAttributeFilterEmptyRegexValue
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/<someUnknownAttribute~>"], XMLQueryBrokenException, @"AttributeFilterIncompleteException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryAttributeFilterEmptyVerbatimValue
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/<someUnknownAttribute=>"], XMLQueryBrokenException, @"AttributeFilterIncompleteException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryGarbageInputUsingMultipleConversionCommandSeparators
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"|||"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryMissingNodeSelectionBeforeConversionCommand
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"|base64"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryDoubleConversionCommand
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"#|base64|base64"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryNeitherElementNorNamespace
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"@@|bool"], XMLQueryBrokenException, @"NeitherElementNorNamespaceException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenConversionQuery
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/@@|bool"], XMLQueryBrokenException, @"ConversionCommandOnNonStringResultException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryPathComponent01
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"//#|bool"], XMLQueryBrokenException, @"PathComponentBrokenException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryPathComponent02
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"//#|bool"], XMLQueryBrokenException, @"PathComponentBrokenException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryConversionNotAtTerminalNode01
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/#|bool/{hello}world"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryConversionNotAtTerminalNode02
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"{hello}world|bool/{some}element"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryConversionForFullNode
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"{*}*|bool"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryFormsQueryOnNonDataForm
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/{*}*\\{some}result@here\\"], XMLQueryBrokenException, @"DataFormsQueryOnNonDataFormsNodeException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryDataFormsSubqueryUnallowedConversionCommandAfterFullDataFormExtraction
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result\\|base64"], XMLQueryBrokenException, @"DataFormsConversionException", "all stanzas should throw an exception");
+}
+
+-(void) testParseBrokenQueryDataFormsSubqueryUnallowedConversionCommandAfterFullFieldExtraction
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result&muc#roomconfig_roomname\\|uuidcast"], XMLQueryBrokenException, @"DataFormsConversionException", "all stanzas should throw an exception");
+}
+
+-(void) testParseBrokenQueryDataFormsSubqueryEmpty
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\\\"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+}
+
+-(void) testParseBrokenQueryDataFormsSubqueryGarbage
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+        {
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\***{***}\\"], XMLQueryBrokenException, @"DataFormSyntaxErrorException", "all stanzas should throw an exception");
+        }
+}
+
+-(void) testParseBrokenQueryDoubleConversionCommandAfterDataFormSubquery
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\|datetime|uuidcast"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+}
+
+-(void) testParseDataFormSubqueryImplicitNamespaceAndElementName
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should be filtered by the implicit '{jabber:x:data}x' query, thus don't match
+        id result = [_parsedStanzas[i] find:@"/\\{some}result@here\\"];
+        XCTAssertEqualObjects(result, @[], "all stanzas should be filtered by the implicit '{jabber:x:data}x' query, thus don't match");
+    }
+}
+
+-(void) testParseDataFormsSubquery
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //stanza 2 should match
+        id result = [_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\"];
+        if(i == 2)
+            XCTAssertEqualObjects(result, @"testchat gruppe");
+        else
+            XCTAssertNil(result, "all other stanzas should not match: %lu", i);
+    }
+}
+
+-(void) testParseDataFormsSubqueryWithConversion
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertNoThrow([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\|uuidcast"], "dataform subqueries should not throw when using conversion commands for field extractions");
+}
+
+-(void) testParseAttributePresence
 {
     for(unsigned long i=0; i<_parsedStanzas.count; i++)
     {
@@ -345,19 +538,6 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         id result = [_parsedStanzas[i] findFirst:@"body#"];
         if(i == 1)
             XCTAssertEqualObjects(result, @"Message text");
-        else
-            XCTAssertNil(result, "all other stanzas should not match: %lu", i);
-    }
-}
-
--(void) testParseDataFormsSubquery
-{
-    for(unsigned long i=0; i<_parsedStanzas.count; i++)
-    {
-        //stanza 2 should match
-        id result = [_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\"];
-        if(i == 2)
-            XCTAssertEqualObjects(result, @"testchat gruppe");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }

@@ -808,7 +808,7 @@
     if(self.cancelConnectingTimeout != nil)
         self.cancelConnectingTimeout();
     self.cancelConnectingTimeout = nil;
-    self.cancelConnectingTimeout = createTimer(15.0, (^{
+    self.cancelConnectingTimeout = createTimer(20.0, (^{
         DDLogError(@"Failed to connect call, aborting!");
         [self end];
     }));
@@ -839,7 +839,7 @@
     if(self.cancelRingingTimeout != nil)
         self.cancelRingingTimeout();
     self.cancelRingingTimeout = nil;
-    self.cancelRingingTimeout = createTimer(45.0, (^{
+    self.cancelRingingTimeout = createTimer(60.0, (^{
         DDLogError(@"Call not answered in time, aborting!");
         [self end];
     }));

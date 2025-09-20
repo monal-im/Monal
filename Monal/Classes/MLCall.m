@@ -1485,7 +1485,7 @@
     }
     
     //make sure we don't handle incoming sdp twice
-    if(self.remoteSDP != nil && [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action~^session-(initiate|accept)$>"])
+    if(self.remoteSDP != nil && [iqNode check:@"{urn:xmpp:jingle:1}jingle<action~^session-(initiate|accept)$>"])
     {
         DDLogWarn(@"Got new remote sdp but we already got one, ignoring! MITM/DDOS??");
         XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];

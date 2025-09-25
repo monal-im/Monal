@@ -1723,33 +1723,32 @@
                     
                     @synchronized(self.candidateQueueLock) {
                         self.localSDP = sdpIQ;
-                        
-                        DDLogDebug(@"Now handling queued incoming candidate iqs: %lu", (unsigned long)self.incomingCandidateQueue.count);
-                        for(XMPPIQ* candidateIq in self.incomingCandidateQueue)
-                            [self processRemoteICECandidate:candidateIq];
                     }
                 }];
             }
             else
-            {
                 [self.account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
-                @synchronized(self.candidateQueueLock) {
-                    DDLogDebug(@"Now handling queued incoming candidate iqs: %lu", (unsigned long)self.incomingCandidateQueue.count);
-                    for(XMPPIQ* candidateIq in self.incomingCandidateQueue)
-                        [self processRemoteICECandidate:candidateIq];
-                }
-            }
-            @synchronized(self.candidateQueueLock) {
-                DDLogDebug(@"Now sending queued outgoing candidate iqs: %lu", (unsigned long)self.outgoingCandidateQueue.count);
-                for(XMPPIQ* candidateIq in self.outgoingCandidateQueue)
-                    [self.account sendIq:candidateIq withResponseHandler:^(XMPPIQ* result) {
-                        DDLogDebug(@"%@: Received outgoing ICE candidate result: %@", [self short], result);
-                    } andErrorHandler:^(XMPPIQ* error) {
-                        DDLogError(@"%@: Got error for outgoing ICE candidate: %@", [self short], error);
-                    }];
-            }
         }
     }];
+    
+    //do this inside the receive queue rather than in the signalling thread the above webrtc callback is running in
+    @synchronized(self.candidateQueueLock) {
+        //make sure we really are in the correct state (even if the above webrtc call should be blocking etc.)
+        if(self.remoteSDP != nil && self.localSDP != nil)
+        {
+            DDLogDebug(@"Now handling queued incoming candidate iqs: %lu", (unsigned long)self.incomingCandidateQueue.count);
+            for(XMPPIQ* candidateIq in self.incomingCandidateQueue)
+                [self processRemoteICECandidate:candidateIq];
+            
+            DDLogDebug(@"Now sending queued outgoing candidate iqs: %lu", (unsigned long)self.outgoingCandidateQueue.count);
+            for(XMPPIQ* candidateIq in self.outgoingCandidateQueue)
+                [self.account sendIq:candidateIq withResponseHandler:^(XMPPIQ* result) {
+                    DDLogDebug(@"%@: Received outgoing ICE candidate result: %@", [self short], result);
+                } andErrorHandler:^(XMPPIQ* error) {
+                    DDLogError(@"%@: Got error for outgoing ICE candidate: %@", [self short], error);
+                }];
+        }
+    }
     DDLogDebug(@"Leaving method...");
 }
 

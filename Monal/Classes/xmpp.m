@@ -3180,8 +3180,7 @@ NSString* const kStanza = @"stanza";
     //check if the server activated SASL2 after previously only upporting SASL1
     else if([[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo] && ((NSNumber*)checkProperSasl2Support()).boolValue)
     {
-        DDLogInfo(@"We detected SASL2 SCRAM support, deactivating forced SASL1 PLAIN fallback and retrying using SASL2...");
-        [[DataLayer sharedInstance] deactivatePlainForAccount:self.accountNo];
+        DDLogInfo(@"We detected SASL2 SCRAM support, retrying using SASL2...");
         //try again, this time using sasl2
         return [self handleFeaturesBeforeAuth:parsedStanza withForceSasl2:YES];
     }

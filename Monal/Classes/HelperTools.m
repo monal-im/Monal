@@ -324,7 +324,23 @@ void swizzle(Class c, SEL orig, SEL new)
 
 static void notification_center_logging(CFNotificationCenterRef center, void* observer, CFStringRef name, const void* object, CFDictionaryRef userInfo)
 {
-    DDLogDebug(@"NSNotification %@ with %@: %@", name, object, userInfo);
+    // The `object` pointers of some Apple-internal notifications don't represent objective-C objects.
+    // Trying to log them as such causes a crash. They are all related to audio / video file playback.
+    NSArray* unprintableNotifications = @[
+        @"FPM_PlayableRangeChanged",
+        @"FPM_StreamLikelyToKeepUp",
+        @"MentorPrerollComplete",
+        @"MentorStoppingDueToCompletion",
+        @"MentorPausingDueToHighWaterLevel",
+        @"MentorResumingAfterHighWaterLevel",
+        @"MentorResettingDueToModeSwitch",
+        @"BufferConsumed", // received when generating a video's thumbnail for the upload item preview
+        @"pool_ForgetBlock", // logging this doesn't cause a crash, but it breaks audio / video file playblack
+    ];
+    if([unprintableNotifications containsObject:(__bridge NSString*)name])
+        DDLogDebug(@"NSNotification %@ with <unprintable object>: %@", name, userInfo);
+    else
+        DDLogDebug(@"NSNotification %@ with %@: %@", name, object, userInfo);
 }
 
 @implementation WeakContainer

@@ -1195,7 +1195,10 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
             }
             
             //try to generate video thumbnail
-            [self generateVideoThumbnailFromFile:url.path havingMimeType:[UTType typeWithFilenameExtension:url.pathExtension].preferredMIMEType andFileExtension:url.pathExtension].then(^(UIImage* image) {
+            NSString* mimeType = [UTType typeWithFilenameExtension:url.pathExtension].preferredMIMEType;
+            if(!mimeType)
+                mimeType = @"application/octet-stream";
+            [self generateVideoThumbnailFromFile:url.path havingMimeType:mimeType andFileExtension:url.pathExtension].then(^(UIImage* image) {
                 payload[@"preview"] = image;
                 DDLogVerbose(@"Managed to generate thumbnail for url=%@ using generateVideoThumbnailFromFile: %@", url, image);
                 [url stopAccessingSecurityScopedResource];

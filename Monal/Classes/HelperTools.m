@@ -334,11 +334,14 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         @"MentorPausingDueToHighWaterLevel",
         @"MentorResumingAfterHighWaterLevel",
         @"MentorResettingDueToModeSwitch",
-        @"BufferConsumed", // received when generating a video's thumbnail for the upload item preview
         @"pool_ForgetBlock", // logging this doesn't cause a crash, but it breaks audio / video file playblack
     ];
     if([unprintableNotifications containsObject:(__bridge NSString*)name])
         DDLogDebug(@"NSNotification %@ with <unprintable object>: %@", name, userInfo);
+    else if([(__bridge NSString*)name isEqualToString:@"BufferConsumed"])
+        // Received when generating a video's thumbnail for the upload item preview
+        // In addition to its `object`, its `userInfo` also contains an unprintable value
+        DDLogDebug(@"NSNotification %@ with <unprintable object>: <unprintable userInfo>", name);
     else
         DDLogDebug(@"NSNotification %@ with %@: %@", name, object, userInfo);
 }

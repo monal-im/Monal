@@ -60,6 +60,7 @@
     _ssdpString = nil;
     _serverFirstMessageParsed = NO;
     _finishedSuccessfully = NO;
+    _ssdpSupported = NO;
     return self;
 }
 
@@ -79,16 +80,24 @@
     DDLogVerbose(@"SDDP string is now: %@", _ssdpString);
 }
 
--(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType
+-(NSString*) clientFirstMessageWithNoMatchingChannelBindingFound:(BOOL) noMatchingChannelBindingFound andChannelBinding:(NSString* _Nullable) channelBindingType
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     MLAssert(!_serverFirstMessageParsed, @"SCRAM handler already parsed server-first-message!");
-    if(channelBindingType == nil)
-        _gssHeader = @"n,,";                                                                //not supported by us
-    else if(!_usingChannelBinding)
-        _gssHeader = @"y,,";                                                                //supported by us BUT NOT advertised by the server
+    //no matching channel binding could be found, but server advertised channel-binding capability
+    //--> tell the server we DON'T support channel-binding and abort the authentication later on,
+    //    if the server doesn't support SSDP to sign this fact
+    //NOTE: XEP-0440 makes tls-server-end-point mandatory and we support this
+    //NOTE: ==> not having a match almost always means a MITM attacker tampered with the XEP-0440 list
+    if(noMatchingChannelBindingFound)
+        _gssHeader = @"n,,";
+    //supported by us BUT NOT advertised by the server
+    //--> mark this fact so that the server can abort authentication, if this isn't true
+    else if(channelBindingType == nil)
+        _gssHeader = @"y,,";
+    //supported by us AND advertised by the server
     else
-        _gssHeader = [NSString stringWithFormat:@"p=%@,,", channelBindingType];             //supported by us AND advertised by the server
+        _gssHeader = [NSString stringWithFormat:@"p=%@,,", channelBindingType];
     //the g attribute is a random grease to check if servers are rfc compliant (e.g. accept optional attributes)
     _clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@,g=%@", [self quote:_username], _nonce, [NSUUID UUID].UUIDString];
     return [NSString stringWithFormat:@"%@%@", _gssHeader, _clientFirstMessageBare];
@@ -133,7 +142,7 @@
     //calculate gss header with optional channel binding data
     NSMutableData* gssHeaderWithChannelBindingData = [NSMutableData new];
     [gssHeaderWithChannelBindingData appendData:[_gssHeader dataUsingEncoding:NSUTF8StringEncoding]];
-    if(channelBindingData != nil)
+    if(_usingChannelBinding && channelBindingData != nil)
         [gssHeaderWithChannelBindingData appendData:channelBindingData];
     
     NSData* saltedPassword = [self hashPasswordWithSalt:_salt andIterationCount:_iterationCount];

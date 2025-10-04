@@ -117,9 +117,6 @@ struct AVCallUI: View {
             case .connected:
                 DDLogDebug("state: connected")
                 maybeStartRenderer()
-                if MLCallType(rawValue:call.callType) == .video {
-                    call.speaker = true
-                }
             case .finished:
                 DDLogDebug("state: finished: \(String(describing:call.finishReason as NSNumber))")
                 //check audio state before trying to play anything (if we are still in state .call,

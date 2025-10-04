@@ -523,6 +523,8 @@
     [[RTCAudioSession sharedInstance] audioSessionDidActivate:audioSession];
     [[RTCAudioSession sharedInstance] setIsAudioEnabled:YES];
     [[RTCAudioSession sharedInstance] unlockForConfiguration];
+    if(self.callType == MLCallTypeVideo)
+        self.speaker = YES;
 }
 
 -(void) didDeactivateAudioSession:(AVAudioSession*) audioSession

@@ -14,7 +14,7 @@ permissions: {}
 
 jobs:
   run_tests:
-    runs-on: macos-latest
+    runs-on: macos-14
     name: Run automated tests
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +27,8 @@ jobs:
           lfs: true
       - name: Checkout submodules
         run: git submodule update -f --init --remote
+      - name: Select Xcode version
+        run: sudo xcode-select -s '/Applications/Xcode_16.2.app/Contents/Developer'
       - name: Install coreutils
         run: brew install coreutils
       - name: Build rust

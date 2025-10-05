@@ -223,10 +223,17 @@
 -(void) setSpeaker:(BOOL) speaker
 {
     @synchronized(self) {
+        DDLogError(@"*** setSpeaker:%@ called...", bool2str(speaker));
         if(self.webRTCClient == nil || self.audioSession == nil)
+        {
+            DDLogError(@"*** setSpeaker: not ready: %@, %@", self.webRTCClient, self.audioSession);
             return;
+        }
         if(_speaker == speaker)
+        {
+            DDLogError(@"*** setSpeaker: called but identical...");
             return;
+        }
         _speaker = speaker;
         if(_speaker)
             [self.webRTCClient speakerOn];
@@ -476,7 +483,10 @@
     [[RTCAudioSession sharedInstance] setIsAudioEnabled:YES];
     [[RTCAudioSession sharedInstance] unlockForConfiguration];
     if(self.callType == MLCallTypeVideo)
+    {
+        DDLogError(@"*** Activating speaker...");
         self.speaker = YES;
+    }
 }
 
 -(void) didDeactivateAudioSession:(AVAudioSession*) audioSession
@@ -1711,15 +1721,15 @@
 {
     DDLogVerbose(@"Audio route changed: %@", notification);
     DDLogVerbose(@"Current audio route: %@", self.audioSession.currentRoute);
-    BOOL speaker = NO;
-    for(AVAudioSessionPortDescription* port in self.audioSession.currentRoute.outputs)
-        if(port.portType == AVAudioSessionPortBuiltInSpeaker)
-            speaker = YES;
-    
-    if(speaker)
-        self.speaker = YES;
-    else
-        self.speaker = NO;
+//     BOOL speaker = NO;
+//     for(AVAudioSessionPortDescription* port in self.audioSession.currentRoute.outputs)
+//         if(port.portType == AVAudioSessionPortBuiltInSpeaker)
+//             speaker = YES;
+//     
+//     if(speaker)
+//         self.speaker = YES;
+//     else
+//         self.speaker = NO;
 }
 
 -(MLCallEncryptionState) encryptionTypeForDeviceid:(NSNumber* _Nonnull) deviceid

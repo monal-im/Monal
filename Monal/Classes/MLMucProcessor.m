@@ -23,7 +23,7 @@
 #import "MLOMEMO.h"
 #import "MLImageManager.h"
 
-#define CURRENT_MUC_STATE_VERSION @9
+#define CURRENT_MUC_STATE_VERSION @10
 
 @interface MLMucProcessor()
 {
@@ -33,6 +33,7 @@
     NSMutableDictionary* _roomFeatures;
     NSMutableDictionary* _creating;
     NSMutableDictionary* _joining;
+    NSMutableSet* _joined;
     NSMutableSet* _destroying;
     NSMutableSet* _firstJoin;
     NSMutableDictionary* _changingName;
@@ -77,6 +78,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     _roomFeatures = [NSMutableDictionary new];
     _creating = [NSMutableDictionary new];
     _joining = [NSMutableDictionary new];
+    _joined = [NSMutableSet new];
     _destroying = [NSMutableSet new];
     _firstJoin = [NSMutableSet new];
     _changingName = [NSMutableDictionary new];
@@ -112,6 +114,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         _roomFeatures = [state[@"roomFeatures"] mutableCopy];
         _creating = [state[@"creating"] mutableCopy];
         _joining = [state[@"joining"] mutableCopy];
+        _joined = [state[@"joined"] mutableCopy];
         _destroying = [state[@"destroying"] mutableCopy];
         _firstJoin = [state[@"firstJoin"] mutableCopy];
         _changingName = [state[@"changingName"] mutableCopy];
@@ -129,6 +132,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             @"roomFeatures": [_roomFeatures copy],
             @"creating": [_creating copy],
             @"joining": [_joining copy],
+            @"joined": [_joined copy],
             @"destroying": [_destroying copy],
             @"firstJoin": [_firstJoin copy],
             @"changingName": [_changingName copy],
@@ -147,7 +151,9 @@ static NSDictionary* _optionalGroupConfigOptions;
     //NOTE: this event won't be called for smacks resumes!
     if(_account == ((xmpp*)notification.object))
     {
+        //reset our state
         @synchronized(_stateLockObject) {
+            _joined = [NSMutableSet new];
             _roomFeatures = [NSMutableDictionary new];
             _destroying = [NSMutableSet new];
             _changingName = [NSMutableDictionary new];
@@ -165,10 +171,6 @@ static NSDictionary* _optionalGroupConfigOptions;
             //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
             _hasFetchedBookmarks = NO;
         }
-            
-        //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
-        for(NSString* room in [[DataLayer sharedInstance] listMucsForAccount:_account.accountNo])
-            [self join:room];
     }
 }
 
@@ -212,6 +214,13 @@ static NSDictionary* _optionalGroupConfigOptions;
 {
     @synchronized(_stateLockObject) {
         return _joining[room] != nil;
+    }
+}
+
+-(BOOL) isJoined:(NSString*) room
+{
+    @synchronized(_stateLockObject) {
+        return [_joined containsObject:room];
     }
 }
 
@@ -282,7 +291,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     }
     
     //check for all other errors (these can happen if the muc is discoverable but joining somehow fails nonetheless like with biboumi)
-    if([presenceNode check:@"/<type=error>/error<type=wait>"])
+    if([presenceNode check:@"/<type=error>/error<type=wait>"] && ([self isJoining:presenceNode.fromUser] || [self isJoined:presenceNode.fromUser]))
     {
         DDLogError(@"Got transient muc error presence of %@: %@", presenceNode.fromUser, [presenceNode findFirst:@"error"]);
         [self removeRoomFromJoining:presenceNode.fromUser];
@@ -297,7 +306,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Temporary failure to enter Group/Channel: %@", @""), presenceNode.fromUser] forMuc:presenceNode.fromUser withNode:presenceNode andIsSevere:NO];
         return;
     }
-    else if([presenceNode check:@"/<type=error>"])
+    else if([presenceNode check:@"/<type=error>"] && ([self isJoining:presenceNode.fromUser] || [self isJoined:presenceNode.fromUser]))
     {
         DDLogError(@"Got permanent muc error presence of %@: %@", presenceNode.fromUser, [presenceNode findFirst:@"error"]);
         [self removeRoomFromJoining:presenceNode.fromUser];
@@ -849,8 +858,11 @@ $$
             {
                 DDLogInfo(@"Successfully joined muc %@...", node.fromUser);
                 
-                //we are joined now, remove from joining list
-                [self removeRoomFromJoining:node.fromUser];
+                //we are joined now, remove from joining list and add to joined list
+                @synchronized(_stateLockObject) {
+                    [self removeRoomFromJoining:node.fromUser];
+                    [_joined addObject:node.fromUser];
+                }
                 
                 //we joined successfully --> add muc to our favorites (this will use the already up to date nick from buddylist db table)
                 //and update bookmarks if this was the first time we joined this muc

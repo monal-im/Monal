@@ -126,11 +126,11 @@ jobs:
           name: monal-ios
           path: Monal/build/ipa/Quicksy.ipa
           if-no-files-found: error
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: monal-ios-dsym
-      #     path: Monal/build/ios_Monal.xcarchive/dSYMs
-      #     if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monal-ios-dsym
+          path: Monal/build/ios_Monal.xcarchive/dSYMs
+          if-no-files-found: error
       - name: validate ios app
         run: xcrun altool --validate-app --file ./Monal/build/ipa/Quicksy.ipa --type ios -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
       - name: push tag to stable repo

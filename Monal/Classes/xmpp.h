@@ -26,7 +26,9 @@ typedef NS_ENUM (NSInteger, xmppState) {
     kStateHasStream,
     kStateLoggedIn,
     kStateBinding,
-    kStateBound		//is operating normally
+    kStateBound,
+    kStateInitStarted,		//initializing session (smacks resume and non-smacks resume)
+    kStateCatchupDone,		//is operating normally
 };
 
 typedef NS_ENUM (NSInteger, xmppRegistrationState) {
@@ -230,6 +232,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) addMessageToMamPageArray:(NSDictionary*) messageDictionary;
 -(NSMutableArray*) getOrderedMamPageFor:(NSString*) mamQueryId;
 -(void) bindResource:(NSString*) resource;
+-(void) earlyInitSession;
 -(void) initSession;
 -(void) sendDisplayMarkerForMessages:(NSArray<MLMessage*>*) unread;
 -(void) publishAvatar:(UIImage*) image;

@@ -482,7 +482,7 @@ enum DummySettingsRows {
 -(IBAction) deleteAccountClicked:(id) sender
 {
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(xmppAccount.accountState < kStateBound)
+    if(xmppAccount.accountState < kStateInitStarted)
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error Removing Account", @"")
                                                                         message:NSLocalizedString(@"Your account must be enabled and connected, to be removed from the server!", @"") preferredStyle:UIAlertControllerStyleAlert];

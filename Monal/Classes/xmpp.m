@@ -48,7 +48,7 @@
 
 @import AVFoundation;
 
-#define STATE_VERSION 18
+#define STATE_VERSION 604019
 #define CONNECT_TIMEOUT 7.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
@@ -335,7 +335,7 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"New caps hash: %@", hash);
         _capsHash = hash;
         //broadcast new version hash (will be ignored if we are not bound)
-        if(_accountState >= kStateBound)
+        if(_accountState >= kStateInitStarted)
             [self sendPresence];
     }
 }
@@ -924,6 +924,7 @@ NSString* const kStanza = @"stanza";
         
         //mark this account as currently connecting
         self->_accountState = kStateReconnecting;
+        [self accountStatusChanged];
         
         //only proceed with connection if not concurrent with other processes
         DDLogVerbose(@"Checking remote process lock...");
@@ -936,6 +937,7 @@ NSString* const kStanza = @"stanza";
         {
             DDLogInfo(@"MainApp is running, not connecting (this should transition us into idle state again which will terminate this extension)");
             self->_accountState = kStateDisconnected;
+            [self accountStatusChanged];
             return;
         }
         
@@ -955,6 +957,7 @@ NSString* const kStanza = @"stanza";
         {
             DDLogError(@"Server disallows xmpp connections for account '%@', ignoring login", self.accountNo);
             self->_accountState = kStateDisconnected;
+            [self accountStatusChanged];
             return;
         }
         
@@ -1099,7 +1102,7 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"doing explicit logout (xmpp stream close)");
             self->_reconnectBackoffTime = 0.0;
             [self unfreezeSendQueue];      //make sure the queue is operational again
-            if(self.accountState>=kStateBound)
+            if(self.accountState >= kStateInitStarted)
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
                     if([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
@@ -1174,7 +1177,7 @@ NSString* const kStanza = @"stanza";
             else
             {
                 //send one last ack before closing the stream (xep version 1.5.2)
-                if(self.accountState>=kStateBound)
+                if(self.accountState >= kStateInitStarted)
                 {
                     [self->_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                         [self sendLastAck];
@@ -1239,6 +1242,8 @@ NSString* const kStanza = @"stanza";
         //we don't throw away operations in the receive queue because they could be more than just stanzas
         //(for example outgoing messages that should be written to the smacks queue instead of just vanishing in a void)
         //all incoming stanzas in the receive queue will honor the _accountState being lower than kStateReconnecting and be dropped
+        
+        [self accountStatusChanged];
     }];
 }
 
@@ -1433,7 +1438,7 @@ NSString* const kStanza = @"stanza";
                 }]] waitUntilFinished:YES];
             //we have to wait for the stanza/nonza to be handled before parsing the next one to not introduce race conditions
             //between the response to our pipelined stream restart and the parser reset in the sasl success handler
-            }]] waitUntilFinished:(self->_accountState < kStateBound ? YES : NO)];
+            }]] waitUntilFinished:(self->_accountState < kStateInitStarted ? YES : NO)];
         }];
     }
     else
@@ -1530,7 +1535,7 @@ NSString* const kStanza = @"stanza";
             return;
         }
         
-        if(self.accountState<kStateBound)
+        if(self.accountState < kStateInitStarted)
         {
             DDLogInfo(@"ping attempted before logged in and bound, ignoring ping.");
             return;
@@ -1563,8 +1568,8 @@ NSString* const kStanza = @"stanza";
                 self->_pingTimer = nil;
                 [self dispatchAsyncOnReceiveQueue: ^{
                     //check if someone already called reconnect or disconnect while we were waiting for the ping
-                    //(which was called while we still were >= kStateBound)
-                    if(self.accountState<kStateBound)
+                    //(which was called while we still were >= kStateInitStarted)
+                    if(self.accountState < kStateInitStarted)
                         DDLogInfo(@"ping took too long, but reconnect or disconnect already in progress, ignoring");
                     else
                     {
@@ -1696,11 +1701,23 @@ NSString* const kStanza = @"stanza";
 {
     NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     @synchronized(_stateLockObject) {
+        //sanity check
+        MLAssert(([self.unAckedStanzas count]+[self.lastHandledOutboundStanza unsignedIntValue])==[self.lastOutboundStanza unsignedIntValue], @"Calculated outgoing stanza count and counted one differ!", (@{
+            @"calculated:unAckedStanzas+lastHandledOutboundStanza": @([self.unAckedStanzas count] + [self.lastHandledOutboundStanza unsignedIntValue]),
+            @"counted:lastOutboundStanza": self.lastOutboundStanza,
+        }));
         //stanza counting bugs on the server are fatal
         if(([hvalue unsignedIntValue] - [self.lastHandledOutboundStanza unsignedIntValue]) > [self.unAckedStanzas count])
         {
             self.streamID = nil;        //we don't ever want to resume this
-            NSString* message = @"Server acknowledged more stanzas than sent by client";
+            NSString* message = [NSString stringWithFormat:
+                @"Server acknowledged more stanzas (%@) than sent by client (%@, %@), %@ still waiting to be acked, %@ acked last time",
+                hvalue,
+                @([self.unAckedStanzas count] + [self.lastHandledOutboundStanza unsignedIntValue]),
+                self.lastHandledOutboundStanza,
+                @([self.unAckedStanzas count]),
+                self.lastHandledOutboundStanza
+            ];
             DDLogError(@"Stream error: %@", message);
             [self postError:message withIsSevere:NO];
             MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
@@ -1718,7 +1735,7 @@ NSString* const kStanza = @"stanza";
         if([hvalue unsignedIntValue] < [self.lastHandledOutboundStanza unsignedIntValue])
         {
             self.streamID = nil;        //we don't ever want to resume this
-            NSString* message = @"Server acknowledged less stanzas than last time";
+            NSString* message = [NSString stringWithFormat:@"Server acknowledged less stanzas (%@) than last time (%@)", hvalue, self.lastHandledOutboundStanza];
             DDLogError(@"Stream error: %@", message);
             [self postError:message withIsSevere:NO];
             MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
@@ -1790,7 +1807,7 @@ NSString* const kStanza = @"stanza";
     MLXMLNode* rNode;
     @synchronized(_stateLockObject) {
         unsigned long unackedCount = (unsigned long)[self.unAckedStanzas count];
-        if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
+        if(self.accountState >= kStateInitStarted && self.connectionProperties.supportsSM3 &&
             ((!self.smacksRequestInFlight && unackedCount>0) || force)
         ) {
             DDLogVerbose(@"requesting smacks ack...");
@@ -1816,8 +1833,8 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendSMAck:(BOOL) queuedSend
 {
-    //don't send anything before a resource is bound
-    if(self.accountState<kStateBound || !self.connectionProperties.supportsSM3)
+    //don't send anything before a resource is bound and smacks was enabled
+    if(self.accountState < kStateInitStarted || !self.connectionProperties.supportsSM3)
         return;
     
     NSDictionary* dic;
@@ -1852,11 +1869,11 @@ NSString* const kStanza = @"stanza";
     //only process most stanzas/nonzas after having a secure context
     if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
     {
-        if([parsedStanza check:@"/{urn:xmpp:sm:3}r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
+        if([parsedStanza check:@"/{urn:xmpp:sm:3}r"] && self.connectionProperties.supportsSM3 && self.accountState >= kStateInitStarted)
         {
             [self sendSMAck:YES];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState >= kStateInitStarted)
         {
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
             if(h==nil)
@@ -1870,7 +1887,7 @@ NSString* const kStanza = @"stanza";
                 [self requestSMAck:NO];                 //request ack again (will only happen if queue is not empty)
             }
         }
-        else if([parsedStanza check:@"/{jabber:client}presence"])
+        else if([parsedStanza check:@"/{jabber:client}presence"] && self.accountState >= kStateInitStarted)
         {
             XMPPPresence* presenceNode = (XMPPPresence*)parsedStanza;
             
@@ -2083,7 +2100,7 @@ NSString* const kStanza = @"stanza";
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
         }
-        else if([parsedStanza check:@"/{jabber:client}message"])
+        else if([parsedStanza check:@"/{jabber:client}message"] && self.accountState >= kStateInitStarted)
         {
             //outerMessageNode and messageNode are the same for messages not carrying a carbon copy or mam result
             XMPPMessage* originalParsedStanza = (XMPPMessage*)[parsedStanza copy];
@@ -2275,6 +2292,9 @@ NSString* const kStanza = @"stanza";
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
         }
+        //nearly all iqs accepted must be a response to something requested
+        //--> no kStateInitStarted, kStateBound or kStateBinding gatekeeping needed
+        //see processUnboundIq:forAccount: in MLIQProcessor.m for more information
         else if([parsedStanza check:@"/{jabber:client}iq"])
         {
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
@@ -2339,7 +2359,7 @@ NSString* const kStanza = @"stanza";
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanzaWithDelayedReplay:delayedReplay];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"])
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"] && self.accountState == kStateBound)
         {
             NSMutableArray* stanzas;
             @synchronized(_stateLockObject) {
@@ -2368,7 +2388,7 @@ NSString* const kStanza = @"stanza";
             //message duplicates are possible in this scenario, but that's better than dropping messages
             [self resendUnackedMessageStanzasOnly:stanzas];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}resumed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound)
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}resumed"] && self.connectionProperties.supportsSM3 && self.accountState < kStateBound)
         {
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
             if(h==nil)
@@ -2376,10 +2396,13 @@ NSString* const kStanza = @"stanza";
             self.resuming = NO;
             self.isDoingFullReconnect = NO;
 
-            //now we are bound again
-            _accountState = kStateBound;
+            //now we are initialized again (the following block is *largely* taken from earlyInitSession)
+            DDLogInfo(@"Session resumed, initializing state...");
+            self.isDoingFullReconnect = YES;
             _connectedTime = [NSDate date];
             _reconnectBackoffTime = 0;
+            _accountState = kStateInitStarted;
+            [[MLNotificationQueue currentQueue] postNotificationName:kMLSessionInitNotice object:self];
             [self accountStatusChanged];
 
             @synchronized(_stateLockObject) {
@@ -2442,7 +2465,7 @@ NSString* const kStanza = @"stanza";
             //initialize stanza counter for statistics
             [self initCatchupStats];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound && self.resuming)
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState < kStateBound && self.resuming)
         {
             //we landed here because smacks resume failed
             
@@ -2467,7 +2490,7 @@ NSString* const kStanza = @"stanza";
                 [self bindResource:self.connectionProperties.identity.resource];
             }
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound && !self.resuming)
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState == kStateBound && !self.resuming)
         {
             //we landed here because smacks enable failed
             
@@ -2532,6 +2555,7 @@ NSString* const kStanza = @"stanza";
             
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
+            [self accountStatusChanged];
             
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
@@ -2575,25 +2599,11 @@ NSString* const kStanza = @"stanza";
             NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"/{urn:xmpp:sasl:2}challenge#|base64"] encoding:NSUTF8StringEncoding];
             switch([self->_scramHandler parseServerFirstMessage:innerSASLData]) {
                 case MLScramStatusSSDPTriggered: deactivate_account = YES; message = NSLocalizedString(@"Detected ongoing MITM attack via SSDP, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
-                case MLScramStatusNonceError: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (nonce error), disconnecting!", @"parenthesis should be verbatim"); break;
-                case MLScramStatusUnsupportedMAttribute: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (m-attr error), disconnecting!", @"parenthesis should be verbatim"); break;
-                case MLScramStatusIterationCountInsecure: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (iteration count too low), disconnecting!", @"parenthesis should be verbatim"); break;
+                case MLScramStatusNonceError: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (nonce error), disconnecting!", @"parenthesis should remain in english"); break;
+                case MLScramStatusUnsupportedMAttribute: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (m-attr error), disconnecting!", @"parenthesis should remain in english"); break;
+                case MLScramStatusIterationCountInsecure: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (iteration count too low), disconnecting!", @"parenthesis should remain in english"); break;
                 case MLScramStatusServerFirstOK: deactivate_account = NO; message = nil; break;        //everything is okay
                 default: unreachable(@"wrong status for scram message!"); break;
-            }
-            
-            //check for incomplete XEP-0440 support (not implementing mandatory tls-server-end-point channel-binding) not mitigated by SSDP
-            //(we allow either support for tls-server-end-point or SSDP signed non-support)
-            if([kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]])
-            {
-                MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
-                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:kServerDoesNotFollowXep0440Error],
-                ] andData:nil];
-                [self disconnectWithStreamError:streamError andExplicitLogout:YES];
-                
-                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
-                [HelperTools postError:NSLocalizedString(@"Either this is a man-in-the-middle attack OR your server neither implements XEP-0474 nor does it fully implement XEP-0440 which mandates support for tls-server-end-point channel-binding. In either case you should inform your server admin! Account disabled now.", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
             }
             
             if(message != nil)
@@ -2623,7 +2633,32 @@ NSString* const kStanza = @"stanza";
                 return;
             }
             
+            // we allow one of these three cases:
+            // 1. we allow non-support of channel-binding altogether (no -PLUS methods and no XEP-0440 list advertised by server)
+            //    in this case, we send a "y,," gss-header indicating we would have used channel-binding if the server
+            //    would have advertised support
+            //    --> the server will abort authentication, if it did advertise support, but a MITM stripped it off
+            // 2. we allow an SSDP signed XEP-0440 list not containing tls-server-end-point
+            //    --> since this is signed by SSDP, it cannot have been caused by a MITM attacker
+            // 3. we allow a XEP-0440 list containing tls-server-end-point. support for this cb-type this is mandatory via XEP-0440.
+            //    --> non-support for tls-server-end-point is likely caused by a MITM attacker (SSDP isn't supported to authenticate this!)
+            // ==> abort authentication if cb-types were anounced, but the list doesn't contain tls-server-end-point and this wasn't
+            //     signed by SSDP (the check for SSDP is done in [self channelBindingToUse].
+            if(_supportedChannelBindings != nil && [kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]])
+            {
+                MLXMLNode* streamError = [[MLXMLNode alloc] initWithElement:@"stream:error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"undefined-condition" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:nil],
+                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:kServerDoesNotFollowXep0440Error],
+                ] andData:nil];
+                [self disconnectWithStreamError:streamError andExplicitLogout:YES];
+                
+                //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
+                [HelperTools postError:NSLocalizedString(@"Either this is a man-in-the-middle attack OR your server neither implements XEP-0474 nor does it fully implement XEP-0440 which mandates support for tls-server-end-point channel-binding. In either case you should inform your server admin! Account disabled now.", @"") withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+            }
+            
             NSData* channelBindingData = nil;
+            //this can only be the case if it was closed shortly before handling this stanza (race condition)
+            //in this case we'll abort the auth after handling the challenge, so not adding cb-data is fine here
             if([((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen)
                 channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];
             MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessageWithChannelBindingData:channelBindingData]]];
@@ -2763,6 +2798,8 @@ NSString* const kStanza = @"stanza";
             //NOTE: we don't have any stream restart when using SASL2
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
             _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
+            
+            [self accountStatusChanged];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}continue"])
         {
@@ -2813,7 +2850,10 @@ NSString* const kStanza = @"stanza";
         {
             //prevent reconnect attempt
             if(_accountState < kStateHasStream)
+            {
                 _accountState = kStateHasStream;
+                [self accountStatusChanged];
+            }
             
             //perform logic to handle stream
             if(self.accountState < kStateLoggedIn)
@@ -2837,7 +2877,7 @@ NSString* const kStanza = @"stanza";
                     [self handleFeaturesAfterAuth:parsedStanza];
                 }
                 else
-                    DDLogDebug(@"Stream features (after auth) already read from cache, ignoring incoming stream features (but refreshing cache).\n Cached: %@\nIncoming: %@", _cachedStreamFeaturesAfterAuth, parsedStanza);
+                    DDLogDebug(@"Stream features (after auth) already read from cache, ignoring incoming stream features (but refreshing cache).\nCached: %@\nIncoming: %@", _cachedStreamFeaturesAfterAuth, parsedStanza);
                 _cachedStreamFeaturesAfterAuth = parsedStanza;
             }
         }
@@ -2858,6 +2898,7 @@ NSString* const kStanza = @"stanza";
         }
         else
         {
+            //this includes spurious message/presence errors generated on bind by prosody's *broken smacks module* on and reflected by MUCs
             DDLogWarn(@"Ignoring unhandled top-level xml element <%@>: %@", parsedStanza.element, parsedStanza);
         }
     }
@@ -2906,7 +2947,7 @@ NSString* const kStanza = @"stanza";
                 [_xmlParser abortParsing];
                 _xmlParser = nil;
                 //throw away all parsed but not processed stanzas (we aborted the parser right now)
-                //the xml parser will fill the parse queue synchronously while < kStateBound
+                //the xml parser will fill the parse queue synchronously while < kStateInitStarted
                 //--> no stanzas/nonzas will leak into the parse queue after resetting the parser and clearing the parse queue
                 [_parseQueue cancelAllOperations];
             }
@@ -3061,6 +3102,8 @@ NSString* const kStanza = @"stanza";
     else if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/mechanism"] && (![[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo] || forceSasl2))
     {
         DDLogDebug(@"Trying SASL2...");
+        __block BOOL supportsScram = NO;
+        __block BOOL supportsPlus = NO;
         
         weakify(self);
         _blockToCallOnTCPOpen = ^{
@@ -3068,6 +3111,24 @@ NSString* const kStanza = @"stanza";
             
             if([self->_supportedSaslMechanisms containsObject:@"PLAIN"])
                 DDLogWarn(@"Server supports SASL2 PLAIN, ignoring because this is insecure!");
+            
+            //no channel-bindings were announced using XEP-0440, but the server offered -PLUS methods
+            //--> this is an implementation bug because XEP-0388 demands XEP-440 support
+            if(self->_supportedChannelBindings == nil && supportsPlus)
+            {
+                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Your server offered SCRAM-PLUS methods, but did not announce any channel-binding types using XEP-0440 which is mandatory by XEP-0388. This is either an ongoing man-in-the-middle attack or a server misconfiguration, disabling account!", @""));
+                return;
+            }
+            
+            //the server announced channel-bindings but did not offer any SCRAM-PLUS methods
+            //--> this is likely a MITM, because announcing cb-methods but not offering any -PLUS methods is moot
+            if(self->_supportedChannelBindings != nil && !supportsPlus)
+            {
+                clearPipelineCacheOrReportSevereError(NSLocalizedString(@"Your server announced channel-binding types but did not offer any SCRAM-PLUS methods. This is likely an ongoing man-in-the-middle attack (but could also be a server misconfiguration), disabling account!", @""));
+                return;
+            }
+            
+            BOOL noMatchingChannelBindingFound = self->_supportedChannelBindings!=nil && ([self channelBindingToUse]==nil || [kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]]);
             
             //create list of upgradable scram mechanisms and pick the first one (highest security) the server and we support
             //but only do so, if we are using channel-binding for additional security
@@ -3097,7 +3158,7 @@ NSString* const kStanza = @"stanza";
                         andNamespace:@"urn:xmpp:sasl:2"
                         withAttributes:@{@"mechanism": mechanism}
                         andChildren:@[
-                            [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithChannelBinding:[self channelBindingToUse]]]],
+                            [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithNoMatchingChannelBindingFound:noMatchingChannelBindingFound andChannelBinding:[self channelBindingToUse]]]],
                             [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
                                 @"id":[[[UIDevice currentDevice] identifierForVendor] UUIDString],
                             } andChildren:@[
@@ -3122,16 +3183,18 @@ NSString* const kStanza = @"stanza";
         _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
         
         //extract supported channel-binding types
-        if([parsedStanza check:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding"])
-            _supportedChannelBindings = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding/channel-binding@type"]];
-        else
+        _supportedChannelBindings = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding/channel-binding@type"]];
+        if([_supportedChannelBindings count] == 0)
             _supportedChannelBindings = nil;
         
         //check if the server supports *any* scram method and wait for TLS connection establishment if so
-        BOOL supportsScram = NO;
         for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:YES])
             if([_supportedSaslMechanisms containsObject:mechanism])
+            {
                 supportsScram = YES;
+                if(mechanism.length > 5 && [@"-PLUS" isEqualToString:[mechanism substringFromIndex:mechanism.length-5]])
+                    supportsPlus = YES;
+            }
         
         //directly call our continuation block if SCRAM is not supported, because _blockToCallOnTCPOpen() will throw an error then
         //(we currently only support SCRAM for SASL2)
@@ -3150,8 +3213,7 @@ NSString* const kStanza = @"stanza";
     //check if the server activated SASL2 after previously only upporting SASL1
     else if([[DataLayer sharedInstance] isPlainActivatedForAccount:self.accountNo] && ((NSNumber*)checkProperSasl2Support()).boolValue)
     {
-        DDLogInfo(@"We detected SASL2 SCRAM support, deactivating forced SASL1 PLAIN fallback and retrying using SASL2...");
-        [[DataLayer sharedInstance] deactivatePlainForAccount:self.accountNo];
+        DDLogInfo(@"We detected SASL2 SCRAM support, retrying using SASL2...");
         //try again, this time using sasl2
         return [self handleFeaturesBeforeAuth:parsedStanza withForceSasl2:YES];
     }
@@ -3302,11 +3364,16 @@ NSString* const kStanza = @"stanza";
     //if our scram handshake finished without negotiating a mutually supported channel-binding and this was not backed by SSDP --> report error
     if(self->_scramHandler.serverFirstMessageParsed && !self->_scramHandler.ssdpSupported)
     {
-        DDLogWarn(@"Could not find any supported channel-binding type, this MUST be a mitm attack, because tls-server-end-point is mandatory via XEP-0440!");
-        return kServerDoesNotFollowXep0440Error;     //this will trigger a disconnect
+        if(_supportedChannelBindings != nil)
+            DDLogWarn(@"Could not find any supported channel-binding type and non-matching cb-list wasn't signed by XEP-0474 (SSDP) --> this MUST be a MITM attack, because tls-server-end-point is mandatory via XEP-0440!");
+        else
+            DDLogWarn(@"No channel-binding types were announced and this wasnt signed by XEP-0474 (SSDP) --> this MAY be a MITM attack that will be mitigated by the 'y,,' gss header!");
+        return kServerDoesNotFollowXep0440Error;
     }
-    if(!self->_scramHandler.serverFirstMessageParsed)
-        DDLogWarn(@"Could not find any supported channel-binding type, this COULD be a mitm attack (check via XEP-0474 pending)!");
+    else if(!self->_scramHandler.serverFirstMessageParsed)
+        DDLogWarn(@"Could not find any supported channel-binding type, this COULD be a mitm attack (check via XEP-0474 (SSDP) pending)!");
+    else if(self->_scramHandler.ssdpSupported)
+        DDLogInfo(@"XEP-0474 (SSDP) signed non-matching cb-list found, this is allowed and NOT a MITM attack");
     return nil;
 }
 
@@ -3389,13 +3456,13 @@ NSString* const kStanza = @"stanza";
             }
         }
         
-        //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateBound
+        //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateInitStarted
         //only exceptions: an outgoing bind request or jabber:iq:register stanza (this is allowed before binding a resource)
         BOOL isBindRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/resource"];
         BOOL isRegisterRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{jabber:iq:register}query"];
         BOOL isPreauthRegisterRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"/<type=set>/{urn:xmpp:pars:0}preauth"];
         if(
-            self.accountState>=kStateBound ||
+            self.accountState>=kStateInitStarted ||
             (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest || isRegisterRequest || isPreauthRegisterRequest))
         )
         {
@@ -3541,7 +3608,7 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendChatState:(BOOL) isTyping toContact:(nonnull MLContact*) contact
 {
-    if(self.accountState < kStateBound)
+    if(self.accountState < kStateInitStarted)
         return;
 
     XMPPMessage* messageNode = [[XMPPMessage alloc] initToContact:contact];
@@ -3653,7 +3720,7 @@ NSString* const kStanza = @"stanza";
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\t_cachedStreamFeaturesBeforeAuth=%@\n\t_cachedStreamFeaturesAfterAuth=%@\n",
                 self.accountNo,
                 values[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3673,7 +3740,9 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
                 self.omemo.state,
-                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid)
+                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid),
+                bool2str(self->_cachedStreamFeaturesBeforeAuth!=nil),
+                bool2str(self->_cachedStreamFeaturesAfterAuth!=nil)
             );
             DDLogVerbose(@"%@ --> realPersistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
@@ -3854,7 +3923,7 @@ NSString* const kStanza = @"stanza";
             }
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\t_cachedStreamFeaturesBeforeAuth=%@\n\t_cachedStreamFeaturesAfterAuth=%@\n",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -3874,7 +3943,9 @@ NSString* const kStanza = @"stanza";
                 self.connectionProperties.accountDiscoDone,
                 self->_inCatchup,
                 self.omemo.state,
-                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid)
+                bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid),
+                bool2str(self->_cachedStreamFeaturesBeforeAuth!=nil),
+                bool2str(self->_cachedStreamFeaturesAfterAuth!=nil)
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -3927,7 +3998,7 @@ NSString* const kStanza = @"stanza";
         {
             //this will count any stanza between our bind result and smacks enable result but gets reset to sane values
             //once the smacks enable result surfaces (e.g. the wrong counting will be ignored later)
-            if(self.accountState>=kStateBound)
+            if(self.accountState >= kStateInitStarted)
                 self.lastHandledInboundStanza = [NSNumber numberWithInteger:[self.lastHandledInboundStanza integerValue] + 1];
         }
         [self persistState];        //make sure we persist our state, even if smacks is not supported
@@ -3960,6 +4031,7 @@ NSString* const kStanza = @"stanza";
     
     self.isDoingFullReconnect = YES;
     _accountState = kStateBinding;
+    [self accountStatusChanged];
     
     //delete old resources because we get new presences once we're done initializing the session
     [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
@@ -4096,8 +4168,8 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendPresence
 {
-    //don't send presences if we are not bound
-    if(_accountState < kStateBound)
+    //don't send presences if we are not bound and smacks enabled
+    if(_accountState < kStateInitStarted)
         return;
     
     XMPPPresence* presence = [[XMPPPresence alloc] initWithHash:_capsHash];
@@ -4122,9 +4194,9 @@ NSString* const kStanza = @"stanza";
     [self sendIq:roster withHandler:$newHandler(MLIQProcessor, handleRoster)];
 }
 
--(void) initSession
+-(void) earlyInitSession
 {
-    DDLogInfo(@"Now bound, initializing new xmpp session");
+    DDLogInfo(@"Now bound, resetting state...");
     self.isDoingFullReconnect = YES;
     
     //we are now bound
@@ -4136,6 +4208,18 @@ NSString* const kStanza = @"stanza";
     
     //inform other parts of monal about our new state
     [[MLNotificationQueue currentQueue] postNotificationName:kMLResourceBoundNotice object:self];
+    [self accountStatusChanged];
+}
+
+-(void) initSession
+{
+    DDLogInfo(@"Now bound and past smacks enable, initializing new xmpp session...");
+    
+    //indicate we are bound and smacks enabled now
+    _accountState = kStateInitStarted;
+    
+    //inform other parts of monal about our new state
+    [[MLNotificationQueue currentQueue] postNotificationName:kMLSessionInitNotice object:self];
     [self accountStatusChanged];
     
     //now fetch roster, request disco and send initial presence
@@ -4171,6 +4255,10 @@ NSString* const kStanza = @"stanza";
     
     //fetch current mds state
     [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
+    
+    //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
+    for(NSString* room in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
+        [self.mucProcessor join:room];
     
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
     
@@ -4346,9 +4434,9 @@ NSString* const kStanza = @"stanza";
 {
     [self dispatchOnReceiveQueue: ^{
         //don't send anything before a resource is bound
-        if(self.accountState<kStateBound || ![self.connectionProperties.serverFeatures check:@"{urn:xmpp:csi:0}csi"])
+        if(self.accountState < kStateInitStarted || ![self.connectionProperties.serverFeatures check:@"{urn:xmpp:csi:0}csi"])
         {
-            DDLogVerbose(@"NOT sending csi state, because we are not bound yet (or csi is not supported)");
+            DDLogVerbose(@"NOT sending csi state, because we are not bound and smacks enabled yet (or csi is not supported)");
             return;
         }
         
@@ -4819,6 +4907,7 @@ NSString* const kStanza = @"stanza";
                         self->_blockToCallOnTCPOpen();
                         self->_blockToCallOnTCPOpen = nil;     //don't call this twice
                     }
+                    [self accountStatusChanged];
                 }];
             }
             break;
@@ -5006,7 +5095,7 @@ NSString* const kStanza = @"stanza";
         //*after* processing an incoming burst of stanzas (which is potentially causing an outgoing burst of stanzas)
         //this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
         //for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
-        if(_accountState>=kStateBound)
+        if(_accountState >= kStateInitStarted)
             [_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                 [self requestSMAck:NO];
             }]] waitUntilFinished:NO];
@@ -5123,7 +5212,7 @@ NSString* const kStanza = @"stanza";
 #else
     NSString* pushToken = [MLXMPPManager sharedInstance].pushToken;
     NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
-    if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateBound)
+    if(pushToken == nil || [pushToken length] == 0 || selectedPushServer == nil || self.accountState < kStateInitStarted)
     {
         DDLogInfo(@"NOT registering and enabling push: %@ token: %@ (accountState: %ld, supportsPush: %@)", selectedPushServer, pushToken, (long)self.accountState, bool2str([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"]));
         return;
@@ -5218,7 +5307,7 @@ NSString* const kStanza = @"stanza";
 {
     //only handle iq timeouts while the parseQueue is almost empty
     //(a long backlog in the parse queue could trigger spurious iq timeouts for iqs we already received an answer to, but didn't process it yet)
-    if([_parseQueue operationCount] > 4 || _accountState < kStateBound || !_catchupDone)
+    if([_parseQueue operationCount] > 4 || _accountState < kStateInitStarted || !_catchupDone)
         return;
     
     //update idle timers, too
@@ -5306,9 +5395,9 @@ NSString* const kStanza = @"stanza";
 //this method is needed to not have a retain cycle (happens when using a block instead of this method in mamFinishedFor:)
 -(void) _handleInternalMamFinishedFor:(NSString*) archiveJid
 {
-    if(self.accountState < kStateBound)
+    if(self.accountState < kStateInitStarted)
     {
-        DDLogWarn(@"Aborting delayed replay because not >= kStateBound anymore! Remaining stanzas will be kept in DB and be handled after next smacks reconnect.");
+        DDLogWarn(@"Aborting delayed replay because not >= kStateInitStarted anymore! Remaining stanzas will be kept in DB and be handled after next smacks reconnect.");
         return;
     }
     
@@ -5408,8 +5497,10 @@ NSString* const kStanza = @"stanza";
     }
     [self persistState];
     
+    _accountState = kStateCatchupDone;
     //don't queue this notification because it should be handled INLINE inside the receive queue
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:nil];
+    [self accountStatusChanged];
 }
 
 -(void) updateMdsData:(NSDictionary*) mdsData

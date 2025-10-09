@@ -29,7 +29,7 @@ typedef NS_ENUM(NSUInteger, MLScramStatus) {
 -(instancetype) initWithUsername:(NSString*) username password:(NSString*) password andMethod:(NSString*) method;
 -(void) setSSDPMechanisms:(NSArray<NSString*>*) mechanisms andChannelBindingTypes:(NSArray<NSString*>* _Nullable) cbTypes;
 
--(NSString*) clientFirstMessageWithChannelBinding:(NSString* _Nullable) channelBindingType;
+-(NSString*) clientFirstMessageWithNoMatchingChannelBindingFound:(BOOL) noMatchingChannelBindingFound andChannelBinding:(NSString* _Nullable) channelBindingType;
 -(MLScramStatus) parseServerFirstMessage:(NSString*) str;
 -(NSString*) clientFinalMessageWithChannelBindingData:(NSData* _Nullable) channelBindingData;
 -(MLScramStatus) parseServerFinalMessage:(NSString*) str;

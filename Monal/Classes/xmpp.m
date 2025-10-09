@@ -1608,7 +1608,8 @@ NSString* const kStanza = @"stanza";
                 [self sendIq:ping withResponseHandler:^(XMPPIQ* result __unused) {
                     handler();
                 } andErrorHandler:^(XMPPIQ* error) {
-                    handler();
+                    if(error != nil)
+                        handler();
                 }];
             }
         }

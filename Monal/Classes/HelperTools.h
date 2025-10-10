@@ -44,6 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSUInteger, MLVersionType) {
     MLVersionTypeIQ,
     MLVersionTypeLog,
+    MLVersionTypeUserAgent,
 };
 
 typedef NS_ENUM(NSUInteger, MLRunLoopIdentifier) {

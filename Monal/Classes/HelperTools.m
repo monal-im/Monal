@@ -2873,6 +2873,8 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
             return _versionInfoCache[@(type)] = rawVersionString;
         else if(type == MLVersionTypeLog)
             return _versionInfoCache[@(type)] = [NSString stringWithFormat:@"Version %@, %@ on iOS/macOS %@", rawVersionString, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion];
+        else if(type==MLVersionTypeUserAgent)
+            return _versionInfoCache[@(type)] = [[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"] ? [NSString stringWithFormat:@"Monal %@", rawVersionString] : @"Monal";
         unreachable(@"unknown version type!");
     }
 }
@@ -3346,6 +3348,21 @@ a=%@\r\n", mid, candidate];
     NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
         sessionConfig.requiresDNSSECValidation = YES;
+    sessionConfig.HTTPAdditionalHeaders = @{
+        @"User-Agent": [HelperTools appBuildVersionInfoFor:MLVersionTypeUserAgent],
+    };
+    return [NSURLSession sessionWithConfiguration:sessionConfig];
+}
+
++(NSURLSession*) createBackgroundURLSession
+{
+    NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@.backgroundHttpFetch", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]]];
+    if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+        sessionConfig.requiresDNSSECValidation = YES;
+    sessionConfig.HTTPAdditionalHeaders = @{
+        @"User-Agent": [HelperTools appBuildVersionInfoFor:MLVersionTypeUserAgent],
+    };
+    sessionConfig.sessionSendsLaunchEvents = YES;
     return [NSURLSession sessionWithConfiguration:sessionConfig];
 }
 

@@ -92,6 +92,12 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 -(void) swizzled_queueLogMessage:(DDLogMessage*) logMessage asynchronously:(BOOL) asyncFlag;
 @end
 
+@interface PMKArray (AllowSerialization) <NSSecureCoding>
++(BOOL) supportsSecureCoding;
+-(void) encodeWithCoder:(NSCoder*) coder;
+-(instancetype) initWithCoder:(NSCoder*) coder;
+@end
+
 static char* _crashBundleName = "UnifiedReport";
 static NSString* _processID;
 static DDFileLogger* _fileLogger = nil;
@@ -464,6 +470,31 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
             swizzle([self class], @selector(queueLogMessage:asynchronously:), @selector(swizzled_queueLogMessage:asynchronously:));
         });
     }
+}
+
+@end
+
+@implementation PMKArray (AllowSerialization)
+
++(BOOL) supportsSecureCoding
+{
+    return YES;
+}
+
+-(void) encodeWithCoder:(NSCoder*) coder
+{
+    [coder encodeInteger:self->count forKey:@"count"];
+    for(NSUInteger c=0; c<self->count; c++)
+        [coder encodeObject:self->objs[c] forKey:[NSString stringWithFormat:@"%@", @(c)]];
+}
+
+-(instancetype) initWithCoder:(NSCoder*) coder
+{
+    self = [self init];
+    self->count = [coder decodeIntegerForKey:@"count"];
+    for(NSUInteger c=0; c<self->count; c++)
+        self->objs[c] = [coder decodeObjectForKey:[NSString stringWithFormat:@"%@", @(c)]];
+    return self;
 }
 
 @end
@@ -1030,6 +1061,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         [NSUUID class],
         [MLPromise class],
         [NSError class],
+        [PMKArray class],
     ]] fromData:data error:&error];
     if(error)
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];

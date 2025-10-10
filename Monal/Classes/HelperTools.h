@@ -64,6 +64,14 @@ void swizzle(Class c, SEL orig, SEL new);
 @property (nonatomic) BOOL ml_isDirect;
 @end
 
+//copy of private definition at https://github.com/mxcl/PromiseKit/blob/master/Sources/PMKCallVariadicBlock.m
+//please keep in sync manually!
+@interface PMKArray : NSObject {
+@public
+    id objs[3];
+    NSUInteger count;
+} @end
+
 @interface HelperTools : NSObject
 
 @property (class, nonatomic, strong, nullable) DDFileLogger* fileLogger;

@@ -242,7 +242,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self setPushToken:nil];       //load push settings from defaultsDB (can be overwritten later on in mainapp, but *not* in appex)
 
     //set up regular ping
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+    dispatch_queue_t q_background = dispatch_queue_create_with_target("im.monal.activityLog", DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0));
     _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, q_background);
 
     dispatch_source_set_timer(_pinger,
@@ -255,7 +255,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         {
             if(xmppAccount.accountState >= kStateInitStarted)
             {
-                DDLogInfo(@"began a idle ping");
+                DDLogInfo(@"sending idle ping");
                 [xmppAccount sendPing:LONG_PING];        //long ping timeout because this is a background/interval ping
             }
         }

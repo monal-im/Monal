@@ -2025,10 +2025,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(accountID == nil || !archiveJid || !stanza)
         return;
-    NSError* error;
-    NSData* data = [NSKeyedArchiver archivedDataWithRootObject:stanza requiringSecureCoding:YES error:&error];
-    if(error)
-        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+    NSData* data = [HelperTools serializeObject:stanza];
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"INSERT INTO delayed_message_stanzas (account_id, archive_jid, stanza) VALUES(?, ?, ?);" andArguments:@[accountID, archiveJid, data]];
     }];
@@ -2047,6 +2044,7 @@ static NSDateFormatter* dbFormatter;
     }];
     if(data)
     {
+        //use dedicated unarchiver instead of [HelperTools unserializeData:] to restrict the datatypes further
         NSError* error;
         MLXMLNode* stanza = (MLXMLNode*)[NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
             [NSData class],
@@ -2519,10 +2517,7 @@ static NSDateFormatter* dbFormatter;
     DDLogDebug(@"Adding promise %@ with uuid %@ to DB", promise, promise.uuid);
     [self.db voidWriteTransaction:^{
         NSString* query = @"INSERT INTO promises (uuid, promise) VALUES (?, ?) ON CONFLICT DO UPDATE SET promise=?;";
-        NSError* error;
-        NSData* data = [NSKeyedArchiver archivedDataWithRootObject:promise requiringSecureCoding:YES error:&error];
-        if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+        NSData* data = [HelperTools serializeObject:promise];
         [self.db executeNonQuery:query andArguments:@[[promise.uuid UUIDString], data, data]];
     }];
 }
@@ -2550,10 +2545,9 @@ static NSDateFormatter* dbFormatter;
     DDLogDebug(@"Getting promise %@ with uuid %@ from DB", promise, promise.uuid);
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT promise FROM promises WHERE uuid = ?;";
-        NSArray* results = [self.db executeScalarReader:query andArguments:@[[promise.uuid UUIDString]]];
-        MLAssert([results count] == 1, @"Tried to retrieve a promise that did not exist in the DB");
-        NSData* data = results[0];
-        MLPromise* retrieved = [HelperTools unserializeData:data];
+        NSData* result = [self.db executeScalar:query andArguments:@[[promise.uuid UUIDString]]];
+        MLAssert(result != nil, @"Tried to retrieve a promise that did not exist in the DB");
+        MLPromise* retrieved = [HelperTools unserializeData:result];
         return retrieved;
     }];
 }

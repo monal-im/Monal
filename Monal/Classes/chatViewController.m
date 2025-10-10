@@ -2845,21 +2845,15 @@ enum msgSentState {
     [self scrollToBottomIfNeeded];
 }
 
-- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+-(BOOL) textView:(UITextView*) textView shouldChangeTextInRange:(NSRange) range replacementText:(NSString*) text
 {
-    BOOL shouldInsert = YES;
-
     // Notify that we are typing
     [self sendChatState:YES];
-
+    
     // Limit text length to kMonalChatMaxAllowedTextLen
-    if([text isEqualToString:@""]) {
-        shouldInsert &= YES;
-    } else {
-        shouldInsert &= (range.location + range.length < kMonalChatMaxAllowedTextLen);
-    }
-    shouldInsert &= ([textView.text length] + [text length] - range.length <= kMonalChatMaxAllowedTextLen);
-
+    BOOL shouldInsert = ([textView.text length] + [text length] - range.length <= kMonalChatMaxAllowedTextLen);
+    if([text isEqualToString:@""])
+        shouldInsert = YES;
     return shouldInsert;
 }
 

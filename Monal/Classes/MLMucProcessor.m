@@ -1309,7 +1309,7 @@ $$
         DDLogInfo(@"Removing avatar image for muc '%@'...", room);
         XMPPIQ* vcard = [[XMPPIQ alloc] initWithType:kiqSetType to:room];
         [vcard setRemoveVcardAvatar];
-        [_account sendIq:vcard withHandler:$newHandlerWithInvalidation(self, handleAvatarPublishResult, handleAvatarPublishResultInvalidation, $ID(room), $ID(promise))];
+        [_account sendIq:vcard withHandler:$newHandlerWithInvalidation(self, handleAvatarPublishResult, handleAvatarPublishResultInvalidation, $ID(room), $PROMISE(promise))];
         return [promise toAnyPromise];
     }
     //should work for ejabberd >= 19.02 and prosody >= 0.11
@@ -1319,18 +1319,18 @@ $$
     DDLogInfo(@"Publishing avatar image for muc '%@' with hash %@", room, imageHash);
     XMPPIQ* vcard = [[XMPPIQ alloc] initWithType:kiqSetType to:room];
     [vcard setVcardAvatarWithData:imageData andType:@"image/jpeg"];
-    [_account sendIq:vcard withHandler:$newHandlerWithInvalidation(self, handleAvatarPublishResult, handleAvatarPublishResultInvalidation, $ID(room), $ID(promise))];
+    [_account sendIq:vcard withHandler:$newHandlerWithInvalidation(self, handleAvatarPublishResult, handleAvatarPublishResultInvalidation, $ID(room), $PROMISE(promise))];
 
     return [promise toAnyPromise];
 }
 
-$$instance_handler(handleAvatarPublishResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room), $$ID(MLPromise*, promise))
+$$instance_handler(handleAvatarPublishResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room), $$PROMISE(promise))
     NSString* errorString = [NSString stringWithFormat:NSLocalizedString(@"Failed to publish avatar image for group/channel %@: please try again", @""), room];
     NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}];
     [promise reject:error];
 $$
 
-$$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLPromise*, promise))
+$$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$PROMISE(promise))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Publishing avatar for muc '%@' returned error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);

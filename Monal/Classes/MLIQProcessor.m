@@ -233,14 +233,14 @@ $$class_handler(handleMamResponseWithLatestId, $$ID(xmpp*, account), $$ID(XMPPIQ
     [account mamFinishedFor:account.connectionProperties.identity.jid];
 $$
 
-$$class_handler(handleMAMBackscrollingResultInvalidation, $$ID(xmpp*, account), $$ID(MLContact*, contact), $$ID(MLPromise*, promise))
+$$class_handler(handleMAMBackscrollingResultInvalidation, $$ID(xmpp*, account), $$ID(MLContact*, contact), $$PROMISE(promise))
     DDLogError(@"Got backscrolling mam error for %@", contact.contactJid);
     NSString* errorMessage = [NSString stringWithFormat:NSLocalizedString(@"Could not fetch more old chat history for '%@' from the server archive. Please try again.", @""), contact.contactJid];
     NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
     [promise reject:error];
 $$
 
-$$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLContact*, contact), $_ID(NSArray*, historyIdsOfAlreadyRetreivedMessages), $$ID(MLPromise*, promise))
+$$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLContact*, contact), $_ID(NSArray*, historyIdsOfAlreadyRetreivedMessages), $$PROMISE(promise))
     //the promise will be rejected if an error prevented us to get any messages.
     //it will resolve an empty array, if the upper end of our archive was reached
     //and it will resolve an array of newly loaded mlmessages in all other cases
@@ -345,7 +345,7 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
                 DDLogVerbose(@"Going to send another mam backscrolling query because we didn't get enough message bodies. We got %lu bodies in this query and %lu bodies in all the queries since the user scrolled up to fetch more.", retrievedBodiesInThisQuery, retrievedBodiesOverall);
                 NSString* earliestStanzaId = [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/first#"];
                 XMPPIQ* newQuery = [account prepareIQForMAMQueryMostRecentForContact:contact before:earliestStanzaId];
-                [account sendIq:newQuery withHandler:$newHandlerWithInvalidation(MLIQProcessor, handleMAMBackscrollingResult, handleMAMBackscrollingResultInvalidation, $ID(contact), $ID(historyIdsOfAlreadyRetreivedMessages, overallHistoryIdList), $ID(promise))];
+                [account sendIq:newQuery withHandler:$newHandlerWithInvalidation(MLIQProcessor, handleMAMBackscrollingResult, handleMAMBackscrollingResultInvalidation, $ID(contact), $ID(historyIdsOfAlreadyRetreivedMessages, overallHistoryIdList), $PROMISE(promise))];
             }
             else
             {
@@ -862,7 +862,7 @@ $$class_handler(handleBlocked, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID
     }
 $$
 
-$$class_handler(handlePasswordChangeInvalidation, $$ID(xmpp*, account), $$ID(NSString*, uuid), $$ID(MLPromise*, promise))
+$$class_handler(handlePasswordChangeInvalidation, $$ID(xmpp*, account), $$ID(NSString*, uuid), $$PROMISE(promise))
     NSString* jid = account.connectionProperties.identity.jid;
     DDLogError(@"Could not change the password of '%@'", jid);
     [SAMKeychain deletePasswordForService:kMonalTmpKeychainName account:uuid];
@@ -871,7 +871,7 @@ $$class_handler(handlePasswordChangeInvalidation, $$ID(xmpp*, account), $$ID(NSS
     [promise reject:error];
 $$
 
-$$class_handler(handlePasswordChange, $$ID(XMPPIQ*, iqNode), $$ID(xmpp*, account), $$ID(NSString*, uuid), $$ID(MLPromise*, promise))
+$$class_handler(handlePasswordChange, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, uuid), $$PROMISE(promise))
     NSString* jid = account.connectionProperties.identity.jid;
     if([iqNode check:@"/<type=error>"])
     {

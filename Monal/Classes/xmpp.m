@@ -4516,7 +4516,7 @@ NSString* const kStanza = @"stanza";
     MLPromise* promise = [MLPromise new];
     XMPPIQ* query = [self prepareIQForMAMQueryMostRecentForContact:contact before:before];
     DDLogDebug(@"Loading mam:2 page before stanzaId %@", before);
-    [self sendIq:query withHandler:$newHandlerWithInvalidation(MLIQProcessor, handleMAMBackscrollingResult, handleMAMBackscrollingResultInvalidation, $ID(contact), $ID(promise))];
+    [self sendIq:query withHandler:$newHandlerWithInvalidation(MLIQProcessor, handleMAMBackscrollingResult, handleMAMBackscrollingResultInvalidation, $ID(contact), $PROMISE(promise))];
     return [promise toAnyPromise];
 }
 
@@ -4664,7 +4664,7 @@ NSString* const kStanza = @"stanza";
     NSString* uuid = [[NSUUID UUID] UUIDString];
     [SAMKeychain setPassword:newPass forService:kMonalTmpKeychainName account:uuid];
 
-    [self sendIq:iqNode withHandler:$newHandlerWithInvalidation(MLIQProcessor, handlePasswordChange,handlePasswordChangeInvalidation, $ID(uuid), $ID(promise))];
+    [self sendIq:iqNode withHandler:$newHandlerWithInvalidation(MLIQProcessor, handlePasswordChange,handlePasswordChangeInvalidation, $ID(uuid), $PROMISE(promise))];
     return [promise toAnyPromise];
 }
 

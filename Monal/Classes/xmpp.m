@@ -1525,10 +1525,13 @@ NSString* const kStanza = @"stanza";
             return;
         }
         
+        //this sometimes races with a disconnect triggered by app freeze, but we can't remove this because in some (rare?)
+        //cases triggering a reconnect if sendPing was called by the connectivity monitor is the only way to get connected again
+        //--> use big reconnect time here to not race (freezing the app and triggering the ping after waking up again is okay)
         if(self.accountState<kStateReconnecting)
         {
             DDLogInfo(@"ping calling reconnect");
-            [self reconnect:0];
+            [self reconnect:CONNECT_TIMEOUT];
             return;
         }
         

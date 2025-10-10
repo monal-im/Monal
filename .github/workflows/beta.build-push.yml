@@ -283,8 +283,10 @@ jobs:
           body: "${{ steps.releasenotes.outputs.notes }}"
           files: |
             ./Monal/build/ipa/Monal.ipa
+            ./Monal/build/ipa/monal-ios-dsym.zip
             ./Monal/build/app/Monal.pkg
             ./Monal/build/app/Monal.zip
+            ./Monal/build/app/monal-catalyst-dsym.zip
           fail_on_unmatched_files: true
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false

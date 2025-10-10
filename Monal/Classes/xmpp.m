@@ -494,7 +494,6 @@ NSString* const kStanza = @"stanza";
         ) || (
             //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
             _catchupDone &&
-            _pingTimer == nil &&
             !unackedCount &&
             ![_parseQueue operationCount] &&        //if something blocks the parse queue it is either an incoming stanza currently processed or waiting to be processed
             //[_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
@@ -508,7 +507,6 @@ NSString* const kStanza = @"stanza";
             "\t_accountState < kStateReconnecting = %@\n"
             "\t_reconnectInProgress = %@\n"
             "\t_catchupDone = %@\n"
-            "\t_pingTimer = %@\n"
             "\t[self.unAckedStanzas count] = %lu\n"
             "\t[_parseQueue operationCount] = %lu\n"
             //"\t[_receiveQueue operationCount] = %lu\n"
@@ -519,7 +517,6 @@ NSString* const kStanza = @"stanza";
         bool2str(_accountState < kStateReconnecting),
         bool2str(_reconnectInProgress),
         bool2str(_catchupDone),
-        _pingTimer == nil ? @"none" : @"running timer",
         unackedCount,
         (unsigned long)[_parseQueue operationCount],
         //(unsigned long)[_receiveQueue operationCount],

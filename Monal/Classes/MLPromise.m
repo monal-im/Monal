@@ -123,6 +123,8 @@ static NSMutableDictionary* _resolvers;
         DDLogVerbose(@"Resolvers map is now: %@", _resolvers);
     }];
 
+    [self attemptConsume];
+
     return self.anyPromise;
 }
 
@@ -130,6 +132,10 @@ static NSMutableDictionary* _resolvers;
 {
     DDLogDebug(@"Intend to consume promise %@ and argument %@", self, self.resolvedArgument);
 
+    //not needed, we won't have a _resolvers entry in the appex if the toAnyPromise was called in the main app
+    //but we will have, if we extracted the AnyPromise in the appex, which is fine if we want to use it there
+    //--> TODO don't block the appex from transforming the MLPromise to AnyPromise and using that
+    //    TODO think through all consequences like the possibility to create multiple AnyPromises (one for every process)
     if([HelperTools isAppExtension])
     {
         DDLogDebug(@"Not consuming promise %@ as we are in the app extension", self);

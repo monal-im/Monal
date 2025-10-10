@@ -94,6 +94,7 @@ if [ "$BUILD_SCHEME" != "Quicksy" ]; then
         cd tar_release
         /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME".zip
         cd ../../..
+        /usr/bin/ditto -c -k --sequesterRsrc --keepParent "build/macos_$APP_NAME.xcarchive/dSYMs" "build/app/monal-catalyst-dsym.zip"
         ls -l build/app
     fi
 fi
@@ -127,6 +128,7 @@ NSUnbufferedIO=YES xcodebuild \
     -allowProvisioningUpdates \
     -allowProvisioningDeviceRegistration \
     2>&1 | xcbeautify
+/usr/bin/ditto -c -k --sequesterRsrc --keepParent "build/ios_$APP_NAME.xcarchive/dSYMs" "build/ipa/monal-ios-dsym.zip"
 
 echo "build dir:"
 find build

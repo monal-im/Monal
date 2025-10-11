@@ -216,11 +216,19 @@ NSString* type_to_classname(NSString* type)
     return NSSelectorFromString([NSString stringWithFormat:@"MLHandler_%@_withArguments:andBoundArguments:", handlerName]);
 }
 
-+(void) throwDynamicExceptionForType:(NSString*) type andVar:(NSString*) varName andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(void) throwDynamicUnpackingExceptionForType:(NSString*) type andVar:(NSString*) varName andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
     NSString* text = [NSString stringWithFormat:@"Dynamic unpacking exception triggered for '%@' var '%@' at %@:%d in %s", type, varName, [HelperTools sanitizeFilePath:file], line, func];
     DDLogError(@"%@", text);
     @throw [NSException exceptionWithName:text reason:text userInfo:userInfo];
+}
+
++(NSString*) throwDynamicPackingExceptionForType:(NSString*) type andVar:(NSString*) varName andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
+{
+    NSString* text = [NSString stringWithFormat:@"Dynamic packing exception triggered for '%@' var '%@' at %@:%d in %s", type, varName, [HelperTools sanitizeFilePath:file], line, func];
+    DDLogError(@"%@", text);
+    @throw [NSException exceptionWithName:text reason:text userInfo:userInfo];
+    return [NSString stringWithFormat:@"Wrong type packed for type '%@' name '%@' at %@:%d in %s", type, varName, [HelperTools sanitizeFilePath:file], line, func];
 }
 
 @end

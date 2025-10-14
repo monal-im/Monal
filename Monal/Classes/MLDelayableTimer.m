@@ -152,8 +152,8 @@
 //     NSCondition* condition = [NSCondition new];
 //     [condition lock];
     CFRunLoopPerformBlock([runLoop getCFRunLoop], (__bridge CFStringRef)NSDefaultRunLoopMode, ^{
-        block();
 //         [condition lock];
+        block();
 //         [condition signal];
 //         [condition unlock];
     });

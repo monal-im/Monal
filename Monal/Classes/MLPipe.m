@@ -86,10 +86,26 @@
         if(_output)
         {
             DDLogInfo(@"Pipe making output stream orphan");
-            [_output setDelegate:nil];
-            [_output removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
-            [_output close];
-            _output = nil;
+            NSCondition* condition = [NSCondition new];
+            [condition lock];
+            NSRunLoop* runLoop = [HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork];
+            DDLogDebug(@"Scheduling _output teardown block on our network runloop...");
+            CFRunLoopPerformBlock([runLoop getCFRunLoop], (__bridge CFStringRef)NSDefaultRunLoopMode, ^{
+                DDLogDebug(@"Tearing down _output...");
+                [condition lock];
+                [self->_output setDelegate:nil];
+                [self->_output removeFromRunLoop:runLoop forMode:NSDefaultRunLoopMode];
+                [self->_output close];
+                self->_output = nil;
+                [condition signal];
+                [condition unlock];
+            });
+            CFRunLoopWakeUp([runLoop getCFRunLoop]);    //trigger wakeup of runloop to execute the block as soon as possible
+            //wait for our block to finish executing
+            DDLogDebug(@"Waiting for scheduled _output teardown block to finish...");
+            [condition wait];
+            [condition unlock];
+            DDLogDebug(@"_output teardown complete...");
         }
         [self cleanupOutputBuffer];
         

@@ -1618,27 +1618,40 @@
         }
         
         //now handle the jingle offer/response nodes and convert jingle xml to sdp
-        if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
+        if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
         {
             type = @"answer";
             rawSDP = [HelperTools xml2sdp:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:NO];
         }
-        else if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"])
+        else if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"])
         {
             type = @"offer";
             rawSDP = [HelperTools xml2sdp:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:YES];
         }
     }
     //handle session-terminate: fake jmi finish message and handle it
-    else if([iqNode findFirst:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>"])
+    else if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>"])
     {
-        DDLogDebug(@"Got jingle session-terminate, faking incoming jmi:finish for Conversations compatibility...");
-        XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.account.connectionProperties.identity.jid];
-        [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
-            @"id": self.jmiid,
-        } andChildren:[iqNode find:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>/reason"] andData:nil]];
-        [jmiNode setStoreHint];
-        [self.voipProcessor handleIncomingJMIStanza:jmiNode onAccount:self.account];
+        if(self.jmiProceed == nil)
+        {
+            DDLogDebug(@"Got jingle session-terminate after jmi proceed, faking incoming jmi:finish for Conversations compatibility...");
+            XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.account.connectionProperties.identity.jid];
+            [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"finish" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
+                @"id": self.jmiid,
+            } andChildren:[iqNode find:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>/reason"] andData:nil]];
+            [jmiNode setStoreHint];
+            [self.voipProcessor handleIncomingJMIStanza:jmiNode onAccount:self.account];
+        }
+        else
+        {
+            DDLogDebug(@"Got jingle session-terminate before even receiving jmi proceed, faking incoming jmi:reject for unknown-client compatibility...");
+            XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.account.connectionProperties.identity.jid];
+            [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
+                @"id": self.jmiid,
+            } andChildren:[iqNode find:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>/reason"] andData:nil]];
+            [jmiNode setStoreHint];
+            [self.voipProcessor handleIncomingJMIStanza:jmiNode onAccount:self.account];
+        }
         return;
     }
     else

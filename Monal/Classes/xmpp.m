@@ -494,7 +494,6 @@ NSString* const kStanza = @"stanza";
         ) || (
             //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
             _catchupDone &&
-            _pingTimer == nil &&
             !unackedCount &&
             ![_parseQueue operationCount] &&        //if something blocks the parse queue it is either an incoming stanza currently processed or waiting to be processed
             //[_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
@@ -508,7 +507,6 @@ NSString* const kStanza = @"stanza";
             "\t_accountState < kStateReconnecting = %@\n"
             "\t_reconnectInProgress = %@\n"
             "\t_catchupDone = %@\n"
-            "\t_pingTimer = %@\n"
             "\t[self.unAckedStanzas count] = %lu\n"
             "\t[_parseQueue operationCount] = %lu\n"
             //"\t[_receiveQueue operationCount] = %lu\n"
@@ -519,7 +517,6 @@ NSString* const kStanza = @"stanza";
         bool2str(_accountState < kStateReconnecting),
         bool2str(_reconnectInProgress),
         bool2str(_catchupDone),
-        _pingTimer == nil ? @"none" : @"running timer",
         unackedCount,
         (unsigned long)[_parseQueue operationCount],
         //(unsigned long)[_receiveQueue operationCount],
@@ -764,94 +761,103 @@ NSString* const kStanza = @"stanza";
 
 -(void) freezeSendQueue
 {
-    if(_sendQueue.suspended)
-    {
-        DDLogWarn(@"Send queue of account %@ already frozen, doing nothing...", self);
-        return;
+    @synchronized(_sendQueue) {
+        if(_sendQueue.suspended)
+        {
+            DDLogWarn(@"Send queue of account %@ already frozen, doing nothing...", self);
+            return;
+        }
+        
+        //wait for all queued operations to finish (this will NOT block if the tcp stream is not writable)
+        [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
+            self->_sendQueue.suspended = YES;
+        }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
+        [HelperTools busyWaitForOperationQueue:_sendQueue];
     }
-    
-    //wait for all queued operations to finish (this will NOT block if the tcp stream is not writable)
-    [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
-        self->_sendQueue.suspended = YES;
-    }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
-    [HelperTools busyWaitForOperationQueue:_sendQueue];
 }
 
 -(void) unfreezeSendQueue
 {
-    //no need to dispatch anything here, just start processing jobs
-    self->_sendQueue.suspended = NO;
+    @synchronized(_sendQueue) {
+        //no need to dispatch anything here, just start processing jobs
+        self->_sendQueue.suspended = NO;
+    }
 }
 
 -(void) freeze
 {
-    //this can only be done if this method is the only one that freezes the receive queue,
-    //because this shortcut assumes that parse and send queues are always frozen, too, if the receive queue is frozen
-    if(_receiveQueue.suspended)
-    {
-        DDLogWarn(@"Account %@ already frozen, doing nothing...", self);
-        return;
+    @synchronized(self) {
+        //this can only be done if this method is the only one that freezes the receive queue,
+        //because this shortcut assumes that parse and send queues are always frozen, too, if the receive queue is frozen
+        if(_receiveQueue.suspended)
+        {
+            DDLogWarn(@"Account %@ already frozen, doing nothing...", self);
+            return;
+        }
+        
+        DDLogInfo(@"Freezing account: %@", self);
+        
+        //this does not have to be synchronized with the freezing of the parse queue and receive queue
+        [self freezeSendQueue];
+        
+        //don't merge the sync dispatch to freeze the receive queue with the sync dispatch done by freezeParseQueue
+        //merging those might leave some tasks in the receive queue that got added to it after the parse queue freeze
+        //was signalled but before it actually completed the freeze
+        //statement 1:
+        //this is not okay because leaked stanzas while frozen could be processed twice if the complete app gets frozen afterwards,
+        //then these stanzas get processed by the appex and afterwards the complete app and subsequently the receive queue gets unfrozen again
+        //statement 2:
+        //stanzas still in the parse queue when unfreezing the account will be dropped because self.accountState < kStateConnected
+        //will instruct the block inside prepareXMPPParser to drop any stanzas still queued in the parse queue
+        //and having even self.accountState < kStateReconnecting will make a call to [self connect] mandatory,
+        //which will cancel all operations still queued on the parse queue
+        //statement 3:
+        //normally a complete app freeze will only occur after calling [MLXMPPManager disconnectAll] and subsequently [xmpp freeze],
+        //so self.accountState < kStateReconnecting should always be true on unfreeze (which will make statement 2 above always hold true)
+        //statement 4:
+        //if an app freeze takes too long, for example because disconnecting does not finish in time, or if the app still holds the MLProcessLock,
+        //the app will be killed by iOS, which will immediately invalidate every block in every queue
+        [self freezeParseQueue];
+        [self dispatchOnReceiveQueue:^{
+            //this is the last block running in the receive queue (it will be frozen once this block finishes execution)
+            self->_receiveQueue.suspended = YES;
+        }];
+        [HelperTools busyWaitForOperationQueue:_receiveQueue];
     }
-    
-    DDLogInfo(@"Freezing account: %@", self);
-    
-    //this does not have to be synchronized with the freezing of the parse queue and receive queue
-    [self freezeSendQueue];
-    
-    //don't merge the sync dispatch to freeze the receive queue with the sync dispatch done by freezeParseQueue
-    //merging those might leave some tasks in the receive queue that got added to it after the parse queue freeze
-    //was signalled but before it actually completed the freeze
-    //statement 1:
-    //this is not okay because leaked stanzas while frozen could be processed twice if the complete app gets frozen afterwards,
-    //then these stanzas get processed by the appex and afterwards the complete app and subsequently the receive queue gets unfrozen again
-    //statement 2:
-    //stanzas still in the parse queue when unfreezing the account will be dropped because self.accountState < kStateConnected
-    //will instruct the block inside prepareXMPPParser to drop any stanzas still queued in the parse queue
-    //and having even self.accountState < kStateReconnecting will make a call to [self connect] mandatory,
-    //which will cancel all operations still queued on the parse queue
-    //statement 3:
-    //normally a complete app freeze will only occur after calling [MLXMPPManager disconnectAll] and subsequently [xmpp freeze],
-    //so self.accountState < kStateReconnecting should always be true on unfreeze (which will make statement 2 above always hold true)
-    //statement 4:
-    //if an app freeze takes too long, for example because disconnecting does not finish in time, or if the app still holds the MLProcessLock,
-    //the app will be killed by iOS, which will immediately invalidate every block in every queue
-    [self freezeParseQueue];
-    [self dispatchOnReceiveQueue:^{
-        //this is the last block running in the receive queue (it will be frozen once this block finishes execution)
-        self->_receiveQueue.suspended = YES;
-    }];
-    [HelperTools busyWaitForOperationQueue:_receiveQueue];
 }
 
 -(void) unfreeze
 {
-    DDLogInfo(@"Unfreezing account: %@", self);
-    
-    //make sure we don't have any race conditions by dispatching this to our receive queue
-    //this operation has highest priority to make sure it will be executed first once unfrozen
-    NSBlockOperation* unfreezeOperation  = [NSBlockOperation blockOperationWithBlock:^{
-        //this has to be the very first thing even before unfreezing the parse or send queues
-        @synchronized(self->_stateLockObject) {
-            if(self.accountState < kStateReconnecting)
-            {
-                DDLogInfo(@"Reloading UNfrozen account %@", self.accountNo);
-                //(re)read persisted state (could be changed by appex)
-                [self readState];
+    @synchronized(self) {
+        DDLogInfo(@"Unfreezing account: %@", self);
+        
+        //make sure we don't have any race conditions by dispatching this to our receive queue
+        //this operation has highest priority to make sure it will be executed first once unfrozen
+        NSBlockOperation* unfreezeOperation  = [NSBlockOperation blockOperationWithBlock:^{
+            //this has to be the very first thing even before unfreezing the parse or send queues
+            //make sure to lock this against our explicitLogout, even if not reloading state
+            @synchronized(self->_stateLockObject) {
+                if(self.accountState < kStateReconnecting)
+                {
+                    DDLogInfo(@"Reloading UNfrozen account %@", self.accountNo);
+                    //(re)read persisted state (could be changed by appex)
+                    [self readState];
+                }
+                else
+                    DDLogInfo(@"Not reloading UNfrozen account %@, already connected", self.accountNo);
+                
+                //this must be inside the dispatch async, because it will dispatch *SYNC* to the receive queue and potentially block or even deadlock the system
+                [self unfreezeParseQueue];
+                
+                [self unfreezeSendQueue];
             }
-            else
-                DDLogInfo(@"Not reloading UNfrozen account %@, already connected", self.accountNo);
-            
-            //this must be inside the dispatch async, because it will dispatch *SYNC* to the receive queue and potentially block or even deadlock the system
-            [self unfreezeParseQueue];
-            
-            [self unfreezeSendQueue];
-        }
-    }];
-    unfreezeOperation.queuePriority = NSOperationQueuePriorityVeryHigh;     //make sure this will become the first operation executed once unfrozen
-    [self->_receiveQueue addOperations: @[unfreezeOperation] waitUntilFinished:NO];
-    
-    //unfreeze receive queue and execute block added above
-    self->_receiveQueue.suspended = NO;
+        }];
+        unfreezeOperation.queuePriority = NSOperationQueuePriorityVeryHigh;     //make sure this will become the first operation executed once unfrozen
+        [self->_receiveQueue addOperations: @[unfreezeOperation] waitUntilFinished:NO];
+        
+        //unfreeze receive queue and execute block added above
+        self->_receiveQueue.suspended = NO;
+    }
 }
 
 -(void) reinitLoginTimer
@@ -1528,10 +1534,13 @@ NSString* const kStanza = @"stanza";
             return;
         }
         
+        //this sometimes races with a disconnect triggered by app freeze, but we can't remove this because in some (rare?)
+        //cases triggering a reconnect if sendPing was called by the connectivity monitor is the only way to get connected again
+        //--> use big reconnect time here to not race (freezing the app and triggering the ping after waking up again is okay)
         if(self.accountState<kStateReconnecting)
         {
             DDLogInfo(@"ping calling reconnect");
-            [self reconnect:0];
+            [self reconnect:CONNECT_TIMEOUT];
             return;
         }
         

@@ -8,87 +8,9 @@
 
 /**************************** <USAGE> ****************************
 
-- Define handler method (this will be a static class method and doesn't
-have to be declared in any interface to be usable). The argument number
-or order does not matter, feel free to reorder or even remove arguments
-you don't need. Arguments declared with $$-prefix are mandatory, arguments
-with $_-prefix are optional.
-Primitive datatypes like BOOL, int etc. can not be imported as optional.
-Syntax:
-```
-$$class_handler(myHandlerName, $_ID(xmpp*, account), $$BOOL(success))
-    // your code comes here
-    // variables defined/imported: account (optional), success (mandatory)
-$$
-```
-
-Instance handlers are instance methods instead of static methods.
-You need to specify on which instance these handlers should operate.
-The instance extraxtion statement (the second argument to $$instance_handler() can be everything that
-returns an objc object. For example: "account.omemo" or "[account getInstanceToUse]" or just "account".
-Synax:
-```
-$$instance_handler(myHandlerName, instanceToUse, $$ID(xmpp*, account), $$BOOL(success))
-    // your code comes here
-    // 'self' is now the instance of the class extracted by the instanceToUse statement.
-    // instead of the class instance as it would be if $$class_handler() was used instead of $$instance_handler()
-    // variables defined/imported: account, success (both mandatory)
-$$
-```
-
-- Call defined handlers by:
-```
-MLHandler* h = $newHandler(ClassName, myHandlerName);
-$call(h);
-```
-
-- You can bind variables to MLHandler objects when creating them and when
-invoking them. Variables supplied on invocation overwrite variables
-supplied when creating the handler if the names are equal.
-Variables bound to the handler when creating it have to conform to the
-NSCoding protocol to make the handler serializable.
-Variable binding example:
-```
-NSString* var1 = @"value";
-MLHandler* h = $newHandler(ClassName, myHandlerName,
-        $ID(var1),
-        $BOOL(success, YES)
-}));
-xmpp* account = nil;
-$call(h, $ID(account), $ID(otherAccountVarWithSameValue, account))
-```
-
-- Usable shortcuts to create MLHandler objects:
-  - $newHandler(ClassName, handlerName, boundArgs...)
-  - $newHandlerWithInvalidation(ClassName, handlerName, invalidationHandlerName, boundArgs...)
-
-- You can add an invalidation method to a handler when creating the
-MLHandler object (after invalidating a handler you can not call or
-invalidate it again!). Invalidation handlers can be instance handlers or static handlers,
-just like with "normal" handlers:
-```
-// definition of normal handler method as instance_handler
-$$instance_handler(myHandlerName, [account getInstanceToUse], $_ID(xmpp*, account), $$BOOL(success))
-        // your code comes here
-        // 'self' is now the instance of the class extracted by [account getInstanceToUse]
-        // instead of the class instance as it would be if $$class_handler() was used instead of $$instance_handler()
-$$
-
-// definition of invalidation method
-$$class_handler(myInvalidationHandlerName, $$BOOL(done), $_ID(NSString*, var1))
-        // your code comes here
-        // variables imported: var1, done
-        // variables that could have been imported according to $newHandler and $call below: var1, success, done
-$$
-
-MLHandler* h = $newHandlerWithInvalidation(ClassName, myHandlerName, myInvalidationHandlerName,
-        $ID(var1, @"value"),
-        $BOOL(success, YES)
-}));
-
-// call invalidation method with "done" argument set to YES
-$invalidate(h, $BOOL(done, YES))
-```
+Complete usage with exhaustive explanations and examples
+can be found over here:
+https://github.com/monal-im/Monal/wiki/Handler-Framework
 
 **************************** </USAGE> ****************************/
 

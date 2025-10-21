@@ -17,10 +17,10 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSUInteger) flush;
 -(NSUInteger) clear;
 
-+(id) currentQueue;
--(void) postNotificationName:(NSNotificationName) notificationName object:(id _Nullable) notificationObject userInfo:(id _Nullable) notificationUserInfo;
--(void) postNotificationName:(NSNotificationName) notificationName object:(id _Nullable) notificationObject;
--(void) postNotification:(NSNotification* _Nonnull) notification;
++(instancetype) currentQueue;
+-(void) postNotificationName:(NSNotificationName) notificationName object:(id _Nullable) notificationObject userInfo:(id _Nullable) notificationUserInfo NS_SWIFT_NAME(post(name:object:userInfo:));
+-(void) postNotificationName:(NSNotificationName) notificationName object:(id _Nullable) notificationObject NS_SWIFT_NAME(post(name:object:));
+-(void) postNotification:(NSNotification* _Nonnull) notification NS_SWIFT_NAME(post(name:));
 
 @property (readonly, strong) NSString* name;
 -(NSString*) description;

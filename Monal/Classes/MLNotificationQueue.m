@@ -43,11 +43,11 @@
     queue = nil;
 }
 
-+(id) currentQueue
++(instancetype) currentQueue
 {
     NSMutableArray* stack = [self getThreadLocalNotificationQueueStack];
     if(![stack count])
-        return [NSNotificationCenter defaultCenter];
+        return (MLNotificationQueue*) [NSNotificationCenter defaultCenter];
     return [stack lastObject];
 }
 

@@ -2472,19 +2472,10 @@ enum msgSentState {
     UIContextualAction* retractAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Retract", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         //only delete directly if we sent that message, try to moderate otherwise
         if(!message.inbound)
-        {
             [self.xmppAccount retractMessage:message];
-            [[DataLayer sharedInstance] retractMessageHistory:message.messageDBId];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:self.xmppAccount userInfo:@{
-                @"message": message,
-                @"contact": self.contact
-            }];
-        }
         else
-        {
             //hardcode reason for now (change this when rewriting chatui using swiftui)
             [self.xmppAccount moderateMessage:message withReason:@"This message contains inappropriate content for this forum."];
-        }
 
         return completionHandler(YES);
     }];

@@ -3460,7 +3460,14 @@ NSString* const kStanza = @"stanza";
     //for MAM
     [messageNode setStoreHint];
     
-    [self send:messageNode];
+    [self dispatchAsyncOnReceiveQueue: ^{
+        [self send:messageNode];
+        [[DataLayer sharedInstance] retractMessageHistory:msg.messageDBId];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:self userInfo:@{
+            @"message": msg,
+            @"contact": msg.contact
+        }];
+    }];
 }
 
 -(void) moderateMessage:(MLMessage*) msg withReason:(NSString*) reason

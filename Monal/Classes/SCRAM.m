@@ -87,8 +87,8 @@
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     MLAssert(!_serverFirstMessageParsed, @"SCRAM handler already parsed server-first-message!");
     //no matching channel binding could be found, but server advertised channel-binding capability
-    //--> tell the server we DON'T support channel-binding and abort the authentication later on,
-    //    if the server doesn't support SSDP to sign this fact
+    //--> tell the server we DON'T support channel-binding and, if the server doesn't support SSDP
+    //    to sign this fact, abort the authentication later on,
     //NOTE: XEP-0440 makes tls-server-end-point mandatory and we support this
     //NOTE: ==> not having a match almost always means a MITM attacker tampered with the XEP-0440 list
     if(noMatchingChannelBindingFound)
@@ -109,7 +109,7 @@
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     MLAssert(!_serverFirstMessageParsed, @"SCRAM handler already parsed server-first-message!");
-    NSDictionary* msg = [self parseScramString:str];
+    NSDictionary* msg = [self parseScramString:str withKeysRegex:@"^m?rsi.*$"];
     _serverFirstMessageParsed = YES;
     //server nonce MUST start with our client nonce
     if(![msg[@"r"] hasPrefix:_nonce])
@@ -140,7 +140,7 @@
 -(NSString*) clientFinalMessageWithChannelBindingData:(NSData* _Nullable) channelBindingData
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
-    MLAssert(_serverFirstMessageParsed, @"SCRAM handler did not parsed server-first-message yet!");
+    MLAssert(_serverFirstMessageParsed, @"SCRAM handler did not parse server-first-message yet!");
     //calculate gss header with optional channel binding data
     NSMutableData* gssHeaderWithChannelBindingData = [NSMutableData new];
     [gssHeaderWithChannelBindingData appendData:[_gssHeader dataUsingEncoding:NSUTF8StringEncoding]];
@@ -180,7 +180,7 @@
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     MLAssert(_serverFirstMessageParsed, @"SCRAM handler did not parsed server-first-message yet!");
-    NSDictionary* msg = [self parseScramString:str];
+    NSDictionary* msg = [self parseScramString:str withKeysRegex:@"^(e|v).*$"];
     //wrong v-value
     if(![HelperTools constantTimeCompareAttackerString:msg[@"v"] withKnownString:_expectedServerSignature])
         return MLScramStatusWrongServerProof;
@@ -245,15 +245,21 @@
     return nil;
 }
 
--(NSDictionary* _Nullable) parseScramString:(NSString*) str
+-(NSDictionary* _Nullable) parseScramString:(NSString*) str withKeysRegex:(NSString*) keyRegex
 {
+    NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:keyRegex options:0 error:nil];
+    NSMutableString* keys = [NSMutableString new];
     NSMutableDictionary* retval = [NSMutableDictionary new];
     for(NSString* component in [str componentsSeparatedByString:@","])
     {
         NSString* attribute = [component substringToIndex:1];
         NSString* value = [component substringFromIndex:2];
         retval[attribute] = [self unquote:value];
+        [keys appendString:attribute];
     }
+    //check order of attributes in accordance to RFC 5802
+    if([regex numberOfMatchesInString:keys options:0 range:NSMakeRange(0, [keys length])] == 0)
+        return @{};     //return empty dictionary to make sure the wrong order doesn't lead to successful authentications
     return retval;
 }
 

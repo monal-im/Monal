@@ -2698,7 +2698,7 @@ NSString* const kStanza = @"stanza";
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}failure"])
         {
-            NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
+            NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-sasl}*$"];
             NSString* message = [parsedStanza findFirst:@"text#"];
             DDLogWarn(@"Got SASL2 %@: %@", errorReason, message);
             if([errorReason isEqualToString:@"not-authorized"])

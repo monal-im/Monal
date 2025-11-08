@@ -629,7 +629,7 @@ static NSMutableDictionary* _pendingCalls;
     else if([messageNode check:@"{urn:xmpp:jingle-message:0}finish"])
     {
         NSString* reason = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}finish/{urn:xmpp:jingle:1}reason/*$"];
-        if(call.jmiProceed != nil)
+        if(call.wasConnectedOnce)
         {
             DDLogInfo(@"Remote finished call with reason: %@", reason);
             [call end];     //use "end" because this was a successful call

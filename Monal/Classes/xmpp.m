@@ -2698,7 +2698,7 @@ NSString* const kStanza = @"stanza";
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}failure"])
         {
-            NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
+            NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-sasl}*$"];
             NSString* message = [parsedStanza findFirst:@"text#"];
             DDLogWarn(@"Got SASL2 %@: %@", errorReason, message);
             if([errorReason isEqualToString:@"not-authorized"])
@@ -4376,8 +4376,16 @@ NSString* const kStanza = @"stanza";
             ];
         });
     } andErrorHandler:^(XMPPIQ* error) {
+        if(error == nil)
+        {
+            //account wasn't connected or got disconnected while waiting for IQ response --> try again in one second
+            createTimer(1.0, (^{
+                [self requestHTTPSlotWithParams:params andCompletion:completion];
+            }));
+            return;
+        }
         if(completion)
-            completion(nil, error == nil ? [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Upload Error: your account got disconnected while requesting upload slot", @"")}] : [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Upload Error", @"")]}]);
+            completion(nil, [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Upload Error", @"")]}]);
     }];
 }
 

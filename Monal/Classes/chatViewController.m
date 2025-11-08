@@ -3106,34 +3106,41 @@ enum msgSentState {
                     break;
             }
         }
+        [self hideOmemoHUD];
         if(!omemoDeviceForContactFound && self.contact.isEncrypted)
         {
             if(!self.contact.isMuc && [[HelperTools splitJid:self.contact.contactJid][@"host"] isEqualToString:@"cheogram.com"])
             {
                 // cheogram.com does not support OMEMO encryption as it is a PSTN gateway
                 // --> disable it
-                self.contact.isEncrypted = NO;
-                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountID:self.contact.accountID];
+                [self.contact toggleEncryption:NO];
             }
             else if(self.contact.isMuc && ![self.contact.mucType isEqualToString:kMucTypeGroup])
             {
                 // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
-                // --> disable it
-                self.contact.isEncrypted = NO;
-                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountID:self.contact.accountID];
+                // --> warn user about this
+                DDLogWarn(@"Showing alert because omemo is suddenly impossible since group changed to channel: %@", self.contact);
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Group suddenly changed to public channel!", @"") message:NSLocalizedString(@"This contact suddenly changed from an encrypted private group to an unencrypted public channel! Please contact the administrator of that group/channel if you think this is wrong.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Keep encryption enabled", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    //don't change anything, just close the alert
+                    [alert dismissViewControllerAnimated:YES completion:nil];
+                }]];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable encryption. This is dangerous!", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    //disable encryption
+                    [self.contact toggleEncryption:NO];
+                    [alert dismissViewControllerAnimated:YES completion:nil];
+                }]];
+                [self presentViewController:alert animated:YES completion:nil];
             }
             else if(!self.contact.isMuc || (self.contact.isMuc && [self.contact.mucType isEqualToString:kMucTypeGroup]))
             {
-                [self hideOmemoHUD];
                 if(showWarning)
                 {
                     DDLogWarn(@"Showing omemo not supported alert for: %@", self.contact);
                     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No OMEMO keys found", @"") message:NSLocalizedString(@"This contact may not support OMEMO encrypted messages. Please try to enable encryption again in a few seconds, if you think this is wrong.", @"") preferredStyle:UIAlertControllerStyleAlert];
                     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                         // Disable encryption
-                        self.contact.isEncrypted = NO;
-                        [self updateUIElements];
-                        [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountID:self.contact.accountID];
+                        [self.contact toggleEncryption:NO];
                         [alert dismissViewControllerAnimated:YES completion:nil];
                     }]];
                     [self presentViewController:alert animated:YES completion:nil];
@@ -3151,8 +3158,6 @@ enum msgSentState {
                 }
             }
         }
-        else
-            [self hideOmemoHUD];
     }
 #endif
 }

@@ -196,7 +196,7 @@ struct ChatView: View {
                     .destructive(
                         Text("Yes, deactivate encryption"),
                         action: {
-                            showCannotEncryptAlert(!contact.obj.toggleEncryption(!contact.isEncrypted))
+                            contact.obj.toggleEncryption(false)
                         }
                     )
                 ]
@@ -225,20 +225,34 @@ struct ChatView: View {
                     }
                 }
             }
+            hideLoadingOverlay(overlay)
             if !omemoDeviceForContactFound && contact.isEncrypted {
                 if HelperTools.isContactBlacklistedForEncryption(contact.obj) {
                     // this contact was blacklisted for encryption
                     // --> disable it
-                    contact.isEncrypted = false
-                    DataLayer.sharedInstance().disableEncrypt(forJid:contact.contactJid, andAccountID:contact.accountID)
+                    contact.obj.toggleEncryption(false)
                 } else if contact.isMuc && contact.mucType != kMucTypeGroup {
                     // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
-                    // --> disable it
-                    contact.isEncrypted = false
-                    DataLayer.sharedInstance().disableEncrypt(forJid:contact.contactJid, andAccountID:contact.accountID)
+                    // --> warn user about this
+                    DDLogWarn("Showing alert because omemo is suddenly impossible since group changed to channel: \(self.contact)");
+                    confirmationPrompt = ConfirmationPrompt(
+                        title: Text("Group suddenly changed to public channel!"),
+                        message: Text("This contact suddenly changed from an encrypted private group to an unencrypted public channel! Please contact the administrator of that group/channel if you think this is wrong."),
+                        buttons: [
+                            .default(
+                                Text("Keep encryption enabled"),
+                                //don't change anything, just close the alert
+                                action: { }
+                            ),
+                            .destructive(
+                                Text("Disable encryption. This is dangerous!"),
+                                action: {
+                                    contact.obj.toggleEncryption(false)
+                                }
+                            )
+                        ]
+                    )
                 } else if !contact.isMuc || (contact.isMuc && contact.mucType == kMucTypeGroup) {
-                    hideLoadingOverlay(overlay)
-
                     if showWarning {
                         DDLogWarn("Showing omemo not supported alert for: \(self.contact)")
                         alertPrompt = AlertPrompt(
@@ -246,8 +260,7 @@ struct ChatView: View {
                             message: Text("This contact may not support OMEMO encrypted messages. Please try to enable encryption again in a few seconds, if you think this is wrong."),
                             dismissLabel: Text("Disable Encryption")
                         ) {
-                            contact.isEncrypted = false
-                            DataLayer.sharedInstance().disableEncrypt(forJid:contact.contactJid, andAccountID:contact.accountID)
+                            contact.obj.toggleEncryption(false)
                         }
                     } else {
                         DDLogInfo("Trying to fetch omemo keys for: \(self.contact)")
@@ -260,8 +273,6 @@ struct ChatView: View {
                         }
                     }
                 }
-            } else {
-                hideLoadingOverlay(overlay)
             }
         }
 #endif
@@ -569,7 +580,7 @@ struct ChatView: View {
                         DDLogVerbose("Showing should disable encryption confirmation...")
                         showShouldDisableEncryptionConfirmation(true)
                     } else {
-                        showCannotEncryptAlert(!contact.obj.toggleEncryption(!contact.isEncrypted))
+                        showCannotEncryptAlert(!contact.obj.toggleEncryption(true))
                     }
                 } label: {
                     if contact.isEncrypted {

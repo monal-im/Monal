@@ -107,7 +107,7 @@
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     MLAssert(!_serverFirstMessageParsed, @"SCRAM handler already parsed server-first-message!");
-    NSDictionary* msg = [self parseScramString:str withKeysRegex:@"^m?rsi.*$"];
+    NSDictionary* msg = [self parseScramString:str withKeysRegex:@"^m?rsi[^mrsi]*$"];
     _serverFirstMessageParsed = YES;
     //server nonce MUST start with our client nonce
     if(![msg[@"r"] hasPrefix:_nonce])
@@ -178,7 +178,7 @@
 {
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     MLAssert(_serverFirstMessageParsed, @"SCRAM handler did not parsed server-first-message yet!");
-    NSDictionary* msg = [self parseScramString:str withKeysRegex:@"^(e|v).*$"];
+    NSDictionary* msg = [self parseScramString:str withKeysRegex:@"^(e|v)*$"];
     //wrong v-value
     if(![HelperTools constantTimeCompareAttackerString:msg[@"v"] withKnownString:_expectedServerSignature])
         return MLScramStatusWrongServerProof;

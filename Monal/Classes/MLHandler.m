@@ -77,7 +77,7 @@ NSString* type_to_classname(NSString* type)
     _internalData[@"boundArguments"] = [self sanitizeArguments:args];
 }
 
--(id) callWithArguments:(NSDictionary* _Nullable) args
+-(id _Nullable) callWithArguments:(NSDictionary* _Nullable) args
 {
     MLAssert(_internalData[@"delegate"] && _internalData[@"handlerName"], @"Tried to call MLHandler while delegate and/or handlerName was not set!", @{@"handler": _internalData});
     [self checkInvalidation];
@@ -111,7 +111,7 @@ NSString* type_to_classname(NSString* type)
     return retval;
 }
 
--(id) invalidateWithArguments:(NSDictionary* _Nullable) args
+-(id _Nullable) invalidateWithArguments:(NSDictionary* _Nullable) args
 {
     if(!(_internalData[@"delegate"] && _internalData[@"invalidationName"]))
         return nil;

@@ -270,7 +270,6 @@ struct OmemoKeysForChatView: View {
     @State private var scannedFingerprints : Dictionary<NSInteger, String> = [:]
 
     @State var selectedContact : ObservableKVOWrapper<MLContact>? // for reason why see start of body
-    @State private var navigateToQRCodeView = false
     @State private var navigateToQRCodeScanner = false
 
     @State private var showScannedContactMissmatchAlert = false
@@ -325,9 +324,6 @@ struct OmemoKeysForChatView: View {
     }
 
     var body: some View {
-        // workaround for the fact that NavigationLink inside a form forces a formatting we don't want
-        if(self.selectedContact != nil) { // selectedContact is set to a value either when the user presses a QR code button or if there is only a single contact to choose from (-> user views a single account)
-            NavigationLink(destination:LazyClosureView(OmemoQrCodeView(contact: self.selectedContact!)), isActive: $navigateToQRCodeView){}.hidden().disabled(true) // navigation happens as soon as our button sets navigateToQRCodeView to true...
 //             NavigationLink(destination: LazyClosureView(MLQRCodeScanner(
 //                 handleContact: { jid, fingerprints in
 //                     // we scanned a contact but it was not in the contact list, show the alert...
@@ -336,7 +332,6 @@ struct OmemoKeysForChatView: View {
 //                     showScannedContactMissmatchAlert = true
 //                 }, handleClose: {}
 //             )), isActive: $navigateToQRCodeScanner){}.hidden().disabled(true)
-        }
         List {
             let helpDescription = isOwnKeys() ?
             Text("These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it. Double tap onto a fingerprint to copy to clipboard.") :
@@ -356,8 +351,8 @@ struct OmemoKeysForChatView: View {
                                 Text("Keys of \(contact.obj.contactJid)")
                                 Spacer()
                                 Button(action: {
-                                    self.selectedContact = contact
-                                    self.navigateToQRCodeView = true
+                                    DDLogInfo("Selected contact for qr code viewer: \(String(describing:contact))")
+                                    selectedContact = contact
                                 }, label: {
                                     Image(systemName: "qrcode.viewfinder")
                                 }).buttonStyle(.borderless)
@@ -367,10 +362,16 @@ struct OmemoKeysForChatView: View {
                 }
             }
         }
+        //invisible navigation link that can be triggered programmatically
+        .background(
+            NavigationLink(destination: LazyClosureView(OmemoQrCodeView(contact: selectedContact)), isActive: $selectedContact.optionalMappedToBool()) { EmptyView() }
+                .opacity(0)
+        )
         .listStyle(.plain)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack{
+                    //TODO: reactivate qr code scanner
                     /*if(self.account != nil) {
                         Button(action: {
                             self.navigateToQRCodeScanner = true
@@ -380,7 +381,7 @@ struct OmemoKeysForChatView: View {
                     }*/
                     if(omemoKeys.contacts.count == 1 && self.account != nil) {
                         Button(action: {
-                            self.navigateToQRCodeView = true
+                            self.selectedContact = self.omemoKeys.contacts.keys.first
                         }, label: {
                             Image(systemName: "qrcode.viewfinder")
                         })
@@ -389,9 +390,6 @@ struct OmemoKeysForChatView: View {
             }
         }
         .navigationBarTitle(isOwnKeys() ? Text("My Encryption Keys") : Text("Encryption Keys"), displayMode: .inline)
-        .onAppear(perform: {
-            self.selectedContact = self.omemoKeys.contacts.keys.first // needs to be done here as first is nil in init
-        })
         .alert(isPresented: $showScannedContactMissmatchAlert) {
             Alert(
                 title: Text("QR code: Fingerprints found"),

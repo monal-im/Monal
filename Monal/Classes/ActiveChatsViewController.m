@@ -51,7 +51,7 @@ typedef void (^view_queue_block_t)(PMKResolver _Nonnull);
 @property (nonatomic, readonly) DZNEmptyDataSetView* emptyDataSetView;
 @end
 
-
+/*
 //prevent display of _UIAlternateApplicationIconsAlertContentViewController
 @interface UISplitViewController (nopresent)
 -(void) swizzled_presentViewController:(UIViewController*) viewControllerToPresent animated:(BOOL) flag completion:(void (^)(void))completion;
@@ -92,6 +92,7 @@ typedef void (^view_queue_block_t)(PMKResolver _Nonnull);
     }
 }
 @end
+*/
 
 
 @interface ActiveChatsViewController() {

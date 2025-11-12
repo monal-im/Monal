@@ -27,10 +27,10 @@ struct OmemoQrCodeView: View {
     let jid: String
     @State private var qrCodeImage: UIImage
 
-    init(contact: ObservableKVOWrapper<MLContact>)
+    init(contact: ObservableKVOWrapper<MLContact>?)
     {
-        self.jid = contact.obj.contactJid
-        if let account = contact.obj.account {
+        if let jid = contact?.obj.contactJid, let account = contact?.obj.account {
+            self.jid = jid
             let devices = Array(account.omemo.knownDevices(forAddressName: self.jid))
             var keyList = ""
             var prefix = "?"
@@ -47,6 +47,7 @@ struct OmemoQrCodeView: View {
             }
             self.qrCodeImage = createQrCode(value: String(format:"xmpp:%@%@", jid, keyList))
         } else {
+            self.jid = "Keys of unknown user"       //this should never happen
             self.qrCodeImage = UIImage()
         }
     }

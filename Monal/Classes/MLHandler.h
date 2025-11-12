@@ -98,8 +98,8 @@ NSString* type_to_classname(NSString* type);
 -(void) bindArguments:(NSDictionary* _Nullable) args;
 
 //call and invalidate
--(id) callWithArguments:(NSDictionary* _Nullable) defaultArgs;
--(id) invalidateWithArguments:(NSDictionary* _Nullable) args;
+-(id _Nullable) callWithArguments:(NSDictionary* _Nullable) defaultArgs;
+-(id _Nullable) invalidateWithArguments:(NSDictionary* _Nullable) args;
 
 @end
 

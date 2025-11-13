@@ -26,7 +26,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-static const size_t MIN_OMEMO_KEYS = 90;
+static const size_t MIN_OMEMO_KEYS = 80;
 static const size_t MAX_OMEMO_KEYS = 100;
 static const int KEY_SIZE = 16;
 
@@ -173,7 +173,7 @@ static const int KEY_SIZE = 16;
 #ifndef DISABLE_OMEMO
     if(self.account.accountNo.intValue == ((xmpp*)notification.object).accountNo.intValue)
     {
-        DDLogInfo(@"We did a non-smacks-resume reconnect, resetting some of our state...");
+        DDLogInfo(@"We did a non-smacks-resume reconnect, resetting some of our state (MLOMEMO instance=%@)...", self);
         DDLogVerbose(@"Current state: %@", self.state);
         
         //we bound a new xmpp session --> reset our whole state

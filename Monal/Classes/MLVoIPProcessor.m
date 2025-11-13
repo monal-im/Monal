@@ -338,7 +338,7 @@ static NSMutableDictionary* _pendingCalls;
                 //wait for our account to connect before initializing webrtc using XEP-0215 iq stanzas
                 //if the user proceeds the call before we are bound, the outgoing proceed message stanza will be queued and sent once we are bound
                 //outgoing iq messages are not queued in all cases (e.g. non-smacks reconnect), hence this waiting loop
-                while(call.account.accountState < kStateBound)
+                while(call.account.accountState < kStateInitStarted)
                     [NSThread sleepForTimeInterval:0.250];
                 
                 DDLogDebug(@"Account is connected, now really initialize WebRTC...");
@@ -629,7 +629,7 @@ static NSMutableDictionary* _pendingCalls;
     else if([messageNode check:@"{urn:xmpp:jingle-message:0}finish"])
     {
         NSString* reason = [messageNode findFirst:@"{urn:xmpp:jingle-message:0}finish/{urn:xmpp:jingle:1}reason/*$"];
-        if(call.jmiProceed != nil)
+        if(call.wasConnectedOnce)
         {
             DDLogInfo(@"Remote finished call with reason: %@", reason);
             [call end];     //use "end" because this was a successful call

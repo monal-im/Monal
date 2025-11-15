@@ -507,11 +507,11 @@ public class HtmlParserBridge : NSObject {
 
 @objcMembers
 public class XmlParserBridge : NSObject {
-    var wrapped: MonalXmlStreamParser
+    var wrapped: MonalXmlStreamParserWrapper
     var delegate: MLBasePaser
     
     public init(with delegate: MLBasePaser) {
-        self.wrapped = MonalXmlStreamParser()
+        self.wrapped = MonalXmlStreamParserWrapper()
         self.delegate = delegate
     }
     
@@ -529,19 +529,19 @@ public class XmlParserBridge : NSObject {
             var notDoneYet = true
             while notDoneYet {
                 switch try self.wrapped.poll() {
-                    case MonalXmlStreamParserResultStart((name, ns, attrs)):
+                    case MonalXmlStreamParserResultWrapperStart((name, ns, attrs)):
                         var attributes: [String:String]
                         for (key, value) in attrs/*.intoArray()*/ {
                             attributes[key.toString()] = value.toString()
                         }
                         self.delegate.parserDidStartElement(name.toString(), namespaceURI:ns.toString(), attributes:attributes)
-                    case MonalXmlStreamParserResultEnd((name, ns)):
+                    case MonalXmlStreamParserResultWrapperEnd((name, ns)):
                         self.delegate.parserDidEndElement(name.toString(), namespaceURI:ns.toString())
-                    case MonalXmlStreamParserResultText(text):
+                    case MonalXmlStreamParserResultWrapperText(text):
                         self.delegate.parserFoundCharacters(text.toString())
-                    case MonalXmlStreamParserResultCData(cdata):
+                    case MonalXmlStreamParserResultWrapperCData(cdata):
                         self.delegate.parserFoundCharacters(cdata.toString())
-                    case MonalXmlStreamParserResultNeedMoreData:
+                    case MonalXmlStreamParserResultWrapperNeedMoreData:
                         notDoneYet = false
                 }
             }

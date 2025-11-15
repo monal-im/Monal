@@ -2,21 +2,8 @@ use crate::ffi::rust_panic_handler;
 use monal_html_parser::MonalHtmlParser;
 use monal_xml_parser::{MonalXmlStreamParser, MonalXmlStreamParserResult};
 
-// #[swift_bridge::bridge]
-// mod ffi_i {
-//     pub enum MonalXmlStreamParserResultX {
-//         // Start((String, String, Vec<(String, String)>)),
-//         // End((String, String)),
-//         Text(String),
-//         CData(String),
-//         NeedMoreData,
-//     }
-// }
-// 
-// use ffi_i::MonalXmlStreamParserResultX;
-
 #[swift_bridge::bridge]
-pub mod ffi {
+mod ffi {
     //simple functions exported from rust to swift
     extern "Rust" {
         pub fn install_panichandler();
@@ -30,50 +17,73 @@ pub mod ffi {
         type MonalHtmlParser;
         #[swift_bridge(init)]
         pub fn new(html: String) -> MonalHtmlParser;
-        pub fn select(
-            &self,
-            selector: String,
-            atrribute: Option<String>,
-        ) -> Vec<String>;
+        pub fn select(&self, selector: String, atrribute: Option<String>) -> Vec<String>;
     }
-    
+
     //rust struct exported from rust to swift
     extern "Rust" {
-        type MonalXmlStreamParser;
+        type MonalXmlStreamParserWrapper;
         #[swift_bridge(init)]
-        pub fn new() -> MonalXmlStreamParser;
+        pub fn new() -> MonalXmlStreamParserWrapper;
         pub fn feed(&mut self, chunk: &str);
         pub fn poll(&mut self) -> Result<MonalXmlStreamParserResultWrapper, String>;
     }
-    
+
     //enum wrapper
     //TODO: autogenerate this (@friedrichaltheide)
     extern "Rust" {
-        pub enum MonalXmlStreamParserResultWrapper {
-            Start((String, String, Vec<(String, String)>)),
-            End((String, String)),
-            Text(String),
-            CData(String),
-            NeedMoreData,
-        }
+        type MonalXmlStreamParserResultWrapper;
     }
-    
+
     //exported from our internal swift helper to rust
     extern "Swift" {
         fn rust_panic_handler(text: String, backtrace: String);
     }
 }
 
+pub enum MonalXmlStreamParserResultWrapper {
+    Start((String, String, Vec<(String, String)>)),
+    End((String, String)),
+    Text(String),
+    CData(String),
+    NeedMoreData,
+}
+
+struct MonalXmlStreamParserWrapper(MonalXmlStreamParser);
+
+impl MonalXmlStreamParserWrapper {
+    pub fn new() -> MonalXmlStreamParserWrapper {
+        Self(MonalXmlStreamParser::new())
+    }
+    pub fn feed(&mut self, chunk: &str) {
+        self.0.feed(chunk)
+    }
+    pub fn poll(&mut self) -> Result<MonalXmlStreamParserResultWrapper, String> {
+        match self.0.poll() {
+            Ok(stream_parser) => Ok(stream_parser.into()),
+            Err(e) => Err(e),
+        }
+    }
+}
+
 //from implementation for enum wrapper
 //TODO: autogenerate this (@friedrichaltheide)
-pub impl From<MonalXmlStreamParserResult> for MonalXmlStreamParserResultWrapper {
-    pub fn from(item: MonalXmlStreamParserResult) -> Self {
-        match orig {
-            MonalXmlStreamParserResult::Start((String, String, Vec<(String, String)>)) => MonalXmlStreamParserResultWrapper::Start((String, String, Vec<(String, String)>)),
-            MonalXmlStreamParserResult::End((String, String)) => MonalXmlStreamParserResultWrapper::End((String, String)),
-            MonalXmlStreamParserResult::Text(String) => MonalXmlStreamParserResultWrapper::Text(String),
-            MonalXmlStreamParserResult::CData(String) => MonalXmlStreamParserResultWrapper::CData(String),
-            MonalXmlStreamParserResult::NeedMoreData => MonalXmlStreamParserResultWrapper::NeedMoreData,
+impl From<MonalXmlStreamParserResult> for MonalXmlStreamParserResultWrapper {
+    fn from(item: MonalXmlStreamParserResult) -> Self {
+        match item {
+            MonalXmlStreamParserResult::Start((name, ns, attrs)) => {
+                MonalXmlStreamParserResultWrapper::Start((name, ns, attrs))
+            }
+            MonalXmlStreamParserResult::End((name, ns)) => {
+                MonalXmlStreamParserResultWrapper::End((name, ns))
+            }
+            MonalXmlStreamParserResult::Text(text) => MonalXmlStreamParserResultWrapper::Text(text),
+            MonalXmlStreamParserResult::CData(cdata) => {
+                MonalXmlStreamParserResultWrapper::CData(cdata)
+            }
+            MonalXmlStreamParserResult::NeedMoreData => {
+                MonalXmlStreamParserResultWrapper::NeedMoreData
+            }
         }
     }
 }

@@ -6,8 +6,14 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
+class ContactDetailsDefaultsDB: ObservableObject {
+    @defaultsDB("showAdvancedUI")
+    var showAdvancedUI: Bool
+}
+
 struct ContactDetails: View {
     @Environment(\.presentationMode) private var presentationMode
+    @ObservedObject var contactDetailsDefaultsDB = ContactDetailsDefaultsDB()
     @State private var ownRole = kMucRoleParticipant
     @State private var ownAffiliation = kMucAffiliationNone
     @StateObject var contact: ObservableKVOWrapper<MLContact>
@@ -378,7 +384,7 @@ struct ContactDetails: View {
                 }
 #endif
                 
-                if !contact.isMuc && !contact.isSelfChat {
+                if contactDetailsDefaultsDB.showAdvancedUI && !contact.isMuc && !contact.isSelfChat {
                     NavigationLink(destination: LazyClosureView(ContactResources(contact: contact))) {
                         Text("Resources")
                     }
@@ -604,7 +610,7 @@ struct ContactDetails: View {
             //omemo debug stuff, should be removed in a few months
             Section {
                 // only display omemo session reset button on 1:1 and private groups
-                if contact.obj.isMuc == false || (contact.isMuc && contact.mucType == kMucTypeGroup) {
+                if contactDetailsDefaultsDB.showAdvancedUI && (contact.obj.isMuc == false || (contact.isMuc && contact.mucType == kMucTypeGroup)) {
                     Button(action: {
                         showingResetOmemoSessionConfirmation = true
                     }) {
@@ -614,7 +620,7 @@ struct ContactDetails: View {
                     .actionSheet(isPresented: $showingResetOmemoSessionConfirmation) {
                         ActionSheet(
                             title: Text("Reset OMEMO session"),
-                            message: Text("Do you really want to reset the OMEMO session? You should only reset the connection if you know what you are doing!"),
+                            message: Text("Do you really want to reset the OMEMO session? You should only reset the session if you know what you are doing!"),
                             buttons: [
                                 .cancel(),
                                 .destructive(

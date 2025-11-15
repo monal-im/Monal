@@ -147,6 +147,7 @@
 		54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81B282316F5003664BD /* RegisterAccount.swift */; };
 		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
 		840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */; };
+		84110CFB2EC8662600DFC286 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84110CFA2EC8662600DFC286 /* WebRTC */; };
 		8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */; };
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
@@ -185,7 +186,6 @@
 		849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF3E2BACF0360009BCD7 /* CocoaLumberjack */; };
 		849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF402BACF0360009BCD7 /* CocoaLumberjackSwift */; };
 		849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 849ADF422BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend */; };
-		84AF79BF2DF36DA400FE3818 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79BE2DF36DA400FE3818 /* WebRTC */; };
 		84AF79C22DF3C0A900FE3818 /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79C12DF3C0A900FE3818 /* CropViewController */; };
 		84AF79C42DF3C0A900FE3818 /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79C32DF3C0A900FE3818 /* TOCropViewController */; };
 		84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */; };
@@ -823,11 +823,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				84774DF52D1A935000B15E51 /* ExyteChat in Frameworks */,
+				84110CFB2EC8662600DFC286 /* WebRTC in Frameworks */,
 				843DC1B22C8E51E3002724FE /* ExyteChat in Frameworks */,
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
 				84F194D12C15197200F0A994 /* FrameUp in Frameworks */,
 				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
-				84AF79BF2DF36DA400FE3818 /* WebRTC in Frameworks */,
 				84AF79C22DF3C0A900FE3818 /* CropViewController in Frameworks */,
 				84774DFB2D1A956400B15E51 /* ExyteChat in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
@@ -1617,9 +1617,9 @@
 				843DC1B12C8E51E3002724FE /* ExyteChat */,
 				84774DF42D1A935000B15E51 /* ExyteChat */,
 				84774DFA2D1A956400B15E51 /* ExyteChat */,
-				84AF79BE2DF36DA400FE3818 /* WebRTC */,
 				84AF79C12DF3C0A900FE3818 /* CropViewController */,
 				84AF79C32DF3C0A900FE3818 /* TOCropViewController */,
+				84110CFA2EC8662600DFC286 /* WebRTC */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1838,8 +1838,8 @@
 				84F194CF2C15197200F0A994 /* XCRemoteSwiftPackageReference "FrameUp" */,
 				84E231F12C16A9CE00735FB7 /* XCRemoteSwiftPackageReference "SVGView" */,
 				84774DF92D1A956400B15E51 /* XCRemoteSwiftPackageReference "ExyteChat" */,
-				84AF79BD2DF36DA400FE3818 /* XCRemoteSwiftPackageReference "WebRTC" */,
 				84AF79C02DF3C0A900FE3818 /* XCRemoteSwiftPackageReference "TOCropViewController" */,
+				84110CF92EC8662600DFC286 /* XCRemoteSwiftPackageReference "WebRTC" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4395,9 +4395,12 @@
 				CODE_SIGN_ENTITLEMENTS = Monal.Alpha.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Monal.Alpha.ios.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Monal.Alpha.macos.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMPILER_INDEX_STORE_ENABLE = YES;
 				CURRENT_PROJECT_VERSION = 0;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				ENABLE_PREVIEWS = YES;
@@ -4433,6 +4436,7 @@
 				PRODUCT_NAME = Monal.alpha;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = "non-global";
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -4736,6 +4740,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		84110CF92EC8662600DFC286 /* XCRemoteSwiftPackageReference "WebRTC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Stasel/WebRTC";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 139.0.0;
+			};
+		};
 		841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GeorgeElsham/ViewExtractor";
@@ -4758,14 +4770,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 3.8.5;
-			};
-		};
-		84AF79BD2DF36DA400FE3818 /* XCRemoteSwiftPackageReference "WebRTC" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Stasel/WebRTC";
-			requirement = {
-				branch = latest;
-				kind = branch;
 			};
 		};
 		84AF79C02DF3C0A900FE3818 /* XCRemoteSwiftPackageReference "TOCropViewController" */ = {
@@ -4803,6 +4807,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		84110CFA2EC8662600DFC286 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84110CF92EC8662600DFC286 /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
+		};
 		8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LibMonalRustSwiftBridge;
@@ -4839,11 +4848,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 849ADF3D2BACF0360009BCD7 /* XCRemoteSwiftPackageReference "cocoalumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
-		};
-		84AF79BE2DF36DA400FE3818 /* WebRTC */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 84AF79BD2DF36DA400FE3818 /* XCRemoteSwiftPackageReference "WebRTC" */;
-			productName = WebRTC;
 		};
 		84AF79C12DF3C0A900FE3818 /* CropViewController */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -515,38 +515,37 @@ public class XmlParserBridge : NSObject {
         self.delegate = delegate
     }
     
-    /*
-    Start((String, String, Vec<(String, String)>)),
-    End((String, String)),
-    Text(String),
-    CData(String),
-    Error(String),
-    NeedMoreData,
-    */
-    public func feed(data chunk: String) {
+    @objc(feedString:)
+    public func feed(string chunk: String) {
         do {
             self.wrapped.feed(chunk)
             var notDoneYet = true
             while notDoneYet {
                 switch try self.wrapped.poll() {
-                    case MonalXmlStreamParserResultWrapperStart((name, ns, attrs)):
-                        var attributes: [String:String]
-                        for (key, value) in attrs/*.intoArray()*/ {
-                            attributes[key.toString()] = value.toString()
+                    case .Start(let element):
+                        let keys: [String] = element.attr_keys!.intoArray().map { $0.toString() }
+                        let values: [String] = element.attr_values!.intoArray().map { $0.toString() }
+                        MLAssert(keys.count == values.count, "Atrribute vectors coming from rust should have the same sizes!", [
+                            "keys": keys as NSArray,
+                            "values": values as NSArray,
+                        ])
+                        var attributes: [String:String] = [:]
+                        for i in 0..<keys.count {
+                            attributes[keys[i]] = values[i]
                         }
-                        self.delegate.parserDidStartElement(name.toString(), namespaceURI:ns.toString(), attributes:attributes)
-                    case MonalXmlStreamParserResultWrapperEnd((name, ns)):
-                        self.delegate.parserDidEndElement(name.toString(), namespaceURI:ns.toString())
-                    case MonalXmlStreamParserResultWrapperText(text):
+                        self.delegate.parserDidStartElement(element.name.toString(), namespaceURI:element.ns.toString(), attributes:attributes)
+                    case .End(let element):
+                        self.delegate.parserDidEndElement(element.name.toString(), namespaceURI:element.ns.toString())
+                    case .Text(let text):
                         self.delegate.parserFoundCharacters(text.toString())
-                    case MonalXmlStreamParserResultWrapperCData(cdata):
+                    case .CData(let cdata):
                         self.delegate.parserFoundCharacters(cdata.toString())
-                    case MonalXmlStreamParserResultWrapperNeedMoreData:
+                    case .NeedMoreData:
                         notDoneYet = false
                 }
             }
         } catch let err {
-            errorText = String(describing:err)
+            let errorText = String(describing:err)
             DDLogError("XML parser returned error: \(errorText)")
             self.delegate.parserErrorOccurred(errorText)
         }

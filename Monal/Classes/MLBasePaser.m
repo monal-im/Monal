@@ -11,7 +11,6 @@
 
 #define DebugParser(...)    DDLogDebug(__VA_ARGS__)
 // #define DebugParser(...)
-
 @interface MLXMLNode()
 @property (atomic, readwrite) MLXMLNode* parent;
 -(MLXMLNode*) addChildNodeWithoutCopy:(MLXMLNode*) child;
@@ -73,7 +72,7 @@
     if(depth == 0)
     {
         DDLogError(@"Got xml character data outside of any element!");
-        [self fakeStreamError];
+        [self fakeStreamErrorWithMessage:@"Got xml character data outside of any element!"];
         return;
     }
     
@@ -119,7 +118,7 @@
     //fake stream error and let xmpp.m handle it
     _completion([[MLXMLNode alloc] initWithElement:@"error" andNamespace:@"http://etherx.jabber.org/streams" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"bad-format" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"Could not parse XML coming from server: %@", message]
+            [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-streams" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"Could not parse XML coming from server: %@", message]]
         ] andData:nil]
     ] andData:nil]);
 }

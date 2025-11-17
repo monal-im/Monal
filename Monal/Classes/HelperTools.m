@@ -2924,12 +2924,8 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     if(xmlString == nil)
         return nil;
     DDLogVerbose(@"Parsing XML string produced by rust sdp parser(withInitiator=%@): %@", bool2str(initiator), xmlString);
-    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
-    [xmlParser setShouldProcessNamespaces:YES];
-    [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
-    [xmlParser setShouldResolveExternalEntities:NO];
-    [xmlParser setDelegate:delegate];
-    [xmlParser parse];     //blocking operation
+    XmlParserBridge* xmlParser = [[XmlParserBridge alloc] initWith:delegate];
+    [xmlParser feedString:xmlString];     //blocking operation
     return retval;
 }
 

@@ -10,9 +10,9 @@
 #import <monalxmpp/MLXMLNode.h>
 
 //stanzas
-#import "XMPPIQ.h"
+#import <monalxmpp/XMPPIQ.h>
 #import <monalxmpp/XMPPPresence.h>
-#import "XMPPMessage.h"
+#import <monalxmpp/XMPPMessage.h>
 #import <monalxmpp/XMPPDataForm.h>
 
 

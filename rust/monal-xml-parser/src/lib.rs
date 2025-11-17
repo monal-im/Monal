@@ -71,13 +71,6 @@ impl MonalXmlStreamParser {
                 Ok(MonalXmlStreamParserResult::CData(cow.into_owned()))
             }
             
-            // Ok((_, Event::Text(text))) => {
-            //     self.delegate.text(text.unescape().unwrap_or_default().into_owned())
-            // }
-            // 
-            // Ok((_, Event::CData(cdata))) => {
-            //     self.delegate.cdata(cdata.unescape().unwrap_or_default().into_owned())
-            // }
 
             Ok((_, Event::Eof)) => Ok(MonalXmlStreamParserResult::NeedMoreData),     // this feed's cycle is complete, no more data to parse
 

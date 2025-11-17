@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
+#import <monalxmpp/monalxmpp-Swift.h>
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/HelperTools.h>
 #import "MLBasePaser.h"
@@ -88,12 +89,8 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
 #pragma clang diagnostic pop
     
     //create xml parser, configure our delegate and feed it with data
-    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[_rawXML dataUsingEncoding:NSUTF8StringEncoding]];
-    [xmlParser setShouldProcessNamespaces:YES];
-    [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
-    [xmlParser setShouldResolveExternalEntities:NO];
-    [xmlParser setDelegate:delegate];
-    [xmlParser parse];     //blocking operation
+    XmlParserBridge* xmlParser = [[XmlParserBridge alloc] initWith:delegate];
+    [xmlParser feedString:_rawXML];     //blocking operation
 }
 
 -(void) setUp

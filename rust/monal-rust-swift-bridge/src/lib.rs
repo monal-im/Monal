@@ -1,8 +1,8 @@
 use crate::ffi::rust_panic_handler;
+use crate::ffi::MonalXmlStreamParserResultElement;
+use crate::ffi::MonalXmlStreamParserResultWrapper;
 use monal_html_parser::MonalHtmlParser;
 use monal_xml_parser::{MonalXmlStreamParser, MonalXmlStreamParserResult};
-use crate::ffi::MonalXmlStreamParserResultWrapper;
-use crate::ffi::MonalXmlStreamParserResultElement;
 
 #[swift_bridge::bridge]
 mod ffi {
@@ -30,7 +30,7 @@ mod ffi {
         name: String,
         ns: String,
         attr_keys: Option<Vec<String>>,
-        attr_values: Option<Vec<String>>
+        attr_values: Option<Vec<String>>,
     }
     enum MonalXmlStreamParserResultWrapper {
         Start(MonalXmlStreamParserResultElement),
@@ -38,8 +38,9 @@ mod ffi {
         Text(String),
         CData(String),
         NeedMoreData,
+        Skipped,
     }
-    
+
     //wrapped xml parser struct exported to swift (wrapping needed because of circular references because of return type)
     extern "Rust" {
         type MonalXmlStreamParserWrapper;
@@ -48,7 +49,7 @@ mod ffi {
         pub fn feed(&mut self, chunk: &str);
         pub fn poll(&mut self) -> Result<MonalXmlStreamParserResultWrapper, String>;
     }
-    
+
     //exported from our internal swift helper to rust
     extern "Swift" {
         fn rust_panic_handler(text: String, backtrace: String);
@@ -83,10 +84,20 @@ impl From<MonalXmlStreamParserResult> for MonalXmlStreamParserResultWrapper {
                     attr_keys.push(entry.0.clone());
                     attr_values.push(entry.1.clone());
                 }
-                MonalXmlStreamParserResultWrapper::Start(MonalXmlStreamParserResultElement { name, ns, attr_keys: Some(attr_keys), attr_values: Some(attr_values) })
+                MonalXmlStreamParserResultWrapper::Start(MonalXmlStreamParserResultElement {
+                    name,
+                    ns,
+                    attr_keys: Some(attr_keys),
+                    attr_values: Some(attr_values),
+                })
             }
             MonalXmlStreamParserResult::End((name, ns)) => {
-                MonalXmlStreamParserResultWrapper::End(MonalXmlStreamParserResultElement { name, ns, attr_keys: None, attr_values: None })
+                MonalXmlStreamParserResultWrapper::End(MonalXmlStreamParserResultElement {
+                    name,
+                    ns,
+                    attr_keys: None,
+                    attr_values: None,
+                })
             }
             MonalXmlStreamParserResult::Text(text) => MonalXmlStreamParserResultWrapper::Text(text),
             MonalXmlStreamParserResult::CData(cdata) => {
@@ -95,6 +106,7 @@ impl From<MonalXmlStreamParserResult> for MonalXmlStreamParserResultWrapper {
             MonalXmlStreamParserResult::NeedMoreData => {
                 MonalXmlStreamParserResultWrapper::NeedMoreData
             }
+            MonalXmlStreamParserResult::Skipped => MonalXmlStreamParserResultWrapper::Skipped,
         }
     }
 }

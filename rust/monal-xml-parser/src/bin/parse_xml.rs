@@ -34,5 +34,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 */
 
-fn main() {
-}
+fn main() {}

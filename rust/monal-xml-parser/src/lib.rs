@@ -1,6 +1,6 @@
 use quick_xml::events::Event;
-use quick_xml::NsReader;
 use quick_xml::name::ResolveResult;
+use quick_xml::NsReader;
 use std::collections::VecDeque;
 use std::str;
 
@@ -10,6 +10,7 @@ pub enum MonalXmlStreamParserResult {
     Text(String),
     CData(String),
     NeedMoreData,
+    Skipped,
 }
 
 pub struct MonalXmlStreamParser {
@@ -37,18 +38,25 @@ impl MonalXmlStreamParser {
     pub fn feed(&mut self, chunk: &str) {
         self.reader.get_mut().extend(chunk.as_bytes());
     }
-    
+
     pub fn poll(&mut self) -> Result<MonalXmlStreamParserResult, String> {
         let retval = match self.reader.read_resolved_event_into(&mut self.buffer) {
             Ok((nsresult, Event::Start(start))) => {
-                let name = str::from_utf8(start.name().local_name().as_ref()).map_err(|e| e.to_string())?.to_string();
+                let name = str::from_utf8(start.name().local_name().as_ref())
+                    .map_err(|e| e.to_string())?
+                    .to_string();
                 let ns = ns_to_string(nsresult)?;
-                
+
                 let mut attrs = vec![];
                 for attr in start.attributes().with_checks(true) {
                     let attr = attr.map_err(|e| e.to_string())?;
-                    let key = str::from_utf8(attr.key.local_name().as_ref()).map_err(|e| e.to_string())?.to_string();
-                    let val = attr.unescape_value().map_err(|e| e.to_string())?.to_string();
+                    let key = str::from_utf8(attr.key.local_name().as_ref())
+                        .map_err(|e| e.to_string())?
+                        .to_string();
+                    let val = attr
+                        .unescape_value()
+                        .map_err(|e| e.to_string())?
+                        .to_string();
                     attrs.push((key, val));
                 }
 
@@ -56,7 +64,9 @@ impl MonalXmlStreamParser {
             }
 
             Ok((nsresult, Event::End(end))) => {
-                let name = str::from_utf8(end.name().local_name().as_ref()).map_err(|e| e.to_string())?.to_string();
+                let name = str::from_utf8(end.name().local_name().as_ref())
+                    .map_err(|e| e.to_string())?
+                    .to_string();
                 let ns = ns_to_string(nsresult)?;
                 Ok(MonalXmlStreamParserResult::End((name, ns)))
             }
@@ -70,21 +80,24 @@ impl MonalXmlStreamParser {
                 let cow = cdata.xml10_content().map_err(|e| e.to_string())?;
                 Ok(MonalXmlStreamParserResult::CData(cow.into_owned()))
             }
-            
 
-            Ok((_, Event::Eof)) => Ok(MonalXmlStreamParserResult::NeedMoreData),     // this feed's cycle is complete, no more data to parse
+            Ok((_, Event::Eof)) => Ok(MonalXmlStreamParserResult::NeedMoreData), // this feed's cycle is complete, no more data to parse
 
-            Err(err) => {
-                Err(format!("XML parsing error: {}", err.to_string()))
-            }
+            //ignored events
+            Ok((_, Event::Comment(_))) => Ok(MonalXmlStreamParserResult::Skipped),
+            Ok((_, Event::Decl(_))) => Ok(MonalXmlStreamParserResult::Skipped),
+            Ok((_, Event::PI(_))) => Ok(MonalXmlStreamParserResult::Skipped),
+            Ok((_, Event::DocType(_))) => Ok(MonalXmlStreamParserResult::Skipped),
+
+            Err(err) => Err(format!("XML parsing error: {}", err.to_string())),
 
             catchall => {
                 panic!("Unexpected xml parsing event: {:?}", catchall);
             }
         };
-        
-        self.buffer.clear();        // clear temporary buffer used by read_resolved_event_into()
-        
+
+        self.buffer.clear(); // clear temporary buffer used by read_resolved_event_into()
+
         // prevent memory leak by removing consumed bytes from our VecDeque
         let consumed = self.reader.buffer_position();
         if consumed > 0 {
@@ -93,15 +106,20 @@ impl MonalXmlStreamParser {
                 buf.pop_front();
             }
         }
-        
+
         retval
     }
 }
 
 fn ns_to_string(nsresult: ResolveResult) -> Result<String, String> {
     match nsresult {
-        ResolveResult::Bound(ns) => Ok(String::from_utf8(ns.as_ref().to_vec()).map_err(|e| e.to_string())?),
+        ResolveResult::Bound(ns) => {
+            Ok(String::from_utf8(ns.as_ref().to_vec()).map_err(|e| e.to_string())?)
+        }
         ResolveResult::Unbound => Ok("".to_string()),
-        ResolveResult::Unknown(buf) => Err(format!("Tried to use unbound namespace: {}", String::from_utf8_lossy(&buf))),
+        ResolveResult::Unknown(buf) => Err(format!(
+            "Tried to use unbound namespace: {}",
+            String::from_utf8_lossy(&buf)
+        )),
     }
 }

@@ -615,8 +615,8 @@
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		842790842A32D16C005C18CC /* CallSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CallSounds; sourceTree = "<group>"; };
-		8430EB382E5D6CDC007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = te.lproj/Main.strings; sourceTree = "<group>"; };
-		8430EB392E5D6D68007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = te.lproj/Settings.strings; sourceTree = "<group>"; };
+		8430EB382E5D6CDC007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Main.strings; sourceTree = "<group>"; };
+		8430EB392E5D6D68007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Settings.strings; sourceTree = "<group>"; };
 		843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MLOgHtmlParser.swift; path = Classes/MLOgHtmlParser.swift; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
 		844921E92C29F9A000B99A9C /* MLDelayableTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDelayableTimer.m; sourceTree = "<group>"; };

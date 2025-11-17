@@ -37,30 +37,26 @@ pub mod ffi {
         ) -> Vec<String>;
     }
     
-    #[swift_bridge(already_declared)]
-    enum MonalXmlStreamParserResult {}
-    
     //rust struct exported from rust to swift
     extern "Rust" {
         type MonalXmlStreamParser;
         #[swift_bridge(init)]
         pub fn new() -> MonalXmlStreamParser;
         pub fn feed(&mut self, chunk: &str);
-        pub fn poll(&mut self) -> Result<MonalXmlStreamParserResult, String>;
+        pub fn poll(&mut self) -> Result<MonalXmlStreamParserResultWrapper, String>;
     }
-    // extern "Rust" {
-    //     type MonalXmlStreamParserResult;
-    // }
     
-    // extern "Rust" {
-    //     enum MonalEnum {
-    //         // Start((String, String, Vec<(String, String)>)),
-    //         // End((String, String)),
-    //         Text(String),
-    //         CData(String),
-    //         NeedMoreData,
-    //     }
-    // }
+    //enum wrapper
+    //TODO: autogenerate this (@friedrichaltheide)
+    extern "Rust" {
+        pub enum MonalXmlStreamParserResultWrapper {
+            Start((String, String, Vec<(String, String)>)),
+            End((String, String)),
+            Text(String),
+            CData(String),
+            NeedMoreData,
+        }
+    }
     
     //exported from our internal swift helper to rust
     extern "Swift" {
@@ -68,12 +64,19 @@ pub mod ffi {
     }
 }
 
-// impl XmlStreamParserDelegateTrait for XmlStreamParserDelegate {
-// }
-
-// pub fn call_delegate(d: &mut XmlStreamParserDelegate) {
-//     d.text("bla".to_string());
-// }
+//from implementation for enum wrapper
+//TODO: autogenerate this (@friedrichaltheide)
+pub impl From<MonalXmlStreamParserResult> for MonalXmlStreamParserResultWrapper {
+    pub fn from(item: MonalXmlStreamParserResult) -> Self {
+        match orig {
+            MonalXmlStreamParserResult::Start((String, String, Vec<(String, String)>)) => MonalXmlStreamParserResultWrapper::Start((String, String, Vec<(String, String)>)),
+            MonalXmlStreamParserResult::End((String, String)) => MonalXmlStreamParserResultWrapper::End((String, String)),
+            MonalXmlStreamParserResult::Text(String) => MonalXmlStreamParserResultWrapper::Text(String),
+            MonalXmlStreamParserResult::CData(String) => MonalXmlStreamParserResultWrapper::CData(String),
+            MonalXmlStreamParserResult::NeedMoreData => MonalXmlStreamParserResultWrapper::NeedMoreData,
+        }
+    }
+}
 
 pub fn install_panichandler() {
     monal_panic_handler::install_panic_handler(rust_panic_handler);

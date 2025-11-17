@@ -5,8 +5,8 @@ use std::collections::VecDeque;
 use std::str;
 
 pub enum MonalXmlStreamParserResult {
-    // Start((String, String, Vec<(String, String)>)),
-    // End((String, String)),
+    Start((String, String, Vec<(String, String)>)),
+    End((String, String)),
     Text(String),
     CData(String),
     NeedMoreData,
@@ -52,15 +52,13 @@ impl MonalXmlStreamParser {
                     attrs.push((key, val));
                 }
 
-                // Ok(MonalXmlStreamParserResult::Start((name, ns, attrs)))
-                Ok(MonalXmlStreamParserResult::NeedMoreData)
+                Ok(MonalXmlStreamParserResult::Start((name, ns, attrs)))
             }
 
             Ok((nsresult, Event::End(end))) => {
                 let name = str::from_utf8(end.name().local_name().as_ref()).map_err(|e| e.to_string())?.to_string();
                 let ns = ns_to_string(nsresult)?;
-                // Ok(MonalXmlStreamParserResult::End((name, ns)))
-                Ok(MonalXmlStreamParserResult::NeedMoreData)
+                Ok(MonalXmlStreamParserResult::End((name, ns)))
             }
 
             Ok((_, Event::Text(text))) => {

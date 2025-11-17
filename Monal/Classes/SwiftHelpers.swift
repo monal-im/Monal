@@ -523,6 +523,7 @@ public class XmlParserBridge : NSObject {
             while notDoneYet {
                 switch try self.wrapped.poll() {
                     case .Start(let element):
+                        DDLogVerbose("Got Start(\(String(describing:element)))")
                         let keys: [String] = element.attr_keys!.intoArray().map { $0.toString() }
                         let values: [String] = element.attr_values!.intoArray().map { $0.toString() }
                         MLAssert(keys.count == values.count, "Atrribute vectors coming from rust should have the same sizes!", [
@@ -535,13 +536,19 @@ public class XmlParserBridge : NSObject {
                         }
                         self.delegate.parserDidStartElement(element.name.toString(), namespaceURI:element.ns.toString(), attributes:attributes)
                     case .End(let element):
+                        DDLogVerbose("Got Start(\(String(describing:element)))")
                         self.delegate.parserDidEndElement(element.name.toString(), namespaceURI:element.ns.toString())
                     case .Text(let text):
+                        DDLogVerbose("Got Text(\(String(describing:text)))")
                         self.delegate.parserFoundCharacters(text.toString())
                     case .CData(let cdata):
+                        DDLogVerbose("Got CData(\(String(describing:cdata)))")
                         self.delegate.parserFoundCharacters(cdata.toString())
                     case .NeedMoreData:
+                        DDLogVerbose("Got NeedMoreData")
                         notDoneYet = false
+                    case .Skipped:
+                        DDLogVerbose("Got Skipped")
                 }
             }
         } catch let err {

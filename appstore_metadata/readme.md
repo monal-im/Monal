@@ -3,7 +3,7 @@
 This directory contains the translations of the appstore metadata.
 
 ## Changing translations already present
-Plese fork this repository, make your changes, commit them and then create a PR describing what you changed (andy why).
+Please fork this repository, make your changes, commit them and then create a PR describing what you changed (and why).
 
 ## Adding new translations
 To add a new translation, please fork this repository, then create a new directory for your language.

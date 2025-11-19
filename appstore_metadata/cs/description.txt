@@ -1,0 +1,20 @@
+Nikdy nebyla lepší chvíle začít používat XMPP, svobodnou veřejnou komunikační síť, kterou nikdo neovládá ani nevlastní. Monal je rychlý a uživatelsky přívětivý způsob, jak XMPP používat. Stačí aplikaci stáhnout, přihlásit či registrovat se a můžete chatovat během pár minut. Vypadá a funguje stejně jako ostatní aplikace, takže není potřeba se „učit XMPP“ a dokonce ani se starat, co to je.
+
+Klíčové vlastnosti:
+- otevřený zdrojový kód (open source)
+- bez reklam! silný důraz na soukromí, nenavazuje nevyžádaná spojení a neodesílá údaje o použití
+- nečte žádná osobní data
+- jelikož se připojuje přímo k Vašemu serveru, Vaše heslo ani žádné jiné informace nejsou nikdy odeslány třetí straně
+- konverzace šifrované pomocí OMEMO
+- kompatibilní s korporátními XMPP servery, které vyžadují VPN
+- podpora pro skupinové konverzace formou MUC (multi-user chat)
+- audio/video hovory
+
+Implementováno je několik rozšíření XMPP navržených pro zlepšení mobilního fungování:
+- XEP-0357: Push Notifications
+- XEP-0280: Message Carbons k synchronizaci zpráv mezi klienty
+- XEP-0198: Stream Management k rychlému znovupřipojení
+- XEP-0199: XMPP Ping k udržování spojení
+- XEP-0313: Message Archive Management ke stahování historie konverzací
+- XEP-0352: Client State Indication k dramatickému snížení spotřeby baterie
+- XEP-0363: HTTP File Upload k posílání obrázků v konverzacích

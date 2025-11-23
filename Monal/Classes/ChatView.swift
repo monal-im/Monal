@@ -237,7 +237,7 @@ struct ChatView: View {
                     DDLogWarn("Showing alert because omemo is suddenly impossible since group changed to channel: \(self.contact)");
                     confirmationPrompt = ConfirmationPrompt(
                         title: Text("Group suddenly changed to public channel!"),
-                        message: Text("This contact suddenly changed from an encrypted private group to an unencrypted public channel! Please contact the administrator of that group/channel if you think this is wrong."),
+                        message: Text("This chat suddenly changed from an encrypted private group to an unencrypted public channel! Please contact the administrator of that group/channel if you think this is wrong."),
                         buttons: [
                             .default(
                                 Text("Keep encryption enabled"),

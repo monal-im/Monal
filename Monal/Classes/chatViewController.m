@@ -3120,7 +3120,7 @@ enum msgSentState {
                 // a channel type muc has OMEMO encryption enabled, but channels don't support encryption
                 // --> warn user about this
                 DDLogWarn(@"Showing alert because omemo is suddenly impossible since group changed to channel: %@", self.contact);
-                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Group suddenly changed to public channel!", @"") message:NSLocalizedString(@"This contact suddenly changed from an encrypted private group to an unencrypted public channel! Please contact the administrator of that group/channel if you think this is wrong.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Group suddenly changed to public channel!", @"") message:NSLocalizedString(@"This chat suddenly changed from an encrypted private group to an unencrypted public channel! Please contact the administrator of that group/channel if you think this is wrong.", @"") preferredStyle:UIAlertControllerStyleAlert];
                 [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Keep encryption enabled", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     //don't change anything, just close the alert
                     [alert dismissViewControllerAnimated:YES completion:nil];

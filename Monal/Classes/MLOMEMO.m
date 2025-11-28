@@ -442,7 +442,7 @@ $$
         [[DataLayer sharedInstance] addContact:jid forAccount:self.account.accountID nickname:nil];
     }
     NSString* newMessageID = [[NSUUID UUID] UUIDString];
-    NSNumber* historyId = [[DataLayer sharedInstance] addMessageHistoryTo:jid forAccount:self.account.accountID withMessage:omemoMessage actuallyFrom:jid withId:newMessageID encrypted:NO messageType:kMessageTypeStatus mimeType:nil size:nil];
+    NSNumber* historyId = [[DataLayer sharedInstance] addMessageHistoryTo:jid forAccount:self.account.accountID withMessage:omemoMessage actuallyFrom:jid withOccupantId:nil andId:newMessageID encrypted:NO messageType:kMessageTypeStatus mimeType:nil size:nil];
 
     MLMessage* message = [MLMessage createMessageFromHistoryID:historyId];
     MLContact* contact = [MLContact createContactFromJid:jid andAccountID:self.account.accountID];

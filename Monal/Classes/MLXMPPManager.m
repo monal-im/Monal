@@ -701,7 +701,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                    forAccount:contact.accountID
                   withMessage:message
                  actuallyFrom:(contact.isMuc ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
-                       withId:msgid
+               withOccupantId:(contact.isMuc ? [[DataLayer sharedInstance] getOwnOccupantIdForMuc:contact.contactJid onAccountID:contact.accountID] : nil)
+                        andId:msgid
                     encrypted:encrypted
                   messageType:messageType
                      mimeType:uploadInfo[@"mimeType"]

@@ -8,8 +8,10 @@
 
 #import <monalxmpp/MLMessage.h>
 #import <monalxmpp/MLContact.h>
+#import <monalxmpp/MLChannelContact.h>
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/xmpp.h>
 #import "XMPPMessage.h"
 
@@ -17,7 +19,7 @@ static NSMutableDictionary* _singletonCache;
 
 @implementation MLMessage
 {
-    MLContact* _contact;
+    id<MLContactProtocol> _contact;
 }
 
 +(void) initialize
@@ -51,17 +53,19 @@ static NSMutableDictionary* _singletonCache;
 
     NSNumber* cacheKey = [dic objectForKey:@"message_history_id"];
     MLAssert(cacheKey != nil, @"A non-draft message can't have a nil historyID!");
+    MLMessage* message = nil;
     @synchronized(_singletonCache) {
         if(_singletonCache[cacheKey] != nil)
         {
             MLMessage* obj = ((WeakContainer*)_singletonCache[cacheKey]).obj;
+            DDLogDebug(@"Singleton cache for message filled: %@, entry: %@", cacheKey, obj);
             if(obj != nil)
                 return obj;
             else
                 [_singletonCache removeObjectForKey:cacheKey];
         }
 
-        MLMessage* message = [MLMessage new];
+        message = [MLMessage new];
         message.accountID = [dic objectForKey:@"account_id"];
 
         message.buddyName = [dic objectForKey:@"buddy_name"];
@@ -77,6 +81,7 @@ static NSMutableDictionary* _singletonCache;
         message.messageType = [dic objectForKey:@"messageType"];
         message.mucType = [dic objectForKey:@"muc_type"];
         message.participantJid = [dic objectForKey:@"participant_jid"];
+        message.occupantId = [dic objectForKey:@"occupant_id"];
 
         message.hasBeenDisplayed = [(NSNumber*)[dic objectForKey:@"displayed"] boolValue];
         message.hasBeenReceived = [(NSNumber*)[dic objectForKey:@"received"] boolValue];
@@ -96,10 +101,13 @@ static NSMutableDictionary* _singletonCache;
         message.filetransferSize = [dic objectForKey:@"filetransferSize"];
 
         message.retracted = [(NSNumber*)[dic objectForKey:@"retracted"] boolValue];
-
+        
         _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:message];
-        return message;
     }
+    //fill reactions *after* adding this message to our singleton cache to not create an endless loop
+    //(the reactions reference back to this message, but don't store a reference, so no retain cycle)
+    message.reactions = [[DataLayer sharedInstance] getReactionsForHistoryId:message.messageDBId];
+    return message;
 }
 
 +(BOOL) supportsSecureCoding
@@ -154,6 +162,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(void) dealloc
 {
+    DDLogDebug(@"Deallocating %@", self.messageDBId);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -166,12 +175,19 @@ static NSMutableDictionary* _singletonCache;
         return;         //ignore updates of other messages
     NSNumber* LMCReplaced = data[@"LMCReplaced"];
     MLAssert(LMCReplaced != nil, @"Message update notification without LMCReplaced object");
+    NSNumber* reactionsUpdate = data[@"reactionsUpdate"];
+    MLAssert(reactionsUpdate != nil, @"Message update notification without reactionsUpdate object");
     if(LMCReplaced.boolValue)
     {
         // Message correction
         NSString* correctedText = data[@"correctedText"];
         MLAssert(correctedText != nil, @"Message correction notification without the corrected text");
         self.messageText = correctedText;
+    }
+    else if(reactionsUpdate.boolValue)
+    {
+        MLAssert(data[@"reactions"] != nil, @"Reactions updates MUST contain a reactions dictionary!");
+        self.reactions = data[@"reactions"];
     }
     else
     {
@@ -281,18 +297,44 @@ static NSMutableDictionary* _singletonCache;
         return [MLContact createContactFromJid:self.buddyName andAccountID:self.accountID].contactDisplayName;
 }
 
--(MLContact*) contact
+-(xmpp* _Nullable) account
+{
+    return [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
+}
+
+-(id<MLContactProtocol>) contact
 {
     if(self->_contact != nil)
         return self->_contact;
-    return self->_contact = [MLContact createContactFromJid:self.buddyName andAccountID:self.accountID];
+    if(self.isMuc)
+    {
+        if([kMucTypeChannel isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:self.buddyName andAccount:self.accountID]])
+            return self->_contact = [MLChannelContact createChannelContactFromOccupantId:self.occupantId withNick:nilDefault(self.actualFrom, self.occupantId) inMuc:[MLContact createContactFromJid:self.buddyName andAccountID:self.accountID]];
+        else
+        {
+            if(self.inbound)
+                return self->_contact = [MLContact createContactFromJid:self.participantJid andAccountID:self.accountID];
+            else
+                return self->_contact = self.account.contact;
+        }
+    }
+    else
+    {
+        if(self.inbound)
+            return self->_contact = [MLContact createContactFromJid:self.buddyName andAccountID:self.accountID];
+        else
+            return self->_contact = self.account.contact;
+    }
 }
 
--(BOOL) isEqualToContact:(MLContact*) contact
+-(MLContact*) chatContact
 {
-    return contact != nil &&
-           [self.buddyName isEqualToString:contact.contactJid] &&
-           self.accountID.intValue == contact.accountID.intValue;
+    return [MLContact createContactFromJid:self.buddyName andAccountID:self.accountID];
+}
+
+-(BOOL) isEqualToContact:(id<MLContactProtocol>) contact
+{
+    return [self isEqual:contact];
 }
 
 -(BOOL) isEqualToMessage:(MLMessage*) message
@@ -314,10 +356,10 @@ static NSMutableDictionary* _singletonCache;
 {
     if(self == object)
         return YES;
-    if([object isKindOfClass:[MLContact class]])
-        return [self isEqualToContact:(MLContact*)object];
-    if([object isKindOfClass:[MLMessage class]])
+    else if([object isKindOfClass:[MLMessage class]])
         return [self isEqualToMessage:(MLMessage*)object];
+    else if([object conformsToProtocol:@protocol(MLContactProtocol)])
+        return [(id<MLContactProtocol>)object isEqualToMessage:self];
     return NO;
 }
 
@@ -331,16 +373,6 @@ static NSMutableDictionary* _singletonCache;
 -(NSString*) id
 {
     return [NSString stringWithFormat:@"%@|%@", self.accountID, self.messageDBId];
-}
-
--(NSString*) senderID
-{
-    if(self.isMuc && self.participantJid.length == 0)
-        return self.contactDisplayName;
-    else if(self.isMuc)
-        return self.participantJid;
-    else
-        return self.inbound ? self.contact.contactJid : self.contact.account.connectionProperties.identity.jid;
 }
 
 -(NSString*) description

@@ -73,12 +73,13 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, readonly) BOOL parseQueueFrozen;
 
 @property (nonatomic, strong) MLXMPPConnection* connectionProperties;
+@property (nonatomic, readonly) MLContact* contact;
 
 //reg
-@property (nonatomic, strong) NSString *regUser;
-@property (nonatomic, strong) NSString *regPass;
-@property (nonatomic, strong) NSString *regCode;
-@property (nonatomic, strong) NSDictionary *regHidden;
+@property (nonatomic, strong) NSString* regUser;
+@property (nonatomic, strong) NSString* regPass;
+@property (nonatomic, strong) NSString* regCode;
+@property (nonatomic, strong) NSDictionary* regHidden;
 
 // state attributes
 @property (nonatomic, strong) NSString* statusMessage;
@@ -132,6 +133,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId;
 -(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId withLMCId:(NSString* _Nullable) LMCId;
 -(void) sendChatState:(BOOL) isTyping toContact:(nonnull MLContact*) contact;
+-(void) sendReactions:(NSSet*) reactions forMessage:(MLMessage*) message;
 
 /**
  crafts a  ping and sends it

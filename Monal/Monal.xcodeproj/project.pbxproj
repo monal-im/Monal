@@ -198,8 +198,13 @@
 		84CAED6D2ECAC5E500F4FCBF /* XMPPIQ.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CF3EA81780D6B7002B7085 /* XMPPIQ.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84CAED6E2ECAC5F700F4FCBF /* XMPPMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 262D9EA817921E82009292B4 /* XMPPMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
+		84DED8562EE0774700401D3A /* MLChannelContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 84DED8552EE0774600401D3A /* MLChannelContact.m */; };
+		84DED8582EE0776400401D3A /* MLChannelContact.h in Headers */ = {isa = PBXBuildFile; fileRef = 84DED8572EE0776400401D3A /* MLChannelContact.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		84DED85A2EE0795200401D3A /* MLContactProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 84DED8592EE0795200401D3A /* MLContactProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 84E231F22C16A9CE00735FB7 /* SVGView */; };
 		84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
+		84E5AF192EE63FBA00FF1E4A /* MLReactionsEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 84E5AF182EE63FBA00FF1E4A /* MLReactionsEntry.m */; };
+		84E5AF1B2EE63FCF00FF1E4A /* MLReactionsEntry.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E5AF1A2EE63FCF00FF1E4A /* MLReactionsEntry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84F194D12C15197200F0A994 /* FrameUp in Frameworks */ = {isa = PBXBuildFile; productRef = 84F194D02C15197200F0A994 /* FrameUp */; };
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -643,6 +648,11 @@
 		84C6F6042D597FD10015575E /* SDPTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SDPTest.m; sourceTree = "<group>"; };
 		84C6F6062D597FF40015575E /* HandlerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HandlerTest.m; sourceTree = "<group>"; };
 		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
+		84DED8552EE0774600401D3A /* MLChannelContact.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChannelContact.m; sourceTree = "<group>"; };
+		84DED8572EE0776400401D3A /* MLChannelContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChannelContact.h; sourceTree = "<group>"; };
+		84DED8592EE0795200401D3A /* MLContactProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactProtocol.h; sourceTree = "<group>"; };
+		84E5AF182EE63FBA00FF1E4A /* MLReactionsEntry.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLReactionsEntry.m; sourceTree = "<group>"; };
+		84E5AF1A2EE63FCF00FF1E4A /* MLReactionsEntry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReactionsEntry.h; sourceTree = "<group>"; };
 		84F194C32C0FE70900F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Main.strings"; sourceTree = "<group>"; };
 		84F194C42C0FE74500F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Settings.strings"; sourceTree = "<group>"; };
 		84F194C52C0FE78B00F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/iosShare.strings"; sourceTree = "<group>"; };
@@ -1084,6 +1094,11 @@
 				26611025238F17B20030A4EE /* MLMessage.m */,
 				C1F5C7A72775DA000001F295 /* MLContactSoftwareVersionInfo.h */,
 				C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */,
+				84DED8552EE0774600401D3A /* MLChannelContact.m */,
+				84DED8572EE0776400401D3A /* MLChannelContact.h */,
+				84DED8592EE0795200401D3A /* MLContactProtocol.h */,
+				84E5AF182EE63FBA00FF1E4A /* MLReactionsEntry.m */,
+				84E5AF1A2EE63FCF00FF1E4A /* MLReactionsEntry.h */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -1544,6 +1559,7 @@
 				84CAED6D2ECAC5E500F4FCBF /* XMPPIQ.h in Headers */,
 				8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */,
 				C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */,
+				84E5AF1B2EE63FCF00FF1E4A /* MLReactionsEntry.h in Headers */,
 				340F0CA52D2425E1006224D0 /* MLLogFileManager.h in Headers */,
 				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
 				340F0CA42D2425D9006224D0 /* MLXMPPIdentity.h in Headers */,
@@ -1558,9 +1574,11 @@
 				3424B4E92D232BEB009F6503 /* xmpp.h in Headers */,
 				3424B4E82D232BE7009F6503 /* DataLayer.h in Headers */,
 				3424B4E72D232BE2009F6503 /* MLContact.h in Headers */,
+				84DED85A2EE0795200401D3A /* MLContactProtocol.h in Headers */,
 				3424B4ED2D232C07009F6503 /* MLVoIPProcessor.h in Headers */,
 				3424B4EC2D232BFF009F6503 /* MLImageManager.h in Headers */,
 				3424B4EB2D232BFA009F6503 /* MLXMPPManager.h in Headers */,
+				84DED8582EE0776400401D3A /* MLChannelContact.h in Headers */,
 				3424B4EA2D232BF5009F6503 /* MLSignalStore.h in Headers */,
 				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
 				3424B4EF2D232C14009F6503 /* HelperTools.h in Headers */,
@@ -2284,6 +2302,7 @@
 				541B6AB4262BC9040038B936 /* MLStream.m in Sources */,
 				84FC37552897521500634E3E /* snprintf.m in Sources */,
 				26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */,
+				84DED8562EE0774700401D3A /* MLChannelContact.m in Sources */,
 				26CC57B823A0876300ABB92A /* MLHTTPRequest.m in Sources */,
 				26CC57A223A086AA00ABB92A /* xmpp.m in Sources */,
 				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
@@ -2307,6 +2326,7 @@
 				26CC57B723A0876300ABB92A /* MLEncryptedPayload.m in Sources */,
 				26CC57B523A086CC00ABB92A /* XMPPMessage.m in Sources */,
 				26CC57B623A0876300ABB92A /* AESGcm.m in Sources */,
+				84E5AF192EE63FBA00FF1E4A /* MLReactionsEntry.m in Sources */,
 				5455BC3324EB776F0024D80F /* MLUDPLogger.m in Sources */,
 				541E4CC7254D370200FD7B28 /* MLPubSubProcessor.m in Sources */,
 				26CC57C723A0892100ABB92A /* MLContact.m in Sources */,

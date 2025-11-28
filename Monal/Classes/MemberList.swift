@@ -269,7 +269,7 @@ struct MemberList: View {
                         ownUserHasAffiliationToRemove(contact: contact)
                     }
 
-                    if !contact.isSelfChat {
+                    if !contact.isSelf {
                         HStack {
                             HStack {
                                 ContactEntry(contact:contact.obj, fallback:nicknames[contact]) {

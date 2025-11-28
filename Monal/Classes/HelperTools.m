@@ -2573,8 +2573,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
             @"urn:xmpp:eme:0",
             @"urn:xmpp:message-retract:1",
             @"urn:xmpp:message-correct:0",
-            
-            
+            @"urn:xmpp:reactions:0",
         ] mutableCopy];
         if([[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"])
             [featuresArray addObject:@"urn:xmpp:idle:1"];
@@ -3425,7 +3424,16 @@ a=%@\r\n", mid, candidate];
     [input close];
     
     return [NSURL fileURLWithPath:gzipPath];
-    
+}
+
++(NSSet*) createReactionsSetFromString:(NSString*) reactions
+{
+    //"parse" reactions (iterate over grapheme clusters as required in XEP-0444 Business Rules)
+    NSMutableSet* reactionsList = [NSMutableSet new];
+    [reactions enumerateSubstringsInRange:NSMakeRange(0, [reactions length]) options:NSStringEnumerationByComposedCharacterSequences usingBlock:^(NSString * _Nullable substring, NSRange substringRange __unused, NSRange enclosingRange __unused, BOOL * _Nonnull stop __unused) {
+        [reactionsList addObject:substring];
+    }];
+    return reactionsList;
 }
 
 @end

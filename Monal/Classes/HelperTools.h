@@ -216,6 +216,8 @@ void swizzle(Class c, SEL orig, SEL new);
 
 +(NSURL* _Nullable) compressFileAtPath:(NSString*) path withLevel:(NSInteger) level;
 
++(NSSet*) createReactionsSetFromString:(NSString*) reactions;
+
 @end
 
 NS_ASSUME_NONNULL_END

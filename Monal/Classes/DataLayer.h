@@ -223,6 +223,10 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSNumber* _Nullable) getRetractionHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from participantJid:(NSString* _Nullable) participantJid occupantId:(NSString* _Nullable) occupantId andAccount:(NSNumber*) accountID;
 -(NSNumber* _Nullable) getRetractionHistoryIDForModeratedStanzaId:(NSString*) stanzaId from:(NSString*) from andAccount:(NSNumber*) accountID;
 
+-(NSNumber* _Nullable) getReactionHistoryIDForMessageIdOrStanzaId:(NSString*) someId inChat:(MLContact*) contact;
+-(void) setReactions:(NSSet*) reactions fromJid:(NSString* _Nullable) jid orOccupantId:(NSString* _Nullable) occupantId forHistoryId:(NSNumber*) historyId withDate:(NSDate*) date andActualFrom:(NSString* _Nullable) actualFrom;
+-(NSArray<MLReactionsEntry*>*) getReactionsForHistoryId:(NSNumber*) historyId;
+
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID;
 -(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted historyBaseID:(NSNumber* _Nullable) historyBaseID;
 
@@ -239,7 +243,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSNumber*) accountID tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
--(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSNumber*) accountID withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
+-(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSNumber*) accountID withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withOccupantId:(NSString* _Nullable) occupantId andId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
 
 #pragma mark active contacts
 -(NSMutableArray<MLContact*>*) activeContactsWithPinned:(BOOL) pinned;

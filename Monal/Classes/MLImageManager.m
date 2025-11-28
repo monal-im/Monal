@@ -179,7 +179,7 @@
 {
     NSString* contactLetter;
 
-    if(contact.isSelfChat)
+    if(contact.isSelf)
     {
         xmpp* account = contact.account;
         contactLetter = [[[MLContact ownDisplayNameForAccount:account] substringToIndex:1] uppercaseString];

@@ -967,6 +967,35 @@
         [self updateDB:db withDataLayer:dataLayer toVersion:7.001 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN reached_mam_archive_top BOOL DEFAULT FALSE;"];
         }];
+        
+        // Reactions support (user will be <occupant-id> in channels and jid in groups/1:1 chats)
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.002 withBlock:^{
+            [db executeNonQuery:@"CREATE TABLE 'reactions' (\
+                'message_history_id' INTEGER NOT NULL, \
+                'user' VARCHAR(128) NULL DEFAULT NULL, \
+                'jid' VARCHAR(255) NULL DEFAULT NULL, \
+                'occupant_id' VARCHAR(128) NULL DEFAULT NULL, \
+                'muc_nick' VARCHAR(255) NULL DEFAULT NULL, \
+                'reactions' TEXT DEFAULT '', \
+                'timestamp' DATETIME NOT NULL, \
+                PRIMARY KEY('message_history_id','user'), \
+                FOREIGN KEY('message_history_id') REFERENCES 'message_history'('message_history_id') ON DELETE CASCADE \
+            );"];
+        }];
+        
+//         // Support for persisting occupant_id to nick mapping even if the occupant left the muc
+//         [self updateDB:db withDataLayer:dataLayer toVersion:7.003 withBlock:^{
+//             [db executeNonQuery:@"CREATE TABLE 'occupant_info' (\
+//                 'occupant_id' VARCHAR(128) NULL DEFAULT NULL, \
+//                 'nick' VARCHAR(255) NOT NULL, \
+//                 'account_id' INTEGER NOT NULL, \
+//                 'room' VARCHAR(255) NOT NULL, \
+//                 PRIMARY KEY('occupant_id'), \
+//                 FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+//                 FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+//             );"];
+//         }];
+
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

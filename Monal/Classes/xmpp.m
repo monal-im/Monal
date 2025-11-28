@@ -335,6 +335,11 @@ NSString* const kStanza = @"stanza";
     DDLogInfo(@"Done deallocating account %@ object %@", self.accountID, self);
 }
 
+-(MLContact*) contact
+{
+    return [MLContact createContactFromJid:self.connectionProperties.identity.jid andAccountID:self.accountID];
+}
+
 -(void) setCapsHash:(NSString* _Nonnull) hash
 {
     //check if the hash has changed and broadcast a new presence after updating the property
@@ -3548,7 +3553,7 @@ NSString* const kStanza = @"stanza";
         [[DataLayer sharedInstance] retractMessageHistory:msg.messageDBId];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:self userInfo:@{
             @"message": msg,
-            @"contact": msg.contact
+            @"contact": msg.chatContact
         }];
     }];
 }
@@ -3654,6 +3659,57 @@ NSString* const kStanza = @"stanza";
     else
         [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"active" andNamespace:@"http://jabber.org/protocol/chatstates"]];
     [self send:messageNode];
+}
+
+-(void) sendReactions:(NSSet*) reactions forMessage:(MLMessage*) message
+{
+    DDLogInfo(@"Sending reactions for message %@: %@", message, reactions);
+    XMPPMessage* messageNode = [[XMPPMessage alloc] initToContact:message.chatContact];
+    
+    NSMutableArray* reactionNodes = [NSMutableArray new];
+    for(NSString* reaction in reactions)
+        [reactionNodes addObject:[[MLXMLNode alloc] initWithElement:@"reaction" andData:reaction]];
+    
+    [messageNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reactions" andNamespace:@"urn:xmpp:reactions:0" withAttributes:@{
+        @"id": message.isMuc ? message.stanzaId : message.messageId,
+    } andChildren:reactionNodes andData:nil]];
+    
+    //set message type
+    if(message.isMuc)
+        [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
+    else
+        [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
+    
+    //for MAM
+    [messageNode setStoreHint];
+    
+    [self dispatchAsyncOnReceiveQueue: ^{
+        [self send:messageNode];
+        
+        //now add the sent reaction to our database, too
+        NSDate* reactionDate = [NSDate date];
+        NSString* jid = nil;
+        NSString* occupantId = nil;
+        NSString* actualFrom = nil;
+        if(message.isMuc && [kMucTypeChannel isEqualToString:message.mucType])
+        {
+            occupantId = [[DataLayer sharedInstance] getOwnOccupantIdForMuc:message.chatContact.contactJid onAccountID:message.chatContact.accountID];
+            actualFrom = [[DataLayer sharedInstance] ownNickNameforMuc:message.chatContact.contactJid forAccount:message.chatContact.accountID];
+        }
+        else
+            jid = self.connectionProperties.identity.jid;
+        [[DataLayer sharedInstance] setReactions:reactions fromJid:jid orOccupantId:occupantId forHistoryId:message.messageDBId withDate:reactionDate andActualFrom:actualFrom];
+        
+        DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", message.messageDBId);
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:self userInfo:@{
+            @"message": message,
+            @"showAlert": @NO,
+            @"contact": message.chatContact,
+            @"LMCReplaced": @NO,
+            @"reactionsUpdate": @YES,
+            @"reactions": [[DataLayer sharedInstance] getReactionsForHistoryId:message.messageDBId],
+        }];
+    }];
 }
 
 #pragma mark set connection attributes

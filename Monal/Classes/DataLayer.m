@@ -19,6 +19,7 @@
 #import <monalxmpp/DataLayerMigrations.h>
 #import <monalxmpp/MLContactSoftwareVersionInfo.h>
 #import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/MLReactionsEntry.h>
 
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;
@@ -1588,6 +1589,46 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(NSNumber* _Nullable) getReactionHistoryIDForMessageIdOrStanzaId:(NSString*) someId inChat:(MLContact*) contact
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT M.message_history_id FROM message_history AS M INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id \
+            WHERE M.account_id=? AND M.buddy_name=? AND ( \
+                (B.Muc=0 AND M.messageid=?) OR  \
+                (B.Muc=1 AND M.stanzaid=?) \
+            );"
+            andArguments:@[contact.accountID, contact.contactJid, someId, someId]];
+    }];
+}
+
+-(void) setReactions:(NSSet*) reactions fromJid:(NSString* _Nullable) jid orOccupantId:(NSString* _Nullable) occupantId forHistoryId:(NSNumber*) historyId withDate:(NSDate*) date andActualFrom:(NSString* _Nullable) actualFrom
+{
+    NSString* timestamp = [HelperTools generateDateTimeString:date];
+    //user is our primary key (together with message_history_id).
+    //It is either the occupant_id or the jid (in 1:1 chats or non-anon mucs lacking support for occupant_id)
+    NSString* user = occupantId;
+    if(user == nil)
+        user = jid;
+    NSString* reactionsString = [[reactions allObjects] componentsJoinedByString:@""];
+    MLAssert(user != nil, @"User for reaction should never be nil!");
+    return [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"INSERT INTO reactions (message_history_id, user, jid, occupant_id, reactions, timestamp, muc_nick) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET jid=?, occupant_id=?, reactions=?, timestamp=?, muc_nick=?;" andArguments:@[historyId, user, nilWrapper(jid), nilWrapper(occupantId), reactionsString, timestamp, nilWrapper(actualFrom), nilWrapper(jid), nilWrapper(occupantId), reactionsString, timestamp, nilWrapper(actualFrom)]];
+    }];
+}
+
+-(NSArray<MLReactionsEntry*>*) getReactionsForHistoryId:(NSNumber*) historyId
+{
+    NSArray* reactions = [self.db idReadTransaction:^{
+        return [self.db executeReader:@"SELECT R.*, M.account_id FROM reactions AS R \
+            INNER JOIN message_history AS M ON M.message_history_id = R.message_history_id \
+            WHERE R.message_history_id=? ;" andArguments:@[historyId]];
+    }];
+    NSMutableArray* retval = [NSMutableArray new];
+    for(NSDictionary* dict in reactions)
+        [retval addObject:[[MLReactionsEntry alloc] initWithDictionary:dict]];
+    return retval;
+}
+
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID
 {
     return [self.db idReadTransaction:^{
@@ -1799,7 +1840,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSNumber*) accountID withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString*) mimeType size:(NSNumber*) size
+-(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSNumber*) accountID withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withOccupantId:(NSString* _Nullable) occupantId andId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size
 {
     //Message_history going out, from is always the local user. always read and not sent
     NSArray* parts = [[[NSDate date] description] componentsSeparatedByString:@" "];
@@ -1810,13 +1851,13 @@ static NSDateFormatter* dbFormatter;
     NSArray* params;
     if(mimeType && size)
     {
-        query = @"INSERT INTO message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, displayMarkerWanted, filetransferMimeType, filetransferSize) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-        params = @[accountID, to, [NSNumber numberWithBool:NO], dateTime, message, actualfrom, [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES], mimeType, size];
+        query = @"INSERT INTO message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, occupant_id, unread, sent, messageid, messageType, encrypted, displayMarkerWanted, filetransferMimeType, filetransferSize) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        params = @[accountID, to, [NSNumber numberWithBool:NO], dateTime, message, actualfrom, nilWrapper(occupantId), [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES], mimeType, size];
     }
     else
     {
-        query = @"INSERT INTO message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, displayMarkerWanted) VALUES(?,?,?,?,?,?,?,?,?,?,?,?);";
-        params = @[accountID, to, [NSNumber numberWithBool:NO], dateTime, message, actualfrom, [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES]];
+        query = @"INSERT INTO message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, occupant_id, unread, sent, messageid, messageType, encrypted, displayMarkerWanted) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        params = @[accountID, to, [NSNumber numberWithBool:NO], dateTime, message, actualfrom, nilWrapper(occupantId), [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES]];
     }
     
     return [self.db idWriteTransaction:^{
@@ -1877,13 +1918,14 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray<MLContact*>*) activeContactsWithPinned:(BOOL) pinned
 {
-    return [self.db idReadTransaction:^{
+    NSArray* contacts = [self.db idReadTransaction:^{
         NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account ON a.account_id = account.account_id WHERE a.pinned=? AND account.enabled ORDER BY lastMessageTime DESC;";
-        NSMutableArray<MLContact*>* toReturn = [[NSMutableArray<MLContact*> alloc] init];
-        for(NSDictionary* dic in [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]])
-            [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountID:dic[@"account_id"]]];
-        return toReturn;
+        return [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]];
     }];
+    NSMutableArray<MLContact*>* toReturn = [[NSMutableArray<MLContact*> alloc] init];
+    for(NSDictionary* dic in contacts)
+        [toReturn addObject:[MLContact createContactFromJid:dic[@"buddy_name"] andAccountID:dic[@"account_id"]]];
+    return toReturn;
 }
 
 -(NSArray<MLContact*>*) activeContactDict

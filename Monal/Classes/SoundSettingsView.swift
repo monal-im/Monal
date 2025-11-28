@@ -49,7 +49,7 @@ struct SoundSettingsView: View {
         List {
             Section {
                 Toggle(isOn: $defaultsDB.soundsEnabled) {
-                    if contact.isSelfChat {
+                    if contact.isSelf {
                         Text("Play Sounds Globally")
                     } else {
                         Text("Play Sounds for this Contact")

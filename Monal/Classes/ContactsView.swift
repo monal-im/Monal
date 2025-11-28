@@ -30,7 +30,7 @@ struct ContactViewEntry: View {
 
     private var isDeletable: Bool {
         //we don't need the kvo observer here, because the selfchat status won't ever change for a given MLContact singleton
-        !contact.isSelfChat
+        !contact.isSelf
     }
 
     init (contact: MLContact, selectedContactForContactDetails: Binding<MLContact?>, dismissWithContact: @escaping (MLContact) -> ()) {
@@ -99,7 +99,7 @@ struct ContactsView: View {
     }
 
     private static func isNotSelfChatContact(contact: MLContact) -> Bool {
-        return !contact.isSelfChat && ContactsView.shouldDisplayContact(contact)
+        return !contact.isSelf && ContactsView.shouldDisplayContact(contact)
     }
     
     private static func shouldDisplayContact(_ contact: MLContact) -> Bool {

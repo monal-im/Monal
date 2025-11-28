@@ -143,7 +143,7 @@ struct ChatView: View {
 
         static func menuItems(for message: ExyteChat.Message) -> [MessageAction] {
             let mlMessage = (message as! ChatViewMessage).innerMessage.obj
-            let contact = mlMessage.contact
+            let contact = mlMessage.chatContact
             let account = contact.account!
             if mlMessage.retracted {
                 return [.delete]
@@ -388,11 +388,13 @@ struct ChatView: View {
                             MLNotificationQueue.current().post(
                                 name: Notification.Name(kMonalUpdatedMessageNotice),
                                 object: self.account,
-                                userInfo: ["message": mlMessage,
-                                           "contact": self.contact.obj,
-                                           "LMCReplaced": true,
-                                           "correctedText": editedText,
-                                          ]
+                                userInfo: [
+                                    "message": mlMessage,
+                                    "contact": self.contact.obj,
+                                    "LMCReplaced": true,
+                                    "correctedText": editedText,
+                                    "reactionsUpdate": false
+                                ]
                             )
                         }
                     })
@@ -452,6 +454,46 @@ struct ChatView: View {
                     )
             }
         }
+        /*
+        .swipeActions(edge: .leading, performsFirstActionWithFullSwipe: true, items: [
+            SwipeAction(action: { (message, defaultActionClosure) in
+                defaultActions(message, .reply)
+            }, activeFor: { !$0.user.isCurrentUser }, background: .blue) {
+                VStack {
+                    Image(systemName: "arrowshape.turn.up.left")
+                        .imageScale(.large)
+                        .foregroundStyle(.white)
+                        .frame(height: 30)
+                    Text("Reply")
+                        .foregroundStyle(.white)
+                        .font(.footnote)
+                }
+            }
+        ])
+        */
+        .onMessageReaction(didReactTo: { message, reaction in
+            let mlMessage = (message as! ChatViewMessage).innerMessage.obj
+            switch reaction.type {
+                case .emoji(let emoji):
+                    var currentReactions: Set<String> = []
+                    for reactionsInfo in mlMessage.reactions {
+                        if reactionsInfo.contact.isSelf {
+                            currentReactions = reactionsInfo.reactions
+                        }
+                    }
+                    if currentReactions.contains(emoji) {
+                        currentReactions.remove(emoji)
+                    } else {
+                        currentReactions.insert(emoji)
+                    }
+                    DDLogError("Sending reaction for: \(String(describing:mlMessage))")
+                    self.account.sendReactions(currentReactions, for:mlMessage)
+            }
+        }, canReactTo: { message in
+            //don't allow reactions in mucs without occupant-id support
+            let mlMessage = (message as! ChatViewMessage).innerMessage.obj
+            return !mlMessage.isMuc || self.account.mucProcessor.getRoomFeatures(forMuc:mlMessage.chatContact.contactJid).contains("urn:xmpp:occupant-id:0")
+        })
         .showNetworkConnectionProblem(false)
         .enableLoadMore(pageSize: 10) { message in
             await MainActor.run {
@@ -537,7 +579,7 @@ struct ChatView: View {
                 ProgressView()
                     .opacity(isLoadingMamHistory ? 1 : 0)
 
-                if !(contact.isMuc || contact.isSelfChat) {
+                if !(contact.isMuc || contact.isSelf) {
                     let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
                     let voipProcessor = (UIApplication.shared.delegate as! MonalAppDelegate).voipProcessor!
                     Button {
@@ -667,7 +709,7 @@ struct ChatView: View {
                 DDLogError("Notification without message");
                 return
             }
-            if message.isEqual(to: self.contact.obj) {
+            if message.isEqual(self.contact.obj) {
                 // Don't insert based on delay timestamp because that would make it possible to fake history entries.
                 // Insert new messages in batches to work around https://github.com/exyte/Chat/issues/223
                 queuedNewMessages.append(ChatViewMessage(message))
@@ -691,7 +733,7 @@ struct ChatView: View {
                 MLAssert(false, "Notification without contact")
                 return
             }
-            if contact.isEqual(to: self.contact.obj) {
+            if contact.isEqual(self.contact.obj) {
                 self.messages = []
             }
         }
@@ -730,11 +772,35 @@ class ChatViewMessage: ExyteChat.Message {
         }
         set {}
     }
+    override var createdAt: Date {
+        get {
+            return innerMessage.timestamp
+        }
+        set {}
+    }
+    override var reactions: [Reaction] {
+        get {
+            var retval: [Reaction] = []
+            let reactions: [MLReactionsEntry] = innerMessage.reactions
+            for reactionsInfo in reactions {
+                for reaction in reactionsInfo.reactions {
+                    retval.append(Reaction(
+                        user: ChatViewUser(reactionsInfo.contact as! NSObject&MLContactProtocol),
+                        createdAt: reactionsInfo.timestamp,
+                        type: .emoji(reaction),
+                        status: .sent
+                    ))
+                }
+            }
+            return retval
+        }
+        set {}
+    }
     init(_ message: MLMessage) {
         self.innerMessage = ObservableKVOWrapper(message)
-        let user = ExyteChat.User(id: message.senderID, name: message.contactDisplayName, avatarURL: nil, isCurrentUser: !message.inbound)
-        // We don't need to initialize the properties that we overrode with computed properties
-        super.init(id: message.id, user: user, createdAt: message.timestamp, text: "")
+        let user = ChatViewUser(message.contact as! NSObject&MLContactProtocol)
+        // We don't need to properly initialize the properties that we overrode with computed properties
+        super.init(id: message.id, user: user, createdAt: Date(), text: "")
 
         // Forward innerMessage changes as ChatViewMessage changes
         innerMessage.objectWillChange
@@ -745,59 +811,38 @@ class ChatViewMessage: ExyteChat.Message {
     }
 }
 
-// class ChatViewUser: ExyteChat.User {
-//     private enum CodingKeys: CodingKey {
-//         case contact
-//     }
-// 
-// //     @Published public var id: String
-// //     @Published public var name: String
-// //     @Published public var isCurrentUser: Bool
-//     
-//     @Published public var contact: MLContact
-//     
-//     init(_ contact: MLContact) {
-//         super.init(id: contact.id, name: "", avatarURL: nil, isCurrentUser: false)
-//         self.contact = contact
-//         //contact.$contactDisplayName.sink { print($0 as String) }
-//     }
-//     
-//     required public init(from decoder: Decoder) throws {
-//         //let container = try decoder.container(keyedBy: CodingKeys.self)
-//         //contact = try container.decode(String.self, forKey: .contact)
-//         try super.init(from: decoder)
-//     }
-//     
-// //     public func encode(to encoder: Encoder) throws {
-// //         var container = encoder.container(keyedBy: CodingKeys.self)
-// //         try container.encode(contact, forKey: .contact)
-// //         try super.encode(to: encoder)
-// //     }
-// }
-
-/*
-public extension ExyteChat.MessageView {
-    @ViewBuilder
-    override public var avatarView: some View {
-        Group {
-            if showAvatar, let image = (message.user as! ChatViewUser).image {
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .contentShape(Circle())
-                    .onTapGesture {
-                        tapAvatarClosure?(message.user, message.id)
-                    }
-            } else {
-                Color.clear.viewSize(avatarSize)
-            }
+class ChatViewUser: ExyteChat.User {
+    let innerContact: ObservableKVOWrapper<NSObject&MLContactProtocol>
+    private var subscriptions: Set<AnyCancellable> = Set()
+    override var name: String {
+        get {
+            return innerContact.contactDisplayName ?? ""
         }
-        .padding(.horizontal, ExyteChat.MessageView.horizontalAvatarPadding)
-//         .onSizeChange { size in
-//             self.avatarViewSize = size
-//         }
+        set {}
     }
-}*/
+    override var avatarData: Data? {
+        get {
+            return (innerContact.avatar as UIImage?)?.pngData()
+        }
+        set {}
+    }
+    init(_ contact: NSObject&MLContactProtocol) {
+        self.innerContact = ObservableKVOWrapper(contact)
+        // We don't need to initialize the properties that we overrode with computed properties
+        super.init(id: contact.id, name: "", isCurrentUser: contact.isSelf)
+
+        // Forward innerContact changes as ChatViewUser changes
+        innerContact.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &subscriptions)
+    }
+    //our parent class forces us to implement this, but it should never be called!
+    required init(from decoder: Decoder) throws {
+        unreachable("ChatViewUser should never be deserialized!")
+    }
+}
 
 struct MessageView: View {
     @StateObject var message: ChatViewMessage

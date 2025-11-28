@@ -535,6 +535,62 @@ static NSMutableDictionary* _typingNotifications;
         else
             DDLogWarn(@"Got faked tombstone without server supporting them, ignoring it!");
     }
+    //handle incoming reactions
+    else if([messageNode check:@"{urn:xmpp:reactions:0}reactions"])
+    {
+        NSString* reactionId = [messageNode findFirst:@"{urn:xmpp:reactions:0}reactions@id"];
+        NSSet* reactions = [NSSet setWithArray:[messageNode find:@"{urn:xmpp:reactions:0}reactions<id=%@>/reaction#", reactionId]];
+        
+        //we want to either use the jid OR the occupant-id, but never both (even if we are a channel admin)
+        NSString* jidToUse = nil;
+        NSString* occupantIdToUse = nil;
+        NSString* actualFromToUse = nil;
+        if(possiblyUnknownContact.isMuc)
+        {
+            if([kMucTypeChannel isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:messageNode.fromUser andAccount:account.accountID]])
+            {
+                occupantIdToUse = occupantId;
+                actualFromToUse = actualFrom;
+            }
+            else
+                jidToUse = participantJid;
+        }
+        else
+            jidToUse = messageNode.fromUser;
+        
+        //if occupant-id isn't supported, simply ignore the reaction (should only matter for mucs)
+        if(jidToUse == nil && occupantIdToUse == nil)
+            DDLogWarn(@"Ignoring incoming reaction: neither participantJid nor occupant-id provided!");
+        else if(reactionId == nil)
+            DDLogError(@"Received reaction without id attribute, implementation error in sender!");
+        else if([messageNode check:@"body#"] || decrypted)
+            DDLogWarn(@"Ignoring reaction with fallback body! The fallback body will be handled like a normal message.");
+        else
+        {
+            DDLogDebug(@"Searching for history ID of messageIdOrStanzaId=%@, inChat=%@", reactionId, possiblyUnknownContact);
+            NSNumber* historyId = [[DataLayer sharedInstance] getReactionHistoryIDForMessageIdOrStanzaId:reactionId inChat:possiblyUnknownContact];
+            if(historyId != nil)
+            {
+                DDLogInfo(@"Found history ID '%@' for reactions '%@' from '%@' in chat %@", historyId, reactions, messageNode.fromUser, possiblyUnknownContact);
+                NSDate* reactionDate = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
+                if(reactionDate == nil)
+                    reactionDate = [NSDate date];
+                [[DataLayer sharedInstance] setReactions:reactions fromJid:jidToUse orOccupantId:occupantIdToUse forHistoryId:historyId withDate:reactionDate andActualFrom:(possiblyUnknownContact.isMuc ? actualFrom : nil)];
+                
+                DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", historyId);
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{
+                    @"message": [MLMessage createMessageFromHistoryID:historyId],
+                    @"showAlert": @NO,
+                    @"contact": possiblyUnknownContact,
+                    @"LMCReplaced": @NO,
+                    @"reactionsUpdate": @YES,
+                    @"reactions": [[DataLayer sharedInstance] getReactionsForHistoryId:historyId],
+                }];
+            }
+            else
+                DDLogWarn(@"Could not find history ID for reactions '%@' from '%@' in chat %@", reactions, messageNode.fromUser, possiblyUnknownContact); 
+        }
+    }
     //ignore encrypted body messages coming from our own device id (most probably a muc reflection)
     else if(([messageNode check:@"body#"] || decrypted) && !sentByOwnOmemoDevice)
     {
@@ -693,7 +749,7 @@ static NSMutableDictionary* _typingNotifications;
                 
                 [[DataLayer sharedInstance] addActiveBuddies:buddyName forAccount:account.accountID];
                 
-                if (LMCReplaced)
+                if(LMCReplaced)
                 {
                     DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", historyId);
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{
@@ -702,6 +758,7 @@ static NSMutableDictionary* _typingNotifications;
                         @"contact": possiblyUnknownContact,
                         @"LMCReplaced": @YES,
                         @"correctedText": body,
+                        @"reactionsUpdate": @NO,
                     }];
                 }
                 else
@@ -736,6 +793,7 @@ static NSMutableDictionary* _typingNotifications;
                     @"contact": possiblyUnknownContact,
                     @"LMCReplaced": @NO,
                     @"stanzaId": stanzaid,
+                    @"reactionsUpdate": @NO,
                 }];
         }
     }

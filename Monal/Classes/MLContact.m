@@ -7,6 +7,7 @@
 //
 
 #import <monalxmpp/MLContact.h>
+#import <monalxmpp/MLChannelContact.h>
 #import <monalxmpp/MLMessage.h>
 #import <monalxmpp/HelperTools.h>
 #import <monalxmpp/DataLayer.h>
@@ -16,8 +17,8 @@
 #import <monalxmpp/MLNotificationQueue.h>
 #import <monalxmpp/MLImageManager.h>
 #import <monalxmpp/MLVoIPProcessor.h>
-#import "MonalAppDelegate.h"
 #import <monalxmpp/MLMucProcessor.h>
+#import "MonalAppDelegate.h"
 
 @import Intents;
 
@@ -41,7 +42,7 @@ static NSMutableDictionary* _singletonCache;
     monal_void_block_t _cancelFullNameChange;
     UIImage* _avatar;
 }
-@property (nonatomic, assign) BOOL isSelfChat;
+@property (nonatomic, assign) BOOL isSelf;
 @property (nonatomic, assign) BOOL isInRoster;
 @property (nonatomic, assign) BOOL isSubscribedTo;
 @property (nonatomic, assign) BOOL isSubscribedFrom;
@@ -367,7 +368,7 @@ static NSMutableDictionary* _singletonCache;
 {
     //DDLogVerbose(@"Calculating contact display name...");
     NSString* displayName;
-    if(!self.isSelfChat)
+    if(!self.isSelf)
     {
         if(fallbackName == nil)
         {
@@ -515,7 +516,7 @@ static NSMutableDictionary* _singletonCache;
     return [[MLImageManager sharedInstance] hasIconForContact:self];
 }
 
--(BOOL) isSelfChat
+-(BOOL) isSelf
 {
     xmpp* account = self.account;
     return [self.contactJid isEqualToString:account.connectionProperties.identity.jid];
@@ -802,18 +803,25 @@ static NSMutableDictionary* _singletonCache;
            self.accountID.intValue == message.accountID.intValue;
 }
 
--(BOOL) isEqualToContact:(MLContact*) contact
+-(BOOL) isEqualToContact:(id<MLContactProtocol>) contact
 {
-    return contact != nil &&
-           [self.contactJid isEqualToString:contact.contactJid] &&
-           self.accountID.intValue == contact.accountID.intValue;
+    if(contact == nil)
+        return NO;
+    else if([contact isKindOfClass:[MLContact class]])
+        return [self.contactJid isEqualToString:((MLContact*)contact).contactJid] &&
+            self.accountID.intValue == ((MLContact*)contact).accountID.intValue;
+    else if([contact isKindOfClass:[MLChannelContact class]])
+        return [self.contactJid isEqualToString:((MLChannelContact*)contact).mucContact.contactJid] &&
+            self.accountID.intValue == ((MLChannelContact*)contact).mucContact.accountID.intValue;
+    else
+        MLAssert(NO, @"Can not check equality for unknown MLContactProtocol object", (@{@"self": self, @"contact": contact}));
 }
 
 -(BOOL) isEqual:(id _Nullable) object
 {
-    if(object == nil || self == object)
+    if(self == object)
         return YES;
-    else if([object isKindOfClass:[MLContact class]])
+    else if([object conformsToProtocol:@protocol(MLContactProtocol)])
         return [self isEqualToContact:(MLContact*)object];
     else if([object isKindOfClass:[MLMessage class]])
         return [self isEqualToMessage:(MLMessage*)object];

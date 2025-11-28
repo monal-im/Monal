@@ -93,7 +93,7 @@ struct ContactDetails: View {
         Form {
             Section {
                 VStack(spacing: 20) {
-                    if !contact.isSelfChat {
+                    if !contact.isSelf {
                         Image(uiImage: contact.avatar)
                             .resizable()
                             .scaledToFit()
@@ -180,7 +180,7 @@ struct ContactDetails: View {
                     .buttonStyle(.borderless)
                     
 //                     //TODO: wait for account edit to become swiftui
-//                     if contact.isSelfChat {
+//                     if contact.isSelf {
 //                         Button {
 //                             //TODO: open account edit
 //                         } label: {
@@ -192,11 +192,11 @@ struct ContactDetails: View {
                     
                     
                     //only show account jid if more than one is configured
-                    if MLXMPPManager.sharedInstance().connectedXMPP.count > 1 && !contact.isSelfChat {
+                    if MLXMPPManager.sharedInstance().connectedXMPP.count > 1 && !contact.isSelf {
                         Text("Account: \(account.connectionProperties.identity.jid)")
                     }
                     
-                    if !contact.isSelfChat && !contact.isMuc {
+                    if !contact.isSelf && !contact.isMuc {
                         if let lastInteractionTime = contact.lastInteractionTime as Date? {
                             if lastInteractionTime.timeIntervalSince1970 > 0 {
                                 Text(String(format: NSLocalizedString("Last seen: %@", comment: ""),
@@ -260,7 +260,7 @@ struct ContactDetails: View {
             
             // info/nondestructive buttons
             Section {
-                if !contact.isSelfChat {
+                if !contact.isSelf {
                     Button {
                         if contact.isMuc {
                             if !contact.isMuted && !contact.isMentionOnly {
@@ -358,7 +358,7 @@ struct ContactDetails: View {
                     })
                     .accessibilityLabel(contact.obj.mucType == kMucTypeGroup ? Text("Group name") : Text("Channel name"))
                     .addClearButton(isEditing: isEditingNickname, text: $contact.fullNameView)
-                } else if !contact.isMuc && !contact.isSelfChat {
+                } else if !contact.isMuc && !contact.isSelf {
                     TextField(NSLocalizedString("Rename Contact", comment: "placeholder text in contact details"), text: $contact.nickNameView, onEditingChanged: {
                         isEditingNickname = $0
                     })
@@ -375,7 +375,7 @@ struct ContactDetails: View {
                 }
                 
 #if !DISABLE_OMEMO
-                if !HelperTools.isContactBlacklistedForEncryption(contact.obj) && !contact.isSelfChat {
+                if !HelperTools.isContactBlacklistedForEncryption(contact.obj) && !contact.isSelf {
                     if !contact.isMuc || contact.mucType == kMucTypeGroup {
                         NavigationLink(destination: LazyClosureView(OmemoKeysView(omemoKeys: OmemoKeysForChat(viewContact: contact)))) {
                             Text("Encryption Keys")
@@ -384,7 +384,7 @@ struct ContactDetails: View {
                 }
 #endif
                 
-                if contactDetailsDefaultsDB.showAdvancedUI && !contact.isMuc && !contact.isSelfChat {
+                if contactDetailsDefaultsDB.showAdvancedUI && !contact.isMuc && !contact.isSelf {
                     NavigationLink(destination: LazyClosureView(ContactResources(contact: contact))) {
                         Text("Resources")
                     }
@@ -428,7 +428,7 @@ struct ContactDetails: View {
             .listStyle(.plain)
 
             Section { // the destructive section...
-                if !contact.isSelfChat {
+                if !contact.isSelf {
                     Button(action: {
                         if !contact.isBlocked {
                             showingBlockContactConfirmation = true

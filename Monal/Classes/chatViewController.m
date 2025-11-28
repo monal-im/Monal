@@ -250,7 +250,7 @@ enum msgSentState {
         //this does not matter if we aren't already in the main thread, hence the async dispatch
         [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
             //these contact types can not be called
-            if(self.contact.isMuc || self.contact.isSelfChat)
+            if(self.contact.isMuc || self.contact.isSelf)
             {
                 self.callButton = nil;
                 
@@ -1626,7 +1626,7 @@ enum msgSentState {
         return nil;
     }
 
-    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountID withMessage:message actuallyFrom:(self.contact.isMuc ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.contact.isEncrypted messageType:messageType mimeType:mimeType size:size];
+    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountID withMessage:message actuallyFrom:(self.contact.isMuc ? self.contact.accountNickInGroup : self.jid) withOccupantId:(self.contact.isMuc ? [[DataLayer sharedInstance] getOwnOccupantIdForMuc:self.contact.contactJid onAccountID:self.contact.accountID] : nil) andId:messageId encrypted:self.contact.isEncrypted messageType:messageType mimeType:mimeType size:size];
     if(messageDBId != nil)
     {
         DDLogVerbose(@"added message");

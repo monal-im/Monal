@@ -17,6 +17,7 @@
 #import <monalxmpp/MLNotificationQueue.h>
 #import <monalxmpp/MLContactSoftwareVersionInfo.h>
 #import <monalxmpp/MLOMEMO.h>
+#import <monalxmpp/MLContact.h>
 #import "MLMessageProcessor.h"
 
 @import SAMKeychain;
@@ -36,7 +37,7 @@
     if(!(
         //we have to check for .isMuc because mucs always set .isSubscribedFrom to YES
         (!contact.isMuc && contact.isSubscribedFrom) ||
-        contact.isSelfChat ||
+        contact.isSelf ||
         [account.connectionProperties.identity.domain isEqualToString:iqNode.fromUser] ||
         (contact.isMuc && [kMucTypeGroup isEqualToString:contact.mucType])
     ))
@@ -935,13 +936,13 @@ $$class_handler(handleModerationResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iq
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
         @"message": msg,
         @"historyId": msg.messageDBId,
-        @"contact": msg.contact,
+        @"contact": msg.chatContact,
     }];
     
     //update unread count in active chats list
-    [msg.contact updateUnreadCount];
+    [msg.chatContact updateUnreadCount];
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-        @"contact": msg.contact,
+        @"contact": msg.chatContact,
     }];
 $$
 

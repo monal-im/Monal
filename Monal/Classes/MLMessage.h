@@ -10,7 +10,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol MLContactProtocol;
+@class xmpp;
 @class MLContact;
+@class MLReactionsEntry;
 
 /**
  message object intended to be passed around and eventually used to render
@@ -31,11 +34,6 @@ NS_ASSUME_NONNULL_BEGIN
   jid of the contact that this msg corresponds to
  */
 @property (nonatomic, copy) NSString* buddyName;
-
-/**
-  Unique identifier of the message sender (even in MUCs)
- */
-@property (nonatomic, readonly) NSString* senderID;
 
 /**
   indicating if the message was send from buddyName
@@ -67,11 +65,14 @@ The of the message in the DB , should be int
 @property (nonatomic, copy) NSString* messageType;
 @property (nonatomic, copy) NSString* mucType;
 @property (nonatomic, copy) NSString* _Nullable participantJid;
+@property (nonatomic, copy) NSString* _Nullable occupantId;
 
 @property (nonatomic, copy) NSString* filetransferMimeType;
 @property (nonatomic, copy) NSNumber* filetransferSize;
 
 @property (nonatomic, copy) NSString* messageText;
+
+@property (nonatomic, copy) NSArray<MLReactionsEntry*>* reactions;
 
 @property (nonatomic, assign) BOOL retracted;
 
@@ -126,9 +127,11 @@ The of the message in the DB , should be int
  */
 +(MLMessage*) messageFromDictionary:(NSDictionary*) dic;
 
-@property (nonatomic, readonly) MLContact* contact;
+@property (nonatomic, readonly) xmpp* _Nullable account;
+@property (nonatomic, readonly) id<MLContactProtocol> contact;
+@property (nonatomic, readonly) MLContact* chatContact;
 
--(BOOL) isEqualToContact:(MLContact*) contact;
+-(BOOL) isEqualToContact:(id<MLContactProtocol>) contact;
 -(BOOL) isEqualToMessage:(MLMessage*) message;
 -(BOOL) isEqual:(id _Nullable) object;
 

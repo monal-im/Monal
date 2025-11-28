@@ -15,6 +15,9 @@ FOUNDATION_EXPORT double monalxmppVersionNumber;
 FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 
 #import <monalxmpp/MLContact.h>
+#import <monalxmpp/MLChannelContact.h>
+#import <monalxmpp/MLMessage.h>
+#import <monalxmpp/MLReactionsEntry.h>
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/xmpp.h>
 #import <monalxmpp/MLOMEMO.h>

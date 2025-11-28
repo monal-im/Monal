@@ -9,8 +9,10 @@
 #import <monalxmpp/MLConstants.h>
 #import "MLBasePaser.h"
 
+// #define DebugParser(...)    NSLog(__VA_ARGS__)
 // #define DebugParser(...)    DDLogDebug(__VA_ARGS__)
 #define DebugParser(...)
+
 @interface MLXMLNode()
 @property (atomic, readwrite) MLXMLNode* parent;
 -(MLXMLNode*) addChildNodeWithoutCopy:(MLXMLNode*) child;

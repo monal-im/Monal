@@ -3414,6 +3414,7 @@ a=%@\r\n", mid, candidate];
         {
             DDLogError(@"Failed to write gzip data to output file: %@", gzipPath);
             gzclose(gzOutput);
+            fclose(outputFile);
             [input close];
             return nil;
         }

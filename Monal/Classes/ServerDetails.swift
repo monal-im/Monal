@@ -159,7 +159,7 @@ struct ServerDetails: View {
     }
 
     private func getServerContactAddressesEntryData(connection: MLXMPPConnection) -> [EntryData] {
-        let contactAddresses = connection.serverContactAddresses as! [String: [String]]
+        let contactAddresses = connection.serverContactAddresses as? [String: [String]] ?? [:]
         guard contactAddresses.count > 0 else {
             return [
                 EntryData(
@@ -203,7 +203,7 @@ struct ServerDetails: View {
         return result
     }
     private func getMUCEntryData(connection: MLXMPPConnection) -> [EntryData] {
-        let conferenceServers = connection.conferenceServerIdentities as! [[String: String]]
+        let conferenceServers = connection.conferenceServerIdentities as? [[String: String]] ?? []
         guard conferenceServers.count > 0 else {
             return [
                 EntryData(
@@ -230,7 +230,7 @@ struct ServerDetails: View {
     private func getStunTurnEntryData(connection: MLXMPPConnection) -> [EntryData] {
         var result: [EntryData] = []
 
-        let stunTurnServers = connection.discoveredStunTurnServers as! [[String: String]]
+        let stunTurnServers = connection.discoveredStunTurnServers as? [[String: String]] ?? []
         for service in stunTurnServers {
             var status = Status.normal
             switch(service["type"]) {
@@ -274,11 +274,11 @@ struct ServerDetails: View {
 
         var result: [EntryData] = []
         var foundCurrentConn: Bool = false
-        for srvEntry in (xmppAccount.discoveredServersList as! [[String: Any]]) {
-            let hostname = srvEntry["server"] as! String
-            let port = srvEntry["port"] as! NSNumber
-            let isSecure = srvEntry["isSecure"] as! Bool
-            let prio = srvEntry["priority"] as! NSNumber
+        for srvEntry in (xmppAccount.discoveredServersList as? [[String: Any]] ?? []) {
+            let hostname = srvEntry["server"] as? String ?? ""
+            let port = srvEntry["port"] as? NSNumber ?? 5222
+            let isSecure = srvEntry["isSecure"] as? Bool ?? false
+            let prio = srvEntry["priority"] as? NSNumber ?? 0
 
             var entryStatus = Status.normal
 
@@ -333,9 +333,9 @@ struct ServerDetails: View {
         }
 
         var result: [EntryData] = []
-        let saslMethods = connection.saslMethods as! [String: Bool]
+        let saslMethods = connection.saslMethods as? [String: Bool] ?? [:]
         for (method, used) in saslMethods.sortedByKey() {
-            let supported = (SCRAM.supportedMechanisms(includingChannelBinding: true) as! [String]).contains(method)
+            let supported = (SCRAM.supportedMechanisms(includingChannelBinding: true) as? [String] ?? []).contains(method)
             var description: String
             switch method {
                 case "PLAIN":
@@ -372,8 +372,8 @@ struct ServerDetails: View {
         }
 
         var result: [EntryData] = []
-        let channelBindingTypes = connection.channelBindingTypes as! [String: Bool]
-        let supportedChannelBindingTypes = xmppAccount.supportedChannelBindingTypes as! [String]
+        let channelBindingTypes = connection.channelBindingTypes as? [String: Bool] ?? [:]
+        let supportedChannelBindingTypes = xmppAccount.supportedChannelBindingTypes as? [String] ?? []
         for (type, used) in channelBindingTypes.sortedByKey() {
             let supported = supportedChannelBindingTypes.contains(type)
             var description: String

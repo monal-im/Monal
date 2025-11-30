@@ -227,8 +227,8 @@ static NSRegularExpression* dataFormQueryRegex;
     //parse query
     NSMutableDictionary* parsedQuery = [NSMutableDictionary new];
     NSArray* matches = [dataFormQueryRegex matchesInString:query options:0 range:NSMakeRange(0, [query length])];
-    if(![matches count])
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Could not parse data form query!" userInfo:@{
+    if([matches count] == 0)
+        @throw [XMLQueryBrokenException exceptionWithName:@"DataFormSyntaxErrorException" reason:@"Could not parse data form query!" userInfo:@{
             @"node": self,
             @"query": query
         }];

@@ -2617,7 +2617,7 @@ NSString* const kStanza = @"stanza";
             
             if(message != nil)
             {
-                DDLogError(@"SCRAM says this server-first message was wrong!");
+                DDLogError(@"SCRAM says this server-first message was wrong: %@", message);
                 
                 //clear pipeline cache to make sure we have a fresh restart next time
                 xmppPipeliningState oldPipeliningState = _pipeliningState;
@@ -3336,7 +3336,7 @@ NSString* const kStanza = @"stanza";
     
     if(message != nil)
     {
-        DDLogError(@"SCRAM says this server-final message was wrong!");
+        DDLogError(@"SCRAM says this server-final message was wrong: %@", message);
         
         //clear pipeline cache to make sure we have a fresh restart next time
         _pipeliningState = kPipelinedNothing;

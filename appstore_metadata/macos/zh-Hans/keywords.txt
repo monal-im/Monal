@@ -1,0 +1,1 @@
+xmpp, jabber, 聊天, 即时通讯, 通讯, ejabberd, prosody, OMEMO

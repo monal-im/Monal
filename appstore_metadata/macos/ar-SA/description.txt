@@ -1,0 +1,20 @@
+لم يكن هناك وقت أفضل من الآن للانضمام إلى XMPP، شبكة دردشة عامة حرة لا يتحكم أو يمتلكها أحد. Monal وسيلة سريعة وسهلة للتعامل مع XMPP. ما عليك سوى تنزيل التطبيق، وتسجيل الدخول أو التسجيل، وستكون جاهزًا للدردشة في غضون دقائق. يبدو ويعمل بنفس الطريقة التي تعمل بها التطبيقات الأخرى، لذا لا داعي لـ "تعلم XMPP" أو حتى الاهتمام بما هو عليه.
+
+الميزات:
+- مفتوح المصدر
+- بلا اعلانات! يركز على الخصوصية. بلا برمجيات تتبع.
+- لا يقرأ اي بيانات شخصية.
+- من خلال الاتصال المباشر بخادمك، لن يتم إرسال كلمة مرورك وجميع المعلومات الأخرى إلى جهة خارجية أبدًا.
+- تشفير المحادثة بـ OMEMO.
+- يعمل مع خوادم XMPP الخاصة بالشركات التي تتطلب VPN.
+- المحادثة المتعددة مدعومة للمجموعات Multi user chat (MUC).
+- مكالمات صوتية/فيديو.
+
+Implements certain XMPP extensions intended to improve mobile communication:
+- XEP-0357: Push Notifications
+- XEP-0280: Message Carbons keep messages in synch between clients
+- XEP-0198: Stream Management to quickly reconnect
+- XEP-0199: XMPP Ping to maintain connections
+- XEP-0313: Message Archive Management to download chat history
+- XEP-0352: Client State Indication for dramatic reduction on power use
+- XEP-0363: HTTP File Upload to send images in conversations

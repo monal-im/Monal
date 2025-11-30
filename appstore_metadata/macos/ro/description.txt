@@ -1,0 +1,20 @@
+Nu a existat niciodată un moment mai bun pentru a utiliza XMPP, o rețea publică gratuită de chat pe care nimeni nu o controlează și nu o deține. Monal este un mod rapid și prietenos de a utiliza XMPP. Trebuie doar să descărcați aplicația, să vă autentificați sau să vă înregistrați și sunteți gata de discuții în câteva minute. Arată și funcționează la fel ca alte aplicații, deci nu este nevoie să "învățați XMPP" sau chiar să vă pese ce este.
+
+Caracteristici notabile:
+- Sursă deschisă
+- Fără reclame! Accent puternic pe confidențialitate. Nu transmite date altora și nu vă analizează acțiunile
+- Nu citește nicio informație personală
+- Cu o conexiune directă la serverul dvs., parola dvs. și toate celelalte informații nu sunt niciodată trimise unei terțe părți
+- Discuții criptate cu OMEMO
+- Va funcționa cu servere XMPP corporatiste care necesită VPN
+- Discuții de grup MUC
+- Apeluri audio/video
+
+Implementează anumite extensii XMPP menite să îmbunătățească comunicarea mobilă.
+- XEP-0357: Notificări push
+- XEP-0280: Message Carbons menține mesajele sincronizate între clienți
+- XEP-0198: Stream Management pentru reconectarea rapidă
+- XEP-0199: Ping XMPP pentru menținerea conexiunilor
+- XEP-0313: Message Archive Management pentru a descărca istoricul conversațiilor
+- XEP-0352: Client State Indication pentru reducerea drastică a consumului de energie
+- XEP-0363: HTTP File Upload pentru a trimite imagini în conversații

@@ -38,7 +38,7 @@ static NSMutableDictionary* _singletonCache;
 +(MLMessage*) messageFromDictionary:(NSDictionary*) dic
 {
     // Draft messages don't have a historyID and shouldn't be cached
-    if ([[dic objectForKey:@"messageType"] isEqualToString:kMessageTypeMessageDraft])
+    if([[dic objectForKey:@"messageType"] isEqualToString:kMessageTypeMessageDraft])
     {
         MLMessage* message = [MLMessage new];
         // Fill only the properties useful for a draft message
@@ -109,64 +109,33 @@ static NSMutableDictionary* _singletonCache;
 
 -(void) encodeWithCoder:(NSCoder*) coder
 {
-    [coder encodeObject:self.accountID forKey:@"accountID"];
-    [coder encodeObject:self.buddyName forKey:@"buddyName"];
-    [coder encodeBool:self.inbound forKey:@"inbound"];
-    [coder encodeObject:self.actualFrom forKey:@"actualFrom"];
+    //only encode things needed for draft messages (those are NOT singletons)
+    //and the id used for the singleton (the message db id)
     [coder encodeObject:self.messageText forKey:@"messageText"];
-    [coder encodeBool:self.isMuc forKey:@"isMuc"];
-    [coder encodeObject:self.messageId forKey:@"messageId"];
-    [coder encodeObject:self.stanzaId forKey:@"stanzaId"];
     [coder encodeObject:self.messageDBId forKey:@"messageDBId"];
     [coder encodeObject:self.timestamp forKey:@"timestamp"];
     [coder encodeObject:self.messageType forKey:@"messageType"];
-    [coder encodeObject:self.mucType forKey:@"mucType"];
-    [coder encodeObject:self.participantJid forKey:@"participantJid"];
-    [coder encodeBool:self.hasBeenDisplayed forKey:@"hasBeenDisplayed"];
-    [coder encodeBool:self.hasBeenReceived forKey:@"hasBeenReceived"];
-    [coder encodeBool:self.hasBeenSent forKey:@"hasBeenSent"];
-    [coder encodeBool:self.encrypted forKey:@"encrypted"];
-    [coder encodeBool:self.unread forKey:@"unread"];
-    [coder encodeBool:self.displayMarkerWanted forKey:@"displayMarkerWanted"];
-    [coder encodeObject:self.previewText forKey:@"previewText"];
-    [coder encodeObject:self.previewImage forKey:@"previewImage"];
-    [coder encodeObject:self.errorType forKey:@"errorType"];
-    [coder encodeObject:self.errorReason forKey:@"errorReason"];
-    [coder encodeObject:self.filetransferMimeType forKey:@"filetransferMimeType"];
-    [coder encodeObject:self.filetransferSize forKey:@"filetransferSize"];
-    [coder encodeBool:self.retracted forKey:@"retracted"];
 }
 
 -(instancetype) initWithCoder:(NSCoder*) coder
 {
+    //decode everything needed for message drafts and the singleton id.
+    //if this is a singleton, this object will be replaced by the real
+    //singleton one in awakeAfterUsingCoder
     self = [self init];
-    self.accountID = [coder decodeObjectForKey:@"accountID"];
-    self.buddyName = [coder decodeObjectForKey:@"buddyName"];
-    self.inbound = [coder decodeBoolForKey:@"inbound"];
-    self.actualFrom = [coder decodeObjectForKey:@"actualFrom"];
     self.messageText = [coder decodeObjectForKey:@"messageText"];
-    self.isMuc = [coder decodeBoolForKey:@"isMuc"];
-    self.messageId = [coder decodeObjectForKey:@"messageId"];
-    self.stanzaId = [coder decodeObjectForKey:@"stanzaId"];
     self.messageDBId = [coder decodeObjectForKey:@"messageDBId"];
     self.timestamp = [coder decodeObjectForKey:@"timestamp"];
     self.messageType = [coder decodeObjectForKey:@"messageType"];
-    self.mucType = [coder decodeObjectForKey:@"mucType"];
-    self.participantJid = [coder decodeObjectForKey:@"participantJid"];
-    self.hasBeenDisplayed = [coder decodeBoolForKey:@"hasBeenDisplayed"];
-    self.hasBeenReceived = [coder decodeBoolForKey:@"hasBeenReceived"];
-    self.hasBeenSent = [coder decodeBoolForKey:@"hasBeenSent"];
-    self.encrypted = [coder decodeBoolForKey:@"encrypted"];
-    self.unread = [coder decodeBoolForKey:@"unread"];
-    self.displayMarkerWanted = [coder decodeBoolForKey:@"displayMarkerWanted"];
-    self.previewText = [coder decodeObjectForKey:@"previewText"];
-    self.previewImage = [coder decodeObjectForKey:@"previewImage"];
-    self.errorType = [coder decodeObjectForKey:@"errorType"];
-    self.errorReason = [coder decodeObjectForKey:@"errorReason"];
-    self.filetransferMimeType = [coder decodeObjectForKey:@"filetransferMimeType"];
-    self.filetransferSize = [coder decodeObjectForKey:@"filetransferSize"];
-    self.retracted = [coder decodeBoolForKey:@"retracted"];
     return self;
+}
+
+//make sure this singleton remains a singleton, even after decoding (but only for non-draft messages)
+-(instancetype) awakeAfterUsingCoder:(NSCoder*) coder
+{
+    if(![self.messageType isEqualToString:kMessageTypeMessageDraft])
+        return [[self class] createMessageFromHistoryID:self.messageDBId];
+    return self;        //draft messages are not singletons
 }
 
 -(instancetype) init

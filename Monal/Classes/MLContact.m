@@ -747,55 +747,24 @@ static NSMutableDictionary* _singletonCache;
 -(void) encodeWithCoder:(NSCoder*) coder
 {
     [coder encodeObject:self.contactJid forKey:@"contactJid"];
-    [coder encodeObject:self.nickName forKey:@"nickName"];
-    [coder encodeObject:self.fullName forKey:@"fullName"];
-    [coder encodeObject:self.subscription forKey:@"subscription"];
-    [coder encodeObject:self.ask forKey:@"ask"];
     [coder encodeObject:self.accountID forKey:@"accountID"];
-    [coder encodeObject:self.groupSubject forKey:@"groupSubject"];
-    [coder encodeObject:self.accountNickInGroup forKey:@"accountNickInGroup"];
-    [coder encodeObject:self.mucType forKey:@"mucType"];
-    [coder encodeBool:self.isMuc forKey:@"isMuc"];
-    [coder encodeBool:self.isMentionOnly forKey:@"isMentionOnly"];
-    [coder encodeBool:self.isPinned forKey:@"isPinned"];
-    [coder encodeBool:self.isBlocked forKey:@"isBlocked"];
-    [coder encodeObject:self.statusMessage forKey:@"statusMessage"];
-    [coder encodeObject:self.state forKey:@"state"];
-    [coder encodeInteger:self->_unreadCount forKey:@"unreadCount"];
-    [coder encodeBool:self.isActiveChat forKey:@"isActiveChat"];
-    [coder encodeBool:self.isEncrypted forKey:@"isEncrypted"];
-    [coder encodeBool:self.isMuted forKey:@"isMuted"];
-    [coder encodeObject:self.lastInteractionTime forKey:@"lastInteractionTime"];
-    [coder encodeObject:self.rosterGroups forKey:@"rosterGroups"];
-    [coder encodeBool:self.hasReachedMamArchiveTop forKey:@"hasReachedMamArchiveTop"];
 }
 
 -(instancetype) initWithCoder:(NSCoder*) coder
 {
+    //only decode whats needed to access/create the right singleton object.
+    //decoding into a temporary object that will be discarded by the decoder
+    //once awakeAfterUsingCoder returns a new object
     self = [self init];
     self.contactJid = [coder decodeObjectForKey:@"contactJid"];
-    self.nickName = [coder decodeObjectForKey:@"nickName"];
-    self.fullName = [coder decodeObjectForKey:@"fullName"];
-    self.subscription = [coder decodeObjectForKey:@"subscription"];
-    self.ask = [coder decodeObjectForKey:@"ask"];
     self.accountID = [coder decodeObjectForKey:@"accountID"];
-    self.groupSubject = [coder decodeObjectForKey:@"groupSubject"];
-    self.accountNickInGroup = [coder decodeObjectForKey:@"accountNickInGroup"];
-    self.mucType = [coder decodeObjectForKey:@"mucType"];
-    self.isMuc = [coder decodeBoolForKey:@"isMuc"];
-    self.isMentionOnly = [coder decodeBoolForKey:@"isMentionOnly"];
-    self.isPinned = [coder decodeBoolForKey:@"isPinned"];
-    self.isBlocked = [coder decodeBoolForKey:@"isBlocked"];
-    self.statusMessage = [coder decodeObjectForKey:@"statusMessage"];
-    self.state = [coder decodeObjectForKey:@"state"];
-    self->_unreadCount = [coder decodeIntegerForKey:@"unreadCount"];
-    self.isActiveChat = [coder decodeBoolForKey:@"isActiveChat"];
-    self.isEncrypted = [coder decodeBoolForKey:@"isEncrypted"];
-    self.isMuted = [coder decodeBoolForKey:@"isMuted"];
-    self.lastInteractionTime = [coder decodeObjectForKey:@"lastInteractionTime"];
-    self.rosterGroups = [coder decodeObjectForKey:@"rosterGroups"];
-    self.hasReachedMamArchiveTop = [coder decodeBoolForKey:@"hasReachedMamArchiveTop"];
     return self;
+}
+
+//make sure this singleton remains a singleton, even after decoding
+-(instancetype) awakeAfterUsingCoder:(NSCoder*) coder
+{
+    return [[self class] createContactFromJid:self.contactJid andAccountID:self.accountID];
 }
 
 -(void) updateWithContact:(MLContact*) contact

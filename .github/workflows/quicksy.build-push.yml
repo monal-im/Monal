@@ -142,16 +142,43 @@ jobs:
         env:
           CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
         run: |
-          path_ios="$(mktemp -d)"
-          cp -av ./appstore_quicksy_metadata/* "$path_ios"
-          echo -n "$(date +%Y) Thilo Molitor" > "$path_ios/copyright.txt"
-          for dir in ./appstore_quicksy_metadata/*/; do
-            dir="$(basename "$dir")"
-            if [[ -d "./appstore_quicksy_metadata/$dir" ]]; then
-              echo -n "$CHANGELOG_IOS" > "$path_ios/${dir%/}/release_notes.txt"
-            fi
-          done
-          echo "path_ios=$path_ios" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          prepare_metadata() {
+            local path="$(mktemp -d)"
+            cp -a ./appstore_metadata/$1/* "$path"
+            echo -n "$(date +%Y) Thilo Molitor" > "$path/copyright.txt"
+            for dir in ./appstore_metadata/$1/*/; do
+              dir="$(basename "$dir")"
+              if [[ -d "./appstore_metadata/$1/$dir" ]]; then
+                case $1 in
+                  quicksy_ios)
+                    echo -n "$CHANGELOG_IOS" | scripts/translate_changelog.py --json-file "Monal-localization-changelog/translations/changelog/${dir%/}.json" > "$path/${dir%/}/release_notes.txt"
+                    ;;
+                  esac
+              fi
+            done
+            echo "$path"
+          }
+          
+          echo ""
+          echo "**********************************************************"
+          echo "* Cloning and resetting changelog translation repository *"
+          echo "**********************************************************"
+          if [[ -e "Monal-localization-changelog" ]]; then
+            rm -rf Monal-localization-changelog
+          fi
+          git clone git@changelog.translation.repo:monal-im/Monal-localization-changelog.git
+          
+          echo ""
+          echo "**************************"
+          echo "* Translating changelogs *"
+          echo "**************************"
+          echo "path_ios=$(prepare_metadata quicksy_ios)" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "***************"
+          echo "* Cleaning up *"
+          echo "***************"
+          rm -rf Monal-localization-changelog
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app --file ./Monal/build/ipa/Quicksy.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u $(cat /Users/ci/apple_connect_upload_mail.txt) -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:

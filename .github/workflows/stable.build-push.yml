@@ -150,13 +150,13 @@ jobs:
             for dir in ./appstore_metadata/$1/*/; do
               dir="$(basename "$dir")"
               if [[ -d "./appstore_metadata/$1/$dir" ]]; then
-              case $1 in
-                ios)
-                  echo -n "$CHANGELOG_IOS" | scripts/translate_changelog.py --json-file "Monal-localization-changelog/translations/changelog/${dir%/}.json" > "$path/${dir%/}/release_notes.txt"
-                  ;;
-                macos)
-                  echo -n "$CHANGELOG_MACOS" | scripts/translate_changelog.py --json-file "Monal-localization-changelog/translations/changelog/${dir%/}.json" > "$path/${dir%/}/release_notes.txt"
-                  ;;
+                case $1 in
+                  ios)
+                    echo -n "$CHANGELOG_IOS" | scripts/translate_changelog.py --json-file "Monal-localization-changelog/translations/changelog/${dir%/}.json" > "$path/${dir%/}/release_notes.txt"
+                    ;;
+                  macos)
+                    echo -n "$CHANGELOG_MACOS" | scripts/translate_changelog.py --json-file "Monal-localization-changelog/translations/changelog/${dir%/}.json" > "$path/${dir%/}/release_notes.txt"
+                    ;;
                 esac
               fi
             done

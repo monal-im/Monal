@@ -117,10 +117,11 @@ static NSDateFormatter* dbFormatter;
     NSString* temporaryFilename = [NSString stringWithFormat:@"sworim_%@.db", [[NSProcessInfo processInfo] globallyUniqueString]];
     NSString* temporaryFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:temporaryFilename];
     
-    [self.db vacuumInto:temporaryFilePath];
-    if([fileManager fileExistsAtPath:temporaryFilePath])
+    if(![self.db vacuumInto:temporaryFilePath])
+        DDLogError(@"Could not vaccum db into tempfile: %@", temporaryFilePath);
+    else if([fileManager fileExistsAtPath:temporaryFilePath])
         return temporaryFilePath;
-    return nil;
+    unreachable(@"Temporary file should be available if vaccum into succeded!", (@{@"temporaryFilePath": temporaryFilePath}));
 }
 
 -(void) createTransaction:(monal_void_block_t) block

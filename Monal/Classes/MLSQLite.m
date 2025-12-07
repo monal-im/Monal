@@ -230,7 +230,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
         else if([obj isKindOfClass:[NSString class]])
         {
             NSString* text = (NSString*)obj;
-            if(sqlite3_bind_text(statement, (signed)idx+1, [text cStringUsingEncoding:NSUTF8StringEncoding], -1, SQLITE_STATIC) != SQLITE_OK)
+            if(sqlite3_bind_text(statement, (signed)idx+1, [text cStringUsingEncoding:NSUTF8StringEncoding], -1, SQLITE_TRANSIENT) != SQLITE_OK)
             {
                 DDLogError(@"text bind error: %@", text);
                 [self throwErrorForQuery:query andArguments:args];
@@ -239,7 +239,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
         else if([obj isKindOfClass:[NSData class]])
         {
             NSData* data = (NSData*)obj;
-            if(sqlite3_bind_blob(statement, (signed)idx+1, [data bytes], (int)data.length, SQLITE_STATIC) != SQLITE_OK)
+            if(sqlite3_bind_blob(statement, (signed)idx+1, [data bytes], (int)data.length, SQLITE_TRANSIENT) != SQLITE_OK)
             {
                 DDLogError(@"blob bind error: %@", data);
                 [self throwErrorForQuery:query andArguments:args];

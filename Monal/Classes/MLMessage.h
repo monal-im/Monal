@@ -48,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The id for the message as provided by the xmpp server
  */
-@property (nonatomic, copy) NSString* stanzaId;
+@property (nonatomic, copy) NSString* _Nullable stanzaId;
 
 /**
 The of the message in the DB , should be int

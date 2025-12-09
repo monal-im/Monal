@@ -156,10 +156,10 @@ struct ChatView: View {
                 availableActions.append(.edit)
             }
 
-            if !mlMessage.inbound && (!mlMessage.isMuc || (mlMessage.isMuc && !mlMessage.stanzaId.isEmpty)) {
+            if !mlMessage.inbound && (!mlMessage.isMuc || mlMessage.stanzaId != nil) {
                 availableActions.append(.retract)
             }
-            else if mlMessage.isMuc && !mlMessage.stanzaId.isEmpty && DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact) == kMucRoleModerator && account.mucProcessor.getRoomFeatures(forMuc: contact.contactJid).contains("urn:xmpp:message-moderate:1") {
+            else if mlMessage.isMuc && mlMessage.stanzaId != nil && DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact) == kMucRoleModerator && account.mucProcessor.getRoomFeatures(forMuc: contact.contactJid).contains("urn:xmpp:message-moderate:1") {
                 availableActions.append(.moderate)
             } else {
                 availableActions.append(.delete)
@@ -282,7 +282,7 @@ struct ChatView: View {
         //not all messages in history db have a stanzaId (messages sent by this monal instance won't have one for example)
         //--> search for the oldest message having a stanzaId and use that one
         for msg in self.messages {
-            if !msg.innerMessage.obj.stanzaId.isEmpty {
+            if msg.innerMessage.obj.stanzaId != nil {
                 DDLogVerbose("Found oldest stanzaId in currently displayed messages: \(msg.innerMessage.obj.stanzaId)")
                 return msg.innerMessage.stanzaId
             }
@@ -486,13 +486,14 @@ struct ChatView: View {
                     } else {
                         currentReactions.insert(emoji)
                     }
-                    DDLogError("Sending reaction for: \(String(describing:mlMessage))")
                     self.account.sendReactions(currentReactions, for:mlMessage)
             }
         }, canReactTo: { message in
             //don't allow reactions in mucs without occupant-id support
             let mlMessage = (message as! ChatViewMessage).innerMessage.obj
-            return !mlMessage.isMuc || self.account.mucProcessor.getRoomFeatures(forMuc:mlMessage.chatContact.contactJid).contains("urn:xmpp:occupant-id:0")
+            DDLogDebug("Checking if we can react to: \(String(describing:mlMessage))")
+            return !mlMessage.isMuc || 
+                (mlMessage.stanzaId != nil && self.account.mucProcessor.getRoomFeatures(forMuc:mlMessage.chatContact.contactJid).contains("urn:xmpp:occupant-id:0"))
         })
         .showNetworkConnectionProblem(false)
         .enableLoadMore(pageSize: 10) { message in

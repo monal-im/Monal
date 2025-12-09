@@ -189,13 +189,10 @@ static NSMutableDictionary* _singletonCache;
         MLAssert(data[@"reactions"] != nil, @"Reactions updates MUST contain a reactions dictionary!");
         self.reactions = data[@"reactions"];
     }
-    else
-    {
-        // MUC reflection
-        NSString* stanzaId = data[@"stanzaId"];
-        MLAssert(stanzaId != nil, @"MUC reflection notification without the new stanzaId");
-        self.stanzaId = stanzaId;
-    }
+    
+    // MUC reflection and everything else
+    DDLogDebug(@"Updating stanzaid of %p: %@", self, data[@"stanzaId"]);
+    self.stanzaId = data[@"stanzaId"];
 }
 
 // Handle message retraction and moderation
@@ -376,13 +373,14 @@ static NSMutableDictionary* _singletonCache;
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@ {%@messageID: %@, stanzaID: %@} --> %@",
+    return [NSString stringWithFormat:@"%@: %@ {%@messageID: %@, stanzaID: %@} --> %@ (%p)",
         self.accountID,
         self.participantJid ? self.participantJid : self.buddyName,
         self.retracted ? @"retracted " : @"",
         self.messageId,
         self.stanzaId,
-        self.messageDBId
+        self.messageDBId,
+        self
     ];
 }
 

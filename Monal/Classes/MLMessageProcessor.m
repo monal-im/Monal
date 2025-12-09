@@ -454,6 +454,8 @@ static NSMutableDictionary* _typingNotifications;
         sentByOwnOmemoDevice = ((NSNumber*)[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"]).unsignedIntValue == [account.omemo getDeviceId].unsignedIntValue;
 #endif
     
+    BOOL possiblyUpdatedStanzaId = NO;
+    
     //handle message retraction (XEP-0424)
     if([messageNode check:@"{urn:xmpp:message-retract:1}retract"])
     {
@@ -689,6 +691,8 @@ static NSMutableDictionary* _typingNotifications;
             message = [MLMessage createMessageFromHistoryID:historyId];
             if(message != nil && historyId != nil)      //check historyId to make static analyzer happy
             {
+                DDLogVerbose(@"Added or LMC-replaced message in history db: %@", message);
+                
                 //send receive markers if requested, but DON'T do so for MLhistory messages (and don't do so for channel type mucs)
                 if(
                     [[HelperTools defaultsDB] boolForKey:@"SendReceivedMarkers"] &&
@@ -768,9 +772,14 @@ static NSMutableDictionary* _typingNotifications;
                 if(messageType == kMessageTypeFiletransfer && [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"])
                     [MLFiletransfer checkMimeTypeAndSizeForHistoryID:historyId];
             }
+            else
+                possiblyUpdatedStanzaId = YES;
         }
     }
     else if(!inbound)
+        possiblyUpdatedStanzaId = YES;
+    
+    if(possiblyUpdatedStanzaId)
     {
         //just try to use the probably reflected message to update the stanzaid of our message in the db
         //messageId is always a proper origin-id in this case, because inbound == NO and Monal uses origin-ids
@@ -778,7 +787,6 @@ static NSMutableDictionary* _typingNotifications;
         if(historyId != nil)
         {
             message = [MLMessage createMessageFromHistoryID:historyId];
-            DDLogDebug(@"Managed to update stanzaid of message (or stanzaid already known): %@", message);
             DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", historyId);
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{
                     @"message": message,
@@ -788,6 +796,7 @@ static NSMutableDictionary* _typingNotifications;
                     @"stanzaId": stanzaid,
                     @"reactionsUpdate": @NO,
                 }];
+            DDLogDebug(@"Managed to update stanzaid of message (or stanzaid already known): %@", message);
         }
     }
     

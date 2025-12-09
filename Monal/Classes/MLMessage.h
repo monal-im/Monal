@@ -67,8 +67,8 @@ The of the message in the DB , should be int
 @property (nonatomic, copy) NSString* _Nullable participantJid;
 @property (nonatomic, copy) NSString* _Nullable occupantId;
 
-@property (nonatomic, copy) NSString* filetransferMimeType;
-@property (nonatomic, copy) NSNumber* filetransferSize;
+@property (nonatomic, copy) NSString* _Nullable filetransferMimeType;
+@property (nonatomic, copy) NSNumber* _Nullable filetransferSize;
 
 @property (nonatomic, copy) NSString* messageText;
 
@@ -76,21 +76,15 @@ The of the message in the DB , should be int
 
 @property (nonatomic, assign) BOOL retracted;
 
-/**
- If the text was parsed into a URL. For message type url
- */
+//TODO: remove, once our old chatview gets removed
 @property (nonatomic, copy) NSURL* url;
 
 /**
  path to preview image for image type
  */
-@property (nonatomic, copy) NSURL* previewImage;
-@property (nonatomic, copy) NSString* previewText;
+@property (nonatomic, copy) NSURL* _Nullable previewImage;
+@property (nonatomic, copy) NSString* _Nullable previewText;
 
-/**
- for message type status. The MUC subeject
- */
-@property (nonatomic, copy) NSString* groupSubject;
 @property (nonatomic, copy) NSDate* timestamp;
 
 /*
@@ -113,8 +107,8 @@ The of the message in the DB , should be int
  values only set if in a response the message was marked as error.
  if hasBeenReceived is true, these should be ignored
  */
-@property (nonatomic, copy) NSString* errorType;
-@property (nonatomic, copy) NSString* errorReason;
+@property (nonatomic, copy) NSString* _Nullable errorType;
+@property (nonatomic, copy) NSString* _Nullable errorReason;
 
 /*
  the message has not been marked as read in the db

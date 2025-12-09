@@ -27,6 +27,9 @@ class DebugDefaultDB: ObservableObject {
     
     @defaultsDB("debugDtmfSending")
     var debugDtmfSending: Bool
+    
+    @defaultsDB("debugNSNotifications")
+    var debugNSNotifications: Bool
 }
 
 struct LogFilesView: View {
@@ -136,6 +139,10 @@ struct CrashTestingView: View {
                     
                     Toggle(isOn: $defaultDB.debugDtmfSending) {
                         Text("Automatically play DTMF tones in all calls")
+                    }
+                    
+                    Toggle(isOn: $defaultDB.debugNSNotifications) {
+                        Text("Log *all* NSNotifications")
                     }
 
                     Button("Reset the state of all accounts") {

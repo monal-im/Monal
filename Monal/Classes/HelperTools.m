@@ -686,7 +686,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 #else
     BOOL enableNotificationObserver = [[HelperTools defaultsDB] boolForKey:@"showLogInSettings"];
 #endif
-    if(enableNotificationObserver)
+    if(enableNotificationObserver && [[HelperTools defaultsDB] boolForKey:@"debugNSNotifications"])
     {
         //see https://stackoverflow.com/a/3738387
         CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(),

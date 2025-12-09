@@ -41,6 +41,7 @@ static NSMutableDictionary* _singletonCache;
     monal_void_block_t _cancelNickChange;
     monal_void_block_t _cancelFullNameChange;
     UIImage* _avatar;
+    NSMutableDictionary<NSString*, NSString*>* _contactDisplayNameCache;
 }
 @property (nonatomic, assign) BOOL isSelf;
 @property (nonatomic, assign) BOOL isInRoster;
@@ -273,6 +274,8 @@ static NSMutableDictionary* _singletonCache;
 -(instancetype) init
 {
     self = [super init];
+    _contactDisplayNameCache = [NSMutableDictionary new];
+    
     //watch for all sorts of changes and update our singleton dynamically
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLastInteractionTimeUpdate:) name:kMonalLastInteractionUpdatedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleBlockListRefresh:) name:kMonalBlockListRefresh object:nil];
@@ -284,6 +287,7 @@ static NSMutableDictionary* _singletonCache;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMonalUpdatedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMonalDeletedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnreadCount) name:kMLMessageSentToContact object:nil];
+    
     return self;
 }
 
@@ -366,6 +370,12 @@ static NSMutableDictionary* _singletonCache;
     
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName andSelfnotesPrefix:(BOOL) hasSelfnotesPrefix
 {
+    NSString* cacheKey = [NSString stringWithFormat:@"%@|%@|%@|%@|%@", self.nickName, self.fullName, self.contactJid, fallbackName, bool2str(hasSelfnotesPrefix)];
+    @synchronized(_contactDisplayNameCache) {
+        if(_contactDisplayNameCache[cacheKey] != nil)
+            return _contactDisplayNameCache[cacheKey];
+    }
+    
     //DDLogVerbose(@"Calculating contact display name...");
     NSString* displayName;
     if(!self.isSelf)
@@ -417,6 +427,10 @@ static NSMutableDictionary* _singletonCache;
         @"fullName": nilWrapper(self.fullName),
         @"fallbackName": nilWrapper(fallbackName)
     }));
+    
+    @synchronized(_contactDisplayNameCache) {
+        _contactDisplayNameCache[cacheKey] = displayName;
+    }
     return displayName;
 }
 

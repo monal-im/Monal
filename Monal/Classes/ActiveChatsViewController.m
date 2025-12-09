@@ -473,8 +473,6 @@ static NSMutableSet* _pushWarningDisplayed;
                 {
                     if([rowContact isEqualToContact:contact])
                     {
-                        //this MLContact instance is used in various ui parts, not just this file --> update all properties but keep the instance intact
-                        [rowContact updateWithContact:contact];
                         indexPath = [NSIndexPath indexPathForRow:rowIdx inSection:section];
                         break;
                     }

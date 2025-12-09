@@ -644,6 +644,7 @@ static NSMutableDictionary* _singletonCache;
     if(self.isMuc)
         [self.account.mucProcessor updateBookmarks];
     // update active chats
+    //TODO: can be removed once our active chats are swiftui based (using the kvo observed model classes)
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.account userInfo:@{
         @"contact":self,
     }];
@@ -661,6 +662,7 @@ static NSMutableDictionary* _singletonCache;
     if(self.isMuc)
         [self.account.mucProcessor updateBookmarks];
     // update active chats
+    //TODO: can be removed once our active chats are swiftui based (using the kvo observed model classes)
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.account userInfo:@{
         @"contact":self,
     }];
@@ -710,13 +712,13 @@ static NSMutableDictionary* _singletonCache;
     else
         [[DataLayer sharedInstance] unPinChat:self.accountID andBuddyJid:self.contactJid];
     self.isPinned = pinned;
-    // update active chats
-    xmpp* account = self.account;
-    if(account == nil)
-        return;
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact":self, @"pinningChanged": @YES}];
     if(self.isMuc)
-        [account.mucProcessor updateBookmarks];
+        [self.account.mucProcessor updateBookmarks];
+    // update active chats
+    //TODO: can be removed once our active chats are swiftui based (using the kvo observed model classes)
+    if(self.account == nil)
+        return;
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.account userInfo:@{@"contact":self, @"pinningChanged": @YES}];
 }
 
 -(BOOL) toggleBlocked:(BOOL) block

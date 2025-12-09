@@ -389,7 +389,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
 -(void) handleDeletedMessage:(NSNotification*) notification
 {
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    MLMessage* message = [MLMessage createMessageFromHistoryID:notification.userInfo[@"historyId"]];
     
     if([message.messageType isEqualToString:kMessageTypeStatus])
         return;

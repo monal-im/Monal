@@ -1743,15 +1743,14 @@ enum msgSentState {
 -(void) handleDeletedMessage:(NSNotification*) notification
 {
     NSDictionary* dic = notification.userInfo;
-    MLMessage* msg = dic[@"message"];
 
-    DDLogDebug(@"Got deleted message notice for history id %ld and message id %@", (long)[msg.messageDBId intValue], msg.messageId);
+    DDLogDebug(@"Got deleted message notice for history id %ld and message id %@", (long)[dic[@"historyId"] intValue], [dic[@"historyId"] messageId]);
 
     for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
     {
         // find msg that should be deleted
         MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
-        if([msgInList.messageDBId intValue] == [msg.messageDBId intValue])
+        if([msgInList.messageDBId intValue] == [dic[@"historyId"] intValue])
         {
             //update table entry
             NSIndexPath* indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];

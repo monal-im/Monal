@@ -202,9 +202,8 @@ static NSMutableDictionary* _singletonCache;
 -(void) handleMessageDeletion:(NSNotification*) notification
 {
     NSDictionary* data = notification.userInfo;
-    MLMessage* message = data[@"message"];
-    MLAssert(message != nil, @"Notification without message");
-    if(self.messageDBId.integerValue != message.messageDBId.integerValue)
+    MLAssert(data[@"historyId"] != nil, @"kMonalDeletedMessageNotice without historyId!");
+    if(self.messageDBId.integerValue != [data[@"historyId"] integerValue])
         return;         //ignore deletions of other messages
 
     self.messageText = @"";

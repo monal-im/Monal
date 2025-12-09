@@ -934,14 +934,7 @@ $$class_handler(handleModerationResponse, $$ID(xmpp*, account), $$ID(XMPPIQ*, iq
     //update ui
     DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", msg.messageDBId);
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
-        @"message": msg,
         @"historyId": msg.messageDBId,
-        @"contact": msg.chatContact,
-    }];
-    
-    //update unread count in active chats list
-    [msg.chatContact updateUnreadCount];
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
         @"contact": msg.chatContact,
     }];
 $$

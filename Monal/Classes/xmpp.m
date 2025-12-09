@@ -3552,7 +3552,7 @@ NSString* const kStanza = @"stanza";
         [self send:messageNode];
         [[DataLayer sharedInstance] retractMessageHistory:msg.messageDBId];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:self userInfo:@{
-            @"message": msg,
+            @"historyId": msg.messageDBId,
             @"contact": msg.chatContact
         }];
     }];

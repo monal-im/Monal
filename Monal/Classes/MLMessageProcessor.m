@@ -478,13 +478,7 @@ static NSMutableDictionary* _typingNotifications;
             //update ui
             DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
-                @"message": [MLMessage createMessageFromHistoryID:historyIdToRetract],
-                @"contact": possiblyUnknownContact,
-            }];
-            
-            //update unread count in active chats list
-            [possiblyUnknownContact updateUnreadCount];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"historyId": historyIdToRetract,
                 @"contact": possiblyUnknownContact,
             }];
         }
@@ -527,7 +521,6 @@ static NSMutableDictionary* _typingNotifications;
             //update ui
             DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
-                @"message": [MLMessage createMessageFromHistoryID:historyIdToRetract],
                 @"historyId": historyIdToRetract,
                 @"contact": possiblyUnknownContact,
             }];

@@ -678,7 +678,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
 {
     [self testThreadInstanceForQuery:@"lastInsertId" andArguments:nil];
     [self testTransactionsForQuery:@"lastInsertId" andArguments:nil];
-    return [NSNumber numberWithInt:(int)sqlite3_last_insert_rowid(self->_database)];
+    return [NSNumber numberWithLongLong:(long long)sqlite3_last_insert_rowid(self->_database)];
 }
 
 -(void) enableWAL

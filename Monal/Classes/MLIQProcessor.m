@@ -186,7 +186,7 @@ $$class_handler(handleCatchup, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$BO
         {
             //latestMessage can be nil, thus [latestMessage timestamp] will return nil and setMAMQueryAfterTimestamp:nil
             //will query the whole archive since dawn of time
-            MLMessage* latestMessage = [MLMessage createMessageFromHistoryID:[[DataLayer sharedInstance] getBiggestHistoryId]];
+            MLMessage* latestMessage = [MLMessage createMessageFromHistoryID:[[DataLayer sharedInstance] getNewestHistoryEntryId]];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive at %@ after timestamp %@ for catchup", account.connectionProperties.identity.jid, [latestMessage timestamp]);
             XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
             [mamQuery setMAMQueryAfterTimestamp:[latestMessage timestamp]];
@@ -293,7 +293,7 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
             //this means we're safe from mam holes if the app crashes while processing messages.
             //benchmarks reveal that processing 50 message stanzas takes ~58ms.
             //=> no risk of blocking the main thread for db write access for too long.
-            NSNumber* historyId = @([[[DataLayer sharedInstance] getSmallestHistoryId] integerValue] - (NSInteger)retrievedBodiesInThisQuery);
+            NSNumber* historyId = @([[[DataLayer sharedInstance] getAutodecrementHistoryId] integerValue] - (NSInteger)retrievedBodiesInThisQuery);
             uint32_t entryNo = 0;
             for(NSDictionary* data in mamPage)
             {

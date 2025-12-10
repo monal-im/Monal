@@ -1245,14 +1245,25 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) getSmallestHistoryId
+-(NSNumber*) getAutodecrementHistoryId
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"];
+        //use the autodecrement value for our message_history table, if present
+        NSNumber* autodecrement = [self.db executeScalar:@"SELECT value FROM flags WHERE name='autodecrement~message_history';"];
+        if(autodecrement != nil)
+            return autodecrement;
+        
+        //fall back to lowest number in table, if no autodecrement value is present
+        autodecrement = [self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"];
+        if(autodecrement != nil)
+            return autodecrement;
+        
+        //fallback for empty history table and no autodecrement value
+        return @0;
     }];
 }
 
--(NSNumber*) getBiggestHistoryId
+-(NSNumber*) getNewestHistoryEntryId
 {
     return [self.db idReadTransaction:^{
         return [self.db executeScalar:@"SELECT MAX(message_history_id) FROM message_history;"];
@@ -1302,7 +1313,6 @@ static NSDateFormatter* dbFormatter;
             }
             else
             {
-                //we use autoincrement here instead of MAX(message_history_id) + 1 to be a little bit faster (but at the cost of "duplicated code")
                 query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid, participant_jid, occupant_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                 params = @[accountID, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@"", nilWrapper(participantJid), nilWrapper(occupantId)];
             }
@@ -1311,6 +1321,10 @@ static NSDateFormatter* dbFormatter;
             if(!success)
                 return (NSNumber*)nil;
             NSNumber* historyId = [self.db lastInsertId];
+            
+            //update autodecrement value (only strictly monotonically decreasing)
+            [self.db executeNonQuery:@"UPDATE flags SET value=MIN(?,  (SELECT value FROM flags WHERE name='autodecrement~message_history')) WHERE name='autodecrement~message_history';" andArguments:@[historyId]];
+            
             [self updateActiveBuddy:buddyName setTime:dateString forAccount:accountID];
             return historyId;
         }

@@ -111,6 +111,7 @@ static NSObject* _suspensionHandling_lock = nil;
 static BOOL _suspensionHandling_isSuspended = NO;
 static NSMutableDictionary* _versionInfoCache;
 static NSCharacterSet* _invalidXMLCharacters;
+static NSCharacterSet* _validVs16Emojis;
 static MLStreamRedirect* _stdoutRedirector = nil;
 static MLStreamRedirect* _stderrRedirector = nil;
 static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
@@ -529,6 +530,9 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 
     [validXMLCharacters removeCharactersInString:notRecommendedXMLCharacters];
     _invalidXMLCharacters = [validXMLCharacters invertedSet];
+    
+    //listed with vs16 at https://www.unicode.org/Public/emoji/latest/emoji-sequences.txt
+    _validVs16Emojis = [NSCharacterSet characterSetWithCharactersInString:@"\u00A9\u00AE\u203C\u2049\u2122\u2139\u2194\u2195\u2196\u2197\u2198\u2199\u21A9\u21AA\u2328\u23CF\u23ED\u23EE\u23EF\u23F1\u23F2\u23F8\u23F9\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB\u25FC\u2600\u2601\u2602\u2603\u2604\u260E\u2611\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638\u2639\u263A\u2640\u2642\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u2692\u2694\u2695\u2696\u2697\u2699\u269B\u269C\u26A0\u26A7\u26B0\u26B1\u26C8\u26CF\u26D1\u26D3\u26E9\u26F0\u26F1\u26F4\u26F7\u26F8\u26F9\u2702\u2708\u2709\u270C\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2733\u2734\u2744\u2747\u2763\u2764\u27A1\u2934\u2935\u2B05\u2B06\u2B07\u3030\u303D\u3297\u3299\U0001F170\U0001F171\U0001F17E\U0001F17F\U0001F202\U0001F237\U0001F321\U0001F324\U0001F325\U0001F326\U0001F327\U0001F328\U0001F329\U0001F32A\U0001F32B\U0001F32C\U0001F336\U0001F37D\U0001F396\U0001F397\U0001F399\U0001F39A\U0001F39B\U0001F39E\U0001F39F\U0001F3CB\U0001F3CC\U0001F3CD\U0001F3CE\U0001F3D4\U0001F3D5\U0001F3D6\U0001F3D7\U0001F3D8\U0001F3D9\U0001F3DA\U0001F3DB\U0001F3DC\U0001F3DD\U0001F3DE\U0001F3DF\U0001F3F3\U0001F3F5\U0001F3F7\U0001F43F\U0001F441\U0001F4FD\U0001F549\U0001F54A\U0001F56F\U0001F570\U0001F573\U0001F574\U0001F575\U0001F576\U0001F577\U0001F578\U0001F579\U0001F587\U0001F58A\U0001F58B\U0001F58C\U0001F58D\U0001F590\U0001F5A5\U0001F5A8\U0001F5B1\U0001F5B2\U0001F5BC\U0001F5C2\U0001F5C3\U0001F5C4\U0001F5D1\U0001F5D2\U0001F5D3\U0001F5DC\U0001F5DD\U0001F5DE\U0001F5E1\U0001F5E3\U0001F5E8\U0001F5EF\U0001F5F3\U0001F5FA\U0001F6CB\U0001F6CD\U0001F6CE\U0001F6CF\U0001F6E0\U0001F6E1\U0001F6E2\U0001F6E3\U0001F6E4\U0001F6E5\U0001F6E9\U0001F6F0\U0001F6F3#*0123456789"];
 
     //shamelessly stolen from utils.ip in conversations source
     IPV4 = [NSRegularExpression regularExpressionWithPattern:@"\\A(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z" options:0 error:nil];
@@ -3428,10 +3432,19 @@ a=%@\r\n", mid, candidate];
 
 +(NSSet*) createReactionsSetFromString:(NSString*) reactions
 {
+    //remove all vs15 and vs16 modifiers
+    reactions = [[reactions componentsSeparatedByString:@"\ufe0e"] componentsJoinedByString:@""];
+    reactions = [[reactions componentsSeparatedByString:@"\ufe0f"] componentsJoinedByString:@""];
+    
     //"parse" reactions (iterate over grapheme clusters as required in XEP-0444 Business Rules)
     NSMutableSet* reactionsList = [NSMutableSet new];
     [reactions enumerateSubstringsInRange:NSMakeRange(0, [reactions length]) options:NSStringEnumerationByComposedCharacterSequences usingBlock:^(NSString * _Nullable substring, NSRange substringRange __unused, NSRange enclosingRange __unused, BOOL * _Nonnull stop __unused) {
-        [reactionsList addObject:substring];
+        //add vs16 modifier to every emoji it is allowed
+        //see https://www.unicode.org/Public/emoji/latest/emoji-sequences.txt
+        if([_validVs16Emojis characterIsMember:[substring characterAtIndex:0]])
+            [reactionsList addObject:[substring stringByAppendingString:@"\ufe0f"]];
+        else
+            [reactionsList addObject:substring];
     }];
     return reactionsList;
 }

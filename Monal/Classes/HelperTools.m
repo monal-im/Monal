@@ -1739,7 +1739,7 @@ void swizzle(Class c, SEL orig, SEL new)
                     }
                     DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
                     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
-                    content.title = NSLocalizedString(@"Could not synchronize", @"");
+                    content.title = NSLocalizedString(@"Connectivity issues", @"");
                     content.subtitle = account.connectionProperties.identity.jid;
                     content.body = NSLocalizedString(@"Some messages might wait to be retrieved or sent. Please open the app to retry.", @"");
                     content.sound = [UNNotificationSound defaultSound];

@@ -27,6 +27,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) MLMessage* message;
 @property (nonatomic, readonly) id<MLContactProtocol> contact;
 
+-(BOOL) isEqualToMessage:(MLMessage*) message;
+-(BOOL) isEqualToContact:(id<MLContactProtocol>) contact;
+-(BOOL) isEqualToReactionsEntry:(MLReactionsEntry*) reactions;
+
 @property (readonly) NSString* id;     //for Identifiable protocol
 
 @end

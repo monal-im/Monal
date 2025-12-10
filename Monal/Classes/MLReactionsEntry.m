@@ -71,10 +71,19 @@
     return [self.contact isEqual:contact];
 }
 
+-(BOOL) isEqualToReactionsEntry:(MLReactionsEntry*) reactions
+{
+    return self.historyId == reactions.historyId &&
+        [self.user isEqualToString:reactions.user] &&
+        [self.reactions isEqual:reactions.reactions];
+}
+
 -(BOOL) isEqual:(id) object
 {
     if(self == object)
         return YES;
+    else if([object isKindOfClass:[MLReactionsEntry class]])
+        return [self isEqualToReactionsEntry:object];
     else if([object isKindOfClass:[MLMessage class]])
         return [self isEqualToMessage:object];
     else if([object conformsToProtocol:@protocol(MLContactProtocol)])

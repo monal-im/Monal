@@ -82,26 +82,29 @@ static NSDateFormatter* dbFormatter;
 {
     static DataLayer* newInstance;
     static dispatch_once_t once;
+    BOOL __block firstRun = NO;
     dispatch_once(&once, ^{
         newInstance = [self new];
+        firstRun = YES;
     });
+    if(firstRun)
+    {
+        //checking db version and upgrading if necessary
+        DDLogInfo(@"Database version check");
+
+        //do db upgrades and vacuum db afterwards
+        if([DataLayerMigrations migrateDB:newInstance.db withDataLayer:newInstance])
+            [newInstance.db vacuum];
+        [newInstance.db checkpointWal];
+        
+        DDLogInfo(@"Database version check completed");
+    }
     return newInstance;
 }
 
 -(id) init
 {
     self = [super init];
-    
-    //checking db version and upgrading if necessary
-    DDLogInfo(@"Database version check");
-
-    //do db upgrades and vacuum db afterwards
-    if([DataLayerMigrations migrateDB:self.db withDataLayer:self])
-        [self.db vacuum];
-    [self.db checkpointWal];
-    
-    DDLogInfo(@"Database version check completed");
-    
     return self;
 }
 

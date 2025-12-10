@@ -373,8 +373,9 @@ static NSMutableDictionary* _singletonCache;
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@ {%@messageID: %@, stanzaID: %@} --> %@ (%p)",
+    return [NSString stringWithFormat:@"%@: %@ (%@) {%@messageID: %@, stanzaID: %@} --> %@ (%p)",
         self.accountID,
+        self.isMuc ? @"1:1" : self.mucType,
         self.participantJid ? self.participantJid : self.buddyName,
         self.retracted ? @"retracted " : @"",
         self.messageId,

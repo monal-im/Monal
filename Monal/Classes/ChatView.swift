@@ -491,9 +491,10 @@ struct ChatView: View {
         }, canReactTo: { message in
             //don't allow reactions in mucs without occupant-id support
             let mlMessage = (message as! ChatViewMessage).innerMessage.obj
-            DDLogDebug("Checking if we can react to: \(String(describing:mlMessage))")
-            return !mlMessage.isMuc || 
+            let retval = !mlMessage.isMuc || 
                 (mlMessage.stanzaId != nil && self.account.mucProcessor.getRoomFeatures(forMuc:mlMessage.chatContact.contactJid).contains("urn:xmpp:occupant-id:0"))
+            DDLogDebug("Checking if we can react to: \(String(describing:mlMessage)) --> \(String(describing:retval))")
+            return retval
         })
         .showNetworkConnectionProblem(false)
         .enableLoadMore(pageSize: 10) { message in

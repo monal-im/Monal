@@ -781,6 +781,7 @@ class ChatViewMessage: ExyteChat.Message {
     }
     override var reactions: [Reaction] {
         get {
+            //TODO: create new wrapper class ChatViewReaction just like we've already done for User and Contact
             var retval: [Reaction] = []
             let reactions: [MLReactionsEntry] = (innerMessage.reactions as [MLReactionsEntry]).sorted(by: { $0.user < $1.user })
             for reactionsInfo in reactions {
@@ -798,6 +799,7 @@ class ChatViewMessage: ExyteChat.Message {
         set {}
     }
     init(_ message: MLMessage) {
+//         DDLogVerbode("Creating new ChatViewMessage for MLMessage: \(String(describing:message)): \(Thread.callStackSymbols)")
         self.innerMessage = ObservableKVOWrapper(message)
         let user = ChatViewUser(message.contact as! NSObject&MLContactProtocol)
         // We don't need to properly initialize the properties that we overrode with computed properties
@@ -828,6 +830,7 @@ class ChatViewUser: ExyteChat.User {
         set {}
     }
     init(_ contact: NSObject&MLContactProtocol) {
+//         DDLogVerbose("Creating new ChatViewUser for MLContactProtocol: \(String(describing:contact)): \(Thread.callStackSymbols)")
         self.innerContact = ObservableKVOWrapper(contact)
         // We don't need to initialize the properties that we overrode with computed properties
         super.init(id: contact.id, name: "", isCurrentUser: contact.isSelf)

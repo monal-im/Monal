@@ -1252,7 +1252,7 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         //use the autodecrement value for our message_history table, if present
-        NSNumber* autodecrement = [self.db executeScalar:@"SELECT value FROM flags WHERE name='autodecrement~message_history';"];
+        NSNumber* autodecrement = [self.db executeScalar:@"SELECT CAST(value as INTEGER) FROM flags WHERE name='autodecrement~message_history';"];
         if(autodecrement != nil)
             return autodecrement;
         
@@ -1326,7 +1326,7 @@ static NSDateFormatter* dbFormatter;
             NSNumber* historyId = [self.db lastInsertId];
             
             //update autodecrement value (only strictly monotonically decreasing)
-            [self.db executeNonQuery:@"UPDATE flags SET value=MIN(?,  (SELECT value FROM flags WHERE name='autodecrement~message_history')) WHERE name='autodecrement~message_history';" andArguments:@[historyId]];
+            [self.db executeNonQuery:@"UPDATE flags SET value=MIN(?,  (SELECT CAST(value as INTEGER) FROM flags WHERE name='autodecrement~message_history')) WHERE name='autodecrement~message_history';" andArguments:@[historyId]];
             
             [self updateActiveBuddy:buddyName setTime:dateString forAccount:accountID];
             return historyId;

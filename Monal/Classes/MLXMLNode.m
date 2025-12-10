@@ -23,6 +23,9 @@
 //this is the required prototype from Holger's snprintf.c
 int rpl_vasprintf(char **, const char *, va_list *);
 
+@implementation XMLQueryBrokenException
+@end
+
 @interface MLXMLNode()
 {
     NSMutableArray* _children;

@@ -1322,8 +1322,20 @@ enum msgSentState {
         return;
     }
     self.gpsHUD.hidden = YES;
-    // Send location
-    [self sendMessage:[NSString stringWithFormat:@"geo:%f,%f", gpsLoc.coordinate.latitude, gpsLoc.coordinate.longitude] withType:kMessageTypeGeo];
+    
+    UIAlertController* questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Send current location?", @"") message:NSLocalizedString(@"This will now send your current location to all participants in this chat.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction* noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+        //do nothing when "no" was pressed
+    }];
+    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+        // Send location
+        [self sendMessage:[NSString stringWithFormat:@"geo:%f,%f", gpsLoc.coordinate.latitude, gpsLoc.coordinate.longitude] withType:kMessageTypeGeo];
+    }];
+    [questionAlert addAction:noAction];
+    [questionAlert addAction:yesAction];
+    UIPopoverPresentationController* popPresenter = [questionAlert popoverPresentationController];
+    popPresenter.sourceView = self.view;
+    [self presentViewController:questionAlert animated:YES completion:nil];
 }
 
 - (void) locationManager:(CLLocationManager*) manager didFailWithError:(NSError*) error

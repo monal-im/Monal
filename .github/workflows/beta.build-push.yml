@@ -106,6 +106,39 @@ jobs:
           echo "__EOF__" | tee /dev/stderr >> "$OUTPUT_FILE"
           
           cat "$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
+      - name: Update changelog translation repo
+        env:
+          buildVersion: ${{ steps.releasenotes.outputs.buildVersion }}
+          changelog: ${{ steps.releasenotes.outputs.notes }}
+        run: |
+          echo ""
+          echo "**********************************************************"
+          echo "* Cloning and resetting changelog translation repository *"
+          echo "**********************************************************"
+          if [[ -e "Monal-localization-changelog" ]]; then
+            rm -rf Monal-localization-changelog
+          fi
+          git clone git@changelog.translation.repo:monal-im/Monal-localization-changelog.git
+          
+          echo ""
+          echo "******************************"
+          echo "* Updating changelog strings *"
+          echo "******************************"
+          echo -n "$changelog" | scripts/update_changelog_repo.py --base-json "./Monal-localization-changelog/translations/changelog/en-US.json" --version "$buildVersion"
+          cd Monal-localization-changelog
+          git diff
+          git add -u
+          git commit -m "Updated en-US changelog while building beta release" || true
+          git log -n 2
+          git remote --verbose
+          git push
+          cd ..
+          
+          echo ""
+          echo "***************"
+          echo "* Cleaning up *"
+          echo "***************"
+          rm -rf Monal-localization-changelog
       - name: Insert buildNumber and version into plists
         env:
           buildNumber: ${{ steps.releasenotes.outputs.buildNumber }}
@@ -170,31 +203,39 @@ jobs:
         id: appinfo
         run: |
           build_appinfo_entry() {
-            local escaped_marketing_url=$(cat ./appstore_metadata/$1/marketing_url.txt | jq -sRr @json)
-            local escaped_privacy_policy_url=$(cat ./appstore_metadata/$1/privacy_url.txt | jq -sRr @json)
-            local escaped_description=$(cat ./appstore_metadata/$1/description.txt | jq -sRr @json)
-            local json="{\"feedback_email\": \"info@monal-im.org\", \"marketing_url\": $escaped_marketing_url, \"privacy_policy_url\": $escaped_privacy_policy_url, \"description\": $escaped_description}"
+            local escaped_name=$(cat ./appstore_metadata/$2/$1/name.txt | jq -sRr @json)
+            local escaped_subtitle=$(cat ./appstore_metadata/$2/$1/subtitle.txt | jq -sRr @json)
+            local escaped_marketing_url=$(cat ./appstore_metadata/$2/$1/marketing_url.txt | jq -sRr @json)
+            local escaped_privacy_policy_url=$(cat ./appstore_metadata/$2/$1/privacy_url.txt | jq -sRr @json)
+            local escaped_description=$(cat ./appstore_metadata/$2/$1/description.txt | jq -sRr @json)
+            local json="{\"name\": $escaped_name, \"subtitle\": $escaped_subtitle, \"feedback_email\": \"info@monal-im.org\", \"marketing_url\": $escaped_marketing_url, \"privacy_policy_url\": $escaped_privacy_policy_url, \"description\": $escaped_description}"
             echo "$json"
           }
           
-          json="{"
-          json="$json\"default\": $(build_appinfo_entry "en-US"),"
-          for dir in ./appstore_metadata/*/; do
-            dir="$(basename "$dir")"
-            if [[ -d "./appstore_metadata/$dir" ]]; then
-              json="$json\"${dir%/}\": $(build_appinfo_entry "${dir%/}"),"
-            fi
-          done
-          json="${json%,}}"
+          build_json() {
+            local json="{"
+            json="$json\"default\": $(build_appinfo_entry "en-US" "$1"),"
+            for dir in ./appstore_metadata/$1/*/; do
+              dir="$(basename "$dir")"
+              if [[ -d "./appstore_metadata/$1/$dir" ]]; then
+                json="$json\"${dir%/}\": $(build_appinfo_entry "${dir%/}" $1),"
+              fi
+            done
+            json="${json%,}}"
+            echo "$json"
+          }
           
-          echo "appinfo<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "$json" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-          echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          for flavour in ios macos
+          do
+            echo "appinfo_$flavour<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+            build_json $flavour | tee /dev/stderr >> "$GITHUB_OUTPUT"
+            echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
+          done
       - name: Publish ios to appstore connect
         #run: xcrun altool --upload-app -f ./Monal/build/ipa/Monal.ipa --type ios --asc-provider S8D843U34Y --team-id S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)"
         env:
           #PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_ios }}
-          PILOT_LOCALIZED_APP_INFO: ${{ steps.appinfo.outputs.appinfo }}
+          PILOT_LOCALIZED_APP_INFO: ${{ steps.appinfo.outputs.appinfo_ios }}
           PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_ios }}
         run: |
           fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" ipa:"./Monal/build/ipa/Monal.ipa" distribute_external:true notify_external_testers:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true
@@ -226,7 +267,7 @@ jobs:
         #run:  xcrun altool --upload-app --file ./Monal/build/app/Monal.pkg --type macos --asc-provider S8D843U34Y -u "$(cat /Users/ci/apple_connect_upload_mail.txt)" -p "$(cat /Users/ci/apple_connect_upload_secret.txt)" --primary-bundle-id org.monal-im.prod.catalyst.monal
         env:
           #PILOT_LOCALIZED_BUILD_INFO: ${{ steps.buildinfo.outputs.buildinfo_macos }}
-          PILOT_LOCALIZED_APP_INFO: ${{ steps.appinfo.outputs.appinfo }}
+          PILOT_LOCALIZED_APP_INFO: ${{ steps.appinfo.outputs.appinfo_macos }}
           PILOT_CHANGELOG: ${{ steps.releasenotes.outputs.notes_macos }}
         run: |
           fastlane run upload_to_testflight api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" pkg:"./Monal/build/app/Monal.pkg" distribute_external:true notify_external_testers:true groups:"Internal Pre-Beta Testers","Public Beta" reject_build_waiting_for_review:true submit_beta_review:true

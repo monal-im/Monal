@@ -6,3 +6,6 @@
 	path = Monal/shareSheet-iOS/localization/external
 	url = https://github.com/monal-im/Monal-localization-shareSheet.git
 	branch = main
+[submodule "appstore_metadata"]
+	path = appstore_metadata
+	url = git@github.com:monal-im/Monal-localization-appstore.git

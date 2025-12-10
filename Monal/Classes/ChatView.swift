@@ -283,7 +283,7 @@ struct ChatView: View {
         //--> search for the oldest message having a stanzaId and use that one
         for msg in self.messages {
             if msg.innerMessage.obj.stanzaId != nil {
-                DDLogVerbose("Found oldest stanzaId in currently displayed messages: \(msg.innerMessage.obj.stanzaId)")
+                DDLogVerbose("Found oldest stanzaId in currently displayed messages: \(String(describing:msg.innerMessage.obj.stanzaId))")
                 return msg.innerMessage.stanzaId
             }
         }

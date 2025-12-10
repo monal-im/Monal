@@ -577,7 +577,7 @@ static NSMutableDictionary* _typingNotifications;
                 NSDate* reactionDate = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
                 if(reactionDate == nil)
                     reactionDate = [NSDate date];
-                [[DataLayer sharedInstance] setReactions:reactions fromJid:jidToUse orOccupantId:occupantIdToUse forHistoryId:historyId withDate:reactionDate andActualFrom:(possiblyUnknownContact.isMuc ? actualFrom : nil)];
+                [[DataLayer sharedInstance] setReactions:reactions fromJid:jidToUse orOccupantId:occupantIdToUse forHistoryId:historyId withDate:reactionDate andActualFrom:(possiblyUnknownContact.isMuc ? actualFromToUse : nil)];
                 
                 DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", historyId);
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{

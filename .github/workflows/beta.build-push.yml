@@ -124,7 +124,11 @@ jobs:
           echo "******************************"
           echo "* Updating changelog strings *"
           echo "******************************"
+          echo "$changelog"
           echo -n "$changelog" | scripts/update_changelog_repo.py --base-json "./Monal-localization-changelog/translations/changelog/en-US.json" --version "$buildVersion"
+          echo "New basefile:"
+          cat "./Monal-localization-changelog/translations/changelog/en-US.json"
+          echo ""
           cd Monal-localization-changelog
           git diff
           git add -u
@@ -203,12 +207,10 @@ jobs:
         id: appinfo
         run: |
           build_appinfo_entry() {
-            local escaped_name=$(cat ./appstore_metadata/$2/$1/name.txt | jq -sRr @json)
-            local escaped_subtitle=$(cat ./appstore_metadata/$2/$1/subtitle.txt | jq -sRr @json)
             local escaped_marketing_url=$(cat ./appstore_metadata/$2/$1/marketing_url.txt | jq -sRr @json)
             local escaped_privacy_policy_url=$(cat ./appstore_metadata/$2/$1/privacy_url.txt | jq -sRr @json)
             local escaped_description=$(cat ./appstore_metadata/$2/$1/description.txt | jq -sRr @json)
-            local json="{\"name\": $escaped_name, \"subtitle\": $escaped_subtitle, \"feedback_email\": \"info@monal-im.org\", \"marketing_url\": $escaped_marketing_url, \"privacy_policy_url\": $escaped_privacy_policy_url, \"description\": $escaped_description}"
+            local json="{\"feedback_email\": \"info@monal-im.org\", \"marketing_url\": $escaped_marketing_url, \"privacy_policy_url\": $escaped_privacy_policy_url, \"description\": $escaped_description}"
             echo "$json"
           }
           

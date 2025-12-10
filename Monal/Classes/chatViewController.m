@@ -1756,7 +1756,7 @@ enum msgSentState {
 {
     NSDictionary* dic = notification.userInfo;
 
-    DDLogDebug(@"Got deleted message notice for history id %ld and message id %@", (long)[dic[@"historyId"] intValue], [dic[@"historyId"] messageId]);
+    DDLogDebug(@"Got deleted message notice for history id %ld and message id %@", (long)[dic[@"historyId"] intValue], dic[@"historyId"]);
 
     for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
     {

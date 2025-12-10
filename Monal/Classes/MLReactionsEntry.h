@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(instancetype) initWithDictionary:(NSDictionary*) dict;
 
 @property (nonatomic, readonly) NSNumber* historyId;
+@property (nonatomic, readonly) NSString* user;
 @property (nonatomic, readonly) NSString* _Nullable jid;
 @property (nonatomic, readonly) NSString* _Nullable occupantId;
 @property (nonatomic, readonly) NSString* _Nullable mucNick;

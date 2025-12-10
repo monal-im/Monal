@@ -782,7 +782,7 @@ class ChatViewMessage: ExyteChat.Message {
     override var reactions: [Reaction] {
         get {
             var retval: [Reaction] = []
-            let reactions: [MLReactionsEntry] = innerMessage.reactions
+            let reactions: [MLReactionsEntry] = (innerMessage.reactions as [MLReactionsEntry]).sorted(by: { $0.user < $1.user })
             for reactionsInfo in reactions {
                 for reaction in reactionsInfo.reactions {
                     retval.append(Reaction(

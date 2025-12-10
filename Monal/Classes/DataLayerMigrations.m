@@ -983,18 +983,10 @@
             );"];
         }];
         
-//         // Support for persisting occupant_id to nick mapping even if the occupant left the muc
-//         [self updateDB:db withDataLayer:dataLayer toVersion:7.003 withBlock:^{
-//             [db executeNonQuery:@"CREATE TABLE 'occupant_info' (\
-//                 'occupant_id' VARCHAR(128) NULL DEFAULT NULL, \
-//                 'nick' VARCHAR(255) NOT NULL, \
-//                 'account_id' INTEGER NOT NULL, \
-//                 'room' VARCHAR(255) NOT NULL, \
-//                 PRIMARY KEY('occupant_id'), \
-//                 FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
-//                 FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
-//             );"];
-//         }];
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.003 withBlock:^{
+            NSNumber* initialValue = [dataLayer getAutodecrementHistoryId];
+            [db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('autodecrement~message_history', ?);" andArguments:@[initialValue]];
+        }];
 
 
         //check if device id changed and invalidate state, if so

@@ -298,6 +298,13 @@ static const int KEY_SIZE = 16;
 }
 
 $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    MLContact* contact = [MLContact createContactFromJid:jid andAccountID:account.accountID];
+    if(!contact.isListedLocally)
+    {
+        DDLogWarn(@"Ignoring incoming devicelist update of user not even listed in our local contact list: %@", contact);
+        return;
+    }
+    
     //type will be "publish", "retract", "purge" or "delete". "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     MLAssert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"], @"pep node must be 'eu.siacs.conversations.axolotl.devicelist'");

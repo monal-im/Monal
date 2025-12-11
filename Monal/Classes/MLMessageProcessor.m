@@ -360,7 +360,11 @@ static NSMutableDictionary* _typingNotifications;
     
     if([messageNode check:@"/<type=groupchat>/subject"])
     {
-        if(!isMLhistory)
+        if(!possiblyUnknownContact.isMuc)
+            DDLogWarn(@"Ignoring muc subject of unknown muc: %@", possiblyUnknownContact);
+        if(isMLhistory)
+            DDLogVerbose(@"Ignoring muc subject: isMLhistory=YES...");
+        else
         {
             NSString* subject = nilDefault([messageNode findFirst:@"/<type=groupchat>/subject#"], @"");
             subject = [subject stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -369,11 +373,11 @@ static NSMutableDictionary* _typingNotifications;
             
             if([subject isEqualToString:currentSubject])
             {
-                DDLogVerbose(@"Ignoring subject, nothing changed...");
+                DDLogVerbose(@"Ignoring subject, nothing changed for %@", possiblyUnknownContact);
                 return nil;
             }
             
-            DDLogVerbose(@"Updating subject in database: %@", subject);
+            DDLogVerbose(@"Updating subject for %@ in database: %@", possiblyUnknownContact, subject);
             [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
             
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucSubjectChanged object:account userInfo:@{
@@ -381,8 +385,6 @@ static NSMutableDictionary* _typingNotifications;
                 @"subject": subject,
             }];
         }
-        else
-            DDLogVerbose(@"Ignoring muc subject: isMLhistory=YES...");
         return nil;
     }
     

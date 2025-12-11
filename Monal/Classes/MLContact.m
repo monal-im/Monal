@@ -27,6 +27,7 @@ NSString* const kSubNone = @"none";
 NSString* const kSubTo = @"to";
 NSString* const kSubFrom = @"from";
 NSString* const kSubRemove = @"remove";
+NSString* const kSubNotListedLocally = @"notListedLocally";
 NSString* const kAskSubscribe = @"subscribe";
 
 static NSMutableDictionary* _singletonCache;
@@ -220,7 +221,7 @@ static NSMutableDictionary* _singletonCache;
             @"buddy_name": jid.lowercaseString,
             @"nick_name": @"",
             @"full_name": @"",
-            @"subscription": kSubNone,
+            @"subscription": kSubNotListedLocally,
             @"ask": @"",
             @"account_id": accountID,
             //@"muc_subject": nil,
@@ -541,6 +542,17 @@ static NSMutableDictionary* _singletonCache;
     return [NSSet setWithObjects:@"contactJid", @"accountID", nil];
 }
 
+-(BOOL) isListedLocally
+{
+    //if this is a contact not in our database (not on our roster and not listed locally)
+    return ![self.subscription isEqualToString:kSubNotListedLocally];
+}
+
++(NSSet*) keyPathsForValuesAffectingIsListedLocally
+{
+    return [NSSet setWithObjects:@"subscription", nil];
+}
+
 -(BOOL) isInRoster
 {
     //either we already allowed each other or we allow this contact and asked them to allow us
@@ -857,7 +869,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@: %@ (%@) %@%@%@, kSub=%@", self.accountID, self.contactJid, self.isMuc ? self.mucType : @"1:1", self.isInRoster ? @"inRoster" : @"not(inRoster)", self.hasIncomingContactRequest ? @"[incomingContactRequest]" : @"", self.hasOutgoingContactRequest ? @"[outgoingContactRequest]" : @"", self.subscription];
+    return [NSString stringWithFormat:@"%@: %@ (%@) %@%@%@, kSub=%@ (listed locally:%@)", self.accountID, self.contactJid, self.isMuc ? self.mucType : @"1:1", self.isInRoster ? @"inRoster" : @"not(inRoster)", self.hasIncomingContactRequest ? @"[incomingContactRequest]" : @"", self.hasOutgoingContactRequest ? @"[outgoingContactRequest]" : @"", self.subscription, bool2str(self.isListedLocally)];
 }
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic

@@ -206,7 +206,9 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date;
 
 +(NSString*) removeInvalidXMLCharactersFromString:(NSString*) inputString;
++(BOOL) constantTimeCompareAttackerPointer:(void*) p1 withLength:(NSUInteger) p1Length andKnownPointer:(void*) p2 withLength:(NSUInteger) p2Length;
 +(BOOL) constantTimeCompareAttackerString:(NSString* _Nonnull) str1 withKnownString:(NSString* _Nonnull) str2;
++(BOOL) constantTimeCompareAttackerData:(NSData* _Nonnull) data1 withKnownData:(NSData* _Nonnull) data2;
 
 +(BOOL) isIP:(NSString*) host;
 

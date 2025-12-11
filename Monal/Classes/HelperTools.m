@@ -1037,6 +1037,8 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 
 +(id) unserializeData:(NSData*) data
 {
+    if(data == nil)
+        return nil;
     NSError* error;
     id obj = [NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
         [NSData class],
@@ -3296,14 +3298,16 @@ a=%@\r\n", mid, candidate];
 }
 
 //see https://nachtimwald.com/2017/04/02/constant-time-string-comparison-in-c/
-+(BOOL) constantTimeCompareAttackerString:(NSString* _Nonnull) str1 withKnownString:(NSString* _Nonnull) str2
++(BOOL) constantTimeCompareAttackerPointer:(void*) p1 withLength:(NSUInteger) p1Length andKnownPointer:(void*) p2 withLength:(NSUInteger) p2Length
 {
-    if(str1 == nil || str2 == nil)
+    if(p1 == nil || p2 == nil)
         return NO;
     
-    const char* s1 = str1.UTF8String;
-    const char* s2 = str2.UTF8String;
-    volatile int m = 0;
+    p1Length--;
+    p2Length--;
+    const uint8_t* s1 = p1;
+    const uint8_t* s2 = p2;
+    volatile uint8_t m = 0;
     volatile size_t i = 0;
     volatile size_t j = 0;
     volatile size_t k = 0;    
@@ -3313,19 +3317,33 @@ a=%@\r\n", mid, candidate];
         //this will only turn on bits in m, but never turn them off
         m |= s1[i] ^ s2[j];
         
-        //
-        if(s1[i] == '\0')
+        //always balance increments even if s2 is shorter than s1
+        if(j != p2Length)
+            j++;
+        if(j == p2Length)
+            k++;
+        
+        //use length instead of null-byte
+        if(i == p1Length)
             break;
         i++;
-        
-        //always balance increments even if s2 is shorter than s1
-        if(s2[j] != '\0')
-            j++;
-        if(s2[j] == '\0')
-            k++;
     }
     
     return m == 0;      //check if we never turned on any bit in m
+}
+
++(BOOL) constantTimeCompareAttackerString:(NSString* _Nonnull) str1 withKnownString:(NSString* _Nonnull) str2
+{
+    if(str1 == nil || str2 == nil)
+        return NO;
+    return [self constantTimeCompareAttackerPointer:(void*)str1.UTF8String withLength:str1.length andKnownPointer:(void*)str2.UTF8String withLength:str2.length];
+}
+    
++(BOOL) constantTimeCompareAttackerData:(NSData* _Nonnull) data1 withKnownData:(NSData* _Nonnull) data2
+{
+    if(data1 == nil || data2 == nil)
+        return NO;
+    return [self constantTimeCompareAttackerPointer:(void*)data1.bytes withLength:data1.length andKnownPointer:(void*)data2.bytes withLength:data2.length];
 }
 
 +(BOOL) isIP:(NSString*) host

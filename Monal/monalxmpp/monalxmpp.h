@@ -39,3 +39,8 @@ FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 #import <monalxmpp/MLUDPLogger.h>
 #import <monalxmpp/XMPPDataForm.h>
 #import <monalxmpp/MLBasePaser.h>
+#import <monalxmpp/SCRAM.h>
+#import <monalxmpp/HT.h>
+#import <monalxmpp/MLMucProcessor.h>
+#import <monalxmpp/MLNotificationManager.h>
+

@@ -10,7 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <monalxmpp/HelperTools.h>
-#import "SCRAM.h"
+#import <monalxmpp/SCRAM.h>
 
 @interface SCRAM ()
 {

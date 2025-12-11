@@ -27,7 +27,8 @@
 #import <monalxmpp/HelperTools.h>
 #import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/MLNotificationQueue.h>
-#import "SCRAM.h"
+#import <monalxmpp/SCRAM.h>
+#import <monalxmpp/HT.h>
 #import <monalxmpp/MLImageManager.h>
 
 //XMPP objects
@@ -139,10 +140,13 @@ NSString* const kStanza = @"stanza";
     
     //scram related stuff
     SCRAM* _scramHandler;
+    HT* _htHandler;
     NSSet* _supportedSaslMechanisms;
+    NSSet* _supportedFastMechanisms;
     NSSet* _supportedChannelBindings;
     monal_void_block_t _blockToCallOnTCPOpen;
     NSString* _upgradeTask;
+    NSString* _fastTokenRequested;
     
     //catchup statistics
     uint32_t _catchupStanzaCounter;
@@ -971,6 +975,8 @@ NSString* const kStanza = @"stanza";
         
         DDLogVerbose(@"Removing scramHandler...");
         self->_scramHandler = nil;
+        self->_htHandler = nil;
+        self->_fastTokenRequested = nil;
         self->_blockToCallOnTCPOpen = nil;
         
         //(re)read persisted state and start connection
@@ -1049,6 +1055,9 @@ NSString* const kStanza = @"stanza";
             [self persistState];
         }
         
+        //delete FAST token for this account --> use SCRAM on next login
+        [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
+        
         [[DataLayer sharedInstance] resetContactsForAccount:self.accountID];
         
         //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
@@ -1069,7 +1078,7 @@ NSString* const kStanza = @"stanza";
     
     MLAssert(!_receiveQueue.suspended, @"receive queue suspended while trying to disconnect!");
     
-    //this has to be synchronous because we want to wait for the disconnect to complete before continuingand unlocking the process in the NSE
+    //this has to be synchronous because we want to wait for the disconnect to complete before continuing and unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
         DDLogInfo(@"stopping running timers");
         if(self->_loginTimer)
@@ -1089,6 +1098,8 @@ NSString* const kStanza = @"stanza";
         
         DDLogVerbose(@"Removing scramHandler...");
         self->_scramHandler = nil;
+        self->_htHandler = nil;
+        self->_fastTokenRequested = nil;
         self->_blockToCallOnTCPOpen = nil;
         
         if(self->_accountState<kStateReconnecting)
@@ -1178,6 +1189,9 @@ NSString* const kStanza = @"stanza";
                 //persist these changes
                 [self persistState];
             }
+            
+            //delete FAST token for this account --> use SCRAM on next login
+            [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
             
             [[DataLayer sharedInstance] resetContactsForAccount:self.accountID];
             
@@ -2543,7 +2557,9 @@ NSString* const kStanza = @"stanza";
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
-            NSString* message = [parsedStanza findFirst:@"text#"];;
+            NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-sasl}*$"];
+            NSString* message = [parsedStanza findFirst:@"text#"];
+            DDLogWarn(@"Got SASL1 Failure %@: %@", errorReason, message);
             if([parsedStanza check:@"not-authorized"])
             {
                 if(!message)
@@ -2555,6 +2571,7 @@ NSString* const kStanza = @"stanza";
                     message = NSLocalizedString(@"There was a SASL error on the server.", @"");
             }
             message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
+            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
             
             //clear pipeline cache to make sure we have a fresh restart next time
             xmppPipeliningState oldPipeliningState = _pipeliningState;
@@ -2587,7 +2604,8 @@ NSString* const kStanza = @"stanza";
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             //perform logic to handle sasl success
-            DDLogInfo(@"Got SASL Success");
+            DDLogInfo(@"Got SASL1 Success");
+            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
             
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
@@ -2675,8 +2693,8 @@ NSString* const kStanza = @"stanza";
             //    would have advertised support
             //    --> the server will abort authentication, if it did advertise support, but a MITM stripped it off
             // 2. we allow an SSDP signed XEP-0440 list not containing tls-server-end-point
-            //    --> since this is signed by SSDP, it cannot have been caused by a MITM attacker
-            // 3. we allow a XEP-0440 list containing tls-server-end-point. support for this cb-type this is mandatory via XEP-0440.
+            //    --> since this is signed by SSDP, it cannot have been manipulated by a MITM attacker
+            // 3. we allow a XEP-0440 list containing tls-server-end-point. support for this cb-type is mandatory via XEP-0440.
             //    --> non-support for tls-server-end-point is likely caused by a MITM attacker (SSDP isn't supported to authenticate this!)
             // ==> abort authentication if cb-types were anounced, but the list doesn't contain tls-server-end-point and this wasn't
             //     signed by SSDP (the check for SSDP is done in [self channelBindingToUse].
@@ -2725,9 +2743,12 @@ NSString* const kStanza = @"stanza";
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}failure"])
         {
+            if(self.accountState >= kStateLoggedIn)
+                return [self invalidXMLError];
+            
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-sasl}*$"];
             NSString* message = [parsedStanza findFirst:@"text#"];
-            DDLogWarn(@"Got SASL2 %@: %@", errorReason, message);
+            DDLogWarn(@"Got SASL2 Failure %@: %@", errorReason, message);
             if([errorReason isEqualToString:@"not-authorized"])
             {
                 if(!message)
@@ -2739,6 +2760,7 @@ NSString* const kStanza = @"stanza";
                     message = [NSString stringWithFormat:NSLocalizedString(@"Server returned SASL2 error '%@'.", @""), errorReason];
             }
             message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
+            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
             
             //clear pipeline cache to make sure we have a fresh restart next time
             xmppPipeliningState oldPipeliningState = _pipeliningState;
@@ -2764,6 +2786,13 @@ NSString* const kStanza = @"stanza";
                 DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
                 self.connectionProperties.saslMethods = mechanismList;
                 
+                //build FAST mechanism list displayed in ui (mark _htHandler.method as used)
+                NSMutableDictionary* fastMechanismList = [NSMutableDictionary new];
+                for(NSString* mechanism in _supportedFastMechanisms)
+                    fastMechanismList[mechanism] = @([mechanism isEqualToString:self->_htHandler.method]);
+                DDLogInfo(@"Saving fastMethods list: %@", fastMechanismList);
+                self.connectionProperties.fastMethods = fastMechanismList;
+                
                 //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
                 NSMutableDictionary* channelBindings = [NSMutableDictionary new];
                 if(_supportedChannelBindings != nil)
@@ -2787,9 +2816,15 @@ NSString* const kStanza = @"stanza";
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
             
-            //check server-final message for correctness if needed
-            if(!self->_scramHandler.finishedSuccessfully)
-                [self handleScramInSuccessOrContinue:parsedStanza];
+            DDLogWarn(@"Got SASL2 Success");
+            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
+            
+            if(self.accountState >= kStateLoggedIn)
+                return [self invalidXMLError];
+            
+            //check FAST responder-message or SCRAM server-final message for correctness if needed
+            if(!self->_htHandler.finishedSuccessfully || !self->_scramHandler.finishedSuccessfully)
+                [self handleSasl2SuccessOrContinue:parsedStanza];
             
             //build mechanism list displayed in ui (mark _scramHandler.method as used)
             NSMutableDictionary* mechanismList = [NSMutableDictionary new];
@@ -2797,6 +2832,13 @@ NSString* const kStanza = @"stanza";
                 mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
             DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
             self.connectionProperties.saslMethods = mechanismList;
+            
+            //build FAST mechanism list displayed in ui (mark _htHandler.method as used)
+            NSMutableDictionary* fastMechanismList = [NSMutableDictionary new];
+            for(NSString* mechanism in _supportedFastMechanisms)
+                fastMechanismList[mechanism] = @([mechanism isEqualToString:self->_htHandler.method]);
+            DDLogInfo(@"Saving fastMethods list: %@", fastMechanismList);
+            self.connectionProperties.fastMethods = fastMechanismList;
             
             //build channel-binding list displayed in ui (mark [self channelBindingToUse] as used)
             NSMutableDictionary* channelBindings = [NSMutableDictionary new];
@@ -2815,7 +2857,21 @@ NSString* const kStanza = @"stanza";
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
+            //store FAST token, if requested and provided
+            if(_fastTokenRequested != nil && [parsedStanza check:@"{urn:xmpp:fast:0}token"])
+            {
+                NSString* token = [parsedStanza findFirst:@"{urn:xmpp:fast:0}token@token"];
+                NSString* expiry = [parsedStanza findFirst:@"{urn:xmpp:fast:0}token@expiry|datetime"];
+                DDLogInfo(@"Got new FAST token with expiry %@: <redacted>", expiry);
+                [SAMKeychain setPasswordData:[HelperTools serializeObject:@{
+                    @"token": token,
+                    @"mechanism": _fastTokenRequested,
+                }] forService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
+            }
+            
             self->_scramHandler = nil;
+            self->_htHandler = nil;
+            self->_fastTokenRequested = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
             self->_accountState = kStateLoggedIn;
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
@@ -2842,8 +2898,9 @@ NSString* const kStanza = @"stanza";
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
             
-            //check server-final message for correctness
-            [self handleScramInSuccessOrContinue:parsedStanza];
+            //check FAST responder-message or SCRAM server-final message for correctness if needed
+            if(!self->_htHandler.finishedSuccessfully || !self->_scramHandler.finishedSuccessfully)
+                [self handleSasl2SuccessOrContinue:parsedStanza];
             
             NSArray* tasks = [parsedStanza find:@"tasks/task#"];
             if(tasks.count == 0)
@@ -3085,7 +3142,7 @@ NSString* const kStanza = @"stanza";
     };
     //called below, if neither SASL1 nor SASL2 could be used to negotiate a valid SASL mechanism
     monal_void_block_t noAuthSupported = ^{
-        DDLogWarn(@"No supported auth mechanism: %@", self->_supportedSaslMechanisms);
+        DDLogWarn(@"No supported auth mechanism: %@ (%@)", self->_supportedSaslMechanisms, self->_supportedFastMechanisms);
         
         //sasl2 will be pinned if we saw sasl2 support and PLAIN was NOT allowed by creating this account using the  advanced account creation menu
         //display scary warning message if sasl2 is pinned and login was successful at least once
@@ -3138,7 +3195,14 @@ NSString* const kStanza = @"stanza";
         DDLogDebug(@"Trying SASL2...");
         __block BOOL supportsScram = NO;
         __block BOOL supportsPlus = NO;
+        __block BOOL supportsFast = NO;
         
+        NSDictionary* fast2CbMapping = @{
+            @"EXPR": @"tls-exporter",
+            @"ENDP": @"tls-server-end-point",
+            //leaving this out means nil: @"NONE": nil,
+        };
+                    
         weakify(self);
         _blockToCallOnTCPOpen = ^{
             strongify(self);
@@ -3179,20 +3243,42 @@ NSString* const kStanza = @"stanza";
                     }
             }
             
-            //check for supported scram mechanisms (highest security first!)
-            for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:[self channelBindingToUse] != nil])
-                if([self->_supportedSaslMechanisms containsObject:mechanism])
+            MLXMLNode* authenticate = nil;
+            
+            //try to authenticate using FAST
+            //but only use FAST if we don't want to do a SCRAM upgrade via XEP-0480
+            if(self->_upgradeTask == nil)
+            {
+                NSError* error = nil;
+                NSDictionary* tokenData = [HelperTools unserializeData:[SAMKeychain passwordDataForService:kMonalHtTokenKeychainName account:self.accountID.stringValue error:&error]];
+                if(error != nil)
+                    DDLogDebug(@"Failed to load HT token: %@", error);
+                if(tokenData != nil && [self->_supportedFastMechanisms containsObject:tokenData[@"mechanism"]])
                 {
-                    self->_scramHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:mechanism];
-                    //set ssdp data for downgrade protection
-                    //_supportedChannelBindings will be nil, if XEP-0440 is not supported by our server (which should never happen because XEP-0440 is mandatory for SASL2)
-                    [self->_scramHandler setSSDPMechanisms:[self->_supportedSaslMechanisms allObjects] andChannelBindingTypes:[self->_supportedChannelBindings allObjects]];
-                    MLXMLNode* authenticate = [[MLXMLNode alloc]
+                    
+                    NSData* channelBindingData = nil;
+                    NSString* cbMethodOfToken = fast2CbMapping[[tokenData[@"mechanism"] substringWithRange:NSMakeRange([tokenData[@"mechanism"] length]-4, 4)]];
+                    //this can only be the case if it was closed shortly before handling this stanza (race condition)
+                    //in this case we'll abort the auth after sending the authenticate element, so not adding cb-data is fine here
+                    if([((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen)
+                        channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:cbMethodOfToken];
+                    
+                    DDLogInfo(@"Authenticating using FAST token with cb-type %@ and cb-data: %@", cbMethodOfToken, channelBindingData);
+                    self->_htHandler = [[HT alloc]
+                        initWithUsername:self.connectionProperties.identity.user
+                        token:tokenData[@"token"]
+                        method:tokenData[@"mechanism"]
+                        andChannelBindingData:channelBindingData
+                    ];
+                    
+                    authenticate = [[MLXMLNode alloc]
                         initWithElement:@"authenticate"
                         andNamespace:@"urn:xmpp:sasl:2"
-                        withAttributes:@{@"mechanism": mechanism}
+                        withAttributes:@{@"mechanism": tokenData[@"mechanism"]}
                         andChildren:@[
-                            [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithNoMatchingChannelBindingFound:noMatchingChannelBindingFound andChannelBinding:[self channelBindingToUse]]]],
+                            [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithData:[self->_htHandler initiatorMessage]]],
+                            //no count attribute because we don't do any 0rtt TLS here
+                            [[MLXMLNode alloc] initWithElement:@"fast" andNamespace:@"urn:xmpp:fast:0"],
                             [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
                                 @"id":[[HelperTools deviceUUID] UUIDString],
                             } andChildren:@[
@@ -3202,12 +3288,61 @@ NSString* const kStanza = @"stanza";
                         ]
                         andData:nil
                     ];
-                    //add upgrade element if we mutually support upgrades
-                    if(self->_upgradeTask != nil)
-                        [authenticate addChildNode:[[MLXMLNode alloc] initWithElement:@"upgrade" andNamespace:@"urn:xmpp:sasl:upgrade:0" andData:self->_upgradeTask]];
-                    [self send:authenticate];
-                    return;
                 }
+            }
+            
+            if(self->_htHandler == nil)
+            {
+                //check for supported scram mechanisms (highest security first!)
+                for(NSString* mechanism in [SCRAM supportedMechanismsIncludingChannelBinding:[self channelBindingToUse] != nil])
+                    if([self->_supportedSaslMechanisms containsObject:mechanism])
+                    {
+                        self->_scramHandler = [[SCRAM alloc] initWithUsername:self.connectionProperties.identity.user password:self.connectionProperties.identity.password andMethod:mechanism];
+                        //set ssdp data for downgrade protection
+                        //_supportedChannelBindings will be nil, if XEP-0440 is not supported by our server (which should never happen because XEP-0440 is mandatory for SASL2)
+                        [self->_scramHandler setSSDPMechanisms:[self->_supportedSaslMechanisms allObjects] andChannelBindingTypes:[self->_supportedChannelBindings allObjects]];
+                        authenticate = [[MLXMLNode alloc]
+                            initWithElement:@"authenticate"
+                            andNamespace:@"urn:xmpp:sasl:2"
+                            withAttributes:@{@"mechanism": mechanism}
+                            andChildren:@[
+                                [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithNoMatchingChannelBindingFound:noMatchingChannelBindingFound andChannelBinding:[self channelBindingToUse]]]],
+                                [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
+                                    @"id":[[HelperTools deviceUUID] UUIDString],
+                                } andChildren:@[
+                                    [[MLXMLNode alloc] initWithElement:@"software" andData:@"Monal IM"],
+                                    [[MLXMLNode alloc] initWithElement:@"device" andData:[[UIDevice currentDevice] name]],
+                                ] andData:nil],
+                            ]
+                            andData:nil
+                        ];
+                        
+                        //add upgrade element if we mutually support upgrades
+                        if(self->_upgradeTask != nil)
+                            [authenticate addChildNode:[[MLXMLNode alloc] initWithElement:@"upgrade" andNamespace:@"urn:xmpp:sasl:upgrade:0" andData:self->_upgradeTask]];
+                        
+                        //check for supported FAST mechanisms (highest security first) and request FAST token, if supported by server
+                        //but only accept a token with the same channel-binding as our SCRAM auth to prevent downgrades!
+                        if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/inline/{urn:xmpp:fast:0}fast"])
+                            for(NSString* mechanism in [HT supportedMechanismsIncludingChannelBinding:[self channelBindingToUse] != nil])
+                                if(
+                                    [[self channelBindingToUse] isEqualToString:fast2CbMapping[[mechanism substringWithRange:NSMakeRange(mechanism.length-4, 4)]]] &&
+                                    [self->_supportedFastMechanisms containsObject:mechanism]
+                                ) {
+                                    self->_fastTokenRequested = mechanism;
+                                    [authenticate addChildNode:[[MLXMLNode alloc] initWithElement:@"request-token" andNamespace:@"urn:xmpp:fast:0" withAttributes:@{
+                                        @"mechanism": mechanism,
+                                    } andChildren:@[] andData:nil]];
+                                }
+                        break;      //use this SCRAM mechanism rather than iterating through the remaining ones
+                    }
+            }
+            
+            if(authenticate != nil)
+            {
+                [self send:authenticate];
+                return;
+            }
             
             //could not find any matching SASL2 mechanism (we do NOT support PLAIN)
             noAuthSupported();
@@ -3215,6 +3350,7 @@ NSString* const kStanza = @"stanza";
         
         //extract menchanisms presented
         _supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/mechanism#"]];
+        _supportedFastMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/inline/{urn:xmpp:fast:0}fast/mechanism#"]];
         
         //extract supported channel-binding types
         _supportedChannelBindings = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl-cb:0}sasl-channel-binding/channel-binding@type"]];
@@ -3229,6 +3365,9 @@ NSString* const kStanza = @"stanza";
                 if(mechanism.length > 5 && [@"-PLUS" isEqualToString:[mechanism substringFromIndex:mechanism.length-5]])
                     supportsPlus = YES;
             }
+        for(NSString* mechanism in [HT supportedMechanismsIncludingChannelBinding:YES])
+            if([_supportedFastMechanisms containsObject:mechanism])
+                supportsFast = YES;
         
         //directly call our continuation block if SCRAM is not supported, because _blockToCallOnTCPOpen() will throw an error then
         //(we currently only support SCRAM for SASL2)
@@ -3236,7 +3375,7 @@ NSString* const kStanza = @"stanza";
         //and if we are not pipelining the auth, we can call the block immediately, too
         //(because the TLS connection was obviously already established and that made us receive the non-cached stream features used here)
         //if we don't call it here, the continuation block will be called automatically once the TLS connection got established
-        if(!supportsScram || !self.connectionProperties.server.isDirectTLS || _pipeliningState < kPipelinedAuth)
+        if((!supportsScram && !supportsFast) || !self.connectionProperties.server.isDirectTLS || _pipeliningState < kPipelinedAuth)
         {
             _blockToCallOnTCPOpen();
             _blockToCallOnTCPOpen = nil;     //don't call this twice
@@ -3341,27 +3480,48 @@ NSString* const kStanza = @"stanza";
         [self bindResource:self.connectionProperties.identity.resource];
 }
 
--(void) handleScramInSuccessOrContinue:(MLXMLNode*) parsedStanza
+-(void) handleSasl2SuccessOrContinue:(MLXMLNode*) parsedStanza
 {
     //perform logic to handle sasl success
     DDLogInfo(@"Got SASL2 Success/Continue");
-    
-    //only parse and validate scram response, if we are in scram mode (should always be the case)
-    MLAssert(self->_scramHandler != nil, @"self->_scramHandler should NEVER be nil when using SASL2!");
+    MLAssert(self->_scramHandler != nil || self->_htHandler != nil, @"At least self->_scramHandler or self->_htHandler must not be nil when using SASL2!");
     
     NSString* message = nil;
     BOOL deactivate_account = NO;
-    NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"additional-data#|base64"] encoding:NSUTF8StringEncoding];
-    switch([self->_scramHandler parseServerFinalMessage:innerSASLData]) {
-        case MLScramStatusWrongServerProof: deactivate_account = YES; message = NSLocalizedString(@"SCRAM server proof wrong, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
-        case MLScramStatusServerError: deactivate_account = NO; message = NSLocalizedString(@"Unexpected error authenticating server using SASL2 (does your server have a bug?), disconnecting!", @""); break;
-        case MLScramStatusServerFinalOK: deactivate_account = NO; message = nil; break;        //everything is okay
-        default: unreachable(@"wrong status for scram message!"); break;
+    if(_htHandler != nil)
+    {
+        switch([_htHandler parseResponderMessage:[parsedStanza findFirst:@"additional-data#|base64"]])
+        {
+            case MLHtStatusResponderSignatureError: deactivate_account = YES; message = NSLocalizedString(@"FAST responder message wrong, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
+            case MLHtStatusResponderMessageError:
+                DDLogWarn(@"Fast token invalid, reconnecting to flush pipeline and use normal SCRAM...");
+                //clear pipeline cache to make sure we have a fresh restart next time
+                _pipeliningState = kPipelinedNothing;
+                _cachedStreamFeaturesBeforeAuth = nil;
+                _cachedStreamFeaturesAfterAuth = nil;
+                //clear FAST token (it was reported to be invalid by the server) --> use SCRAM on next login
+                [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
+                [self reconnect];
+                return;
+            case MLHtStatusResponderMessageOK: deactivate_account = NO; message = nil; break;        //everything is okay
+            default: unreachable(@"wrong status for ht response!"); break;
+        }
     }
-    
+    else if(_scramHandler != nil)
+    {
+        NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"additional-data#|base64"] encoding:NSUTF8StringEncoding];
+        switch([_scramHandler parseServerFinalMessage:innerSASLData])
+        {
+            case MLScramStatusWrongServerProof: deactivate_account = YES; message = NSLocalizedString(@"SCRAM server proof wrong, ongoing MITM attack highly likely, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
+            case MLScramStatusServerError: deactivate_account = NO; message = NSLocalizedString(@"Unexpected error authenticating server using SASL2 (does your server have a bug?), disconnecting!", @""); break;
+            case MLScramStatusServerFinalOK: deactivate_account = NO; message = nil; break;        //everything is okay
+            default: unreachable(@"wrong status for scram message!"); break;
+        }
+    }
+        
     if(message != nil)
     {
-        DDLogError(@"SCRAM says this server-final message was wrong: %@", message);
+        DDLogError(@"SCRAM/HT says this server-final-message/responder-message was wrong: %@", message);
         
         //clear pipeline cache to make sure we have a fresh restart next time
         _pipeliningState = kPipelinedNothing;
@@ -3376,7 +3536,7 @@ NSString* const kStanza = @"stanza";
         return;
     }
     else
-        DDLogDebug(@"SCRAM says this server-final message was correct");
+        DDLogDebug(@"SCRAM/HT says this server-final-message/responder-message was correct");
 }
 
 //bridge needed fo MLServerDetails.m

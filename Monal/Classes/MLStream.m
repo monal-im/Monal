@@ -437,6 +437,7 @@
         sec_protocol_options_set_tls_false_start_enabled(options, 1);
         sec_protocol_options_set_min_tls_protocol_version(options, tls_protocol_version_TLSv12);
         //sec_protocol_options_set_max_tls_protocol_version(options, tls_protocol_version_TLSv12);
+        sec_protocol_options_set_tls_sct_enabled(options, 1);
         sec_protocol_options_set_tls_resumption_enabled(options, 1);
         sec_protocol_options_set_tls_tickets_enabled(options, 1);
         sec_protocol_options_set_tls_renegotiation_enabled(options, 0);
@@ -850,6 +851,18 @@
         MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
         sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
         return sec_protocol_metadata_get_negotiated_tls_protocol_version(s_metadata) == tls_protocol_version_TLSv13;
+    }
+}
+
+-(BOOL) acceptedTlsEarlyData
+{
+    @synchronized(self.shared_state) {
+        MLAssert([self streamStatus] >= NSStreamStatusOpen && [self streamStatus] < NSStreamStatusClosed, @"Stream must be open to call this method!", (@{@"streamStatus": @([self streamStatus])}));
+        MLAssert(self.shared_state.hasTLS, @"Stream must have TLS negotiated to call this method!");
+        nw_protocol_metadata_t p_metadata = nw_connection_copy_protocol_metadata(self.shared_state.connection, nw_protocol_copy_tls_definition());
+        MLAssert(nw_protocol_metadata_is_tls(p_metadata), @"Protocol metadata is not TLS!");
+        sec_protocol_metadata_t s_metadata = nw_tls_copy_sec_protocol_metadata(p_metadata);
+        return sec_protocol_metadata_get_early_data_accepted(s_metadata);
     }
 }
 

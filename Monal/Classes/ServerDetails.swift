@@ -333,6 +333,8 @@ struct ServerDetails: View {
         }
 
         var result: [EntryData] = []
+        
+        //normal SASL methods (SCRAM etc.)
         let saslMethods = connection.saslMethods as? [String: Bool] ?? [:]
         for (method, used) in saslMethods.sortedByKey() {
             let supported = (SCRAM.supportedMechanisms(includingChannelBinding: true) as? [String] ?? []).contains(method)
@@ -343,9 +345,9 @@ struct ServerDetails: View {
                 case "EXTERNAL":
                     description = NSLocalizedString("Uses TLS client certificates for authentication", comment: "")
                 case let method where (method.hasPrefix("SCRAM-") && method.hasSuffix("-PLUS")):
-                    description = NSLocalizedString("Salted Challenge Response Authentication Mechanism using the given Hash Method additionally secured by Channel-Binding", comment: "")
+                    description = NSLocalizedString("Salted Challenge Response Authentication Mechanism using the given hash method additionally secured by Channel-Binding", comment: "")
                 case let method where method.hasPrefix("SCRAM-"):
-                    description = NSLocalizedString("Salted Challenge Response Authentication Mechanism using the given Hash Method", comment: "")
+                    description = NSLocalizedString("Salted Challenge Response Authentication Mechanism using the given hash method", comment: "")
                 default:
                     description = NSLocalizedString("Unknown authentication method", comment: "")
             }
@@ -357,6 +359,29 @@ struct ServerDetails: View {
                 )
             )
         }
+        
+        //FAST methods (HT token baed)
+        let fastMethods = connection.fastMethods as? [String: Bool] ?? [:]
+        for (method, used) in fastMethods.sortedByKey() {
+            let supported = (HT.supportedMechanisms(includingChannelBinding: true) as? [String] ?? []).contains(method)
+            var description: String
+            switch method {
+                case let method where (method.hasPrefix("HT-") && method.hasSuffix("-NONE")):
+                    description = NSLocalizedString("Hashed Token mechanism using the given hash method", comment: "")
+                case let method where method.hasPrefix("HT-"):
+                    description = NSLocalizedString("Hashed Token mechanism using the given hash method additionally secured by Channel-Binding", comment: "")
+                default:
+                    description = NSLocalizedString("Unknown authentication method", comment: "")
+            }
+            result.append(
+                EntryData(
+                    title: String(format: NSLocalizedString("Method: %@", comment: ""), method),
+                    description: description,
+                    status: used ? .success : (!supported ? .warning : .normal)
+                )
+            )
+        }
+        
         return result
     }
 

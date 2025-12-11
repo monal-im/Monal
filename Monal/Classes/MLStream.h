@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) startTLS;
 @property(readonly) BOOL hasTLS;
 @property(readonly) BOOL isTLS13;
+@property(readonly) BOOL acceptedTlsEarlyData;
 
 @property(nullable, readonly) NSArray* supportedChannelBindingTypes;
 -(NSData* _Nullable) channelBindingDataForType:(NSString* _Nullable) type;

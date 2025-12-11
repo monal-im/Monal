@@ -47,6 +47,7 @@ static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
 
 #define kMonalKeychainName @"Monal"
 #define kMonalTmpKeychainName @"Monal.tmp"
+#define kMonalHtTokenKeychainName @"Monal.HT"
 #define kMonalDeviceUUIDKeychainName @"Monal.deviceUUID"
 #define kDeviceUUIDKeychainAccount @"deviceUUIDKeychainAccount"
 

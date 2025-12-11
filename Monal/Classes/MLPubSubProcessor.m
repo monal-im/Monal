@@ -62,6 +62,12 @@ $$class_handler(handleMdsFetchResult, $$ID(xmpp*, account), $$BOOL(success), $_I
 $$
 
 $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+    if(contact.isSubscribedTo)
+    {
+        DDLogWarn(@"Ignoring incoming avatar update of user we are not subscribed to: %@", contact);
+        return;
+    }
     DDLogDebug(@"Got new avatar metadata from '%@'", jid);
     if([type isEqualToString:@"publish"])
     {
@@ -72,12 +78,12 @@ $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(
             if(!avatarHash)     //the user disabled his avatar
             {
                 DDLogInfo(@"User '%@' disabled his avatar", jid);
-                [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountNo:account.accountNo] WithData:nil];
+                [[MLImageManager sharedInstance] setIconForContact:contact WithData:nil];
                 [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
                 //delete cache to make sure the image will be regenerated
                 [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                    @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
+                    @"contact": contact
                 }];
             }
             else
@@ -107,12 +113,12 @@ $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(
     else
     {
         DDLogInfo(@"User %@ disabled his avatar", jid);
-        [[MLImageManager sharedInstance] setIconForContact:[MLContact createContactFromJid:jid andAccountNo:account.accountNo] WithData:nil];
+        [[MLImageManager sharedInstance] setIconForContact:contact WithData:nil];
         [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
         //delete cache to make sure the image will be regenerated
         [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-            @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
+            @"contact": contact
         }];
     }
 $$
@@ -176,6 +182,12 @@ $$class_handler(handleAvatarFetchResult, $$ID(xmpp*, account), $$ID(NSString*, j
 $$
 
 $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+    if(contact.isSubscribedTo)
+    {
+        DDLogWarn(@"Ignoring incoming XEP-0172 nick update of user we are not subscribed to: %@", contact);
+        return;
+    }
     //new/updated nickname
     if([type isEqualToString:@"publish"])
     {
@@ -192,15 +204,11 @@ $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
             {
                 DDLogInfo(@"Got nickname of %@: %@", jid, [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
                 [[DataLayer sharedInstance] setFullName:[data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:account.accountNo];
-                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-                if(contact)     //ignore updates for jids not in our roster
-                {
-                    //delete cache to make sure the image will be regenerated
-                    [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
-                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                        @"contact": contact
-                    }];
-                }
+                //delete cache to make sure the image will be regenerated
+                [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                    @"contact": contact
+                }];
             }
             break;      //we only need the first item (there should be only one item in the first place)
         }
@@ -219,15 +227,11 @@ $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         {
             DDLogInfo(@"Nickname of %@ got retracted", jid);
             [[DataLayer sharedInstance] setFullName:@"" forContact:jid andAccount:account.accountNo];
-            MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-            if(contact)     //ignore updates for jids not in our roster
-            {
-                //delete cache to make sure the image will be regenerated
-                [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                    @"contact": contact
-                }];
-            }
+            //delete cache to make sure the image will be regenerated
+            [[MLImageManager sharedInstance] purgeCacheForContact:jid andAccount:account.accountNo];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"contact": contact
+            }];
         }
     }
 $$

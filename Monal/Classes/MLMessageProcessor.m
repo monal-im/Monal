@@ -214,6 +214,9 @@ static NSMutableDictionary* _typingNotifications;
         //ignore muc pms without id attribute (we can't send out errors pointing to this message without an id)
         if(messageNode.id == nil)
             return nil;
+        //don't send error messages if this isn't even a muc
+        if(!possiblyUnknownContact.isMuc)
+            return nil;
         XMPPMessage* errorReply = [XMPPMessage new];
         [errorReply.attributes setObject:@"error" forKey:@"type"];
         [errorReply.attributes setObject:messageNode.from forKey:@"to"];                       //this has to be the full jid here

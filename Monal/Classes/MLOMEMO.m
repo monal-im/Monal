@@ -1131,6 +1131,11 @@ $$
         return nil;
     }
     
+    //make sure we get sessions to all devices even if not currently online
+    //(the result of sending key transport messages back and forth would
+    //only be to establish sessions with devices that are currently online)
+    [self subscribeAndFetchDevicelistIfNoSessionExistsForJid:senderJid];
+    
     BOOL isKeyTransportElement = ![envelope check:@"payload"];
     NSNumber* sid = [envelope findFirst:@"header@sid|uint"];
 

@@ -2790,7 +2790,11 @@ NSString* const kStanza = @"stanza";
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
-            self->_accountState = kStateLoggedIn;
+            //only increment account state if we are still trying to login (calling bindJid could have triggered a disconnect)
+            if(self->_accountState == kStateHasStream)
+                self->_accountState = kStateLoggedIn;
+            else
+                DDLogWarn(@"Not setting accountState to kStateLoggedIn, because we are no longer in kStateHasStream!");
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
             {

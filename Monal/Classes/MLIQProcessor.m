@@ -269,6 +269,13 @@ $$class_handler(handleBind, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     [account.connectionProperties.identity bindJid:[iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"] onAccount:account];
     DDLogDebug(@"bareJid=%@, resource=%@, fullJid=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource, account.connectionProperties.identity.fullJid);
     
+    //only continue and increment accountState if we are still trying to bind (calling bindJid could have triggered a disconnect)
+    if(account.accountState != kStateBinding)
+    {
+        DDLogWarn(@"Not setting accountState to kStateBound (via call to earlyInitSession), because we are no longer in kStateBinding. Aborting binding process instead!");
+        return;
+    }
+    
     //update resource in db (could be changed by server)
     NSMutableDictionary* accountDict = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo]];
     accountDict[kResource] = account.connectionProperties.identity.resource;

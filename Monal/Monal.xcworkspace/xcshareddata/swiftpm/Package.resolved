@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "ActivityIndicatorView",
-        "repositoryURL": "https://github.com/exyte/ActivityIndicatorView",
-        "state": {
-          "branch": null,
-          "revision": "36140867802ae4a1d2b11490bcbbefe058001d14",
-          "version": "1.2.1"
-        }
-      },
-      {
         "package": "CocoaLumberjack",
         "repositoryURL": "https://github.com/cocoalumberjack/cocoalumberjack",
         "state": {
@@ -20,30 +11,12 @@
         }
       },
       {
-        "package": "Chat",
-        "repositoryURL": "https://github.com/monal-im/ExyteChat",
-        "state": {
-          "branch": "main",
-          "revision": "9fd90e067c41eab6177827ce46f4a7a35ffc53e7",
-          "version": null
-        }
-      },
-      {
         "package": "FrameUp",
         "repositoryURL": "https://github.com/ryanlintott/FrameUp",
         "state": {
           "branch": null,
-          "revision": "0fccfdc93a01c8555cec86bf2c64caee30c23704",
-          "version": "0.9.11"
-        }
-      },
-      {
-        "package": "ExyteMediaPicker",
-        "repositoryURL": "https://github.com/monal-im/MediaPicker.git",
-        "state": {
-          "branch": "main",
-          "revision": "81ec10c7f9cd32d296fdc42c376c0f252925c719",
-          "version": null
+          "revision": "42254f19f2500050a67e73a9d5b2d0914289a7e9",
+          "version": "0.8.0"
         }
       },
       {
@@ -74,30 +47,12 @@
         }
       },
       {
-        "package": "TOCropViewController",
-        "repositoryURL": "https://github.com/TimOliver/TOCropViewController",
-        "state": {
-          "branch": null,
-          "revision": "d4a6d8100f4b886fdbc8ae399bf144ff3e9afb7e",
-          "version": "2.8.0"
-        }
-      },
-      {
         "package": "ViewExtractor",
         "repositoryURL": "https://github.com/GeorgeElsham/ViewExtractor",
         "state": {
           "branch": null,
           "revision": "e20b1944524d4454c2a65c0054ce345c2c5d0185",
           "version": "2.0.0"
-        }
-      },
-      {
-        "package": "WebRTC",
-        "repositoryURL": "https://github.com/Stasel/WebRTC",
-        "state": {
-          "branch": null,
-          "revision": "d8f47164ab8180dd3a44f625d1774085c1bbd682",
-          "version": "139.0.0"
         }
       }
     ]

@@ -240,7 +240,7 @@ NSString* const kStanza = @"stanza";
 #else
         @"type": @"phone",
 #endif
-        @"name": [NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]]
+        @"name": @"Monal",
     } andChildren:@[] andData:nil];
     _capsFeatures = [HelperTools getOwnFeatureSet];
     NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];

@@ -298,7 +298,7 @@ static const int KEY_SIZE = 16;
 }
 
 $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
-    MLContact* contact = [MLContact createContactFromJid:jid andAccountID:account.accountID];
+    MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:self.account.accountNo];
     if(!contact.isListedLocally)
     {
         DDLogWarn(@"Ignoring incoming devicelist update of user not even listed in our local contact list: %@", contact);

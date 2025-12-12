@@ -984,6 +984,12 @@
 
 -(void) sendJmiReject
 {
+    if(!self.contact.isSubscribedFrom)
+    {
+        DDLogWarn(@"Not sending JMI reject: this contact isn't at least subscribedFrom: %@", self.contact);
+        return;
+    }
+    
     DDLogDebug(@"Rejecting via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
@@ -999,6 +1005,12 @@
 
 -(void) sendJmiRejectWithTieBreak
 {
+    if(!self.contact.isSubscribedFrom)
+    {
+        DDLogWarn(@"Not sending JMI reject with tie-break: this contact isn't at least subscribedFrom: %@", self.contact);
+        return;
+    }
+    
     DDLogDebug(@"Rejecting with tie-break via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"reject" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
@@ -1015,6 +1027,12 @@
 
 -(void) sendJmiRinging
 {
+    if(!self.contact.isSubscribedFrom)
+    {
+        DDLogWarn(@"Not sending JMI ringing: this contact isn't at least subscribedFrom: %@", self.contact);
+        return;
+    }
+    
     DDLogDebug(@"Ringing via JMI: %@", self);
     XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.fullRemoteJid];
     [jmiNode addChildNode:[[MLXMLNode alloc] initWithElement:@"ringing" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{

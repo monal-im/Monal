@@ -29,7 +29,7 @@
     //only handle these iqs if the remote user is on our roster or
     //if they are coming from our own domain,
     //but always allow pings in MUCs and jingle iqs if allowCallsFromNonRosterContacts is set to YES
-    MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountID:account.accountNo];
+    MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
     //list of allowed iq senders
     if(!(
         //we have to check for isGroup because mucs always set isSubscribedFrom to YES

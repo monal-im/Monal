@@ -774,7 +774,7 @@ $$class_handler(handleExternalDisco, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode)
     
     for(MLXMLNode* service in [iqNode find:@"{urn:xmpp:extdisco:2}services/service"])
     {
-        if([service check:@"/<type=stun>"] || [service check:@"/<type=turn>"])
+        if([service check:@"/<type=stun>"] || [service check:@"/<type=turn>"] || [service check:@"/<type=stuns>"] || [service check:@"/<type=turns>"])
         {
             NSMutableDictionary* info = [NSMutableDictionary dictionaryWithDictionary:@{@"directoryJid": iqNode.from}];
             [info addEntriesFromDictionary:[service findFirst:@"/@@"]];

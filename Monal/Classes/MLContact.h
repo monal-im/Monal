@@ -15,7 +15,7 @@ FOUNDATION_EXPORT NSString* const kSubNone;
 FOUNDATION_EXPORT NSString* const kSubTo;
 FOUNDATION_EXPORT NSString* const kSubFrom;
 FOUNDATION_EXPORT NSString* const kSubRemove;
-
+FOUNDATION_EXPORT NSString* const kSubNotListedLocally;
 FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @class xmpp;
@@ -32,6 +32,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (readonly) NSString* id;     //for Identifiable protocol
 
 @property (nonatomic, readonly) BOOL isSelfChat;
+@property (nonatomic, readonly) BOOL isListedLocally;
 @property (nonatomic, readonly) BOOL isInRoster;
 @property (nonatomic, readonly) BOOL isSubscribedTo;
 @property (nonatomic, readonly) BOOL isSubscribedFrom;

@@ -26,18 +26,27 @@
 
 +(void) processUnboundIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    //only handle these iqs if the remote user is on our roster,
-    //if the are coming from our own domain,
-    //or if they are from a muc group, not a channel
-    MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
+    //only handle these iqs if the remote user is on our roster or
+    //if they are coming from our own domain,
+    //but always allow pings in MUCs and jingle iqs if allowCallsFromNonRosterContacts is set to YES
+    MLContact* contact = [MLContact createContactFromJid:iqNode.fromUser andAccountID:account.accountNo];
+    //list of allowed iq senders
     if(!(
-        //we have to check for .isGroup because mucs always set .isSubscribedFrom to YES
+        //we have to check for isGroup because mucs always set isSubscribedFrom to YES
         (!contact.isGroup && contact.isSubscribedFrom) ||
         contact.isSelfChat ||
-        [account.connectionProperties.identity.domain isEqualToString:iqNode.fromUser] ||
-        (contact.isGroup && [@"group" isEqualToString:contact.mucType])
+        [account.connectionProperties.identity.domain isEqualToString:iqNode.fromUser]
+    //list of exceptions regardless of sender
+    ) && !(
+        //still allow jingle iqs if allowCallsFromNonRosterContacts is YES (only allowing JMI stanzas isn't enough)
+        ([iqNode check:@"{urn:xmpp:jingle:1}jingle"] && [[HelperTools defaultsDB] boolForKey:@"allowCallsFromNonRosterContacts"]) ||
+        //also allow ping iqs in MUCs (especially channel-type), because the sender already knows we are present in the MUC
+        (contact.isGroup && [iqNode check:@"/<type=get>/{urn:xmpp:ping}ping"])
     ))
-        DDLogWarn(@"Invalid sender for iq (!subscribedFrom || isGroup), ignoring: %@", iqNode);
+    {
+        DDLogWarn(@"Invalid sender for iq, ignoring: %@", iqNode);
+        return;
+    }
     
     if([iqNode check:@"/<type=get>"])
         [self processGetIq:iqNode forAccount:account];
@@ -259,6 +268,13 @@ $$class_handler(handleBind, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     DDLogInfo(@"Now bound to fullJid: %@", [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]);
     [account.connectionProperties.identity bindJid:[iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"] onAccount:account];
     DDLogDebug(@"bareJid=%@, resource=%@, fullJid=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource, account.connectionProperties.identity.fullJid);
+    
+    //only continue and increment accountState if we are still trying to bind (calling bindJid could have triggered a disconnect)
+    if(account.accountState != kStateBinding)
+    {
+        DDLogWarn(@"Not setting accountState to kStateBound (via call to earlyInitSession), because we are no longer in kStateBinding. Aborting binding process instead!");
+        return;
+    }
     
     //update resource in db (could be changed by server)
     NSMutableDictionary* accountDict = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo]];

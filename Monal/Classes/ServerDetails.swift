@@ -76,6 +76,7 @@ struct ServerDetails: View {
 
     private func getXEPEntryData(connection: MLXMPPConnection) -> [EntryData] {
         let maxFileUploadSize = HelperTools.bytes(toHuman: Int64(connection.uploadSize))
+        let isUsingFast = (connection.fastMethods as? [String: Bool] ?? [:]).values.reduce(false, { $0 || $1 })
         let result: [EntryData] = [
             EntryData(
                 title: NSLocalizedString("XEP-0163 Personal Eventing Protocol", comment: ""),
@@ -151,8 +152,8 @@ struct ServerDetails: View {
 
             EntryData(
                 title: NSLocalizedString("XEP-0474: SASL SCRAM Downgrade Protection", comment: ""),
-                description: NSLocalizedString("This specification provides a way to secure the SASL and SASL2 handshakes against method and channel-binding downgrades.", comment: ""),
-                status: connection.supportsSSDP ? .success : .error
+                description: NSLocalizedString("This specification provides a way to secure the SASL and SASL2 handshakes against method and channel-binding downgrades. It is not used when authenticating using a XEP-0484 (FAST) token.", comment: ""),
+                status: connection.supportsSSDP ? .success : (isUsingFast ? .normal : .error)
             ),
         ]
         return result
@@ -220,7 +221,7 @@ struct ServerDetails: View {
                 EntryData(
                     title: String(format: NSLocalizedString("Server: %@", comment: ""), entry["jid"] ?? "error"),
                     description: String(format: NSLocalizedString("%@ (type '%@', category '%@')", comment: ""), entry["name"] ?? "<unknown name>", entry["type"] ?? "<unknown>", entry["category"] ?? "<unknown>"),
-                    status: entry["type"] ?? "<unknown>" == "text" ? .success : .normal
+                    status: (entry["type"] ?? "<unknown>") == "text" ? .success : .normal
                 )
             )
         }

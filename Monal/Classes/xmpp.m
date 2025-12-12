@@ -230,7 +230,7 @@ NSString* const kStanza = @"stanza";
     _capsIdentity = [[MLXMLNode alloc] initWithElement:@"identity" withAttributes:@{
         @"category": @"client",
         @"type": @"phone",
-        @"name": [NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]]
+        @"name": @"Monal",
     } andChildren:@[] andData:nil];
     _capsFeatures = [HelperTools getOwnFeatureSet];
     NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];

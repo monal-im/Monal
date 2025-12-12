@@ -216,7 +216,7 @@ static NSMutableDictionary* _typingNotifications;
         if([messageNode findFirst:@"/@id"] == nil)
             return nil;
         //don't send error messages if this isn't even a muc
-        if(!possiblyUnknownContact.isMuc)
+        if(!possiblyUnknownContact.isGroup)
             return nil;
         XMPPMessage* errorReply = [XMPPMessage new];
         [errorReply.attributes setObject:@"error" forKey:@"type"];
@@ -360,7 +360,7 @@ static NSMutableDictionary* _typingNotifications;
     
     if([messageNode check:@"/<type=groupchat>/subject"])
     {
-        if(!possiblyUnknownContact.isMuc)
+        if(!possiblyUnknownContact.isGroup)
             DDLogWarn(@"Ignoring muc subject of unknown muc: %@", possiblyUnknownContact);
         if(isMLhistory)
             DDLogVerbose(@"Ignoring muc subject: isMLhistory=YES...");

@@ -61,6 +61,7 @@
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";
 
+static NSRegularExpression* fastTokenRemovalRegex;
 
 @interface MLPubSub ()
 -(id) initWithAccount:(xmpp*) account;
@@ -185,6 +186,11 @@ NSString* const kStanza = @"stanza";
 
 
 @implementation xmpp
+
++(void) initialize
+{
+    fastTokenRemovalRegex = [NSRegularExpression regularExpressionWithPattern:@"<token\\b(?=[^>]*\\bxmlns=['\"]urn:xmpp:fast:0['\"])\\b[^>]*/>" options:NSRegularExpressionCaseInsensitive error:nil];
+}
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountID:(NSNumber*) accountID
 {
@@ -1461,7 +1467,7 @@ NSString* const kStanza = @"stanza";
                         DDLogWarn(@"Throwing away incoming stanza queued in parse queue, accountState < kStateConnected");
                         return;
                     }
-                    NSString* loggedStanza = [NSString stringWithFormat:@"%@: %@", parsedStanza.element, nilDefault([parsedStanza findFirst:@"/@id"], parsedStanza)];
+                    NSString* loggedStanza = [NSString stringWithFormat:@"<%@%@/>", parsedStanza.element, [parsedStanza check:@"/@id"] ? [NSString stringWithFormat:@" id='%@'", [parsedStanza findFirst:@"/@id"]] : @""];
                     [MLNotificationQueue queueNotificationsInBlock:^{
                         //add whole processing of incoming stanzas to one big transaction
                         //this will make it impossible to leave inconsistent database entries on app crashes or iphone crashes/reboots
@@ -1517,10 +1523,10 @@ NSString* const kStanza = @"stanza";
     {
         //log stanzas being sent as idempotent data
         if(withXMLOpening)
-            [self logStanza:xmlOpening withPrefix:@"IDEMPOTENT_SEND"];
-        [self logStanza:stream withPrefix:@"IDEMPOTENT_SEND"];
+            [self logOutgoingStanza:xmlOpening withPrefix:@"IDEMPOTENT_SEND" andLoglevel:DDLogFlagDebug];
+        [self logOutgoingStanza:stream withPrefix:@"IDEMPOTENT_SEND" andLoglevel:DDLogFlagDebug];
         if(withStartTLS)
-            [self logStanza:startTLS withPrefix:@"IDEMPOTENT_SEND"];
+            [self logOutgoingStanza:startTLS withPrefix:@"IDEMPOTENT_SEND" andLoglevel:DDLogFlagDebug];
         
         //concatenate everything and directly write it as one single string, wait until this is finished to make sure
         //the direct write is complete when returning from here (not strictly needed, but done for good measure)
@@ -1890,9 +1896,9 @@ NSString* const kStanza = @"stanza";
 -(void) processInput:(MLXMLNode*) parsedStanza withDelayedReplay:(BOOL) delayedReplay
 {
     if(delayedReplay)
-        DDLogInfo(@"delayedReplay of Stanza: %@", parsedStanza);
+        [self logIncomingStanza:parsedStanza withPrefix:@"delayedReplay of Stanza: " andLoglevel:DDLogFlagInfo];
     else
-        DDLogInfo(@"RECV Stanza: %@", parsedStanza);
+        [self logIncomingStanza:parsedStanza withPrefix:@"RECV Stanza: " andLoglevel:DDLogFlagInfo];
     
     //update stanza counter statistics
     self->_catchupStanzaCounter++;
@@ -2862,7 +2868,7 @@ NSString* const kStanza = @"stanza";
             {
                 NSString* token = [parsedStanza findFirst:@"{urn:xmpp:fast:0}token@token"];
                 NSString* expiry = [parsedStanza findFirst:@"{urn:xmpp:fast:0}token@expiry|datetime"];
-                DDLogInfo(@"Got new FAST token with expiry %@: <redacted>", expiry);
+                DDLogInfo(@"Got new FAST token with expiry: %@", expiry);
                 [SAMKeychain setPasswordData:[HelperTools serializeObject:@{
                     @"token": token,
                     @"mechanism": _fastTokenRequested,
@@ -3644,7 +3650,7 @@ NSString* const kStanza = @"stanza";
                     [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
             }
             @synchronized(self->_stateLockObject) {
-                [self logStanza:queued_stanza withPrefix:[NSString stringWithFormat:@"ADD UNACKED STANZA: %@", self.lastOutboundStanza]];
+                [self logOutgoingStanza:queued_stanza withPrefix:[NSString stringWithFormat:@"ADD UNACKED STANZA: %@", self.lastOutboundStanza] andLoglevel:DDLogFlagDebug];
                 NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
                 [self.unAckedStanzas addObject:dic];
                 //increment for next call
@@ -3665,27 +3671,44 @@ NSString* const kStanza = @"stanza";
         )
         {
             [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-                [self logStanza:stanza withPrefix:@"SEND"];
+                [self logOutgoingStanza:stanza withPrefix:@"SEND" andLoglevel:DDLogFlagDebug];
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space
             }]];
         }
         else
-            [self logStanza:stanza withPrefix:@"NOT ADDING STANZA TO SEND QUEUE"];
+            [self logOutgoingStanza:stanza withPrefix:@"NOT ADDING STANZA TO SEND QUEUE" andLoglevel:DDLogFlagDebug];
     }];
 }
 
--(void) logStanza:(MLXMLNode*) stanza withPrefix:(NSString*) prefix
+-(void) logIncomingStanza:(MLXMLNode*) stanza withPrefix:(NSString*) prefix andLoglevel:(unsigned long) loglevel
+{
+#if !TARGET_OS_SIMULATOR
+    if([stanza check:@"/{urn:xmpp:sasl:2}success/{urn:xmpp:fast:0}token"])
+    {
+        MLXMLNode* redactedStanza = [stanza copy];
+        MLXMLNode* fastTokenNode = [redactedStanza findFirst:@"/{urn:xmpp:sasl:2}success/{urn:xmpp:fast:0}token"];
+        fastTokenNode.attributes[@"token"] = @"redacted_token";
+        DDLogWithLevel(loglevel, @"%@: %@", prefix, redactedStanza);
+    }
+    else
+        DDLogWithLevel(loglevel, @"%@: %@", prefix, stanza);
+#else
+    DDLogWithLevel(loglevel, @"%@: %@", prefix, stanza);
+#endif
+}
+
+-(void) logOutgoingStanza:(MLXMLNode*) stanza withPrefix:(NSString*) prefix andLoglevel:(unsigned long) loglevel
 {
 #if !TARGET_OS_SIMULATOR
     if([stanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*"])
-        DDLogDebug(@"%@: redacted sasl element: %@", prefix, [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
+        DDLogWithLevel(loglevel, @"%@: redacted sasl element: %@", prefix, [stanza findFirst:@"/{urn:ietf:params:xml:ns:xmpp-sasl}*$"]);
     else if([stanza check:@"/{jabber:client}iq<type=set>/{jabber:iq:register}query"])
-        DDLogDebug(@"%@: redacted register/change password iq", prefix);
+        DDLogWithLevel(loglevel, @"%@: redacted register/change password iq", prefix);
     else
-        DDLogDebug(@"%@: %@", prefix, stanza);
+        DDLogWithLevel(loglevel, @"%@: %@", prefix, stanza);
 #else
-    DDLogDebug(@"%@: %@", prefix, stanza);
+    DDLogWithLevel(loglevel, @"%@: %@", prefix, stanza);
 #endif
 }
 
@@ -5076,7 +5099,7 @@ NSString* const kStanza = @"stanza";
                     return;
                 }
                 buffer[readLen] = '\0';      //null termination for log output of raw string
-                DDLogVerbose(@"RECV(%ld): %s", (long)readLen, buffer);
+                DDLogVerbose(@"RECV(%ld): %@", (long)readLen, [fastTokenRemovalRegex stringByReplacingMatchesInString:[NSString stringWithFormat:@"%s", buffer] options:0 range:NSMakeRange(0, readLen) withTemplate:@"<redacted-fast-element/>"]);
                 //this is zero-copy (but only valid for the lifetime of this function call)
                 //only a single copy is made, when the VecDequeue buffer gets extended on the rust side
                 [self->_xmlParser feedData:buffer withLength:readLen];
@@ -5569,7 +5592,7 @@ NSString* const kStanza = @"stanza";
             [self freezeSendQueue];
             //pick the next delayed message stanza (will return nil if there isn't any left)
             MLXMLNode* delayedStanza = [[DataLayer sharedInstance] getNextDelayedMessageStanzaForArchiveJid:archiveJid andAccountID:self.accountID];
-            DDLogDebug(@"Got delayed stanza: %@", delayedStanza);
+            [self logIncomingStanza:delayedStanza withPrefix:@"Got delayed stanza: " andLoglevel:DDLogFlagDebug];
             if(delayedStanza == nil)
             {
                 DDLogInfo(@"Catchup finished for jid %@", archiveJid);
@@ -5595,7 +5618,7 @@ NSString* const kStanza = @"stanza";
                 //now *really* process delayed message stanza
                 [self processInput:delayedStanza withDelayedReplay:YES];
                 
-                DDLogDebug(@"Delayed Stanza finished processing: %@", delayedStanza);
+                [self logIncomingStanza:delayedStanza withPrefix:@"Delayed Stanza finished processing: " andLoglevel:DDLogFlagDebug];
                 
                 //add async processing of next delayed message stanza to receiveQueue
                 //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue

@@ -66,6 +66,8 @@
 
 +(void) processGetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
+    //WARNING: be careful adding stateless get handlers here (those can impose security risks!)
+    
     if([iqNode check:@"{urn:xmpp:ping}ping"])
     {
         XMPPIQ* pong = [[XMPPIQ alloc] initAsResponseTo:iqNode];
@@ -97,6 +99,8 @@
 
 +(void) processSetIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
+    //WARNING: be careful adding stateless set handlers here (those can impose security risks!)
+    
     //these iqs will be ignored if not matching an outgoing or incoming call
     //--> no presence leak if the call was not outgoing, because the jmi stanzas creating the call will
     //not be processed without isSubscribedFrom in the first place

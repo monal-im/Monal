@@ -144,6 +144,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     HT* _htHandler;
     NSSet* _supportedSaslMechanisms;
     NSSet* _supportedFastMechanisms;
+    NSSet* _supportedBin2InlinedFeatures;
     NSSet* _supportedChannelBindings;
     monal_void_block_t _blockToCallOnTCPOpen;
     NSString* _upgradeTask;
@@ -157,8 +158,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
 @property (nonatomic, assign) BOOL smacksRequestInFlight;
 
 @property (nonatomic, assign) BOOL resuming;
+@property (nonatomic, assign) BOOL smacksResumeInlined;
 @property (atomic, strong) NSString* streamID;
 @property (nonatomic, assign) BOOL isDoingFullReconnect;
+@property (nonatomic, assign) BOOL bind2Inlined;
 
 /**
  h to go out in r stanza
@@ -282,6 +285,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
     _cachedStreamFeaturesBeforeAuth = nil;
     _cachedStreamFeaturesAfterAuth = nil;
     _timersToCancelOnDisconnect = [NSMutableArray new];
+    _supportedSaslMechanisms = [NSSet new];
+    _supportedFastMechanisms = [NSSet new];
+    _supportedBin2InlinedFeatures = [NSSet new];
+    _supportedChannelBindings = [NSSet new];
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [NSMutableArray new];
@@ -1896,9 +1903,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
 -(void) processInput:(MLXMLNode*) parsedStanza withDelayedReplay:(BOOL) delayedReplay
 {
     if(delayedReplay)
-        [self logIncomingStanza:parsedStanza withPrefix:@"delayedReplay of Stanza: " andLoglevel:DDLogFlagInfo];
+        [self logIncomingStanza:parsedStanza withPrefix:@"delayedReplay of Stanza" andLoglevel:DDLogFlagInfo];
     else
-        [self logIncomingStanza:parsedStanza withPrefix:@"RECV Stanza: " andLoglevel:DDLogFlagInfo];
+        [self logIncomingStanza:parsedStanza withPrefix:@"RECV Stanza" andLoglevel:DDLogFlagInfo];
     
     //update stanza counter statistics
     self->_catchupStanzaCounter++;
@@ -2452,15 +2459,14 @@ static NSRegularExpression* fastTokenRemovalRegex;
             self.resuming = NO;
             self.isDoingFullReconnect = NO;
 
-            //now we are initialized again (the following block is *largely* taken from earlyInitSession)
+            //now we are initialized again (the following part is taken from earlyInitSession and initSession)
             DDLogInfo(@"Session resumed, initializing state...");
-            self.isDoingFullReconnect = YES;
             _connectedTime = [NSDate date];
             _reconnectBackoffTime = 0;
             _accountState = kStateInitStarted;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLSessionInitNotice object:self];
             [self accountStatusChanged];
-
+            
             @synchronized(_stateLockObject) {
                 //remove already delivered stanzas and resend the (still) unacked ones
                 [self removeAckedStanzasFromQueue:h];
@@ -2539,10 +2545,13 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 [self persistState];
             }
 
+            
             //don't try to bind, if removeAckedStanzasFromQueue returned an error (it will trigger a reconnect in these cases)
-            if(!error)
+            //don't try to bind if we are already handling a BIND2 response
+            if(!error && !self.bind2Inlined)
             {
                 //bind  a new resource like normal on failed resume (supportsSM3 is still YES here but switches to NO on failed enable later on, if necessary)
+                //legacy bind
                 [self bindResource:self.connectionProperties.identity.resource];
             }
         }
@@ -2822,14 +2831,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
             if(self.accountState >= kStateLoggedIn)
                 return [self invalidXMLError];
             
-            DDLogWarn(@"Got SASL2 Success");
+            DDLogInfo(@"Got SASL2 Success");
             DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
             
-            if(self.accountState >= kStateLoggedIn)
-                return [self invalidXMLError];
-            
             //check FAST responder-message or SCRAM server-final message for correctness if needed
-            if(!self->_htHandler.finishedSuccessfully || !self->_scramHandler.finishedSuccessfully)
+            if(!self->_htHandler.finishedSuccessfully && !self->_scramHandler.finishedSuccessfully)
                 [self handleSasl2SuccessOrContinue:parsedStanza];
             
             //build mechanism list displayed in ui (mark _scramHandler.method as used)
@@ -2878,16 +2884,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
             self->_scramHandler = nil;
             self->_htHandler = nil;
             self->_fastTokenRequested = nil;
-            self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
-            //only increment account state if we are still trying to login (calling bindJid could have triggered a disconnect)
-            if(self->_accountState == kStateHasStream)
-                self->_accountState = kStateLoggedIn;
-            else
-                DDLogWarn(@"Not setting accountState to kStateLoggedIn, because we are no longer in kStateHasStream!");
-            _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
+            self->_blockToCallOnTCPOpen = nil;              //just to be sure but not strictly necessary
+            _usableServersList = [NSMutableArray new];      //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
             {
-                [self->_loginTimer cancel];     //we are now logged in --> cancel running login timer
+                [self->_loginTimer cancel];                 //we are now logged in --> cancel running login timer
                 _loginTimer = nil;
             }
             self->_loggedInOnce = YES;
@@ -2901,7 +2902,84 @@ static NSRegularExpression* fastTokenRemovalRegex;
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
             _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
             
-            [self accountStatusChanged];
+            //only increment account state if we are still trying to login (calling bindJid could have triggered a disconnect)
+            if(self->_accountState == kStateHasStream)
+            {
+                self->_accountState = kStateLoggedIn;
+                [self accountStatusChanged];
+                
+                //SASL2 inlined resume
+                if(self.resuming && [parsedStanza check:@"{urn:xmpp:sm:3}resumed"])
+                {
+                    DDLogInfo(@"Handling SASL2 inlined smacks result...");
+                    [self processInput:[parsedStanza findFirst:@"{urn:xmpp:sm:3}resumed"] withDelayedReplay:NO];
+                }
+                else
+                {
+                    if(self.smacksResumeInlined)
+                    {
+                        if(self.resuming && [parsedStanza check:@"{urn:xmpp:sm:3}failed"])
+                        {
+                            DDLogInfo(@"Handling SASL2 inlined smacks result...");
+                            [self processInput:[parsedStanza findFirst:@"{urn:xmpp:sm:3}failed"] withDelayedReplay:NO];
+                        }
+                        else        //just to be sure (e.g. if the server didn't respond to our resumption request at all)
+                        {
+                            self.resuming = NO;
+                            self.smacksResumeInlined = NO;
+                        }
+                    }
+                    
+                    //SASL2 inlined BIND2
+                    if([parsedStanza check:@"{urn:xmpp:bind:0}bound"] && self.bind2Inlined)
+                    {
+                        //identity.bindJid was already called above and since our bind succeeded it included a fullJid
+                        DDLogInfo(@"Now bound to fullJid: %@", [parsedStanza findFirst:@"authorization-identifier#"]);
+                        DDLogDebug(@"bareJid=%@, resource=%@, fullJid=%@", self.connectionProperties.identity.jid, self.connectionProperties.identity.resource, self.connectionProperties.identity.fullJid);
+                        
+                        //technically our connectionProperties.identity is already bound, but we need to initialize everything else, too
+                        [self cleanupBeforeBind];
+                        
+                        //update resource in db (could have been changed by server)
+                        NSMutableDictionary* accountDict = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:self.accountID]];
+                        accountDict[kResource] = self.connectionProperties.identity.resource;
+                        [[DataLayer sharedInstance] updateAccounWithDictionary:accountDict];
+                        
+                        //we can at least do this
+                        [self earlyInitSession];     //the call to initSession is pending the smacks enable handling below
+                        
+                        if([parsedStanza check:@"{urn:xmpp:bind:0}bound/{urn:xmpp:carbons:2}enabled"])
+                        {
+                            DDLogInfo(@"Carbons now enabled via BIND2...");
+                            self.connectionProperties.usingCarbons2 = YES;
+                        }
+                        
+                        if([parsedStanza check:@"{urn:xmpp:bind:0}bound/{urn:xmpp:sm:3}*"])
+                        {
+                            DDLogInfo(@"Handling BIND2 inlined smacks result...");
+                            [self processInput:[parsedStanza findFirst:@"{urn:xmpp:bind:0}bound/{urn:xmpp:sm:3}*"] withDelayedReplay:NO];
+                        }
+                        else if(self.connectionProperties.supportsSM3)
+                        {
+                            DDLogInfo(@"Sending smacks enable, pipelining it onto BIND2 did not work!");
+                            [self send:[[MLXMLNode alloc]
+                                initWithElement:@"enable"
+                                andNamespace:@"urn:xmpp:sm:3"
+                                withAttributes:@{@"resume": @"true"}
+                                andChildren:@[]
+                                andData:nil
+                            ]];
+                        }
+                        else
+                        {
+                            //init session and query disco, roster etc.
+                            [self initSession];
+                        }
+                    }
+                }
+            }
+            else
+                DDLogWarn(@"Not setting accountState to kStateLoggedIn, because we are no longer in kStateHasStream!");
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}continue"])
         {
@@ -2909,7 +2987,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 return [self invalidXMLError];
             
             //check FAST responder-message or SCRAM server-final message for correctness if needed
-            if(!self->_htHandler.finishedSuccessfully || !self->_scramHandler.finishedSuccessfully)
+            if(!self->_htHandler.finishedSuccessfully && !self->_scramHandler.finishedSuccessfully)
                 [self handleSasl2SuccessOrContinue:parsedStanza];
             
             NSArray* tasks = [parsedStanza find:@"tasks/task#"];
@@ -3206,6 +3284,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
         __block BOOL supportsScram = NO;
         __block BOOL supportsPlus = NO;
         __block BOOL supportsFast = NO;
+        __block BOOL supportsInlinedSmacks = NO;
+        __block BOOL supportsInlinedBind2 = NO;
         
         NSDictionary* fast2CbMapping = @{
             @"EXPR": @"tls-exporter",
@@ -3237,12 +3317,87 @@ static NSRegularExpression* fastTokenRemovalRegex;
             }
             
             BOOL noMatchingChannelBindingFound = self->_supportedChannelBindings!=nil && ([self channelBindingToUse]==nil || [kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]]);
+            MLXMLNode* authenticate = nil;
+            NSMutableArray* sasl2InlinedElements = [NSMutableArray new];
+            
+            //don't reveal our user agent in high security environments (e.g. the preventLeaksBeforeAuth setting is YES)
+            MLXMLNode* sasl2UserAgent = nil;
+            if(![[HelperTools defaultsDB] boolForKey:@"preventLeaksBeforeAuth"])
+                sasl2UserAgent = [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
+                    @"id":[[HelperTools deviceUUID] UUIDString],
+                } andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"software" andData:@"Monal IM"],
+                    [[MLXMLNode alloc] initWithElement:@"device" andData:[[UIDevice currentDevice] name]],
+                ] andData:nil];
+            
+            //inline smacks resume if possible, but not in high security environment (e.g. the preventLeaksBeforeAuth setting is YES)
+            if(![[HelperTools defaultsDB] boolForKey:@"preventLeaksBeforeAuth"])
+            {
+                @synchronized(self->_stateLockObject) {
+                    if(supportsInlinedSmacks)
+                        self.connectionProperties.supportsSM3 = YES;
+                    if(supportsInlinedSmacks && self.streamID)
+                    {
+                        [sasl2InlinedElements addObject:[[MLXMLNode alloc] initWithElement:@"resume" andNamespace:@"urn:xmpp:sm:3" withAttributes:@{
+                            @"h": [NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
+                            @"previd": self.streamID,
+                        } andChildren:@[] andData:nil]];
+                        self.smacksResumeInlined = YES;
+                        self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
+                    }
+                    else
+                    {
+                        self.smacksResumeInlined = NO;
+                        self.resuming = NO;
+                    }
+                }
+            }
+            
+            //inline bind2 if possible, but not in high security environments (e.g. the preventLeaksBeforeAuth setting is YES)
+            if(supportsInlinedBind2 && ![[HelperTools defaultsDB] boolForKey:@"preventLeaksBeforeAuth"])
+            {
+                self.bind2Inlined = YES;
+                
+                [sasl2InlinedElements addObject:[[MLXMLNode alloc] initWithElement:@"bind" andNamespace:@"urn:xmpp:bind:0" withAttributes:@{} andChildren:@[
+#if TARGET_OS_MACCATALYST
+                    [[MLXMLNode alloc] initWithElement:@"tag" andData: @"Monal-macOS"],
+#else
+#if IS_QUICKSY
+                    [[MLXMLNode alloc] initWithElement:@"tag" andData: @"Quicksy-iOS"],
+#else
+                    [[MLXMLNode alloc] initWithElement:@"tag" andData: @"Monal-iOS"],
+#endif
+#endif
+                    //inline carbons enable into bind2 if possible
+                    nilWrapper(
+                        [self->_supportedBin2InlinedFeatures containsObject:@"urn:xmpp:carbons:2"]
+                        ? [[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:carbons:2"]
+                        : nil
+                    ),
+                    
+                    //inline smacks enable into bind2 if possible
+                    nilWrapper(
+                        [self->_supportedBin2InlinedFeatures containsObject:@"urn:xmpp:sm:3"]
+                        ? [[MLXMLNode alloc]
+                            initWithElement:@"enable"
+                            andNamespace:@"urn:xmpp:sm:3"
+                            withAttributes:@{@"resume": @"true"}
+                            andChildren:@[]
+                            andData:nil
+                        ]
+                        : nil
+                    ),
+                ] andData:nil]];
+            }
+            else
+                self.bind2Inlined = NO;
             
             //create list of upgradable scram mechanisms and pick the first one (highest security) the server and we support
             //but only do so, if we are using channel-binding for additional security
             //(a MITM could passively intercept the new SCRAM hash which is roughly equivalent to intercepting the plaintext password)
+            //don't do this in high security environments (e.g. the preventLeaksBeforeAuth setting is YES)
             self->_upgradeTask = nil;
-            if([self channelBindingToUse] != nil && ![kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]])
+            if([self channelBindingToUse] != nil && ![kServerDoesNotFollowXep0440Error isEqualToString:[self channelBindingToUse]] && ![[HelperTools defaultsDB] boolForKey:@"preventLeaksBeforeAuth"])
             {
                 NSSet* upgradesOffered = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/{urn:xmpp:sasl:upgrade:0}upgrade#"]];
                 for(NSString* method in [SCRAM supportedMechanismsIncludingChannelBinding:NO])
@@ -3253,11 +3408,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
                     }
             }
             
-            MLXMLNode* authenticate = nil;
-            
             //try to authenticate using FAST
             //but only use FAST if we don't want to do a SCRAM upgrade via XEP-0480
-            if(self->_upgradeTask == nil)
+            //and don't use FAST in high security environment (e.g. the preventLeaksBeforeAuth setting is YES)
+            if(self->_upgradeTask == nil && ![[HelperTools defaultsDB] boolForKey:@"preventLeaksBeforeAuth"])
             {
                 NSError* error = nil;
                 NSDictionary* tokenData = [HelperTools unserializeData:[SAMKeychain passwordDataForService:kMonalHtTokenKeychainName account:self.accountID.stringValue error:&error]];
@@ -3289,15 +3443,27 @@ static NSRegularExpression* fastTokenRemovalRegex;
                             [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithData:[self->_htHandler initiatorMessage]]],
                             //no count attribute because we don't do any 0rtt TLS here
                             [[MLXMLNode alloc] initWithElement:@"fast" andNamespace:@"urn:xmpp:fast:0"],
-                            [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
-                                @"id":[[HelperTools deviceUUID] UUIDString],
-                            } andChildren:@[
-                                [[MLXMLNode alloc] initWithElement:@"software" andData:@"Monal IM"],
-                                [[MLXMLNode alloc] initWithElement:@"device" andData:[[UIDevice currentDevice] name]],
-                            ] andData:nil],
+                            nilWrapper(sasl2UserAgent),
                         ]
                         andData:nil
                     ];
+                    
+                    //authenticating using FAST always means we accept a new token for token rotation, too
+                    self->_fastTokenRequested = tokenData[@"mechanism"];
+                    
+                    //always request a new fast token if supported by server
+                    //fast token rotation means an attacker who stole our token will be locked out as soon as we authenticate again
+                    //but only accept the exact same token mechanism as the one we already posses and use to authenticate
+                    //or a better one better to prevent downgrades!
+                    /*
+                    if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/inline/{urn:xmpp:fast:0}fast"])
+                    {
+                        self->_fastTokenRequested = tokenData[@"mechanism"];
+                        [authenticate addChildNode:[[MLXMLNode alloc] initWithElement:@"request-token" andNamespace:@"urn:xmpp:fast:0" withAttributes:@{
+                            @"mechanism": tokenData[@"mechanism"],
+                        } andChildren:@[] andData:nil]];
+                    }
+                    */
                 }
             }
             
@@ -3317,12 +3483,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                             withAttributes:@{@"mechanism": mechanism}
                             andChildren:@[
                                 [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithNoMatchingChannelBindingFound:noMatchingChannelBindingFound andChannelBinding:[self channelBindingToUse]]]],
-                                [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
-                                    @"id":[[HelperTools deviceUUID] UUIDString],
-                                } andChildren:@[
-                                    [[MLXMLNode alloc] initWithElement:@"software" andData:@"Monal IM"],
-                                    [[MLXMLNode alloc] initWithElement:@"device" andData:[[UIDevice currentDevice] name]],
-                                ] andData:nil],
+                                nilWrapper(sasl2UserAgent),
                             ]
                             andData:nil
                         ];
@@ -3333,7 +3494,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
                         
                         //check for supported FAST mechanisms (highest security first) and request FAST token, if supported by server
                         //but only accept a token with the same channel-binding as our SCRAM auth to prevent downgrades!
-                        if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/inline/{urn:xmpp:fast:0}fast"])
+                        //also don't request a FAST token in high security environments (e.g. the preventLeaksBeforeAuth setting is YES)
+                        if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/inline/{urn:xmpp:fast:0}fast"] && ![[HelperTools defaultsDB] boolForKey:@"preventLeaksBeforeAuth"])
                             for(NSString* mechanism in [HT supportedMechanismsIncludingChannelBinding:[self channelBindingToUse] != nil])
                                 if(
                                     [[self channelBindingToUse] isEqualToString:fast2CbMapping[[mechanism substringWithRange:NSMakeRange(mechanism.length-4, 4)]]] &&
@@ -3344,12 +3506,16 @@ static NSRegularExpression* fastTokenRemovalRegex;
                                         @"mechanism": mechanism,
                                     } andChildren:@[] andData:nil]];
                                 }
-                        break;      //use this SCRAM mechanism rather than iterating through the remaining ones
+                        
+                        //use this SCRAM mechanism rather than iterating through the remaining ones
+                        break;
                     }
             }
             
             if(authenticate != nil)
             {
+                for(MLXMLNode* inlined in sasl2InlinedElements)
+                    [authenticate addChildNode:inlined];
                 [self send:authenticate];
                 return;
             }
@@ -3378,6 +3544,24 @@ static NSRegularExpression* fastTokenRemovalRegex;
         for(NSString* mechanism in [HT supportedMechanismsIncludingChannelBinding:YES])
             if([_supportedFastMechanisms containsObject:mechanism])
                 supportsFast = YES;
+        
+        //check for smacks inline support
+        supportsInlinedSmacks = ![[HelperTools defaultsDB] boolForKey:@"preventLeaksBeforeAuth"] && [parsedStanza check:@"{urn:xmpp:sasl:2}authentication/inline/{urn:xmpp:sm:3}sm"];
+        if(supportsInlinedSmacks)
+            DDLogInfo(@"Server supports inlined SM3");
+        
+        //check for bind2 inline support
+        supportsInlinedBind2 = ![[HelperTools defaultsDB] boolForKey:@"preventLeaksBeforeAuth"] && [parsedStanza check:@"{urn:xmpp:sasl:2}authentication/inline/{urn:xmpp:bind:0}bind"];
+        if(supportsInlinedBind2)
+            DDLogInfo(@"Server supports inlined BIND2");
+        
+        //check for supported bind2-inlined features
+        _supportedBin2InlinedFeatures = [NSSet new];
+        if(supportsInlinedBind2)
+        {
+            _supportedBin2InlinedFeatures = [NSSet setWithArray:[parsedStanza find:@"{urn:xmpp:sasl:2}authentication/inline/{urn:xmpp:bind:0}bind/inline/feature@var"]];
+            DDLogInfo(@"BIND2 inlining supported for: %@", _supportedBin2InlinedFeatures);
+        }
         
         //directly call our continuation block if SCRAM is not supported, because _blockToCallOnTCPOpen() will throw an error then
         //(we currently only support SCRAM for SASL2)
@@ -3456,10 +3640,17 @@ static NSRegularExpression* fastTokenRemovalRegex;
 
 -(void) handleFeaturesAfterAuth:(MLXMLNode*) parsedStanza
 {
+    if(self.accountState > kStateLoggedIn)
+    {
+        DDLogInfo(@"Ignoring stream features after login, we are already binding/bound!");
+        return;
+    }
+    
     self.connectionProperties.serverFeatures = parsedStanza;
     
-    //this is set to NO if we fail to enable it
-    if([parsedStanza check:@"{urn:xmpp:sm:3}sm"])
+    //this is later on set to NO if we fail to enable it
+    //don't check the stream feature if its support was already detected via SASL2 inlining
+    if(!self.connectionProperties.supportsSM3 && [parsedStanza check:@"{urn:xmpp:sm:3}sm"])
     {
         DDLogInfo(@"Server supports SM3");
         self.connectionProperties.supportsSM3 = YES;
@@ -3471,23 +3662,30 @@ static NSRegularExpression* fastTokenRemovalRegex;
         self.connectionProperties.serverIdentity = [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"];
     }
     
+    //don't try to resume if already inlined via SASL2
     MLXMLNode* resumeNode = nil;
-    @synchronized(_stateLockObject) {
-        //test if smacks is supported and allows resume
-        if(self.connectionProperties.supportsSM3 && self.streamID)
-        {
-            NSDictionary* dic = @{
-                @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
-                @"previd":self.streamID,
-            };
-            resumeNode = [[MLXMLNode alloc] initWithElement:@"resume" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
-            self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
+    if(!self.smacksResumeInlined)
+    {
+        @synchronized(_stateLockObject) {
+            //test if smacks is supported and allows resume
+            if(self.connectionProperties.supportsSM3 && self.streamID)
+            {
+                NSDictionary* dic = @{
+                    @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
+                    @"previd":self.streamID,
+                };
+                resumeNode = [[MLXMLNode alloc] initWithElement:@"resume" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
+                self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
+            }
         }
     }
     if(resumeNode)
-        [self send:resumeNode];
+        [self send:resumeNode];     //legacy resume
     else
+    {
+        //legacy bind
         [self bindResource:self.connectionProperties.identity.resource];
+    }
 }
 
 -(void) handleSasl2SuccessOrContinue:(MLXMLNode*) parsedStanza
@@ -3650,7 +3848,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                     [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
             }
             @synchronized(self->_stateLockObject) {
-                [self logOutgoingStanza:queued_stanza withPrefix:[NSString stringWithFormat:@"ADD UNACKED STANZA: %@", self.lastOutboundStanza] andLoglevel:DDLogFlagDebug];
+                [self logOutgoingStanza:queued_stanza withPrefix:[NSString stringWithFormat:@"ADD UNACKED STANZA (%@)", self.lastOutboundStanza] andLoglevel:DDLogFlagDebug];
                 NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
                 [self.unAckedStanzas addObject:dic];
                 //increment for next call
@@ -4304,6 +4502,16 @@ static NSRegularExpression* fastTokenRemovalRegex;
     if([parts count] < 2 || [[HelperTools dataWithHexString:parts[1]] length] < 1)
         return [self bindResource:[HelperTools encodeRandomResource]];
     
+    [self cleanupBeforeBind];
+    
+    //send bind iq
+    XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [iqNode setBindWithResource:resource];
+    [self sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleBind)];
+}
+
+-(void) cleanupBeforeBind
+{
     self.isDoingFullReconnect = YES;
     _accountState = kStateBinding;
     [self accountStatusChanged];
@@ -4369,11 +4577,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
     //--> no harm in deleting them when starting a new session (but DON'T DELETE them when resuming the old smacks session)
     _inCatchup = [NSMutableDictionary new];
     [[DataLayer sharedInstance] deleteDelayedMessageStanzasForAccount:self.accountID];
-    
-    //send bind iq
-    XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [iqNode setBindWithResource:resource];
-    [self sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleBind)];
 }
 
 -(void) queryDisco
@@ -5592,7 +5795,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [self freezeSendQueue];
             //pick the next delayed message stanza (will return nil if there isn't any left)
             MLXMLNode* delayedStanza = [[DataLayer sharedInstance] getNextDelayedMessageStanzaForArchiveJid:archiveJid andAccountID:self.accountID];
-            [self logIncomingStanza:delayedStanza withPrefix:@"Got delayed stanza: " andLoglevel:DDLogFlagDebug];
+            [self logIncomingStanza:delayedStanza withPrefix:@"Got delayed stanza" andLoglevel:DDLogFlagDebug];
             if(delayedStanza == nil)
             {
                 DDLogInfo(@"Catchup finished for jid %@", archiveJid);
@@ -5618,7 +5821,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 //now *really* process delayed message stanza
                 [self processInput:delayedStanza withDelayedReplay:YES];
                 
-                [self logIncomingStanza:delayedStanza withPrefix:@"Delayed Stanza finished processing: " andLoglevel:DDLogFlagDebug];
+                [self logIncomingStanza:delayedStanza withPrefix:@"Delayed Stanza finished processing" andLoglevel:DDLogFlagDebug];
                 
                 //add async processing of next delayed message stanza to receiveQueue
                 //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue

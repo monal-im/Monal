@@ -30,7 +30,9 @@
 {
     //we don't support FAST mechanisms without channel-binding
     if(include)
-        return @[@"HT-SHA-512-EXPR", @"HT-SHA-256-EXPR", @"HT-SHA-512-ENDP", @"HT-SHA-256-ENDP"];
+        //only support exporter channel-binding: lower channel-bindings pose a security risk yet to be solved (dubbed upgrade prevention)
+        return @[@"HT-SHA-512-EXPR", @"HT-SHA-256-EXPR"];
+        //return @[@"HT-SHA-512-EXPR", @"HT-SHA-256-EXPR", @"HT-SHA-512-ENDP", @"HT-SHA-256-ENDP"];
     return @[];
     
 //     if(include)

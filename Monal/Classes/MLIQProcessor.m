@@ -375,6 +375,7 @@ $$class_handler(handleCarbonsEnabled, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode
         [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enable carbons for account %@", @""), account.connectionProperties.identity.jid] withNode:iqNode andAccount:account andIsSevere:YES];
         return;
     }
+    DDLogInfo(@"Carbons now enabled via legacy mechanism...");
     account.connectionProperties.usingCarbons2 = YES;
 $$
 
@@ -405,7 +406,7 @@ $$class_handler(handleBind, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
         return;
     }
     
-    //update resource in db (could be changed by server)
+    //update resource in db (could have been changed by server)
     NSMutableDictionary* accountDict = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountID]];
     accountDict[kResource] = account.connectionProperties.identity.resource;
     [[DataLayer sharedInstance] updateAccounWithDictionary:accountDict];
@@ -413,21 +414,15 @@ $$class_handler(handleBind, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     [account earlyInitSession];
     
     if(account.connectionProperties.supportsSM3)
-    {
-        MLXMLNode* enableNode = [[MLXMLNode alloc]
+        [account send:[[MLXMLNode alloc]
             initWithElement:@"enable"
             andNamespace:@"urn:xmpp:sm:3"
             withAttributes:@{@"resume": @"true"}
             andChildren:@[]
             andData:nil
-        ];
-        [account send:enableNode];
-    }
+        ]];
     else
-    {
-        //init session and query disco, roster etc.
-        [account initSession];
-    }
+        [account initSession];      //init session and query disco, roster etc.
 $$
 
 //proxy handler

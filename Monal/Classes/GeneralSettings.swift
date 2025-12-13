@@ -124,6 +124,9 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     
     @defaultsDB("showAdvancedUI")
     var showAdvancedUI: Bool
+    
+    @defaultsDB("preventLeaksBeforeAuth")
+    var preventLeaksBeforeAuth: Bool
 }
 
 
@@ -287,6 +290,14 @@ struct SecuritySettings: View {
                     Text("Every new contact will have encryption enabled, but already known contacts will preserve their encryption settings.")
                 }
                 
+            }
+            
+            Section(header: Text("Networking")) {
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcAllowP2P) {
+                    Text("Calls: Allow P2P sessions")
+                    Text("Allow your device to establish a direct network connection to the remote party. This might leak your IP address to the caller/callee.")
+                }
+                
                 if generalSettingsDefaultsDB.showAdvancedUI {
                     SettingsToggle(isOn: $generalSettingsDefaultsDB.useDnssecForAllConnections) {
                         Text("Use DNSSEC validation for all connections")
@@ -301,9 +312,17 @@ like hotel wifi, ugly mobile carriers etc.
                     }
                 }
                 
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.webrtcAllowP2P) {
-                    Text("Calls: Allow P2P sessions")
-                    Text("Allow your device to establish a direct network connection to the remote party. This might leak your IP address to the caller/callee.")
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.preventLeaksBeforeAuth) {
+                    Text("Prevent leaks when authenticating")
+                    Text(
+"""
+This is only needed in extreme situations and slows down your connection setup. \
+It will remove the SASL2 User-Agent and deactivate authentication using FAST tokens \
+as well as inlining XEP-0198 resumption and BIND2.
+Only activate if you fear active MITM attacks or already experienced one and want them \
+to be detected before revealing your XEP-0198 counter or random but unique device-id.
+"""
+                    )
                 }
             }
             

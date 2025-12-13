@@ -56,7 +56,7 @@
 
 //monal version 7.x, state counter: 020
 #define STATE_VERSION 7020
-#define CONNECT_TIMEOUT 7.0
+#define CONNECT_TIMEOUT 12.0
 #define IQ_TIMEOUT 60.0
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";

@@ -708,8 +708,7 @@ struct ChatView: View {
             DDLogVerbose("ChatView got new message notice \(String(describing:notification.userInfo))")
 
             guard let message = notification.userInfo?["message"] as? MLMessage else {
-                DDLogError("Notification without message");
-                return
+                unreachable("Notification without message")
             }
             if message.isEqual(self.contact.obj) {
                 // Don't insert based on delay timestamp because that would make it possible to fake history entries.
@@ -732,8 +731,7 @@ struct ChatView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalContactHistoryCleared)).receive(on: RunLoop.main)) { notification in
             DDLogVerbose("ChatView got history cleared notice \(String(describing:notification.userInfo))")
             guard let contact = notification.userInfo?["contact"] as? MLContact else {
-                MLAssert(false, "Notification without contact")
-                return
+                unreachable("Notification without contact")
             }
             if contact.isEqual(self.contact.obj) {
                 self.messages = []

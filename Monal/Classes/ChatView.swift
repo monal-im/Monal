@@ -95,6 +95,7 @@ struct ChatView: View {
     @State var queuedNewMessages: [ChatViewMessage] = []
     private var account: xmpp
     @State private var isLoadingMamHistory = false
+    @State private var isUploadingFile = false
     @State private var messageInsertionTimer: Timer?
     
     init(contact: ObservableKVOWrapper<MLContact>) {
@@ -356,12 +357,51 @@ struct ChatView: View {
         }
     }
 
+    private func uploadAndSendFile(_ localFileURL: URL?) async {
+        guard let localFileURL = localFileURL else {
+            DDLogError("Couldn't get file location in order to upload it!")
+            return
+        }
+        self.isUploadingFile = true
+        do {
+            let (url, mimeType, size) = try await MLFiletransfer.uploadFile(localFileURL, onAccount: self.account, withEncryption: self.contact.isEncrypted)
+            await MainActor.run {
+                guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: url, havingType: kMessageTypeFiletransfer, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: ["mimeType": mimeType, "size": size]) else {
+                    self.isUploadingFile = false
+                    return
+                }
+                messages.append(ChatViewMessage(newMLMessage))
+            }
+        } catch {
+            DDLogError("Couldn't upload file! error:  \(error.localizedDescription)")
+            alertPrompt = AlertPrompt(
+                title: Text("Could not upload file"),
+                message: Text(error.localizedDescription),
+                dismissLabel: Text("Close")
+            )
+        }
+        self.isUploadingFile = false
+    }
+
     var body: some View {
         ExyteChatView(messages: messages, chatType: .conversation, replyMode: .quote) { draft in
-            guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: draft.text, havingType: kMessageTypeText, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: nil) else {
-                return
+            if !draft.medias.isEmpty || draft.recording != nil {
+                Task {
+                    if draft.recording != nil {
+                        await uploadAndSendFile(draft.recording!.url)
+                    }
+                    for media in draft.medias {
+                        let localFileURL = await media.getURL()
+                        await uploadAndSendFile(localFileURL)
+                    }
+                }
             }
-            messages.append(ChatViewMessage(newMLMessage))
+            if !draft.text.isEmpty {
+                guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: draft.text, havingType: kMessageTypeText, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: nil) else {
+                    return
+                }
+                messages.append(ChatViewMessage(newMLMessage))
+            }
         } messageBuilder: { message, viewModel, positionInUserGroup, positionInMessagesSection, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
             MessageView(message: (message as! ChatViewMessage), viewModel: viewModel, positionInUserGroup: positionInUserGroup, positionInMessagesSection: positionInMessagesSection)
         } messageMenuAction: { (action: MessageAction, defaultActionClosure, message) in
@@ -496,6 +536,8 @@ struct ChatView: View {
             DDLogDebug("Checking if we can react to: \(String(describing:mlMessage)) --> \(String(describing:retval))")
             return retval
         })
+        // For some reason, the ExyteChat audio recorder works only if the codec is set to FLAC, ALAC, or LinearPCM
+        .setRecorderSettings(RecorderSettings(audioFormatID: kAudioFormatFLAC))
         .showNetworkConnectionProblem(false)
         .enableLoadMore(pageSize: 10) { message in
             await MainActor.run {
@@ -579,7 +621,7 @@ struct ChatView: View {
             
             ToolbarItemGroup(placement: .topBarTrailing) {
                 ProgressView()
-                    .opacity(isLoadingMamHistory ? 1 : 0)
+                    .opacity(isLoadingMamHistory || isUploadingFile ? 1 : 0)
 
                 if !(contact.isMuc || contact.isSelf) {
                     let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!

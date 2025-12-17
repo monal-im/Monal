@@ -64,6 +64,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @import CoreImage.CIFilterBuiltins;
 @import UIKit;
 @import AVFoundation;
+@import SAMKeychain;
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
 
@@ -573,8 +574,8 @@ void swizzle(Class c, SEL orig, SEL new)
 +(NSDictionary<NSString*, NSString*>*) getInvalidPushServers
 {
     return @{
-        @"ios13push.monal.im": nilWrapper([[[UIDevice currentDevice] identifierForVendor] UUIDString]),
-        @"push.monal.im": nilWrapper([[[UIDevice currentDevice] identifierForVendor] UUIDString]),
+        @"ios13push.monal.im": nilWrapper([[HelperTools deviceUUID] UUIDString]),
+        @"push.monal.im": nilWrapper([[HelperTools deviceUUID] UUIDString]),
         @"us.prod.push.monal-im.org": nilWrapper(nil),
     };
 }
@@ -1781,7 +1782,7 @@ void swizzle(Class c, SEL orig, SEL new)
                     }
                     DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
                     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
-                    content.title = NSLocalizedString(@"Could not synchronize", @"");
+                    content.title = NSLocalizedString(@"Connectivity issues", @"");
                     content.subtitle = account.connectionProperties.identity.jid;
                     content.body = NSLocalizedString(@"Some messages might wait to be retrieved or sent. Please open the app to retry.", @"");
                     content.sound = [UNNotificationSound defaultSound];
@@ -2556,6 +2557,29 @@ void swizzle(Class c, SEL orig, SEL new)
             return _versionInfoCache[@(type)] = [NSString stringWithFormat:@"Version %@, %@ on iOS/macOS %@", rawVersionString, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion];
         unreachable(@"unknown version type!");
     }
+}
+
+// Similar to UIDevice.currentDevice.identifierForVendor, but provides stable IDs
+// Fixes issue #1401
++(NSUUID*) deviceUUID
+{
+    NSError* error;
+    NSString* deviceUUID = [SAMKeychain passwordForService:kMonalDeviceUUIDKeychainName account:kDeviceUUIDKeychainAccount error:&error];
+    if(error)
+    {
+        //The keychain is empty (due to a device migration for example)
+        NSUUID* newDeviceUUID = nilDefault([[UIDevice currentDevice] identifierForVendor], [NSUUID UUID]);
+        //Save the new device UUID in the special keychain, which uses a `ThisDeviceOnly` accessibility.
+        //This accessibility ensures we can't migrate this keychain to another device
+        NSError* deviceUUIDSavingError;
+        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly];
+        [SAMKeychain setPassword:[newDeviceUUID UUIDString] forService:kMonalDeviceUUIDKeychainName account:kDeviceUUIDKeychainAccount error:&deviceUUIDSavingError];
+        if(deviceUUIDSavingError)
+            DDLogError(@"Failed to save the device UUID in the keychain, error: %@", deviceUUIDSavingError);
+        return newDeviceUUID;
+    }
+    else
+        return [[NSUUID alloc] initWithUUIDString:deviceUUID];
 }
 
 +(NSNumber*) currentTimestampInSeconds

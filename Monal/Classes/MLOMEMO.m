@@ -298,6 +298,13 @@ static const int KEY_SIZE = 16;
 }
 
 $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
+    MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:self.account.accountNo];
+    if(!contact.isListedLocally)
+    {
+        DDLogWarn(@"Ignoring incoming devicelist update of user not even listed in our local contact list: %@", contact);
+        return;
+    }
+    
     //type will be "publish", "retract", "purge" or "delete". "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     MLAssert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"], @"pep node must be 'eu.siacs.conversations.axolotl.devicelist'");
@@ -1131,6 +1138,11 @@ $$
         showErrorOnAlpha(self.account, @"decryptOmemoEnvelope called but the envelope has no encryption header");
         return nil;
     }
+    
+    //make sure we get sessions to all devices even if not currently online
+    //(the result of sending key transport messages back and forth would
+    //only be to establish sessions with devices that are currently online)
+    [self subscribeAndFetchDevicelistIfNoSessionExistsForJid:senderJid];
     
     BOOL isKeyTransportElement = ![envelope check:@"payload"];
     NSNumber* sid = [envelope findFirst:@"header@sid|uint"];

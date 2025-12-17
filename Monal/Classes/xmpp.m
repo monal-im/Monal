@@ -230,7 +230,7 @@ NSString* const kStanza = @"stanza";
     _capsIdentity = [[MLXMLNode alloc] initWithElement:@"identity" withAttributes:@{
         @"category": @"client",
         @"type": @"phone",
-        @"name": [NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]]
+        @"name": @"Monal",
     } andChildren:@[] andData:nil];
     _capsFeatures = [HelperTools getOwnFeatureSet];
     NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];
@@ -2617,7 +2617,7 @@ NSString* const kStanza = @"stanza";
             
             if(message != nil)
             {
-                DDLogError(@"SCRAM says this server-first message was wrong!");
+                DDLogError(@"SCRAM says this server-first message was wrong: %@", message);
                 
                 //clear pipeline cache to make sure we have a fresh restart next time
                 xmppPipeliningState oldPipeliningState = _pipeliningState;
@@ -2790,7 +2790,11 @@ NSString* const kStanza = @"stanza";
             
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
-            self->_accountState = kStateLoggedIn;
+            //only increment account state if we are still trying to login (calling bindJid could have triggered a disconnect)
+            if(self->_accountState == kStateHasStream)
+                self->_accountState = kStateLoggedIn;
+            else
+                DDLogWarn(@"Not setting accountState to kStateLoggedIn, because we are no longer in kStateHasStream!");
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
             {
@@ -3169,7 +3173,7 @@ NSString* const kStanza = @"stanza";
                         andChildren:@[
                             [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithNoMatchingChannelBindingFound:noMatchingChannelBindingFound andChannelBinding:[self channelBindingToUse]]]],
                             [[MLXMLNode alloc] initWithElement:@"user-agent" withAttributes:@{
-                                @"id":[[[UIDevice currentDevice] identifierForVendor] UUIDString],
+                                @"id":[[HelperTools deviceUUID] UUIDString],
                             } andChildren:@[
                                 [[MLXMLNode alloc] initWithElement:@"software" andData:@"Monal IM"],
                                 [[MLXMLNode alloc] initWithElement:@"device" andData:[[UIDevice currentDevice] name]],
@@ -3336,7 +3340,7 @@ NSString* const kStanza = @"stanza";
     
     if(message != nil)
     {
-        DDLogError(@"SCRAM says this server-final message was wrong!");
+        DDLogError(@"SCRAM says this server-final message was wrong: %@", message);
         
         //clear pipeline cache to make sure we have a fresh restart next time
         _pipeliningState = kPipelinedNothing;

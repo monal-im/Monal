@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
           "branch": "main",
-          "revision": "9fd90e067c41eab6177827ce46f4a7a35ffc53e7",
+          "revision": "3b4b41202fc656443b599935a60be431d571f9b6",
           "version": null
         }
       },
@@ -38,11 +38,20 @@
         }
       },
       {
+        "package": "Kingfisher",
+        "repositoryURL": "https://github.com/onevcat/Kingfisher",
+        "state": {
+          "branch": null,
+          "revision": "d30a5fad881137e2267f96a8e3fc35c58999bb94",
+          "version": "8.6.2"
+        }
+      },
+      {
         "package": "ExyteMediaPicker",
         "repositoryURL": "https://github.com/monal-im/MediaPicker.git",
         "state": {
           "branch": "main",
-          "revision": "81ec10c7f9cd32d296fdc42c376c0f252925c719",
+          "revision": "78869f8a07b2d7e8c78fe97f50c4b7122425678f",
           "version": null
         }
       },

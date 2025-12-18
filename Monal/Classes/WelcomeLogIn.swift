@@ -338,7 +338,19 @@ struct WelcomeLogIn: View {
         .addLoadingOverlay(overlay)
         .navigationTitle(advancedMode ? Text("Add Account (advanced)") : Text("Welcome"))
         .navigationBarTitleDisplayMode(advancedMode ? .inline : .large)
-        .onDisappear {UITableView.appearance().tableHeaderView = nil}       //why that??
+        .onDisappear {
+            UITableView.appearance().tableHeaderView = nil      //why that??
+            
+            guard let newAccountID = self.newAccountID else {
+                return
+            }
+            DispatchQueue.main.async {
+                currentTimeout = nil // <- disable timeout when leaving ui
+                errorObserverEnabled = false
+                MLXMPPManager.sharedInstance().removeAccount(forAccountID: newAccountID)
+                self.newAccountID = nil
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kXMPPError)).receive(on: RunLoop.main)) { notification in
             if(self.errorObserverEnabled == false) {
                 return

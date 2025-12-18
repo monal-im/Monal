@@ -45,6 +45,7 @@
 
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalRefresh object:nil];
 }
 
 -(void) dealloc

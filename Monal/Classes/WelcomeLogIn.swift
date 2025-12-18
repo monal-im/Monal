@@ -227,12 +227,26 @@ struct WelcomeLogIn: View {
                 }
                 .frame(minHeight: 310)
                 .textFieldStyle(.roundedBorder)
-                .onAppear {UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 30))}
+                .onAppear {
+                    UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 30))
+                }
             }
         }
         .addLoadingOverlay(overlay)
         .navigationBarTitle(Text("Welcome"))
-        .onDisappear {UITableView.appearance().tableHeaderView = nil}       //why that??
+        .onDisappear {
+            UITableView.appearance().tableHeaderView = nil      //why that??
+            
+            guard let newAccountNo = self.newAccountNo else {
+                return
+            }
+            DispatchQueue.main.async {
+                currentTimeout = nil // <- disable timeout when leaving ui
+                errorObserverEnabled = false
+                MLXMPPManager.sharedInstance().removeAccount(forAccountNo: newAccountNo)
+                self.newAccountNo = nil
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
             if(self.errorObserverEnabled == false) {
                 return

@@ -10,7 +10,7 @@ import AVKit
 import AVFoundation
 
 struct MediaGalleryView: View {
-    @State private var mediaItems: [[String: Any]] = []
+    @State private var mediaItems: [MLFiletransferInfo] = []
     let contact: String
     let accountID: NSNumber
     
@@ -34,11 +34,11 @@ struct MediaGalleryView: View {
     }
     
     private func fetchDownloadedMediaItems() {
-        if let attachments = DataLayer.sharedInstance().allAttachments(fromContact: contact, forAccount: accountID) as? [[String: Any]] {
+        if let attachments = DataLayer.sharedInstance().allAttachments(fromContact: contact, forAccount: accountID) as? [MLFiletransferInfo] {
             mediaItems = attachments.filter { fileInfo in
-                if let mimeType = fileInfo["mimeType"] as? String,
-                   !((fileInfo["needsDownloading"] as? NSNumber)?.boolValue ?? true) &&
-                    (mimeType.starts(with: "image/") || mimeType.starts(with: "video/")) {
+                if let mimeType = fileInfo.mimeType,
+                   fileInfo.downloadState == .complete,
+                   (mimeType.starts(with: "image/") || mimeType.starts(with: "video/")) {
                     return true
                 }
                 return false
@@ -49,10 +49,10 @@ struct MediaGalleryView: View {
 
 class MediaItem: Identifiable, ObservableObject {
     let id = UUID()
-    let fileInfo: [String: Any]
+    let fileInfo: MLFiletransferInfo
     @Published var thumbnail: UIImage?
 
-    init(fileInfo: [String: Any]) {
+    init(fileInfo: MLFiletransferInfo) {
         self.fileInfo = fileInfo
         self.thumbnail = nil
         Task { @MainActor in
@@ -62,7 +62,7 @@ class MediaItem: Identifiable, ObservableObject {
 
     @MainActor
     func generateThumbnail() async {
-        guard let cacheFile = fileInfo["cacheFile"] as? String, let mimeType = fileInfo["mimeType"] as? String else {
+        guard let cacheFile = fileInfo.cacheFile, let mimeType = fileInfo.mimeType else {
             DDLogError("Failed to get cacheFile or mimeType for: \(fileInfo)")
             self.thumbnail = UIImage(systemName: "exclamationmark.triangle")
             return
@@ -91,8 +91,8 @@ class MediaItem: Identifiable, ObservableObject {
     }
 
     @MainActor
-    func videoPreview(for fileInfo: [String: Any]) async -> UIImage? {
-        let moviePath = URL(fileURLWithPath: fileInfo["cacheFile"] as! String)
+    func videoPreview(for fileInfo: MLFiletransferInfo) async -> UIImage? {
+        let moviePath = URL(fileURLWithPath: fileInfo.cacheFile!)
         DDLogInfo("Trying to generate video thumbnail for: \(String(describing:fileInfo))")
         
         let payload: NSDictionary? = try? await HelperTools.addUploadItemPreview(
@@ -102,9 +102,9 @@ class MediaItem: Identifiable, ObservableObject {
         ).toTypedPromise().asyncOnMainActor()
         guard let image = payload?["preview"] as? UIImage else {
             return try? await HelperTools.generateVideoThumbnail(
-                fromFile:fileInfo["cacheFile"] as! String,
-                havingMimeType:fileInfo["mimeType"] as! String,
-                andFileExtension:fileInfo["fileExtension"] as? String
+                fromFile:fileInfo.cacheFile!,
+                havingMimeType:fileInfo.mimeType! ,
+                andFileExtension:fileInfo.fileExtension
             ).toTypedPromise().asyncOnMainActor()
         }
         return image
@@ -114,7 +114,7 @@ class MediaItem: Identifiable, ObservableObject {
 struct MediaItemView: View {
     @StateObject private var item: MediaItem
 
-    init(fileInfo: [String: Any]) {
+    init(fileInfo: MLFiletransferInfo) {
         _item = StateObject(wrappedValue: MediaItem(fileInfo: fileInfo))
     }
 
@@ -136,7 +136,7 @@ struct MediaItemView: View {
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
             
             // Add play icon overlay for video files
-            if let mimeType = item.fileInfo["mimeType"] as? String, mimeType.starts(with: "video/") {
+            if let mimeType = item.fileInfo.mimeType, mimeType.starts(with: "video/") {
                 Image(systemName: "play.circle.fill")
                     .resizable()
                     .frame(width: 30, height: 30)
@@ -152,12 +152,12 @@ struct MediaItemDetailView: View {
     @StateObject private var item: MediaItem
     @StateObject private var dismisser = SheetDismisserProtocol()
     
-    init(fileInfo: [String: Any]) {
+    init(fileInfo: MLFiletransferInfo) {
         _item = StateObject(wrappedValue: MediaItem(fileInfo: fileInfo))
     }
 
     var body: some View {
-        ImageViewerWrapper(info: item.fileInfo as [String: AnyObject], dismisser: dismisser)
+        ImageViewerWrapper(info: item.fileInfo as MLFiletransferInfo, dismisser: dismisser)
             .onAppear {
                 let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                 if let hostingController = appDelegate.getTopViewController() as? UIHostingController<AnyView> {
@@ -169,13 +169,13 @@ struct MediaItemDetailView: View {
 
 struct MediaItemSwipeView: View {
     @State private var currentIndex: Int
-    let allItems: [[String: Any]]
+    let allItems: [MLFiletransferInfo]
 
-    init(currentItem: [String: Any], allItems: [[String: Any]]) {
+    init(currentItem: MLFiletransferInfo, allItems: [MLFiletransferInfo]) {
         let index = allItems.firstIndex { item in
             // Compare using 'cacheFile'
-            if let currentPath = currentItem["cacheFile"] as? String,
-               let itemPath = item["cacheFile"] as? String {
+            if let currentPath = currentItem.cacheFile,
+               let itemPath = item.cacheFile {
                 return currentPath == itemPath
             }
             return false
@@ -201,12 +201,12 @@ struct MediaItemSwipeView: View {
 }
 
 struct ImageViewerWrapper: View {
-    let info: [String: AnyObject]
+    let info: MLFiletransferInfo
     let dismisser: SheetDismisserProtocol
     
     var body: some View {
         Group {
-            if let _ = info["mimeType"] as? String, (info["needsDownloading"] as! NSNumber).boolValue != true {
+            if info.downloadState == DownloadState.complete {
                 try? ImageViewer(delegate: dismisser, info: info)
             } else {
                 Text("Invalid file data")

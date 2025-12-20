@@ -208,10 +208,11 @@ extern NSString* const kMessageTypeFiletransfer;
  sets a preview info for a specified message
  */
 -(void) setMessageId:(NSString*_Nonnull) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image;
-
 -(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId;
--(void) setMessageHistoryId:(NSNumber*) historyId filetransferMimeType:(NSString*) mimeType filetransferSize:(NSNumber*) size;
 -(void) setMessageHistoryId:(NSNumber*) historyId messageType:(NSString*) messageType;
+
+-(NSDictionary*) getFiletransferInfoForHistoryId:(NSNumber*) historyId;
+-(void) setFiletransferInfoForHistoryId:(NSNumber*) historyId withMimeType:(NSString*) mimeType andSize:(NSNumber*) size;
 
 -(void) clearMessages:(NSNumber*) accountID;
 -(void) clearMessagesWithBuddy:(NSString*) buddy onAccount:(NSNumber*) accountID;
@@ -281,7 +282,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) encryptForJid:(NSString*) jid andAccountID:(NSNumber*) accountID;
 -(void) disableEncryptForJid:(NSString*) jid andAccountID:(NSNumber*) accountID;
 
--(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSNumber*) accountID;
+-(NSMutableArray<MLFiletransferInfo*>*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSNumber*) accountID;
 
 -(NSDate* _Nullable) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountID:(NSNumber* _Nonnull) accountID;
 -(NSDate* _Nullable) lastInteractionOfJid:(NSString* _Nonnull) jid andResource:(NSString* _Nonnull) resource forAccountID:(NSNumber* _Nonnull) accountID;

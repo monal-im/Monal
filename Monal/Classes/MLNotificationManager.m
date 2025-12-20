@@ -14,6 +14,7 @@
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/xmpp.h>
 #import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/MLFileTransferInfo.h>
 #import <monalxmpp/MLNotificationQueue.h>
 #import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/monalxmpp-Swift.h>
@@ -504,63 +505,35 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         
         if([message.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
-            if(info)
-            {
-                NSString* mimeType = info[@"mimeType"];
-                
-                if([mimeType hasPrefix:@"image/"])
-                    msgText = NSLocalizedString(@"📷 An Image", @"");
-                else if([mimeType hasPrefix:@"audio/"])
-                    msgText = NSLocalizedString(@"🎵 An Audiomessage", @"");
-                else if([mimeType hasPrefix:@"video/"])
-                    msgText = NSLocalizedString(@"🎥 A Video", @"");
-                else if([mimeType isEqualToString:@"application/pdf"])
-                    msgText = NSLocalizedString(@"📄 A Document", @"");
-                else
-                    msgText = NSLocalizedString(@"📁 A File", @"");
-                
-                if(![info[@"needsDownloading"] boolValue])
-                {
-                    if([mimeType hasPrefix:@"image/"])
-                    {
-                        UNNotificationAttachment* attachment;
-                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
-                        if(typeHint == nil)
-                            typeHint = UTTypeImage;
-                        attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
-                        if(attachment)
-                            content.attachments = @[attachment];
-                    }
-                    else if([mimeType hasPrefix:@"audio/"])
-                    {
-                        UNNotificationAttachment* attachment;
-                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
-                        if(typeHint == nil)
-                            typeHint = UTTypeAudio;
-                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info[@"cacheFile"]] filename:info[@"filename"] typeIdentifier:typeHint.identifier]];
-                        DDLogVerbose(@"Added audio attachment(%@ = %@): %@", mimeType, typeHint, audioAttachment);
-                        attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
-                        if(attachment)
-                            content.attachments = @[attachment];
-                    }
-                    else if([mimeType hasPrefix:@"video/"])
-                    {
-                        UNNotificationAttachment* attachment;
-                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
-                        if(typeHint == nil)
-                            typeHint = UTTypeMovie;
-                        attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
-                        if(attachment)
-                            content.attachments = @[attachment];
-                    }
-                }
-            }
+            MLFiletransferInfo* info = message.fileInfo;
+            NSString* mimeType = info.mimeType;
+
+            if([mimeType hasPrefix:@"image/"])
+                msgText = NSLocalizedString(@"📷 An Image", @"");
+            else if([mimeType hasPrefix:@"audio/"])
+                msgText = NSLocalizedString(@"🎵 An Audiomessage", @"");
+            else if([mimeType hasPrefix:@"video/"])
+                msgText = NSLocalizedString(@"🎥 A Video", @"");
+            else if([mimeType isEqualToString:@"application/pdf"])
+                msgText = NSLocalizedString(@"📄 A Document", @"");
             else
-            {
-                // empty info dict default to "Sent a file"
-                DDLogWarn(@"Got filetransfer with unknown type");
                 msgText = NSLocalizedString(@"📁 A File", @"");
+
+            if(info.downloadState == DownloadStateComplete)
+            {
+                if([mimeType hasPrefix:@"image/"] || [mimeType hasPrefix:@"video/"] || [mimeType hasPrefix:@"audio/"])
+                {
+                    UNNotificationAttachment* attachment;
+                    UTType* typeHint = info.typeHint;
+                    if([mimeType hasPrefix:@"audio/"])
+                    {
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info.cacheFile] filename:info.filename typeIdentifier:typeHint.identifier]];
+                        DDLogVerbose(@"Added audio attachment(%@ = %@): %@", mimeType, typeHint, audioAttachment);
+                    }
+                    attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
+                    if(attachment)
+                        content.attachments = @[attachment];
+                }
             }
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
@@ -851,44 +824,35 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
 
         if([message.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
-            if(info)
+            NSString* mimeType = message.fileInfo.mimeType;
+            if([mimeType hasPrefix:@"image/"])
             {
-                NSString* mimeType = info[@"mimeType"];
-                if([mimeType hasPrefix:@"image/"])
-                {
-                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
+                content.body = NSLocalizedString(@"Sent an Image 📷", @"");
 
-                    UNNotificationAttachment* attachment;
-                    if(![info[@"needsDownloading"] boolValue])
+                UNNotificationAttachment* attachment;
+                if(message.fileInfo.downloadState == DownloadStateComplete)
+                {
+                    UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                    if(typeHint == nil)
+                        typeHint = UTTypeImage;
+                    attachment = [self createNotificationAttachmentForFileInfo:message.fileInfo havingTypeHint:typeHint];
+                    if(attachment)
                     {
-                        UTType* typeHint = [UTType typeWithMIMEType:mimeType];
-                        if(typeHint == nil)
-                            typeHint = UTTypeImage;
-                        attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
-                        if(attachment)
-                        {
-                            content.attachments = @[attachment];
-                            content.body = @"";
-                        }
+                        content.attachments = @[attachment];
+                        content.body = @"";
                     }
                 }
-                else if([mimeType hasPrefix:@"image/"])
-                    content.body = NSLocalizedString(@"📷 An Image", @"");
-                else if([mimeType hasPrefix:@"audio/"])
-                    content.body = NSLocalizedString(@"🎵 An Audiomessage", @"");
-                else if([mimeType hasPrefix:@"video/"])
-                    content.body = NSLocalizedString(@"🎥 A Video", @"");
-                else if([mimeType isEqualToString:@"application/pdf"])
-                    content.body = NSLocalizedString(@"📄 A Document", @"");
-                else
-                    content.body = NSLocalizedString(@"Sent a File 📁", @"");
             }
+            else if([mimeType hasPrefix:@"image/"])
+                content.body = NSLocalizedString(@"📷 An Image", @"");
+            else if([mimeType hasPrefix:@"audio/"])
+                content.body = NSLocalizedString(@"🎵 An Audiomessage", @"");
+            else if([mimeType hasPrefix:@"video/"])
+                content.body = NSLocalizedString(@"🎥 A Video", @"");
+            else if([mimeType isEqualToString:@"application/pdf"])
+                content.body = NSLocalizedString(@"📄 A Document", @"");
             else
-            {
-                // empty info dict default to "Sent a file"
                 content.body = NSLocalizedString(@"Sent a File 📁", @"");
-            }
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
             content.body = NSLocalizedString(@"Sent a Link 🔗", @"");
@@ -902,28 +866,28 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     [self publishNotificationContent:[self updateBadgeForContent:content] withID:idval];
 }
 
--(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(NSDictionary*) info havingTypeHint:(UTType*) typeHint
+-(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(MLFiletransferInfo*) info havingTypeHint:(UTType*) typeHint
 {
     NSError* error;
     NSString* attachmentDir = [[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path];
     //use "tmp." prefix to make sure this file will be garbage collected should the ios notification attachment implementation leave it behind
-    NSString* attachmentBasename = [NSString stringWithFormat:@"tmp.%@", info[@"cacheId"]];
+    NSString* attachmentBasename = [NSString stringWithFormat:@"tmp.%@", info.cacheId];
     NSString* notificationAttachment = [attachmentDir stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtensionForType:typeHint]];
     //using stringByAppendingPathExtensionForType: does not produce playable audio notifications for audios sent by conversations,
     //but seems to work for other types
     //--> use info[@"fileExtension"] for audio files and stringByAppendingPathExtensionForType: for all other types
     if([typeHint conformsToType:UTTypeAudio])
-        notificationAttachment = [notificationAttachment stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtension:info[@"fileExtension"]]];
+        notificationAttachment = [notificationAttachment stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtension:info.fileExtension]];
     UIImage* image = nil;
-    if([info[@"mimeType"] hasPrefix:@"image/svg"])
+    if([info.mimeType hasPrefix:@"image/svg"])
     {
         NSString* pngAttachment = [attachmentDir stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtensionForType:UTTypePNG]];
-        DDLogVerbose(@"Preparing for notification attachment(%@): converting downloaded file from svg at '%@' to png at '%@'...", typeHint, info[@"cacheFile"], pngAttachment);
+        DDLogVerbose(@"Preparing for notification attachment(%@): converting downloaded file from svg at '%@' to png at '%@'...", typeHint, info.cacheFile, pngAttachment);
         //we want our code to run synchronously --> use PMKHang
         //this code should never run in the main queue to not provoke a deadlock
         if([NSThread isMainThread])
             @throw [NSException exceptionWithName:@"InvalidThread" reason:@"PMKHang on renderUIImageFromSVGURL must never be called on the main thread!" userInfo:nil]; 
-        image = (UIImage*)nilExtractor(PMKHang([HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]]));
+        image = (UIImage*)nilExtractor(PMKHang([HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info.cacheFile]]));
         if(image != nil)
         {
             [UIImagePNGRepresentation(image) writeToFile:pngAttachment atomically:YES];
@@ -934,8 +898,8 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     //fallback if svg extraction failed OR it wasn't an SVG image in the first place
     if(image == nil)
     {
-        DDLogVerbose(@"Preparing for notification attachment(%@): hardlinking downloaded file from '%@' to '%@'...", typeHint, info[@"cacheFile"], notificationAttachment);
-        error = [HelperTools hardLinkOrCopyFile:info[@"cacheFile"] to:notificationAttachment];
+        DDLogVerbose(@"Preparing for notification attachment(%@): hardlinking downloaded file from '%@' to '%@'...", typeHint, info.cacheFile, notificationAttachment);
+        error = [HelperTools hardLinkOrCopyFile:info.cacheFile to:notificationAttachment];
         if(error)
         {
             DDLogError(@"Could not hardlink cache file to notification image temp file!");
@@ -943,7 +907,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         }
     }
     [HelperTools configureFileProtectionFor:notificationAttachment];
-    UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:notificationAttachment] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+    UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:info.cacheId URL:[NSURL fileURLWithPath:notificationAttachment] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
     if(error != nil)
         DDLogError(@"Could not create UNNotificationAttachment: %@", error);
     return attachment;

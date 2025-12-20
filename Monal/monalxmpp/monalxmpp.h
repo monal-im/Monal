@@ -33,6 +33,7 @@ FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 #import <monalxmpp/Quicksy_Country.h>
 #import <monalxmpp/IPC.h>
 #import <monalxmpp/MLFiletransfer.h>
+#import <monalxmpp/MLFiletransferInfo.h>
 #import <monalxmpp/MLProcessLock.h>
 #import <monalxmpp/MLNotificationQueue.h>
 #import <monalxmpp/UIColor+Extension.h>

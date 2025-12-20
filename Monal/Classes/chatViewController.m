@@ -23,6 +23,7 @@
 #import "MLChatViewHelper.h"
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/MLFiletransferInfo.h>
 #import <monalxmpp/MLImageManager.h>
 #import <monalxmpp/MLMucProcessor.h>
 #import <monalxmpp/MLVoIPProcessor.h>
@@ -1832,7 +1833,7 @@ enum msgSentState {
     NSDictionary* dic = notification.userInfo;
     MLMessage* msg = dic[@"message"];
 
-    DDLogDebug(@"Got filetransfer message update for history id %ld: %@ (%@)", (long)[msg.messageDBId intValue], msg.filetransferMimeType, msg.filetransferSize);
+    DDLogDebug(@"Got filetransfer message update for history id %ld: %@ (%@)", (long)[msg.messageDBId intValue], msg.fileInfo.mimeType, msg.fileInfo.size);
 
     NSIndexPath* indexPath;
     for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
@@ -2069,20 +2070,19 @@ enum msgSentState {
     }
     if(cell == nil && [row.messageType isEqualToString:kMessageTypeFiletransfer])
     {
-        DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.filetransferMimeType, row.filetransferSize);
-        NSDictionary* info = [MLFiletransfer getFileInfoForMessage:row];
+        DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.fileInfo.mimeType, row.fileInfo.size);
+        MLFiletransferInfo* info = row.fileInfo;
 
-        if(![info[@"needsDownloading"] boolValue])
+        if(info.downloadState == DownloadStateComplete)
         {
             DDLogVerbose(@"Filetransfer already downloaded: %@", info);
-            cell = [self fileTransferCellCheckerWithInfo:info direction:inboundDir tableView:tableView andMsg:row];
+            cell = [self fileTransferCellCheckerWithMessage:row direction:inboundDir tableView:tableView];
         }
-        else if([info[@"needsDownloading"] boolValue])
+        else
         {
             DDLogVerbose(@"Filetransfer needs downloading: %@", info);
             MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell*)[self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
-            NSString* fileSize = info[@"size"] ? info[@"size"] : @"0";
-            [fileTransferCell initCellForMessageId:row.messageDBId andFilename:info[@"filename"] andMimeType:info[@"mimeType"] andFileSize:fileSize.longLongValue];
+            [fileTransferCell initCellForMessageId:row.messageDBId andFilename:info.filename andMimeType:info.mimeType andFileSize:info.size.longLongValue];
             cell = fileTransferCell;
         }
     }
@@ -2352,10 +2352,10 @@ enum msgSentState {
                 [(MLChatCell *)cell openlink:self];
             } else  {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    NSDictionary* selectedItem = [MLFiletransfer getFileInfoForMessage:[self.messageList objectAtIndex:indexPath.row]];
+                    MLFiletransferInfo* selectedItem = [self.messageList objectAtIndex:indexPath.row].fileInfo;
                     NSMutableArray* allItems = [NSMutableArray new];
-                    for(NSDictionary* info in [[DataLayer sharedInstance] allAttachmentsFromContact:self.contact.contactJid forAccount:self.contact.accountID])
-                        if(!(((NSNumber*)nilDefault(info[@"needsDownloading"], @YES)).boolValue) && ([info[@"mimeType"] hasPrefix:@"image/"] || [info[@"mimeType"] hasPrefix:@"video/"]))
+                    for(MLFiletransferInfo* info in [[DataLayer sharedInstance] allAttachmentsFromContact:self.contact.contactJid forAccount:self.contact.accountID])
+                        if(info.downloadState == DownloadStateComplete && ([info.mimeType hasPrefix:@"image/"] || [info.mimeType hasPrefix:@"video/"]))
                             [allItems addObject:info];
                     UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewerForCurrentItem:selectedItem allItems:allItems];
                     imageViewer.modalPresentationStyle = UIModalPresentationOverFullScreen;
@@ -2555,30 +2555,32 @@ enum msgSentState {
         ]];
 }
 
--(MLBaseCell*) fileTransferCellCheckerWithInfo:(NSDictionary*)info direction:(BOOL)inDirection tableView:(UITableView*)tableView andMsg:(MLMessage*)row{
+-(MLBaseCell*) fileTransferCellCheckerWithMessage:(MLMessage*)message direction:(BOOL)inDirection tableView:(UITableView*)tableView
+{
+    MLFiletransferInfo* info = message.fileInfo;
     MLBaseCell* cell = nil;
-    if(cell == nil && [info[@"mimeType"] hasPrefix:@"image/"])
+    if(cell == nil && [info.mimeType hasPrefix:@"image/"])
     {
         MLChatImageCell* imageCell = (MLChatImageCell*)[self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
-        [imageCell initCellWithMLMessage:row];
+        [imageCell initCellWithMLMessage:message];
         cell = imageCell;
     }
-    if(cell == nil && [info[@"mimeType"] hasPrefix:@"video/"])
+    if(cell == nil && [info.mimeType hasPrefix:@"video/"])
     {
         MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell*)[self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
-        NSString* videoStr = info[@"cacheFile"];
-        NSString* videoFileName = info[@"filename"];
-        [videoCell avplayerConfigWithUrlStr:videoStr andMimeType:info[@"mimeType"] fileName:videoFileName andVC:self];
+        NSString* videoStr = info.cacheFile;
+        NSString* videoFileName = info.filename;
+        [videoCell avplayerConfigWithUrlStr:videoStr andMimeType:info.mimeType fileName:videoFileName andVC:self];
 
         cell = videoCell;
     }
-    if(cell == nil && [info[@"mimeType"] hasPrefix:@"audio/"])
+    if(cell == nil && [info.mimeType hasPrefix:@"audio/"])
     {
         //we may wan to make a new kind later but for now this is perfectly functional
         MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell*)[self messageTableCellWithIdentifier:@"fileTransferAudio" andInbound:inDirection fromTable:tableView];
-        NSString *audioStr = info[@"cacheFile"];
-        NSString *audioFileName = info[@"filename"];
-        [audioCell avplayerConfigWithUrlStr:audioStr andMimeType:info[@"mimeType"] fileName:audioFileName andVC:self];
+        NSString *audioStr = info.cacheFile;
+        NSString *audioFileName = info.filename;
+        [audioCell avplayerConfigWithUrlStr:audioStr andMimeType:info.mimeType fileName:audioFileName andVC:self];
 
         cell = audioCell;
     }
@@ -2586,26 +2588,25 @@ enum msgSentState {
     {
         MLFileTransferTextCell* textCell = (MLFileTransferTextCell*)[self messageTableCellWithIdentifier:@"fileTransferText" andInbound:inDirection fromTable:tableView];
 
-        NSString *fileSizeStr = info[@"size"];
-        long long fileSizeLongLongValue = fileSizeStr.longLongValue;
+        long long fileSizeLongLongValue = info.size.longLongValue;
         NSString *readableFileSize = [NSByteCountFormatter stringFromByteCount:fileSizeLongLongValue
                                                                     countStyle:NSByteCountFormatterCountStyleFile];
-        NSString *hintStr = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Open", @""), info[@"filename"]];
-        NSString *fileCacheUrlStr = info[@"cacheFile"];
+        NSString *hintStr = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Open", @""), info.filename];
+        NSString *fileCacheUrlStr = info.cacheFile;
         textCell.fileCacheUrlStr = fileCacheUrlStr;
 
-        NSUInteger countOfMimtTypeComponent = [info[@"mimeType"] componentsSeparatedByString:@";"].count;
+        NSUInteger countOfMimtTypeComponent = [info.mimeType componentsSeparatedByString:@";"].count;
         NSString* fileMimeType = @"";
         NSString* fileCharSet = @"";
         NSString* fileEncodeName = @"utf-8";
         if (countOfMimtTypeComponent > 1)
         {
-            fileMimeType = [info[@"mimeType"] componentsSeparatedByString:@";"].firstObject;
-            fileCharSet = [info[@"mimeType"] componentsSeparatedByString:@";"].lastObject;
+            fileMimeType = [info.mimeType componentsSeparatedByString:@";"].firstObject;
+            fileCharSet = [info.mimeType componentsSeparatedByString:@";"].lastObject;
         }
         else
         {
-            fileMimeType = info[@"mimeType"];
+            fileMimeType = info.mimeType;
         }
 
         if (fileCharSet != nil && fileCharSet.length > 0)
@@ -2614,7 +2615,7 @@ enum msgSentState {
         }
 
         textCell.fileMimeType = fileMimeType;
-        textCell.fileName = info[@"filename"];
+        textCell.fileName = info.filename;
         textCell.fileEncodeName = fileEncodeName;
         [textCell.fileTransferHint setText:hintStr];
         [textCell.sizeLabel setText:readableFileSize];

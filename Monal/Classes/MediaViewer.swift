@@ -48,13 +48,13 @@ struct SVGRepresentation: Transferable {
 
 struct ImageViewer: View {
     var delegate: SheetDismisserProtocol
-    let info: [String:AnyObject]
+    let info: MLFiletransferInfo
     @State private var previewImage: UIImage?
     @State private var controlsVisible = false
     @StateObject private var customPlayer = CustomAVPlayer()
     @State private var isPlayerReady = false
 
-    init(delegate: SheetDismisserProtocol, info: [String:AnyObject]) throws {
+    init(delegate: SheetDismisserProtocol, info: MLFiletransferInfo) throws {
         self.delegate = delegate
         self.info = info
         DDLogDebug("Loading image for info: \(String(describing:self.info))")
@@ -65,18 +65,18 @@ struct ImageViewer: View {
             Color.background
                 .ignoresSafeArea()
             
-            if (info["mimeType"] as! String).hasPrefix("image/svg") {
+            if info.mimeType!.hasPrefix("image/svg") {
                 VStack {
                     ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {
-                        SVGView(contentsOf: URL(fileURLWithPath:info["cacheFile"] as! String))
+                        SVGView(contentsOf: URL(fileURLWithPath:info.cacheFile!))
                     }
                 }
-            } else if (info["mimeType"] as! String).hasPrefix("image/") {
-                if let image = UIImage(contentsOfFile:info["cacheFile"] as! String) {
+            } else if info.mimeType!.hasPrefix("image/") {
+                if let image = UIImage(contentsOfFile:info.cacheFile!) {
                     VStack {
                         ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {
-                            if (info["mimeType"] as! String).hasPrefix("image/gif") {
-                                GIFViewer(data:Binding(get: { try! NSData(contentsOfFile:info["cacheFile"] as! String) as Data }, set: { _ in }))
+                            if info.mimeType!.hasPrefix("image/gif") {
+                                GIFViewer(data:Binding(get: { try! NSData(contentsOfFile:info.cacheFile!) as Data }, set: { _ in }))
                                     .scaledToFit()
                             } else {
                                 Image(uiImage: image)
@@ -88,7 +88,7 @@ struct ImageViewer: View {
                 } else {
                     InvalidFileView()
                 }
-            } else if (info["mimeType"] as! String).hasPrefix("video/") {
+            } else if info.mimeType!.hasPrefix("video/") {
                 if isPlayerReady, let playerViewController = customPlayer.playerViewController {
                     ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {
                         AVPlayerControllerRepresentable(playerViewController: playerViewController)
@@ -115,13 +115,12 @@ struct ImageViewer: View {
     }
     
     private func loadPreviewAndConfigurePlayer() async {
-        if (info["mimeType"] as! String).hasPrefix("image/svg") {
-            previewImage = await HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info["cacheFile"] as! String)).toTypedGuarantee().asyncOnMainActor()
-        } else if (info["mimeType"] as! String).hasPrefix("image/") {
-            previewImage = UIImage(contentsOfFile:info["cacheFile"] as! String)
-        } else if (info["mimeType"] as! String).hasPrefix("video/") {
-            if let filePath = info["cacheFile"] as? String,
-               let mimeType = info["mimeType"] as? String {
+        if info.mimeType!.hasPrefix("image/svg") {
+            previewImage = await HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info.cacheFile!)).toTypedGuarantee().asyncOnMainActor()
+        } else if info.mimeType!.hasPrefix("image/") {
+            previewImage = UIImage(contentsOfFile:info.cacheFile!)
+        } else if info.mimeType!.hasPrefix("video/") {
+            if let filePath = info.cacheFile, let mimeType = info.mimeType {
                 customPlayer.configurePlayer(filePath: filePath, mimeType: mimeType)
                 isPlayerReady = true
             }
@@ -183,7 +182,7 @@ struct InvalidFileView: View {
 }
 
 struct ControlsOverlay: View {
-    let info: [String: AnyObject]
+    let info: MLFiletransferInfo
     @Binding var previewImage: UIImage?
     let dismiss: () -> Void
     
@@ -194,28 +193,28 @@ struct ControlsOverlay: View {
                 .overlay(
                     HStack {
                         Spacer().frame(width: 20)
-                        Text(info["filename"] as! String).foregroundColor(.primary)
+                        Text(info.filename).foregroundColor(.primary)
                         Spacer()
                         
                         if let image = previewImage {
-                            if (info["mimeType"] as! String).hasPrefix("image/svg") {
+                            if info.mimeType!.hasPrefix("image/svg") {
                                 ShareLink(
                                     item: SVGRepresentation(getData: {
-                                        try! NSData(contentsOfFile: info["cacheFile"] as! String) as Data
+                                        try! NSData(contentsOfFile: info.cacheFile!) as Data
                                     }), preview: SharePreview("Share image", image: Image(uiImage: image))
                                 )
                                 .labelStyle(.iconOnly)
                                 .foregroundColor(.primary)
-                            } else if (info["mimeType"] as! String).hasPrefix("image/gif") {
+                            } else if info.mimeType!.hasPrefix("image/gif") {
                                 ShareLink(
                                     item: GifRepresentation(getData: {
-                                        try! NSData(contentsOfFile: info["cacheFile"] as! String) as Data
+                                        try! NSData(contentsOfFile: info.cacheFile!) as Data
                                     }), preview: SharePreview("Share image", image: Image(uiImage: image))
                                 )
                                 .labelStyle(.iconOnly)
                                 .foregroundColor(.primary)
-                            } else if (info["mimeType"] as! String).hasPrefix("video/") {
-                                if let fileURL = URL(string: info["cacheFile"] as! String) {
+                            } else if info.mimeType!.hasPrefix("video/") {
+                                if let fileURL = URL(string: info.cacheFile!) {
                                     let mediaItem = MediaItem(fileInfo: info)
                                     ShareLink(item: fileURL, preview: SharePreview("Share video", image: Image(uiImage: mediaItem.thumbnail ?? UIImage(systemName: "video")!)))
                                         .labelStyle(.iconOnly)
@@ -224,7 +223,7 @@ struct ControlsOverlay: View {
                             } else {
                                 ShareLink(
                                     item: JpegRepresentation(getData: {
-                                        try! NSData(contentsOfFile: info["cacheFile"] as! String) as Data
+                                        try! NSData(contentsOfFile: info.cacheFile!) as Data
                                     }), preview: SharePreview("Share image", image: Image(uiImage: image))
                                 )
                                 .labelStyle(.iconOnly)

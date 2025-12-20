@@ -16,6 +16,7 @@
 #import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/xmpp.h>
 #import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLFiletransferInfo.h>
 #import <QuartzCore/QuartzCore.h>
 
 @interface MLContactCell()
@@ -69,13 +70,13 @@
             [self showStatusText:NSLocalizedString(@"🔗 A Link", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
         else if([lastMessage.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            if([lastMessage.filetransferMimeType hasPrefix:@"image/"])
+            if([lastMessage.fileInfo.mimeType hasPrefix:@"image/"])
                 [self showStatusText:NSLocalizedString(@"📷 An Image", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
-            else if([lastMessage.filetransferMimeType hasPrefix:@"audio/"])
+            else if([lastMessage.fileInfo.mimeType hasPrefix:@"audio/"])
                 [self showStatusText:NSLocalizedString(@"🎵 An Audiomessage", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
-            else if([lastMessage.filetransferMimeType hasPrefix:@"video/"])
+            else if([lastMessage.fileInfo.mimeType hasPrefix:@"video/"])
                 [self showStatusText:NSLocalizedString(@"🎥 A Video", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
-            else if([lastMessage.filetransferMimeType isEqualToString:@"application/pdf"])
+            else if([lastMessage.fileInfo.mimeType isEqualToString:@"application/pdf"])
                 [self showStatusText:NSLocalizedString(@"📄 A Document", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             else
                 [self showStatusText:NSLocalizedString(@"📁 A File", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];

@@ -763,7 +763,7 @@ class SwiftuiInterface : NSObject {
     }
     
     @objc(makeImageViewerForCurrentItem:allItems:)
-    func makeImageViewerFor(currentItem:[String:AnyObject], allItems: [[String:AnyObject]]) -> UIViewController {
+    func makeImageViewerFor(currentItem:MLFiletransferInfo, allItems: [MLFiletransferInfo]) -> UIViewController {
         let delegate = SheetDismisserProtocol()
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         delegate.host = host

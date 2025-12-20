@@ -864,7 +864,7 @@ class ChatViewMessage: ExyteChat.Message {
                 return nil
             }
             let fileURL = URL(fileURLWithPath: fileInfo.cacheFile as String)
-            return Recording(url: fileURL, mimeType: fileInfo.mimeType)
+            return Recording(duration: fileInfo.mediaDuration, url: fileURL, mimeType: fileInfo.mimeType)
         }
         set {}
     }

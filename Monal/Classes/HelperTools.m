@@ -1152,6 +1152,21 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         DDLogError(@"Could not clean up symlink file '%@' pointing to '%@': %@", symlinkUrl, fileUrl, error);
 }
 
++(AnyPromise*) computeMediaDurationFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension
+{
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        [self createAVURLAssetFromFile:file havingMimeType:mimeType andFileExtension:fileExtension withCompletionHandler:^(AVURLAsset* asset) {
+            if(asset == nil)
+                return resolve([NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: @"Could not create AVURLAsset"}]);
+
+            [asset loadValuesAsynchronouslyForKeys:@[@"duration"] completionHandler:^{
+                Float64 duration = CMTimeGetSeconds(asset.duration);
+                resolve(@(duration));
+            }];
+        }];
+    }];
+}
+
 +(AnyPromise*) generateVideoThumbnailFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension
 {
     return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {

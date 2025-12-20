@@ -988,6 +988,27 @@
             [db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('autodecrement~message_history', ?);" andArguments:@[initialValue]];
         }];
 
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.004 withBlock:^{
+            [db executeNonQuery:@"CREATE TABLE 'filetransfer_info' (\
+                'message_history_id' INTEGER NOT NULL PRIMARY KEY, \
+                'mime_type' VARCHAR(128) DEFAULT NULL, \
+                'size' INTEGER DEFAULT NULL, \
+                FOREIGN KEY('message_history_id') REFERENCES 'message_history'('message_history_id') ON DELETE CASCADE \
+            );"];
+            [db executeNonQuery:@"INSERT INTO filetransfer_info (message_history_id, mime_type, size) SELECT message_history_id, filetransferMimeType, filetransferSize FROM message_history WHERE messageType=?;" andArguments:@[kMessageTypeFiletransfer]];
+            [db executeNonQuery:@"ALTER TABLE message_history DROP COLUMN filetransferMimeType;"];
+            [db executeNonQuery:@"ALTER TABLE message_history DROP COLUMN filetransferSize;"];
+
+            // Automatically insert into 'filetransfer_info' table when a filetransfer is inserted into 'message_history' table
+            [db executeNonQuery:@"CREATE TRIGGER sync_filetransfer_info_on_message_insertion \
+                AFTER INSERT ON message_history \
+                WHEN NEW.messageType = 'Filetransfer' \
+                BEGIN \
+                    INSERT INTO filetransfer_info (message_history_id) VALUES (NEW.message_history_id); \
+                END;"
+            ];
+        }];
+
 
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

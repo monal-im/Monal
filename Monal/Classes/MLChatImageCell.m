@@ -12,6 +12,7 @@
 #import <monalxmpp/MLFileTransfer.h>
 #import <monalxmpp/MLMessage.h>
 #import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLFiletransferInfo.h>
 
 @import QuartzCore;
 @import UIKit;
@@ -55,17 +56,17 @@
 /// Load the image from messageText (link) and display it in the UI
 -(void) loadImage:(MLMessage*) msg
 {
+    MLFiletransferInfo* info = msg.fileInfo;
     if(_animatedImageView != nil)
         [_animatedImageView removeFromSuperview];
     if(msg.messageText && self.thumbnailImage.image == nil)
     {
         [self.spinner startAnimating];
-        NSDictionary* info = [MLFiletransfer getFileInfoForMessage:msg];
-        if(info && [info[@"mimeType"] hasPrefix:@"image/gif"])
+        if([info.mimeType hasPrefix:@"image/gif"])
         {
             self.link = msg.messageText;
             // uses cached file if the file was already downloaded
-            FLAnimatedImage* image = [FLAnimatedImage animatedImageWithGIFData:[NSData dataWithContentsOfFile:info[@"cacheFile"]]];
+            FLAnimatedImage* image = [FLAnimatedImage animatedImageWithGIFData:[NSData dataWithContentsOfFile:info.cacheFile]];
             if(!image)
                 return;
             _animatedImageView = [FLAnimatedImageView new];
@@ -86,15 +87,15 @@
             [self.thumbnailImage addSubview:_animatedImageView];
             self.thumbnailImage.contentMode = UIViewContentModeScaleAspectFit;
         }
-        else if(info && [info[@"mimeType"] hasPrefix:@"image/"])
+        else if([info.mimeType hasPrefix:@"image/"])
         {
             self.link = msg.messageText;
             AnyPromise* imagePromise = nil;
             // this code already runs in the main queue --> we can't use PMKHang
-            if([info[@"mimeType"] hasPrefix:@"image/svg"])
-                imagePromise = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info[@"cacheFile"]]];
+            if([info.mimeType hasPrefix:@"image/svg"])
+                imagePromise = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info.cacheFile]];
             else
-                imagePromise = [AnyPromise promiseWithValue:[[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]]];
+                imagePromise = [AnyPromise promiseWithValue:[[UIImage alloc] initWithContentsOfFile:info.cacheFile]];
             imagePromise.then(^(UIImage* image) {
                 if(!nilExtractor(image))
                     return;

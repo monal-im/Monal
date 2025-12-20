@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class xmpp;
 @class MLContact;
 @class MLReactionsEntry;
+@class MLFiletransferInfo;
 
 /**
  message object intended to be passed around and eventually used to render
@@ -67,8 +68,7 @@ The of the message in the DB , should be int
 @property (nonatomic, copy) NSString* _Nullable participantJid;
 @property (nonatomic, copy) NSString* _Nullable occupantId;
 
-@property (nonatomic, copy) NSString* _Nullable filetransferMimeType;
-@property (nonatomic, copy) NSNumber* _Nullable filetransferSize;
+@property (nonatomic, readonly) MLFiletransferInfo* fileInfo;
 
 @property (nonatomic, copy) NSString* messageText;
 

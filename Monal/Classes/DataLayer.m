@@ -1436,17 +1436,6 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setMessageHistoryId:(NSNumber*) historyId filetransferMimeType:(NSString*) mimeType filetransferSize:(NSNumber*) size
-{
-    if(historyId == nil)
-        return;
-    [self.db voidWriteTransaction:^{
-        NSString* query = @"UPDATE message_history SET messageType=?, filetransferMimeType=?, filetransferSize=? WHERE message_history_id=?;";
-        DDLogVerbose(@"setting message type 'kMessageTypeFiletransfer', mime type '%@' and size %@ for history id %@", mimeType, size, historyId);
-        [self.db executeNonQuery:query andArguments:@[kMessageTypeFiletransfer, mimeType, size, historyId]];
-    }];
-}
-
 -(void) setMessageHistoryId:(NSNumber*) historyId messageType:(NSString*) messageType
 {
     if(historyId == nil)
@@ -1475,6 +1464,39 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"UPDATE message_history SET stanzaid=? WHERE messageid=?;";
         DDLogVerbose(@"setting message stanzaid %@", query);
         [self.db executeNonQuery:query andArguments:@[stanzaId, messageid]];
+    }];
+}
+
+-(NSDictionary*) getFiletransferInfoForHistoryId:(NSNumber*) historyId
+{
+    if(historyId == nil)
+        return (NSDictionary*) nil;
+
+    return [self.db idReadTransaction:^{
+        NSArray* results = [self.db executeReader:@"SELECT * FROM filetransfer_info WHERE message_history_id=?;" andArguments:@[historyId]];
+
+        MLAssert(results != nil && results.count <= 1, @"Unexpected filetransfer_info count", (@{
+            @"historyId": historyId,
+            @"count": [NSNumber numberWithInteger:[results count]],
+            @"results": results ? results : @"(null)"
+        }));
+        if(results.count == 0)
+            return (NSDictionary*) nil;
+        else
+            return (NSDictionary*) results[0];
+    }];
+}
+
+-(void) setFiletransferInfoForHistoryId:(NSNumber*) historyId withMimeType:(NSString*) mimeType andSize:(NSNumber*) size
+{
+    if(historyId == nil)
+        return;
+    [self.db voidWriteTransaction:^{
+        MLMessage* message = [MLMessage createMessageFromHistoryID:historyId];
+        MLAssert([message.messageType isEqualToString:kMessageTypeFiletransfer], @"Can't set mimeType and size of a message that isn't a file transfer!");
+        DDLogVerbose(@"Setting mime type '%@' and size %@ for history id %@", mimeType, size, historyId);
+        NSString* query = @"UPDATE filetransfer_info SET mime_type=?, size=? WHERE message_history_id=?;";
+        [self.db executeNonQuery:query andArguments:@[mimeType, size, historyId]];
     }];
 }
 
@@ -1547,7 +1569,8 @@ static NSDateFormatter* dbFormatter;
         MLMessage* msg = [MLMessage createMessageFromHistoryID:messageNo];
         if([msg.messageType isEqualToString:kMessageTypeFiletransfer])
             [MLFiletransfer deleteFileForMessage:msg];
-        [self.db executeNonQuery:@"UPDATE message_history SET message='', messageType=?, filetransferMimeType='', filetransferSize=0, retracted=1 WHERE message_history_id=?;" andArguments:@[kMessageTypeText, messageNo]];
+        [self.db executeNonQuery:@"UPDATE message_history SET message='', messageType=?, retracted=1 WHERE message_history_id=?;" andArguments:@[kMessageTypeText, messageNo]];
+        [self.db executeNonQuery:@"UPDATE filetransfer_info SET mime_type='', size=0 WHERE message_history_id=?;" andArguments:@[messageNo]];
         [self.db executeNonQuery:@"PRAGMA secure_delete=off;"];
     }];
 }
@@ -1862,27 +1885,25 @@ static NSDateFormatter* dbFormatter;
     //Message_history going out, from is always the local user. always read and not sent
     NSArray* parts = [[[NSDate date] description] componentsSeparatedByString:@" "];
     NSString* dateTime = [NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0], [parts objectAtIndex:1]];
-    if(mimeType && size != nil)
-        size = @(0);
-    NSString* query;
-    NSArray* params;
-    if(mimeType && size)
-    {
-        query = @"INSERT INTO message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, occupant_id, unread, sent, messageid, messageType, encrypted, displayMarkerWanted, filetransferMimeType, filetransferSize) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-        params = @[accountID, to, [NSNumber numberWithBool:NO], dateTime, message, actualfrom, nilWrapper(occupantId), [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES], mimeType, size];
-    }
-    else
-    {
-        query = @"INSERT INTO message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, occupant_id, unread, sent, messageid, messageType, encrypted, displayMarkerWanted) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?);";
-        params = @[accountID, to, [NSNumber numberWithBool:NO], dateTime, message, actualfrom, nilWrapper(occupantId), [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES]];
-    }
-    
+    NSString* query = @"INSERT INTO message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, occupant_id, unread, sent, messageid, messageType, encrypted, displayMarkerWanted) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?);";
+    NSArray* params = @[accountID, to, [NSNumber numberWithBool:NO], dateTime, message, actualfrom, nilWrapper(occupantId), [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES]];
     return [self.db idWriteTransaction:^{
         DDLogVerbose(@"%@", query);
         BOOL result = [self.db executeNonQuery:query andArguments:params];
         if(!result)
             return (NSNumber*)nil;
+
         NSNumber* historyId = [self.db lastInsertId];
+        if([messageType isEqualToString:kMessageTypeFiletransfer])
+        {
+            MLAssert(mimeType != nil && size != nil, @"Outgoing file transfers must have a mimeType and size");
+            // Insertion of 'message_history_id' already happened automatically thanks to a trigger
+            NSString* query = @"UPDATE filetransfer_info SET mime_type=?, size=? WHERE message_history_id=?;";
+            NSArray* params = @[mimeType, size, historyId];
+            result = [self.db executeNonQuery:query andArguments:params];
+            if(!result)
+                DDLogError(@"Failed to save the mimeType and size of an outgoing filetransfer to the db! (historyId = %@)", historyId);
+        }
         [self updateActiveBuddy:to setTime:dateTime forAccount:accountID];
         return historyId;
     }];
@@ -2330,7 +2351,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark - Filetransfers
 
--(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSNumber*) accountID
+-(NSMutableArray<MLFiletransferInfo*>*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSNumber*) accountID
 {
     if(accountID == nil ||! contact)
         return nil;
@@ -2341,7 +2362,7 @@ static NSDateFormatter* dbFormatter;
         
         NSMutableArray* retval = [NSMutableArray new];
         for(MLMessage* msg in [self messagesForHistoryIDs:[self.db executeScalarReader:query andArguments:params]])
-            [retval addObject:[MLFiletransfer getFileInfoForMessage:msg]];
+            [retval addObject:msg.fileInfo];
         return retval;
     }];
 }

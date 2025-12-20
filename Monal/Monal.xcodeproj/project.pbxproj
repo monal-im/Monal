@@ -254,6 +254,8 @@
 		C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = C1F5C7AE2777638B0001F295 /* OrderedCollections */; };
 		D02192F32C89BB3800202A59 /* BlockedUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D02192F22C89BB3800202A59 /* BlockedUsers.swift */; };
 		D09B51F62C7F30DD008D725B /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
+		D0BEF5062EF1F5A800947F75 /* MLFiletransferInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = D0BEF5052EF1F5A800947F75 /* MLFiletransferInfo.m */; };
+		D0BEF50A2EF1F5F400947F75 /* MLFiletransferInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = D0BEF5092EF1F5F400947F75 /* MLFiletransferInfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D0E0497A2DB3A7FA002783A3 /* ChatViewHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = D0E049792DB3A7FA002783A3 /* ChatViewHelpers.m */; };
 		D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */; };
 		D0FE3F542C5C56ED007AAD23 /* ChangePassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FE3F532C5C56ED007AAD23 /* ChangePassword.swift */; };
@@ -812,6 +814,8 @@
 		C1F5C7A82775DA000001F295 /* MLContactSoftwareVersionInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactSoftwareVersionInfo.m; sourceTree = "<group>"; };
 		C1F5C7AB2777621B0001F295 /* ContactResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactResources.swift; sourceTree = "<group>"; };
 		D02192F22C89BB3800202A59 /* BlockedUsers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockedUsers.swift; sourceTree = "<group>"; };
+		D0BEF5052EF1F5A800947F75 /* MLFiletransferInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLFiletransferInfo.m; sourceTree = "<group>"; };
+		D0BEF5092EF1F5F400947F75 /* MLFiletransferInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLFiletransferInfo.h; sourceTree = "<group>"; };
 		D0E049792DB3A7FA002783A3 /* ChatViewHelpers.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ChatViewHelpers.m; sourceTree = "<group>"; };
 		D0E0497C2DB3A862002783A3 /* ChatViewHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ChatViewHelpers.h; sourceTree = "<group>"; };
 		D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDetails.swift; sourceTree = "<group>"; };
@@ -1105,6 +1109,8 @@
 				84DED8592EE0795200401D3A /* MLContactProtocol.h */,
 				84E5AF182EE63FBA00FF1E4A /* MLReactionsEntry.m */,
 				84E5AF1A2EE63FCF00FF1E4A /* MLReactionsEntry.h */,
+				D0BEF5052EF1F5A800947F75 /* MLFiletransferInfo.m */,
+				D0BEF5092EF1F5F400947F75 /* MLFiletransferInfo.h */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -1613,6 +1619,7 @@
 				542CF4002763314F002C3710 /* hsluv.h in Headers */,
 				54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */,
 				341F44662CAF427500AA6C7D /* MLPromise.h in Headers */,
+				D0BEF50A2EF1F5F400947F75 /* MLFiletransferInfo.h in Headers */,
 				541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */,
 				84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */,
 				84CAED6E2ECAC5F700F4FCBF /* XMPPMessage.h in Headers */,
@@ -2306,6 +2313,7 @@
 				540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */,
 				26CC57C823A0892100ABB92A /* MLMessage.m in Sources */,
 				848904A9289C82C30097E19C /* SCRAM.m in Sources */,
+				D0BEF5062EF1F5A800947F75 /* MLFiletransferInfo.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
 				540BD0D424D8D2000087A743 /* IPC.m in Sources */,
 				8418B55E2C7EC6B7006FAF60 /* Quicksy_Country.m in Sources */,

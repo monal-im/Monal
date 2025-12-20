@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/MLFiletransferInfo.h>
 #import <monalxmpp/DataLayer.h>
 #import "MLEncryptedPayload.h"
 #import <monalxmpp/xmpp.h>
@@ -63,7 +64,7 @@ static NSObject* _hardlinkingSyncObject;
     url = [self genCanonicalUrl:msg.messageText];
     @synchronized(_expectedDownloadSizes) {
         if(_expectedDownloadSizes[url] == nil)
-            _expectedDownloadSizes[url] = msg.filetransferSize;
+            _expectedDownloadSizes[url] = msg.fileInfo.size;
     }
     //make sure we don't check or download this twice
     @synchronized(_currentlyTransfering) {
@@ -114,7 +115,7 @@ static NSObject* _hardlinkingSyncObject;
             DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
             
             //update db with content type and size
-            [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:contentLength];
+            [[DataLayer sharedInstance] setFiletransferInfoForHistoryId:historyId withMimeType:mimeType andSize:contentLength];
 
             //send out update notification
             xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
@@ -122,7 +123,8 @@ static NSObject* _hardlinkingSyncObject;
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{
                     @"message": msg,
                     @"mimeType": mimeType,
-                    @"filetransferSize": contentLength
+                    @"size": contentLength,
+                    @"downloadState": @(DownloadStateHeaders),
                 }];
             else
                 return;             //abort here without autodownloading if account was already deleted
@@ -282,14 +284,16 @@ static NSObject* _hardlinkingSyncObject;
             NSNumber* filetransferSize = @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]);
             DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
             //update db with content type and size
-            [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:filetransferSize];
+            [[DataLayer sharedInstance] setFiletransferInfoForHistoryId:historyId withMimeType:mimeType andSize:filetransferSize];
+
             //send out update notification
             xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
             if(account != nil)      //don't send out update notices for already deleted accounts
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{
                     @"message": msg,
                     @"mimeType": mimeType,
-                    @"filetransferSize": filetransferSize
+                    @"size": filetransferSize,
+                    @"downloadState": @(DownloadStateComplete),
                 }];
 
             else
@@ -431,7 +435,7 @@ $$
 
 +(void) hardlinkFileForMessage:(MLMessage*) msg
 {
-    NSDictionary* fileInfo = [self getFileInfoForMessage:msg];
+    MLFiletransferInfo* fileInfo = msg.fileInfo;
     xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
     if(account == nil)
         return;
@@ -459,11 +463,11 @@ $$
     if(msg.inbound)
     {
         //put every mime-type in its own type directory
-        if([fileInfo[@"mimeType"] hasPrefix:@"image/"])
+        if([fileInfo.mimeType hasPrefix:@"image/"])
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Images", @"directory for downloaded images")];
-        else if([fileInfo[@"mimeType"] hasPrefix:@"video/"])
+        else if([fileInfo.mimeType hasPrefix:@"video/"])
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Videos", @"directory for downloaded videos")];
-        else if([fileInfo[@"mimeType"] hasPrefix:@"audio/"])
+        else if([fileInfo.mimeType hasPrefix:@"audio/"])
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Audios", @"directory for downloaded audios")];
         else
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Files", @"directory for downloaded files")];
@@ -475,11 +479,11 @@ $$
     else
     {
         //put every mime-type in its own type directory
-        if([fileInfo[@"mimeType"] hasPrefix:@"image/"])
+        if([fileInfo.mimeType hasPrefix:@"image/"])
             [hardlinkPathComponents addObject:NSLocalizedString(@"Sent Images", @"directory for downloaded images")];
-        else if([fileInfo[@"mimeType"] hasPrefix:@"video/"])
+        else if([fileInfo.mimeType hasPrefix:@"video/"])
             [hardlinkPathComponents addObject:NSLocalizedString(@"Sent Videos", @"directory for downloaded videos")];
-        else if([fileInfo[@"mimeType"] hasPrefix:@"audio/"])
+        else if([fileInfo.mimeType hasPrefix:@"audio/"])
             [hardlinkPathComponents addObject:NSLocalizedString(@"Sent Audios", @"directory for downloaded audios")];
         else
             [hardlinkPathComponents addObject:NSLocalizedString(@"Sent Files", @"directory for downloaded files")];
@@ -487,77 +491,20 @@ $$
     
     u_int16_t i=(u_int16_t)arc4random();
     NSString* randomID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
-    NSString* fileExtension = [fileInfo[@"filename"] pathExtension];
-    NSString* fileBasename = [fileInfo[@"filename"] stringByDeletingPathExtension];
+    NSString* fileExtension = fileInfo.fileExtension;
+    NSString* fileBasename = [fileInfo.filename stringByDeletingPathExtension];
     [hardlinkPathComponents addObject:[[NSString stringWithFormat:@"%@_%@", fileBasename, randomID] stringByAppendingPathExtension:fileExtension]];
     
-    MLAssert(fileInfo[@"cacheFile"] != nil, @"cacheFile should never be empty here!", (@{@"fileInfo": fileInfo}));
+    MLAssert(fileInfo.cacheFile != nil, @"cacheFile should never be empty here!", (@{@"fileInfo": fileInfo}));
     
-    MLHandler* handler = $newHandler(self, handleHardlinking, $ID(cacheFile, fileInfo[@"cacheFile"]), $ID(hardlinkPathComponents), $BOOL(direct, NO));
+    MLHandler* handler = $newHandler(self, handleHardlinking, $ID(cacheFile, fileInfo.cacheFile), $ID(hardlinkPathComponents), $BOOL(direct, NO));
     if([HelperTools isAppExtension])
     {
-        DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at %@: we are in the appex, rescheduling this to next account connect", fileInfo[@"cacheFile"], [hardlinkPathComponents componentsJoinedByString:@"/"]);
+        DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at %@: we are in the appex, rescheduling this to next account connect", fileInfo.cacheFile, [hardlinkPathComponents componentsJoinedByString:@"/"]);
         [account addReconnectionHandler:handler];       //the reconnect handler framework will add $ID(account) to the callerArgs, no need to add an accountID etc. here
     }
     else
         $call(handler, $ID(account), $BOOL(direct, YES));       //no reconnect handler framework used, explicitly bind $ID(account) via callerArgs
-}
-
-+(NSDictionary*) getFileInfoForMessage:(MLMessage*) msg
-{
-    MLAssert([msg.messageType isEqualToString:kMessageTypeFiletransfer], @"message not of type filetransfer!", (@{@"msg": msg}));
-    
-    NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];
-    //default is a dummy filename (used when the filename can not be extracted from url)
-    NSString* filename = [NSString stringWithFormat:@"%@.bin", [[NSUUID UUID] UUIDString]];
-    if(urlComponents != nil && urlComponents.path)
-        filename = [urlComponents.path lastPathComponent];
-    NSString* cacheFile = [self retrieveCacheFileForUrl:msg.messageText andMimeType:(msg.filetransferMimeType && ![msg.filetransferMimeType isEqualToString:@""] ? msg.filetransferMimeType : nil)];
-    
-    //return every information we have
-    if(!cacheFile)
-    {
-        //if we have mimeype and size the http head request was already done, else we did not even do a head request
-        if(msg.filetransferMimeType != nil && msg.filetransferSize != nil)
-        {
-            let retval = @{
-                @"url": msg.messageText,
-                @"filename": filename,
-                @"needsDownloading": @YES,
-                @"mimeType": msg.filetransferMimeType,
-                @"size": msg.filetransferSize,
-                @"fileExtension": [filename pathExtension],
-                @"historyID": msg.messageDBId,
-            };
-            DDLogVerbose(@"Returning image info: %@", retval);
-            return retval;
-        }
-        else
-        {
-            let retval = @{
-                @"url": msg.messageText,
-                @"filename": filename,
-                @"needsDownloading": @YES,
-                @"fileExtension": [filename pathExtension],
-                @"historyID": msg.messageDBId,
-            };
-            DDLogVerbose(@"Returning image info: %@", retval);
-            return retval;
-        }
-    }
-    let retval = @{
-        @"url": msg.messageText,
-        @"filename": filename,
-        @"needsDownloading": @NO,
-        @"mimeType": [self getMimeTypeOfCacheFile:cacheFile],
-        @"size": @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]),
-        @"cacheId": [cacheFile lastPathComponent],
-        @"cacheFile": cacheFile,
-        @"fileExtension": [filename pathExtension],
-        @"historyID": msg.messageDBId,
-    };
-    DDLogVerbose(@"Returning image info: %@", retval);
-    return retval;
 }
 
 +(void) deleteFileForMessage:(MLMessage*) msg
@@ -565,12 +512,9 @@ $$
     if(![msg.messageType isEqualToString:kMessageTypeFiletransfer])
         return;
     DDLogInfo(@"Deleting file for url %@", msg.messageText);
-    NSDictionary* info = [self getFileInfoForMessage:msg];
-    if(info)
-    {
-        DDLogDebug(@"Deleting file in cache: %@", info[@"cacheFile"]);
-        [_fileManager removeItemAtPath:info[@"cacheFile"] error:nil];
-    }
+    MLFiletransferInfo* info = msg.fileInfo;
+    DDLogDebug(@"Deleting file in cache: %@", info.cacheFile);
+    [_fileManager removeItemAtPath:info.cacheFile error:nil];
 }
 
 +(MLHandler*) prepareDataUpload:(NSData*) data

@@ -13,6 +13,7 @@
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLFiletransferInfo.h>
 #import "XMPPMessage.h"
 
 static NSMutableDictionary* _singletonCache;
@@ -97,9 +98,6 @@ static NSMutableDictionary* _singletonCache;
         message.errorType = [dic objectForKey:@"errorType"];
         message.errorReason = [dic objectForKey:@"errorReason"];
 
-        message.filetransferMimeType = [dic objectForKey:@"filetransferMimeType"];
-        message.filetransferSize = [dic objectForKey:@"filetransferSize"];
-
         message.retracted = [(NSNumber*)[dic objectForKey:@"retracted"] boolValue];
         
         _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:message];
@@ -152,7 +150,6 @@ static NSMutableDictionary* _singletonCache;
     //watch for all sorts of changes and update our singleton dynamically
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageUpdate:) name:kMonalUpdatedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageDeletion:) name:kMonalDeletedMessageNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFiletransferUpdate:) name:kMonalMessageFiletransferUpdateNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageSent:) name:kMonalSentMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageReceived:) name:kMonalMessageReceivedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageDisplayed:) name:kMonalMessageDisplayedNotice object:nil];
@@ -205,24 +202,7 @@ static NSMutableDictionary* _singletonCache;
 
     self.messageText = @"";
     self.messageType = kMessageTypeText;
-    self.filetransferMimeType = @"";
-    self.filetransferSize = @0;
     self.retracted = YES;
-}
-
--(void) handleFiletransferUpdate:(NSNotification*) notification
-{
-    NSDictionary* data = notification.userInfo;
-    MLMessage* message = data[@"message"];
-    MLAssert(message != nil, @"Notification without message");
-    if(self.messageDBId.integerValue != message.messageDBId.integerValue)
-        return;         //ignore filetransfer updates of other messages
-
-    NSString* mimeType = data[@"mimeType"];
-    NSNumber* filetransferSize = data[@"filetransferSize"];
-    MLAssert(mimeType != nil && filetransferSize != nil, @"Notification without mimeType and/or filetransferSize");
-    self.filetransferMimeType = mimeType;
-    self.filetransferSize = filetransferSize;
 }
 
 -(void) handleMessageSent:(NSNotification*) notification
@@ -291,6 +271,11 @@ static NSMutableDictionary* _singletonCache;
     }
     else
         return [MLContact createContactFromJid:self.buddyName andAccountID:self.accountID].contactDisplayName;
+}
+
+-(MLFiletransferInfo*) fileInfo
+{
+    return [MLFiletransferInfo createFiletransferInfoForMessage:self];
 }
 
 -(xmpp* _Nullable) account

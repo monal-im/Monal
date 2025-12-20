@@ -18,7 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) doStartupCleanup;
 +(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId;
 +(void) downloadFileForHistoryID:(NSNumber*) historyId;
-+(NSDictionary* _Nullable) getFileInfoForMessage:(MLMessage* _Nullable) msg;
 +(void) deleteFileForMessage:(MLMessage* _Nullable) msg;
 +(MLHandler*) prepareDataUpload:(NSData*) data;
 +(MLHandler*) prepareDataUpload:(NSData*) data withFileExtension:(NSString*) fileExtension;

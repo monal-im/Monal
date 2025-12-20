@@ -31,6 +31,8 @@ static NSMutableDictionary* _singletonCache;
 @property (nonatomic) DownloadState downloadState;
 @property (nonatomic) double mediaDuration;
 @property (atomic) BOOL isComputingMediaDuration;
+@property (nonatomic) NSURL* thumbnailURL;
+@property (atomic) BOOL isGeneratingThumbnail;
 
 @end
 
@@ -107,6 +109,7 @@ static NSMutableDictionary* _singletonCache;
     self.size = @0;
     self.downloadState = DownloadStateUndefined;
     self.mediaDuration = 0.0;
+    self.thumbnailURL = nil;
 }
 
 -(DownloadState) downloadState
@@ -149,6 +152,40 @@ static NSMutableDictionary* _singletonCache;
 
     // return _mediaDuration (which contains 0.0) while the computation happens in a background thread
     return _mediaDuration;
+}
+
+-(NSURL*) thumbnailURL {
+    // return thumbnail cached in memory.
+    if(_thumbnailURL != nil)
+        return _thumbnailURL;
+
+    // return thumbnail cached on disk
+    NSURL* url = [[MLImageManager sharedInstance] getThumbnailURLOfMessage:self.message];
+    if(url != nil)
+    {
+        self.thumbnailURL = url;
+        return url;
+    }
+
+    // Generate the thumbnail now, but try to ensure that only one thread is doing the generation
+    // Also, prevent retries in the case of an error (to avoid repeated failures)
+    // Note that isGeneratingThumbnail is not thread safe.
+    if(!self.isGeneratingThumbnail)
+    {
+        self.isGeneratingThumbnail = YES;
+        [HelperTools generateVideoThumbnailFromFile:self.cacheFile havingMimeType:self.mimeType andFileExtension:self.fileExtension]
+        .then(^(UIImage* image) {
+            NSData* imageData = UIImagePNGRepresentation(image);
+            // The following instruction triggers a ChatView update
+            self.thumbnailURL = [[MLImageManager sharedInstance] setThumbnailOfMessage:self.message withData:imageData];
+            self.isGeneratingThumbnail = NO;
+        }).catch(^(NSError* error) {
+            DDLogError(@"Could not create video thumbnail: %@", error);
+        });
+    }
+
+    // return _thumbnailURL (which is nil) while thumbnail generation happens in a background thread
+    return _thumbnailURL;
 }
 
 -(NSString*) url

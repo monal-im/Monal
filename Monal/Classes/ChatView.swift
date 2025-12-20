@@ -885,7 +885,8 @@ class ChatViewMessage: ExyteChat.Message {
                     let attachment = Attachment(id: attachmentUUID, url: URL(fileURLWithPath: cacheFile), type: .image)
                     return [attachment]
                 case let mimeType where mimeType.starts(with: "video/"):
-                    let attachment = Attachment(id: attachmentUUID, url: URL(fileURLWithPath: cacheFile), type: .video, mimeType: mimeType)
+                    let thumbnail = fileInfo.thumbnailURL as URL? ?? URL(string: "about:blank")!
+                    let attachment = Attachment(id: attachmentUUID, thumbnail: thumbnail, full: URL(fileURLWithPath: cacheFile), type: .video, mimeType: mimeType)
                     return [attachment]
                 default:
                     return []

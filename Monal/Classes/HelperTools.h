@@ -178,7 +178,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSString* _Nullable) stringSha512HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
 
 +(NSUUID*) dataToUUID:(NSData*) data;
-+(NSUUID*) stringToUUID:(NSString*) data;
++(NSUUID*) stringToUUID:(NSString*) data NS_SWIFT_NAME(stringToUUID(_:));
 
 +(NSString*) encodeBase64WithString:(NSString*) strData;
 +(NSString*) encodeBase64WithData:(NSData*) objData;

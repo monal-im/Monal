@@ -742,9 +742,37 @@ struct ChatView: View {
 
 class ChatViewMessage: ExyteChat.Message {
     let innerMessage: ObservableKVOWrapper<MLMessage>
+    let fileInfo: ObservableKVOWrapper<MLFiletransferInfo>?
     private var subscriptions: Set<AnyCancellable> = Set()
     override var text: String {
         get {
+            if innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo {
+                switch(fileInfo.downloadState as DownloadState.RawValue) {
+                    case DownloadState.complete.rawValue:
+                        let mimeType = fileInfo.mimeType as String
+                        if mimeType.starts(with: "audio/") || mimeType.starts(with: "image/") || mimeType.starts(with: "video/") {
+                            return ""
+                        } else {
+                            return """
+                                [File transfer with a file type that's not yet supported for displaying]
+                                \(innerMessage.obj.encrypted ? "" : "Link: \(innerMessage.messageText as String)")
+                            """
+                        }
+                    case DownloadState.headers.rawValue:
+                        let humanReadableSize = (fileInfo.size as NSNumber).int64Value.formatted(.byteCount(style: .file))
+                        return """
+                        [File transfer; auto-downloading if the settings allow it...]
+                        Size: \(humanReadableSize)
+                        MimeType: \(fileInfo.obj.mimeType)
+                        \(innerMessage.obj.encrypted ? "" : "Link: \(fileInfo.url)")
+                        """
+                    case DownloadState.none.rawValue:
+                        return "[File transfer; checking the size...]"
+                    default:
+                        // .invalid case
+                        unreachable()
+                }
+            }
             return innerMessage.retracted ? NSLocalizedString("This message got retracted", comment: "") : innerMessage.messageText
         }
         set {}
@@ -797,15 +825,71 @@ class ChatViewMessage: ExyteChat.Message {
         }
         set {}
     }
+    override var attachments: [Attachment] {
+        get {
+            guard innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo else {
+                return []
+            }
+
+            guard (fileInfo.downloadState as DownloadState.RawValue) == DownloadState.complete.rawValue else {
+                // TODO: show a proper button for mime type checks instead of doing this automatically
+                MLFiletransfer.checkMimeTypeAndSize(forHistoryID: innerMessage.messageDBId)
+                return []
+            }
+            let cacheFile = fileInfo.cacheFile as String
+            let attachmentUUID = HelperTools.stringToUUID(cacheFile).uuidString
+            switch fileInfo.mimeType as String {
+                case let mimeType where mimeType.starts(with: "image/"):
+                    let attachment = Attachment(id: attachmentUUID, url: URL(fileURLWithPath: cacheFile), type: .image)
+                    return [attachment]
+                case let mimeType where mimeType.starts(with: "video/"):
+                    let attachment = Attachment(id: attachmentUUID, url: URL(fileURLWithPath: cacheFile), type: .video, mimeType: mimeType)
+                    return [attachment]
+                default:
+                    return []
+            }
+        }
+        set {}
+    }
+    override var recording: Recording? {
+        get {
+            guard innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo else {
+                return nil
+            }
+
+            guard (fileInfo.downloadState as DownloadState.RawValue) == DownloadState.complete.rawValue else {
+                return nil
+            }
+            guard (fileInfo.mimeType as String).starts(with: "audio/") else {
+                return nil
+            }
+            let fileURL = URL(fileURLWithPath: fileInfo.cacheFile as String)
+            return Recording(url: fileURL, mimeType: fileInfo.mimeType)
+        }
+        set {}
+    }
+
     init(_ message: MLMessage) {
 //         DDLogVerbode("Creating new ChatViewMessage for MLMessage: \(String(describing:message)): \(Thread.callStackSymbols)")
         self.innerMessage = ObservableKVOWrapper(message)
+        if innerMessage.obj.messageType == kMessageTypeFiletransfer {
+            self.fileInfo = ObservableKVOWrapper(innerMessage.obj.fileInfo)
+        } else {
+            self.fileInfo = nil
+        }
         let user = ChatViewUser(message.contact as! NSObject&MLContactProtocol)
         // We don't need to properly initialize the properties that we overrode with computed properties
         super.init(id: message.id, user: user, createdAt: Date(), text: "")
 
         // Forward innerMessage changes as ChatViewMessage changes
         innerMessage.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &subscriptions)
+
+        // Forward fileInfo changes as ChatViewMessage changes
+        fileInfo?.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }

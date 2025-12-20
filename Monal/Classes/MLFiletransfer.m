@@ -693,66 +693,6 @@ $$
             [_fileManager removeItemAtPath:[_documentCacheDir stringByAppendingPathComponent:file] error:nil];
         }
     }
-    
-    //*** migrate old image store to new fileupload store if needed***
-    if(![[HelperTools defaultsDB] boolForKey:@"ImageCacheMigratedToFiletransferCache"])
-    {
-        DDLogInfo(@"Migrating old image store to new filetransfer cache");
-        
-        //first of all upgrade all message types (needed to make getFileInfoForMessage: work later on)
-        [[DataLayer sharedInstance] upgradeImageMessagesToFiletransferMessages];
-        
-        //copy all images listed in old imageCache db tables to our new filetransfer store
-        NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        NSString* documentsDirectory = [paths objectAtIndex:0];
-        NSString* cachePath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
-        for(NSDictionary* img in [[DataLayer sharedInstance] getAllCachedImages])
-        {
-            //extract old url, file and mime type
-            NSURLComponents* urlComponents = [NSURLComponents componentsWithString:img[@"url"]];
-            if(!urlComponents)
-                continue;
-            NSString* mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
-            NSString* oldFile = [cachePath stringByAppendingPathComponent:img[@"path"]];
-            NSString* newFile = [self calculateCacheFileForNewUrl:img[@"url"] andMimeType:mimeType];
-            
-            DDLogInfo(@"Migrating old image cache file %@ (having mimeType %@) for URL %@ to new cache at %@", oldFile, mimeType, img[@"url"], newFile);
-            if([_fileManager fileExistsAtPath:oldFile])
-            {
-                [_fileManager copyItemAtPath:oldFile toPath:newFile error:nil];
-                [HelperTools configureFileProtectionFor:newFile];
-                [_fileManager removeItemAtPath:oldFile error:nil];
-            }
-            else
-                DDLogWarn(@"Old file not existing --> not moving file, but still updating db entries");
-            
-            //update every history_db entry with new filetransfer metadata
-            //(this will flip the message type to kMessageTypeFiletransfer and set correct mimeType and size values)
-            NSArray* messageList = [[DataLayer sharedInstance] getAllMessagesForFiletransferUrl:img[@"url"]];
-            if(![messageList count])
-            {
-                DDLogWarn(@"No messages in history db having this url, deleting file completely");
-                [_fileManager removeItemAtPath:newFile error:nil];
-            }
-            else
-            {
-                DDLogInfo(@"Updating every history db entry with new filetransfer metadata: %lu messages", [messageList count]);
-                for(MLMessage* msg in messageList)
-                {
-                    NSDictionary* info = [self getFileInfoForMessage:msg];
-                    DDLogDebug(@"FILETRANSFER INFO: %@", info);
-                    //don't update mime type and size if we still need to download the file (both is unknown in this case)
-                    if(info && ![info[@"needsDownloading"] boolValue])
-                        [[DataLayer sharedInstance] setMessageHistoryId:msg.messageDBId filetransferMimeType:info[@"mimeType"] filetransferSize:info[@"size"]];
-                }
-            }
-        }
-        
-        //remove old db tables completely
-        [[DataLayer sharedInstance] removeImageCacheTables];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ImageCacheMigratedToFiletransferCache"];
-        DDLogInfo(@"Migration done");
-    }
 }
 
 #pragma mark - internal methods

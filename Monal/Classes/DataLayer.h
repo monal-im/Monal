@@ -303,11 +303,6 @@ extern NSString* const kMessageTypeFiletransfer;
  */
 -(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword betweenContact:(MLContact* _Nonnull) contact;
 
--(NSArray<NSDictionary*>*) getAllCachedImages;
--(void) removeImageCacheTables;
--(NSArray*) getAllMessagesForFiletransferUrl:(NSString*) url;
--(void) upgradeImageMessagesToFiletransferMessages;
-
 -(void) invalidateAllAccountStates;
 
 -(NSString*) lastUsedPushServerForAccount:(NSNumber*) accountID;

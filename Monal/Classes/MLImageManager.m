@@ -224,6 +224,44 @@
     return [NSString stringWithFormat:@"%@_%@.png", contact.accountID.stringValue, [contact.contactJid lowercaseString]];;
 }
 
+-(NSString*) fileNameforThumbnailOfMessage:(MLMessage*) message
+{
+    return [NSString stringWithFormat:@"%@.png", message.messageDBId.stringValue];
+}
+
+-(NSURL*) setThumbnailOfMessage:(MLMessage*) message withData:(NSData* _Nullable) data
+{
+    //documents directory/thumbnails/accountID/contact
+
+    NSString* filename = [self fileNameforThumbnailOfMessage:message];
+
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+
+    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"thumbnails"];
+    writablePath = [writablePath stringByAppendingPathComponent:message.accountID.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:message.buddyName];
+    NSError* error;
+    [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
+    [HelperTools configureFileProtectionFor:writablePath];
+    writablePath = [writablePath stringByAppendingPathComponent:filename];
+
+    if([fileManager fileExistsAtPath:writablePath])
+        [fileManager removeItemAtPath:writablePath error:nil];
+
+    if(data)
+    {
+        if([data writeToFile:writablePath atomically:NO])
+        {
+            [HelperTools configureFileProtectionFor:writablePath];
+            DDLogVerbose(@"wrote image to file: %@", writablePath);
+            return [NSURL fileURLWithPath:writablePath];
+        }
+        else
+            DDLogError(@"failed to write image to file: %@", writablePath);
+    }
+    return (NSURL*)nil;
+}
+
 -(void) setIconForContact:(MLContact*) contact WithData:(NSData* _Nullable) data
 {
     //documents directory/buddyicons/account no/contact
@@ -268,6 +306,19 @@
     
     DDLogVerbose(@"Checking avatar image at: %@", writablePath);
     return [UIImage imageWithContentsOfFile:writablePath] != nil;
+}
+
+-(NSURL*) getThumbnailURLOfMessage:(MLMessage*) message
+{
+    NSString* path = [self.documentsDirectory stringByAppendingPathComponent:@"thumbnails"];
+    path = [path stringByAppendingPathComponent:message.accountID.stringValue];
+    path = [path stringByAppendingPathComponent:message.buddyName];
+    NSString* filename = [self fileNameforThumbnailOfMessage:message];
+    path = [path stringByAppendingPathComponent:filename];
+    if([[NSFileManager defaultManager] fileExistsAtPath:path])
+        return [NSURL fileURLWithPath:path];
+    else
+        return nil;
 }
 
 -(UIImage*) getIconForContact:(MLContact*) contact

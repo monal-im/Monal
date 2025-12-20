@@ -459,7 +459,7 @@ struct ChatView: View {
                 case .resend:
                     confirmationPrompt = ConfirmationPrompt(
                         title: Text("Retry sending message?"),
-                        message: Text("This message failed to send (\(mlMessage.errorType)): \(mlMessage.errorReason)"),
+                        message: Text("This message failed to send (\(mlMessage.errorType ?? "unknown error")): \(mlMessage.errorReason ?? "unknown reason")"),
                         buttons: [
                             .default(
                                 Text("Retry"),

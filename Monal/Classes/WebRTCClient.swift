@@ -215,7 +215,6 @@ final class WebRTCClient: NSObject {
         let videoTrack = self.createVideoTrack()
         self.localVideoTrack = videoTrack
         self.peerConnection.add(videoTrack, streamIds: [self.streamId])
-        self.remoteVideoTrack = self.peerConnection.transceivers.first { $0.mediaType == .video }?.receiver.track as? RTCVideoTrack
     }
     
     @objc
@@ -313,10 +312,15 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
         DDLogDebug("peerConnection did add stream")
+        //self.remoteVideoTrack = self.peerConnection.transceivers.first { $0.mediaType == .video }?.receiver.track as? RTCVideoTrack
+        self.remoteVideoTrack = stream.videoTracks.first(where: { $0 is RTCVideoTrack }) as? RTCVideoTrack
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
         DDLogDebug("peerConnection did remove stream")
+        if stream.videoTracks.first(where: { $0.trackId == self.remoteVideoTrack?.trackId }) != nil {
+            self.remoteVideoTrack = nil
+        }
     }
     
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {

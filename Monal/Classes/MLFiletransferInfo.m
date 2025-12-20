@@ -29,6 +29,8 @@ static NSMutableDictionary* _singletonCache;
 @property (nonatomic) NSNumber* size;
 
 @property (nonatomic) DownloadState downloadState;
+@property (nonatomic) double mediaDuration;
+@property (atomic) BOOL isComputingMediaDuration;
 
 @end
 
@@ -104,6 +106,7 @@ static NSMutableDictionary* _singletonCache;
     self.mimeType = @"";
     self.size = @0;
     self.downloadState = DownloadStateUndefined;
+    self.mediaDuration = 0.0;
 }
 
 -(DownloadState) downloadState
@@ -122,6 +125,30 @@ static NSMutableDictionary* _singletonCache;
 
     self.downloadState = state;
     return _downloadState;
+}
+
+-(double) mediaDuration {
+    // return already cached value.
+    if(_mediaDuration != 0.0)
+        return _mediaDuration;
+
+    // Compute the duration, but try to ensure that only one thread is doing so
+    // Also prevent further retries in the case of an error
+    // Note that isComputingMediaDuration is not thread safe
+    if(!self.isComputingMediaDuration) {
+        self.isComputingMediaDuration = YES;
+        [HelperTools computeMediaDurationFromFile:self.cacheFile havingMimeType:self.mimeType andFileExtension:self.fileExtension]
+        .then(^(NSNumber* duration) {
+            // The following instruction triggers a ChatView update
+            self.mediaDuration = duration.doubleValue;
+            self.isComputingMediaDuration = NO;
+        }).catch(^(NSError* error) {
+            DDLogError(@"Could not compute media duration: %@", error);
+        });
+    }
+
+    // return _mediaDuration (which contains 0.0) while the computation happens in a background thread
+    return _mediaDuration;
 }
 
 -(NSString*) url

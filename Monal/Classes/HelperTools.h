@@ -122,6 +122,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(id) unserializeData:(NSData*) data;
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request;
 +(void) createAVURLAssetFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension withCompletionHandler:(void(^)(AVURLAsset* _Nullable)) completion;
++(AnyPromise*) computeMediaDurationFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension;
 +(AnyPromise*) generateVideoThumbnailFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension;
 +(AnyPromise*) addUploadItemPreviewForItem:(NSURL* _Nullable) url provider:(NSItemProvider* _Nullable) provider andPayload:(NSMutableDictionary*) payload;
 +(AnyPromise*) handleUploadItemProvider:(NSItemProvider*) provider;

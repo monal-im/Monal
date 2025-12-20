@@ -151,7 +151,11 @@ struct ChatView: View {
             if case .error = message.status {
                 return [.resend, .delete]
             }
-            var availableActions: [MessageAction] = [.copy]
+            var availableActions: [MessageAction] = []
+            if !message.text.isEmpty {
+                availableActions.append(.copy)
+            }
+
             if !mlMessage.inbound && DataLayer.sharedInstance().checkLMCEligible(mlMessage.messageDBId, encrypted: mlMessage.encrypted || contact.isEncrypted, historyBaseID: nil) {
                 availableActions.append(.edit)
             }

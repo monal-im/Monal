@@ -2330,41 +2330,6 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark - Filetransfers
 
--(NSArray*) getAllMessagesForFiletransferUrl:(NSString*) url
-{
-    return [self.db idReadTransaction:^{
-        return [self messagesForHistoryIDs:[self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE message=?;" andArguments:@[url]]];
-    }];
-}
-
--(void) upgradeImageMessagesToFiletransferMessages
-{
-    [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"UPDATE message_history SET messageType=? WHERE messageType=?;" andArguments:@[kMessageTypeFiletransfer, @"Image"]];
-    }];
-}
-
-// (deprecated) should only be used to upgrade to new table format
--(NSArray<NSDictionary*>*) getAllCachedImages
-{
-    return [self.db idReadTransaction:^{
-        NSNumber* tableFound = [self.db executeScalar:@"SELECT count(*) FROM sqlite_master WHERE type='table' AND name='imageCache';"];
-        if(tableFound.boolValue == NO)
-        {
-            return [[NSArray<NSDictionary*> alloc] init];
-        }
-        return (NSArray<NSDictionary*>*)[self.db executeReader:@"SELECT DISTINCT * FROM imageCache;"];
-    }];
-}
-
-// (deprecated) should only be used to upgrade to new table format
--(void) removeImageCacheTables
-{
-    [self.db voidWriteTransaction:^{
-        [self.db executeNonQuery:@"DROP TABLE IF EXISTS imageCache;"];
-    }];
-}
-
 -(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSNumber*) accountID
 {
     if(accountID == nil ||! contact)

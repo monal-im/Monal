@@ -19,7 +19,7 @@
 @property (nonatomic) NSString* _Nullable jid;
 @property (nonatomic) NSString* _Nullable occupantId;
 @property (nonatomic) NSString* _Nullable mucNick;
-@property (nonatomic) NSSet<NSString*>* reactions;
+@property (nonatomic) NSOrderedSet<NSString*>* reactions;
 @property (nonatomic) NSDate* timestamp;
 @property (nonatomic) MLMessage* message;
 @property (nonatomic) id<MLContactProtocol> contact;

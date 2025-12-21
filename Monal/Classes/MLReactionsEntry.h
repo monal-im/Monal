@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSString* _Nullable jid;
 @property (nonatomic, readonly) NSString* _Nullable occupantId;
 @property (nonatomic, readonly) NSString* _Nullable mucNick;
-@property (nonatomic, readonly) NSSet<NSString*>* reactions;
+@property (nonatomic, readonly) NSOrderedSet<NSString*>* reactions;
 @property (nonatomic, readonly) NSDate* timestamp;
 @property (nonatomic, readonly) MLMessage* message;
 @property (nonatomic, readonly) id<MLContactProtocol> contact;

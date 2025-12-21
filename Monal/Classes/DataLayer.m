@@ -1641,7 +1641,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setReactions:(NSSet*) reactions fromJid:(NSString* _Nullable) jid orOccupantId:(NSString* _Nullable) occupantId forHistoryId:(NSNumber*) historyId withDate:(NSDate*) date andActualFrom:(NSString* _Nullable) actualFrom
+-(void) setReactions:(NSOrderedSet*) reactions fromJid:(NSString* _Nullable) jid orOccupantId:(NSString* _Nullable) occupantId forHistoryId:(NSNumber*) historyId withDate:(NSDate*) date andActualFrom:(NSString* _Nullable) actualFrom
 {
     NSString* timestamp = [HelperTools generateDateTimeString:date];
     //user is our primary key (together with message_history_id).
@@ -1649,7 +1649,7 @@ static NSDateFormatter* dbFormatter;
     NSString* user = occupantId;
     if(user == nil)
         user = jid;
-    NSString* reactionsString = [[reactions allObjects] componentsJoinedByString:@""];
+    NSString* reactionsString = [[reactions.set allObjects] componentsJoinedByString:@""];
     MLAssert(user != nil, @"User for reaction should never be nil!");
     return [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"INSERT INTO reactions (message_history_id, user, jid, occupant_id, reactions, timestamp, muc_nick) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET jid=?, occupant_id=?, reactions=?, timestamp=?, muc_nick=?;" andArguments:@[historyId, user, nilWrapper(jid), nilWrapper(occupantId), reactionsString, timestamp, nilWrapper(actualFrom), nilWrapper(jid), nilWrapper(occupantId), reactionsString, timestamp, nilWrapper(actualFrom)]];

@@ -225,7 +225,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSNumber* _Nullable) getRetractionHistoryIDForModeratedStanzaId:(NSString*) stanzaId from:(NSString*) from andAccount:(NSNumber*) accountID;
 
 -(NSNumber* _Nullable) getReactionHistoryIDForMessageIdOrStanzaId:(NSString*) someId inChat:(MLContact*) contact;
--(void) setReactions:(NSSet*) reactions fromJid:(NSString* _Nullable) jid orOccupantId:(NSString* _Nullable) occupantId forHistoryId:(NSNumber*) historyId withDate:(NSDate*) date andActualFrom:(NSString* _Nullable) actualFrom;
+-(void) setReactions:(NSOrderedSet*) reactions fromJid:(NSString* _Nullable) jid orOccupantId:(NSString* _Nullable) occupantId forHistoryId:(NSNumber*) historyId withDate:(NSDate*) date andActualFrom:(NSString* _Nullable) actualFrom;
 -(NSArray<MLReactionsEntry*>*) getReactionsForHistoryId:(NSNumber*) historyId;
 
 -(NSDate* _Nullable) returnTimestampForQuote:(NSNumber*) historyID;

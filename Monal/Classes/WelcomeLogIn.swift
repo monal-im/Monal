@@ -237,7 +237,7 @@ struct WelcomeLogIn: View {
         .onDisappear {
             UITableView.appearance().tableHeaderView = nil      //why that??
             
-            guard let newAccountNo = self.newAccountNo else {
+            guard let newAccountNo = self.newAccountNo, currentTimeout != nil || errorObserverEnabled else {
                 return
             }
             DispatchQueue.main.async {

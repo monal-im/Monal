@@ -3463,14 +3463,14 @@ a=%@\r\n", mid, candidate];
     return [NSURL fileURLWithPath:gzipPath];
 }
 
-+(NSSet*) createReactionsSetFromString:(NSString*) reactions
++(NSOrderedSet*) createReactionsSetFromString:(NSString*) reactions
 {
     //remove all vs15 and vs16 modifiers
     reactions = [[reactions componentsSeparatedByString:@"\ufe0e"] componentsJoinedByString:@""];
     reactions = [[reactions componentsSeparatedByString:@"\ufe0f"] componentsJoinedByString:@""];
     
     //"parse" reactions (iterate over grapheme clusters as required in XEP-0444 Business Rules)
-    NSMutableSet* reactionsList = [NSMutableSet new];
+    NSMutableOrderedSet* reactionsList = [NSMutableOrderedSet new];
     [reactions enumerateSubstringsInRange:NSMakeRange(0, [reactions length]) options:NSStringEnumerationByComposedCharacterSequences usingBlock:^(NSString * _Nullable substring, NSRange substringRange __unused, NSRange enclosingRange __unused, BOOL * _Nonnull stop __unused) {
         //add vs16 modifier to every emoji it is allowed
         //see https://www.unicode.org/Public/emoji/latest/emoji-sequences.txt

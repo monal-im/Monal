@@ -546,8 +546,8 @@ static NSMutableDictionary* _typingNotifications;
     else if([messageNode check:@"{urn:xmpp:reactions:0}reactions"])
     {
         NSString* reactionId = [messageNode findFirst:@"{urn:xmpp:reactions:0}reactions@id"];
-        NSSet* reactions = [NSSet setWithArray:[messageNode find:@"{urn:xmpp:reactions:0}reactions<id=%@>/reaction#", reactionId]];
-        
+        NSOrderedSet* reactions = [NSOrderedSet orderedSetWithArray:[messageNode find:@"{urn:xmpp:reactions:0}reactions<id=%@>/reaction#", reactionId]];
+
         //we want to either use the jid OR the occupant-id, but never both (even if we are a channel admin)
         NSString* jidToUse = nil;
         NSString* occupantIdToUse = nil;

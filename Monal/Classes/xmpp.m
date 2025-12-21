@@ -4048,7 +4048,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     [self send:messageNode];
 }
 
--(void) sendReactions:(NSSet*) reactions forMessage:(MLMessage*) message
+-(void) sendReactions:(NSOrderedSet*) reactions forMessage:(MLMessage*) message
 {
     DDLogInfo(@"Sending reactions for message %@: %@", message, reactions);
     XMPPMessage* messageNode = [[XMPPMessage alloc] initToContact:message.chatContact];

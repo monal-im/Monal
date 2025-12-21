@@ -519,16 +519,16 @@ struct ChatView: View {
             let mlMessage = (message as! ChatViewMessage).innerMessage.obj
             switch reaction.type {
                 case .emoji(let emoji):
-                    var currentReactions: Set<String> = []
+                    var currentReactions: NSMutableOrderedSet = []
                     for reactionsInfo in mlMessage.reactions {
                         if reactionsInfo.contact.isSelf {
-                            currentReactions = reactionsInfo.reactions
+                            currentReactions = NSMutableOrderedSet(orderedSet: reactionsInfo.reactions)
                         }
                     }
                     if currentReactions.contains(emoji) {
                         currentReactions.remove(emoji)
                     } else {
-                        currentReactions.insert(emoji)
+                        currentReactions.add(emoji)
                     }
                     self.account.sendReactions(currentReactions, for:mlMessage)
             }
@@ -862,7 +862,7 @@ class ChatViewMessage: ExyteChat.Message {
                     retval.append(Reaction(
                         user: ChatViewUser(reactionsInfo.contact as! NSObject&MLContactProtocol),
                         createdAt: reactionsInfo.timestamp,
-                        type: .emoji(reaction),
+                        type: .emoji(reaction as! String),
                         status: .sent
                     ))
                 }

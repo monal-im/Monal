@@ -2568,7 +2568,7 @@ enum msgSentState {
     if(cell == nil && info.isVideo)
     {
         MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell*)[self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
-        NSString* videoStr = info.cacheFile;
+        NSString* videoStr = info.cacheFilePath;
         NSString* videoFileName = info.filename;
         [videoCell avplayerConfigWithUrlStr:videoStr andMimeType:info.mimeType fileName:videoFileName andVC:self];
 
@@ -2578,7 +2578,7 @@ enum msgSentState {
     {
         //we may wan to make a new kind later but for now this is perfectly functional
         MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell*)[self messageTableCellWithIdentifier:@"fileTransferAudio" andInbound:inDirection fromTable:tableView];
-        NSString *audioStr = info.cacheFile;
+        NSString *audioStr = info.cacheFilePath;
         NSString *audioFileName = info.filename;
         [audioCell avplayerConfigWithUrlStr:audioStr andMimeType:info.mimeType fileName:audioFileName andVC:self];
 
@@ -2592,7 +2592,7 @@ enum msgSentState {
         NSString *readableFileSize = [NSByteCountFormatter stringFromByteCount:fileSizeLongLongValue
                                                                     countStyle:NSByteCountFormatterCountStyleFile];
         NSString *hintStr = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Open", @""), info.filename];
-        NSString *fileCacheUrlStr = info.cacheFile;
+        NSString *fileCacheUrlStr = info.cacheFilePath;
         textCell.fileCacheUrlStr = fileCacheUrlStr;
 
         NSUInteger countOfMimtTypeComponent = [info.mimeType componentsSeparatedByString:@";"].count;

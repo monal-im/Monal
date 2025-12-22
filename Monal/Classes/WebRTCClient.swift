@@ -225,7 +225,7 @@ final class WebRTCClient: NSObject {
             try self.rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord)
             try self.rtcAudioSession.setMode(AVAudioSession.Mode.voiceChat)
         } catch let error {
-            DDLogDebug("Error changeing AVAudioSession category: \(error)")
+            DDLogError("Error changing AVAudioSession category: \(String(describing:error))")
         }
         self.rtcAudioSession.useManualAudio = true
         self.rtcAudioSession.isAudioEnabled = false
@@ -397,7 +397,7 @@ extension WebRTCClient {
                 try self.rtcAudioSession.setCategory(AVAudioSession.Category.playAndRecord)
                 try self.rtcAudioSession.overrideOutputAudioPort(.none)
             } catch let error {
-                DDLogDebug("Error setting AVAudioSession category: \(error)")
+                DDLogError("Error setting AVAudioSession category: \(String(describing:error))")
             }
             self.rtcAudioSession.unlockForConfiguration()
         }
@@ -417,7 +417,7 @@ extension WebRTCClient {
                 try self.rtcAudioSession.overrideOutputAudioPort(.speaker)
                 try self.rtcAudioSession.setActive(true)
             } catch let error {
-                DDLogDebug("Couldn't force audio to speaker: \(error)")
+                DDLogError("Couldn't force audio to speaker: \(String(describing:error))")
             }
             self.rtcAudioSession.unlockForConfiguration()
         }
@@ -450,7 +450,7 @@ extension WebRTCClient {
     @objc
     public var canSendDtmf: Bool {
         guard let dtmfSender = self.dtmfSender else {
-            DDLogInfo("DTMF sender not available")
+            DDLogWarn("DTMF sender not available")
             return false
         }
         return dtmfSender.canInsertDtmf

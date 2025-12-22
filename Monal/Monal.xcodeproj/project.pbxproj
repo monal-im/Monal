@@ -626,8 +626,6 @@
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		842790842A32D16C005C18CC /* CallSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CallSounds; sourceTree = "<group>"; };
-		8430EB382E5D6CDC007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Main.strings; sourceTree = "<group>"; };
-		8430EB392E5D6D68007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Settings.strings; sourceTree = "<group>"; };
 		843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MLOgHtmlParser.swift; path = Classes/MLOgHtmlParser.swift; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
 		844921E92C29F9A000B99A9C /* MLDelayableTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDelayableTimer.m; sourceTree = "<group>"; };
@@ -743,6 +741,18 @@
 		C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperTools.m; sourceTree = "<group>"; };
 		C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MonalXMPPUnitTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		C1B940E926144AF500E9D290 /* AESGCMTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGCMTest.m; sourceTree = "<group>"; };
+		C1BEDB322EF9BE8E00B84871 /* te-IN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "te-IN"; path = "external/te-IN.lproj/Main.strings"; sourceTree = "<group>"; };
+		C1BEDB332EF9BE9400B84871 /* te-IN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "te-IN"; path = "external/te-IN.lproj/Settings.strings"; sourceTree = "<group>"; };
+		C1BEDB342EF9BEAC00B84871 /* te-IN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "te-IN"; path = "external/te-IN.lproj/iosShare.strings"; sourceTree = "<group>"; };
+		C1BEDB352EF9BEAE00B84871 /* te-IN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "te-IN"; path = "external/te-IN.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		C1BEDB392EF9BFC800B84871 /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Main.strings; sourceTree = "<group>"; };
+		C1BEDB3A2EF9BFC800B84871 /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Settings.strings; sourceTree = "<group>"; };
+		C1BEDB3B2EF9BFC900B84871 /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/iosShare.strings; sourceTree = "<group>"; };
+		C1BEDB3C2EF9BFC900B84871 /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C1BEDB3D2EF9C06700B84871 /* et */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = et; path = external/et.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C1BEDB3E2EF9C06700B84871 /* et */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = et; path = external/et.lproj/Main.strings; sourceTree = "<group>"; };
+		C1BEDB3F2EF9C06800B84871 /* et */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = et; path = external/et.lproj/Settings.strings; sourceTree = "<group>"; };
+		C1BEDB402EF9C06900B84871 /* et */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = et; path = external/et.lproj/iosShare.strings; sourceTree = "<group>"; };
 		C1C8394E24F0EDFD00BBCF17 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = external/ar.lproj/Main.strings; sourceTree = "<group>"; };
 		C1C8395024F0EE0300BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "external/zh-Hant-HK.lproj/Main.strings"; sourceTree = "<group>"; };
 		C1C8395224F0EE0A00BBCF17 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = external/cs.lproj/Main.strings; sourceTree = "<group>"; };
@@ -1870,7 +1880,9 @@
 				ko,
 				eu,
 				"es-AR",
+				"te-IN",
 				te,
+				et,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (
@@ -2459,6 +2471,9 @@
 				C15A4E5F279D2AC80055CD11 /* ko */,
 				C1E856A828DECF5F00B104E9 /* eu */,
 				84F194C52C0FE78B00F0A994 /* es-AR */,
+				C1BEDB342EF9BEAC00B84871 /* te-IN */,
+				C1BEDB3B2EF9BFC900B84871 /* te */,
+				C1BEDB402EF9C06900B84871 /* et */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2501,7 +2516,9 @@
 				C15A4E5D279D2AC70055CD11 /* ko */,
 				C1E856A728DECF5F00B104E9 /* eu */,
 				84F194C42C0FE74500F0A994 /* es-AR */,
-				8430EB392E5D6D68007A2B1F /* te */,
+				C1BEDB332EF9BE9400B84871 /* te-IN */,
+				C1BEDB3A2EF9BFC800B84871 /* te */,
+				C1BEDB3F2EF9C06800B84871 /* et */,
 			);
 			name = Settings.storyboard;
 			sourceTree = "<group>";
@@ -2544,7 +2561,9 @@
 				C15A4E5B279D2AC60055CD11 /* ko */,
 				C1E856A628DECF5F00B104E9 /* eu */,
 				84F194C32C0FE70900F0A994 /* es-AR */,
-				8430EB382E5D6CDC007A2B1F /* te */,
+				C1BEDB322EF9BE8E00B84871 /* te-IN */,
+				C1BEDB392EF9BFC800B84871 /* te */,
+				C1BEDB3E2EF9C06700B84871 /* et */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -2586,6 +2605,9 @@
 				C15A4E60279D2AC80055CD11 /* ko */,
 				C1E856A928DECF5F00B104E9 /* eu */,
 				84F194C62C0FE79000F0A994 /* es-AR */,
+				C1BEDB352EF9BEAE00B84871 /* te-IN */,
+				C1BEDB3C2EF9BFC900B84871 /* te */,
+				C1BEDB3D2EF9C06700B84871 /* et */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

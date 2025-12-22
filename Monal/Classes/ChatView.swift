@@ -809,8 +809,8 @@ class ChatViewMessage: ExyteChat.Message {
                         return """
                         [File transfer; auto-downloading if the settings allow it...]
                         Size: \(humanReadableSize)
-                        MimeType: \(fileInfo.obj.mimeType)
-                        \(innerMessage.obj.encrypted ? "" : "Link: \(fileInfo.url)")
+                        MimeType: \(fileInfo.mimeType as String)
+                        \(innerMessage.encrypted ? "" : "Link: \(fileInfo.url as String)")
                         """
                     case DownloadState.none.rawValue:
                         return "[File transfer; checking the size...]"

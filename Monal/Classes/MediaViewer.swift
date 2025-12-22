@@ -88,7 +88,7 @@ struct ImageViewer: View {
                 } else {
                     InvalidFileView()
                 }
-            } else if info.mimeType!.hasPrefix("video/") {
+            } else if info.isVideo {
                 if isPlayerReady, let playerViewController = customPlayer.playerViewController {
                     ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {
                         AVPlayerControllerRepresentable(playerViewController: playerViewController)
@@ -119,7 +119,7 @@ struct ImageViewer: View {
             previewImage = await HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info.cacheFile!)).toTypedGuarantee().asyncOnMainActor()
         } else if info.mimeType!.hasPrefix("image/") {
             previewImage = UIImage(contentsOfFile:info.cacheFile!)
-        } else if info.mimeType!.hasPrefix("video/") {
+        } else if info.isVideo {
             if let filePath = info.cacheFile, let mimeType = info.mimeType {
                 customPlayer.configurePlayer(filePath: filePath, mimeType: mimeType)
                 isPlayerReady = true
@@ -213,7 +213,7 @@ struct ControlsOverlay: View {
                                 )
                                 .labelStyle(.iconOnly)
                                 .foregroundColor(.primary)
-                            } else if info.mimeType!.hasPrefix("video/") {
+                            } else if info.isVideo {
                                 if let fileURL = URL(string: info.cacheFile!) {
                                     let mediaItem = MediaItem(fileInfo: info)
                                     ShareLink(item: fileURL, preview: SharePreview("Share video", image: Image(uiImage: mediaItem.thumbnail ?? UIImage(systemName: "video")!)))

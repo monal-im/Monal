@@ -70,13 +70,13 @@
             [self showStatusText:NSLocalizedString(@"🔗 A Link", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
         else if([lastMessage.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            if([lastMessage.fileInfo.mimeType hasPrefix:@"image/"])
+            if(lastMessage.fileInfo.isImage)
                 [self showStatusText:NSLocalizedString(@"📷 An Image", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
-            else if([lastMessage.fileInfo.mimeType hasPrefix:@"audio/"])
+            else if(lastMessage.fileInfo.isAudio)
                 [self showStatusText:NSLocalizedString(@"🎵 An Audiomessage", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
-            else if([lastMessage.fileInfo.mimeType hasPrefix:@"video/"])
+            else if(lastMessage.fileInfo.isVideo)
                 [self showStatusText:NSLocalizedString(@"🎥 A Video", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
-            else if([lastMessage.fileInfo.mimeType isEqualToString:@"application/pdf"])
+            else if(lastMessage.fileInfo.isPDF)
                 [self showStatusText:NSLocalizedString(@"📄 A Document", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             else
                 [self showStatusText:NSLocalizedString(@"📁 A File", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];

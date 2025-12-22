@@ -2354,9 +2354,9 @@ enum msgSentState {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     MLFiletransferInfo* selectedItem = [self.messageList objectAtIndex:indexPath.row].fileInfo;
                     NSMutableArray* allItems = [NSMutableArray new];
-                    for(MLFiletransferInfo* info in [[DataLayer sharedInstance] allAttachmentsFromContact:self.contact.contactJid forAccount:self.contact.accountID])
-                        if(info.downloadState == DownloadStateComplete && ([info.mimeType hasPrefix:@"image/"] || [info.mimeType hasPrefix:@"video/"]))
-                            [allItems addObject:info];
+                    for(MLFiletransferInfo* fileInfo in [[DataLayer sharedInstance] allAttachmentsFromContact:self.contact.contactJid forAccount:self.contact.accountID])
+                        if(fileInfo.downloadState == DownloadStateComplete && (fileInfo.isImage || fileInfo.isVideo))
+                            [allItems addObject:fileInfo];
                     UIViewController* imageViewer = [[SwiftuiInterface new] makeImageViewerForCurrentItem:selectedItem allItems:allItems];
                     imageViewer.modalPresentationStyle = UIModalPresentationOverFullScreen;
                     [self presentViewController:imageViewer animated:YES completion:^{}];
@@ -2559,13 +2559,13 @@ enum msgSentState {
 {
     MLFiletransferInfo* info = message.fileInfo;
     MLBaseCell* cell = nil;
-    if(cell == nil && [info.mimeType hasPrefix:@"image/"])
+    if(cell == nil && info.isImage)
     {
         MLChatImageCell* imageCell = (MLChatImageCell*)[self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
         [imageCell initCellWithMLMessage:message];
         cell = imageCell;
     }
-    if(cell == nil && [info.mimeType hasPrefix:@"video/"])
+    if(cell == nil && info.isVideo)
     {
         MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell*)[self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
         NSString* videoStr = info.cacheFile;
@@ -2574,7 +2574,7 @@ enum msgSentState {
 
         cell = videoCell;
     }
-    if(cell == nil && [info.mimeType hasPrefix:@"audio/"])
+    if(cell == nil && info.isAudio)
     {
         //we may wan to make a new kind later but for now this is perfectly functional
         MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell*)[self messageTableCellWithIdentifier:@"fileTransferAudio" andInbound:inDirection fromTable:tableView];

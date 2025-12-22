@@ -406,6 +406,16 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     return nil;
 }
 
+-(void) application:(UIApplication*) application handleEventsForBackgroundURLSession:(NSString*) identifier completionHandler:(void (^)()) completionHandler
+{
+    NSString* expectedIdentifier = [NSString stringWithFormat:@"%@.backgroundHttpFetch", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]];
+    MLAssert([expectedIdentifier isEqualToString:identifier], @"BackgroundURLSession identifier unknown!", @{@"identifier": identifier});
+    
+    //resume upload etc.
+    [HelperTools createBackgroundURLSession];
+    completionHandler();
+}
+
 #if TARGET_OS_MACCATALYST
 -(void) windowHandling:(NSNotification*) notification
 {
@@ -1794,31 +1804,26 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
                     [self.activeChats.currentChatView showUploadHUD];
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                        $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                                if(error != nil)
-                                {
-                                    DDLogError(@"Failed to upload outbox file: %@", error);
-                                    NSMutableDictionary* payloadCopy = [NSMutableDictionary dictionaryWithDictionary:payload];
-                                    cleanup(payloadCopy);
-                                    
-                                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Failed to share file", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Error: %@", @""), error] preferredStyle:UIAlertControllerStyleAlert];
-                                    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
-                                    }]];
-                                    [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
-                                }
-                                else
-                                {
-                                    MLMessage* newMLMessage = [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url havingType:messageType toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size}];
-                                    if(newMLMessage)
-                                        DDLogInfo(@"SHARESHEET_SEND_DATA success=YES, account=%@, messageIdSentObject=%@", account.accountID, newMLMessage.messageDBId);
-                                    else
-                                        DDLogInfo(@"SHARESHEET_SEND_DATA success=NO, account=%@", account.accountID);
+                        MLPromise* promise = [MLPromise new];
+                        $call(payload[@"data"], $ID(account), $BOOL(encrypted), $PROMISE(promise));
+                        [promise toAnyPromise].then(^(NSString* url, NSString* mimeType, NSNumber* size) {
+                            MLMessage* newMLMessage = [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:url havingType:messageType toContact:contact isEncrypted:encrypted uploadInfo:@{@"mimeType": mimeType, @"size": size}];
+                            if(newMLMessage)
+                                DDLogInfo(@"SHARESHEET_SEND_DATA success=YES, account=%@, messageIdSentObject=%@", account.accountID, newMLMessage.messageDBId);
+                            else
+                                DDLogInfo(@"SHARESHEET_SEND_DATA success=NO, account=%@", account.accountID);
 
-                                    cleanup(payload);
-                                }
-                            });
-                        })));
+                            cleanup(payload);
+                        }).catch(^(NSError* error) {
+                            DDLogError(@"Failed to upload outbox file: %@", error);
+                            NSMutableDictionary* payloadCopy = [NSMutableDictionary dictionaryWithDictionary:payload];
+                            cleanup(payloadCopy);
+                            
+                            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Failed to share file", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Error: %@", @""), error] preferredStyle:UIAlertControllerStyleAlert];
+                            [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                            }]];
+                            [self.activeChats presentViewController:messageAlert animated:YES completion:nil];
+                        });
                     });
                 }
             };

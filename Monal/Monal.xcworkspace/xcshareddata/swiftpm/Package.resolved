@@ -56,6 +56,15 @@
         }
       },
       {
+        "package": "OMGHTTPURLRQ",
+        "repositoryURL": "https://github.com/mxcl/OMGHTTPURLRQ",
+        "state": {
+          "branch": null,
+          "revision": "d3781339560d47a9e5cb9e70a81dc16b2d291edc",
+          "version": "3.3.0"
+        }
+      },
+      {
         "package": "SVGView",
         "repositoryURL": "https://github.com/exyte/SVGView",
         "state": {

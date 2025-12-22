@@ -23,6 +23,7 @@
 
 static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;
+//TODO: this must be serialized in our state!
 static NSMutableSet* _currentlyTransfering;
 static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 static NSObject* _hardlinkingSyncObject;
@@ -264,7 +265,7 @@ static NSObject* _hardlinkingSyncObject;
             else        //cleartext filetransfer
             {
                 //hardlink file to our cache directory
-                //it will be removed once this completion returnes, even if moved to a new location (this seems to be a ios16 bug)
+                //it will be removed once this completion returns, even if moved to a new location (this seems to be a ios16 bug)
                 DDLogInfo(@"Hardlinking downloaded file from '%@' to document cache at '%@'...", [location path], cacheFile);
                 error = [HelperTools hardLinkOrCopyFile:[location path] to:cacheFile];
                 if(error)
@@ -541,7 +542,7 @@ $$
     {
         [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         DDLogError(@"Failed to save NSData to file: %@", error);
-        return $newHandler(self, errorCompletion, $ID(error));
+        return $newHandler(self, uploadErrorProxy, $ID(error));
     }
     [HelperTools configureFileProtectionFor:file];
     
@@ -567,7 +568,7 @@ $$
     {
         [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         DDLogError(@"File upload failed: %@", error);
-        return $newHandler(self, errorCompletion, $ID(error));
+        return $newHandler(self, uploadErrorProxy, $ID(error));
     }
     [HelperTools configureFileProtectionFor:file];
     
@@ -594,7 +595,7 @@ $$
     {
         [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         DDLogError(@"File upload failed: %@", error);
-        return $newHandler(self, errorCompletion, $ID(error));
+        return $newHandler(self, uploadErrorProxy, $ID(error));
     }
     [HelperTools configureFileProtectionFor:file];
     
@@ -605,23 +606,22 @@ $$
     );
 }
 
-//proxy to allow calling the completion with a (possibly) serialized error
-$$class_handler(errorCompletion, $$ID(NSError*, error), $$ID(monal_upload_completion_t, completion))
-    completion(nil, nil, nil, error);
-$$
-
-+(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(monal_upload_completion_t) completion
++(AnyPromise*) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypted
 {
     DDLogInfo(@"Uploading file stored at %@", [fileUrl path]);
-    //directly call internal file upload handler returned as MLHandler and bind our (non serializable) completion block to it
-    $call([self prepareFileUpload:fileUrl], $ID(account), $BOOL(encrypted), $ID(completion));
+    MLPromise* promise = [MLPromise new];
+    //directly call internal file upload handler returned as MLHandler and bind our promise to it
+    $call([self prepareFileUpload:fileUrl], $ID(account), $BOOL(encrypted), $PROMISE(promise));
+    return [promise toAnyPromise];
 }
 
-+(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(monal_upload_completion_t) completion
++(AnyPromise*) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypted
 {
     DDLogInfo(@"Uploading image from UIImage object");
-    //directly call internal file upload handler returned as MLHandler and bind our (non serializable) completion block to it
-    $call([self prepareUIImageUpload:image], $ID(account), $BOOL(encrypted), $ID(completion));
+    MLPromise* promise = [MLPromise new];
+    //directly call internal file upload handler returned as MLHandler and bind our promise to it
+    $call([self prepareUIImageUpload:image], $ID(account), $BOOL(encrypted), $PROMISE(promise));
+    return [promise toAnyPromise];
 }
 
 +(void) doStartupCleanup
@@ -732,8 +732,17 @@ $$
     }];
 }
 
-$$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSString*, userFacingFilename), $$ID(NSString*, mimeType), $$ID(xmpp*, account), $$BOOL(encrypted), $$ID(monal_upload_completion_t, completion))
+//proxy to allow rejecting the promise with a (possibly) serialized error while always returning an MLHandler from prepare methods,
+//even in error cases. The promise is optional and doesn't cause any error if nil, because sending a message to a nil object in objc is a noop.
+$$class_handler(uploadErrorProxy, $$ID(NSError*, error), $_PROMISE(promise))
+    [promise reject:error]; 
+$$
+
+//The promise is optional and doesn't cause any error if nil, because sending a message to a nil object in objc is a noop.
+$$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, userFacingFilename), $$ID(NSString*, file), $$ID(NSString*, mimeType), $$ID(xmpp*, account), $$BOOL(encrypted), $_PROMISE(promise))
     NSError* error;
+    
+    MLAssert(userFacingFilename != nil, @"userFacingFilename should never be nil!");
     
     //make sure we don't upload the same tmpfile twice (should never happen anyways)
     @synchronized(_currentlyTransfering)
@@ -743,7 +752,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
             error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Already uploading this content, ignoring", @"")}];
             DDLogError(@"Already uploading this content, ignoring %@", file);
             [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
-            return completion(nil, nil, nil, error);
+            return [promise reject:error];
         }
         [_currentlyTransfering addObject:file];
     }
@@ -756,7 +765,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
         [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         [self markAsComplete:file];
         DDLogError(@"File upload failed: %@", error);
-        return completion(nil, nil, nil, error);
+        return [promise reject:error];
     }
     
     //encrypt data (TODO: do this in a streaming fashion, e.g. from file to tmpfile and stream this tmpfile via http afterwards)
@@ -773,88 +782,159 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
         }
         else
         {
-            NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to encrypt file", @"")}];
+            error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to encrypt file", @"")}];
             [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
             [self markAsComplete:file];
             DDLogError(@"File upload failed: %@", error);
-            return completion(nil, nil, nil, error);
+            return [promise reject:error];
         }
     }
+    MLAssert(fileData != nil, @"fileData should never be nil!");
+    
+    //write file to our document cache (temporary filename because it might be encrypted and the upload url is also unknown yet)
+    NSString* tempname = [NSString stringWithFormat:@"tmp.%@", [[NSUUID UUID] UUIDString]];
+    NSString* uploadTempFile = [_documentCacheDir stringByAppendingPathComponent:tempname];
+    DDLogDebug(@"Tempstoring file to upload: %@", uploadTempFile);
+    [fileData writeToFile:uploadTempFile options:NSDataWritingAtomic error:&error];
+    if(error)
+    {
+        [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+        DDLogError(@"File upload failed: %@", error);
+        return [promise reject:error];
+    }
+    [HelperTools configureFileProtectionFor:uploadTempFile];
+    NSNumber* fileLength = [NSNumber numberWithUnsignedInteger:fileData.length]
     
     //make sure we don't leak information about encrypted files
     NSString* sendMimeType = mimeType;
     if(encrypted)
         sendMimeType = @"application/octet-stream";
-    
-    MLAssert(fileData != nil, @"fileData should never be nil!");
-    MLAssert(userFacingFilename != nil, @"userFacingFilename should never be nil!");
     MLAssert(sendMimeType != nil, @"sendMimeType should never be nil!");
     
+    
+    
     DDLogDebug(@"Requesting file upload slot for mimeType %@", sendMimeType);
+    XMPPIQ* httpSlotRequest = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [httpSlotRequest setiqTo:account.connectionProperties.uploadServer];
+    [httpSlotRequest
+        httpUploadforFile:userFacingFilename
+        ofSize:fileLength
+        andContentType:sendMimeType
+    ];
+    [account sendIq:httpSlotRequest withHandler:$newHandlerWithInvalidation(self, handleHTTPSlotResult, handleHTTPSlotResultInvalidation, $ID(NSString*, file), $ID(NSString*, mimeType), $ID(account), $BOOL(encrypted), $ID(uploadTempFile), $UINTEGER(fileLength), $PROMISE(promise))];
+$$
+
+//The promise is optional and doesn't cause any error if nil, because sending a message to a nil object in objc is a noop.
+$$class_handler(handleHTTPSlotResultInvalidation, $$ID(xmpp*, account), $$ID(NSString*, file), $$ID(NSString*, mimeType), $$BOOL(encrypted), $$ID(NSString*, uploadTempFile), $$UINTEGER(fileLength), $_PROMISE(promise))
+//     if(promise != nil)
+//     {
+//         NSString* errorMessage = NSLocalizedString(@"Upload Error: your account got disconnected while requesting upload slot. Please try again.", @"");
+//         NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+//         return [promise reject:error];
+//     }
+
+    //retry on next account reconnect (should be already underway)
+    [account addReconnectionHandler:$newHandlerWithInvalidation(self, handleHTTPSlotResult, handleHTTPSlotResultInvalidation, $ID(account), $ID(NSString*, file), $ID(NSString*, mimeType), $BOOL(encrypted), $ID(uploadTempFile), $UINTEGER(fileLength), $PROMISE(promise))];
+$$
+
+//The promise is optional and doesn't cause any error if nil, because sending a message to a nil object in objc is a noop.
+$$class_handler(handleHTTPSlotResult, $$ID(xmpp*, account), $$ID(NSString*, file), $$ID(NSString*, mimeType), $$BOOL(encrypted), $$ID(NSString*, uploadTempFile), $$UINTEGER(fileLength), $_PROMISE(promise))
+    NSString* putUrl = [iqNode findFirst:@"{urn:xmpp:http:upload:0}slot/put@url"];
+    NSString* getUrl = [iqNode findFirst:@"{urn:xmpp:http:upload:0}slot/get@url"];
+    DDLogInfo(@"Got upload url: %@, download url: %@", putUrl, getUrl);
+    NSMutableDictionary* putHeaders = [NSMutableDictionary new];
+    putHeaders[@"Content-Type"] = params[@"contentType"];
+    for(MLXMLNode* header in [iqNode find:@"{urn:xmpp:http:upload:0}slot/put/header"])
+        putHeaders[[header findFirst:@"/@name"]] = [header findFirst:@"/#"];
+    DDLogInfo(@"Using upload headers: %@", putHeaders);
+    
+    //check urls
+    NSError* error = nil;
+    if(putUrl == nil || [NSURLComponents componentsWithString:putUrl] == nil)
+        error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to parse PUT-URL returned by HTTP upload server.", @"")}];
+    if(getUrl == nil || [NSURLComponents componentsWithString:getUrl] == nil)
+        error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to parse GET-URL returned by HTTP upload server.", @"")}];
+    if(error != nil)
+    {
+        [_fileManager removeItemAtPath:file error:nil];                 //remove temporary file
+        [_fileManager removeItemAtPath:uploadTempFile error:nil];       //remove temporary file
+        [self markAsComplete:file];
+        DDLogError(@"File upload failed: %@", error);
+        return [promise reject:error];
+    }
+    
+    //now upload the file in the background
+    NSURLSession* session = [HelperTools createBackgroundURLSession];
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:putUrl]];
+    request.HTTPMethod = @"PUT";
+    for(NSString* key in putHeaders)
+        [request addValue:putHeaders[key] forHTTPHeaderField:key];
+
+    NSURLSessionTask* uploadTask = [session uploadTaskWithRequest:request fromFile:uploadTempFile completionHandler:completeBlock];
+    task.taskDescription = file;
+    [task resume];
+$$
+
+$$class_handler(handleUploadComplete, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, file), $$ID(NSString*, mimeType), $$ID(xmpp*, account), $$BOOL(encrypted), $$UINTEGER(fileLength), $$PROMISE(promise))
     [account requestHTTPSlotWithParams:@{
         @"data":fileData,
         @"fileName":userFacingFilename,
         @"contentType":sendMimeType
-    } andCompletion:^(NSString* url, NSError* error) {
-        if(error)
+    } andHandler:
+    
+    .then(^(NSString* getUrl, NSString* putUrl, NSDictionary* putHeaders) {
+        NSMutableURLRequest* request = [OMGHTTPURLRQ PUT:putUrl:];
+        for(NSString* key in putHeaders)
+            [request addValue:putHeaders[key] forHTTPHeaderField:key];
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            request.requiresDNSSECValidation = YES;
+        return getUrl;
+    }).then(^(NSString* url) {
+        NSURLComponents* urlComponents = [NSURLComponents componentsWithString:url];
+        //build aesgcm url containing "aesgcm" url-scheme and IV and AES-key in urlfragment
+        if(encrypted)
         {
-            [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
-            [self markAsComplete:file];
-            DDLogError(@"File upload failed: %@", error);
-            return completion(nil, nil, nil, error);
+            urlComponents.scheme = @"aesgcm";
+            urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
+                                    [HelperTools hexadecimalString:encryptedPayload.iv],
+                                    //extract real aes key without authtag (32 bytes = 256bit) (conversations compatibility)
+                                    [HelperTools hexadecimalString:[encryptedPayload.key subdataWithRange:NSMakeRange(0, 32)]]];
+            url = urlComponents.string;
         }
         
-        NSURLComponents* urlComponents = [NSURLComponents componentsWithString:url];
-        if(url && urlComponents)
+        //ignore upload if account was already removed
+        if([[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountID] == nil)
         {
-            //build aesgcm url containing "aesgcm" url-scheme and IV and AES-key in urlfragment
-            if(encrypted)
-            {
-                urlComponents.scheme = @"aesgcm";
-                urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
-                                        [HelperTools hexadecimalString:encryptedPayload.iv],
-                                        //extract real aes key without authtag (32 bytes = 256bit) (conversations compatibility)
-                                        [HelperTools hexadecimalString:[encryptedPayload.key subdataWithRange:NSMakeRange(0, 32)]]];
-                url = urlComponents.string;
-            }
-            
-            //ignore upload if account was already removed
-            if([[MLXMPPManager sharedInstance] getEnabledAccountForID:account.accountID] == nil)
-            {
-                NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to upload file: account was removed", @"")}];
-                [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
-                [self markAsComplete:file];
-                DDLogError(@"File upload failed: %@", error);
-                return completion(nil, nil, nil, error);
-            }
-            
-            //move the tempfile to our cache location
-            NSString* cacheFile = [self calculateCacheFileForNewUrl:url andMimeType:mimeType];
-            DDLogInfo(@"Moving (possibly encrypted) file to our document cache at %@", cacheFile);
-            [_fileManager moveItemAtPath:file toPath:cacheFile error:&error];
-            if(error)
-            {
-                NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to move uploaded file to file cache directory", @"")}];
-                [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
-                [self markAsComplete:file];
-                DDLogError(@"File upload failed: %@", error);
-                return completion(nil, nil, nil, error);
-            }
-            [HelperTools configureFileProtectionFor:cacheFile];
-            
-            [self markAsComplete:file];
-            DDLogInfo(@"URL for download: %@", url);
-            return completion(url, mimeType, [NSNumber numberWithInteger:fileData.length], nil);
-        }
-        else
-        {
-            NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to parse URL returned by HTTP upload server", @"")}];
+            NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to upload file: account was removed", @"")}];
             [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
             [self markAsComplete:file];
             DDLogError(@"File upload failed: %@", error);
-            return completion(nil, nil, nil, error);
+            return [promise reject:error];
         }
-    }];
+        
+        //move the tempfile to our cache location
+        NSString* cacheFile = [self calculateCacheFileForNewUrl:url andMimeType:mimeType];
+        DDLogInfo(@"Moving plaintext file to our document cache at %@", cacheFile);
+        [_fileManager moveItemAtPath:file toPath:cacheFile error:&error];
+        if(error)
+        {
+            NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to move uploaded file to file cache directory", @"")}];
+            [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+            [self markAsComplete:file];
+            DDLogError(@"File upload failed: %@", error);
+            return [promise reject:error];
+        }
+        [HelperTools configureFileProtectionFor:cacheFile];
+        
+        [self markAsComplete:file];
+        DDLogInfo(@"URL for download: %@", url);
+        return [promise fulfill:PMKManifold(url, mimeType, fileLength)];
+    }).catch(^(NSError* error) {
+        [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+        [self markAsComplete:file];
+        DDLogError(@"File upload failed: %@", error);
+        return [promise reject:error];
+    });
 $$
 
 +(void) markAsComplete:(id) obj

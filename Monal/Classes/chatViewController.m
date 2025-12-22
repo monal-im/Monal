@@ -3290,22 +3290,19 @@ enum msgSentState {
         NSFileCoordinator* coordinator = [NSFileCoordinator new];
 
         [coordinator coordinateReadingItemAtURL:fileURL options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
-            [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self showPotentialError:error];
-                    if(!error)
-                    {
-                        NSString* newMessageID = [[NSUUID UUID] UUIDString];
-                        MLMessage* msg = [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-                        [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
-                            DDLogInfo(@"File upload sent to contact...");
-                            [MLFiletransfer hardlinkFileForMessage:msg];        //hardlink cache file if possible
-                            [self hideUploadHUD];
-                        }];
-                    }
+            [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted].then(^(NSString* url, NSString* mimeType, NSNumber* size) {
+                    NSString* newMessageID = [[NSUUID UUID] UUIDString];
+                    MLMessage* msg = [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
+                    [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
+                        DDLogInfo(@"File upload sent to contact...");
+                        [MLFiletransfer hardlinkFileForMessage:msg];        //hardlink cache file if possible
+                        [self hideUploadHUD];
+                    }];
                     DDLogVerbose(@"upload done");
+                }).catch(^(NSError* error) {
+                    [self showPotentialError:error];
                 });
-            }];
+            });
         }];
     });
 }
@@ -3399,14 +3396,13 @@ enum msgSentState {
     
     DDLogVerbose(@"start dispatch");
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        $call(payload[@"data"], $ID(account, self.xmppAccount), $BOOL(encrypted, self.contact.isEncrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(error != nil)
-                    [self handleMediaUploadCompletion:nil withMime:nil withSize:nil withError:error];
-                else
-                    [self handleMediaUploadCompletion:url withMime:mimeType withSize:size withError:error];
-            });
-        })));
+        MLPromise* promise = [MLPromise new];
+        $call(payload[@"data"], $ID(account, self.xmppAccount), $BOOL(encrypted, self.contact.isEncrypted), $PROMISE(promise));
+        [promise toAnyPromise].then(^(NSString* url, NSString* mimeType, NSNumber* size) {
+            [self handleMediaUploadCompletion:url withMime:mimeType withSize:size withError:error];
+        }).catch(^(NSError* error) {
+            [self handleMediaUploadCompletion:nil withMime:nil withSize:nil withError:error];
+        });
     });
 }
 

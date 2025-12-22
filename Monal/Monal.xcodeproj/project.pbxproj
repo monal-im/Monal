@@ -166,6 +166,9 @@
 		8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8441EFF82921B53500E851E9 /* BackgroundSettings.swift */; };
 		844921EA2C29F9A000B99A9C /* MLDelayableTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 844921E92C29F9A000B99A9C /* MLDelayableTimer.m */; };
 		844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8452FFE02E99774600523F00 /* OMGHTTPURLRQ in Frameworks */ = {isa = PBXBuildFile; productRef = 8452FFDF2E99774600523F00 /* OMGHTTPURLRQ */; };
+		8452FFE22E99774600523F00 /* OMGHTTPURLRQFormURLEncode in Frameworks */ = {isa = PBXBuildFile; productRef = 8452FFE12E99774600523F00 /* OMGHTTPURLRQFormURLEncode */; };
+		8452FFE42E99774600523F00 /* OMGHTTPURLRQUserAgent in Frameworks */ = {isa = PBXBuildFile; productRef = 8452FFE32E99774600523F00 /* OMGHTTPURLRQUserAgent */; };
 		84558DBF2DF04C3100F8357F /* OneClickRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84558DBE2DF04C3100F8357F /* OneClickRegistration.swift */; };
 		845836BA2C49F36300B11EC5 /* Quicksy Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */; };
 		845D636B2AD4AEDA0066EFFB /* MediaViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845D636A2AD4AEDA0066EFFB /* MediaViewer.swift */; };
@@ -893,12 +896,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8452FFE02E99774600523F00 /* OMGHTTPURLRQ in Frameworks */,
 				849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */,
 				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
 				849ADF412BACF0360009BCD7 /* CocoaLumberjackSwift in Frameworks */,
 				84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */,
 				849ADF432BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
 				8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */,
+				8452FFE22E99774600523F00 /* OMGHTTPURLRQFormURLEncode in Frameworks */,
+				8452FFE42E99774600523F00 /* OMGHTTPURLRQUserAgent in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1736,6 +1742,9 @@
 				849ADF402BACF0360009BCD7 /* CocoaLumberjackSwift */,
 				849ADF422BACF0360009BCD7 /* CocoaLumberjackSwiftLogBackend */,
 				84E231F22C16A9CE00735FB7 /* SVGView */,
+				8452FFDF2E99774600523F00 /* OMGHTTPURLRQ */,
+				8452FFE12E99774600523F00 /* OMGHTTPURLRQFormURLEncode */,
+				8452FFE32E99774600523F00 /* OMGHTTPURLRQUserAgent */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1894,6 +1903,7 @@
 				84774DF92D1A956400B15E51 /* XCRemoteSwiftPackageReference "ExyteChat" */,
 				84AF79C02DF3C0A900FE3818 /* XCRemoteSwiftPackageReference "TOCropViewController" */,
 				84110CF92EC8662600DFC286 /* XCRemoteSwiftPackageReference "WebRTC" */,
+				8452FFDE2E99774600523F00 /* XCRemoteSwiftPackageReference "OMGHTTPURLRQ" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4838,6 +4848,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		8452FFDE2E99774600523F00 /* XCRemoteSwiftPackageReference "OMGHTTPURLRQ" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mxcl/OMGHTTPURLRQ";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.0;
+			};
+		};
 		84774DF92D1A956400B15E51 /* XCRemoteSwiftPackageReference "ExyteChat" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/monal-im/ExyteChat";
@@ -4906,6 +4924,21 @@
 		843DC1B12C8E51E3002724FE /* ExyteChat */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ExyteChat;
+		};
+		8452FFDF2E99774600523F00 /* OMGHTTPURLRQ */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8452FFDE2E99774600523F00 /* XCRemoteSwiftPackageReference "OMGHTTPURLRQ" */;
+			productName = OMGHTTPURLRQ;
+		};
+		8452FFE12E99774600523F00 /* OMGHTTPURLRQFormURLEncode */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8452FFDE2E99774600523F00 /* XCRemoteSwiftPackageReference "OMGHTTPURLRQ" */;
+			productName = OMGHTTPURLRQFormURLEncode;
+		};
+		8452FFE32E99774600523F00 /* OMGHTTPURLRQUserAgent */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8452FFDE2E99774600523F00 /* XCRemoteSwiftPackageReference "OMGHTTPURLRQ" */;
+			productName = OMGHTTPURLRQUserAgent;
 		};
 		84774DF42D1A935000B15E51 /* ExyteChat */ = {
 			isa = XCSwiftPackageProductDependency;

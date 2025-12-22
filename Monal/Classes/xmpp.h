@@ -188,11 +188,6 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
  */
 -(void) setClientInactive;
 
-/*
- HTTP upload
-*/
- -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
-
 
 -(XMPPIQ*) prepareIQForMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString*) before;
 -(AnyPromise*) setMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString* _Nullable) before;

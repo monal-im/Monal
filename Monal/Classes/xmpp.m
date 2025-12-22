@@ -4805,53 +4805,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
     }
 }
 
-#pragma mark HTTP upload
-
--(void) requestHTTPSlotWithParams:(NSDictionary*) params andCompletion:(void(^)(NSString* url, NSError* error)) completion
-{
-    XMPPIQ* httpSlotRequest = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [httpSlotRequest setiqTo:self.connectionProperties.uploadServer];
-    [httpSlotRequest
-        httpUploadforFile:params[@"fileName"]
-        ofSize:[NSNumber numberWithInteger:((NSData*)params[@"data"]).length]
-        andContentType:params[@"contentType"]
-    ];
-    [self sendIq:httpSlotRequest withResponseHandler:^(XMPPIQ* response) {
-        DDLogInfo(@"Got slot for upload: %@", [response findFirst:@"{urn:xmpp:http:upload:0}slot/put@url"]);
-        //upload to server using HTTP PUT
-        NSMutableDictionary* headers = [NSMutableDictionary new];
-        headers[@"Content-Type"] = params[@"contentType"];
-        for(MLXMLNode* header in [response find:@"{urn:xmpp:http:upload:0}slot/put/header"])
-            headers[[header findFirst:@"/@name"]] = [header findFirst:@"/#"];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [MLHTTPRequest
-                sendWithVerb:kPut path:[response findFirst:@"{urn:xmpp:http:upload:0}slot/put@url"]
-                headers:headers
-                withArguments:nil
-                data:params[@"data"]
-                andCompletionHandler:^(NSError* error, id result __unused) {
-                    if(!error)
-                    {
-                        DDLogInfo(@"Upload succeded, get url: %@", [response findFirst:@"{urn:xmpp:http:upload:0}slot/get@url"]);
-                        //send get url to contact
-                        if(completion)
-                            completion([response findFirst:@"{urn:xmpp:http:upload:0}slot/get@url"], nil);
-                    }
-                    else
-                    {
-                        DDLogInfo(@"Upload failed, error: %@", error);
-                        if(completion)
-                            completion(nil, error);
-                    }
-                }
-            ];
-        });
-    } andErrorHandler:^(XMPPIQ* error) {
-        if(completion)
-            completion(nil, error == nil ? [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Upload Error: your account got disconnected while requesting upload slot", @"")}] : [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Upload Error", @"")]}]);
-    }];
-}
-
 #pragma mark client state
 -(void) setClientActive
 {

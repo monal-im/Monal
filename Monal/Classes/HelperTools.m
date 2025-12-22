@@ -3389,14 +3389,19 @@ a=%@\r\n", mid, candidate];
 
 +(NSURLSession*) createBackgroundURLSession
 {
-    NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@.backgroundHttpFetch", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]]];
-    if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
-        sessionConfig.requiresDNSSECValidation = YES;
-    sessionConfig.HTTPAdditionalHeaders = @{
-        @"User-Agent": [HelperTools appBuildVersionInfoFor:MLVersionTypeUserAgent],
-    };
-    sessionConfig.sessionSendsLaunchEvents = YES;
-    return [NSURLSession sessionWithConfiguration:sessionConfig];
+    static NSURLSession* session = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@.backgroundHttpFetch", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]]];
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            sessionConfig.requiresDNSSECValidation = YES;
+        sessionConfig.HTTPAdditionalHeaders = @{
+            @"User-Agent": [HelperTools appBuildVersionInfoFor:MLVersionTypeUserAgent],
+        };
+        sessionConfig.sessionSendsLaunchEvents = YES;
+        session = [NSURLSession sessionWithConfiguration:sessionConfig];
+    });
+    return session;
 }
 
 +(NSURL* _Nullable) compressFileAtPath:(NSString*) path withLevel:(NSInteger) level

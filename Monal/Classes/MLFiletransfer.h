@@ -23,8 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 +(MLHandler*) prepareDataUpload:(NSData*) data withFileExtension:(NSString*) fileExtension;
 +(MLHandler*) prepareFileUpload:(NSURL*) fileUrl;
 +(MLHandler*) prepareUIImageUpload:(UIImage*) image;
-+(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion;
-+(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion;
++(AnyPromise*) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypted;
++(AnyPromise*) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypted;
 +(void) hardlinkFileForMessage:(MLMessage*) msg;
 +(BOOL) isFileForHistoryIdInTransfer:(NSNumber*) historyId;
 +(NSString*) getMimeTypeOfOriginalFile:(NSString*) file;

@@ -32,7 +32,7 @@ typedef NS_ENUM(NSUInteger, DownloadState) {
 @property (nonatomic, readonly) NSString* fileExtension;
 @property (nonatomic, readonly) NSString* _Nullable cacheFile;
 @property (nonatomic, readonly) NSString* _Nullable cacheId;
-@property (nonatomic, readonly) UTType* _Nullable typeHint;
+@property (nonatomic, readonly) UTType* _Nullable utType;
 
 @property (nonatomic, readonly) BOOL isImage;
 @property (nonatomic, readonly) BOOL isAudio;

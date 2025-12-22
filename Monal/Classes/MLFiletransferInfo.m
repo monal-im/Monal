@@ -238,7 +238,7 @@ static NSMutableDictionary* _singletonCache;
     return [NSSet setWithObjects:@"mimeType", nil];
 }
 
--(UTType* _Nullable) typeHint
+-(UTType* _Nullable) utType
 {
     if(self.mimeType == nil)
         return nil;
@@ -256,7 +256,7 @@ static NSMutableDictionary* _singletonCache;
     return nil;
 }
 
-+(NSSet*) keyPathsForValuesAffectingTypeHint
++(NSSet*) keyPathsForValuesAffectingUtType
 {
     return [NSSet setWithObjects:@"mimeType", nil];
 }

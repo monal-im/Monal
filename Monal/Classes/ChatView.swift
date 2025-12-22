@@ -883,7 +883,8 @@ class ChatViewMessage: ExyteChat.Message {
                 return []
             }
             let cacheFilePath = fileInfo.cacheFilePath as String
-            let attachmentUUID = HelperTools.stringToUUID(cacheFilePath).uuidString
+            let cacheId = fileInfo.cacheId as String
+            let attachmentUUID = HelperTools.stringToUUID(cacheId).uuidString
             switch fileInfo.mimeType as String {
                 case let mimeType where mimeType.starts(with: "image/"):
                     let attachment = Attachment(id: attachmentUUID, url: URL(fileURLWithPath: cacheFilePath), type: .image)

@@ -27,7 +27,7 @@ typedef NS_ENUM(NSUInteger, DownloadState) {
 @property (nonatomic, readonly) double mediaDuration;
 @property (nonatomic, readonly) NSURL* _Nullable thumbnailURL;
 
-@property (nonatomic, readonly) NSString* url;
+@property (nonatomic, readonly) NSString* downloadURL;
 @property (nonatomic, readonly) NSString* filename;
 @property (nonatomic, readonly) NSString* fileExtension;
 @property (nonatomic, readonly) NSString* _Nullable cacheFilePath;

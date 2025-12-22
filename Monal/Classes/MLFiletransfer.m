@@ -120,12 +120,7 @@ static NSObject* _hardlinkingSyncObject;
             //send out update notification
             xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
             if(account != nil)      //don't send out update notices for already deleted accounts
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{
-                    @"message": msg,
-                    @"mimeType": mimeType,
-                    @"size": contentLength,
-                    @"downloadState": @(DownloadStateHeaders),
-                }];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{ @"message": msg }];
             else
                 return;             //abort here without autodownloading if account was already deleted
             
@@ -289,13 +284,7 @@ static NSObject* _hardlinkingSyncObject;
             //send out update notification
             xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
             if(account != nil)      //don't send out update notices for already deleted accounts
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{
-                    @"message": msg,
-                    @"mimeType": mimeType,
-                    @"size": filetransferSize,
-                    @"downloadState": @(DownloadStateComplete),
-                }];
-
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{ @"message": msg }];
             else
                 [_fileManager removeItemAtPath:cacheFile error:nil];
             

@@ -89,13 +89,7 @@ static NSMutableDictionary* _singletonCache;
     if(self.historyId.integerValue != message.messageDBId.integerValue)
         return;         //ignore filetransfer updates of other messages
 
-    NSString* mimeType = data[@"mimeType"];
-    NSNumber* size = data[@"size"];
-    NSNumber* downloadState = data[@"downloadState"];
-    MLAssert(mimeType != nil && size != nil && downloadState != nil, @"Notification without mimeType and/or size and/or downloadState");
-    self.mimeType = mimeType;
-    self.size = size;
-    self.downloadState = downloadState.unsignedIntegerValue;
+    [self refresh];
 }
 
 -(void) handleMessageDeletion:(NSNotification*) notification
@@ -110,6 +104,19 @@ static NSMutableDictionary* _singletonCache;
     self.downloadState = DownloadStateUndefined;
     self.mediaDuration = 0.0;
     self.thumbnailURL = nil;
+}
+
+-(void) refresh
+{
+    NSDictionary* dic = [[DataLayer sharedInstance] getFiletransferInfoForHistoryId:self.historyId];
+    if(dic == nil)
+        DDLogError(@"A row in the filetransfer_info db table SHOULD exist for a filetransferInfo object!");
+
+    updateIfIdNotEqual(self.mimeType, [dic objectForKey:@"mime_type"]);
+    updateIfIdNotEqual(self.size, [dic objectForKey:@"size"]);
+    // Reset the cached value of downloadState. This will cause it to be recalculated on next read access
+    // (which will happen soon due to the KVO notification emitted by calling the setter)
+    self.downloadState = DownloadStateUndefined;
 }
 
 -(DownloadState) downloadState

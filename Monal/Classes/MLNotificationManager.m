@@ -524,8 +524,8 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
                 {
                     if(fileInfo.isAudio)
                     {
-                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:fileInfo.cacheFile] filename:fileInfo.filename typeIdentifier:fileInfo.typeHint.identifier]];
-                        DDLogVerbose(@"Added audio attachment(%@ = %@): %@", fileInfo.mimeType, fileInfo.typeHint, audioAttachment);
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:fileInfo.cacheFile] filename:fileInfo.filename typeIdentifier:fileInfo.utType.identifier]];
+                        DDLogVerbose(@"Added audio attachment(%@ = %@): %@", fileInfo.mimeType, fileInfo.utType, audioAttachment);
                     }
                     UNNotificationAttachment* attachment = [self createNotificationAttachmentForFileInfo:fileInfo];
                     if(attachment)
@@ -863,7 +863,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
 -(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(MLFiletransferInfo*) info
 {
     NSError* error;
-    UTType* typeHint = info.typeHint;
+    UTType* typeHint = info.utType;
     NSString* attachmentDir = [[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path];
     //use "tmp." prefix to make sure this file will be garbage collected should the ios notification attachment implementation leave it behind
     NSString* attachmentBasename = [NSString stringWithFormat:@"tmp.%@", info.cacheId];

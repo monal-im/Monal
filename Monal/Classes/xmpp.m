@@ -1109,12 +1109,14 @@ NSString* const kStanza = @"stanza";
             self->_reconnectBackoffTime = 0.0;
             [self unfreezeSendQueue];      //make sure the queue is operational again
             if(self.accountState >= kStateInitStarted)
+            {
+                //disable push for this node
+                if([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
+                    [self disablePush];
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
-                    //disable push for this node
-                    if([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
-                        [self disablePush];
                     [self sendLastAck];
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the xmpp stream directly afterwards
+            }
             [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                 //close stream (either with error or normally)
                 if(streamError != nil)
@@ -5280,9 +5282,7 @@ NSString* const kStanza = @"stanza";
     NSString* pushToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
     NSString* pushServer = [[DataLayer sharedInstance] lastUsedPushServerForAccount:self.accountNo];
     if(pushToken == nil || pushServer == nil)
-    {
         return;
-    }
     DDLogInfo(@"DISABLING push token %@ on server %@ (accountState: %ld, supportsPush: %@)", pushToken, pushServer, (long)self.accountState, bool2str([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"]));
     XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
     [disable setPushDisable:pushToken onPushServer:pushServer];

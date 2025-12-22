@@ -195,17 +195,17 @@ static NSMutableDictionary* _singletonCache;
     return _thumbnailURL;
 }
 
-// The url property doesn't emit KVO notifications if it changes (it's not possible to declare
+// downloadURL doesn't emit KVO notifications if it changes (it's not possible to declare
 // it as depending on messageText, because that's only accessible through a computed property).
-// url is not supposed to change. But if it does, those that depend on it won't get notified.
--(NSString*) url
+// downloadURL is not supposed to change. But if it does, those that depend on it won't get notified.
+-(NSString*) downloadURL
 {
     return self.message.messageText;
 }
 
 -(NSString*) filename
 {
-    NSURLComponents* urlComponents = [NSURLComponents componentsWithString:self.url];
+    NSURLComponents* urlComponents = [NSURLComponents componentsWithString:self.downloadURL];
     if(urlComponents != nil && urlComponents.path)
         return [urlComponents.path lastPathComponent];
     else
@@ -220,7 +220,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(NSString* _Nullable) cacheFilePath
 {
-    return [MLFiletransfer retrieveCacheFilePathForUrl:self.url andMimeType:(self.mimeType && ![self.mimeType isEqualToString:@""] ? self.mimeType : nil)];
+    return [MLFiletransfer retrieveCacheFilePathForUrl:self.downloadURL andMimeType:(self.mimeType && ![self.mimeType isEqualToString:@""] ? self.mimeType : nil)];
 }
 
 +(NSSet*) keyPathsForValuesAffectingCacheFilePath

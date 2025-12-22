@@ -522,14 +522,12 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
             {
                 if(fileInfo.isImage || fileInfo.isVideo || fileInfo.isAudio)
                 {
-                    UNNotificationAttachment* attachment;
-                    UTType* typeHint = fileInfo.typeHint;
                     if(fileInfo.isAudio)
                     {
-                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:fileInfo.cacheFile] filename:fileInfo.filename typeIdentifier:typeHint.identifier]];
-                        DDLogVerbose(@"Added audio attachment(%@ = %@): %@", fileInfo.mimeType, typeHint, audioAttachment);
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:fileInfo.cacheFile] filename:fileInfo.filename typeIdentifier:fileInfo.typeHint.identifier]];
+                        DDLogVerbose(@"Added audio attachment(%@ = %@): %@", fileInfo.mimeType, fileInfo.typeHint, audioAttachment);
                     }
-                    attachment = [self createNotificationAttachmentForFileInfo:fileInfo havingTypeHint:typeHint];
+                    UNNotificationAttachment* attachment = [self createNotificationAttachmentForFileInfo:fileInfo];
                     if(attachment)
                         content.attachments = @[attachment];
                 }
@@ -831,10 +829,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
                 UNNotificationAttachment* attachment;
                 if(fileInfo.downloadState == DownloadStateComplete)
                 {
-                    UTType* typeHint = [UTType typeWithMIMEType:fileInfo.mimeType];
-                    if(typeHint == nil)
-                        typeHint = UTTypeImage;
-                    attachment = [self createNotificationAttachmentForFileInfo:fileInfo havingTypeHint:typeHint];
+                    attachment = [self createNotificationAttachmentForFileInfo:fileInfo];
                     if(attachment)
                     {
                         content.attachments = @[attachment];
@@ -865,9 +860,10 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     [self publishNotificationContent:[self updateBadgeForContent:content] withID:idval];
 }
 
--(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(MLFiletransferInfo*) info havingTypeHint:(UTType*) typeHint
+-(UNNotificationAttachment* _Nullable) createNotificationAttachmentForFileInfo:(MLFiletransferInfo*) info
 {
     NSError* error;
+    UTType* typeHint = info.typeHint;
     NSString* attachmentDir = [[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path];
     //use "tmp." prefix to make sure this file will be garbage collected should the ios notification attachment implementation leave it behind
     NSString* attachmentBasename = [NSString stringWithFormat:@"tmp.%@", info.cacheId];

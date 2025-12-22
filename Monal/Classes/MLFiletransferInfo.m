@@ -195,6 +195,9 @@ static NSMutableDictionary* _singletonCache;
     return _thumbnailURL;
 }
 
+// The url property doesn't emit KVO notifications if it changes (it's not possible to declare
+// it as depending on messageText, because that's only accessible through a computed property).
+// url is not supposed to change. But if it does, those that depend on it won't get notified.
 -(NSString*) url
 {
     return self.message.messageText;
@@ -220,9 +223,19 @@ static NSMutableDictionary* _singletonCache;
     return [MLFiletransfer retrieveCacheFileForUrl:self.url andMimeType:(self.mimeType && ![self.mimeType isEqualToString:@""] ? self.mimeType : nil)];
 }
 
++(NSSet*) keyPathsForValuesAffectingCacheFile
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
+}
+
 -(NSString* _Nullable) cacheId
 {
     return [self.cacheFile lastPathComponent];
+}
+
++(NSSet*) keyPathsForValuesAffectingCacheId
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
 }
 
 -(UTType* _Nullable) typeHint
@@ -243,9 +256,19 @@ static NSMutableDictionary* _singletonCache;
     return nil;
 }
 
++(NSSet*) keyPathsForValuesAffectingTypeHint
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
+}
+
 -(BOOL) isImage
 {
     return [self.mimeType hasPrefix:@"image/"];
+}
+
++(NSSet*) keyPathsForValuesAffectingIsImage
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
 }
 
 -(BOOL) isAudio
@@ -253,14 +276,29 @@ static NSMutableDictionary* _singletonCache;
     return [self.mimeType hasPrefix:@"audio/"];
 }
 
++(NSSet*) keyPathsForValuesAffectingIsAudio
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
+}
+
 -(BOOL) isVideo
 {
     return [self.mimeType hasPrefix:@"video/"];
 }
 
++(NSSet*) keyPathsForValuesAffectingIsVideo
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
+}
+
 -(BOOL) isPDF
 {
     return [self.mimeType isEqualToString:@"application/pdf"];
+}
+
++(NSSet*) keyPathsForValuesAffectingIsPDF
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
 }
 
 // Needed to not create a retain cycle between MLFiletransferInfo and MLMessage

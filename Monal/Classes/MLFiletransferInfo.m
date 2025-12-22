@@ -19,7 +19,7 @@
 static NSMutableDictionary* _singletonCache;
 
 @interface MLFiletransfer ()
-+(NSString*) retrieveCacheFileForUrl:(NSString*) url andMimeType:(NSString*) mimeType;
++(NSString*) retrieveCacheFilePathForUrl:(NSString*) url andMimeType:(NSString*) mimeType;
 @end
 
 @interface MLFiletransferInfo ()
@@ -126,7 +126,7 @@ static NSMutableDictionary* _singletonCache;
         return _downloadState;
 
     DownloadState state;
-    if(self.cacheFile)
+    if(self.cacheFilePath)
         state = DownloadStateComplete;
     else if(self.size && self.mimeType && ![self.mimeType isEqualToString:@""])
         state = DownloadStateHeaders;
@@ -147,7 +147,7 @@ static NSMutableDictionary* _singletonCache;
     // Note that isComputingMediaDuration is not thread safe
     if(!self.isComputingMediaDuration) {
         self.isComputingMediaDuration = YES;
-        [HelperTools computeMediaDurationFromFile:self.cacheFile havingMimeType:self.mimeType andFileExtension:self.fileExtension]
+        [HelperTools computeMediaDurationFromFile:self.cacheFilePath havingMimeType:self.mimeType andFileExtension:self.fileExtension]
         .then(^(NSNumber* duration) {
             // The following instruction triggers a ChatView update
             self.mediaDuration = duration.doubleValue;
@@ -180,7 +180,7 @@ static NSMutableDictionary* _singletonCache;
     if(!self.isGeneratingThumbnail)
     {
         self.isGeneratingThumbnail = YES;
-        [HelperTools generateVideoThumbnailFromFile:self.cacheFile havingMimeType:self.mimeType andFileExtension:self.fileExtension]
+        [HelperTools generateVideoThumbnailFromFile:self.cacheFilePath havingMimeType:self.mimeType andFileExtension:self.fileExtension]
         .then(^(UIImage* image) {
             NSData* imageData = UIImagePNGRepresentation(image);
             // The following instruction triggers a ChatView update
@@ -218,19 +218,19 @@ static NSMutableDictionary* _singletonCache;
     return [self.filename pathExtension];
 }
 
--(NSString* _Nullable) cacheFile
+-(NSString* _Nullable) cacheFilePath
 {
-    return [MLFiletransfer retrieveCacheFileForUrl:self.url andMimeType:(self.mimeType && ![self.mimeType isEqualToString:@""] ? self.mimeType : nil)];
+    return [MLFiletransfer retrieveCacheFilePathForUrl:self.url andMimeType:(self.mimeType && ![self.mimeType isEqualToString:@""] ? self.mimeType : nil)];
 }
 
-+(NSSet*) keyPathsForValuesAffectingCacheFile
++(NSSet*) keyPathsForValuesAffectingCacheFilePath
 {
     return [NSSet setWithObjects:@"mimeType", nil];
 }
 
 -(NSString* _Nullable) cacheId
 {
-    return [self.cacheFile lastPathComponent];
+    return [self.cacheFilePath lastPathComponent];
 }
 
 +(NSSet*) keyPathsForValuesAffectingCacheId

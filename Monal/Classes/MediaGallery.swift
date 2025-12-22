@@ -60,14 +60,14 @@ class MediaItem: Identifiable, ObservableObject {
 
     @MainActor
     func generateThumbnail() async {
-        guard let cacheFile = fileInfo.cacheFile else {
-            DDLogError("Failed to get cacheFile for: \(fileInfo)")
+        guard let cacheFilePath = fileInfo.cacheFilePath else {
+            DDLogError("Failed to get cacheFilePath for: \(fileInfo)")
             self.thumbnail = UIImage(systemName: "exclamationmark.triangle")
             return
         }
 
         if fileInfo.isImage {
-            if let image = UIImage(contentsOfFile: cacheFile) {
+            if let image = UIImage(contentsOfFile: cacheFilePath) {
                 self.thumbnail = image
             } else {
                 DDLogError("Failed to generate image thumbnail for: \(fileInfo)")
@@ -90,7 +90,7 @@ class MediaItem: Identifiable, ObservableObject {
 
     @MainActor
     func videoPreview(for fileInfo: MLFiletransferInfo) async -> UIImage? {
-        let moviePath = URL(fileURLWithPath: fileInfo.cacheFile!)
+        let moviePath = URL(fileURLWithPath: fileInfo.cacheFilePath!)
         DDLogInfo("Trying to generate video thumbnail for: \(String(describing:fileInfo))")
         
         let payload: NSDictionary? = try? await HelperTools.addUploadItemPreview(
@@ -100,7 +100,7 @@ class MediaItem: Identifiable, ObservableObject {
         ).toTypedPromise().asyncOnMainActor()
         guard let image = payload?["preview"] as? UIImage else {
             return try? await HelperTools.generateVideoThumbnail(
-                fromFile:fileInfo.cacheFile!,
+                fromFile:fileInfo.cacheFilePath!,
                 havingMimeType:fileInfo.mimeType! ,
                 andFileExtension:fileInfo.fileExtension
             ).toTypedPromise().asyncOnMainActor()
@@ -171,9 +171,9 @@ struct MediaItemSwipeView: View {
 
     init(currentItem: MLFiletransferInfo, allItems: [MLFiletransferInfo]) {
         let index = allItems.firstIndex { item in
-            // Compare using 'cacheFile'
-            if let currentPath = currentItem.cacheFile,
-               let itemPath = item.cacheFile {
+            // Compare using 'cacheFilePath'
+            if let currentPath = currentItem.cacheFilePath,
+               let itemPath = item.cacheFilePath {
                 return currentPath == itemPath
             }
             return false

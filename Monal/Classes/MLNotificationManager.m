@@ -524,7 +524,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
                 {
                     if(fileInfo.isAudio)
                     {
-                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:fileInfo.cacheFile] filename:fileInfo.filename typeIdentifier:fileInfo.utType.identifier]];
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:fileInfo.cacheFilePath] filename:fileInfo.filename typeIdentifier:fileInfo.utType.identifier]];
                         DDLogVerbose(@"Added audio attachment(%@ = %@): %@", fileInfo.mimeType, fileInfo.utType, audioAttachment);
                     }
                     UNNotificationAttachment* attachment = [self createNotificationAttachmentForFileInfo:fileInfo];
@@ -877,12 +877,12 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     if([info.mimeType hasPrefix:@"image/svg"])
     {
         NSString* pngAttachment = [attachmentDir stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtensionForType:UTTypePNG]];
-        DDLogVerbose(@"Preparing for notification attachment(%@): converting downloaded file from svg at '%@' to png at '%@'...", typeHint, info.cacheFile, pngAttachment);
+        DDLogVerbose(@"Preparing for notification attachment(%@): converting downloaded file from svg at '%@' to png at '%@'...", typeHint, info.cacheFilePath, pngAttachment);
         //we want our code to run synchronously --> use PMKHang
         //this code should never run in the main queue to not provoke a deadlock
         if([NSThread isMainThread])
             @throw [NSException exceptionWithName:@"InvalidThread" reason:@"PMKHang on renderUIImageFromSVGURL must never be called on the main thread!" userInfo:nil]; 
-        image = (UIImage*)nilExtractor(PMKHang([HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info.cacheFile]]));
+        image = (UIImage*)nilExtractor(PMKHang([HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info.cacheFilePath]]));
         if(image != nil)
         {
             [UIImagePNGRepresentation(image) writeToFile:pngAttachment atomically:YES];
@@ -893,8 +893,8 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     //fallback if svg extraction failed OR it wasn't an SVG image in the first place
     if(image == nil)
     {
-        DDLogVerbose(@"Preparing for notification attachment(%@): hardlinking downloaded file from '%@' to '%@'...", typeHint, info.cacheFile, notificationAttachment);
-        error = [HelperTools hardLinkOrCopyFile:info.cacheFile to:notificationAttachment];
+        DDLogVerbose(@"Preparing for notification attachment(%@): hardlinking downloaded file from '%@' to '%@'...", typeHint, info.cacheFilePath, notificationAttachment);
+        error = [HelperTools hardLinkOrCopyFile:info.cacheFilePath to:notificationAttachment];
         if(error)
         {
             DDLogError(@"Could not hardlink cache file to notification image temp file!");

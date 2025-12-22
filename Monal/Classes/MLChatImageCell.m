@@ -66,7 +66,7 @@
         {
             self.link = msg.messageText;
             // uses cached file if the file was already downloaded
-            FLAnimatedImage* image = [FLAnimatedImage animatedImageWithGIFData:[NSData dataWithContentsOfFile:info.cacheFile]];
+            FLAnimatedImage* image = [FLAnimatedImage animatedImageWithGIFData:[NSData dataWithContentsOfFile:info.cacheFilePath]];
             if(!image)
                 return;
             _animatedImageView = [FLAnimatedImageView new];
@@ -93,9 +93,9 @@
             AnyPromise* imagePromise = nil;
             // this code already runs in the main queue --> we can't use PMKHang
             if([info.mimeType hasPrefix:@"image/svg"])
-                imagePromise = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info.cacheFile]];
+                imagePromise = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info.cacheFilePath]];
             else
-                imagePromise = [AnyPromise promiseWithValue:[[UIImage alloc] initWithContentsOfFile:info.cacheFile]];
+                imagePromise = [AnyPromise promiseWithValue:[[UIImage alloc] initWithContentsOfFile:info.cacheFilePath]];
             imagePromise.then(^(UIImage* image) {
                 if(!nilExtractor(image))
                     return;

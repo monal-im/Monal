@@ -207,7 +207,7 @@ static NSObject* _hardlinkingSyncObject;
             if(!mimeType)
                 mimeType = @"application/octet-stream";
             
-            NSString* cacheFile = [self calculateCacheFileForNewUrl:msg.messageText andMimeType:mimeType];
+            NSString* cacheFilePath = [self calculateCacheFilePathForNewUrl:msg.messageText andMimeType:mimeType];
             
             //encrypted filetransfer
             if([[urlComponents.scheme lowercaseString] isEqualToString:@"aesgcm"])
@@ -237,7 +237,7 @@ static NSObject* _hardlinkingSyncObject;
                         [self markAsComplete:historyId];
                         return;
                     }
-                    [decryptedData writeToFile:cacheFile options:NSDataWritingAtomic error:&error];
+                    [decryptedData writeToFile:cacheFilePath options:NSDataWritingAtomic error:&error];
                     if(error)
                     {
                         DDLogError(@"File download for %@ failed: %@", msg, error);
@@ -245,8 +245,8 @@ static NSObject* _hardlinkingSyncObject;
                         [self markAsComplete:historyId];
                         return;
                     }
-                    MLAssert([_fileManager fileExistsAtPath:cacheFile], @"cache file should be there!", (@{@"cacheFile": cacheFile}));
-                    [HelperTools configureFileProtectionFor:cacheFile];
+                    MLAssert([_fileManager fileExistsAtPath:cacheFilePath], @"cache file should be there!", (@{@"cacheFilePath": cacheFilePath}));
+                    [HelperTools configureFileProtectionFor:cacheFilePath];
                 }
                 else
                 {
@@ -260,8 +260,8 @@ static NSObject* _hardlinkingSyncObject;
             {
                 //hardlink file to our cache directory
                 //it will be removed once this completion returnes, even if moved to a new location (this seems to be a ios16 bug)
-                DDLogInfo(@"Hardlinking downloaded file from '%@' to document cache at '%@'...", [location path], cacheFile);
-                error = [HelperTools hardLinkOrCopyFile:[location path] to:cacheFile];
+                DDLogInfo(@"Hardlinking downloaded file from '%@' to document cache at '%@'...", [location path], cacheFilePath);
+                error = [HelperTools hardLinkOrCopyFile:[location path] to:cacheFilePath];
                 if(error)
                 {
                     DDLogError(@"File download for %@ failed: %@", msg, error);
@@ -269,14 +269,14 @@ static NSObject* _hardlinkingSyncObject;
                     [self markAsComplete:historyId];
                     return;
                 }
-                MLAssert([_fileManager fileExistsAtPath:cacheFile], @"cache file should be there!", (@{@"cacheFile": cacheFile}));
-                [HelperTools configureFileProtectionFor:cacheFile];
+                MLAssert([_fileManager fileExistsAtPath:cacheFilePath], @"cache file should be there!", (@{@"cacheFilePath": cacheFilePath}));
+                [HelperTools configureFileProtectionFor:cacheFilePath];
             }
             
             //hardlink cache file if possible
             [self hardlinkFileForMessage:msg];
             
-            NSNumber* filetransferSize = @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]);
+            NSNumber* filetransferSize = @([[_fileManager attributesOfItemAtPath:cacheFilePath error:nil] fileSize]);
             DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
             //update db with content type and size
             [[DataLayer sharedInstance] setFiletransferInfoForHistoryId:historyId withMimeType:mimeType andSize:filetransferSize];
@@ -286,7 +286,7 @@ static NSObject* _hardlinkingSyncObject;
             if(account != nil)      //don't send out update notices for already deleted accounts
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{ @"message": msg }];
             else
-                [_fileManager removeItemAtPath:cacheFile error:nil];
+                [_fileManager removeItemAtPath:cacheFilePath error:nil];
             
             //download done, remove from "currently checking/downloading list"
             [self markAsComplete:historyId];
@@ -316,28 +316,28 @@ static NSObject* _hardlinkingSyncObject;
 }
 
 
-$$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFile), $$ID((NSArray<NSString*>*), hardlinkPathComponents), $$BOOL(direct))
+$$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFilePath), $$ID((NSArray<NSString*>*), hardlinkPathComponents), $$BOOL(direct))
     NSError* error;    
     
     if([HelperTools isAppExtension])
     {
-        DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at '%@': we STILL are in the appex, rescheduling this to next account connect", cacheFile, [hardlinkPathComponents componentsJoinedByString:@"/"]);
+        DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at '%@': we STILL are in the appex, rescheduling this to next account connect", cacheFilePath, [hardlinkPathComponents componentsJoinedByString:@"/"]);
         //the reconnect handler framework will add $ID(account) to the callerArgs, no need to add an accountID etc. here
         //direct=YES is indicating that this hardlinking handler was called directly instead of serializing/unserializing it to/from db
         //AND that we are in the mainapp currently
         //always use direct = NO here, to make sure the file is hardlinkable even if the direct handling depicted above changes and
         //calls from the mainapp are serialized to db, too
         [account addReconnectionHandler:$newHandler(self, handleHardlinking,
-            $ID(cacheFile),
+            $ID(cacheFilePath),
             $ID(hardlinkPathComponents),
             $BOOL(direct, NO)
         )];
         return;
     }
     
-    if(![_fileManager fileExistsAtPath:cacheFile])
+    if(![_fileManager fileExistsAtPath:cacheFilePath])
     {
-        DDLogWarn(@"Could not hardlink cacheFile, file not present: %@", cacheFile);
+        DDLogWarn(@"Could not hardlink cache file, file not present: %@", cacheFilePath);
         return;
     }
     
@@ -346,42 +346,42 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
         //this allows hardlinking later on because now the mainapp owns that file while it had only read/write access before
         if(!direct)
         {
-            NSString* cacheFileTMP = [cacheFile.stringByDeletingLastPathComponent stringByAppendingPathComponent:[NSString stringWithFormat:@"tmp.%@", cacheFile.lastPathComponent]];
-            DDLogInfo(@"Copying appex-created cache file '%@' to '%@' before deleting old file and renaming our copy...", cacheFile, cacheFileTMP);
-            [_fileManager removeItemAtPath:cacheFileTMP error:nil];     //remove tmp file if already present
-            [_fileManager copyItemAtPath:cacheFile toPath:cacheFileTMP error:&error];
+            NSString* cacheFilePathTMP = [cacheFilePath.stringByDeletingLastPathComponent stringByAppendingPathComponent:[NSString stringWithFormat:@"tmp.%@", cacheFilePath.lastPathComponent]];
+            DDLogInfo(@"Copying appex-created cache file '%@' to '%@' before deleting old file and renaming our copy...", cacheFilePath, cacheFilePathTMP);
+            [_fileManager removeItemAtPath:cacheFilePathTMP error:nil];     //remove tmp file if already present
+            [_fileManager copyItemAtPath:cacheFilePath toPath:cacheFilePathTMP error:&error];
             if(error)
             {
                 DDLogError(@"Could not copy cache file to tmp file: %@", error);
 #ifdef DEBUG
                 @throw [NSException exceptionWithName:@"ERROR_WHILE_COPYING_CACHEFILE" reason:@"Could not copy cacheFile!" userInfo:@{
-                    @"cacheFile": cacheFile,
-                    @"cacheFileTMP": cacheFileTMP
+                    @"cacheFilePath": cacheFilePath,
+                    @"cacheFilePathTMP": cacheFilePathTMP
                 }];
 #endif
                 return;
             }
             
-            [_fileManager removeItemAtPath:cacheFile error:&error];
+            [_fileManager removeItemAtPath:cacheFilePath error:&error];
             if(error)
             {
                 DDLogError(@"Could not delete original cache file: %@", error);
 #ifdef DEBUG
                 @throw [NSException exceptionWithName:@"ERROR_WHILE_DELETING_CACHEFILE" reason:@"Could not delete cacheFile!" userInfo:@{
-                    @"cacheFile": cacheFile
+                    @"cacheFilePath": cacheFilePath
                 }];
 #endif
                 return;
             }
             
-            [_fileManager moveItemAtPath:cacheFileTMP toPath:cacheFile error:&error];
+            [_fileManager moveItemAtPath:cacheFilePathTMP toPath:cacheFilePath error:&error];
             if(error)
             {
                 DDLogError(@"Could not rename tmp file to cache file: %@", error);
 #ifdef DEBUG
                 @throw [NSException exceptionWithName:@"ERROR_WHILE_RENAMING_CACHEFILE" reason:@"Could not rename cacheFileTMP to cacheFile!" userInfo:@{
-                    @"cacheFile": cacheFile,
-                    @"cacheFileTMP": cacheFileTMP
+                    @"cacheFilePath": cacheFilePath,
+                    @"cacheFilePathTMP": cacheFilePathTMP
                 }];
 #endif
                 return;
@@ -394,7 +394,7 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
             for(NSString* pathComponent in hardlinkPathComponents)
                 hardLink = [hardLink URLByAppendingPathComponent:pathComponent];
             
-            DDLogInfo(@"Hardlinking cache file at '%@' into documents directory at '%@'...", cacheFile, hardLink);
+            DDLogInfo(@"Hardlinking cache file at '%@' into documents directory at '%@'...", cacheFilePath, hardLink);
             if(![_fileManager fileExistsAtPath:[hardLink.URLByDeletingLastPathComponent path]])
             {
                 DDLogVerbose(@"Creating hardlinking dir struct at '%@'...", hardLink.URLByDeletingLastPathComponent); 
@@ -407,11 +407,11 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
             
             //don't throw any error if the file aready exists, because it could be a rare collision (we only use 16 bit random numbers to keep the file prefix short)
             if([_fileManager fileExistsAtPath:[hardLink path]])
-                DDLogWarn(@"Not hardlinking file '%@' to '%@': file already exists (maybe a rare collision?)...", cacheFile, hardLink);
+                DDLogWarn(@"Not hardlinking file '%@' to '%@': file already exists (maybe a rare collision?)...", cacheFilePath, hardLink);
             else
             {
-                DDLogVerbose(@"Hardlinking cache file '%@' to '%@'...", cacheFile, hardLink);
-                error = [HelperTools hardLinkOrCopyFile:cacheFile to:[hardLink path]];
+                DDLogVerbose(@"Hardlinking cache file '%@' to '%@'...", cacheFilePath, hardLink);
+                error = [HelperTools hardLinkOrCopyFile:cacheFilePath to:[hardLink path]];
                 if(error)
                 {
                     DDLogError(@"Error creating hardlink: %@", error);
@@ -484,12 +484,12 @@ $$
     NSString* fileBasename = [fileInfo.filename stringByDeletingPathExtension];
     [hardlinkPathComponents addObject:[[NSString stringWithFormat:@"%@_%@", fileBasename, randomID] stringByAppendingPathExtension:fileExtension]];
     
-    MLAssert(fileInfo.cacheFile != nil, @"cacheFile should never be empty here!", (@{@"fileInfo": fileInfo}));
+    MLAssert(fileInfo.cacheFilePath != nil, @"cacheFilePath should never be empty here!", (@{@"fileInfo": fileInfo}));
     
-    MLHandler* handler = $newHandler(self, handleHardlinking, $ID(cacheFile, fileInfo.cacheFile), $ID(hardlinkPathComponents), $BOOL(direct, NO));
+    MLHandler* handler = $newHandler(self, handleHardlinking, $ID(cacheFilePath, fileInfo.cacheFilePath), $ID(hardlinkPathComponents), $BOOL(direct, NO));
     if([HelperTools isAppExtension])
     {
-        DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at %@: we are in the appex, rescheduling this to next account connect", fileInfo.cacheFile, [hardlinkPathComponents componentsJoinedByString:@"/"]);
+        DDLogWarn(@"NOT hardlinking cache file at '%@' into documents directory at %@: we are in the appex, rescheduling this to next account connect", fileInfo.cacheFilePath, [hardlinkPathComponents componentsJoinedByString:@"/"]);
         [account addReconnectionHandler:handler];       //the reconnect handler framework will add $ID(account) to the callerArgs, no need to add an accountID etc. here
     }
     else
@@ -502,8 +502,8 @@ $$
         return;
     DDLogInfo(@"Deleting file for url %@", msg.messageText);
     MLFiletransferInfo* info = msg.fileInfo;
-    DDLogDebug(@"Deleting file in cache: %@", info.cacheFile);
-    [_fileManager removeItemAtPath:info.cacheFile error:nil];
+    DDLogDebug(@"Deleting file in cache: %@", info.cacheFilePath);
+    [_fileManager removeItemAtPath:info.cacheFilePath error:nil];
     if([info.mimeType hasPrefix:@"video/"])
     {
         DDLogVerbose(@"Deleting video thumbnail stored at %@", msg.fileInfo.thumbnailURL.path);
@@ -635,7 +635,7 @@ $$
 
 #pragma mark - internal methods
 
-+(NSString*) retrieveCacheFileForUrl:(NSString*) url andMimeType:(NSString*) mimeType
++(NSString*) retrieveCacheFilePathForUrl:(NSString*) url andMimeType:(NSString*) mimeType
 {
     NSString* urlPart = [HelperTools hexadecimalString:[HelperTools sha256:[url dataUsingEncoding:NSUTF8StringEncoding]]];
     if(mimeType)
@@ -643,11 +643,11 @@ $$
         NSString* mimePart = [HelperTools hexadecimalString:[mimeType dataUsingEncoding:NSUTF8StringEncoding]];
         
         //the cache filename consists of a hash of the upload url (in hex) followed of the file mimetype (also in hex) as file extension
-        NSString* cacheFile = [_documentCacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", urlPart, mimePart]];
+        NSString* cacheFilePath = [_documentCacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", urlPart, mimePart]];
         
         //file having the supplied mimeType exists
-        if([_fileManager fileExistsAtPath:cacheFile])
-            return cacheFile;
+        if([_fileManager fileExistsAtPath:cacheFilePath])
+            return cacheFilePath;
     }
     
     //check for files having a different mime type but the same base url
@@ -662,7 +662,7 @@ $$
     return nil;
 }
 
-+(NSString*) calculateCacheFileForNewUrl:(NSString*) url andMimeType:(NSString*) mimeType
++(NSString*) calculateCacheFilePathForNewUrl:(NSString*) url andMimeType:(NSString*) mimeType
 {
     //the cache filename consists of a hash of the upload url (in hex) followed of the file mimetype (also in hex) as file extension
     NSString* urlPart = [HelperTools hexadecimalString:[HelperTools sha256:[url dataUsingEncoding:NSUTF8StringEncoding]]];
@@ -695,11 +695,6 @@ $$
     if(type.preferredMIMEType == nil)
         return @"application/octet-stream";
     return type.preferredMIMEType;
-}
-
-+(NSString*) getMimeTypeOfCacheFile:(NSString*) file
-{
-    return [[NSString alloc] initWithData:[HelperTools dataWithHexString:[file pathExtension]] encoding:NSUTF8StringEncoding];
 }
 
 +(void) setErrorType:(NSString*) errorType andErrorText:(NSString*) errorText forMessage:(MLMessage*) msg
@@ -818,9 +813,9 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
             }
             
             //move the tempfile to our cache location
-            NSString* cacheFile = [self calculateCacheFileForNewUrl:url andMimeType:mimeType];
-            DDLogInfo(@"Moving (possibly encrypted) file to our document cache at %@", cacheFile);
-            [_fileManager moveItemAtPath:file toPath:cacheFile error:&error];
+            NSString* cacheFilePath = [self calculateCacheFilePathForNewUrl:url andMimeType:mimeType];
+            DDLogInfo(@"Moving (possibly encrypted) file to our document cache at %@", cacheFilePath);
+            [_fileManager moveItemAtPath:file toPath:cacheFilePath error:&error];
             if(error)
             {
                 NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to move uploaded file to file cache directory", @"")}];
@@ -829,7 +824,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
                 DDLogError(@"File upload failed: %@", error);
                 return completion(nil, nil, nil, error);
             }
-            [HelperTools configureFileProtectionFor:cacheFile];
+            [HelperTools configureFileProtectionFor:cacheFilePath];
             
             [self markAsComplete:file];
             DDLogInfo(@"URL for download: %@", url);

@@ -36,9 +36,7 @@ struct MediaGalleryView: View {
     private func fetchDownloadedMediaItems() {
         if let attachments = DataLayer.sharedInstance().allAttachments(fromContact: contact, forAccount: accountID) as? [MLFiletransferInfo] {
             mediaItems = attachments.filter { fileInfo in
-                if let mimeType = fileInfo.mimeType,
-                   fileInfo.downloadState == .complete,
-                   (mimeType.starts(with: "image/") || mimeType.starts(with: "video/")) {
+                if fileInfo.downloadState == .complete, (fileInfo.isImage || fileInfo.isVideo) {
                     return true
                 }
                 return false
@@ -62,13 +60,13 @@ class MediaItem: Identifiable, ObservableObject {
 
     @MainActor
     func generateThumbnail() async {
-        guard let cacheFile = fileInfo.cacheFile, let mimeType = fileInfo.mimeType else {
-            DDLogError("Failed to get cacheFile or mimeType for: \(fileInfo)")
+        guard let cacheFile = fileInfo.cacheFile else {
+            DDLogError("Failed to get cacheFile for: \(fileInfo)")
             self.thumbnail = UIImage(systemName: "exclamationmark.triangle")
             return
         }
 
-        if mimeType.starts(with: "image/") {
+        if fileInfo.isImage {
             if let image = UIImage(contentsOfFile: cacheFile) {
                 self.thumbnail = image
             } else {
@@ -76,7 +74,7 @@ class MediaItem: Identifiable, ObservableObject {
                 self.thumbnail = UIImage(systemName: "photo")
             }
             return
-        } else if mimeType.starts(with: "video/") {
+        } else if fileInfo.isVideo {
             if let thumbnail = await videoPreview(for:fileInfo) {
                 self.thumbnail = thumbnail
             } else {
@@ -86,7 +84,7 @@ class MediaItem: Identifiable, ObservableObject {
             return
         }
 
-        DDLogError("Unsupported mime type: \(mimeType)")
+        DDLogError("Unsupported mime type: \(fileInfo.mimeType ?? "(unknown)")")
         self.thumbnail = UIImage(systemName: "doc")
     }
 
@@ -136,7 +134,7 @@ struct MediaItemView: View {
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
             
             // Add play icon overlay for video files
-            if let mimeType = item.fileInfo.mimeType, mimeType.starts(with: "video/") {
+            if item.fileInfo.isVideo {
                 Image(systemName: "play.circle.fill")
                     .resizable()
                     .frame(width: 30, height: 30)

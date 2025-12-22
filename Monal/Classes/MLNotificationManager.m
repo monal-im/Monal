@@ -505,32 +505,31 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         
         if([message.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            MLFiletransferInfo* info = message.fileInfo;
-            NSString* mimeType = info.mimeType;
+            MLFiletransferInfo* fileInfo = message.fileInfo;
 
-            if([mimeType hasPrefix:@"image/"])
+            if(fileInfo.isImage)
                 msgText = NSLocalizedString(@"📷 An Image", @"");
-            else if([mimeType hasPrefix:@"audio/"])
+            else if(fileInfo.isAudio)
                 msgText = NSLocalizedString(@"🎵 An Audiomessage", @"");
-            else if([mimeType hasPrefix:@"video/"])
+            else if(fileInfo.isVideo)
                 msgText = NSLocalizedString(@"🎥 A Video", @"");
-            else if([mimeType isEqualToString:@"application/pdf"])
+            else if(fileInfo.isPDF)
                 msgText = NSLocalizedString(@"📄 A Document", @"");
             else
                 msgText = NSLocalizedString(@"📁 A File", @"");
 
-            if(info.downloadState == DownloadStateComplete)
+            if(fileInfo.downloadState == DownloadStateComplete)
             {
-                if([mimeType hasPrefix:@"image/"] || [mimeType hasPrefix:@"video/"] || [mimeType hasPrefix:@"audio/"])
+                if(fileInfo.isImage || fileInfo.isVideo || fileInfo.isAudio)
                 {
                     UNNotificationAttachment* attachment;
-                    UTType* typeHint = info.typeHint;
-                    if([mimeType hasPrefix:@"audio/"])
+                    UTType* typeHint = fileInfo.typeHint;
+                    if(fileInfo.isAudio)
                     {
-                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:info.cacheFile] filename:info.filename typeIdentifier:typeHint.identifier]];
-                        DDLogVerbose(@"Added audio attachment(%@ = %@): %@", mimeType, typeHint, audioAttachment);
+                        audioAttachment = [INSendMessageAttachment attachmentWithAudioMessageFile:[INFile fileWithFileURL:[NSURL fileURLWithPath:fileInfo.cacheFile] filename:fileInfo.filename typeIdentifier:typeHint.identifier]];
+                        DDLogVerbose(@"Added audio attachment(%@ = %@): %@", fileInfo.mimeType, typeHint, audioAttachment);
                     }
-                    attachment = [self createNotificationAttachmentForFileInfo:info havingTypeHint:typeHint];
+                    attachment = [self createNotificationAttachmentForFileInfo:fileInfo havingTypeHint:typeHint];
                     if(attachment)
                         content.attachments = @[attachment];
                 }
@@ -824,18 +823,18 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
 
         if([message.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            NSString* mimeType = message.fileInfo.mimeType;
-            if([mimeType hasPrefix:@"image/"])
+            MLFiletransferInfo* fileInfo = message.fileInfo;
+            if(fileInfo.isImage)
             {
                 content.body = NSLocalizedString(@"Sent an Image 📷", @"");
 
                 UNNotificationAttachment* attachment;
-                if(message.fileInfo.downloadState == DownloadStateComplete)
+                if(fileInfo.downloadState == DownloadStateComplete)
                 {
-                    UTType* typeHint = [UTType typeWithMIMEType:mimeType];
+                    UTType* typeHint = [UTType typeWithMIMEType:fileInfo.mimeType];
                     if(typeHint == nil)
                         typeHint = UTTypeImage;
-                    attachment = [self createNotificationAttachmentForFileInfo:message.fileInfo havingTypeHint:typeHint];
+                    attachment = [self createNotificationAttachmentForFileInfo:fileInfo havingTypeHint:typeHint];
                     if(attachment)
                     {
                         content.attachments = @[attachment];
@@ -843,13 +842,13 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
                     }
                 }
             }
-            else if([mimeType hasPrefix:@"image/"])
+            else if(fileInfo.isImage)
                 content.body = NSLocalizedString(@"📷 An Image", @"");
-            else if([mimeType hasPrefix:@"audio/"])
+            else if(fileInfo.isAudio)
                 content.body = NSLocalizedString(@"🎵 An Audiomessage", @"");
-            else if([mimeType hasPrefix:@"video/"])
+            else if(fileInfo.isVideo)
                 content.body = NSLocalizedString(@"🎥 A Video", @"");
-            else if([mimeType isEqualToString:@"application/pdf"])
+            else if(fileInfo.isPDF)
                 content.body = NSLocalizedString(@"📄 A Document", @"");
             else
                 content.body = NSLocalizedString(@"Sent a File 📁", @"");

@@ -234,21 +234,41 @@ static NSMutableDictionary* _singletonCache;
     if(type != nil)
         return type;
 
-    if([self.mimeType hasPrefix:@"image/"])
+    if(self.isImage)
         return UTTypeImage;
-    if([self.mimeType hasPrefix:@"audio/"])
+    if(self.isAudio)
         return UTTypeAudio;
-    if([self.mimeType hasPrefix:@"video/"])
+    if(self.isVideo)
        return UTTypeMovie;
     return nil;
 }
 
+-(BOOL) isImage
+{
+    return [self.mimeType hasPrefix:@"image/"];
+}
+
+-(BOOL) isAudio
+{
+    return [self.mimeType hasPrefix:@"audio/"];
+}
+
+-(BOOL) isVideo
+{
+    return [self.mimeType hasPrefix:@"video/"];
+}
+
+-(BOOL) isPDF
+{
+    return [self.mimeType isEqualToString:@"application/pdf"];
+}
+
+// Needed to not create a retain cycle between MLFiletransferInfo and MLMessage
 -(MLMessage*) message
 {
     return [MLMessage createMessageFromHistoryID:self.historyId];
 }
 
-// Needed to not create a retain cycle between MLFiletransferInfo and MLMessage
 -(NSString*) id
 {
     return [NSString stringWithFormat:@"%@", self.historyId];

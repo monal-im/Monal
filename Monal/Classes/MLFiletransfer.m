@@ -452,11 +452,11 @@ $$
     if(msg.inbound)
     {
         //put every mime-type in its own type directory
-        if([fileInfo.mimeType hasPrefix:@"image/"])
+        if(fileInfo.isImage)
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Images", @"directory for downloaded images")];
-        else if([fileInfo.mimeType hasPrefix:@"video/"])
+        else if(fileInfo.isVideo)
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Videos", @"directory for downloaded videos")];
-        else if([fileInfo.mimeType hasPrefix:@"audio/"])
+        else if(fileInfo.isAudio)
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Audios", @"directory for downloaded audios")];
         else
             [hardlinkPathComponents addObject:NSLocalizedString(@"Received Files", @"directory for downloaded files")];
@@ -468,11 +468,11 @@ $$
     else
     {
         //put every mime-type in its own type directory
-        if([fileInfo.mimeType hasPrefix:@"image/"])
+        if(fileInfo.isImage)
             [hardlinkPathComponents addObject:NSLocalizedString(@"Sent Images", @"directory for downloaded images")];
-        else if([fileInfo.mimeType hasPrefix:@"video/"])
+        else if(fileInfo.isVideo)
             [hardlinkPathComponents addObject:NSLocalizedString(@"Sent Videos", @"directory for downloaded videos")];
-        else if([fileInfo.mimeType hasPrefix:@"audio/"])
+        else if(fileInfo.isAudio)
             [hardlinkPathComponents addObject:NSLocalizedString(@"Sent Audios", @"directory for downloaded audios")];
         else
             [hardlinkPathComponents addObject:NSLocalizedString(@"Sent Files", @"directory for downloaded files")];

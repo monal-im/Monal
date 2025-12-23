@@ -226,7 +226,7 @@ struct AVCallUI: View {
             (MLCallType(rawValue:call.callType) == .video && (MLCallState(rawValue:call.state) != .connected || controlsVisible)) {
                 VStack {
                     Group {
-                        Spacer().frame(height: 24)
+                        Spacer().frame(height: 16)
                         
                         HStack(alignment: .top) {
                             Spacer().frame(width:20)
@@ -502,7 +502,7 @@ struct AVCallUI: View {
                         }
                     }
                     
-                    Spacer().frame(height: 32)
+                    Spacer().frame(height: 16)
                 }
             }
         }

@@ -33,7 +33,7 @@ struct ContactRequestsMenuEntry: View {
                     MLXMPPManager.sharedInstance().remove(contact)
                     MLXMPPManager.sharedInstance().block(true, contact:contact)
                 } label: {
-                    Image(systemName: "person.crop.circle.badge.checkmark")
+                    Image(systemName: "person.crop.circle.badge.xmark")
                         .foregroundStyle(Color.red)
                 }
                 //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
@@ -44,7 +44,7 @@ struct ContactRequestsMenuEntry: View {
                     MLXMPPManager.sharedInstance().remove(contact)
                 } label: {
                     Image(systemName: "person.crop.circle.badge.minus")
-                        .foregroundStyle(Color.red)
+                        .foregroundStyle(Color.yellow)
                 }
                 //see https://www.hackingwithswift.com/forums/swiftui/tap-button-in-hstack-activates-all-button-actions-ios-14-swiftui-2/2952
                 .buttonStyle(BorderlessButtonStyle())

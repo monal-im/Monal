@@ -184,6 +184,7 @@ struct AVCallUI: View {
             
             if MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
                 VideoView(renderer:self.remoteRenderer)
+                    .ignoresSafeArea()
                 
                 ZStack {
                     VideoView(renderer:self.localRenderer)

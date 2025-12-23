@@ -882,16 +882,16 @@ class ChatViewMessage: ExyteChat.Message {
                 MLFiletransfer.checkMimeTypeAndSize(forHistoryID: innerMessage.messageDBId)
                 return []
             }
-            let cacheFilePath = fileInfo.cacheFilePath as String
+            let fileURL = fileInfo.fileURL as URL
             let cacheId = fileInfo.cacheId as String
             let attachmentUUID = HelperTools.stringToUUID(cacheId).uuidString
             switch fileInfo.mimeType as String {
                 case let mimeType where mimeType.starts(with: "image/"):
-                    let attachment = Attachment(id: attachmentUUID, url: URL(fileURLWithPath: cacheFilePath), type: .image)
+                    let attachment = Attachment(id: attachmentUUID, url: fileURL, type: .image)
                     return [attachment]
                 case let mimeType where mimeType.starts(with: "video/"):
                     let thumbnail = fileInfo.thumbnailURL as URL? ?? URL(string: "about:blank")!
-                    let attachment = Attachment(id: attachmentUUID, thumbnail: thumbnail, full: URL(fileURLWithPath: cacheFilePath), type: .video, mimeType: mimeType)
+                    let attachment = Attachment(id: attachmentUUID, thumbnail: thumbnail, full: fileURL, type: .video, mimeType: mimeType)
                     return [attachment]
                 default:
                     return []
@@ -911,7 +911,7 @@ class ChatViewMessage: ExyteChat.Message {
             guard (fileInfo.mimeType as String).starts(with: "audio/") else {
                 return nil
             }
-            let fileURL = URL(fileURLWithPath: fileInfo.cacheFilePath as String)
+            let fileURL = fileInfo.fileURL as URL
             return Recording(duration: fileInfo.mediaDuration, url: fileURL, mimeType: fileInfo.mimeType)
         }
         set {}

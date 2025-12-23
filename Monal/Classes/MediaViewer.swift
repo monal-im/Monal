@@ -68,7 +68,7 @@ struct ImageViewer: View {
             if info.mimeType!.hasPrefix("image/svg") {
                 VStack {
                     ZoomableContainer(maxScale:8.0, doubleTapScale:4.0) {
-                        SVGView(contentsOf: URL(fileURLWithPath:info.cacheFilePath!))
+                        SVGView(contentsOf: info.fileURL!)
                     }
                 }
             } else if info.mimeType!.hasPrefix("image/") {
@@ -116,7 +116,7 @@ struct ImageViewer: View {
     
     private func loadPreviewAndConfigurePlayer() async {
         if info.mimeType!.hasPrefix("image/svg") {
-            previewImage = await HelperTools.renderUIImage(fromSVGURL:URL(fileURLWithPath:info.cacheFilePath!)).toTypedGuarantee().asyncOnMainActor()
+            previewImage = await HelperTools.renderUIImage(fromSVGURL: info.fileURL!).toTypedGuarantee().asyncOnMainActor()
         } else if info.mimeType!.hasPrefix("image/") {
             previewImage = UIImage(contentsOfFile:info.cacheFilePath!)
         } else if info.isVideo {
@@ -214,7 +214,7 @@ struct ControlsOverlay: View {
                                 .labelStyle(.iconOnly)
                                 .foregroundColor(.primary)
                             } else if info.isVideo {
-                                if let fileURL = URL(string: info.cacheFilePath!) {
+                                if let fileURL = info.fileURL {
                                     let mediaItem = MediaItem(fileInfo: info)
                                     ShareLink(item: fileURL, preview: SharePreview("Share video", image: Image(uiImage: mediaItem.thumbnail ?? UIImage(systemName: "video")!)))
                                         .labelStyle(.iconOnly)

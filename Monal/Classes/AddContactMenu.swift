@@ -132,7 +132,7 @@ struct AddContactMenu: View {
             }
             return
         }
-        showPromisingLoadingOverlay(overlay, headline:NSLocalizedString("Adding...", comment: ""), description:"") {
+        showPromisingLoadingOverlay(overlay, headline:"Adding...", description:"") {
             account.checkJidType(jid)
         }.done { type in
             let type = type as! String
@@ -310,7 +310,7 @@ struct AddContactMenu: View {
                 if account.connectionProperties.discoveredAdhocCommands["urn:xmpp:invite#invite"] != nil {
                     Button(action: {
                         DDLogVerbose("Trying to create invitation for: \(String(describing:splitJid["host"]!))")
-                        showLoadingOverlay(overlay, headline: NSLocalizedString("Creating invitation...", comment: ""))
+                        showLoadingOverlay(overlay, headline:"Creating invitation...")
                         account.createInvitation(completion: {
                             let result = $0 as! [String:AnyObject]
                             DispatchQueue.main.async {

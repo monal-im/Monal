@@ -140,7 +140,7 @@ struct WelcomeLogIn: View {
 
         if (!showAlert) {
             startLoginTimeout()
-            showLoadingOverlay(overlay, headline:NSLocalizedString("Logging in", comment: ""))
+            showLoadingOverlay(overlay, headline:"Logging in")
             self.errorObserverEnabled = true
             if advancedMode {
                 self.newAccountID = MLXMPPManager.sharedInstance().login(self.jid, password: self.password, hardcodedServer:self.hardcodedServer, hardcodedPort:self.hardcodedPort, forceDirectTLS: self.forceDirectTLS, allowPlainAuth: self.allowPlainAuth)
@@ -373,7 +373,7 @@ struct WelcomeLogIn: View {
                     DispatchQueue.main.async {
                         currentTimeout = nil // <- disable timeout on successful connection
                         self.errorObserverEnabled = false
-                        showLoadingOverlay(overlay, headline:NSLocalizedString("Loading contact list", comment: ""))
+                        showLoadingOverlay(overlay, headline:"Loading contact list")
                     }
                 }
             }
@@ -384,8 +384,8 @@ struct WelcomeLogIn: View {
                     isLoadingOmemoBundles = true
                     showLoadingOverlay(
                         overlay, 
-                        headline:NSLocalizedString("Loading omemo bundles", comment: ""),
-                        description:String(format: NSLocalizedString("Loading omemo bundles: %@ / %@", comment: ""), completed, all)
+                        headline:"Loading omemo bundles",
+                        description:"Loading omemo bundles: \(completed) / \(all)"
                     )
                 }
             }

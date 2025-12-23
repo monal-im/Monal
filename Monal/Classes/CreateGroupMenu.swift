@@ -73,7 +73,7 @@ struct CreateGroupMenu: View {
                             errorAlert(title: Text("Error creating group!"), message: Text("Your server does not provide a MUC component."))
                             return
                         }
-                        showLoadingOverlay(overlay, headline: NSLocalizedString("Creating Group", comment: ""))
+                        showLoadingOverlay(overlay, headline: "Creating Group")
                         guard let roomJid = self.selectedAccount!.mucProcessor.createGroup(generatedJid) else {
                             //room already existing in our local bookmarks --> just open it
                             //this should never happen since we randomly generated a jid above

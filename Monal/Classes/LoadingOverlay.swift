@@ -66,7 +66,11 @@ func showPromisingLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayStat
     })).toTypedGuarantee()
 }
 
-func showPromisingLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") -> Guarantee<Void> {
+func showPromisingLoadingOverlay(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "") -> Guarantee<Void> {
+    return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description))
+}
+@_disfavoredOverload
+func showPromisingLoadingOverlay(_ overlay: LoadingOverlayState, headline: String, description: String = "") -> Guarantee<Void> {
     return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description))
 }
 
@@ -95,11 +99,19 @@ func showPromisingLoadingOverlay<T1:View, T2:View, U: PMKFinalizer>(_ overlay: L
     }
 }
 
-func showPromisingLoadingOverlay<T:StringProtocol, U: Thenable>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) -> Promise<U.T> {
+func showPromisingLoadingOverlay<U: Thenable>(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "", firstlyClosure: @escaping () -> U) -> Promise<U.T> {
+    return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
+}
+@_disfavoredOverload
+func showPromisingLoadingOverlay<U: Thenable>(_ overlay: LoadingOverlayState, headline: String, description: String = "", firstlyClosure: @escaping () -> U) -> Promise<U.T> {
     return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
 }
 
-func showPromisingLoadingOverlay<T:StringProtocol, U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) -> Guarantee<Void> {
+func showPromisingLoadingOverlay<U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "", firstlyClosure: @escaping () -> U) -> Guarantee<Void> {
+    return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
+}
+@_disfavoredOverload
+func showPromisingLoadingOverlay<U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: String, description: String = "", firstlyClosure: @escaping () -> U) -> Guarantee<Void> {
     return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
 }
 
@@ -107,7 +119,11 @@ func showLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayState, headli
     let _ = showPromisingLoadingOverlay(overlay, headlineView:headline, descriptionView:description)
 }
 
-func showLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") {
+func showLoadingOverlay(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "") {
+    let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description)
+}
+@_disfavoredOverload
+func showLoadingOverlay(_ overlay: LoadingOverlayState, headline: String, description: String = "") {
     let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description)
 }
 
@@ -119,11 +135,19 @@ func showLoadingOverlay<T1:View, T2:View, U: PMKFinalizer>(_ overlay: LoadingOve
     let _ = showPromisingLoadingOverlay(overlay, headlineView:headline, descriptionView:description, firstlyClosure:firstlyClosure)
 }
 
-func showLoadingOverlay<T:StringProtocol, U: Thenable>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) {
+func showLoadingOverlay<U: Thenable>(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "", firstlyClosure: @escaping () -> U) {
+    let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
+}
+@_disfavoredOverload
+func showLoadingOverlay<U: Thenable>(_ overlay: LoadingOverlayState, headline: String, description: String = "", firstlyClosure: @escaping () -> U) {
     let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
 }
 
-func showLoadingOverlay<T:StringProtocol, U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) {
+func showLoadingOverlay<U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "", firstlyClosure: @escaping () -> U) {
+    let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
+}
+@_disfavoredOverload
+func showLoadingOverlay<U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: String, description: String = "", firstlyClosure: @escaping () -> U) {
     let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
 }
 

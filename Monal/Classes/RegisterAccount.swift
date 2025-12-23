@@ -169,7 +169,7 @@ struct RegisterAccount: View {
     }
     
     private func register() {
-        showLoadingOverlay(overlay, headline:NSLocalizedString("Registering account...", comment: ""))
+        showLoadingOverlay(overlay, headline:"Registering account...")
         if(self.xmppAccount == nil) {
             self.xmppAccount = createXMPPInstance()
         }
@@ -224,7 +224,7 @@ struct RegisterAccount: View {
         self.currentTimeout = newTimeout
         DispatchQueue.main.asyncAfter(deadline: newTimeout) {
             if(newTimeout == self.currentTimeout) {
-                showLoadingOverlay(overlay, headline:NSLocalizedString("Fetching registration form...", comment: ""))
+                showLoadingOverlay(overlay, headline:"Fetching registration form...")
                 if(self.xmppAccount != nil) {
                     self.xmppAccount!.disconnect(true)
                 }

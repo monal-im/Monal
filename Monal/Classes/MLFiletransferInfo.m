@@ -238,6 +238,16 @@ static NSMutableDictionary* _singletonCache;
     return [NSSet setWithObjects:@"mimeType", nil];
 }
 
+-(NSURL* _Nullable) fileURL
+{
+    return [NSURL fileURLWithPath:self.cacheFilePath];
+}
+
++(NSSet*) keyPathsForValuesAffectingFileURL
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
+}
+
 -(UTType* _Nullable) utType
 {
     if(self.mimeType == nil)

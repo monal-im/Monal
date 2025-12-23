@@ -11,18 +11,21 @@ import OrderedCollections
 struct ChannelMemberList: View {
     private let account: xmpp
     @State private var ownAffiliation: String;
+    @State private var ownRole: String;
     @StateObject var channel: ObservableKVOWrapper<MLContact>
-    @State private var participants: OrderedDictionary<String, String>
+    @State private var participants: OrderedDictionary<String, [String:String]>
 
     init(mucContact: ObservableKVOWrapper<MLContact>) {
         account = mucContact.obj.account! as xmpp
         _channel = StateObject(wrappedValue:mucContact)
         _ownAffiliation = State(wrappedValue:kMucAffiliationNone)
-        _participants = State(wrappedValue:OrderedDictionary<String, String>())
+        _ownRole = State(wrappedValue:kMucRoleNone)
+        _participants = State(wrappedValue:OrderedDictionary<String, [String:String]>())
     }
     
     func updateParticipantList() {
         ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:channel.obj) ?? kMucAffiliationNone
+        ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel:channel.obj) ?? kMucRoleNone
         participants.removeAll(keepingCapacity:true)
         for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:channel.contactJid, forAccountID:account.accountID)) {
             //ignore ourselves
@@ -32,24 +35,29 @@ struct ChannelMemberList: View {
                 }
             }
             if let nick = memberInfo["room_nick"] as? String {
-                participants[nick] = memberInfo["affiliation"] as? String ?? kMucAffiliationNone
+                participants[nick] = [
+                    "affiliation": memberInfo["affiliation"] as? String ?? kMucAffiliationNone,
+                    "role": memberInfo["role"] as? String ?? kMucRoleNone,
+                ]
             }
         }
         participants.sort {
-            (mucAffiliationToInt($0.value), $0.key.lowercased()) < (mucAffiliationToInt($1.value), $1.key.lowercased())
+            (mucAffiliationToInt($0.value["affiliation"]), mucRoleToInt($0.value["role"]), $0.key.lowercased())
+            <
+            (mucAffiliationToInt($1.value["affiliation"]), mucRoleToInt($1.value["role"]), $1.key.lowercased())
         }
     }
     
 
     var body: some View {
         List {
-            Section(header: Text("\(self.channel.contactDisplayName as String) (affiliation: \(mucAffiliationToString(ownAffiliation)))")) {
+            Section(header: Text("\(self.channel.contactDisplayName as String) (affiliation: \(mucAffiliationToString(ownAffiliation, ownRole)))")) {
                 ForEach(participants.keys, id: \.self) { participant_key in
                     ZStack(alignment: .topLeading) {
                         HStack(alignment: .center) {
                             Text(participant_key)
                             Spacer()
-                            Text(mucAffiliationToString(participants[participant_key]))
+                            Text(mucAffiliationToString(participants[participant_key]?["affiliation"], participants[participant_key]?["role"]))
                         }
                     }
                 }

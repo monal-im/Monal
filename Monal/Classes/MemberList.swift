@@ -17,9 +17,11 @@ struct ActionSheetPrompt {
 struct MemberList: View {
     private let account: xmpp
     @State private var ownAffiliation: String
+    @State private var ownRole: String
     @StateObject var muc: ObservableKVOWrapper<MLContact>
     @State private var memberList: OrderedSet<ObservableKVOWrapper<MLContact>>
     @State private var affiliations: Dictionary<ObservableKVOWrapper<MLContact>, String>
+    @State private var roles: Dictionary<ObservableKVOWrapper<MLContact>, String>
     @State private var online: Dictionary<ObservableKVOWrapper<MLContact>, Bool>
     @State private var nicknames: Dictionary<ObservableKVOWrapper<MLContact>, String>
     @State private var navigationActive: ObservableKVOWrapper<MLContact>?
@@ -33,8 +35,10 @@ struct MemberList: View {
         account = mucContact.obj.account! as xmpp
         _muc = StateObject(wrappedValue:mucContact)
         _ownAffiliation = State(wrappedValue:kMucAffiliationNone)
+        _ownRole = State(wrappedValue:kMucRoleNone)
         _memberList = State(wrappedValue:OrderedSet<ObservableKVOWrapper<MLContact>>())
         _affiliations = State(wrappedValue:[:])
+        _roles = State(wrappedValue:[:])
         _online = State(wrappedValue:[:])
         _nicknames = State(wrappedValue:[:])
     }
@@ -42,7 +46,9 @@ struct MemberList: View {
     func updateMemberlist() {
         memberList = getContactList(viewContact:self.muc)
         ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:self.muc.obj) ?? kMucAffiliationNone
+        ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel:self.muc.obj) ?? kMucRoleNone
         affiliations.removeAll(keepingCapacity:true)
+        roles.removeAll(keepingCapacity:true)
         online.removeAll(keepingCapacity:true)
         nicknames.removeAll(keepingCapacity:true)
         for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:self.muc.contactJid, forAccountID:account.accountID)) {
@@ -56,6 +62,7 @@ struct MemberList: View {
                 continue
             }
             affiliations[contact] = memberInfo["affiliation"] as? String ?? kMucAffiliationNone
+            roles[contact] = memberInfo["role"] as? String ?? kMucRoleNone
             if let num = memberInfo["online"] as? NSNumber {
                 online[contact] = num.boolValue
             } else {
@@ -72,11 +79,13 @@ struct MemberList: View {
             (
                 (online[$0]! ? 0 : 1),
                 mucAffiliationToInt(affiliations[$0]),
+                mucRoleToInt(roles[$0]),
                 (contactNames[$0]!.lowercased()),
                 ($0.contactJid as String)
             ) < (
                 (online[$1]! ? 0 : 1),
                 mucAffiliationToInt(affiliations[$1]),
+                mucRoleToInt(roles[$1]),
                 (contactNames[$1]!.lowercased()),
                 ($1.contactJid as String)
             )
@@ -151,7 +160,7 @@ struct MemberList: View {
             }
         }
         //fallback (should hopefully never be needed)
-        DDLogWarn("Fallback for group/channel \(String(describing:self.muc.contactJid as String)): affiliation=\(String(describing:affiliations[contact])), online=\(String(describing:online[contact]))")
+        DDLogWarn("Fallback for group/channel \(String(describing:self.muc.contactJid as String)): affiliation=\(String(describing:affiliations[contact])), role=\(String(describing:roles[contact])), online=\(String(describing:online[contact]))")
         if self.muc.mucType == kMucTypeGroup {
             return [/*kMucActionShowProfile,*/ kMucActionReinvite]
         } else {
@@ -205,7 +214,7 @@ struct MemberList: View {
                     }
                 } else {
                     DDLogVerbose("Changing affiliation of \(String(describing:contact)) to: \(String(describing:newAffiliation))...")
-                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Changing affiliation"), descriptionView: Text("Changing affiliation to \(mucAffiliationToString(affiliations[contact])): \(contact.contactJid as String)")) {
+                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Changing affiliation"), descriptionView: Text("Changing affiliation to \(mucAffiliationToString(affiliations[contact], roles[contact])): \(contact.contactJid as String)")) {
                         promisifyAction {
                             account.mucProcessor.setAffiliation(newAffiliation, ofUser:contact.contactJid, inMuc:self.muc.contactJid)
                         }
@@ -223,7 +232,7 @@ struct MemberList: View {
 
     var body: some View {
         List {
-            Section(header: Text("\(self.muc.contactDisplayName as String) (affiliation: \(mucAffiliationToString(ownAffiliation)))")) {
+            Section(header: Text("\(self.muc.contactDisplayName as String) (affiliation: \(mucAffiliationToString(ownAffiliation, ownRole)))")) {
                 if ownAffiliation == kMucAffiliationOwner || ownAffiliation == kMucAffiliationAdmin {
                     NavigationLink(destination: LazyClosureView(ContactPicker(account, initializeFrom: memberList, allowRemoval: false) { newMemberList in
                         for member in newMemberList {
@@ -273,7 +282,7 @@ struct MemberList: View {
                         HStack {
                             HStack {
                                 ContactEntry(contact:contact.obj, fallback:nicknames[contact]) {
-                                    Text("Affiliation: \(mucAffiliationToString(affiliations[contact]))\(!(online[contact] ?? false) ? Text(" (offline)") : Text(""))")
+                                    Text("Affiliation: \(mucAffiliationToString(affiliations[contact], roles[contact]))\(!(online[contact] ?? false) ? Text(" (offline)") : Text(""))")
                                         //.foregroundColor(Color(UIColor.secondaryLabel))
                                         .font(.footnote)
                                 }
@@ -301,8 +310,8 @@ struct MemberList: View {
                         }
                         .swipeActions(allowsFullSwipe: false) {
                             Button("Delete") {
-                                showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[contact]))?"), description: self.muc.mucType == kMucTypeGroup ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
-                                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[contact]))"), descriptionView: Text("Removing \(contact.contactJid as String)...")) {
+                                showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[contact], roles[contact]))?"), description: self.muc.mucType == kMucTypeGroup ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
+                                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[contact], roles[contact]))"), descriptionView: Text("Removing \(contact.contactJid as String)...")) {
                                         promisifyAction {
                                             account.mucProcessor.setAffiliation(kMucAffiliationNone, ofUser: contact.contactJid, inMuc: self.muc.contactJid)
                                         }

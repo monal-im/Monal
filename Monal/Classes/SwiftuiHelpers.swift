@@ -109,7 +109,7 @@ func promisifyMucAction(account: xmpp, mucJid: String, action: @escaping () thro
     }
 }
 
-func mucAffiliationToString(_ affiliation: String?) -> String {
+func mucAffiliationToString(_ affiliation: String?, _ role: String? = nil) -> String {
     if let affiliation = affiliation {
         if affiliation == kMucAffiliationOwner {
             return NSLocalizedString("Owner", comment:"muc affiliation")
@@ -118,7 +118,13 @@ func mucAffiliationToString(_ affiliation: String?) -> String {
         } else if affiliation == kMucAffiliationMember {
             return NSLocalizedString("Member", comment:"muc affiliation")
         } else if affiliation == kMucAffiliationNone {
-            return NSLocalizedString("Participant", comment:"muc affiliation")
+            if role == kMucRoleParticipant {
+                return NSLocalizedString("Participant", comment:"muc affiliation")
+            } else if role == kMucRoleVisitor {
+                return NSLocalizedString("Visitor", comment:"muc affiliation")
+            } else {
+                return NSLocalizedString("None", comment:"muc affiliation")
+            }
         } else if affiliation == kMucAffiliationOutcast {
             return NSLocalizedString("Blocked", comment:"muc affiliation")
         } else if affiliation == kMucActionShowProfile {
@@ -146,6 +152,21 @@ func mucAffiliationToInt(_ affiliation: String?) -> Int {
             return 1000
         } else if affiliation == kMucActionReinvite {
             return 100
+        }
+    }
+    return 0
+}
+
+func mucRoleToInt(_ role: String?) -> Int {
+    if let role = role {
+        if role == kMucRoleModerator {
+            return 1
+        } else if role == kMucRoleParticipant {
+            return 2
+        } else if role == kMucRoleVisitor {
+            return 3
+        } else if role == kMucRoleNone {
+            return 4
         }
     }
     return 0

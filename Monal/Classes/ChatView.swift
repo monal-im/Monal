@@ -461,41 +461,45 @@ struct ChatView: View {
                         )
                     }
                 case .resend:
-                    confirmationPrompt = ConfirmationPrompt(
-                        title: Text("Retry sending message?"),
-                        message: Text("This message failed to send (\(mlMessage.errorType ?? "unknown error")): \(mlMessage.errorReason ?? "unknown reason")"),
-                        buttons: [
-                            .default(
-                                Text("Retry"),
-                                action: {
-                                    Task { @MainActor in
-                                        await Task.detached(priority: .userInitiated) {
-                                            DataLayer.sharedInstance().clearError(ofMessageId: mlMessage.messageId)
-                                        }.value
+                    // Explicitly schedule this on the main thread, to ensure the update to confirmationPrompt happens.
+                    // This is needed for some reason, despite this code being already on the main thread.
+                    Task { @MainActor in
+                        self.confirmationPrompt = ConfirmationPrompt(
+                            title: Text("Retry sending message?"),
+                            message: Text("This message failed to send (\(mlMessage.errorType ?? "unknown error")): \(mlMessage.errorReason ?? "unknown reason")"),
+                            buttons: [
+                                .default(
+                                    Text("Retry"),
+                                    action: {
+                                        Task { @MainActor in
+                                            await Task.detached(priority: .userInitiated) {
+                                                DataLayer.sharedInstance().clearError(ofMessageId: mlMessage.messageId)
+                                            }.value
 
-                                        mlMessage.errorType = ""
-                                        mlMessage.errorReason = ""
-                                        let isUpload = mlMessage.messageType == kMessageTypeFiletransfer
-                                        let isEncrypted = mlMessage.encrypted || self.contact.isEncrypted
-                                        self.account.sendMessage(mlMessage.messageText,
-                                                                 to: self.contact.obj,
-                                                                 isEncrypted: isEncrypted,
-                                                                 isUpload: isUpload,
-                                                                 andMessageId: mlMessage.messageId)
-                                        MLNotificationQueue.current().post(
-                                            name: Notification.Name(kMLMessageSentToContact),
-                                            object: self.account,
-                                            userInfo: ["contact": self.contact.obj]
-                                        )
+                                            mlMessage.errorType = ""
+                                            mlMessage.errorReason = ""
+                                            let isUpload = mlMessage.messageType == kMessageTypeFiletransfer
+                                            let isEncrypted = mlMessage.encrypted || self.contact.isEncrypted
+                                            self.account.sendMessage(mlMessage.messageText,
+                                                                     to: self.contact.obj,
+                                                                     isEncrypted: isEncrypted,
+                                                                     isUpload: isUpload,
+                                                                     andMessageId: mlMessage.messageId)
+                                            MLNotificationQueue.current().post(
+                                                name: Notification.Name(kMLMessageSentToContact),
+                                                object: self.account,
+                                                userInfo: ["contact": self.contact.obj]
+                                            )
+                                        }
                                     }
-                                }
-                            ),
-                            .cancel(
-                                Text("Cancel"),
-                                action: { }
-                            )
-                        ]
-                    )
+                                ),
+                                .cancel(
+                                    Text("Cancel"),
+                                    action: { }
+                                )
+                            ]
+                        )
+                    }
             }
         }
         /*

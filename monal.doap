@@ -539,7 +539,9 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0386.html" />
-        <xmpp:status>planned</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:version>1.0.1</xmpp:version>
+        <xmpp:since>7.0</xmpp:since>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -608,6 +610,14 @@
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0420.html" />
         <xmpp:status>planned</xmpp:status>
+      </xmpp:SupportedXep>
+    </implements>
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0421.html" />
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:version>1.0.1</xmpp:version>
+        <xmpp:since>6.4.1</xmpp:since>
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -703,7 +713,9 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0484.html" />
-        <xmpp:status>planned</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:version>0.2.0</xmpp:version>
+        <xmpp:since>7.0</xmpp:since>
       </xmpp:SupportedXep>
     </implements>
     <implements>

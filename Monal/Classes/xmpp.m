@@ -86,8 +86,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
     NSMutableArray* _outputQueue;
     dispatch_queue_t _xmlParserFeedingQueue;
     // buffer for stanzas we can not (completely) write to the tcp socket
-    uint8_t* _outputBuffer;
-    size_t _outputBufferByteCount;
     BOOL _streamHasSpace;
 
     //parser and queue related stuff
@@ -315,10 +313,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
     _sendQueue.qualityOfService = NSQualityOfServiceUserInitiated;
     _sendQueue.maxConcurrentOperationCount = 1;
     [_sendQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
-    if(_outputBuffer)
-        free(_outputBuffer);
-    _outputBuffer = nil;
-    _outputBufferByteCount = 0;
     
     _isCSIActive = YES;         //default value is yes if no csi state was set yet
     if([HelperTools isAppExtension])
@@ -339,9 +333,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
 -(void) dealloc
 {
     DDLogInfo(@"Deallocating account %@ object %@", self.accountID, self);
-    if(_outputBuffer)
-        free(_outputBuffer);
-    _outputBuffer = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_parseQueue removeObserver:self forKeyPath:@"operationCount"];
     [_receiveQueue removeObserver:self forKeyPath:@"operationCount"];
@@ -566,10 +557,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
         DDLogVerbose(@"Cleaning up sendQueue [internal]");
         [self->_sendQueue cancelAllOperations];
         self->_outputQueue = [NSMutableArray new];
-        if(self->_outputBuffer)
-            free(self->_outputBuffer);
-        self->_outputBuffer = nil;
-        self->_outputBufferByteCount = 0;
         self->_streamHasSpace = NO;
         DDLogVerbose(@"Cleanup of sendQueue finished [internal]");
     }]] waitUntilFinished:YES];
@@ -5505,90 +5492,17 @@ static NSRegularExpression* fastTokenRemovalRegex;
     if(!_oStream)
     {
         DDLogVerbose(@"no stream to write. returning.");
-        return NO;		//no stream to write --> stanza has to remain in _outputQueue and get dropped later on
+        return NO;		//no stream to write --> stanza has to remain in _outputQueue and possibly get dropped later on
     }
-
-    //try to send remaining buffered data first
-    if(_outputBufferByteCount > 0)
-    {
-        DDLogVerbose(@"sending remaining bytes in outputBuffer: %lu", (unsigned long)_outputBufferByteCount);
-        NSInteger sentLen = [_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
-        if(sentLen > 0)
-        {
-            if((NSUInteger)sentLen != _outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
-            {
-                DDLogVerbose(@"could not send all bytes in outputBuffer: %lu of %lu sent, %lu remaining", (unsigned long)sentLen, (unsigned long)_outputBufferByteCount, (unsigned long)(_outputBufferByteCount-sentLen));
-                memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteCount-(size_t)sentLen);
-                _outputBufferByteCount-=sentLen;
-                _streamHasSpace=NO;
-                return NO;		//stanza has to remain in _outputQueue
-            }
-            else
-            {
-                DDLogVerbose(@"managed to send whole outputBuffer: %lu bytes", (unsigned long)sentLen);
-                //dealloc empty buffer
-                free(_outputBuffer);
-                _outputBuffer=nil;
-                _outputBufferByteCount=0;		//everything sent
-            }
-        }
-        else
-        {
-            NSError* error = [_oStream streamError];
-            DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
-            //reconnect from third party queue to not block send queue
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-                [self reconnect];
-            });
-            return NO;
-        }
-    }
-
-    //then try to send the stanza in question and buffer half sent data
-    if(!messageOut)
+    if(!messageOut || messageOut.length == 0)
     {
         DDLogInfo(@"tried to send empty message. returning without doing anything.");
         return YES;     //pretend we sent the empty "data"
     }
-    const uint8_t* rawstring = (const uint8_t *)[messageOut UTF8String];
-    NSInteger rawstringLen = strlen((char*)rawstring);
-    if(rawstringLen <= 0)
-        return YES;     //pretend we sent the empty "data"
-    NSInteger sentLen = [_oStream write:rawstring maxLength:rawstringLen];
-    if(sentLen!=-1)
-    {
-        if(sentLen!=rawstringLen)
-        {
-            DDLogVerbose(@"could not send all bytes of outgoing stanza: %lu of %lu sent, %lu remaining", (unsigned long)sentLen, (unsigned long)rawstringLen, (unsigned long)(rawstringLen-sentLen));
-            //allocate new _outputBuffer
-            _outputBuffer=malloc(sizeof(uint8_t) * (rawstringLen-sentLen));
-            if(_outputBuffer == NULL)
-            {
-                [NSException raise:@"NSInternalInconsistencyException" format:@"failed malloc" arguments:nil];
-                return NO;      //since the stanza was partially written, neither YES nor NO as return value will result in a consistent state
-            }
-            //copy the remaining data into the buffer and set the buffer pointer accordingly
-            memcpy(_outputBuffer, rawstring+(size_t)sentLen, (size_t)(rawstringLen-sentLen));
-            _outputBufferByteCount=(size_t)(rawstringLen-sentLen);
-            _streamHasSpace=NO;
-        }
-        else
-        {
-            DDLogVerbose(@"managed to send whole outgoing stanza: %lu bytes", (unsigned long)sentLen);
-            _outputBufferByteCount=0;
-        }
-        return YES;
-    }
-    else
-    {
-        NSError* error = [_oStream streamError];
-        DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
-        //reconnect from third party queue to not block send queue
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-            [self reconnect];
-        });
-        return NO;
-    }
+    
+    //we have to use strlen to count bytes instead of utf8 codepoints
+    [_oStream write:(void*)messageOut.UTF8String maxLength:strlen((void*)messageOut.UTF8String)];
+    return YES;         //write complete --> stanza has to be removed from _outputQueue
 }
 
 #pragma mark misc

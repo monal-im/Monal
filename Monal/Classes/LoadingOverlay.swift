@@ -69,6 +69,9 @@ func showPromisingLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayStat
 func showPromisingLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") -> Guarantee<Void> {
     return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description))
 }
+func showPromisingLoadingOverlay(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "") -> Guarantee<Void> {
+    return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description))
+}
 
 func showPromisingLoadingOverlay<T1:View, T2:View, U: Thenable>(_ overlay: LoadingOverlayState, headlineView headline: T1, descriptionView description: T2, firstlyClosure: @escaping () -> U) -> Promise<U.T> {
     return Promise { seal in
@@ -98,8 +101,14 @@ func showPromisingLoadingOverlay<T1:View, T2:View, U: PMKFinalizer>(_ overlay: L
 func showPromisingLoadingOverlay<T:StringProtocol, U: Thenable>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) -> Promise<U.T> {
     return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
 }
+func showPromisingLoadingOverlay<U: Thenable>(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "", firstlyClosure: @escaping () -> U) -> Promise<U.T> {
+    return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
+}
 
 func showPromisingLoadingOverlay<T:StringProtocol, U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) -> Guarantee<Void> {
+    return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
+}
+func showPromisingLoadingOverlay<U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "", firstlyClosure: @escaping () -> U) -> Guarantee<Void> {
     return showPromisingLoadingOverlay(overlay, headlineView:Text(headline), descriptionView:Text(description), firstlyClosure:firstlyClosure)
 }
 
@@ -108,6 +117,9 @@ func showLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayState, headli
 }
 
 func showLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") {
+    let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description)
+}
+func showLoadingOverlay(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "") {
     let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description)
 }
 
@@ -122,8 +134,14 @@ func showLoadingOverlay<T1:View, T2:View, U: PMKFinalizer>(_ overlay: LoadingOve
 func showLoadingOverlay<T:StringProtocol, U: Thenable>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) {
     let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
 }
+func showLoadingOverlay<U: Thenable>(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "", firstlyClosure: @escaping () -> U) {
+    let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
+}
 
 func showLoadingOverlay<T:StringProtocol, U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: T, description: T = "", firstlyClosure: @escaping () -> U) {
+    let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
+}
+func showLoadingOverlay<U: PMKFinalizer>(_ overlay: LoadingOverlayState, headline: LocalizedStringKey, description: LocalizedStringKey = "", firstlyClosure: @escaping () -> U) {
     let _ = showPromisingLoadingOverlay(overlay, headline:headline, description:description, firstlyClosure:firstlyClosure)
 }
 

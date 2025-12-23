@@ -260,6 +260,15 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.buddyName onAccount:message.accountId];
     if(!muted && message.isMuc == YES && [[DataLayer sharedInstance] isMucAlertOnMentionOnly:message.buddyName onAccount:message.accountId])
     {
+        //check for high mention count and then ignore mentions altogether
+        NSSet* words = [NSSet setWithArray:[message.messageText componentsSeparatedByString:@" "]];
+        NSMutableSet* participants = [NSMutableSet new];
+        for(NSDictionary* entry in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountID:message.accountID])
+            [participants addObject:nilWrapper(entry[@"room_nick"])];       //nil wrapper just to make sure, should never intersect with words
+        [participants intersectSet:words];
+        if([participants count] > 5)
+            muted = YES;
+        
         NSString* displayName = [MLContact ownDisplayNameForAccount:xmppAccount];
         NSString* ownJid = xmppAccount.connectionProperties.identity.jid;
         NSString* userPart = [HelperTools splitJid:ownJid][@"user"];

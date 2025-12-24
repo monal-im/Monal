@@ -124,73 +124,79 @@ struct UDPConfigView: View {
 }
 
 struct CrashTestingView: View {
-    @ObservedObject var defaultDB = DebugDefaultDB()
-    
     var body: some View {
-            VStack(alignment:.leading, spacing: 25) {
-                Section(header: Text("Some debug settings:")) {
-                    Toggle(isOn: $defaultDB.hasCompletedOnboarding) {
-                        Text("Don't show onboarding")
-                    }
-                    
-                    Toggle(isOn: $defaultDB.showNewChatView) {
-                        Text("Show new SwiftUI ChatView")
-                    }
-                    
-                    Toggle(isOn: $defaultDB.debugDtmfSending) {
-                        Text("Automatically play DTMF tones in all calls")
-                    }
-                    
-                    Toggle(isOn: $defaultDB.debugNSNotifications) {
-                        Text("Log *all* NSNotifications")
-                    }
-
-                    Button("Reset the state of all accounts") {
-                        MLXMPPManager.sharedInstance().resetAllAccountStates()
-                    }
-                    
-                    Button("Change app icon to christmas") {
-                        UIApplication.shared.setAlternateIconName("AlphaAppIcon-Christmas")
-                    }
-                    
-                    Button("Change app icon to default") {
-                        UIApplication.shared.setAlternateIconName(nil)
-                    }
+        VStack(alignment: .leading) {
+            Text("The following buttons allow you to forcefully crash the app using several different methods to test the crash handling.")
+            List {
+                Button("Try to call unknown handler method") {
+                    DispatchQueue.global(qos: .default).async(execute: {
+                        let handler = MLHandler(delegate: self, handlerName: "IDontKnowThis", andBoundArguments: [:])
+                        handler.call(withArguments: nil)
+                    })
                 }
-                
-                Text("The following buttons allow you to forcefully crash the app using several different methods to test the crash handling.")
-                
-                Group {
-                    Button("Try to call unknown handler method") {
-                        DispatchQueue.global(qos: .default).async(execute: {
-                            let handler = MLHandler(delegate: self, handlerName: "IDontKnowThis", andBoundArguments: [:])
-                            handler.call(withArguments: nil)
-                        })
-                    }
-                    Button("Bad Access Crash") {
-                        let delegate: AnyClass? = NSClassFromString("MonalAppDelegate")
-                        print(delegate.unsafelyUnwrapped.audiovisualTypes())
-                        
-                    }
-                    Button("MLAssert Crash") {
-                        HelperTools.flushLogs(withTimeout: 0.100)
-                        MLAssert(false, "MLAssert_example")
-                    }
-                    Button("Assertion Crash") {
-                        assert(false)
-                    }
-                    Button("Fatal Error Crash") {
-                        fatalError("fatalError_example")
-                    }
-                    Button("Nil Crash") {
-                        let crasher:Int? = nil
-                        print(crasher!)
-                    }
-                }.foregroundColor(.red)
-                Spacer()
+                Button("Bad Access Crash") {
+                    let delegate: AnyClass? = NSClassFromString("MonalAppDelegate")
+                    print(delegate.unsafelyUnwrapped.audiovisualTypes())
+                }
+                Button("MLAssert Crash") {
+                    HelperTools.flushLogs(withTimeout: 0.100)
+                    MLAssert(false, "MLAssert_example")
+                }
+                Button("Assertion Crash") {
+                    assert(false)
+                }
+                Button("Fatal Error Crash") {
+                    fatalError("fatalError_example")
+                }
+                Button("Nil Crash") {
+                    let crasher:Int? = nil
+                    print(crasher!)
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(.interpolatedWindowBackground)
+            .foregroundColor(.red)
+            .listStyle(.grouped)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.interpolatedWindowBackground)
+    }
+}
+
+struct ExtraSettingsView: View {
+    @ObservedObject var defaultDB = DebugDefaultDB()
+
+    var body: some View {
+        List {
+            Section(header: Text("Some debug settings:")) {
+                Toggle(isOn: $defaultDB.hasCompletedOnboarding) {
+                    Text("Don't show onboarding")
+                }
+
+                Toggle(isOn: $defaultDB.showNewChatView) {
+                    Text("Show new SwiftUI ChatView")
+                }
+
+                Toggle(isOn: $defaultDB.debugDtmfSending) {
+                    Text("Automatically play DTMF tones in all calls")
+                }
+
+                Toggle(isOn: $defaultDB.debugNSNotifications) {
+                    Text("Log *all* NSNotifications")
+                }
+
+                Button("Reset the state of all accounts") {
+                    MLXMPPManager.sharedInstance().resetAllAccountStates()
+                }
+
+                Button("Change app icon to christmas") {
+                    UIApplication.shared.setAlternateIconName("AlphaAppIcon-Christmas")
+                }
+
+                Button("Change app icon to default") {
+                    UIApplication.shared.setAlternateIconName(nil)
+                }
+            }
+        }
+        .listStyle(.grouped)
     }
 }
 
@@ -213,6 +219,11 @@ struct DebugView: View {
                 .tabItem {
                     Image(systemName: "bolt.fill")
                     Text("Crash Testing")
+                }
+            ExtraSettingsView()
+                .tabItem {
+                    Image(systemName: "gearshape")
+                    Text("Extra Settings")
                 }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

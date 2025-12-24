@@ -212,6 +212,9 @@ struct ContactDetails: View {
                     if !contact.isMuc, let statusMessage = contact.statusMessage as String?, statusMessage.count > 0 {
                         VStack {
                             Text("Status message:")
+                                .underline()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
                             Text(contact.statusMessage as String)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -258,7 +261,8 @@ struct ContactDetails: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
                             
-                            Text(contact.groupSubject as String)
+                            
+                            LinkedText(contact.groupSubject)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }

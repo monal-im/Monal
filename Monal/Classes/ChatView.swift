@@ -84,6 +84,7 @@ extension MonalView {
 struct ChatView: View {
     @Environment(\.presentationMode) private var presentationMode
     
+    @StateObject var voipProcessor: ObservableKVOWrapper<MLVoIPProcessor>
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     @State private var selectedContactForContactDetails: ObservableKVOWrapper<MLContact>?
     @State private var alertPrompt: AlertPrompt?
@@ -99,7 +100,8 @@ struct ChatView: View {
     @State private var messageInsertionTimer: Timer?
     
     init(contact: ObservableKVOWrapper<MLContact>) {
-        _contact = StateObject(wrappedValue: contact)
+        _contact = StateObject(wrappedValue:contact)
+        _voipProcessor = StateObject(wrappedValue:ObservableKVOWrapper((UIApplication.shared.delegate as! MonalAppDelegate).voipProcessor!))
         account = contact.obj.account!
     }
 
@@ -632,33 +634,30 @@ struct ChatView: View {
                     .opacity(isLoadingMamHistory || isUploadingFile ? 1 : 0)
 
                 if !(contact.isMuc || contact.isSelf) {
-                    let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
-                    let voipProcessor = (UIApplication.shared.delegate as! MonalAppDelegate).voipProcessor!
                     Button {
-                        if voipProcessor.getActiveCall(with:contact.obj) != nil {
-                            if !DataLayer.sharedInstance().checkCap("urn:xmpp:jingle-message:0", forUser:contact.contactJid, onAccountID:contact.accountID) {
-                                confirmationPrompt = ConfirmationPrompt(
-                                    title: Text("Missing Call Support"),
-                                    message: Text("Your contact may not support calls. Your call might never reach its destination."),
-                                    buttons: [
-                                        .default(
-                                            Text("Try nevertheless"),
-                                            action: {
-                                                activeChats.call(contact.obj, withUIKitSender:nil)
-                                            }
-                                        ),
-                                        .cancel(
-                                            Text("Cancel"),
-                                            action: { }
-                                        )
-                                    ]
-                                )
-                            }
+                        let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
+                        if voipProcessor.obj.getActiveCall(with:contact.obj) == nil && !DataLayer.sharedInstance().checkCap("urn:xmpp:jingle-message:0", forUser:contact.contactJid, onAccountID:contact.accountID) {
+                            confirmationPrompt = ConfirmationPrompt(
+                                title: Text("Missing Call Support"),
+                                message: Text("Your contact may not support calls. Your call might never reach its destination."),
+                                buttons: [
+                                    .default(
+                                        Text("Try nevertheless"),
+                                        action: {
+                                            activeChats.call(contact.obj, withUIKitSender:nil)
+                                        }
+                                    ),
+                                    .cancel(
+                                        Text("Cancel"),
+                                        action: { }
+                                    )
+                                ]
+                            )
                         } else {
-                                activeChats.call(contact.obj, withUIKitSender:nil)
+                            activeChats.call(contact.obj, withUIKitSender:nil)
                         }
                     } label: {
-                        if voipProcessor.getActiveCall(with:contact.obj) != nil {
+                        if (voipProcessor.activeCalls as [MLCall]).contains { $0.isEqual(to:contact.obj) } {
                             Image(systemName: "phone.connection.fill")
                         } else {
                             Image(systemName: "phone.fill")

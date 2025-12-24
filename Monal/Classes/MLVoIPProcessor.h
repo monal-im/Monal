@@ -21,7 +21,7 @@ typedef NS_ENUM(NSUInteger, MLCallType);
 -(MLCall*) initiateCallWithType:(MLCallType) callType toContact:(MLContact*) contact;
 
 @property (nonatomic, readonly) NSUInteger pendingCallsCount;
--(NSDictionary<NSString*, MLCall*>*) getActiveCalls;
+@property (nonatomic, readonly) NSArray<MLCall*>* activeCalls;
 -(MLCall* _Nullable) getActiveCallWithContact:(MLContact*) contact;
 
 -(void) voipRegistration;

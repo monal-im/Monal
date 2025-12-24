@@ -110,18 +110,24 @@ static NSMutableDictionary* _pendingCalls;
 -(void) addCall:(MLCall*) call
 {
     DDLogInfo(@"Adding call to list: %@", call);
+    [self willChangeValueForKey:@"activeCalls"];
     @synchronized(_pendingCalls) {
         _pendingCalls[call.uuid] = call;
     }
+    [self didChangeValueForKey:@"activeCalls"];
+    //TODO: remove once chatviewcontroller gets removed
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalCallAdded object:call userInfo:@{@"uuid": call.uuid}];
 }
 
 -(void) removeCall:(MLCall*) call
 {
     DDLogInfo(@"Removing call from list: %@", call);
+    [self willChangeValueForKey:@"activeCalls"];
     @synchronized(_pendingCalls) {
         [_pendingCalls removeObjectForKey:call.uuid];
     }
+    [self didChangeValueForKey:@"activeCalls"];
+    //TODO: remove once chatviewcontroller gets removed
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalCallRemoved object:call userInfo:@{@"uuid": call.uuid}];
 }
 
@@ -130,10 +136,10 @@ static NSMutableDictionary* _pendingCalls;
     return _pendingCalls.count;
 }
 
--(NSDictionary<NSString*, MLCall*>*) getActiveCalls
+-(NSArray<MLCall*>*) activeCalls
 {
     @synchronized(_pendingCalls) {
-        return [_pendingCalls copy];
+        return [_pendingCalls allValues];
     }
 }
 

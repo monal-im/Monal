@@ -973,10 +973,10 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             [[MLXMPPManager sharedInstance] nowForegrounded];           //NOTE: this will unfreeze all queues in our accounts
             
             //open call ui using first call if at least one call is present
-            NSDictionary* activeCalls = [self.voipProcessor getActiveCalls];
-            for(NSUUID* uuid in activeCalls)
+            NSArray<MLCall*>* activeCalls = self.voipProcessor.activeCalls;
+            for(MLCall* call in activeCalls)
             {
-                [self.activeChats presentCall:activeCalls[uuid]];
+                [self.activeChats presentCall:call];
                 break;
             }
             

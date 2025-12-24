@@ -43,8 +43,8 @@ struct ContactDetails: View {
             self.ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? "none"
             self.ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:contact.obj) ?? "none"
         } else {
-            self.ownRole = "participant"
-            self.ownAffiliation = "none"
+            self.ownRole = kMucRoleNone
+            self.ownAffiliation = kMucAffiliationNone
         }
     }
     
@@ -226,26 +226,36 @@ struct ContactDetails: View {
                                     if contact.obj.mucType == "group" {
                                         HStack {
                                             Text("Group subject:")
+                                                .underline()
                                             Spacer().frame(width:8)
                                             Image(systemName: "pencil")
                                                 .foregroundColor(.primary)
                                                 .accessibilityHidden(true)
                                         }
                                         .accessibilityHint("Edit Group Subject")
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                     } else {
                                         HStack {
                                             Text("Channel subject:")
+                                                .underline()
                                             Spacer().frame(width:8)
                                             Image(systemName: "pencil")
                                                 .foregroundColor(.primary)
                                                 .accessibilityHidden(true)
                                         }
                                         .accessibilityHint("Edit Channel Subject")
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                     }
                                 }
                                 .buttonStyle(.borderless)
-                            } else {
+                            } else if contact.obj.mucType == kMucTypeGroup {
                                 Text("Group subject:")
+                                    .underline()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            } else {
+                                Text("Channel subject:")
+                                    .underline()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                             }
                             
                             Text(contact.groupSubject as String)
@@ -257,7 +267,25 @@ struct ContactDetails: View {
                 .padding([.top, .bottom])
                 .frame(maxWidth: .infinity)
             }
-                
+            
+            if ownRole == kMucRoleVisitor {
+                Section {
+                    Text("You currently aren't allowed to write messages in this Channel.")
+                    Button {
+                        showPromisingLoadingOverlay(overlay, headlineView:Text("Requesting Voice"), descriptionView:text("")) {
+                            Guarantee { $0(account.mucProcessor.requestVoice(inMuc:contact.obj.contactJid)) }
+                        }
+                    } label: {
+                        Label {
+                            Text("Request Voice")
+                        } icon: {
+                            Image(systemName: "checkmark.bubble")
+                        }
+                        .foregroundStyle(Color.green)
+                    }
+                }
+            }
+            
             // info/nondestructive buttons
             Section {
                 if !contact.isSelfChat {

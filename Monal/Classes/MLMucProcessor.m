@@ -1276,6 +1276,16 @@ $$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmp
     [self callSuccessUIHandlerForMuc:iqNode.fromUser];
 $$
 
+-(void) requestVoiceInMuc:(NSString*) roomJid
+{
+    DDLogInfo(@"Requesting voice in '%@'...", roomJid);
+    XMPPMessage* msg = [[XMPPMessage alloc] initWithType:kMessageNormalType to:roomJid];
+    [msg addChildNode:[[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/muc#request" andDictionary:@{
+        @"muc#role": @"participant",
+    }]];
+    [_account send:msg];
+}
+
 -(void) changeNameOfMuc:(NSString*) room to:(NSString*) name
 {
     [self incrementNameChange:room];

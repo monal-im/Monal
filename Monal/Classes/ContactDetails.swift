@@ -50,7 +50,7 @@ struct ContactDetails: View {
             self.ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? kMucRoleNone
             self.ownAffiliation = DataLayer.sharedInstance().getOwnAffiliation(inGroupOrChannel:contact.obj) ?? kMucAffiliationNone
         } else {
-            self.ownRole = kMucRoleParticipant
+            self.ownRole = kMucRoleNone
             self.ownAffiliation = kMucAffiliationNone
         }
     }
@@ -260,6 +260,15 @@ struct ContactDetails: View {
             
             // info/nondestructive buttons
             Section {
+                if ownRole == kMucRoleVisitor {
+                    Button("Request Voice") {
+                        showPromisingLoadingOverlay(overlay, headline:"Requesting Voice") {
+                            Guarantee { $0(account.mucProcessor.requestVoice(inMuc:contact.obj.contactJid)) }
+                        }
+                    }
+                    .foregroundStyle(Color.green)
+                }
+                
                 if !contact.isSelf {
                     Button {
                         if contact.isMuc {

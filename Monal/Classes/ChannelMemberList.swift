@@ -14,6 +14,7 @@ struct ChannelMemberList: View {
     @State private var ownRole: String;
     @StateObject var channel: ObservableKVOWrapper<MLContact>
     @State private var participants: OrderedDictionary<String, [String:String]>
+    @StateObject private var overlay = LoadingOverlayState()
 
     init(mucContact: ObservableKVOWrapper<MLContact>) {
         account = mucContact.obj.account! as xmpp
@@ -50,6 +51,18 @@ struct ChannelMemberList: View {
     
 
     var body: some View {
+        if ownRole == kMucRoleVisitor {
+            HStack {
+                Spacer().frame(width:20)
+                Button("Request Voice") {
+                    showPromisingLoadingOverlay(overlay, headline:"Requesting Voice") {
+                        Guarantee { $0(account.mucProcessor.requestVoice(inMuc:channel.contactJid)) }
+                    }
+                }
+                .foregroundStyle(Color.green)
+                Spacer()
+            }
+        }
         List {
             Section(header: Text("\(self.channel.contactDisplayName as String) (affiliation: \(mucAffiliationToString(ownAffiliation, ownRole)))")) {
                 ForEach(participants.keys, id: \.self) { participant_key in
@@ -63,6 +76,7 @@ struct ChannelMemberList: View {
                 }
             }
         }
+        .addLoadingOverlay(overlay)
         .navigationBarTitle(Text("Channel Participants"), displayMode: .inline)
         .onAppear {
             updateParticipantList()

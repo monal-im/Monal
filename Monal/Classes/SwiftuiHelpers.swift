@@ -563,6 +563,46 @@ struct LinkedText: View {
     }
 }
 
+//see https://sarunw.com/posts/sfsafariviewcontroller-in-swiftui/
+struct SFSafariView: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: UIViewControllerRepresentableContext<Self>) -> SFSafariViewController {
+        return SFSafariViewController(url: url)
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: UIViewControllerRepresentableContext<Self>) {
+        
+    }
+}
+
+//see https://www.avanderlee.com/swiftui/sfsafariviewcontroller-open-webpages-in-app/
+struct ExternalLinkViewModifier: ViewModifier {
+    @State private var urlToOpen: URL?
+
+    func body(content: Content) -> some View {
+        content
+            .environment(\.openURL, OpenURLAction { url in
+                urlToOpen = url
+                if HelperTools.defaultsDB().bool(forKey:"useInlineSafari") {
+                    return .handled
+                } else {
+                    return .systemAction
+                }
+            })
+            .sheet(isPresented: $urlToOpen.optionalMappedToBool(), onDismiss: {
+                urlToOpen = nil
+            }, content: {
+                SFSafariView(url: urlToOpen!)
+            })
+    }
+}
+extension View {
+    func canContainExternalLinks() -> some View {
+        modifier(ExternalLinkViewModifier())
+    }
+}
+
 // //see https://stackoverflow.com/a/68291983
 // struct OverflowContentViewModifier: ViewModifier {
 //     @State private var contentOverflow: Bool = false

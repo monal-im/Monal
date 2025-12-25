@@ -9,6 +9,9 @@
 class ContactDetailsDefaultsDB: ObservableObject {
     @defaultsDB("showAdvancedUI")
     var showAdvancedUI: Bool
+    
+    @defaultsDB("useInlineSafari")
+    var useInlineSafari: Bool
 }
 
 struct ContactDetails: View {
@@ -263,6 +266,7 @@ struct ContactDetails: View {
                             
                             
                             LinkedText(contact.groupSubject)
+                                .canContainExternalLinks()
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }

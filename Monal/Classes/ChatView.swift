@@ -1009,5 +1009,6 @@ struct MessageView: View {
             messageLinkPreviewLimit: 8,
             font: UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
         )
+        .canContainExternalLinks()
     }
 }

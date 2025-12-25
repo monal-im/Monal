@@ -263,7 +263,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         //check for high mention count and then ignore mentions altogether
         NSSet* words = [NSSet setWithArray:[message.messageText componentsSeparatedByString:@" "]];
         NSMutableSet* participants = [NSMutableSet new];
-        for(NSDictionary* entry in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountID:message.accountID])
+        for(NSDictionary* entry in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountId:message.accountId])
             [participants addObject:nilWrapper(entry[@"room_nick"])];       //nil wrapper just to make sure, should never intersect with words
         [participants intersectSet:words];
         if([participants count] > 5)

@@ -142,15 +142,9 @@ struct MemberList: View {
             }
         }
         //fallback (should hopefully never be needed)
-<<<<<<< HEAD
-        DDLogWarn("Fallback for group/channel \(String(describing:self.muc.contactJid as String)): affiliation=\(String(describing:affiliations[contact])), online=\(String(describing:online[contact]))")
-        if self.muc.mucType == "group" {
-            return [/*"profile",*/ "reinvite"]
-=======
         DDLogWarn("Fallback for group/channel \(String(describing:self.muc.contactJid as String)): affiliation=\(String(describing:affiliations[contact])), role=\(String(describing:roles[contact])), online=\(String(describing:online[contact]))")
         if self.muc.mucType == kMucTypeGroup {
             return [/*kMucActionShowProfile,*/ kMucActionReinvite]
->>>>>>> 9c2457109 (Properly display visitor role in channels)
         } else {
             return [/*"profile",*/ "reinvite", "none"]
         }
@@ -265,7 +259,7 @@ struct MemberList: View {
                     if !contact.isSelfChat {
                         HStack {
                             HStack {
-                                ContactEntry(contact:contact.obj, fallback:nicknames[contact]) {
+                                ContactEntry(contact:contact, fallback:nicknames[contact]) {
                                     Text("Affiliation: \(mucAffiliationToString(affiliations[contact], roles[contact]))\(!(online[contact] ?? false) ? Text(" (offline)") : Text(""))")
                                         //.foregroundColor(Color(UIColor.secondaryLabel))
                                         .font(.footnote)
@@ -291,21 +285,6 @@ struct MemberList: View {
                             } else {
                                 view
                             }
-                        }
-                        .swipeActions(allowsFullSwipe: false) {
-                            Button("Delete") {
-                                showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[contact], roles[contact]))?"), description: self.muc.mucType == kMucTypeGroup ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
-                                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[contact], roles[contact]))"), descriptionView: Text("Removing \(contact.contactJid as String)...")) {
-                                        promisifyAction {
-                                            account.mucProcessor.setAffiliation(kMucAffiliationNone, ofUser: contact.contactJid, inMuc: self.muc.contactJid)
-                                        }
-                                    }.catch { error in
-                                        showAlert(title:Text("Error removing user!"), description:Text("\(String(describing:error))"))
-                                    }
-                                }
-                            }
-                            .tint(.red)
-                            .disabled(!isDeletable)
                         }
                     }
                 }

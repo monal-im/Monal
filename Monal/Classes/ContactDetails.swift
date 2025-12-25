@@ -272,7 +272,7 @@ struct ContactDetails: View {
                 Section {
                     Text("You currently aren't allowed to write messages in this Channel.")
                     Button {
-                        showPromisingLoadingOverlay(overlay, headlineView:Text("Requesting Voice"), descriptionView:text("")) {
+                        let _ = showPromisingLoadingOverlay(overlay, headlineView:Text("Requesting Voice"), descriptionView:Text("")) {
                             Guarantee { $0(account.mucProcessor.requestVoice(inMuc:contact.obj.contactJid)) }
                         }
                     } label: {
@@ -281,7 +281,7 @@ struct ContactDetails: View {
                         } icon: {
                             Image(systemName: "checkmark.bubble")
                         }
-                        .foregroundStyle(Color.green)
+                        .foregroundColor(Color.green)
                     }
                 }
             }

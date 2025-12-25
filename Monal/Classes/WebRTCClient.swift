@@ -223,7 +223,7 @@ final class WebRTCClient: NSObject {
         let codecs = capabilities.codecs
         let preferredCodecs = codecs.filter { $0.name=="VP8" }
         do {
-            try videoTransceiver.setCodecPreferences(preferredCodecs)
+            try videoTransceiver.setCodecPreferences(preferredCodecs, error: ())
         } catch {
             DDLogError("Error setting codec preferences: \(String(describing:error))")
         }

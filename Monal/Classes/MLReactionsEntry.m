@@ -59,6 +59,11 @@
     return [MLMessage createMessageFromHistoryID:self.historyId];
 }
 
++(NSSet*) keyPathsForValuesAffectingMessage
+{
+    return [NSSet setWithObjects:@"historyId", nil];
+}
+
 -(BOOL) isEqualToMessage:(MLMessage*) message
 {
     return [self.message isEqual:message];

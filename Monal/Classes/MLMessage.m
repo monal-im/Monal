@@ -273,14 +273,29 @@ static NSMutableDictionary* _singletonCache;
         return [MLContact createContactFromJid:self.buddyName andAccountID:self.accountID].contactDisplayName;
 }
 
++(NSSet*) keyPathsForValuesAffectingContactDisplayName
+{
+    return [NSSet setWithObjects:@"isMuc", @"mucType", @"participantJid", @"accountID", @"actualFrom", @"buddyName", nil];
+}
+
 -(MLFiletransferInfo*) fileInfo
 {
     return [MLFiletransferInfo createFiletransferInfoForMessage:self];
 }
 
++(NSSet*) keyPathsForValuesAffectingFileInfo
+{
+    return [NSSet setWithObjects:@"messageDBId", nil];
+}
+
 -(xmpp* _Nullable) account
 {
     return [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
+}
+
++(NSSet*) keyPathsForValuesAffectingAccount
+{
+    return [NSSet setWithObjects:@"accountID", nil];
 }
 
 -(id<MLContactProtocol>) contact
@@ -308,9 +323,19 @@ static NSMutableDictionary* _singletonCache;
     }
 }
 
++(NSSet*) keyPathsForValuesAffectingContact
+{
+    return [NSSet setWithObjects:@"isMuc", @"occupantId", @"actualFrom", @"buddyName", @"accountID", @"participantJid", @"account", nil];
+}
+
 -(MLContact*) chatContact
 {
     return [MLContact createContactFromJid:self.buddyName andAccountID:self.accountID];
+}
+
++(NSSet*) keyPathsForValuesAffectingChatContact
+{
+    return [NSSet setWithObjects:@"buddyName", @"accountID", nil];
 }
 
 -(BOOL) isEqualToContact:(id<MLContactProtocol>) contact

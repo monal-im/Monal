@@ -107,9 +107,19 @@ static NSMutableDictionary* _singletonCache;
     return self.nick;
 }
 
++(NSSet*) keyPathsForValuesAffectingContactDisplayName
+{
+    return [NSSet setWithObjects:@"nick", nil];
+}
+
 -(BOOL) isSelf
 {
     return [self.occupantId isEqualToString:self->_ownOccupantId];
+}
+
++(NSSet*) keyPathsForValuesAffectingIsSelf
+{
+    return [NSSet setWithObjects:@"occupantId", nil];
 }
 
 -(xmpp* _Nullable) account
@@ -117,10 +127,10 @@ static NSMutableDictionary* _singletonCache;
     return [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.mucContact.accountID];
 }
 
-// +(NSSet*) keyPathsForValuesAffectingContactDisplayName
-// {
-//     return [NSSet setWithObjects:@"nickName", @"fullName", @"contactJid", nil];
-// }
++(NSSet*) keyPathsForValuesAffectingAccount
+{
+    return [NSSet setWithObjects:@"mucContact.accountID", nil];
+}
 
 -(UIImage*) avatar
 {
@@ -132,6 +142,11 @@ static NSMutableDictionary* _singletonCache;
 //     self.avatar = [[MLImageManager sharedInstance] getIconForContact:self];
 //     return _avatar;
 }
+
+// +(NSSet*) keyPathsForValuesAffectingAvatar
+// {
+//     return [NSSet setWithObjects:@"", nil];
+// }
 
 -(void) setAvatar:(UIImage*) avatar
 {
@@ -146,6 +161,11 @@ static NSMutableDictionary* _singletonCache;
     return NO;
 //     return [[MLImageManager sharedInstance] hasIconForContact:self];
 }
+
+// +(NSSet*) keyPathsForValuesAffectingHasAvatar
+// {
+//     return [NSSet setWithObjects:@"", nil];
+// }
 
 -(BOOL) isEqualToMessage:(MLMessage*) message
 {

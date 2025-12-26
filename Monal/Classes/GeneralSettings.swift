@@ -127,6 +127,9 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     
     @defaultsDB("preventLeaksBeforeAuth")
     var preventLeaksBeforeAuth: Bool
+    
+    @defaultsDB("showNotificationsForReactions")
+    var showNotificationsForReactions: Bool
 }
 
 
@@ -457,6 +460,11 @@ struct NotificationSettings: View {
                     }
                 }
                 .frame(height: 56, alignment: .trailing)
+                
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.showNotificationsForReactions) {
+                    Text("Show reaction notifications")
+                    Text("Show notifications if users react to your messages.")
+                }
             }
             
             Section(header: Text("Debugging")) {

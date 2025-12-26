@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol MLContactProtocol <NSObject>
 
+@property (nonatomic, readonly) BOOL isMuc;
 @property (nonatomic, readonly) BOOL isSelf;
 @property (nonatomic, readonly) NSString* contactDisplayName;
 @property (nonatomic, readonly) xmpp* _Nullable account;

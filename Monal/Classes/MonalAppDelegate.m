@@ -228,6 +228,12 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         intentIdentifiers:@[]
         options:UNNotificationCategoryOptionNone
     ];
+    UNNotificationCategory* reactionCategory = [UNNotificationCategory
+        categoryWithIdentifier:@"reaction"
+        actions:@[]
+        intentIdentifiers:@[]
+        options:UNNotificationCategoryOptionNone
+    ];
     UNNotificationCategory* subscriptionCategory = [UNNotificationCategory
         categoryWithIdentifier:@"subscription"
         actions:@[approveSubscriptionAction, denySubscriptionAction, blockSubscriptionAction]
@@ -279,7 +285,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             }
         });
     }];
-    [center setNotificationCategories:[NSSet setWithObjects:messageCategory, subscriptionCategory , nil]];
+    [center setNotificationCategories:[NSSet setWithObjects:messageCategory, reactionCategory, subscriptionCategory , nil]];
 
     UINavigationBarAppearance* appearance = [UINavigationBarAppearance new];
     [appearance configureWithTransparentBackground];
@@ -672,13 +678,14 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 -(void) userNotificationCenter:(UNUserNotificationCenter*) center didReceiveNotificationResponse:(UNNotificationResponse*) response withCompletionHandler:(void (^)(void)) completionHandler
 {
-    if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
+    DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
+    if([response.notification.request.content.categoryIdentifier isEqualToString:@"reaction"])
     {
-        DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
-        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountID:response.notification.request.content.userInfo[@"fromContactAccountID"]];
+        MLContact* fromContact = [HelperTools unserializeData:response.notification.request.content.userInfo[@"contact"]];
         MLAssert(fromContact, @"fromContact should not be nil");
-        NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
-        MLAssert(messageId, @"messageId should not be nil");
+        //TODO: use message to scroll to this message when opening chat, see below
+        MLMessage* message = [HelperTools unserializeData:response.notification.request.content.userInfo[@"message"]];
+        MLAssert(message, @"message should not be nil");
         xmpp* account = fromContact.account;
         //this can happen if that account got disabled
         if(account == nil)
@@ -694,6 +701,37 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             completionHandler();
         }];
         
+        //make sure we have an active buddy for this chat
+        [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountID];
+        
+        if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
+        {
+            //TODO: use message to scroll to this message when opening chat
+            [self openChatOfContact:fromContact];
+        }
+        else
+            unreachable(@"Unexpected notification action!");
+    }
+    else if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
+    {
+        MLContact* fromContact = [HelperTools unserializeData:response.notification.request.content.userInfo[@"contact"]];
+        MLAssert(fromContact, @"fromContact should not be nil");
+        MLMessage* message = [HelperTools unserializeData:response.notification.request.content.userInfo[@"message"]];
+        MLAssert(message, @"message should not be nil");
+        xmpp* account = fromContact.account;
+        //this can happen if that account got disabled
+        if(account == nil)
+        {
+            //call completion handler directly (we did not handle anything and no connectIfNecessary was called)
+            if(completionHandler)
+                completionHandler();
+            return;
+        }
+        
+        //add our completion handler to handler queue
+        [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
+            completionHandler();
+        }];
         
         //make sure we have an active buddy for this chat
         [[DataLayer sharedInstance] addActiveBuddies:fromContact.contactJid forAccount:fromContact.accountID];
@@ -710,11 +748,13 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             }
             
             //mark messages as read because we are replying
-            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountID tillStanzaId:messageId wasOutgoing:NO];
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountID tillStanzaId:message.messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
             //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{
+                @"messagesArray": unread
+            }];
             
             //update unread count in active chats list
             [fromContact refresh];      //this will make sure the unread count is correct
@@ -732,7 +772,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         else if([response.actionIdentifier isEqualToString:@"MARK_AS_READ_ACTION"])
         {
             DDLogInfo(@"MARK_AS_READ_ACTION triggered...");
-            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountID tillStanzaId:messageId wasOutgoing:NO];
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:fromContact.contactJid andAccount:fromContact.accountID tillStanzaId:message.messageId wasOutgoing:NO];
             DDLogDebug(@"Marked as read: %@", unread);
             
             //publish MDS display marker and optionally send displayed marker for last unread message (XEP-0333)
@@ -740,7 +780,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             [account sendDisplayMarkerForMessages:unread];
             
             //remove notifications of all read messages (this will cause the MLNotificationManager to update the app badge, too)
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{@"messagesArray":unread}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessagesNotice object:account userInfo:@{
+                @"messagesArray": unread
+            }];
             
             //update unread count in active chats list
             [fromContact refresh];      //this will make sure the unread count is correct
@@ -749,12 +791,16 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             }];
         }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
+        {
+            //TODO: use message to scroll to this message when opening chat
             [self openChatOfContact:fromContact];
+        }
+        else
+            unreachable(@"Unexpected notification action!");
     }
     else if([response.notification.request.content.categoryIdentifier isEqualToString:@"subscription"])
     {
-        DDLogVerbose(@"notification action '%@' triggered for %@", response.actionIdentifier, response.notification.request.content.userInfo);
-        MLContact* fromContact = [MLContact createContactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountID:response.notification.request.content.userInfo[@"fromContactAccountID"]];
+        MLContact* fromContact = [HelperTools unserializeData:response.notification.request.content.userInfo[@"contact"]];
         MLAssert(fromContact, @"fromContact should not be nil");
         xmpp* account = fromContact.account;
         //this can happen if that account got disabled
@@ -790,13 +836,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             [[MLXMPPManager sharedInstance] block:YES contact:fromContact];
         }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-                while(self.activeChats == nil)
-                    usleep(100000);
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [(ActiveChatsViewController*)self.activeChats showAddContact];
-                });
-            });
+            [self openChatOfContact:fromContact];
+        else
+            unreachable(@"Unexpected notification action!");
     }
     else
     {

@@ -130,6 +130,12 @@ static NSMutableDictionary* _singletonCache;
     return [NSSet setWithObjects:@"nick", nil];
 }
 
+//channel contacts are obviously always muc
+-(BOOL) isMuc
+{
+    return YES;
+}
+
 -(BOOL) isSelf
 {
     return [self.occupantId isEqualToString:self->_ownOccupantId];

@@ -19,6 +19,9 @@
 #import <monalxmpp/MLFileTransfer.h>
 #import <monalxmpp/MLMucProcessor.h>
 #import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLContact.h>
+#import <monalxmpp/MLChannelContact.h>
+#import <monalxmpp/MLReactionsEntry.h>
 #import "MonalAppDelegate.h"
 
 @interface MLPubSub ()
@@ -585,13 +588,29 @@ static NSMutableDictionary* _typingNotifications;
                 [[DataLayer sharedInstance] setReactions:reactions fromJid:jidToUse orOccupantId:occupantIdToUse forHistoryId:historyId withDate:reactionDate andActualFrom:(possiblyUnknownContact.isMuc ? actualFromToUse : nil)];
                 
                 DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", historyId);
+                id<MLContactProtocol> reactingContact = nil;
+                if(jidToUse != nil)     //this is a non-anon muc or an 1:1 chat
+                    reactingContact = [MLContact createContactFromJid:jidToUse andAccountID:account.accountID]; 
+                else                    //this is a channel-type muc
+                    reactingContact = [MLChannelContact
+                        createChannelContactFromOccupantId:occupantIdToUse
+                        withNick:nilDefault(actualFromToUse, occupantIdToUse)
+                        inMuc:possiblyUnknownContact
+                    ];
+                NSArray<MLReactionsEntry*>* reactions = [[DataLayer sharedInstance] getReactionsForHistoryId:historyId];
+                MLReactionsEntry* changedReactions = nil;
+                for(MLReactionsEntry* reactionsEntry in reactions)
+                    if([reactionsEntry.contact isEqual:reactingContact])
+                        changedReactions = reactionsEntry;
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{
                     @"message": [MLMessage createMessageFromHistoryID:historyId],
                     @"showAlert": @NO,
                     @"contact": possiblyUnknownContact,
                     @"LMCReplaced": @NO,
                     @"reactionsUpdate": @YES,
-                    @"reactions": [[DataLayer sharedInstance] getReactionsForHistoryId:historyId],
+                    @"reactions": reactions,
+                    @"reactingContact": reactingContact,
+                    @"changedReactions": changedReactions,
                 }];
             }
             else

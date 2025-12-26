@@ -176,6 +176,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     [self upgradeBoolUserSettingsIfUnset:@"preventLeaksBeforeAuth" toDefault:NO];
     
+    [self upgradeBoolUserSettingsIfUnset:@"showNotificationsForReactions" toDefault:YES];
+    
 // //always show onboarding on simulator for now
 // #if TARGET_OS_SIMULATOR
 //     [[HelperTools defaultsDB] setBool:NO forKey:@"hasCompletedOnboarding"];

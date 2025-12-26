@@ -73,7 +73,6 @@ static NSMutableDictionary* _singletonCache;
         message.inbound = [(NSNumber*)[dic objectForKey:@"inbound"] boolValue];
         message.actualFrom = [dic objectForKey:@"af"];
         message.messageText = [dic objectForKey:@"message"];
-        message.isMuc = [(NSNumber*)[dic objectForKey:@"Muc"] boolValue];
 
         message.messageId = [dic objectForKey:@"messageid"];
         message.stanzaId = [dic objectForKey:@"stanzaid"];
@@ -260,6 +259,16 @@ static NSMutableDictionary* _singletonCache;
     }
 }
 
+-(BOOL) isMuc
+{
+    return self.chatContact.isMuc;
+}
+
++(NSSet*) keyPathsForValuesAffectingIsMuc
+{
+    return [NSSet setWithObjects:@"chatContact", @"chatContact.isMuc", nil];
+}
+
 -(NSString*) contactDisplayName
 {
     if(self.isMuc)
@@ -275,7 +284,7 @@ static NSMutableDictionary* _singletonCache;
 
 +(NSSet*) keyPathsForValuesAffectingContactDisplayName
 {
-    return [NSSet setWithObjects:@"isMuc", @"mucType", @"participantJid", @"accountID", @"actualFrom", @"buddyName", nil];
+    return [NSSet setWithObjects:@"chatContact", @"chatContact.isMuc", @"mucType", @"participantJid", @"accountID", @"actualFrom", @"buddyName", nil];
 }
 
 -(MLFiletransferInfo*) fileInfo
@@ -385,8 +394,8 @@ static NSMutableDictionary* _singletonCache;
 {
     return [NSString stringWithFormat:@"%@: %@ (%@) {%@messageID: %@, stanzaID: %@} --> %@ (%p)",
         self.accountID,
-        self.isMuc ? @"1:1" : self.mucType,
-        self.participantJid ? self.participantJid : self.buddyName,
+        self.buddyName,
+        !self.isMuc ? @"1:1" : self.mucType,
         self.retracted ? @"retracted " : @"",
         self.messageId,
         self.stanzaId,

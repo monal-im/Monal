@@ -65,7 +65,7 @@ static NSMutableDictionary* _singletonCache;
 {
     self = [super init];
     //watch for all sorts of changes and update our singleton dynamically
-    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLastInteractionTimeUpdate:) name:kMonalLastInteractionUpdatedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleParticipantUpdate:) name:kMonalMucParticipantsAndMembersUpdated object:nil];
     return self;
 }
 
@@ -93,6 +93,11 @@ static NSMutableDictionary* _singletonCache;
     self = [self init];
     self.occupantId = [coder decodeObjectForKey:@"occupantId"];
     self.mucContact = [coder decodeObjectForKey:@"mucContact"];
+    NSDictionary* participantInfo = [[DataLayer sharedInstance] getParticipantForOccupant:self.occupantId inRoom:self.mucContact.contactJid forAccountID:self.mucContact.accountID];
+    if(participantInfo != nil)
+        self.nick = participantInfo[@"room_nick"];
+    else
+        self.nick = self.occupantId;        //fallback
     return self;
 }
 
@@ -100,6 +105,19 @@ static NSMutableDictionary* _singletonCache;
 -(instancetype) awakeAfterUsingCoder:(NSCoder*) coder
 {
     return [[self class] createChannelContactFromOccupantId:self.occupantId withNick:self.nick inMuc:self.mucContact];
+}
+
+-(void) handleParticipantUpdate:(NSNotification*) notification
+{
+    MLContact* contact = notification.userInfo[@"contact"];
+    if([self.mucContact isEqual:contact])
+    {
+        NSDictionary* participantInfo = [[DataLayer sharedInstance] getParticipantForOccupant:self.occupantId inRoom:self.mucContact.contactJid forAccountID:self.mucContact.accountID];
+        if(participantInfo != nil)
+            self.nick = participantInfo[@"room_nick"];
+        else
+            self.nick = self.occupantId;        //fallback (should never happen when receiving this notification)
+    }
 }
 
 -(NSString*) contactDisplayName
@@ -143,10 +161,11 @@ static NSMutableDictionary* _singletonCache;
 //     return _avatar;
 }
 
-// +(NSSet*) keyPathsForValuesAffectingAvatar
-// {
-//     return [NSSet setWithObjects:@"", nil];
-// }
++(NSSet*) keyPathsForValuesAffectingAvatar
+{
+    //nick is used for fallback avatar generation
+    return [NSSet setWithObjects:@"nick", nil];
+}
 
 -(void) setAvatar:(UIImage*) avatar
 {

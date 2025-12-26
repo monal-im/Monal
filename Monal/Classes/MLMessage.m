@@ -269,6 +269,16 @@ static NSMutableDictionary* _singletonCache;
     return [NSSet setWithObjects:@"chatContact", @"chatContact.isMuc", nil];
 }
 
+-(NSString*) mucType
+{
+    return self.chatContact.mucType;
+}
+
++(NSSet*) keyPathsForValuesAffectingMucType
+{
+    return [NSSet setWithObjects:@"chatContact", @"chatContact.mucType", nil];
+}
+
 -(NSString*) contactDisplayName
 {
     if(self.isMuc)
@@ -284,7 +294,7 @@ static NSMutableDictionary* _singletonCache;
 
 +(NSSet*) keyPathsForValuesAffectingContactDisplayName
 {
-    return [NSSet setWithObjects:@"chatContact", @"chatContact.isMuc", @"mucType", @"participantJid", @"accountID", @"actualFrom", @"buddyName", nil];
+    return [NSSet setWithObjects:@"isMuc", @"mucType", @"participantJid", @"accountID", @"actualFrom", @"buddyName", nil];
 }
 
 -(MLFiletransferInfo*) fileInfo

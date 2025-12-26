@@ -60,11 +60,11 @@ The of the message in the DB , should be int
  Actual sender will differ from the "from" when in a group chat
  */
 @property (nonatomic, copy) NSString* actualFrom;
-@property (nonatomic, assign) BOOL isMuc;
+@property (nonatomic, readonly) BOOL isMuc;
 @property (nonatomic, readonly) NSString* contactDisplayName;
 
 @property (nonatomic, copy) NSString* messageType;
-@property (nonatomic, copy) NSString* mucType;
+@property (nonatomic, readonly) NSString* mucType;
 @property (nonatomic, copy) NSString* _Nullable participantJid;
 @property (nonatomic, copy) NSString* _Nullable occupantId;
 

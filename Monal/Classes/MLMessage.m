@@ -180,15 +180,20 @@ static NSMutableDictionary* _singletonCache;
         MLAssert(correctedText != nil, @"Message correction notification without the corrected text");
         self.messageText = correctedText;
     }
-    else if(reactionsUpdate.boolValue)
+
+    if(reactionsUpdate.boolValue)
     {
+        // Reactions update
         MLAssert(data[@"reactions"] != nil, @"Reactions updates MUST contain a reactions dictionary!");
         self.reactions = data[@"reactions"];
     }
-    
-    // MUC reflection and everything else
-    DDLogDebug(@"Updating stanzaid of %p: %@", self, data[@"stanzaId"]);
-    self.stanzaId = data[@"stanzaId"];
+
+    if(data[@"stanzaId"])
+    {
+        // MUC reflection
+        DDLogDebug(@"Updating stanzaid of %p: %@", self, data[@"stanzaId"]);
+        self.stanzaId = data[@"stanzaId"];
+    }
 }
 
 // Handle message retraction and moderation

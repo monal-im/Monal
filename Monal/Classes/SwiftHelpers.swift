@@ -90,15 +90,38 @@ public extension Binding {
     case DisplayOnlyPlaceholder
 }
 
+final class ChangeCoalescer {
+    private var scheduled = false
+    private let lock = NSLock()
+    private let notify: () -> Void
+
+    init(notify: @escaping () -> Void) {
+        self.notify = notify
+    }
+
+    func markChanged() {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !scheduled else { return }
+        scheduled = true
+        DispatchQueue.main.async {
+            self.lock.lock()
+            self.scheduled = false
+            self.lock.unlock()
+            self.notify()
+        }
+    }
+}
+
 class KVOObserver: NSObject {
     var obj: NSObject
     var keyPath: String
-    var objectWillChange: ()->Void
+    var coalescer: ChangeCoalescer
     
-    init(obj:NSObject, keyPath:String, objectWillChange: @escaping ()->Void) {
+    init(obj:NSObject, keyPath:String, coalescer: ChangeCoalescer) {
         self.obj = obj
         self.keyPath = keyPath
-        self.objectWillChange = objectWillChange
+        self.coalescer = coalescer
         super.init()
         self.obj.addObserver(self, forKeyPath: keyPath, options: [], context: nil)
     }
@@ -109,35 +132,44 @@ class KVOObserver: NSObject {
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
         //DDLogVerbose("\(String(describing:object)): keyPath \(String(describing:keyPath)) changed: \(String(describing:change))")
-        self.objectWillChange()
+        self.coalescer.markChanged()
     }
 }
 
 @dynamicMemberLookup
 public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable, CustomStringConvertible, Identifiable {
-    public var obj: ObjType
+    public let obj: ObjType
     private var observedMembers: NSMutableSet = NSMutableSet()
     private var observers: [KVOObserver] = Array()
+    
+    private lazy var coalescer = ChangeCoalescer { [weak self] in
+        guard let self = self else {
+            return
+        }
+        DDLogDebug("Calling objectWillChange.send() for obj: \(String(describing:self.obj))")
+        self.objectWillChange.send()
+    }
     
     public init(_ obj: ObjType) {
         self.obj = obj
     }
 
-    private func addObserverForMember(_ member: String){
+    private func addObserverForMember(_ member: String) {
+        //doesn't work for protocols
+        /*
+        guard self.obj.responds(to: NSSelectorFromString(member)), self.obj.responds(to: NSSelectorFromString("set\(member.capitalized):")) else {
+            HelperTools.throwException(withName:"ObservableKVOWrapperAccessError", reason:"Getter/setter not provided for member '\(String(describing:member))' by underlying objc object \(String(describing:self.obj))", userInfo:[
+                "obj": "\(String(describing:self.obj))",
+                "member": "\(String(describing:member))",
+            ])
+            return
+        }
+        */
         if(!self.observedMembers.contains(member)) {
             let ownAddress = Unmanaged.passUnretained(self).toOpaque()
             let objAddress = Unmanaged.passUnretained(self.obj).toOpaque()
             DDLogDebug("Adding observer for member '\(member)' in KVOObserver \(ownAddress) with wrapped obj \(objAddress)...")
-            self.observers.append(KVOObserver(obj:self.obj, keyPath:member, objectWillChange: { [weak self] in
-                guard let self = self else {
-                    return
-                }
-                //DDLogDebug("Observer said '\(member)' has changed...")
-                DispatchQueue.main.async {
-                    DDLogDebug("Calling self.objectWillChange.send() for '\(member)'...")
-                    self.objectWillChange.send()
-                }
-            }))
+            self.observers.append(KVOObserver(obj:self.obj, keyPath:member, coalescer: self.coalescer))
             self.observedMembers.add(member)
         }
     }

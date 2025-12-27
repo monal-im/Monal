@@ -1008,13 +1008,8 @@ enum msgSentState {
     if(!self.jid)
         return;
 
-    //TODO: use a factory method for this!!
-    MLMessage* unreadStatus = [MLMessage new];
-    unreadStatus.messageType = kMessageTypeStatus;
-    unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @"");
-    unreadStatus.actualFrom = self.jid;
-    unreadStatus.isMuc = self.contact.isMuc;
-
+    MLMessage* unreadStatus = [MLMessage createNewStatusMessageForContact:self.contact withText:NSLocalizedString(@"Unread Messages Below", @"")];
+    
     NSInteger unreadPos = (NSInteger)messages.count - 1;
     while(unreadPos >= 0)
     {

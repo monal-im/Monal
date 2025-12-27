@@ -21,6 +21,10 @@
 #import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/MLReactionsEntry.h>
 
+@interface MLMessage ()
++(MLMessage* _Nullable) createDraftMessageFromDatabaseWithJid:(NSString*) jid andAccountID:(NSNumber*) accountID;
+@end
+
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;
 @end
@@ -920,6 +924,21 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(NSDictionary* _Nullable) getDraftMessageDictionaryForJid:(NSString*) jid onAccount:(NSNumber*) accountID
+{
+    return [self.db idReadTransaction:^{
+        NSArray* results = [self.db executeReader:@"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType FROM buddylist AS bl INNER JOIN activechats AS ac ON bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name WHERE ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';" andArguments:@[accountID, jid]];
+        if([results count])
+        {
+            NSMutableDictionary* message = [(NSDictionary*)results[0] mutableCopy];
+            if(message[@"thetime"])
+                message[@"thetime"] = [dbFormatter dateFromString:message[@"thetime"]];
+            return (NSDictionary*)message;
+        }
+        return @{};
+    }];
+}
+
 #pragma mark MUC
 
 -(BOOL) initMuc:(NSString*) room forAccountID:(NSNumber*) accountID andMucNick:(NSString* _Nullable) mucNick
@@ -1219,32 +1238,24 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark message Commands
 
--(NSArray<MLMessage*>*) messagesForHistoryIDs:(NSArray<NSNumber*>*) historyIDs
+-(NSDictionary*) messageDataForHistoryID:(NSNumber*) historyID
 {
     return [self.db idReadTransaction:^{
-        NSString* idList = [historyIDs componentsJoinedByString:@","];
-        NSString* query = [NSString stringWithFormat:@"SELECT \
-            B.Muc, B.muc_type, \
+        NSArray<NSDictionary*>* result = [self.db executeReader:@"SELECT \
             CASE \
                 WHEN M.actual_from NOT NULL THEN M.actual_from \
                 WHEN M.inbound=0 THEN (A.username || '@' || A.domain) \
                 ELSE M.buddy_name \
             END AS af, \
             timestamp AS thetime, M.* \
-            FROM message_history AS M INNER JOIN buddylist AS B \
-                ON M.account_id=B.account_id AND M.buddy_name=B.buddy_name \
-            INNER JOIN account AS A \
+            FROM message_history AS M INNER JOIN account AS A \
                 ON M.account_id=A.account_id \
-            WHERE M.message_history_id IN(%@);", idList];
-        NSMutableArray<MLMessage*>* retval = [[NSMutableArray<MLMessage*> alloc] init];
-        for(NSDictionary* dic in [self.db executeReader:query])
-        {
-            NSMutableDictionary* message = [dic mutableCopy];
-            if(message[@"thetime"])
-                message[@"thetime"] = [dbFormatter dateFromString:message[@"thetime"]];
-            [retval addObject:[MLMessage messageFromDictionary:message]];
-        }
-        return retval;
+            WHERE M.message_history_id=?;" andArguments:@[historyID]];
+        MLAssert(result.count == 1, @"Querying for one single history ID must always yield exactly one result!", (@{@"historyID": historyID}));
+        NSMutableDictionary* message = [result[0] mutableCopy];
+        if(message[@"thetime"])
+            message[@"thetime"] = [dbFormatter dateFromString:message[@"thetime"]];
+        return (NSDictionary*)message;
     }];
 }
 
@@ -1782,7 +1793,7 @@ static NSDateFormatter* dbFormatter;
         NSNumber* msgLimit = @(kMonalBackscrollingMsgCount);
         NSArray* params = @[accountID, buddy, historyIdToUse, msgLimit];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
-        return [self messagesForHistoryIDs:results];
+        return [MLMessage createMessagesFromHistoryIDs:results];
     }];
 }
 
@@ -1793,16 +1804,9 @@ static NSDateFormatter* dbFormatter;
     
     return [self.db idReadTransaction:^{
         //return message draft (if any)
-        NSString* query = @"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType FROM buddylist AS bl INNER JOIN activechats AS ac ON bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name WHERE ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';";
-        NSArray* params = @[accountID, contact];
-        NSArray* results = [self.db executeReader:query andArguments:params];
-        if([results count])
-        {
-            NSMutableDictionary* message = [(NSDictionary*)results[0] mutableCopy];
-            if(message[@"thetime"])
-                message[@"thetime"] = [dbFormatter dateFromString:message[@"thetime"]];
-            return [MLMessage messageFromDictionary:message];
-        }
+        MLMessage* draft = [MLMessage createDraftMessageFromDatabaseWithJid:contact andAccountID:accountID];
+        if(draft != nil)
+            return draft;
         
         //return "real" last message
         NSNumber* historyID = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountID, contact]];
@@ -1876,7 +1880,7 @@ static NSDateFormatter* dbFormatter;
         }
         
         //return NSArray of all updated MLMessages
-        return (NSArray*)[self messagesForHistoryIDs:messageArray];
+        return (NSArray*)[MLMessage createMessagesFromHistoryIDs:messageArray];
     }];
 }
 
@@ -2361,7 +2365,7 @@ static NSDateFormatter* dbFormatter;
         NSArray* params = @[kMessageTypeFiletransfer, accountID, contact];
         
         NSMutableArray* retval = [NSMutableArray new];
-        for(MLMessage* msg in [self messagesForHistoryIDs:[self.db executeScalarReader:query andArguments:params]])
+        for(MLMessage* msg in [MLMessage createMessagesFromHistoryIDs:[self.db executeScalarReader:query andArguments:params]])
             [retval addObject:msg.fileInfo];
         return retval;
     }];
@@ -2541,7 +2545,7 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id = ? AND (message like ? OR buddy_name LIKE ? OR messageType LIKE ?) ORDER BY timestamp ASC;";
         NSArray* params = @[accountID, likeString, likeString, likeString];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
-        return [self messagesForHistoryIDs:results];
+        return [MLMessage createMessagesFromHistoryIDs:results];
     }];
 }
 
@@ -2554,7 +2558,7 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND (message LIKE ? OR messageType LIKE ?) AND buddy_name=? ORDER BY timestamp ASC;";
         NSArray* params = @[contact.accountID, likeString, contact.contactJid];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
-        return [self messagesForHistoryIDs:results];
+        return [MLMessage createMessagesFromHistoryIDs:results];
     }];
 }
 

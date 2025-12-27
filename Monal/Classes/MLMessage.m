@@ -30,32 +30,8 @@ static NSMutableDictionary* _singletonCache;
 
 +(MLMessage*) createMessageFromHistoryID:(NSNumber*) historyID
 {
-    if(historyID == nil)
-        return nil;
-    NSArray<MLMessage*>* result = [[DataLayer sharedInstance] messagesForHistoryIDs:@[historyID]];
-    if(![result count])
-        return nil;
-    return result[0];
-}
-
-+(MLMessage*) messageFromDictionary:(NSDictionary*) dic
-{
-    // Draft messages don't have a historyID and shouldn't be cached
-    if([[dic objectForKey:@"messageType"] isEqualToString:kMessageTypeMessageDraft])
-    {
-        MLMessage* message = [MLMessage new];
-        // Fill only the properties useful for a draft message
-        // The timestamp is used when rendering MLContactCell, among other things
-        message.messageText = [dic objectForKey:@"message"];
-        message.messageType = [dic objectForKey:@"messageType"];
-        message.timestamp = [dic objectForKey:@"thetime"];
-        return message;
-    }
-
-    NSNumber* cacheKey = [dic objectForKey:@"message_history_id"];
-    MLAssert(cacheKey != nil, @"A non-draft message can't have a nil historyID!");
-    MLMessage* message = nil;
     @synchronized(_singletonCache) {
+        NSNumber* cacheKey = historyID;
         if(_singletonCache[cacheKey] != nil)
         {
             MLMessage* obj = ((WeakContainer*)_singletonCache[cacheKey]).obj;
@@ -65,48 +41,92 @@ static NSMutableDictionary* _singletonCache;
             else
                 [_singletonCache removeObjectForKey:cacheKey];
         }
-
-        message = [MLMessage new];
-        message.accountID = [dic objectForKey:@"account_id"];
-
-        message.buddyName = [dic objectForKey:@"buddy_name"];
-        message.inbound = [(NSNumber*)[dic objectForKey:@"inbound"] boolValue];
-        message.actualFrom = [dic objectForKey:@"af"];
-        message.messageText = [dic objectForKey:@"message"];
-
-        message.messageId = [dic objectForKey:@"messageid"];
-        message.stanzaId = [dic objectForKey:@"stanzaid"];
-        message.messageDBId = [dic objectForKey:@"message_history_id"];
-        message.timestamp = [dic objectForKey:@"thetime"];
-        message.messageType = [dic objectForKey:@"messageType"];
-        message.mucType = [dic objectForKey:@"muc_type"];
-        message.participantJid = [dic objectForKey:@"participant_jid"];
-        message.occupantId = [dic objectForKey:@"occupant_id"];
-
-        message.hasBeenDisplayed = [(NSNumber*)[dic objectForKey:@"displayed"] boolValue];
-        message.hasBeenReceived = [(NSNumber*)[dic objectForKey:@"received"] boolValue];
-        message.hasBeenSent = [(NSNumber*)[dic objectForKey:@"sent"] boolValue];
-        message.encrypted = [(NSNumber*)[dic objectForKey:@"encrypted"] boolValue];
-
-        message.unread = [(NSNumber*)[dic objectForKey:@"unread"] boolValue];
-        message.displayMarkerWanted = [(NSNumber*)[dic objectForKey:@"displayMarkerWanted"] boolValue];
-
-        message.previewText = [dic objectForKey:@"previewText"];
-        message.previewImage = [NSURL URLWithString:[dic objectForKey:@"previewImage"]];
-
-        message.errorType = [dic objectForKey:@"errorType"];
-        message.errorReason = [dic objectForKey:@"errorReason"];
-
-        message.retracted = [(NSNumber*)[dic objectForKey:@"retracted"] boolValue];
         
+        MLMessage* message = [self createMessageFromDatabaseWithHistoryID:historyID];
         _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:message];
+        
+        //fill reactions *after* adding this message to our singleton cache to not create an endless loop
+        //(the reactions reference back to this message, but don't store a reference, so no retain cycle)
+        message.reactions = [[DataLayer sharedInstance] getReactionsForHistoryId:message.messageDBId];
+        return message;
     }
-    //fill reactions *after* adding this message to our singleton cache to not create an endless loop
-    //(the reactions reference back to this message, but don't store a reference, so no retain cycle)
-    message.reactions = [[DataLayer sharedInstance] getReactionsForHistoryId:message.messageDBId];
+}
+
++(NSArray<MLMessage*>*) createMessagesFromHistoryIDs:(NSArray<NSNumber*>*) historyIDs
+{
+    NSMutableArray* result = [NSMutableArray new];
+    for(NSNumber* historyId in historyIDs)
+        [result addObject:[self createMessageFromHistoryID:historyId]];
+    return result;
+}
+
++(MLMessage*) createMessageFromDatabaseWithHistoryID:(NSNumber*) historyID
+{
+    NSDictionary* dic = [[DataLayer sharedInstance] messageDataForHistoryID:historyID];
+
+    MLMessage* message = [self new];
+    message.accountID = [dic objectForKey:@"account_id"];
+
+    message.buddyName = [dic objectForKey:@"buddy_name"];
+    message.inbound = [(NSNumber*)[dic objectForKey:@"inbound"] boolValue];
+    message.actualFrom = [dic objectForKey:@"af"];
+    message.messageText = [dic objectForKey:@"message"];
+
+    message.messageId = [dic objectForKey:@"messageid"];
+    message.stanzaId = [dic objectForKey:@"stanzaid"];
+    message.messageDBId = [dic objectForKey:@"message_history_id"];
+    message.timestamp = [dic objectForKey:@"thetime"];
+    message.messageType = [dic objectForKey:@"messageType"];
+    message.participantJid = [dic objectForKey:@"participant_jid"];
+    message.occupantId = [dic objectForKey:@"occupant_id"];
+
+    message.hasBeenDisplayed = [(NSNumber*)[dic objectForKey:@"displayed"] boolValue];
+    message.hasBeenReceived = [(NSNumber*)[dic objectForKey:@"received"] boolValue];
+    message.hasBeenSent = [(NSNumber*)[dic objectForKey:@"sent"] boolValue];
+    message.encrypted = [(NSNumber*)[dic objectForKey:@"encrypted"] boolValue];
+
+    message.unread = [(NSNumber*)[dic objectForKey:@"unread"] boolValue];
+    message.displayMarkerWanted = [(NSNumber*)[dic objectForKey:@"displayMarkerWanted"] boolValue];
+
+    message.previewText = [dic objectForKey:@"previewText"];
+    message.previewImage = [NSURL URLWithString:[dic objectForKey:@"previewImage"]];
+
+    message.errorType = [dic objectForKey:@"errorType"];
+    message.errorReason = [dic objectForKey:@"errorReason"];
+
+    message.retracted = [(NSNumber*)[dic objectForKey:@"retracted"] boolValue];
+    
     return message;
 }
 
++(MLMessage* _Nullable) createDraftMessageFromDatabaseWithJid:(NSString*) jid andAccountID:(NSNumber*) accountID
+{
+    // Draft messages don't have a historyID and shouldn't be cached
+    NSDictionary* dic = [[DataLayer sharedInstance] getDraftMessageDictionaryForJid:jid onAccount:accountID];
+    if([kMessageTypeMessageDraft isEqualToString:[dic objectForKey:@"messageType"]])
+    {
+        MLMessage* message = [self new];
+        // Fill only the properties useful for a draft message
+        // The timestamp is used when rendering MLContactCell, among other things
+        message.messageText = dic[@"message"];
+        message.messageType = dic[@"messageType"];
+        message.timestamp = dic[@"thetime"];
+        return message;
+    }
+    return nil;
+}
+
++(MLMessage*) createNewStatusMessageForContact:(MLContact*) contact withText:(NSString*) text
+{
+    MLMessage* message = [MLMessage new];
+    message.messageType = kMessageTypeStatus;
+    message.messageText = text;
+    message.actualFrom = contact.contactJid;
+    message.timestamp = [NSDate date];
+    return message;
+}
+
+    
 +(BOOL) supportsSecureCoding
 {
     return YES;
@@ -117,9 +137,9 @@ static NSMutableDictionary* _singletonCache;
     //only encode things needed for draft messages (those are NOT singletons)
     //and the id used for the singleton (the message db id)
     [coder encodeObject:self.messageText forKey:@"messageText"];
-    [coder encodeObject:self.messageDBId forKey:@"messageDBId"];
-    [coder encodeObject:self.timestamp forKey:@"timestamp"];
     [coder encodeObject:self.messageType forKey:@"messageType"];
+    [coder encodeObject:self.timestamp forKey:@"timestamp"];
+    [coder encodeObject:self.messageDBId forKey:@"messageDBId"];
 }
 
 -(instancetype) initWithCoder:(NSCoder*) coder
@@ -129,9 +149,9 @@ static NSMutableDictionary* _singletonCache;
     //singleton one in awakeAfterUsingCoder
     self = [self init];
     self.messageText = [coder decodeObjectForKey:@"messageText"];
-    self.messageDBId = [coder decodeObjectForKey:@"messageDBId"];
-    self.timestamp = [coder decodeObjectForKey:@"timestamp"];
     self.messageType = [coder decodeObjectForKey:@"messageType"];
+    self.timestamp = [coder decodeObjectForKey:@"timestamp"];
+    self.messageDBId = [coder decodeObjectForKey:@"messageDBId"];
     return self;
 }
 

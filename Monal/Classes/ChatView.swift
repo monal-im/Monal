@@ -346,7 +346,7 @@ struct ChatView: View {
                         contact.obj.markReachedMamArchiveTop()
                     }
                 } else {
-                    DDLogVerbose("Got backscrolling mam response: \(returnedMessages.count) messages")
+                    DDLogVerbose("Got backscrolling mam response: \(returnedMessages.count) messages: \(String(describing:returnedMessages))")
                     self.messages.insert(contentsOf: returnedMessages.map {ChatViewMessage($0)}, at: 0)
                 }
             }

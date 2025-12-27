@@ -345,7 +345,7 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
         if(retrievedBodiesOverall > kMonalBackscrollingMsgCount / 2)
         {
             //query db for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
-            [promise fulfill:[[DataLayer sharedInstance] messagesForHistoryIDs:overallHistoryIdList]];
+            [promise fulfill:[MLMessage createMessagesFromHistoryIDs:overallHistoryIdList]];
         }
         else
         {
@@ -366,7 +366,7 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
                 // Either the top of the mam archive was reached, or we got an error after receiving some bodies.
 
                 //query db for the real MLMessages to account for changes in history table by non-body metadata messages received after the body-message
-                [promise fulfill:[[DataLayer sharedInstance] messagesForHistoryIDs:overallHistoryIdList]];
+                [promise fulfill:[MLMessage createMessagesFromHistoryIDs:overallHistoryIdList]];
             }
         }
     }

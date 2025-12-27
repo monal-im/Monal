@@ -21,7 +21,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MLMessage : NSObject <NSSecureCoding>
 
-+(MLMessage* _Nullable) createMessageFromHistoryID:(NSNumber* _Nullable) historyID;
++(MLMessage*) createMessageFromHistoryID:(NSNumber*) historyID;
++(NSArray<MLMessage*>*) createMessagesFromHistoryIDs:(NSArray<NSNumber*>*) historyIDs;
++(MLMessage*) createNewStatusMessageForContact:(MLContact*) contact withText:(NSString*) text;
+
 +(BOOL) supportsSecureCoding;
 
 @property (readonly) NSString* id;     //for Identifiable protocol
@@ -115,11 +118,6 @@ The of the message in the DB , should be int
  */
 @property (nonatomic, assign) BOOL unread;
 @property (nonatomic, assign) BOOL displayMarkerWanted;
-
-/**
- Converts a dictonary to a message object Provide a formatter for the format the dates will be in
- */
-+(MLMessage*) messageFromDictionary:(NSDictionary*) dic;
 
 @property (nonatomic, readonly) xmpp* _Nullable account;
 @property (nonatomic, readonly) id<MLContactProtocol> contact;

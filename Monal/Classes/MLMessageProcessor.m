@@ -48,7 +48,7 @@ static NSMutableDictionary* _typingNotifications;
     MLAssert(outerMessageNode != nil, @"outerMessageNode should not be nil!");
     MLAssert(account != nil, @"account should not be nil!");
     
-    //this will be the return value f tis method
+    //this will be the return value of this method
     //(a valid MLMessage, if this was a new message added to the db or nil, if it was another stanza not added
     //directly to the message_history table (but possibly altering it, e.g. marking someentr as read)
     MLMessage* message = nil;
@@ -719,7 +719,8 @@ static NSMutableDictionary* _typingNotifications;
                 ];
             }
             
-            message = [MLMessage createMessageFromHistoryID:historyId];
+            if(historyId != nil)
+                message = [MLMessage createMessageFromHistoryID:historyId];
             if(message != nil && historyId != nil)      //check historyId to make static analyzer happy
             {
                 DDLogVerbose(@"Added or LMC-replaced message in history db: %@", message);

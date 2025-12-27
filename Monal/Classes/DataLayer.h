@@ -106,6 +106,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountID withComment:(NSString*) comment;
 -(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountID;
+-(NSDictionary* _Nullable) getDraftMessageDictionaryForJid:(NSString*) jid onAccount:(NSNumber*) accountID;
 
 #pragma mark - MUC
 
@@ -178,7 +179,6 @@ extern NSString* const kMessageTypeFiletransfer;
 /**
  returns messages with the provided local id number
  */
--(NSArray<MLMessage*>*) messagesForHistoryIDs:(NSArray<NSNumber*>*) historyIDs;
 -(NSNumber*) getAutodecrementHistoryId;
 -(NSNumber*) getNewestHistoryEntryId;
 
@@ -236,6 +236,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSNumber*) lastMessageHistoryIdForContact:(NSString*) buddy forAccount:(NSNumber*) accountID;
 -(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSNumber*) accountID beforeMsgHistoryID:(NSNumber* _Nullable) msgHistoryID;
 -(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSNumber*) accountID;
+-(NSDictionary*) messageDataForHistoryID:(NSNumber*) historyID;
 
 
 -(MLMessage*) lastMessageForContact:(NSString*) contact forAccount:(NSNumber*) accountID;

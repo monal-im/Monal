@@ -946,6 +946,9 @@ class ChatViewMessage: ExyteChat.Message {
             }
             .store(in: &subscriptions)
     }
+    public var description: String {
+        return "ChatViewMessage<\(String(describing:self.innerMessage))>"
+    }
 }
 
 class ChatViewUser: ExyteChat.User {
@@ -979,6 +982,9 @@ class ChatViewUser: ExyteChat.User {
     //our parent class forces us to implement this, but it should never be called!
     required init(from decoder: Decoder) throws {
         unreachable("ChatViewUser should never be deserialized!")
+    }
+    public var description: String {
+        return "ChatViewUser<\(String(describing:self.innerContact))>"
     }
 }
 

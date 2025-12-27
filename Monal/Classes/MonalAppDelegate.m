@@ -629,9 +629,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 }
                 else
                 {
-                    DDLogError(@"No account available to handel xmpp: uri!");
+                    DDLogError(@"No account available to handle xmpp: uri!");
                     
-                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error adding contact or channel", @"") message:NSLocalizedString(@"No account available to handel 'xmpp:' URI!", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error adding contact or channel", @"") message:NSLocalizedString(@"No account available to handle 'xmpp:' URI!", @"") preferredStyle:UIAlertControllerStyleAlert];
                     [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
                     }]];
                     [self.activeChats presentViewController:messageAlert animated:YES completion:nil];

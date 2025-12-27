@@ -539,18 +539,18 @@ static NSMutableDictionary* _singletonCache;
 
 +(NSSet*) keyPathsForValuesAffectingIsSelfChat
 {
-    return [NSSet setWithObjects:@"contactJid", @"accountID", nil];
+    return [NSSet setWithObjects:@"contactJid", @"account", nil];
 }
 
 -(BOOL) isListedLocally
 {
     //if this is a contact not in our database (not on our roster and not listed locally)
-    return ![self.subscription isEqualToString:kSubNotListedLocally];
+    return self.isSelf || ![self.subscription isEqualToString:kSubNotListedLocally];
 }
 
 +(NSSet*) keyPathsForValuesAffectingIsListedLocally
 {
-    return [NSSet setWithObjects:@"subscription", nil];
+    return [NSSet setWithObjects:@"subscription", @"isSelf", nil];
 }
 
 -(BOOL) isInRoster
@@ -558,64 +558,66 @@ static NSMutableDictionary* _singletonCache;
     //either we already allowed each other or we allow this contact and asked them to allow us
     //--> if isInRoster is true this is displayed as "remove contact" in contact details, otherwise it will be displayed as "add contact"
     //(mucs have a subscription of 'both', ensured by the datalayer)
-    return [self.subscription isEqualToString:kSubBoth] || ([self.subscription isEqualToString:kSubFrom] && [self.ask isEqualToString:kAskSubscribe]);
+    return self.isSelf || [self.subscription isEqualToString:kSubBoth] || ([self.subscription isEqualToString:kSubFrom] && [self.ask isEqualToString:kAskSubscribe]);
 }
 
 +(NSSet*) keyPathsForValuesAffectingIsInRoster
 {
-    return [NSSet setWithObjects:@"subscription", @"ask", nil];
+    return [NSSet setWithObjects:@"subscription", @"ask", @"isSelf", nil];
 }
 
 -(BOOL) isSubscribedTo
 {
     return [self.subscription isEqualToString:kSubBoth]
-        || [self.subscription isEqualToString:kSubTo];
+        || [self.subscription isEqualToString:kSubTo]
+        || self.isSelf;
 }
 
 +(NSSet*) keyPathsForValuesAffectingIsSubscribedTo
 {
-    return [NSSet setWithObjects:@"subscription", nil];
+    return [NSSet setWithObjects:@"subscription", @"isSelf", nil];
 }
 
 -(BOOL) isSubscribedFrom
 {
     return [self.subscription isEqualToString:kSubBoth]
-        || [self.subscription isEqualToString:kSubFrom];
+        || [self.subscription isEqualToString:kSubFrom]
+        || self.isSelf;
 }
 
 +(NSSet*) keyPathsForValuesAffectingIsSubscribedFrom
 {
-    return [NSSet setWithObjects:@"subscription", nil];
+    return [NSSet setWithObjects:@"subscription", @"isSelf", nil];
 }
 
 -(BOOL) isSubscribedBoth
 {
-    return [self.subscription isEqualToString:kSubBoth];
+    return [self.subscription isEqualToString:kSubBoth] || self.isSelf;
 }
 
 +(NSSet*) keyPathsForValuesAffectingIsSubscribedBoth
 {
-    return [NSSet setWithObjects:@"subscription", nil];
+    return [NSSet setWithObjects:@"subscription", @"isSelf", nil];
 }
 
 -(BOOL) hasIncomingContactRequest
 {
-    return self.isMuc == NO && [[DataLayer sharedInstance] hasContactRequestForContact:self];
+    return self.isMuc == NO && self.isSelf == NO && [[DataLayer sharedInstance] hasContactRequestForContact:self];
 }
 
 +(NSSet*) keyPathsForValuesAffectingHasIncomingContactRequest
 {
-    return [NSSet setWithObjects:@"isMuc", nil];
+    return [NSSet setWithObjects:@"isMuc", @"isSelf", nil];
 }
 
 -(BOOL) hasOutgoingContactRequest
 {
-    return self.isMuc == NO && [self.ask isEqualToString:kAskSubscribe];
+    return self.isMuc == NO && self.isSelf == NO && [self.ask isEqualToString:kAskSubscribe];
 }
 
 +(NSSet*) keyPathsForValuesAffectingHasOutgoingContactRequest
 {
-    return [NSSet setWithObjects:@"isMuc", @"ask", nil];
+    return [NSSet setWithObjects:@"isMuc", @"isSelf", @"ask", nil];
 }
 
 -(xmpp* _Nullable) account

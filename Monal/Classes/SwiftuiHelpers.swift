@@ -583,8 +583,9 @@ struct ExternalLinkViewModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .environment(\.openURL, OpenURLAction { url in
-                urlToOpen = url
-                if HelperTools.defaultsDB().bool(forKey:"useInlineSafari") {
+                let openableInSFSafariView = url.scheme == "http" || url.scheme == "https"
+                if openableInSFSafariView && HelperTools.defaultsDB().bool(forKey:"useInlineSafari") {
+                    urlToOpen = url
                     return .handled
                 } else {
                     return .systemAction

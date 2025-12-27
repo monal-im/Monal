@@ -1262,17 +1262,17 @@ static NSDateFormatter* dbFormatter;
 -(NSNumber*) getAutodecrementHistoryId
 {
     return [self.db idReadTransaction:^{
-        //use the autodecrement value for our message_history table, if present
+        //use the autodecrement value for our message_history table, if present, but make sure it is <= 0
         NSNumber* autodecrement = [self.db executeScalar:@"SELECT CAST(value as INTEGER) FROM flags WHERE name='autodecrement~message_history';"];
-        if(autodecrement != nil)
+        if(autodecrement != nil && autodecrement.integerValue <= 0)
             return autodecrement;
         
-        //fall back to lowest number in table, if no autodecrement value is present
+        //fall back to lowest number in table, if no autodecrement value is present, but make sure they are still <= 0
         autodecrement = [self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"];
-        if(autodecrement != nil)
+        if(autodecrement != nil && autodecrement.integerValue <= 0)
             return autodecrement;
         
-        //fallback for empty history table and no autodecrement value
+        //fallback for empty history table or autodecrement values > 0
         return @0;
     }];
 }

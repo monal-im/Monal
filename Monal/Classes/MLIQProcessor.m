@@ -318,7 +318,7 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
                 if(msg != nil)
                 {
                     [historyIdList addObject:msg.messageDBId];      //we only need the history id to fetch a fresh copy later
-                    historyId = @([historyId intValue] + 1);      //calculate next history id
+                    historyId = @([historyId integerValue] + 1);    //calculate next history id
                 }
                 entryNo++;
             }

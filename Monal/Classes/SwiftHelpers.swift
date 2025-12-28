@@ -84,6 +84,26 @@ public extension Binding {
     }
 }
 
+public extension String {
+    /**
+     Returns an attributed version of the string, where the links are clickable.
+     */
+    func linkify() -> AttributedString {
+        var attributed = AttributedString(self)
+        if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
+            let range = NSRange(self.startIndex..., in: self)
+            detector.enumerateMatches(in: self, range: range) { match, _, _ in
+                if let match = match, let url = match.url, let range = Range(match.range, in: attributed) {
+                    attributed[range].link = url
+                    attributed[range].underlineStyle = .single
+                    attributed[range].foregroundColor = Color("monalGreen")
+                }
+            }
+        }
+        return attributed
+    }
+}
+
 @objc public enum NotificationPrivacySettingOption: Int, CaseIterable, RawRepresentable {
     case DisplayNameAndMessage
     case DisplayOnlyName

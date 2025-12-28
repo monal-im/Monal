@@ -541,23 +541,11 @@ struct NumberlessBadge: View {
 
 struct LinkedText: View {
     let attributed: AttributedString
-    
+
     init(_ text: String) {
-        //make links in text clickable
-        var attributed = AttributedString(text)
-        if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
-            let range = NSRange(text.startIndex..., in: text)
-            detector.enumerateMatches(in: text, range: range) { match, _, _ in
-                if let match = match, let url = match.url, let range = Range(match.range, in: attributed) {
-                    attributed[range].link = url
-                    attributed[range].underlineStyle = .single
-                    attributed[range].foregroundColor = .monalGreen
-                }
-            }
-        }
-        self.attributed = attributed
+        self.attributed = text.linkify()
     }
-    
+
     var body: some View {
         Text(attributed)
     }

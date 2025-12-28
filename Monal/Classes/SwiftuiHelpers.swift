@@ -579,10 +579,11 @@ struct ExternalLinkViewModifier: ViewModifier {
                     return .systemAction
                 }
             })
-            .sheet(isPresented: $urlToOpen.optionalMappedToBool(), onDismiss: {
+            .fullScreenCover(isPresented: $urlToOpen.optionalMappedToBool(), onDismiss: {
                 urlToOpen = nil
             }, content: {
                 SFSafariView(url: urlToOpen!)
+                    .ignoresSafeArea()
             })
     }
 }

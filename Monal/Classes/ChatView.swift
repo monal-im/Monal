@@ -1008,8 +1008,8 @@ struct MessageView: View {
             chatType: .conversation,
             avatarSize: 32,
             tapAvatarClosure: nil,
-            messageStyler: AttributedString.init,
-            shouldShowLinkPreview: { _ in true },
+            messageStyler: { $0.linkify() },
+            shouldShowLinkPreview: { _ in false },  //disabled for now due to https://github.com/exyte/Chat/issues/208
             isDisplayingMessageMenu: false,
             showMessageTimeView: true,
             messageLinkPreviewLimit: 8,

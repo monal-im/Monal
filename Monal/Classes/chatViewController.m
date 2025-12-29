@@ -277,6 +277,11 @@ enum msgSentState {
                     [rightBarButtons addObject:entry];
             self.navigationItem.rightBarButtonItems = rightBarButtons;
         }
+        
+        //update placeholder text, too
+        self.placeHolderText.text = [NSString stringWithFormat:NSLocalizedString(@"Message from %@", @""), self.jid];
+        if(self.contact.isMuc && [kMucRoleVisitor isEqualToString:[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact]])
+            self.placeHolderText.text = NSLocalizedString(@"You don't have voice in this chat", @"");
     });
 }
 
@@ -880,8 +885,7 @@ enum msgSentState {
     [self displayEncryptionStateInUI];
 
     [self handleBackgroundChanged];
-
-    self.placeHolderText.text = [NSString stringWithFormat:NSLocalizedString(@"Message from %@", @""), self.jid];
+    
     // Load message draft from db
     NSString* messageDraft = [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountID];
     if(messageDraft && [messageDraft length] > 0) {

@@ -194,6 +194,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalBlockListRefresh @"kMonalBlockListRefresh"
 #define kMonalContactRemoved @"kMonalContactRemoved"
 #define kMonalMucParticipantsAndMembersUpdated @"kMonalMucParticipantsAndMembersUpdated"
+#define kMonalMucOwnAffiliationOrRoleChanged @"kMonalMucOwnAffiliationOrRoleChanged"
 
 #define kMucTypeGroup @"group"
 #define kMucTypeChannel @"channel"

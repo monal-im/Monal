@@ -234,6 +234,12 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         intentIdentifiers:@[]
         options:UNNotificationCategoryOptionNone
     ];
+    UNNotificationCategory* somethingRegardingAContactCategory = [UNNotificationCategory
+        categoryWithIdentifier:@"somethingRegardingAContact"
+        actions:@[]
+        intentIdentifiers:@[]
+        options:UNNotificationCategoryOptionNone
+    ];
     UNNotificationCategory* subscriptionCategory = [UNNotificationCategory
         categoryWithIdentifier:@"subscription"
         actions:@[approveSubscriptionAction, denySubscriptionAction, blockSubscriptionAction]
@@ -285,7 +291,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             }
         });
     }];
-    [center setNotificationCategories:[NSSet setWithObjects:messageCategory, reactionCategory, subscriptionCategory , nil]];
+    [center setNotificationCategories:[NSSet setWithObjects:messageCategory, reactionCategory, somethingRegardingAContactCategory, subscriptionCategory , nil]];
 
     UINavigationBarAppearance* appearance = [UINavigationBarAppearance new];
     [appearance configureWithTransparentBackground];
@@ -836,6 +842,30 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             [[MLXMPPManager sharedInstance] block:YES contact:fromContact];
         }
         else if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
+            [self openChatOfContact:fromContact];
+        else
+            unreachable(@"Unexpected notification action!");
+    }
+    else if([response.notification.request.content.categoryIdentifier isEqualToString:@"somethingRegardingAContact"])
+    {
+        MLContact* fromContact = [HelperTools unserializeData:response.notification.request.content.userInfo[@"contact"]];
+        MLAssert(fromContact, @"fromContact should not be nil");
+        xmpp* account = fromContact.account;
+        //this can happen if that account got disabled
+        if(account == nil)
+        {
+            //call completion handler directly (we did not handle anything and no connectIfNecessary was called)
+            if(completionHandler)
+                completionHandler();
+            return;
+        }
+        
+        //add our completion handler to handler queue
+        [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result __unused) {
+            completionHandler();
+        }];
+        
+        if([response.actionIdentifier isEqualToString:@"com.apple.UNNotificationDefaultActionIdentifier"])     //open chat of this contact
             [self openChatOfContact:fromContact];
         else
             unreachable(@"Unexpected notification action!");

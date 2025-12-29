@@ -23,6 +23,9 @@
 //this is the required prototype from Holger's snprintf.c
 int rpl_vasprintf(char **, const char *, va_list *);
 
+@implementation XMLQueryBrokenException
+@end
+
 @interface MLXMLNode()
 {
     NSMutableArray* _children;
@@ -53,9 +56,9 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
-    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
-    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~]+[=~][^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
-    attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~]+)([=~])([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
+    pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^(/?(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+[=~!][^>]*\\>)*))((/((\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+[=~!][^>]*\\>)*)))*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=~!]+[=~!][^>]*\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$|\\\\[^\\\\]+\\\\)(\\|(bool|int|uint|double|datetime|base64|uuid|uuidcast))?)?$" options:NSRegularExpressionCaseInsensitive error:nil];
+    attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=~!]+)([=~!])(([^>]+)|)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 
 //     testcases for stanza
 //     <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism><mechanism>SCRAM-SHA-1-PLUS</mechanism></mechanisms></stream:features>
@@ -230,8 +233,8 @@ static NSRegularExpression* attributeFilterRegex;
 {
     [self.cache removeAllObjects];
     [self.queryEntryCache removeAllObjects];
-    DDLogVerbose(@"Removed all cached objects in this MLXMLNode due to memory pressure");
-    DDLogVerbose(@"Node: %@", self);
+    DDLogWarn(@"Removed all cached objects in this MLXMLNode due to memory pressure");
+    DDLogWarn(@"Node: %@", self);
 }
 
 -(void) setXMLNS:(NSString*) xmlns
@@ -415,7 +418,7 @@ static NSRegularExpression* attributeFilterRegex;
     //split our path into first component and rest
     NSArray* matches = [pathSplitterRegex matchesInString:queryString options:0 range:NSMakeRange(0, [queryString length])];
     if(![matches count])
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML query has syntax errors (no matches for path splitter regex)!" userInfo:@{
+        @throw [XMLQueryBrokenException exceptionWithName:@"SyntaxErrorException" reason:@"XML query has syntax errors (no matches for path splitter regex)!" userInfo:@{
             @"self": self,
             @"queryString": queryString,
         }];
@@ -463,7 +466,7 @@ static NSRegularExpression* attributeFilterRegex;
     }
     
     if(!parsedEntry[@"elementName"] && !parsedEntry[@"namespace"])
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML queries must not contain a path component having neither element name nor namespace!" userInfo:@{
+        @throw [XMLQueryBrokenException exceptionWithName:@"NeitherElementNorNamespaceException" reason:@"XML queries must not contain a path component having neither element name nor namespace!" userInfo:@{
             @"self": self,
             @"queryString": queryString,
             @"pathComponent": pathComponent,
@@ -512,19 +515,30 @@ static NSRegularExpression* attributeFilterRegex;
                 BOOL ok = YES;
                 for(NSDictionary* filter in parsedEntry[@"attributeFilters"])
                 {
-                    if(node.attributes[filter[@"name"]])
+                    if([filter[@"type"] isEqualToString:@"!"])
                     {
-                        NSArray* matches = [filter[@"value"] matchesInString:node.attributes[filter[@"name"]] options:0 range:NSMakeRange(0, [node.attributes[filter[@"name"]] length])];
-                        if(![matches count])
+                        if(node.attributes[filter[@"name"]] == nil)
                         {
-                            ok = NO;        //this node does *not* fullfill the attribute filter regex
+                            ok = NO;
                             break;
                         }
                     }
                     else
                     {
-                        ok = NO;
-                        break;
+                        if(node.attributes[filter[@"name"]])
+                        {
+                            NSArray* matches = [filter[@"value"] matchesInString:node.attributes[filter[@"name"]] options:0 range:NSMakeRange(0, [node.attributes[filter[@"name"]] length])];
+                            if(![matches count])
+                            {
+                                ok = NO;        //this node does *not* fullfill the attribute filter regex
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            ok = NO;
+                            break;
+                        }
                     }
                 }
                 if(!ok)
@@ -535,7 +549,7 @@ static NSRegularExpression* attributeFilterRegex;
             {
                 //sanity check
                 if([rest length] > 0)
-                    @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Extraction commands are only allowed for terminal nodes of XML queries!" userInfo:@{
+                    @throw [XMLQueryBrokenException exceptionWithName:@"ExtractionCommandOnNonTerminalNodeException" reason:@"Extraction commands are only allowed for terminal nodes of XML queries!" userInfo:@{
                         @"self": self,
                         @"node": node,
                         @"queryString": queryString,
@@ -553,7 +567,7 @@ static NSRegularExpression* attributeFilterRegex;
                 else if([parsedEntry[@"extractionCommand"] isEqualToString:@"\\"])
                 {
                     if(![node respondsToSelector:NSSelectorFromString(@"processDataFormQuery:")])
-                        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Data form extractions can only be used on data forms! This exception means you have a bug somewhere else in your code (probably at the source of the element you are trying to use in your data form query)!" userInfo:@{
+                        @throw [XMLQueryBrokenException exceptionWithName:@"DataFormsQueryOnNonDataFormsNodeException" reason:@"Data form extractions can only be used on data forms! This exception means you have a bug somewhere else in your code (probably at the source of the element you are trying to use in your data form query)!" userInfo:@{
                             @"self": self,
                             @"node": node,
                             @"queryString": queryString,
@@ -566,7 +580,7 @@ static NSRegularExpression* attributeFilterRegex;
                     {
                         //check if we try to operate a conversion command on something not a single extracted simple form field of type NSString
                         if(parsedEntry[@"conversionCommand"] && ![extraction isKindOfClass:[NSString class]])
-                            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Conversion commands can not be used on data form extractions returning the whole data form or an NSArray/NSDictionary!" userInfo:@{
+                            @throw [XMLQueryBrokenException exceptionWithName:@"DataFormsConversionException" reason:@"Conversion commands can not be used on data form extractions returning the whole data form or an NSArray/NSDictionary!" userInfo:@{
                                 @"self": self,
                                 @"node": node,
                                 @"queryString": queryString,
@@ -579,7 +593,7 @@ static NSRegularExpression* attributeFilterRegex;
                 else if([parsedEntry[@"extractionCommand"] isEqualToString:@"@"] && [parsedEntry[@"attribute"] isEqualToString:@"@"])
                 {
                     if(parsedEntry[@"conversionCommand"])
-                        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Conversion commands can not be used on attribute dict extractions (e.g. extraction command '@@')!" userInfo:@{
+                        @throw [XMLQueryBrokenException exceptionWithName:@"ConversionCommandOnNonStringResultException" reason:@"Conversion commands can not be used on attribute dict extractions (e.g. extraction command '@@')!" userInfo:@{
                             @"self": self,
                             @"node": node,
                             @"queryString": queryString,
@@ -594,7 +608,7 @@ static NSRegularExpression* attributeFilterRegex;
             else
             {
                 if(parsedEntry[@"conversionCommand"])
-                    @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Conversion commands are only allowed for terminal nodes of XML queries that use an extraction command!" userInfo:@{
+                    @throw [XMLQueryBrokenException exceptionWithName:@"ConversionCommandOnNonTerminalNodeException" reason:@"Conversion commands are only allowed for terminal nodes of XML queries that use an extraction command!" userInfo:@{
                         @"self": self,
                         @"node": node,
                         @"queryString": queryString,
@@ -673,7 +687,7 @@ static NSRegularExpression* attributeFilterRegex;
     NSMutableDictionary* retval = [NSMutableDictionary new];
     NSArray* matches = [componentParserRegex matchesInString:entry options:0 range:NSMakeRange(0, [entry length])];
     if(![matches count])
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Could not parse path component!" userInfo:@{
+        @throw [XMLQueryBrokenException exceptionWithName:@"PathComponentBrokenException" reason:@"Could not parse path component!" userInfo:@{
             @"self": self,
             @"queryEntry": entry
         }];
@@ -699,19 +713,27 @@ static NSRegularExpression* attributeFilterRegex;
         {
             NSRange attributeFilterNameRange = [attributeFilterMatch rangeAtIndex:1];
             NSRange attributeFilterTypeRange = [attributeFilterMatch rangeAtIndex:2];
-            NSRange attributeFilterValueRange = [attributeFilterMatch rangeAtIndex:3];
-            if(attributeFilterNameRange.location == NSNotFound || attributeFilterTypeRange.location == NSNotFound || attributeFilterValueRange.location == NSNotFound)
-                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter not complete!" userInfo:@{
+            if(attributeFilterNameRange.location == NSNotFound || attributeFilterTypeRange.location == NSNotFound)
+                @throw [XMLQueryBrokenException exceptionWithName:@"AttributeFilterIncompleteException" reason:@"Attribute filter not complete!" userInfo:@{
                     @"self": self,
                     @"queryEntry": entry,
                     @"attributeFilters": attributeFilters
                 }];
-            
             NSString* attributeFilterName = [attributeFilters substringWithRange:attributeFilterNameRange];
             unichar attributeFilterType = [[attributeFilters substringWithRange:attributeFilterTypeRange] characterAtIndex:0];
-            NSString* attributeFilterValue = [attributeFilters substringWithRange:attributeFilterValueRange];
             
-            NSString* attributeFilterValueRegexPattern;
+            NSRange attributeFilterValueRange = [attributeFilterMatch rangeAtIndex:4];
+            if(attributeFilterType != '!' && attributeFilterValueRange.location == NSNotFound)
+                @throw [XMLQueryBrokenException exceptionWithName:@"AttributeFilterIncompleteException" reason:@"Attribute filter not complete!" userInfo:@{
+                    @"self": self,
+                    @"queryEntry": entry,
+                    @"attributeFilters": attributeFilters
+                }];
+            NSString* attributeFilterValue = nil;
+            if(attributeFilterValueRange.location != NSNotFound)
+                attributeFilterValue = [attributeFilters substringWithRange:attributeFilterValueRange];
+            
+            NSString* attributeFilterValueRegexPattern = nil;
             if(attributeFilterType == '=')      //verbatim comparison using format string interpolation
             {
                 //substitute format string specifiers inside of our attribute filter string.
@@ -735,8 +757,12 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
             }
             else if(attributeFilterType == '~')      //raw regex comparison *without* format string interpolation
+            {
                 //you will have to include sring-start and string-end markers yourself as well as all other regex stuff
                 attributeFilterValueRegexPattern = attributeFilterValue;
+            }
+            else if(attributeFilterType == '!')
+                ;       //no attributeFilterValueRegexPattern needed for attribute presence check
             else
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Internal attribute filter bug, this should never happen!" userInfo:@{
                     @"self": self,
@@ -744,21 +770,34 @@ static NSRegularExpression* attributeFilterRegex;
                     @"attributeFilters": attributeFilters
                 }];
                 
-            NSError* error;
-            [retval[@"attributeFilters"] addObject:@{
-                @"name": attributeFilterName,
-                //this regex will be cached in parsed form in the local cache of this method
-                @"value": [NSRegularExpression regularExpressionWithPattern:attributeFilterValueRegexPattern options:NSRegularExpressionCaseInsensitive error:&error]
-            }];
-            if(error)
-                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
-                    @"self": self,
-                    @"queryEntry": entry,
-                    @"filterType": @(attributeFilterType),
-                    @"filterName": attributeFilterName,
-                    @"filterValue": attributeFilterValue,
-                    @"error": error
+            NSError* error = nil;
+            if(attributeFilterValueRegexPattern == nil)
+                [retval[@"attributeFilters"] addObject:@{
+                    @"name": attributeFilterName,
+                    @"type": [NSString stringWithCharacters:&attributeFilterType length:1],
                 }];
+            else
+            {
+                NSRegularExpression* compiledRegex = [NSRegularExpression regularExpressionWithPattern:attributeFilterValueRegexPattern options:NSRegularExpressionCaseInsensitive error:&error];
+                if(error || compiledRegex == nil)
+                    @throw [XMLQueryBrokenException exceptionWithName:@"AttributeFilterRegexException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
+                        @"self": self,
+                        @"queryEntry": entry,
+                        @"filterType": [NSString stringWithCharacters:&attributeFilterType length:1],
+                        @"filterName": attributeFilterName,
+                        @"filterValue": nilWrapper(attributeFilterValue),
+                        @"filterRegex": nilWrapper(attributeFilterValueRegexPattern),
+                        @"compiledFilterRegex": nilWrapper(compiledRegex),
+                        @"error": nilWrapper(error),
+                    }];
+                else
+                    [retval[@"attributeFilters"] addObject:@{
+                        @"name": attributeFilterName,
+                        @"type": [NSString stringWithCharacters:&attributeFilterType length:1],
+                        //this regex will be cached in parsed form in the local cache of this method
+                        @"value": compiledRegex,
+                    }];
+            }
         }
 #ifdef DEBUG_XMLQueryLanguage
         DDLogDebug(@"Done extracting, attributeFilters are now: %@", retval[@"attributeFilters"]);
@@ -803,9 +842,9 @@ static NSRegularExpression* attributeFilterRegex;
     NSMutableString* outputString = [NSMutableString new];
     [outputString appendString:[NSString stringWithFormat:@"<%@", _element]];
     
-    //set attributes
+    //set attributes (sort them to stabilize xml output)
     MLXMLNode* parent = self.parent;
-    for(NSString* key in [_attributes allKeys])
+    for(NSString* key in [[_attributes allKeys] sortedArrayUsingSelector:@selector(compare:)])
     {
         //handle xmlns inheritance (don't add namespace to childs if it should be the same like the parent's one)
         if([key isEqualToString:@"xmlns"] && parent && [[NSString stringWithFormat:@"%@", _attributes[@"xmlns"]] isEqualToString:[NSString stringWithFormat:@"%@", parent.attributes[@"xmlns"]]])

@@ -40,6 +40,7 @@ struct AVCallUI: View {
     )
     @State private var cameraPosition: AVCaptureDevice.Position = .front
     @State private var sendingVideo = true
+    @State private var videoRenderingStarted = false
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -64,7 +65,6 @@ struct AVCallUI: View {
         
         self.localRenderer = RTCMTLVideoView(frame: UIScreen.main.bounds)
         self.localRenderer.videoContentMode = .scaleAspectFill
-        self.localRenderer.transform = CGAffineTransformMakeScale(-1.0, 1.0)        //local video should be displayed as "mirrored"
         
         self.ringingPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"ringing", withExtension:"wav", subdirectory:"CallSounds")!)
         self.busyPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"busy", withExtension:"wav", subdirectory:"CallSounds")!)
@@ -72,11 +72,19 @@ struct AVCallUI: View {
     }
     
     func maybeStartRenderer() {
-        if MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
+        if !videoRenderingStarted && MLCallType(rawValue:call.callType) == .video && MLCallState(rawValue:call.state) == .connected {
             DDLogInfo("Starting local and remote video renderers...")
+            //local video should be displayed as "mirrored", if front camera is used
+            self.localRenderer.transform = CGAffineTransformMakeScale(cameraPosition == .front ? -1.0 : 1.0, 1.0)
             call.obj.startCaptureLocalVideo(withRenderer: self.localRenderer, andCameraPosition:cameraPosition)
             call.obj.renderRemoteVideo(withRenderer: self.remoteRenderer)
+            videoRenderingStarted = true
         }
+    }
+    
+    func stopRenderer() {
+        call.obj.stopCaptureLocalVideo()
+        videoRenderingStarted = false
     }
     
     func handleStateChange(_ state:MLCallState, _ audioState:MLAudioState) {
@@ -109,6 +117,9 @@ struct AVCallUI: View {
             case .connected:
                 DDLogDebug("state: connected")
                 maybeStartRenderer()
+                if MLCallType(rawValue:call.callType) == .video {
+                    call.speaker = true
+                }
             case .finished:
                 DDLogDebug("state: finished: \(String(describing:call.finishReason as NSNumber))")
                 //check audio state before trying to play anything (if we are still in state .call,
@@ -189,7 +200,7 @@ struct AVCallUI: View {
                             } else {
                                 cameraPosition = .front
                             }
-                            call.obj.stopCaptureLocalVideo()
+                            stopRenderer()
                             maybeStartRenderer()
                         }, label: {
                             Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
@@ -550,8 +561,8 @@ struct AVCallUI: View {
             UIApplication.shared.isIdleTimerDisabled = true
             
             self.ringingPlayer.numberOfLoops = -1
-            self.busyPlayer.numberOfLoops = -1
-            self.errorPlayer.numberOfLoops = -1
+            self.busyPlayer.numberOfLoops = 6
+            self.errorPlayer.numberOfLoops = 6
             
             //ask for mic permissions
             AVAudioSession.sharedInstance().requestRecordPermission { granted in
@@ -572,7 +583,7 @@ struct AVCallUI: View {
             errorPlayer.stop()
             
             if MLCallType(rawValue:call.callType) == .video {
-                call.obj.stopCaptureLocalVideo()
+                stopRenderer()
             }
         }
         .onChange(of: MLCallState(rawValue:call.state)) { state in

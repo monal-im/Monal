@@ -579,18 +579,23 @@ static NSMutableDictionary* _typingNotifications;
             {
                 NSString* messageIdToReplace = [messageNode findFirst:@"{urn:xmpp:message-correct:0}replace@id"];
                 DDLogVerbose(@"Message id to LMC-replace: %@", messageIdToReplace);
-                //this checks if this message is from the same jid as the message it tries to do the LMC for (e.g. inbound can only correct inbound and outbound only outbound)
-                historyId = [[DataLayer sharedInstance] getLMCHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser occupantId:occupantId participantJid:participantJid andAccount:account.accountNo];
-                DDLogVerbose(@"History id to LMC-replace: %@", historyId);
-                //now check if the LMC is allowed (we use historyIdToUse for MLhistory mam queries to only check LMC for the 3 messages coming before this ID in this converastion)
-                //historyIdToUse will be nil, for messages going forward in time which means (check for the newest 3 messages in this conversation)
-                if(historyId != nil && [[DataLayer sharedInstance] checkLMCEligible:historyId encrypted:encrypted historyBaseID:historyIdToUse])
-                {
-                    [[DataLayer sharedInstance] updateMessageHistory:historyId withText:body];
-                    LMCReplaced = YES;
-                }
+                if(messageIdToReplace == nil)
+                    DDLogWarn(@"Ignoring LMC message not carrying a replacement id, spec vialoation!");
                 else
-                    historyId = nil;
+                {
+                    //this checks if this message is from the same jid as the message it tries to do the LMC for (e.g. inbound can only correct inbound and outbound only outbound)
+                    historyId = [[DataLayer sharedInstance] getLMCHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser occupantId:occupantId participantJid:participantJid andAccount:account.accountNo];
+                    DDLogVerbose(@"History id to LMC-replace: %@", historyId);
+                    //now check if the LMC is allowed (we use historyIdToUse for MLhistory mam queries to only check LMC for the 3 messages coming before this ID in this converastion)
+                    //historyIdToUse will be nil, for messages going forward in time which means (check for the newest 3 messages in this conversation)
+                    if(historyId != nil && [[DataLayer sharedInstance] checkLMCEligible:historyId encrypted:encrypted historyBaseID:historyIdToUse])
+                    {
+                        [[DataLayer sharedInstance] updateMessageHistory:historyId withText:body];
+                        LMCReplaced = YES;
+                    }
+                    else
+                        historyId = nil;
+                }
             }
             
             //handle normal messages or LMC messages that can not be found

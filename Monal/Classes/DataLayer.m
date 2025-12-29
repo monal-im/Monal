@@ -1287,7 +1287,7 @@ static NSDateFormatter* dbFormatter;
             if(!success)
                 return (NSNumber*)nil;
             NSNumber* historyId = [self.db lastInsertId];
-            [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
+            [self updateActiveBuddy:buddyName setTime:dateString forAccount:accountNo];
             return historyId;
         }
         else
@@ -1895,8 +1895,8 @@ static NSDateFormatter* dbFormatter;
         //add contact if possible (ignore already existing contacts)
         [self addContact:buddyname forAccount:accountNo nickname:nil];
 
-        // insert or update active chat
-        NSString* query = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp) ON CONFLICT(buddy_name, account_id) DO UPDATE SET lastMessageTime=current_timestamp;";
+        // insert active chat (do nothing if it's already there)
+        NSString* query = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp) ON CONFLICT(buddy_name, account_id) DO NOTHING;";
         [self.db executeNonQuery:query andArguments:@[buddyname, accountNo]];
     }];
     return;

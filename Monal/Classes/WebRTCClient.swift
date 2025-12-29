@@ -32,7 +32,6 @@ final class WebRTCClient: NSObject {
     @objc public let peerConnection: RTCPeerConnection
     private let rtcAudioSession =  RTCAudioSession.sharedInstance()
     private let audioQueue = DispatchQueue(label: "audio")
-    private let streamId = "-"
     private var mediaConstrains: [String:String] = [:]
     private var videoCapturer: RTCVideoCapturer?
     private var localVideoTrack: RTCVideoTrack?
@@ -110,8 +109,8 @@ final class WebRTCClient: NSObject {
         self.peerConnection = peerConnection!
         super.init()
         
-        self.createMediaSenders(audioOnly: audioOnly)
         self.peerConnection.delegate = self
+        self.createMediaSenders(audioOnly: audioOnly)
         
         if audioOnly {
             self.mediaConstrains = [
@@ -206,6 +205,7 @@ final class WebRTCClient: NSObject {
     
     @objc
     func renderRemoteVideo(to renderer: RTCVideoRenderer) {
+        DDLogInfo("Now rendering remote video to RTCVideoRenderer view...")
         self.remoteVideoTrack?.add(renderer)
     }
     
@@ -213,8 +213,22 @@ final class WebRTCClient: NSObject {
     func addVideo() {
         let videoTrack = self.createVideoTrack()
         self.localVideoTrack = videoTrack
-        self.peerConnection.add(videoTrack, streamIds: [self.streamId])
-        self.remoteVideoTrack = self.peerConnection.transceivers.first { $0.mediaType == .video }?.receiver.track as? RTCVideoTrack
+        
+        self.peerConnection.add(videoTrack, streamIds: [UUID().uuidString])
+        let videoTransceiver = self.peerConnection.transceivers.first { $0.mediaType == .video }!
+//         let videoTransceiver = self.peerConnection.addTransceiver(of:.video, init:RTCRtpTransceiverInit())!
+//         videoTransceiver.sender.track = videoTrack
+        
+        let capabilities = WebRTCClient.factory.rtpSenderCapabilities(forKind: kRTCMediaStreamTrackKindVideo)
+        let codecs = capabilities.codecs
+        let preferredCodecs = codecs.filter { $0.name=="VP8" }
+        do {
+            try videoTransceiver.setCodecPreferences(preferredCodecs)
+        } catch {
+            DDLogError("Error setting codec preferences: \(String(describing:error))")
+        }
+        
+        self.remoteVideoTrack = videoTransceiver.receiver.track as? RTCVideoTrack
     }
     
     @objc
@@ -235,7 +249,10 @@ final class WebRTCClient: NSObject {
     private func createMediaSenders(audioOnly: Bool) {
         //Audio
         let audioTrack = self.createAudioTrack()
-        self.peerConnection.add(audioTrack, streamIds: [self.streamId])
+        
+//         let audioTransceiver = self.peerConnection.addTransceiver(of:.audio, init:RTCRtpTransceiverInit())
+//         audioTransceiver?.sender.track = audioTrack
+        self.peerConnection.add(audioTrack, streamIds: [UUID().uuidString])
         
         //Video
         if !audioOnly {
@@ -312,10 +329,14 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
         DDLogDebug("peerConnection did add stream")
+//         self.remoteVideoTrack = stream.videoTracks.first(where: { $0 is RTCVideoTrack }) as? RTCVideoTrack
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
         DDLogDebug("peerConnection did remove stream")
+//         if stream.videoTracks.first(where: { $0.trackId == self.remoteVideoTrack?.trackId }) != nil {
+//             self.remoteVideoTrack = nil
+//         }
     }
     
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {

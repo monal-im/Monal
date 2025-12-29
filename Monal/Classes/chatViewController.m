@@ -13,6 +13,7 @@
 #import "MLLinkCell.h"
 #import "MLReloadCell.h"
 #import "MLUploadQueueCell.h"
+#import "UIColor+Theme.h"
 
 #import "ActiveChatsViewController.h"
 #import "AESGcm.h"
@@ -246,7 +247,7 @@ enum msgSentState {
 -(void) updateVoiceRequestButton
 {
     BOOL shouldBePresent = NO;
-    if(self.contact.isMuc && [kMucRoleVisitor isEqualToString:[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact]])
+    if(self.contact.isGroup && [kMucRoleVisitor isEqualToString:[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact]])
         shouldBePresent = YES;
     
     BOOL present = NO;
@@ -259,7 +260,7 @@ enum msgSentState {
         {
             UIBarButtonItem* requestVoiceButton = [UIBarButtonItem new];
             [requestVoiceButton setAction:@selector(requestVoice:)];
-            requestVoiceButton.image = [[UIImage systemImageNamed:@"checkmark.bubble"] imageWithTintColor:UIColor.tintColor];
+            requestVoiceButton.image = [[UIImage systemImageNamed:@"checkmark.bubble"] imageWithTintColor:UIColor.monalGreen];
             [requestVoiceButton setIsAccessibilityElement:YES];
             [requestVoiceButton setAccessibilityLabel:NSLocalizedString(@"Request Voice", @"")];
             [requestVoiceButton setAccessibilityTraits:UIAccessibilityTraitButton];
@@ -279,7 +280,7 @@ enum msgSentState {
         
         //update placeholder text, too
         self.placeHolderText.text = [NSString stringWithFormat:NSLocalizedString(@"Message from %@", @""), self.jid];
-        if(self.contact.isMuc && [kMucRoleVisitor isEqualToString:[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact]])
+        if(self.contact.isGroup && [kMucRoleVisitor isEqualToString:[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact]])
             self.placeHolderText.text = NSLocalizedString(@"You don't have voice in this chat", @"");
     });
 }

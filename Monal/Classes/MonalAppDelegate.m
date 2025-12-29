@@ -802,7 +802,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     {
         MLContact* fromContact = [HelperTools unserializeData:response.notification.request.content.userInfo[@"contact"]];
         MLAssert(fromContact, @"fromContact should not be nil");
-        xmpp* account = fromContact.account;
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
         //this can happen if that account got disabled
         if(account == nil)
         {

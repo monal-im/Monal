@@ -56,6 +56,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleContactRefresh:) name:kMonalContactRemoved object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleOwnRoleOrAffiliationChange:) name:kMonalMucOwnAffiliationOrRoleChanged object:nil];
     return self;
 }
 
@@ -64,6 +65,29 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     NotificationPrivacySettingOption value = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     DDLogVerbose(@"Current NotificationPrivacySettingOption: %d", (int)value);
     return value;
+}
+
+-(void) handleOwnRoleOrAffiliationChange:(NSNotification*) notification
+{
+    MLContact* contact = notification.userInfo[@"contact"];
+    NSString* oldRole = nilExtractor(notification.userInfo[@"oldRole"]);
+    NSString* newRole = nilExtractor(notification.userInfo[@"newRole"]);
+    
+    //show notification if we were granted voice in a moderated channel
+    if(newRole != nil && oldRole != nil && ![newRole isEqualToString:oldRole] && [kMucRoleVisitor isEqualToString:oldRole])
+    {
+        NSString* idval = [NSString stringWithFormat:@"roleChange(%@, %@)", contact.accountId, contact.contactJid];
+        
+        UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+        content.title = contact.contactDisplayName;
+        content.body = NSLocalizedString(@"You were granted voice in this channel.", @"");
+        content.threadIdentifier = [self threadIdentifierWithContact:contact];
+        content.categoryIdentifier = @"somethingRegardingAContact";
+        content.userInfo = @{@"contact": [HelperTools serializeObject:contact]};
+        
+        DDLogDebug(@"Publishing notification with id %@", idval);
+        [self publishNotificationContent:content withID:idval];
+    }
 }
 
 -(void) handleContactRefresh:(NSNotification*) notification
@@ -79,6 +103,40 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     xmpp* xmppAccount = notification.object;
     MLContact* contact = notification.userInfo[@"contact"];
     NSString* idval = [NSString stringWithFormat:@"subscription(%@, %@)", contact.accountId, contact.contactJid];
+    
+    //contact request denial or unsubscribe
+    if(notification.userInfo[@"unsubscribed"] != nil && [notification.userInfo[@"unsubscribed"] boolValue] == YES)
+    {
+        idval = [NSString stringWithFormat:@"unsubscription(%@, %@)", contact.accountId, contact.contactJid];
+        
+        //unsubscribe
+        if(contact.isSubscribedTo)
+        {
+            UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+            content.title = xmppAccount.connectionProperties.identity.jid;
+            content.body = [NSString stringWithFormat:NSLocalizedString(@"The user %@ (%@) removed you from their contact list. You can send out a new contact request, if you think this was a mistake.", @""), contact.contactDisplayName, contact.contactJid];
+            content.threadIdentifier = [self threadIdentifierWithContact:contact];
+            content.categoryIdentifier = @"somethingRegardingAContact";
+            content.userInfo = @{@"contact": [HelperTools serializeObject:contact]};
+            
+            DDLogDebug(@"Publishing notification with id %@", idval);
+            [self publishNotificationContent:content withID:idval];
+        }
+        //contact request denial
+        else
+        {
+            UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+            content.title = xmppAccount.connectionProperties.identity.jid;
+            content.body = [NSString stringWithFormat:NSLocalizedString(@"The user %@ (%@) denied your contact request. You can try again, if you think this was a mistake.", @""), contact.contactDisplayName, contact.contactJid];
+            content.threadIdentifier = [self threadIdentifierWithContact:contact];
+            content.categoryIdentifier = @"somethingRegardingAContact";
+            content.userInfo = @{@"contact": [HelperTools serializeObject:contact]};
+            
+            DDLogDebug(@"Publishing notification with id %@", idval);
+            [self publishNotificationContent:content withID:idval];
+        }
+        return;
+    }
     
     //remove contact requests notification once the contact request has been accepted
     if(!contact.hasIncomingContactRequest)
@@ -260,6 +318,15 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.buddyName onAccount:message.accountId];
     if(!muted && message.isMuc == YES && [[DataLayer sharedInstance] isMucAlertOnMentionOnly:message.buddyName onAccount:message.accountId])
     {
+        //check for high mention count and then ignore mentions altogether
+        NSSet* words = [NSSet setWithArray:[message.messageText componentsSeparatedByString:@" "]];
+        NSMutableSet* participants = [NSMutableSet new];
+        for(NSDictionary* entry in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountId:message.accountId])
+            [participants addObject:nilWrapper(entry[@"room_nick"])];       //nil wrapper just to make sure, should never intersect with words
+        [participants intersectSet:words];
+        if([participants count] > 5)
+            muted = YES;
+        
         NSString* displayName = [MLContact ownDisplayNameForAccount:xmppAccount];
         NSString* ownJid = xmppAccount.connectionProperties.identity.jid;
         NSString* userPart = [HelperTools splitJid:ownJid][@"user"];

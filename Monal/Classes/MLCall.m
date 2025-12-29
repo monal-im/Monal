@@ -900,10 +900,10 @@
             self.encryptionState = MLCallEncryptionStateClear;
         
         XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
-        [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+        [sdpIQ addChildNode:[self sanitizeJingleNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
             @"action": @"session-initiate",
             @"sid": self.jmiid,
-        } andChildren:children andData:nil]];
+        } andChildren:children andData:nil]]];
         @synchronized(self.candidateQueueLock) {
             self.localSDP = sdpIQ;
         }
@@ -1591,12 +1591,12 @@
         if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
         {
             type = @"answer";
-            rawSDP = [HelperTools xml2sdp:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:NO];
+            rawSDP = [HelperTools xml2sdp:[self sanitizeJingleNode:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"]] withInitiator:NO];
         }
         else if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"])
         {
             type = @"offer";
-            rawSDP = [HelperTools xml2sdp:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:YES];
+            rawSDP = [HelperTools xml2sdp:[self sanitizeJingleNode:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"]] withInitiator:YES];
         }
     }
     //handle session-terminate: fake jmi finish message and handle it
@@ -1710,10 +1710,10 @@
                     [self.account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
                     
                     XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
-                    [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+                    [sdpIQ addChildNode:[self sanitizeJingleNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
                         @"action": @"session-accept",
                         @"sid": self.jmiid,
-                    } andChildren:children andData:nil]];
+                    } andChildren:children andData:nil]]];
                     [self.account send:sdpIQ];
                     
                     @synchronized(self.candidateQueueLock) {
@@ -1835,6 +1835,19 @@
     //this is only true if at least one fingerprint could be found and decrypted
     //(that could be false, if the remote did something weird or a MITM changed something)
     return retval;
+}
+
+-(MLXMLNode*) sanitizeJingleNode:(MLXMLNode*) jingleNode
+{
+    //modify jingle to only include VP8, VP9 and H264 codecs
+    //in particular this means: not having any error correction codecs: these cause black video streams
+    NSArray* allowedCodecs = @[@"VP8"];//, @"VP9", @"H264"];
+    MLXMLNode* sanitizedNode = [jingleNode copy];
+    for(MLXMLNode* videoNode in [sanitizedNode find:@"content/{urn:xmpp:jingle:apps:rtp:1}description<media=video>"])
+        for(MLXMLNode* payloadNode in [videoNode find:@"payload-type"])
+            if(![allowedCodecs containsObject:[payloadNode findFirst:@"/@name"]])
+                [videoNode removeChildNode:payloadNode];
+    return sanitizedNode;
 }
 
 @end

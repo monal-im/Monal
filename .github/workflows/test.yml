@@ -1,0 +1,56 @@
+name: Run automated tests
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - beta
+      - stable
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  run_tests:
+    runs-on: macos-14
+    name: Run automated tests
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          submodules: true
+          fetch-depth: 100
+          fetch-tags: true
+          show-progress: true
+          lfs: true
+      - name: Checkout submodules
+        run: git submodule update -f --init --remote
+      - name: Select Xcode version
+        run: sudo xcode-select -s '/Applications/Xcode_16.2.app/Contents/Developer'
+      - name: Install coreutils
+        run: brew install coreutils
+      - name: Build rust
+        run: bash ./rust/build-rust.sh
+      - name: Install pods
+        working-directory: Monal
+        run: pod install --repo-update
+      - name: Run tests
+        working-directory: Monal
+        run: |
+          set -o pipefail && \
+          NSUnbufferedIO=YES xcodebuild \
+            -workspace Monal.xcworkspace \
+            -scheme Monal \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            test \
+            2>&1 | \
+          stdbuf -oL -eL xcbeautify --renderer github-actions | \
+          while IFS= read -r line; do \
+            echo "$line"; \
+            if [[ "$line" =~ "✔" ]]; then \
+              echo "::notice ::${line}"; \
+            fi; \
+          done

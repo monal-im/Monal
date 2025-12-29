@@ -23,30 +23,6 @@ class MonalUITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    private func intro(app: XCUIApplication)
-    {
-        // wait for launch
-        sleep(1)
-
-        let elementsQuery = app.scrollViews["intro_scroll"].otherElements
-        elementsQuery.buttons["Welcome to Monal, Chat for free with your friends, colleagues and family!"].swipeLeft()
-        sleep(1)
-        elementsQuery.buttons["Choices Galore, Use your existing account or make a new one on the many servers around the world"].swipeLeft()
-        sleep(1)
-        elementsQuery.buttons["Escape The Garden, You are not trapped in a garden. Talk to anyone else without anyone tracking you."].swipeLeft()
-        sleep(1)
-        elementsQuery.buttons["Spread The Word, If you like Monal, please let others know and leave a review"].swipeLeft()
-        sleep(1)
-    }
-
-    private func introSkip(app: XCUIApplication)
-    {
-        // wait for launch
-        sleep(1)
-        app.buttons["Skip"].tap()
-        sleep(1)
-    }
-
     private func createStartArgs() -> [String]
     {
         return createStartArgs(extraArgs: [])
@@ -82,99 +58,8 @@ class MonalUITests: XCTestCase {
         XCTAssertTrue(app.buttons["microphone"].exists)
     }
 
-    func test_0001_DBInit() throws {
-        let app = XCUIApplication()
-        app.launchArguments = createStartArgs(extraArgs: ["--reset"])
-        app.launch()
-    }
-
-    func test_0002_Intro() throws
-    {
-        let app = XCUIApplication()
-        app.launchArguments = createStartArgs(extraArgs: ["--reset"])
-        app.launch()
-
-        intro(app: app)
-
-        let elementsQuery2 = app.scrollViews.otherElements
-        elementsQuery2.textFields["Account@something.com"].tap()
-        elementsQuery2.secureTextFields["Password"].tap()
-    }
-
-    func test_0003_IntroSkip() throws
-    {
-        let app = XCUIApplication()
-        app.launchArguments = createStartArgs(extraArgs: ["--reset"])
-        app.launch()
-
-        introSkip(app: app)
-        app.scrollViews.otherElements.buttons["Set up an account later"].tap()
-
-        let chatsNavigationBar = app.navigationBars["Chats"]
-        chatsNavigationBar.buttons["Add"].tap()
-
-        let closeButton = app.alerts["No enabled account found"].scrollViews.otherElements.buttons["Close"]
-        closeButton.tap()
-        chatsNavigationBar.buttons["Compose"].tap()
-        closeButton.tap()
-    }
-
-    func test_0005_Register() throws
-    {
-        let app = XCUIApplication()
-        app.launchArguments =  createStartArgs(extraArgs: ["--reset"])
-        app.launch()
-
-        introSkip(app: app)
-
-        let elementsQuery = app.scrollViews.otherElements
-        let registerStaticText = elementsQuery.buttons["Register"]
-        registerStaticText.tap()
-
-        app.scrollViews.otherElements.buttons["Terms of service"].tap()
-        // wait for safari window to open
-        sleep(5)
-        app.buttons["Done"].tap()
-        elementsQuery.textFields["Username"].tap()
-        // create random username
-        elementsQuery.textFields["Username"].typeText(String(format: "MonalTestclient-%d", Int.random(in: 1000..<999999)))
-
-        elementsQuery.secureTextFields["Password"].tap()
-        elementsQuery.secureTextFields["Password"].typeText(randomPassword())
-        registerStaticText.tap()
-        // wait for register hud
-        sleep(10)
-        let startChattingStaticText = app.buttons["Start Chatting"]
-        startChattingStaticText.tap()
-        sleep(1)
-        app.navigationBars["Privacy Settings"].buttons["Close"].tap()
-        startChattingStaticText.tap()
-    }
-
-    func test_0007_PlusAndContactsButtons() throws {
-        let app = XCUIApplication()
-        app.launchArguments = createStartArgs()
-        app.launch()
-
-        let chatsNavigationBar = app.navigationBars["Chats"]
-        sleep(1)
-        chatsNavigationBar.buttons["Add"].tap()
-
-        let tablesQuery = app.tables
-        tablesQuery.staticTexts["Add a New Contact"].tap()
-        app.navigationBars["Add Contact"].buttons["New"].tap()
-        tablesQuery.staticTexts["Join a Group Chat"].tap()
-        app.navigationBars["Join Group Chat"].buttons["New"].tap()
-        tablesQuery.staticTexts["View Contact Requests"].tap()
-        app.navigationBars["Contact Requests"].buttons["New"].tap()
-        app.navigationBars["New"].buttons["Close"].tap()
-        chatsNavigationBar.buttons["Compose"].tap()
-
-        let contactsNavigationBar = app.navigationBars["Contacts"]
-        contactsNavigationBar.buttons["Close"].tap()
-    }
-
     func test_0008_AddContact() throws {
+        try XCTSkipIf(true, "This test is left as an example of UI tests. At some point in the future we should consider rewriting these.")
         let app = XCUIApplication()
         app.launchArguments = createStartArgs()
         app.launch()

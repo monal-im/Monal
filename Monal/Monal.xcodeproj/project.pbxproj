@@ -165,6 +165,8 @@
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
 		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; };
+		84C6F6032D597FB20015575E /* ParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C6F6022D597FB20015575E /* ParserTest.m */; };
+		84C6F6072D597FF40015575E /* HandlerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C6F6062D597FF40015575E /* HandlerTest.m */; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
 		84E231F32C16A9CE00735FB7 /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 84E231F22C16A9CE00735FB7 /* SVGView */; };
 		84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
@@ -578,8 +580,6 @@
 		8420EA9A2915E4FE0038FF40 /* OmemoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OmemoState.h; sourceTree = "<group>"; };
 		8420EA9C2915E5100038FF40 /* OmemoState.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OmemoState.m; sourceTree = "<group>"; };
 		842790842A32D16C005C18CC /* CallSounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CallSounds; sourceTree = "<group>"; };
-		8430EB382E5D6CDC007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Main.strings; sourceTree = "<group>"; };
-		8430EB392E5D6D68007A2B1F /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Settings.strings; sourceTree = "<group>"; };
 		843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MLOgHtmlParser.swift; path = Classes/MLOgHtmlParser.swift; sourceTree = "<group>"; };
 		8441EFF82921B53500E851E9 /* BackgroundSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSettings.swift; sourceTree = "<group>"; };
 		844921E92C29F9A000B99A9C /* MLDelayableTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDelayableTimer.m; sourceTree = "<group>"; };
@@ -601,6 +601,8 @@
 		84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftHelpers.swift; sourceTree = "<group>"; };
 		84C1CD512A8F617F007076ED /* MLStreamRedirect.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLStreamRedirect.m; sourceTree = "<group>"; };
 		84C1CD532A8F6196007076ED /* MLStreamRedirect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLStreamRedirect.h; sourceTree = "<group>"; };
+		84C6F6022D597FB20015575E /* ParserTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ParserTest.m; sourceTree = "<group>"; };
+		84C6F6062D597FF40015575E /* HandlerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HandlerTest.m; sourceTree = "<group>"; };
 		84D31CE528653B83006D7926 /* WebRTCClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebRTCClient.swift; path = Classes/WebRTCClient.swift; sourceTree = SOURCE_ROOT; };
 		84E55E7F2964426D003E191A /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
 		84F194C32C0FE70900F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Main.strings"; sourceTree = "<group>"; };
@@ -670,7 +672,7 @@
 		C16D18342792A4AF00F869A0 /* DataLayerMigrations.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DataLayerMigrations.m; sourceTree = "<group>"; };
 		C176F1EB2AF11C31002034E5 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/System/Library/Frameworks/UserNotifications.framework; sourceTree = DEVELOPER_DIR; };
 		C1850E6625F37EC0003D506A /* Monal Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Monal Tests-Bridging-Header.h"; sourceTree = "<group>"; };
-		C1850EB525F38A2D003D506A /* .xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = .xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1850EB525F38A2D003D506A /* MonalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1850EB725F38A2D003D506A /* MonalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonalUITests.swift; sourceTree = "<group>"; };
 		C1850EB925F38A2D003D506A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C1850EC525F3C5EB003D506A /* TestHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHelper.swift; sourceTree = "<group>"; };
@@ -687,6 +689,14 @@
 		C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBlockedUsersTableViewController.m; sourceTree = "<group>"; };
 		C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MonalXMPPUnitTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		C1B940E926144AF500E9D290 /* AESGCMTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGCMTest.m; sourceTree = "<group>"; };
+		C1BEDB392EF9BFC800B84871 /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Main.strings; sourceTree = "<group>"; };
+		C1BEDB3A2EF9BFC800B84871 /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Settings.strings; sourceTree = "<group>"; };
+		C1BEDB3B2EF9BFC900B84871 /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/iosShare.strings; sourceTree = "<group>"; };
+		C1BEDB3C2EF9BFC900B84871 /* te */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = te; path = external/te.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C1BEDB3D2EF9C06700B84871 /* et */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = et; path = external/et.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C1BEDB3E2EF9C06700B84871 /* et */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = et; path = external/et.lproj/Main.strings; sourceTree = "<group>"; };
+		C1BEDB3F2EF9C06800B84871 /* et */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = et; path = external/et.lproj/Settings.strings; sourceTree = "<group>"; };
+		C1BEDB402EF9C06900B84871 /* et */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = et; path = external/et.lproj/iosShare.strings; sourceTree = "<group>"; };
 		C1C8394E24F0EDFD00BBCF17 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = external/ar.lproj/Main.strings; sourceTree = "<group>"; };
 		C1C8395024F0EE0300BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "external/zh-Hant-HK.lproj/Main.strings"; sourceTree = "<group>"; };
 		C1C8395224F0EE0A00BBCF17 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = external/cs.lproj/Main.strings; sourceTree = "<group>"; };
@@ -873,7 +883,7 @@
 				26AA70112146BBB800598605 /* shareSheet.appex */,
 				260773C0232FC4E800BFD50F /* NotificationService.appex */,
 				26CC579223A0867400ABB92A /* monalxmpp.framework */,
-				C1850EB525F38A2D003D506A /* .xctest */,
+				C1850EB525F38A2D003D506A /* MonalUITests.xctest */,
 				C1049186261301530054AC9E /* MonalXMPPUnitTests.xctest */,
 			);
 			name = Products;
@@ -1431,6 +1441,8 @@
 				C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */,
 				C104918A261301530054AC9E /* Info.plist */,
 				C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */,
+				84C6F6022D597FB20015575E /* ParserTest.m */,
+				84C6F6062D597FF40015575E /* HandlerTest.m */,
 			);
 			path = MonalXMPPUnitTests;
 			sourceTree = "<group>";
@@ -1649,7 +1661,7 @@
 			);
 			name = MonalUITests;
 			productName = MonalUITests;
-			productReference = C1850EB525F38A2D003D506A /* .xctest */;
+			productReference = C1850EB525F38A2D003D506A /* MonalUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -1751,6 +1763,8 @@
 				ko,
 				eu,
 				"es-AR",
+				te,
+				et,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (
@@ -2216,6 +2230,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84C6F6072D597FF40015575E /* HandlerTest.m in Sources */,
+				84C6F6032D597FB20015575E /* ParserTest.m in Sources */,
 				C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */,
 				C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */,
 				C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */,
@@ -2311,6 +2327,8 @@
 				C15A4E5F279D2AC80055CD11 /* ko */,
 				C1E856A828DECF5F00B104E9 /* eu */,
 				84F194C52C0FE78B00F0A994 /* es-AR */,
+				C1BEDB3B2EF9BFC900B84871 /* te */,
+				C1BEDB402EF9C06900B84871 /* et */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2353,6 +2371,8 @@
 				C15A4E5D279D2AC70055CD11 /* ko */,
 				C1E856A728DECF5F00B104E9 /* eu */,
 				84F194C42C0FE74500F0A994 /* es-AR */,
+				C1BEDB3A2EF9BFC800B84871 /* te */,
+				C1BEDB3F2EF9C06800B84871 /* et */,
 			);
 			name = Settings.storyboard;
 			sourceTree = "<group>";
@@ -2395,6 +2415,8 @@
 				C15A4E5B279D2AC60055CD11 /* ko */,
 				C1E856A628DECF5F00B104E9 /* eu */,
 				84F194C32C0FE70900F0A994 /* es-AR */,
+				C1BEDB392EF9BFC800B84871 /* te */,
+				C1BEDB3E2EF9C06700B84871 /* et */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -2436,6 +2458,8 @@
 				C15A4E60279D2AC80055CD11 /* ko */,
 				C1E856A928DECF5F00B104E9 /* eu */,
 				84F194C62C0FE79000F0A994 /* es-AR */,
+				C1BEDB3C2EF9BFC900B84871 /* te */,
+				C1BEDB3D2EF9C06700B84871 /* et */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -3691,6 +3715,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
 				TEST_TARGET_NAME = Monal;
@@ -4047,6 +4072,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
 				TEST_TARGET_NAME = Monal;
@@ -4138,6 +4164,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
 				TEST_TARGET_NAME = Monal;
@@ -4156,6 +4183,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
 				TEST_TARGET_NAME = Monal;
@@ -4175,6 +4203,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
 				TEST_TARGET_NAME = Monal;
@@ -4458,6 +4487,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
 				TEST_TARGET_NAME = Monal;

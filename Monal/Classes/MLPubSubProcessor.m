@@ -63,7 +63,7 @@ $$
 
 $$class_handler(avatarHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-    if(contact.isSubscribedTo)
+    if(!contact.isSubscribedTo)
     {
         DDLogWarn(@"Ignoring incoming avatar update of user we are not subscribed to: %@", contact);
         return;
@@ -183,7 +183,7 @@ $$
 
 $$class_handler(rosterNameHandler, $$ID(xmpp*, account), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
     MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-    if(contact.isSubscribedTo)
+    if(!contact.isSubscribedTo)
     {
         DDLogWarn(@"Ignoring incoming XEP-0172 nick update of user we are not subscribed to: %@", contact);
         return;

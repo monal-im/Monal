@@ -13,6 +13,7 @@
 #import "MLLinkCell.h"
 #import "MLReloadCell.h"
 #import "MLUploadQueueCell.h"
+#import "UIColor+Theme.h"
 
 #import "ActiveChatsViewController.h"
 #import "AESGcm.h"
@@ -67,6 +68,7 @@
 @property (nonatomic, strong) MBProgressHUD* uploadHUD;
 @property (nonatomic, strong) MBProgressHUD* gpsHUD;
 @property (nonatomic, strong) MBProgressHUD* omemoHUD;
+@property (nonatomic, strong) MBProgressHUD* requestVoiceHUD;
 @property (nonatomic, strong) UIBarButtonItem* callButton;
 
 @property (nonatomic, strong) NSMutableArray<MLMessage*>* messageList;
@@ -235,10 +237,71 @@ enum msgSentState {
 #endif
     
     [self updateCallButtonImage];
+    [self updateVoiceRequestButton];
     
     //ping this muc on open, to make sure we are still joined
     if([[[DataLayer sharedInstance] listMucsForAccount:self.contact.accountId] containsObject:self.contact.contactJid])
         [self.xmppAccount.mucProcessor ping:self.contact.contactJid];
+}
+
+-(void) updateVoiceRequestButton
+{
+    BOOL shouldBePresent = NO;
+    if(self.contact.isGroup && [kMucRoleVisitor isEqualToString:[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact]])
+        shouldBePresent = YES;
+    
+    BOOL present = NO;
+    for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
+        if(entry.action == @selector(requestVoice:))
+            present = YES;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(!present && shouldBePresent)
+        {
+            UIBarButtonItem* requestVoiceButton = [UIBarButtonItem new];
+            [requestVoiceButton setAction:@selector(requestVoice:)];
+            requestVoiceButton.image = [[UIImage systemImageNamed:@"checkmark.bubble"] imageWithTintColor:UIColor.monalGreen];
+            [requestVoiceButton setIsAccessibilityElement:YES];
+            [requestVoiceButton setAccessibilityLabel:NSLocalizedString(@"Request Voice", @"")];
+            [requestVoiceButton setAccessibilityTraits:UIAccessibilityTraitButton];
+            
+            NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
+            [rightBarButtons addObject:requestVoiceButton];
+            self.navigationItem.rightBarButtonItems = rightBarButtons;
+        }
+        else if(present && !shouldBePresent)
+        {
+            NSMutableArray* rightBarButtons = [NSMutableArray new];
+            for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
+                if(entry.action != @selector(requestVoice:))
+                    [rightBarButtons addObject:entry];
+            self.navigationItem.rightBarButtonItems = rightBarButtons;
+        }
+        
+        //update placeholder text, too
+        self.placeHolderText.text = [NSString stringWithFormat:NSLocalizedString(@"Message from %@", @""), self.jid];
+        if(self.contact.isGroup && [kMucRoleVisitor isEqualToString:[[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:self.contact]])
+            self.placeHolderText.text = NSLocalizedString(@"You don't have voice in this chat", @"");
+    });
+}
+
+-(void) requestVoice:(id) sender
+{
+    if(!self.requestVoiceHUD) {
+        self.requestVoiceHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.requestVoiceHUD.removeFromSuperViewOnHide=NO;
+        self.requestVoiceHUD.label.text = NSLocalizedString(@"Requesting Voice", @"");
+    }
+    
+    //request voice and show HUD
+    self.requestVoiceHUD.hidden = NO;
+    [self.xmppAccount.mucProcessor requestVoiceInMuc:self.contact.contactJid];
+    
+    // Trigger warning when no gps location was received
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        if(self.requestVoiceHUD.hidden == NO)
+            self.requestVoiceHUD.hidden = YES;
+    });
 }
 
 -(void) updateCallButtonImage
@@ -787,6 +850,7 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
     [nc addObserver:self selector:@selector(handleOmemoFetchStateUpdate:) name:kMonalOmemoFetchingStateUpdate object:nil];
+    [nc addObserver:self selector:@selector(updateVoiceRequestButton) name:kMonalMucOwnAffiliationOrRoleChanged object:nil];
 
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:kMonalRefresh object:nil];
@@ -825,8 +889,7 @@ enum msgSentState {
     [self displayEncryptionStateInUI];
 
     [self handleBackgroundChanged];
-
-    self.placeHolderText.text = [NSString stringWithFormat:NSLocalizedString(@"Message from %@", @""), self.jid];
+    
     // Load message draft from db
     NSString* messageDraft = [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountId];
     if(messageDraft && [messageDraft length] > 0) {

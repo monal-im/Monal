@@ -14,6 +14,7 @@
 #import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/xmpp.h>
 #import <monalxmpp/MLFiletransferInfo.h>
+#import <monalxmpp/MLNotificationQueue.h>
 #import "XMPPMessage.h"
 
 static NSMutableDictionary* _singletonCache;
@@ -167,19 +168,19 @@ static NSMutableDictionary* _singletonCache;
 {
     self = [super init];
     //watch for all sorts of changes and update our singleton dynamically
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageUpdate:) name:kMonalUpdatedMessageNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageDeletion:) name:kMonalDeletedMessageNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageSent:) name:kMonalSentMessageNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageReceived:) name:kMonalMessageReceivedNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageDisplayed:) name:kMonalMessageDisplayedNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
+    [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleMessageUpdate:) name:kMonalUpdatedMessageNotice object:nil];
+    [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleMessageDeletion:) name:kMonalDeletedMessageNotice object:nil];
+    [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleMessageSent:) name:kMonalSentMessageNotice object:nil];
+    [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleMessageReceived:) name:kMonalMessageReceivedNotice object:nil];
+    [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleMessageDisplayed:) name:kMonalMessageDisplayedNotice object:nil];
+    [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
     return self;
 }
 
 -(void) dealloc
 {
     DDLogDebug(@"Deallocating %@", self.messageDBId);
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[MLNotificationQueue currentQueue] removeObserver:self];
 }
 
 -(void) handleMessageUpdate:(NSNotification*) notification

@@ -254,7 +254,7 @@ $$class_handler(handleMAMBackscrollingResultInvalidation, $$ID(xmpp*, account), 
     [promise reject:error];
 $$
 
-$$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLContact*, contact), $_ID(NSArray*, historyIdsOfAlreadyRetreivedMessages), $$PROMISE(promise))
+$$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLContact*, contact), $_ID(NSMutableOrderedSet*, historyIdsOfAlreadyRetreivedMessages), $$PROMISE(promise))
     //the promise will be rejected if an error prevented us to get any messages.
     //it will resolve an empty array, if the upper end of our archive was reached
     //and it will resolve an array of newly loaded mlmessages in all other cases
@@ -295,7 +295,7 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
             return;
         }
 
-        NSMutableArray* historyIdList = [NSMutableArray new];
+        NSMutableOrderedSet* historyIdList = [NSMutableOrderedSet new];
 
         //ignore all notifications generated while processing the queued stanzas
         [MLNotificationQueue queueNotificationsInBlock:^{
@@ -335,17 +335,15 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
         if(historyIdList.count < retrievedBodiesInThisQuery)
             DDLogWarn(@"Got %lu mam history messages already contained in history db, possibly ougoing messages that did not have a stanzaid yet!", retrievedBodiesInThisQuery - historyIdList.count);
 
-        NSArray* overallHistoryIdList;
+        NSMutableOrderedSet* overallHistoryIdList = [historyIdList mutableCopy];
         if(historyIdsOfAlreadyRetreivedMessages)
-            overallHistoryIdList = [historyIdList arrayByAddingObjectsFromArray:historyIdsOfAlreadyRetreivedMessages];
-        else
-            overallHistoryIdList = [historyIdList copy];
+            [overallHistoryIdList addObjectsFromArray:historyIdsOfAlreadyRetreivedMessages.array];
 
         //check if we need to load more messages
         if(retrievedBodiesOverall > kMonalBackscrollingMsgCount / 2)
         {
             //query db for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
-            [promise fulfill:[MLMessage createMessagesFromHistoryIDs:overallHistoryIdList]];
+            [promise fulfill:[MLMessage createMessagesFromHistoryIDs:overallHistoryIdList.array]];
         }
         else
         {
@@ -366,7 +364,7 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
                 // Either the top of the mam archive was reached, or we got an error after receiving some bodies.
 
                 //query db for the real MLMessages to account for changes in history table by non-body metadata messages received after the body-message
-                [promise fulfill:[MLMessage createMessagesFromHistoryIDs:overallHistoryIdList]];
+                [promise fulfill:[MLMessage createMessagesFromHistoryIDs:overallHistoryIdList.array]];
             }
         }
     }

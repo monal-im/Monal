@@ -377,7 +377,7 @@ static NSMutableDictionary* _typingNotifications;
         DDLogDebug(@"This is muc, inbound is now: %@ (ownNick: %@, ownOccupantId: %@, ownJid: %@, occupantId: %@, actualFrom: %@, participantJid: %@)", bool2str(inbound), ownNick, ownOccupantId, account.connectionProperties.identity.jid, occupantId, actualFrom, participantJid);
         
         //just generate a random occupantId if the server doesn't support occupant ids
-        //this makes our MLChannelContact happyand should not have any negative side effects
+        //this makes our MLChannelContact happy and should not have any negative side effects
         //(LMC and retraction were already blocked if no occupantId was given and will now just never match our made up occupantId)
         //reactions are always blocked if the occupantId room feature isn't present
         if(occupantId == nil)

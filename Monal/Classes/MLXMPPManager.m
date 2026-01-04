@@ -701,13 +701,21 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     MLAssert(contact != nil, @"Contact should not be nil");
     MLAssert(uploadInfo == nil || messageType == kMessageTypeFiletransfer, @"You must use message type = filetransfer if you supply an uploadInfo!");
     
+    NSString* occupantId = [[DataLayer sharedInstance] getOwnOccupantIdForMuc:contact.contactJid onAccountID:contact.accountID];
+    //just generate a random occupantId if the server doesn't support occupant ids
+    //this makes our MLChannelContact happy and should not have any negative side effects
+    //(LMC and retraction were already blocked if no occupantId was given and will now just never match our made up occupantId)
+    //reactions are always blocked if the occupantId room feature isn't present
+    if(occupantId == nil)
+        occupantId = [[NSUUID UUID] UUIDString];
+    
     // Save message to history
     NSNumber* messageDBId = [[DataLayer sharedInstance]
         addMessageHistoryTo:contact.contactJid
                    forAccount:contact.accountID
                   withMessage:message
                  actuallyFrom:(contact.isMuc ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
-               withOccupantId:(contact.isMuc ? [[DataLayer sharedInstance] getOwnOccupantIdForMuc:contact.contactJid onAccountID:contact.accountID] : nil)
+               withOccupantId:(contact.isMuc ? occupantId : nil)
                         andId:msgid
                     encrypted:encrypted
                   messageType:messageType

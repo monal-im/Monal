@@ -601,7 +601,7 @@ struct ContactDetails: View {
                                                 }
                                                 successAlert(title: Text("Success"), message: contact.mucType == kMucTypeGroup ? Text("Successfully destroyed group.") : Text("Successfully destroyed channel."))
                                             }.catch { error in
-                                                errorAlert(title: Text("Error destroying group!"), message: Text("\(String(describing:error))"))
+                                                errorAlert(title: Text("Error destroying group!"), message: Text(error.localizedDescription))
                                             }
                                         }
                                     )

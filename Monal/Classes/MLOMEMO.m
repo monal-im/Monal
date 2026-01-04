@@ -653,7 +653,17 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     }
     else
     {
-        [self postOMEMOMessageForUser:jid withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new device with id: %@", @"OMEMO warning shown inside chat view"), rid]];
+        BOOL autoTrustNewKeys = [[HelperTools defaultsDB] boolForKey:@"AutoTrustNewOmemoKeys"];
+        NSString* warningText;
+        if(autoTrustNewKeys)
+        {
+            warningText = [NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new device with id: %@", @"OMEMO warning shown inside chat view"), rid];
+        }
+        else
+        {
+            warningText = [NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new device with id: %@. You can verify and enable the new key in the Encryption Keys list.", @"OMEMO warning shown inside chat view"), rid];
+        }
+        [self postOMEMOMessageForUser:jid withMessage:warningText];
 
         //check that a corresponding buddy exists -> prevent foreign key errors
         MLXMLNode* receivedKeys = data[@"current"];

@@ -59,6 +59,9 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     @defaultsDB("OMEMODefaultOn") 
     var omemoDefaultOn:Bool
     
+    @defaultsDB("AutoTrustNewOmemoKeys")
+    var autoTrustNewOmemoKeys: Bool
+    
     @defaultsDB("AutodeleteInterval")
     var AutodeleteInterval: Int
     
@@ -291,6 +294,10 @@ struct SecuritySettings: View {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.omemoDefaultOn) {
                     Text("Enable encryption by default for new chats")
                     Text("Every new contact will have encryption enabled, but already known contacts will preserve their encryption settings.")
+                }
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.autoTrustNewOmemoKeys) {
+                    Text("Automatically trust new encryption keys")
+                    Text("When disabled, new OMEMO keys are added but remain inactive until you verify and enable them in the Encryption Keys list.")
                 }
                 
             }

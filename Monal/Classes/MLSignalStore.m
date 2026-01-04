@@ -418,10 +418,19 @@
         NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
         if(dbIdentity)
             return YES;
-        // Set every new identity to TOFU to increase user experience
+        int initialTrust = MLOmemoInternalToFU;
+        BOOL autoTrust = [[HelperTools defaultsDB] boolForKey:@"AutoTrustNewOmemoKeys"];
+        // only treat this as our own trusted device if the device ID and identity key exactly match our local keypair
+        BOOL isOwnCurrentDevice = ([address.name isEqualToString:self.accountJid]
+            && ((uint32_t)address.deviceId == self.deviceid)
+            && identityKey != nil
+            && [identityKey isEqualToData:self.identityKeyPair.publicKey]);
+        if(autoTrust == NO && isOwnCurrentDevice == NO)
+            initialTrust = MLOmemoInternalNotTrusted;
+        // set every new identity to TOFU (or mark it untrusted if auto-trust is disabled) to improve the user experience
         return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity \
             (account_id, contactName, contactDeviceId, identity, trustLevel) \
-            VALUES (?, ?, ?, ?, ?)" andArguments:@[self.accountID, address.name, [NSNumber numberWithInteger:address.deviceId], identityKey, [NSNumber numberWithInt:MLOmemoInternalToFU]]];
+            VALUES (?, ?, ?, ?, ?)" andArguments:@[self.accountID, address.name, [NSNumber numberWithInteger:address.deviceId], identityKey, [NSNumber numberWithInt:initialTrust]]];
     }];
 }
 

@@ -1053,10 +1053,13 @@
             ];
         }];
         
-        /*[self updateDB:db withDataLayer:dataLayer toVersion:7.006 withBlock:^{
-            [db executeNonQuery:@"UPDATE message_history AS M SET occupant_id=? WHERE NOT occupant_id AND EXISTS(SELECT 1 FROM buddylist AS B WHERE M.account_id = B.account_id AND M.buddy_name = B.buddy_name AND B.Muc);"];
-        }];*/
-        [db executeNonQuery:@"UPDATE message_history AS M SET occupant_id=? WHERE NOT occupant_id AND EXISTS(SELECT 1 FROM buddylist AS B WHERE M.account_id = B.account_id AND M.buddy_name = B.buddy_name AND B.Muc);"];
+        //make sure all muc messages in our history db have an occupant id
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.006 withBlock:^{
+            NSArray<NSNumber*>* missingOccupantIds = [db executeScalarReader:@"SELECT message_history_id FROM message_history AS M WHERE (occupant_id = NULL OR occupant_id = '') AND EXISTS(SELECT 1 FROM buddylist AS B WHERE M.account_id = B.account_id AND M.buddy_name = B.buddy_name AND B.Muc);"];
+            DDLogWarn(@"History IDs of messages with missing occupant IDs during DB migration: %@", missingOccupantIds);
+            for(NSNumber* historyId in missingOccupantIds)
+                [db executeNonQuery:@"UPDATE message_history SET occupant_id=? WHERE message_history_id=?;" andArguments:@[[[NSUUID UUID] UUIDString], historyId]];
+        }];
         
         
         //check if device id changed and invalidate state, if so

@@ -1042,6 +1042,29 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(void) addVoiceRequestBy:(NSString*) jid occupyingNick:(NSString* _Nullable) nick inRoom:(MLContact*) contact
+{
+    DDLogDebug(@"Adding voice request by '%@' (%@) for muc: %@", jid, nick, contact);
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"INSERT OR IGNORE INTO voice_requests ('account_id', 'room', 'jid', 'nick') VALUES(?, ?, ?, ?);" andArguments:@[contact.accountID, contact.contactJid, jid, nilWrapper(nick)]];
+    }];
+}
+
+-(void) removeVoiceRequestBy:(NSString*) jid inRoom:(MLContact*) contact
+{
+    DDLogDebug(@"Removing voice request by '%@' for muc: %@", jid, contact);
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"DELETE FROM voice_requests WHERE account_id=? AND room=? AND jid=?;" andArguments:@[contact.accountID, contact.contactJid, jid]];
+    }];
+}
+
+-(NSArray*) getVoiceRequestsForRoom:(MLContact*) contact
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeReader:@"SELECT * FROM voice_requests WHERE account_id=? AND room=?;" andArguments:@[contact.accountID, contact.contactJid]];
+    }];
+}
+
 -(NSDictionary* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountID:(NSNumber*) accountID
 {
     if(!nick || !room || accountID == nil)
@@ -1091,7 +1114,7 @@ static NSDateFormatter* dbFormatter;
 {
     MLAssert(contact.isMuc, @"Function should only be called on a group contact");
     return [self.db idReadTransaction:^{
-        return [self.db executeScalar:@"SELECT M.role FROM muc_participants AS M INNER JOIN account AS A ON M.account_id=A.account_id WHERE M.room=? AND A.account_id=? AND (A.username || '@' || A.domain) == M.participant_jid" andArguments:@[contact.contactJid, contact.accountID]];
+        return [self.db executeScalar:@"SELECT P.role FROM muc_participants AS P INNER JOIN account AS A ON P.account_id=A.account_id WHERE P.room=? AND P.account_id=? AND (A.username || '@' || A.domain) == P.participant_jid" andArguments:@[contact.contactJid, contact.accountID]];
     }];
 }
 

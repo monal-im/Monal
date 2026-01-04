@@ -287,7 +287,7 @@ struct ContactDetails: View {
                         Label {
                             Text("Request Voice")
                         } icon: {
-                            Image(systemName: "checkmark.bubble")
+                            Image(systemName: "lightbulb")
                         }
                         .foregroundStyle(Color.green)
                     }

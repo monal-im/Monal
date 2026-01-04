@@ -337,7 +337,7 @@ struct MemberList: View {
             Alert(title: alertPrompt.title, message: alertPrompt.message, dismissButton: .default(alertPrompt.dismissLabel))
         })
         .addLoadingOverlay(overlay)
-        .navigationBarTitle(Text("Group Members"), displayMode: .inline)
+        .navigationBarTitle(self.muc.mucType == kMucTypeGroup ? Text("Group Members") : Text("Channel Participants"), displayMode: .inline)
         .onAppear {
             updateMemberlist()
         }

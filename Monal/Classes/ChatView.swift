@@ -84,6 +84,7 @@ extension MonalView {
 struct ChatView: View {
     @Environment(\.presentationMode) private var presentationMode
     
+    private var account: xmpp
     @StateObject var voipProcessor: ObservableKVOWrapper<MLVoIPProcessor>
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     @State private var selectedContactForContactDetails: ObservableKVOWrapper<MLContact>?
@@ -96,10 +97,11 @@ struct ChatView: View {
     @State private var messageToModerate: MLMessage?
     @State var messages: [ChatViewMessage] = []
     @State var queuedNewMessages: [ChatViewMessage] = []
-    private var account: xmpp
+    @State private var voiceRequests: [[String: AnyObject]] = []
     @State private var isLoadingMamHistory = false
     @State private var isUploadingFile = false
     @State private var messageInsertionTimer: Timer?
+    @State private var ownRole = kMucRoleNone
     
     init(contact: ObservableKVOWrapper<MLContact>) {
         _contact = StateObject(wrappedValue:contact)
@@ -168,7 +170,7 @@ struct ChatView: View {
             if !mlMessage.inbound && (!mlMessage.isMuc || mlMessage.stanzaId != nil) {
                 availableActions.append(.retract)
             }
-            else if mlMessage.isMuc && mlMessage.stanzaId != nil && DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact) == kMucRoleModerator && account.mucProcessor.getRoomFeatures(forMuc: contact.contactJid).contains("urn:xmpp:message-moderate:1") {
+            else if mlMessage.isMuc && mlMessage.stanzaId != nil && kMucRoleModerator.isEqual(DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact)) && account.mucProcessor.getRoomFeatures(forMuc: contact.contactJid).contains("urn:xmpp:message-moderate:1") {
                 availableActions.append(.moderate)
             } else {
                 availableActions.append(.delete)
@@ -677,6 +679,24 @@ struct ChatView: View {
                 ProgressView()
                     .opacity(isLoadingMamHistory || isUploadingFile ? 1 : 0)
 
+                if ownRole == kMucRoleVisitor {
+                    Button {
+                        showPromisingLoadingOverlay(overlay, headline:"Requesting Voice") {
+                            Guarantee { $0(contact.obj.account?.mucProcessor.requestVoice(inMuc:contact.obj.contactJid)) }
+                        }
+                    } label: {
+                        Image(systemName: "lightbulb")
+                    }
+                }
+                
+                if contact.isMuc && ownRole == kMucRoleModerator && voiceRequests.count > 0 {
+                    Button {
+                        //TODO: open sheet with voice requests
+                    } label: {
+                        Image(systemName: "questionmark.bubble")
+                    }
+                }
+                
                 if !(contact.isMuc || contact.isSelf) {
                     Button {
                         let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
@@ -751,29 +771,11 @@ struct ChatView: View {
 
             checkOmemoSupport(withAlert:false)
             loadHistory()
+            if self.contact.obj.isMuc {
+                ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? kMucRoleNone
+                voiceRequests = DataLayer.sharedInstance().getVoiceRequests(forRoom:contact.obj) as! [[String: AnyObject]]
+            }
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
-//             messages = [
-//                 ExyteChat.Message(
-//                     id: "123",
-//                     user: ChatViewUser(contact),
-//                     status: .sent,
-//                     createdAt: Date(),
-//                     text: "Dummy message no. one",
-//                     attachments: [],
-//                     recording: nil,
-//                     replyMessage: nil
-//                 ),
-//                 ExyteChat.Message(
-//                     id: "456",
-//                     user: ChatViewUser(contact),
-//                     status: .sent,
-//                     createdAt: Date(),
-//                     text: "Yes, that's really cool :)",
-//                     attachments: [],
-//                     recording: nil,
-//                     replyMessage: nil
-//                 )
-//             ]
         }
         .onDisappear {
             // When the split view is active, selecting different chats results in the old
@@ -801,7 +803,7 @@ struct ChatView: View {
             DDLogVerbose("ChatView got new message notice \(String(describing:notification.userInfo))")
 
             guard let message = notification.userInfo?["message"] as? MLMessage else {
-                unreachable("Notification without message")
+                unreachable("kMonalNewMessageNotice notification without message!")
             }
             if message.isEqual(self.contact.obj) {
                 // Don't insert based on delay timestamp because that would make it possible to fake history entries.
@@ -820,6 +822,24 @@ struct ChatView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalRefresh)).receive(on: RunLoop.main)) { notification in
             ChatViewHelpers.refreshCounter(for: self.contact.obj)
+            voiceRequests = DataLayer.sharedInstance().getVoiceRequests(forRoom:contact.obj) as! [[String: AnyObject]]
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalMucOwnAffiliationOrRoleChanged)).receive(on: RunLoop.main)) { notification in
+            guard let mucContact = notification.userInfo?["contact"] as? MLContact else {
+                unreachable("kMonalMucOwnAffiliationOrRoleChanged notification without contact!")
+            }
+            if self.contact.obj.isMuc && mucContact.isEqual(self.contact.obj) {
+                voiceRequests = DataLayer.sharedInstance().getVoiceRequests(forRoom:contact.obj) as! [[String: AnyObject]]
+                ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? kMucRoleNone
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalMucVoiceRequestsUpdated)).receive(on: RunLoop.main)) { notification in
+            guard let mucContact = notification.userInfo?["contact"] as? MLContact else {
+                unreachable("kMonalMucVoiceRequestsUpdated notification without contact!")
+            }
+            if mucContact.isEqual(self.contact.obj) {
+                voiceRequests = DataLayer.sharedInstance().getVoiceRequests(forRoom:contact.obj) as! [[String: AnyObject]]
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalContactHistoryCleared)).receive(on: RunLoop.main)) { notification in
             DDLogVerbose("ChatView got history cleared notice \(String(describing:notification.userInfo))")

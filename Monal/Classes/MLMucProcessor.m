@@ -488,6 +488,23 @@ static NSDictionary* _optionalGroupConfigOptions;
         return YES;     //stop processing in MLMessageProcessor
     }
     
+    //handle voice requests
+    XMPPDataForm* voiceRequest = [[messageNode findFirst:@"\\{http://jabber.org/protocol/muc#request}form\\"] copy];
+    let contact = [MLContact createContactFromJid:messageNode.fromUser andAccountID:_account.accountID];
+    if(contact.isMuc && voiceRequest != nil && [kMucRoleParticipant isEqualToString:voiceRequest[@"muc#role"]] && voiceRequest[@"muc#jid"] != nil)
+    {
+        let ownRole = [[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:contact];
+        if([kMucRoleModerator isEqualToString:ownRole])
+        {
+            [[DataLayer sharedInstance] addVoiceRequestBy:voiceRequest[@"muc#jid"] occupyingNick:voiceRequest[@"muc#roomnick"] inRoom:contact]; 
+            DDLogDebug(@"Publishing new voice request...");
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucVoiceRequestsUpdated object:_account userInfo:@{
+                @"contact": contact,
+            }];
+            return YES;     //stop processing in MLMessageProcessor
+        }
+    }
+    
     //continue processing in MLMessageProcessor
     return NO;
 }

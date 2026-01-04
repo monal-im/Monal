@@ -3629,12 +3629,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
 
 -(void) handleFeaturesAfterAuth:(MLXMLNode*) parsedStanza
 {
-    if(self.accountState > kStateLoggedIn)
-    {
-        DDLogInfo(@"Ignoring stream features after login, we are already binding/bound!");
-        return;
-    }
-    
     self.connectionProperties.serverFeatures = parsedStanza;
     
     //this is later on set to NO if we fail to enable it
@@ -3649,6 +3643,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
     {
         DDLogInfo(@"Server identity: %@", [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"]);
         self.connectionProperties.serverIdentity = [parsedStanza findFirst:@"{http://jabber.org/protocol/caps}c@node"];
+    }
+    
+    if(self.accountState >= kStateBinding)
+    {
+        DDLogInfo(@"Not reacting with smacks resume or bind to stream features after login: we are already binding/bound!");
+        return;
     }
     
     //don't try to resume if already inlined via SASL2

@@ -311,6 +311,19 @@ public extension AnyPromise {
         }
     }
     
+    func toTypedGuarantee() -> Guarantee<Void> {
+        return Guarantee<Void> { seal in
+            self.done { _ in
+                seal(())
+            }.catch { error in
+                HelperTools.throwException(withName:"AnyPromiseToGuaranteeConversionError", reason:"Uncatched promise error: \(error)", userInfo:[
+                    "error": "\(String(describing:error))",
+                    "promise": "\(String(describing: self))",
+                ])
+            }
+        }
+    }
+    
     func toTypedPromise<T>() -> Promise<T> {
         return Promise<T> { seal in
             self.done { value in
@@ -319,6 +332,16 @@ public extension AnyPromise {
                 } else {
                     seal.reject(PMKError.invalidCallingConvention)
                 }
+            }.catch { error in
+                seal.reject(error)
+            }
+        }
+    }
+    
+    func toTypedPromise() -> Promise<Void> {
+        return Promise<Void> { seal in
+            self.done { _ in
+                seal.fulfill(())
             }.catch { error in
                 seal.reject(error)
             }

@@ -361,6 +361,8 @@ static NSDictionary* _optionalGroupConfigOptions;
         }
         if(!isDestroying)
         {
+            let mucContact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo];
+            
             //extract info if present (use an empty dict if no info is present)
             NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
             if(!item)
@@ -372,6 +374,15 @@ static NSDictionary* _optionalGroupConfigOptions;
             item[@"nick"] = presenceNode.fromResource;
             if([_roomFeatures[presenceNode.fromUser] containsObject:@"urn:xmpp:occupant-id:0"])
                 item[@"occupant_id"] = [presenceNode findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
+            
+            //check for own role/affiliation change and send out a notification, if so
+            NSString* oldAffiliation = nil;
+            NSString* oldRole = nil;
+            if([presenceNode check:@"{http://jabber.org/protocol/muc#user}x/status<code=110>"])
+            {
+                oldAffiliation= [[DataLayer sharedInstance] getOwnAffiliationInGroupOrChannel:mucContact];
+                oldRole = [[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:mucContact];
+            }
             
             //handle participant updates
             if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
@@ -393,7 +404,19 @@ static NSDictionary* _optionalGroupConfigOptions;
             {
                 DDLogDebug(@"Publishing participants list update...");
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucParticipantsAndMembersUpdated object:_account userInfo:@{
-                    @"contact": [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo]
+                    @"contact": mucContact,
+                }];
+            }
+            
+            if(oldAffiliation != nil || oldRole != nil)
+            {
+                DDLogDebug(@"Publishing own affiliation/role change...");
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucOwnAffiliationOrRoleChanged object:_account userInfo:@{
+                    @"contact": mucContact,
+                    @"oldAffiliation": nilWrapper(oldAffiliation),
+                    @"oldRole": nilWrapper(oldRole),
+                    @"newAffiliation": nilWrapper([[DataLayer sharedInstance] getOwnAffiliationInGroupOrChannel:mucContact]),
+                    @"newRole": nilWrapper([[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:mucContact]),
                 }];
             }
         }
@@ -1275,6 +1298,16 @@ $$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmp
     DDLogInfo(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
     [self callSuccessUIHandlerForMuc:iqNode.fromUser];
 $$
+
+-(void) requestVoiceInMuc:(NSString*) roomJid
+{
+    DDLogInfo(@"Requesting voice in '%@'...", roomJid);
+    XMPPMessage* msg = [[XMPPMessage alloc] initWithType:kMessageNormalType to:roomJid];
+    [msg addChildNode:[[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/muc#request" andDictionary:@{
+        @"muc#role": @"participant",
+    }]];
+    [_account send:msg];
+}
 
 -(void) changeNameOfMuc:(NSString*) room to:(NSString*) name
 {

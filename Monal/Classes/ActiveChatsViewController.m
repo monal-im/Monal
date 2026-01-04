@@ -507,10 +507,17 @@ static NSMutableSet* _pushWarningDisplayed;
 -(void) insertOrMoveContact:(MLContact*) contact completion:(void (^ _Nullable)(BOOL finished)) completion
 {
     dispatch_async(dispatch_get_main_queue(), ^{
+        //extract chat array inside main queue (we only write to these arrays from the main queue)
+        //this makes sure that the call to performBatchUpdates probably running in another thread
+        //doesn't access inconsistent chat array states
+        NSMutableArray* unpinnedChatsArray = [self getChatArrayForSection:unpinnedChats];
+        NSMutableArray* pinnedChatsArray = [self getChatArrayForSection:pinnedChats];
+        DDLogVerbose(@"unpinnedChatsArray=%@", unpinnedChatsArray);
+        DDLogVerbose(@"pinnedChatsArray=%@", pinnedChatsArray);
         [self.chatListTable performBatchUpdates:^{
             __block NSIndexPath* indexPath = nil;
             for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++) {
-                NSMutableArray* curContactArray = [self getChatArrayForSection:section];
+                NSMutableArray* curContactArray = section == unpinnedChats ? unpinnedChatsArray : pinnedChatsArray;
 
                 // check if contact is already displayed -> get coresponding indexPath
                 [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -524,14 +531,16 @@ static NSMutableSet* _pushWarningDisplayed;
             }
 
             size_t insertInSection = unpinnedChats;
+            NSMutableArray* insertContactToArray = unpinnedChatsArray;
             if(contact.isPinned) {
                 insertInSection = pinnedChats;
+                insertContactToArray = pinnedChatsArray;
             }
-            NSMutableArray* insertContactToArray = [self getChatArrayForSection:insertInSection];
             NSIndexPath* insertAtPath = [NSIndexPath indexPathForRow:0 inSection:insertInSection];
 
             if(indexPath && insertAtPath.section == indexPath.section && insertAtPath.row == indexPath.row)
             {
+                DDLogVerbose(@"replacing already present contact '%@' in array(%@): %@", contact, insertAtPath, insertContactToArray);
                 [insertContactToArray replaceObjectAtIndex:insertAtPath.row  withObject:contact];
                 [self.chatListTable reloadRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationNone];
                 return;
@@ -539,21 +548,27 @@ static NSMutableSet* _pushWarningDisplayed;
             else if(indexPath)
             {
                 // Contact is already in our active chats list
-                NSMutableArray* removeContactFromArray = [self getChatArrayForSection:indexPath.section];
+                DDLogVerbose(@"moving already present contact...");
+                NSMutableArray* removeContactFromArray = indexPath.section == unpinnedChats ? unpinnedChatsArray : pinnedChatsArray;
+                DDLogVerbose(@"deleting already present contact '%@' from array(%@): %@", contact, indexPath, removeContactFromArray);
                 [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 [removeContactFromArray removeObjectAtIndex:indexPath.row];
+                DDLogVerbose(@"inserting already present contact '%@' into array(%@): %@", contact, insertAtPath, insertContactToArray);
                 [insertContactToArray insertObject:contact atIndex:0];
                 [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationNone];
             }
             else
             {
                 // Chats does not exists in active Chats yet
+                DDLogVerbose(@"inserting new contact '%@' into array(%@): %@", contact, insertAtPath, insertContactToArray);
                 NSUInteger oldCount = [insertContactToArray count];
                 [insertContactToArray insertObject:contact atIndex:0];
                 [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationRight];
                 //make sure to fully refresh to remove the empty dataset (yes this will trigger on first chat pinning, too, but that does no harm)
                 if(oldCount == 0)
-                    [self refreshDisplay];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self refreshDisplay];
+                    });
             }
         } completion:^(BOOL finished) {
             if(completion) completion(finished);

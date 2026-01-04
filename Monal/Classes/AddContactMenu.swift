@@ -156,7 +156,7 @@ struct AddContactMenu: View {
                     self.newContact = MLContact.createContact(fromJid: jid, andAccountNo: account.accountNo)
                     successAlert(title: Text("Success!"), message: Text("Successfully joined group/channel \(jid)!"))
                 }.catch { error in
-                    errorAlert(title: Text("Error entering group/channel!"), message: Text("\(String(describing:error))"))
+                    errorAlert(title: Text("Error entering group/channel!"), message: Text(error.localizedDescription))
                 }
             }
         }.catch { error in

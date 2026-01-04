@@ -952,14 +952,14 @@ $$
 {
     DDLogVerbose(@"Blocking %@: %@", contact, bool2str(isBlocked));
     xmpp* account = contact.account;
-    [account setBlocked:isBlocked forJid:contact.contactJid];
+    [account setBlocked:isBlocked forJid:contact.contactJid withSpamReporting:nil];
 }
 
 -(void) block:(BOOL) isBlocked fullJid:(NSString*) fullJid onAccount:(NSNumber*) accountID
 {
     DDLogVerbose(@"Blocking %@ on account %@: %@", fullJid, accountID, bool2str(isBlocked));
     xmpp* account = [self getEnabledAccountForID:accountID];
-    [account setBlocked:isBlocked forJid:fullJid];
+    [account setBlocked:isBlocked forJid:fullJid withSpamReporting:nil];
 }
 
 #pragma mark message signals

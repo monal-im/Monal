@@ -311,12 +311,16 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
--(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
+-(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid withSpamReporting:(NSString* _Nullable) reason
 {
     MLXMLNode* blockNode = [[MLXMLNode alloc] initWithElement:(blocked ? @"block" : @"unblock") andNamespace:@"urn:xmpp:blocking"];
     
     MLXMLNode* itemNode = [[MLXMLNode alloc] initWithElement:@"item"];
     [itemNode.attributes setObject:blockedJid forKey:@"jid"];
+    if(reason != nil && ![reason isEqualToString:@""])
+        [itemNode addChildNode:[[MLXMLNode alloc] initWithElement:@"report" andNamespace:@"urn:xmpp:reporting:1" withAttributes:@{
+            @"reason": reason,
+        } andChildren:@[] andData:nil]];
     [blockNode addChildNode:itemNode];
     
     [self addChildNode:blockNode];

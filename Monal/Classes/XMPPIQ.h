@@ -129,7 +129,7 @@ removes a contact from the roster
 -(void) registerUser:(NSString*) user withPassword:(NSString*) newPass captcha:(NSString* _Nullable) captcha andHiddenFields:(NSDictionary* _Nullable) hiddenFields;
 -(void) changePasswordForUser:(NSString*) user newPassword:(NSString*) newPass;
 
--(void) setBlocked:(BOOL) blocked forJid:(NSString*) blockedJid;
+-(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid withSpamReporting:(NSString* _Nullable) reason;
 -(void) requestBlockList;
 
 -(void) setMucAdminQueryWithAffiliation:(NSString*) affiliation forJid:(NSString*) jid;

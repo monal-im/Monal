@@ -4741,7 +4741,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     [self persistState];
 }
 
--(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
+-(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid withSpamReporting:(NSString* _Nullable) reason
 {
     if(![self.connectionProperties.serverDiscoFeatures containsObject:@"urn:xmpp:blocking"])
     {
@@ -4751,7 +4751,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     
     XMPPIQ* iqBlocked = [[XMPPIQ alloc] initWithType:kiqSetType];
     
-    [iqBlocked setBlocked:blocked forJid:blockedJid];
+    [iqBlocked setBlocked:blocked forJid:blockedJid withSpamReporting:reason];
     [self sendIq:iqBlocked withHandler:$newHandler(MLIQProcessor, handleBlocked, $ID(blockedJid))];
 }
 

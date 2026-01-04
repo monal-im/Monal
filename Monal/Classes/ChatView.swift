@@ -92,6 +92,7 @@ struct ChatView: View {
     @State private var confirmationPrompt: ConfirmationPrompt?
     @StateObject private var overlay = LoadingOverlayState()
     @State private var moderationReason = "Spam"
+    @State private var moderationSpamReporting = ""
     @State private var isEditingReason = false
     @State private var blockOnModeration = true
     @State private var messageToModerate: MLMessage?
@@ -590,16 +591,25 @@ struct ChatView: View {
                         Text("Block this user")
                     }
                 }
+                
+                if account.mucProcessor.getRoomFeatures(forMuc: contact.contactJid).contains("urn:xmpp:reporting:1") {
+                    Picker(selection: $moderationSpamReporting, label: Text("Report as")) {
+                        Text("Nothing").tag("")
+                        Text("Spam").tag("urn:xmpp:reporting:spam")
+                        Text("abuse").tag("urn:xmpp:reporting:abuse")
+                    }
+                    .frame(height: 56, alignment: .trailing)
+                }
             }.textFieldStyle(.roundedBorder)
         } buttons: { mlMessage in
             Button(action: {
                 let promise = showPromisingLoadingOverlay(self.overlay, headline: "Retracting message", description: "") {
-                    self.account.moderateMessage(mlMessage, withReason: moderationReason)
+                    account.moderateMessage(mlMessage, withReason: moderationReason)
                     return Guarantee.value(())
                 }
                 if blockOnModeration, let participantJid = mlMessage.participantJid {
-                    promise.done { _ in
-                        showPromisingLoadingOverlay(self.overlay, headlineView: Text("Blocking user"), descriptionView: Text("Blocking \(participantJid)")) {
+                    promise = promise.done { _ in
+                        showPromisingLoadingOverlay(self.overlay, headline: "Blocking user", description: "Blocking \(participantJid)") {
                             DDLogVerbose("Changing affiliation of \(participantJid) to: \(String(describing:kMucAffiliationOutcast))...")
                             return account.mucProcessor.setAffiliation(kMucAffiliationOutcast, ofUser:participantJid, inMuc:contact.obj.contactJid).toTypedPromise()
                         }
@@ -612,6 +622,21 @@ struct ChatView: View {
                         }
                     }
                 }
+                
+//                 if moderationSpamReporting != "" {
+// //                     promise = promise.done { _ in
+//                         showPromisingLoadingOverlay(self.overlay, headline: "Reporting spam", description: "") {
+//                             account.setBlocked(true, for:contact.contactJid, withSpamReporting:moderationSpamReporting)
+//                         }
+//                         .catch { error in
+//                             alertPrompt = AlertPrompt(
+//                                 title: Text("Error reporting spam!"),
+//                                 message: Text(error.localizedDescription),
+//                                 dismissLabel: Text("Close")
+//                             )
+//                         }
+// //                     }
+//                 }
                 
                 // Reset the State variables to their default values, as the alert is dismissed
                 messageToModerate = nil

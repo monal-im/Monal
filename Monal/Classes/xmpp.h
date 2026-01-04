@@ -215,7 +215,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 /**
  XEP-0191 blocking
  */
--(void) setBlocked:(BOOL) blocked forJid:(NSString*) jid;
+-(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid withSpamReporting:(NSString* _Nullable) reason;
 -(void) fetchBlocklist;
 -(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids;
 

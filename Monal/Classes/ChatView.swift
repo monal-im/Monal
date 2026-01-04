@@ -91,6 +91,8 @@ struct ChatView: View {
     @State private var confirmationPrompt: ConfirmationPrompt?
     @StateObject private var overlay = LoadingOverlayState()
     @State private var moderationReason = "Spam"
+    @State private var isEditingReason = false
+    @State private var blockOnModeration = true
     @State private var messageToModerate: MLMessage?
     @State var messages: [ChatViewMessage] = []
     @State var queuedNewMessages: [ChatViewMessage] = []
@@ -574,20 +576,62 @@ struct ChatView: View {
                 }
             }))
         }
-        .alert("Moderating message", isPresented: $messageToModerate.optionalMappedToBool(), actions: {
-            TextField("Reason", text: $moderationReason)
-            Button("Moderate", role: .destructive) {
-                MLAssert(messageToModerate != nil, "messageToModerate must not be nil during moderation!")
-                self.account.moderateMessage(messageToModerate!, withReason: moderationReason)
+        .richAlert(isPresented: $messageToModerate, title:Text("Moderating message")) { mlMessage in
+            VStack(alignment: .leading) {
+                Text("Enter the moderation reason:")
+                TextField(NSLocalizedString("Spam", comment: "placeholder when adding account"), text: $moderationReason, onEditingChanged: { isEditingReason = $0 })
+                .submitLabel(.continue)
+                .addClearButton(isEditing: isEditingReason, text: $moderationReason)
+                
+                if let _ = mlMessage.participantJid {
+                    Toggle(isOn: $blockOnModeration) {
+                        Text("Block this user")
+                    }
+                }
+            }.textFieldStyle(.roundedBorder)
+        } buttons: { mlMessage in
+            Button(action: {
+                let promise = showPromisingLoadingOverlay(self.overlay, headline: "Retracting message", description: "") {
+                    self.account.moderateMessage(mlMessage, withReason: moderationReason)
+                    return Guarantee.value(())
+                }
+                if blockOnModeration, let participantJid = mlMessage.participantJid {
+                    promise.done { _ in
+                        showPromisingLoadingOverlay(self.overlay, headlineView: Text("Blocking user"), descriptionView: Text("Blocking \(participantJid)")) {
+                            DDLogVerbose("Changing affiliation of \(participantJid) to: \(String(describing:kMucAffiliationOutcast))...")
+                            return account.mucProcessor.setAffiliation(kMucAffiliationOutcast, ofUser:participantJid, inMuc:contact.obj.contactJid).toTypedPromise()
+                        }
+                        .catch { error in
+                            alertPrompt = AlertPrompt(
+                                title: Text("Error blocking user!"),
+                                message: Text(error.localizedDescription),
+                                dismissLabel: Text("Close")
+                            )
+                        }
+                    }
+                }
+                
                 // Reset the State variables to their default values, as the alert is dismissed
                 messageToModerate = nil
                 moderationReason = "Spam"
+                blockOnModeration = true
+            }) {
+                Text("Moderate")
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity)
             }
-            Button("Cancel", role: .cancel) {
+            
+            Button(action: {
                 messageToModerate = nil
                 moderationReason = "Spam"
+                blockOnModeration = true
+            }) {
+                Text("Cancel")
+                    .foregroundColor(.accentColor)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity)
             }
-        }, message: { Text("Enter the moderation reason") })
+        }
         .toolbar {
             ToolbarItem(placement: .principal) {
                 //make sure to take all space available, otherwise we'll get aligned to the center

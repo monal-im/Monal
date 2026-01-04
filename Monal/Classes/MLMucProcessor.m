@@ -1284,28 +1284,34 @@ $$
     [self->_account send:directInviteMsg];
 }
 
--(void) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inMuc:(NSString*) roomJid
+-(AnyPromise*) setAffiliation:(NSString*) affiliation ofUser:(NSString*) jid inMuc:(NSString*) roomJid
 {
+    MLPromise* promise = [MLPromise new];
+    
     DDLogInfo(@"Changing affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
     XMPPIQ* updateIq = [[XMPPIQ alloc] initWithType:kiqSetType to:roomJid];
     [updateIq setMucAdminQueryWithAffiliation:affiliation forJid:jid];
-    [_account sendIq:updateIq withHandler:$newHandlerWithInvalidation(self, handleAffiliationUpdateResult, handleAffiliationUpdateResultInvalidation, $ID(roomJid), $ID(jid), $ID(affiliation))];
+    [_account sendIq:updateIq withHandler:$newHandlerWithInvalidation(self, handleAffiliationUpdateResult, handleAffiliationUpdateResultInvalidation, $ID(roomJid), $ID(jid), $ID(affiliation), $PROMISE(promise))];
+    
+    return [promise toAnyPromise];
 }
 
-$$instance_handler(handleAffiliationUpdateResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid))
+$$instance_handler(handleAffiliationUpdateResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid), $$PROMISE(promise))
     DDLogError(@"Failed to change affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
-    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@': please try again", @""), jid, roomJid, affiliation] forMuc:roomJid withNode:nil andIsSevere:YES];
+    NSString* errorString = [NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@': please try again", @""), jid, roomJid, affiliation];
+    [promise reject:[NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}]];
 $$
 
-$$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid))
+$$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid), $$PROMISE(promise))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Failed to change affiliation of '%@' in '%@' to '%@': %@", jid, roomJid, affiliation, [iqNode findFirst:@"error"]);
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@'", @""), jid, roomJid, affiliation] forMuc:roomJid withNode:iqNode andIsSevere:YES];
+        NSString* errorString = [HelperTools extractXMPPError:iqNode withDescription:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@'", @""), jid, roomJid, affiliation]];
+        [promise reject:[NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}]];
         return;
     }
     DDLogInfo(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
-    [self callSuccessUIHandlerForMuc:iqNode.fromUser];
+    [promise fulfill:nil];
 $$
 
 -(void) requestVoiceInMuc:(NSString*) roomJid

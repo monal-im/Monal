@@ -172,6 +172,10 @@ static NSDictionary* _optionalGroupConfigOptions;
             //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
             _hasFetchedBookmarks = NO;
         }
+        
+        //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
+        for(NSString* room in [[DataLayer sharedInstance] listMucsForAccount:_account.accountID])
+            [self join:room];
     }
 }
 

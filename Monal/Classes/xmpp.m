@@ -4723,10 +4723,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
     //fetch current mds state
     [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
     
-    //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
-    for(NSString* room in [[DataLayer sharedInstance] listMucsForAccount:self.accountID])
-        [self.mucProcessor join:room];
-    
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
     
     //initialize stanza counter for statistics

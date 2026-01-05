@@ -536,13 +536,13 @@
         return [self.sqliteDatabase executeScalar:(@"SELECT \
                 CASE \
                     WHEN (trustLevel=0) THEN 0 \
-                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= unixepoch('now', '-90 day'))) THEN 100 \
+                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR unixepoch(lastReceivedMsg) >= unixepoch('now', '-90 day'))) THEN 100 \
                     WHEN (trustLevel=1 AND removedFromDeviceList IS NOT NULL) THEN 101 \
-                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < unixepoch('now', '-90 day'))) THEN 102 \
+                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (unixepoch(lastReceivedMsg) < unixepoch('now', '-90 day'))) THEN 102 \
                     WHEN (COUNT(*)=0) THEN 100 \
-                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= unixepoch('now', '-90 day'))) THEN 200 \
+                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR unixepoch(lastReceivedMsg) >= unixepoch('now', '-90 day'))) THEN 200 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NOT NULL) THEN 201 \
-                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < unixepoch('now', '-90 day'))) THEN 202 \
+                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (unixepoch(lastReceivedMsg) < unixepoch('now', '-90 day'))) THEN 202 \
                     ELSE 0 \
                 END \
                 FROM signalContactIdentity \

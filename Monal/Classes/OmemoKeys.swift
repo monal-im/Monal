@@ -12,8 +12,7 @@ struct OmemoKeysEntry: View {
     private let contactJid: String
     
     @State private var trustLevel: NSNumber
-    @State private var showEntryInfo = false
-    @State private var showClipboardCopy = false
+    @State private var showAlert: Alert?
 
     private let deviceId: NSNumber
     private let fingerprint: Data
@@ -159,14 +158,18 @@ struct OmemoKeysEntry: View {
                 }
                 .onTapGesture(count: 2) {
                     UIPasteboard.general.setValue(clipboardValue, forPasteboardType:UTType.utf8PlainText.identifier)
-                    showClipboardCopy = true
+                    showAlert = Alert(
+                        title: Text("Copied to clipboard"),
+                        message: Text(clipboardValue),
+                        dismissButton: nil
+                    )
                 }
                 Spacer()
                 // the trust level of our own device should not be displayed
                 if(!isOwnDevice) {
                     VStack(alignment:.center) {
                         Button {
-                            showEntryInfo = true
+                            showAlert = getEntryInfoAlert()
                         } label: {
                             getTrustLevelIcon()
                         }
@@ -175,21 +178,14 @@ struct OmemoKeysEntry: View {
                     }
                 } else {
                     Button {
-                        showEntryInfo = true
+                        showAlert = getEntryInfoAlert()
                     } label: {
                         getDeviceIconForOwnDevice()
                     }
                 }
             }
-            .alert(isPresented: $showEntryInfo) {
-                getEntryInfoAlert()
-            }
-            .alert(isPresented: $showClipboardCopy) {
-                Alert(
-                    title: Text("Copied to clipboard"),
-                    message: Text(clipboardValue),
-                    dismissButton: nil
-                );
+            .alert(isPresented: $showAlert.optionalMappedToBool()) {
+                showAlert!
             }
         }
     }

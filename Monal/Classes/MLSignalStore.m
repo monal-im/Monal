@@ -90,9 +90,9 @@
 {
     [self.sqliteDatabase voidWriteTransaction:^{
         // remove old keys that have been remove a long time ago from pubsub
-        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND pubSubRemovalTimestamp <= unixepoch('now', '-14 day');" andArguments:@[self.accountID]];
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND unixepoch(pubSubRemovalTimestamp) <= unixepoch('now', '-14 day');" andArguments:@[self.accountID]];
         // mark old unused keys to be removed from pubsub
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND creationTimestamp<= unixepoch('now','-14 day');" andArguments:@[self.accountID]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND unixepoch(creationTimestamp) <= unixepoch('now','-14 day');" andArguments:@[self.accountID]];
     }];
 }
 
@@ -240,7 +240,7 @@
                     AND contactName=? \
                     AND removedFromDeviceList IS NULL \
                     AND brokenSession=true \
-                    AND (lastFailedBundleFetch IS NULL OR lastFailedBundleFetch <= unixepoch('now', '-5 day'))\
+                    AND (lastFailedBundleFetch IS NULL OR unixepoch(lastFailedBundleFetch) <= unixepoch('now', '-5 day'))\
             ;" andArguments:@[self.accountID, jid]];
     }];
 }

@@ -12,6 +12,7 @@
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/MLSQLite.h>
 #import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLOMEMO.h>
 
 @interface MLSignalStore()
 {
@@ -29,6 +30,20 @@
     
     //make sure the datalayer has migrated the database file to the app group location first
     [DataLayer initialize];
+}
+
++(BOOL) acceptedTrustLevel:(int) trustLevel withTofu:(BOOL) withTofu andOutgoing:(BOOL) outgoing
+{
+    //for better UX never refuse to encrypt/decrypt from/to old devices
+    if(withTofu)
+        return
+            trustLevel == MLOmemoTrusted ||
+            trustLevel == MLOmemoTrustedButNoMsgSeenInTime ||
+            trustLevel == MLOmemoToFU ||
+            trustLevel == MLOmemoToFUButNoMsgSeenInTime;
+    return
+        trustLevel == MLOmemoTrusted ||
+        trustLevel == MLOmemoTrustedButNoMsgSeenInTime;
 }
 
 //this is the getter of our readonly "sqliteDatabase" property always returning the thread-local instance of the MLSQLite class
@@ -437,9 +452,13 @@
  */
 -(BOOL) isTrustedIdentity:(SignalAddress*) address identityKey:(NSData*) identityKey;
 {
+    //this method gets called by the C implementation of libsignal when *sending* messages (apparently not when receiving?).
+    //this means, libsignal doesn't send messages to devices we return NO for, but happily receives and decrypts messages
+    //from these devices.
+    //we already fixed this behavior by explicitly checking the deviceids for sending/receiving in MLOMEMO,
+    //but still call acceptedTrustLevel: here, too, for good measures
     int trustLevel = [self getTrustLevel:address identityKey:identityKey].intValue;
-    // For better UX trust ToFU devices even if we did not receive msg in a long time
-    return (trustLevel == MLOmemoTrusted || trustLevel == MLOmemoToFU || trustLevel == MLOmemoToFUButNoMsgSeenInTime);
+    return [[self class] acceptedTrustLevel:trustLevel withTofu:YES andOutgoing:YES];
 }
 
 -(NSData*) getIdentityForAddress:(SignalAddress*) address

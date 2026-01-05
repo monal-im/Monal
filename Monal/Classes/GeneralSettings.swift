@@ -59,6 +59,12 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     @defaultsDB("OMEMODefaultOn") 
     var omemoDefaultOn:Bool
     
+    @defaultsDB("allowMixedTrustInGroups")
+    var allowMixedTrustInGroups: Bool
+    
+    @defaultsDB("allowUnverifiedCalls")
+    var allowUnverifiedCalls: Bool
+    
     @defaultsDB("AutodeleteInterval")
     var AutodeleteInterval: Int
     
@@ -287,12 +293,41 @@ struct SecuritySettings: View {
     
     var body: some View {
         Form {
-            Section(header: Text("Encryption")) {
-                SettingsToggle(isOn: $generalSettingsDefaultsDB.omemoDefaultOn) {
-                    Text("Enable encryption by default for new chats")
-                    Text("Every new contact will have encryption enabled, but already known contacts will preserve their encryption settings.")
+            //only allow power users to mess with the encryption settings at all (turn off encryption etc.)
+            if generalSettingsDefaultsDB.showAdvancedUI {
+                Section(header: Text("Encryption")) {
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.omemoDefaultOn) {
+                        Text("Enable encryption by default for new chats")
+                        Text(
+"""
+Every new contact will have encryption enabled, but already known contacts will preserve their encryption settings.
+Generally this should never be turned off by members of high risk groups like journalists, activists etc.
+"""
+                        )
+                    }
+                    
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.allowUnverifiedCalls) {
+                        Text("Allow unverified calls in encrypted chats")
+                        Text(
+"""
+Allow calls not being OMEMO-verified in OMEMO encrypted chats.
+If you turn this off, you won't be able to place or receive calls to/from contacts not using a client implementing [http://gultsch.de/xmpp/drafts/omemo/dlts-srtp-verification](https://gist.github.com/iNPUTmice/aa4fc0aeea6ce5fb0e0fe04baca842cd).
+This should be turned off by members of high risk groups like journalists, activists etc.
+"""
+                        )
+                    }
+                    
+                    SettingsToggle(isOn: $generalSettingsDefaultsDB.allowMixedTrustInGroups) {
+                        Text("Allow BTBV-only participants in verified encrypted groups")
+                        Text(
+"""
+If this is off, you won't send encrypted messages to members of a group not having any explicitly trusted device once you explicitly trusted/distrusted at least one single device of another member of this group.
+Use with care, because this means you'll have to explicitly trust at least one device of *all* members of a group once you started manually changing the trust of one device of a member of this group (even if you did this in an 1:1 chat with one of the members)!
+Generally this should only be turned off by members of high risk groups like journalists, activists etc.
+"""
+                        )
+                    }
                 }
-                
             }
             
             Section(header: Text("Networking")) {

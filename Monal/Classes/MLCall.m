@@ -1568,6 +1568,14 @@
                     return;
                 }
             }
+            
+            //all calls in encrypted chats eventually reach this point (either as session-initiate or as session-accept)
+            //--> check if we allow unverified calls and abort if the call is unverified and this isn't allowed
+            if(![[HelperTools defaultsDB] boolForKey:@"allowUnverifiedCalls"] && self.encryptionState == MLCallEncryptionStateClear)
+            {
+                [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
+                return;
+            }
         }
         else
             self.encryptionState = MLCallEncryptionStateClear;
@@ -1765,15 +1773,22 @@
 
 -(MLCallEncryptionState) encryptionTypeForDeviceid:(NSNumber* _Nonnull) deviceid
 {
+    //problem is: an attacking server could simply strip out the omemo deviceid from the <proceed> to downgrade us to a non-verified call
+    //dropping calls from a device not trusted but known, would not improve security because the attacker using that device could simply
+    //strip off the omemo deviceid from the <proceed>
+    //--> simply report those calls as unverified (MLCallEncryptionStateClear)
+    //if configured to not allow unverified calls, we drop all MLCallEncryptionStateClear calls in processIncomingSDP
+    
     NSNumber* trustLevel = [self.account.omemo getTrustLevelForJid:self.contact.contactJid andDeviceId:deviceid];
+    DDLogVerbose(@"Trust level: %@", trustLevel);
+    
     if(trustLevel == nil)
         return MLCallEncryptionStateClear;
-    switch(trustLevel.intValue)
-    {
-        case MLOmemoTrusted: return MLCallEncryptionStateTrusted;
-        case MLOmemoToFU: return MLCallEncryptionStateToFU;
-        default: return MLCallEncryptionStateClear;
-    }
+    else if([MLSignalStore acceptedTrustLevel:trustLevel.intValue withTofu:NO andOutgoing:(self.direction == MLCallDirectionOutgoing)])
+        return MLCallEncryptionStateTrusted;
+    else if([MLSignalStore acceptedTrustLevel:trustLevel.intValue withTofu:YES andOutgoing:(self.direction == MLCallDirectionOutgoing)])
+        return MLCallEncryptionStateToFU;
+    return MLCallEncryptionStateClear;
 }
 
 -(BOOL) encryptFingerprintsInChildren:(NSArray<MLXMLNode*>*) children
@@ -1820,7 +1835,7 @@
             DDLogWarn(@"More than one OMEMO envelope found!");
             return NO;
         }
-        NSString* decryptedFingerprint = [self.account.omemo decryptOmemoEnvelope:[fingerprintNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted"] forSenderJid:self.contact.contactJid andReturnErrorString:NO];
+        NSString* decryptedFingerprint = [self.account.omemo decryptOmemoEnvelope:[fingerprintNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted"] forSenderJid:self.contact.contactJid inMuc:nil andReturnErrorString:NO];
         if(decryptedFingerprint == nil)
         {
             DDLogWarn(@"Could not decrypt OMEMO encrypted fingerprint!");

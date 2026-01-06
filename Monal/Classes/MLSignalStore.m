@@ -436,8 +436,8 @@
         // if at least one fingerprint isn't TOFU new fingerprints shouldn't be trusted
         // if all fingerprints are TOFU -> trust new ones with TOFU as well
         return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity \
-            (account_id, contactName, contactDeviceId, identity, trustLevel) \
-            VALUES (?, ?, ?, ?, \
+            (account_id, contactName, contactDeviceId, identity, lastReceivedMsg, trustLevel) \
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, \
                 (SELECT CASE \
                     WHEN COUNT(contactDeviceId) == 0 THEN 1 \
                     ELSE 0 \

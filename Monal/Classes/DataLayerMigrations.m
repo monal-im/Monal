@@ -1061,6 +1061,11 @@
                 [db executeNonQuery:@"UPDATE message_history SET occupant_id=? WHERE message_history_id=?;" andArguments:@[[[NSUUID UUID] UUIDString], historyId]];
         }];
         
+        //make sure all omemo devices have a "last used" timestamp
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.007 withBlock:^{
+            [db executeNonQuery:@"UPDATE signalContactIdentity SET lastReceivedMsg=CURRENT_TIMESTAMP WHERE lastReceivedMsg IS NULL;"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

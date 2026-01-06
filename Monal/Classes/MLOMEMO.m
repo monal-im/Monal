@@ -235,6 +235,7 @@ static NSDictionary* trustLevels2Text = nil;
         {
             [self generateNewKeysIfNeeded];     //generate new prekeys if needed and publish them
             [self repairQueuedSessions];
+            [self cleanupOwnOldDevices];
         }
     }
 #endif
@@ -555,6 +556,30 @@ $$
     }
 
     [self notifyKnownDevicesUpdated:self.account.connectionProperties.identity.jid];
+    
+    [self cleanupOwnOldDevices];
+}
+
+-(void) cleanupOwnOldDevices
+{
+    NSString* jid = self.account.connectionProperties.identity.jid;
+    for(NSNumber* device in [self.ownDeviceList copy])
+    {
+        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)device.unsignedIntValue];
+        NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
+        if(!identity)
+        {
+            //TODO: is it correct to rebuild broken(?) session here, too?
+            [self rebuildSessionWithJid:jid forRid:device];
+            continue;
+        }
+        int trust = [self.monalSignalStore getTrustLevel:address identityKey:identity].intValue;
+        
+        //remove own old devices (these clients will add thei id back, if they are still active)
+        //this is what conversations does, too
+        if(trust == MLOmemoToFUButNoMsgSeenInTime || trust == MLOmemoTrustedButNoMsgSeenInTime)
+            [self bulkDeleteDeviceForSource:jid andRid:device];
+    }
 }
 
 -(void) publishOwnDeviceList
@@ -1555,15 +1580,20 @@ $$
 
 -(void) deleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid
 {
+    [self bulkDeleteDeviceForSource:source andRid:rid];
+    if([source isEqualToString:self.account.connectionProperties.identity.jid])
+        [self publishOwnDeviceList];
+}
+
+-(void) bulkDeleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid
+{
     //we should not delete our own device
     if([source isEqualToString:self.account.connectionProperties.identity.jid] && rid.unsignedIntValue == self.monalSignalStore.deviceid)
         return;
+    DDLogInfo(@"Deleting deviceid %@ of contact %@...", rid, source);
     //handle removal of own deviceids
     if([source isEqualToString:self.account.connectionProperties.identity.jid])
-    {
         [self.ownDeviceList removeObject:rid];
-        [self publishOwnDeviceList];
-    }
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid.unsignedIntValue];
     //don't delete the identity record to not trigger spurious "detected a new omemo device on your account"
@@ -1578,7 +1608,7 @@ $$
 {
     NSSet<NSNumber*>* devices = [self knownDevicesForAddressName:jid];
     for(NSNumber* device in devices)
-        [self deleteDeviceForSource:jid andRid:device];
+        [self bulkDeleteDeviceForSource:jid andRid:device];
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];

@@ -1288,7 +1288,7 @@ $$
     BOOL devicePreKey = [[envelope findFirst:@"header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid] boolValue];
     
     DDLogVerbose(@"Decrypting using:\nrid=%u --> messageKey=%@\nrid=%u --> isPreKey=%@", self.monalSignalStore.deviceid, messageKey, self.monalSignalStore.deviceid, bool2str(devicePreKey));
-
+    
     if(!messageKey && isKeyTransportElement)
     {
         DDLogVerbose(@"Received KeyTransportElement without our own rid included --> Ignore it");
@@ -1377,6 +1377,11 @@ $$
                 return nil;
 #endif
             }
+            
+            //make sure the dh ratchet always advances, even on "receive only" devices
+            //--> force a key transport message with 1% probability (~ every 100th message)
+            if(arc4random_uniform(100)==42)
+                [self sendKeyTransportElement:senderJid forRids:[NSSet setWithArray:@[sid]]];
 
             //some clients have the auth parameter in the ciphertext?
             if(decryptedKey.length == 16 * 2)

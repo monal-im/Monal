@@ -433,10 +433,22 @@
         NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, [NSNumber numberWithInteger:address.deviceId], address.name]];
         if(dbIdentity)
             return YES;
-        // Set every new identity to TOFU to increase user experience
+        // if at least one fingerprint isn't TOFU new fingerprints shouldn't be trusted
+        // if all fingerprints are TOFU -> trust new ones with TOFU as well
         return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity \
             (account_id, contactName, contactDeviceId, identity, trustLevel) \
-            VALUES (?, ?, ?, ?, ?)" andArguments:@[self.accountID, address.name, [NSNumber numberWithInteger:address.deviceId], identityKey, [NSNumber numberWithInt:MLOmemoInternalToFU]]];
+            VALUES (?, ?, ?, ?, \
+                (SELECT CASE \
+                    WHEN COUNT(contactDeviceId) == 0 THEN 1 \
+                    ELSE 0 \
+                END \
+                FROM signalContactIdentity \
+                WHERE \
+                    account_id=? \
+                    AND contactName=? \
+                    AND trustLevel!=1 \
+                ) \
+            );" andArguments:@[self.accountID, address.name, [NSNumber numberWithInteger:address.deviceId], identityKey, self.accountID, address.name]];
     }];
 }
 

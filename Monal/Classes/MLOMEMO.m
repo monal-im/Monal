@@ -789,7 +789,7 @@ $$
 
     if(preKeyIds == nil || preKeyIds.count == 0)
     {
-        DDLogWarn(@"Could not create array of preKeyIds, ignoring: preKeyIds=%@ %lu", preKeyIds, (unsigned long)preKeyIds.count);
+        DDLogWarn(@"Could not create array of preKeyIds, ignoring %lu preKeyIds: %@", (unsigned long)preKeyIds.count, preKeyIds);
         return;
     }
     
@@ -831,7 +831,6 @@ $$
             continue;
         }
         // mark session as functional
-        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)rid.unsignedIntValue];
         [self.monalSignalStore markBundleAsFixed:address];
 
         //found and imported a working key --> try to (re)build a new session proactively (or repair a broken one)
@@ -1560,9 +1559,7 @@ $$
 {
     NSSet<NSNumber*>* devices = [self knownDevicesForAddressName:jid];
     for(NSNumber* device in devices)
-    {
         [self deleteDeviceForSource:jid andRid:device];
-    }
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];

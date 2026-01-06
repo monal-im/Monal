@@ -480,21 +480,16 @@ NSString* const kStanza = @"stanza";
     BOOL retval = NO;
     //we are idle when we are not connected (and not trying to)
     //or: the catchup is done, no unacked stanzas are left in the smacks queue and receive and send queues are empty (no pending operations)
-    unsigned long unackedCount = 0;
-    @synchronized(_stateLockObject) {
-        unackedCount = (unsigned long)[self.unAckedStanzas count];
-    }
+    id unackedCount = @"unchecked";
     if(
         (
             //test if this account was permanently logged out but still has stanzas pending (this can happen if we have no connectivity for example)
             //--> we are not idle in this case because we still have pending outgoing stanzas
             _accountState<kStateReconnecting &&
-            !_reconnectInProgress &&
-            !unackedCount
+            !_reconnectInProgress
         ) || (
             //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
             _catchupDone &&
-            !unackedCount &&
             ![_parseQueue operationCount] &&        //if something blocks the parse queue it is either an incoming stanza currently processed or waiting to be processed
             //[_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
             ![_sendQueue operationCount] &&
@@ -502,12 +497,24 @@ NSString* const kStanza = @"stanza";
         )
     )
         retval = YES;
+    //only check unacked count if needed (this makes sure we don't hold the state lock unnecessarily and block the main thread)
+    if(retval)
+    {
+        @synchronized(_stateLockObject) {
+            NSUInteger unacked = [self.unAckedStanzas count];
+            if(unacked)
+            {
+                retval = NO;
+                unackedCount = @(unacked);
+            }
+        }
+    }
     _lastIdleState = retval;
     DDLogVerbose(@("%@ --> Idle check:\n"
             "\t_accountState < kStateReconnecting = %@\n"
             "\t_reconnectInProgress = %@\n"
             "\t_catchupDone = %@\n"
-            "\t[self.unAckedStanzas count] = %lu\n"
+            "\t[self.unAckedStanzas count] = %@\n"
             "\t[_parseQueue operationCount] = %lu\n"
             //"\t[_receiveQueue operationCount] = %lu\n"
             "\t[_sendQueue operationCount] = %lu\n"

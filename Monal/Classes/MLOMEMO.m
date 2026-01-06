@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 static const size_t MIN_OMEMO_KEYS = 80;
 static const size_t MAX_OMEMO_KEYS = 100;
 static const int KEY_SIZE = 16;
+static NSDictionary* trustLevels2Text = nil;
 
 @interface MLOMEMO ()
 {
@@ -41,6 +42,17 @@ static const int KEY_SIZE = 16;
 @end
 
 @implementation MLOMEMO
+
++(void) initialize
+{
+    trustLevels2Text = @{
+        @MLOmemoNotTrusted: NSLocalizedString(@"untrusted", @"OMEMO warning shown inside chat view"),
+        @MLOmemoToFU: NSLocalizedString(@"automatically trusted", @"OMEMO warning shown inside chat view"),
+        @MLOmemoToFUButNoMsgSeenInTime: NSLocalizedString(@"automatically trusted", @"OMEMO warning shown inside chat view"),
+        @MLOmemoTrusted: NSLocalizedString(@"trusted", @"OMEMO warning shown inside chat view"),
+        @MLOmemoTrustedButNoMsgSeenInTime: NSLocalizedString(@"trusted", @"OMEMO warning shown inside chat view"),
+    };
+}
 
 -(MLOMEMO*) initWithAccount:(xmpp*) account;
 {
@@ -520,30 +532,6 @@ $$
 
 -(void) handleOwnDevicelistUpdate:(NSSet<NSNumber*>*) receivedDevices
 {
-    //check for new deviceids not previously known, but only if this isn't the first login we see a devicelist
-    //this has to be a property of the xmpp class to persist it even across state resets
-    if(self.account.hasSeenOmemoDeviceListAfterOwnDeviceid)
-    {
-        NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
-        [newDevices minusSet:self.ownDeviceList];
-        //alert for all devices now still listed in newDevices
-        for(NSNumber* device in newDevices)
-            if([device unsignedIntValue] != self.monalSignalStore.deviceid)
-            {
-                DDLogWarn(@"Got new deviceid %@ for own account %@", device, self.account.connectionProperties.identity.jid);
-                UNMutableNotificationContent* content = [UNMutableNotificationContent new];
-                content.title = NSLocalizedString(@"New omemo device", @"");;
-                content.subtitle = self.account.connectionProperties.identity.jid;
-                content.body = [NSString stringWithFormat:NSLocalizedString(@"Detected a new omemo device on your account: %@", @""), device];
-                content.sound = [UNNotificationSound defaultSound];
-                content.categoryIdentifier = @"simple";
-                UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"newOwnOmemoDevice::%@::%@", self.account.connectionProperties.identity.jid, device] content:content trigger:nil];
-                NSError* error = [HelperTools postUserNotificationRequest:request];
-                if(error)
-                    DDLogError(@"Error posting new deviceid notification: %@", error);
-            }
-    }
-    
     //update own devicelist (this can be an empty list, if the list on our server is empty)
     self.ownDeviceList = [receivedDevices mutableCopy];
     //this has to be a property of the xmpp class to persist it even across state resets
@@ -653,7 +641,9 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     }
     else
     {
-        [self postOMEMOMessageForUser:jid withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new device with id: %@", @"OMEMO warning shown inside chat view"), rid]];
+        //only show warning, if we don't already know this deviceid (e.g. a really new device, not a bundle fetch due to a session repair)
+        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)rid.unsignedIntValue];
+        NSData* oldIdentity = [self.monalSignalStore getIdentityForAddress:address];
 
         //check that a corresponding buddy exists -> prevent foreign key errors
         MLXMLNode* receivedKeys = data[@"current"];
@@ -667,7 +657,39 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
             DDLogWarn(@"More than one bundle item found from %@ rid: %@, ignoring all items!", jid, rid);
         
         if(receivedKeys)
+        {
             [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
+            
+            NSData* newIdentity = [self.monalSignalStore getIdentityForAddress:address];
+            if(oldIdentity == nil || ![oldIdentity isEqual:newIdentity])
+            {
+                NSString* trustLevel = trustLevels2Text[[self.monalSignalStore getTrustLevel:address identityKey:newIdentity]];
+                [self postOMEMOMessageForUser:jid withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new %@ device with id: %@", @"OMEMO warning shown inside chat view"), trustLevel, rid]];
+            }
+            
+            //check for new deviceids not previously known, but only if this isn't the first login we see a devicelist
+            //this has to be a property of the xmpp class to persist it even across state resets
+            if(self.account.hasSeenOmemoDeviceListAfterOwnDeviceid && [jid isEqualToString:self.account.connectionProperties.identity.jid])
+            {
+                //only show warning, if we don't already know this deviceid
+                //(e.g. a really new device, not a devicelist removal followed by adding it back)
+                if((oldIdentity == nil || ![oldIdentity isEqual:newIdentity]) && [rid unsignedIntValue] != self.monalSignalStore.deviceid)
+                {
+                    NSString* trustLevel = trustLevels2Text[[self.monalSignalStore getTrustLevel:address identityKey:newIdentity]];
+                    DDLogWarn(@"Got new %@ deviceid %@ for own account %@", trustLevel, rid, jid);
+                    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+                    content.title = NSLocalizedString(@"New omemo device", @"");;
+                    content.subtitle = jid;
+                    content.body = [NSString stringWithFormat:NSLocalizedString(@"Detected a new %@ omemo device on your account: %@", @"OMEMO warning shown as notification"), trustLevel, rid];
+                    content.sound = [UNNotificationSound defaultSound];
+                    content.categoryIdentifier = @"simple";
+                    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"newOwnOmemoDevice::%@::%@", jid, rid] content:content trigger:nil];
+                    NSError* error = [HelperTools postUserNotificationRequest:request];
+                    if(error)
+                        DDLogError(@"Error posting new deviceid notification: %@", error);
+                }
+            }
+        }
         else
         {
             DDLogWarn(@"Could not find any bundle in pubsub data from %@ rid: %@, data=%@", jid, rid, data);
@@ -1545,7 +1567,9 @@ $$
     }
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid.unsignedIntValue];
-    [self.monalSignalStore deleteDeviceforAddress:address];
+    //don't delete the identity record to not trigger spurious "detected a new omemo device on your account"
+    //notifications in handleOwnDevicelistUpdate if a device was briefly removed from our devicelist before it was added back in
+    [self.monalSignalStore markDeviceAsDeleted:address];
     [self.monalSignalStore deleteSessionRecordForAddress:address];
     [self notifyKnownDevicesUpdated:address.name];
 }

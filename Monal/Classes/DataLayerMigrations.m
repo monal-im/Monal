@@ -1091,6 +1091,11 @@
             [db executeNonQuery:@"ALTER TABLE account DROP COLUMN 'supports_sasl2';"];
         }];
         
+        //make sure all omemo devices have a "last used" timestamp
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.407 withBlock:^{
+            [db executeNonQuery:@"UPDATE signalContactIdentity SET lastReceivedMsg=CURRENT_TIMESTAMP WHERE lastReceivedMsg IS NULL;"];
+        }];
+
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

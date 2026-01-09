@@ -6,7 +6,7 @@ use webrtc_sdp::attribute_type::{
 use crate::jingle::{GenericParameter, GenericParameterEnum};
 
 // *** xep-0293
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RtcpFb {
     #[serde(rename = "@xmlns", default)]
     xmlns: String,
@@ -60,7 +60,7 @@ impl RtcpFb {
 }
 
 // *** xep-0293
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RtcpFbTrrInt {
     #[serde(rename = "@xmlns", default)]
     xmlns: String,
@@ -88,7 +88,7 @@ impl RtcpFbTrrInt {
 }
 
 // *** xep-0293
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "kebab-case")]
 pub enum RtcpFbType {
     Ack,

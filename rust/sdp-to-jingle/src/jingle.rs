@@ -54,7 +54,7 @@ pub enum JingleRtpSessionsValue {
 }
 
 // *** generic enum for multiple xeps (e.g. global)
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum GenericParameterEnum {
     Parameter(GenericParameter),
@@ -63,7 +63,7 @@ pub enum GenericParameterEnum {
 }
 
 // *** generic struct for multiple xeps (e.g. global)
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GenericParameter {
     #[serde(rename = "@name")]
     name: String,

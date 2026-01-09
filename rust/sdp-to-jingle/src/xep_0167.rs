@@ -328,6 +328,7 @@ impl JingleRtpSessionsPayloadType {
     pub fn to_sdp_fmtp(&self) -> Result<Option<SdpAttributeFmtp>, SdpParserInternalError> {
         // don't return any SdpAttributeFmtp if no attributes are present in xml
         // this avoids returning default values for everything, which results in bogus sdp
+        eprintln!("to_sdp_fmtp parameter: {:?}", self.parameter);
         if self.parameter.is_empty() {
             return Ok(None);
         }
@@ -398,6 +399,7 @@ impl JingleRtpSessionsPayloadType {
             },
         };
         retval.parameters.unknown_tokens = self.get_fmtp_unknown_tokens_vec(&known_param_names);
+        eprintln!("to_sdp_fmtp unknown_tokens: {:?}", retval.parameters.unknown_tokens);
         Ok(Some(retval))
     }
 
@@ -415,7 +417,7 @@ impl JingleRtpSessionsPayloadType {
 }
 
 // *** xep-0167
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "kebab-case")]
 pub enum JingleRtpSessionsPayloadTypeValue {
     Parameter(JingleRtpSessionsPayloadTypeParam),
@@ -426,7 +428,7 @@ pub enum JingleRtpSessionsPayloadTypeValue {
 }
 
 // *** xep-0167
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JingleRtpSessionsPayloadTypeParam {
     #[serde(rename = "@name")]
     name: String,

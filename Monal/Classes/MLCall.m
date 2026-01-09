@@ -931,7 +931,7 @@
         DDLogDebug(@"WebRTC reported local SDP '%@', sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:sdp.sdp withInitiator:YES];
-        if(children.count == 0)
+        if(children == nil || children.count == 0)
         {
             DDLogError(@"Could not serialize local SDP to XML!");
             [self handleEndCallActionWithReason:MLCallFinishReasonError];

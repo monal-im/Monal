@@ -8,4 +8,4 @@
 	branch = main
 [submodule "appstore_metadata"]
 	path = appstore_metadata
-	url = git@github.com:monal-im/Monal-localization-appstore.git
+	url = https://github.com/monal-im/Monal-localization-appstore.git

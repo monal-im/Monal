@@ -517,7 +517,18 @@
     DDLogInfo(@"Activating audio session now: %@", audioSession);
     [[RTCAudioSession sharedInstance] lockForConfiguration];
     NSUInteger options = 0;
+
+    // AVAudioSessionCategoryOptionAllowBluetooth is available in SDK 26, but not SDK 16.
+    // AVAudioSessionCategoryOptionAllowBluetoothHFP is the same in reverse.
+    // __IPHONE_26_0 is only defined in SDKs >= 26.
+    // See https://forums.swift.org/t/xcode-26-avaudiosession-categoryoptions-allowbluetooth-deprecated/80956
+    // TODO: Once all developers and the build run XCode 26, remove the guards in favour of AVAudioSessionCategoryOptionAllowBluetoothHFP.
+#ifdef __IPHONE_26_0
+    options |= AVAudioSessionCategoryOptionAllowBluetoothHFP;
+#else
     options |= AVAudioSessionCategoryOptionAllowBluetooth;
+#endif
+
     options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
     options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
     options |= AVAudioSessionCategoryOptionAllowAirPlay;

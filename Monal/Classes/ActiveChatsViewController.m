@@ -359,6 +359,8 @@ static NSMutableSet* _pushWarningDisplayed;
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
     
+    [self refresh];
+    
     //has to be done here to not always prepend intro screens onto our view queue
     //once a fullscreen view is dismissed (or the app is switched to foreground)
     [self segueToIntroScreensIfNeeded];
@@ -401,13 +403,15 @@ static NSMutableSet* _pushWarningDisplayed;
         }
     };
 
-    dispatch_async(dispatch_get_main_queue(), ^{
+    [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         size_t unpinnedConCntBefore = self.unpinnedContacts.count;
         size_t pinnedConCntBefore = self.pinnedContacts.count;
         NSMutableArray<MLContact*>* newUnpinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:NO];
         NSMutableArray<MLContact*>* newPinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
-        if(!newUnpinnedContacts || ! newPinnedContacts)
-            return;
+        if(!newUnpinnedContacts)
+            newUnpinnedContacts = [NSMutableArray new];
+        if(!newPinnedContacts)
+            newPinnedContacts = [NSMutableArray new];
 
         int unpinnedCntDiff = (int)unpinnedConCntBefore - (int)newUnpinnedContacts.count;
         int pinnedCntDiff = (int)pinnedConCntBefore - (int)newPinnedContacts.count;
@@ -426,8 +430,8 @@ static NSMutableSet* _pushWarningDisplayed;
                 [self presentChatWithContact:nil];
         }
         
-        if(self.chatListTable.hasUncommittedUpdates)
-            return;
+//         if(self.chatListTable.hasUncommittedUpdates)
+//             return;
         [CATransaction begin];
         [UIView performWithoutAnimation:^{
             [self.chatListTable beginUpdates];
@@ -444,7 +448,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
         [appDelegate updateUnread];
-    });
+    }];
 }
 
 -(void) refreshContact:(NSNotification*) notification
@@ -610,9 +614,7 @@ static NSMutableSet* _pushWarningDisplayed;
                 [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationRight];
                 //make sure to fully refresh to remove the empty dataset (yes this will trigger on first chat pinning, too, but that does no harm)
                 if(oldCount == 0)
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self refreshDisplay];
-                    });
+                    [self refreshDisplay];
             }
         } completion:^(BOOL finished) {
             if(completion) completion(finished);
@@ -638,7 +640,6 @@ static NSMutableSet* _pushWarningDisplayed;
 {
     DDLogDebug(@"active chats view did appear");
     [super viewDidAppear:animated];
-    
     [self refresh];
 }
 
@@ -649,10 +650,10 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) refresh
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    [HelperTools dispatchAsync:YES reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
         [self refreshDisplay];      // load contacts
         [self processViewQueue];
-    });
+    }];
 }
 
 -(void) didReceiveMemoryWarning

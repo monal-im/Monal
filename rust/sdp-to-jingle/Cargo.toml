@@ -11,5 +11,5 @@ crate-type = ["staticlib", "lib"]
 [dependencies]
 serde = {version = "1.0"}
 serde_derive = {version = "1.0"}
-quick-xml = { version = "0.38", features = ["serialize", "overlapped-lists"] }
+quick-xml = { version = "0.39", features = ["serialize", "overlapped-lists"] }
 webrtc-sdp = { git = "https://github.com/tmolitor-stud-tu/webrtc-sdp.git", branch = "master", features = ["serialize"] }

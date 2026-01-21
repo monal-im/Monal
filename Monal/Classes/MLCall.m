@@ -254,17 +254,10 @@
 -(void) setSpeaker:(BOOL) speaker
 {
     @synchronized(self) {
-        DDLogError(@"*** setSpeaker:%@ called...", bool2str(speaker));
         if(self.webRTCClient == nil || self.audioSession == nil)
-        {
-            DDLogError(@"*** setSpeaker: not ready: %@, %@", self.webRTCClient, self.audioSession);
             return;
-        }
         if(_speaker == speaker)
-        {
-            DDLogError(@"*** setSpeaker: called but identical...");
             return;
-        }
         _speaker = speaker;
         if(_speaker)
             [self.webRTCClient speakerOn];
@@ -543,7 +536,7 @@
     [[RTCAudioSession sharedInstance] unlockForConfiguration];
     if(self.callType == MLCallTypeVideo)
     {
-        DDLogError(@"*** Activating speaker...");
+        DDLogInfo(@"*** Video call detected, activating speaker...");
         self.speaker = YES;
     }
 }

@@ -28,6 +28,8 @@
 @property (nonatomic, strong) SignalSignedPreKey* _Nullable signedPreKey;
 @property (nonatomic, strong) NSArray<SignalPreKey*>* _Nullable preKeys;
 
++(BOOL) acceptedTrustLevel:(int) trustLevel withTofu:(BOOL) withTofu andOutgoing:(BOOL) outgoing;
+
 -(MLSignalStore* _Nonnull) initWithAccountId:(NSNumber* _Nonnull) accountId andAccountJid:(NSString* _Nonnull) accountJid;
 -(void) saveValues;
 
@@ -73,4 +75,8 @@
 
 -(void) cleanupKeys;
 -(void) reloadCachedPrekeys;
+
+-(BOOL) deletePreKeyWithId:(uint32_t) preKeyId;
+-(BOOL) deleteUsedPrekeys;
+
 @end

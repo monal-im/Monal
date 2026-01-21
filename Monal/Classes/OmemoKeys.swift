@@ -12,8 +12,7 @@ struct OmemoKeysEntry: View {
     private let contactJid: String
     
     @State private var trustLevel: NSNumber
-    @State private var showEntryInfo = false
-    @State private var showClipboardCopy = false
+    @State private var showAlert: Alert?
 
     private let deviceId: NSNumber
     private let fingerprint: Data
@@ -46,40 +45,48 @@ struct OmemoKeysEntry: View {
                 dismissButton: nil);
         }
         switch(self.trustLevel.int32Value) {
-        case MLOmemoTrusted:
-            return Alert(
-                title: Text("Trusted and verified key"),
-                message: Text("This key is trusted and verified by manually comparing fingerprints. To stop trusting this key, use the toggle element."),
-                dismissButton: nil)
-        case MLOmemoToFU:
-            return Alert(
-                title: Text("Trusted but unverified key"),
-                message: Text("Monal currently trusts this key, but fingerprints were not compared yet. To increase security, please confirm with the contact that the displayed fingerprints do match before trusting this key!"),
-                primaryButton: .destructive(Text("Trust Key"), action: {
-                    setTrustLevel(true)
-                }),
-                secondaryButton: .default(Text("Okay")))
         case MLOmemoNotTrusted:
             return Alert(
                 title: Text("Untrusted key"),
                 message: Text("Monal does not trust this key. Either it was manually disabled or not manually verified while other keys of that contact are verified. You can trust this key by using the toggle element. Please ensure with the contact that fingerprints are matching before trusting this key."),
                 dismissButton: nil)
+        case MLOmemoToFU:
+            return Alert(
+                title: Text("Trusted but unverified key"),
+                message: Text("Monal currently trusts this key, but fingerprints were not compared yet. To increase security, please confirm with the contact that the displayed fingerprints do match before trusting this key!"),
+                primaryButton: .default(Text("Trust Key"), action: {
+                    setTrustLevel(true)
+                }),
+                secondaryButton: .default(Text("OK")))
+        case MLOmemoToFUButNoMsgSeenInTime:
+            return Alert(
+                title: Text("Trusted but unverified and unused key"),
+                message: Text("Monal currently trusts this key, but fingerprints were not compared yet and the contact has not used it for a long time. Consider to disable trust for this key."),
+                primaryButton: .destructive(Text("Don't trust Key"), action: {
+                    setTrustLevel(false)
+                }),
+                secondaryButton: .default(Text("OK")))
+        case MLOmemoTrusted:
+            return Alert(
+                title: Text("Trusted and verified key"),
+                message: Text("This key is trusted and verified by manually comparing fingerprints. To stop trusting this key, use the toggle element."),
+                dismissButton: nil)
         case MLOmemoTrustedButRemoved:
             return Alert(
                 title: Text("Trusted but removed key"),
                 message: Text("This key is trusted, but the contact does not use it anymore. Consider to disable trust for this key."),
-                primaryButton: .default(Text("Dont' trust Key"), action: {
+                primaryButton: .destructive(Text("Dont' trust Key"), action: {
                     setTrustLevel(false)
                 }),
-                secondaryButton: .cancel(Text("Okay")))
+                secondaryButton: .cancel(Text("OK")))
         case MLOmemoTrustedButNoMsgSeenInTime:
             return Alert(
                 title: Text("Trusted but unused key"),
-                message: Text("This key is trusted, but the contact has not used it for a long time. Consider to disable trust for this key"),
-                primaryButton: .default(Text("Don't trust Key"), action: {
+                message: Text("This key is trusted, but the contact has not used it for a long time. Consider to disable trust for this key."),
+                primaryButton: .destructive(Text("Don't trust Key"), action: {
                     setTrustLevel(false)
                 }),
-                secondaryButton: .cancel(Text("Okay")))
+                secondaryButton: .cancel(Text("OK")))
         default:
             return Alert(
                 title: Text("Invalid State"),
@@ -88,30 +95,35 @@ struct OmemoKeysEntry: View {
         }
     }
 
-    // @ViewBuilder
-    func getTrustLevelIcon() -> some View {
-        var accentColor = Color.yellow
-        var iconName = "key.fill"
+    @ViewBuilder
+    func getTrustLevelIcons() -> some View {
         switch(self.trustLevel.int32Value) {
-        case MLOmemoTrusted:
-            accentColor = Color.green
-            break
-        case MLOmemoToFU:
-            break
-        case MLOmemoNotTrusted:
-            accentColor = Color.red
-            break
-        case MLOmemoTrustedButRemoved:
-            iconName = "trash.fill"
-        case MLOmemoTrustedButNoMsgSeenInTime:
-            iconName = "clock.fill"
-        default:
-            break
+            case MLOmemoNotTrusted:
+                getTrustLevelIcon("key.fill", .red)
+            case MLOmemoToFU:
+                getTrustLevelIcon("key.fill", .yellow)
+            case MLOmemoToFUButNoMsgSeenInTime:
+                getTrustLevelIcon("clock.fill", .clear)
+                getTrustLevelIcon("key.fill", .yellow)
+            case MLOmemoToFUButRemoved:
+                getTrustLevelIcon("trash.fill", .yellow)
+            case MLOmemoTrusted:
+                getTrustLevelIcon("key.fill", .green)
+            case MLOmemoTrustedButRemoved:
+                getTrustLevelIcon("trash.fill", .yellow)
+            case MLOmemoTrustedButNoMsgSeenInTime:
+                getTrustLevelIcon("clock.fill", .clear)
+                getTrustLevelIcon("key.fill", .green)
+            default:
+                EmptyView()
         }
+    }
+    
+    func getTrustLevelIcon(_ iconName: String, _ iconColor: Color) -> some View {
         return Image(systemName: iconName)
             .frame(width: 30, height: 30, alignment: .center)
             .foregroundColor(Color.primary)
-            .background(accentColor)
+            .background(Color.accentColor)
             .cornerRadius(30)
     }
 
@@ -157,39 +169,39 @@ struct OmemoKeysEntry: View {
                         }
                     }
                 }
+                .onTapGesture(count: 1) {
+                    showAlert = getEntryInfoAlert()
+                }
                 .onTapGesture(count: 2) {
                     UIPasteboard.general.setValue(clipboardValue, forPasteboardType:UTType.utf8PlainText.identifier)
-                    showClipboardCopy = true
+                    showAlert = Alert(
+                        title: Text("Copied to clipboard"),
+                        message: Text(clipboardValue),
+                        dismissButton: nil
+                    )
                 }
                 Spacer()
                 // the trust level of our own device should not be displayed
                 if(!isOwnDevice) {
-                    VStack(alignment:.center) {
+                    VStack(alignment:.trailing) {
                         Button {
-                            showEntryInfo = true
+                            showAlert = getEntryInfoAlert()
                         } label: {
-                            getTrustLevelIcon()
+                            getTrustLevelIcons()
                         }
                         Toggle("", isOn: trustLevelBinding).font(.footnote)
                         .labelsHidden()     //make sure we do not need more space than the actual toggle needs
                     }
                 } else {
                     Button {
-                        showEntryInfo = true
+                        showAlert = getEntryInfoAlert()
                     } label: {
                         getDeviceIconForOwnDevice()
                     }
                 }
             }
-            .alert(isPresented: $showEntryInfo) {
-                getEntryInfoAlert()
-            }
-            .alert(isPresented: $showClipboardCopy) {
-                Alert(
-                    title: Text("Copied to clipboard"),
-                    message: Text(clipboardValue),
-                    dismissButton: nil
-                );
+            .alert(isPresented: $showAlert.optionalMappedToBool()) {
+                showAlert!
             }
         }
     }

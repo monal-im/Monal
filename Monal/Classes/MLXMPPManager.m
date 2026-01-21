@@ -585,33 +585,26 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) disconnectAccount:(NSNumber*) accountID withExplicitLogout:(BOOL) explicitLogout
 {
-    int index = 0;
-    int pos = -1;
     xmpp* account;
     @synchronized(_connectedXMPP) {
         for(xmpp* xmppAccount in _connectedXMPP)
-        {
             if(xmppAccount.accountID.intValue == accountID.intValue)
             {
                 account = xmppAccount;
-                pos=index;
                 break;
             }
-            index++;
-        }
-
-        if((pos >= 0) && (pos < (int)[_connectedXMPP count]))
-        {
-            [_connectedXMPP removeObjectAtIndex:pos];
-            DDLogVerbose(@"removed account at pos  %d", pos);
-        }
     }
+    
     if(account)
     {
         DDLogVerbose(@"got account and cleaning up.. ");
         [account disconnect:explicitLogout];
-        account = nil;
         DDLogVerbose(@"done cleaning up account ");
+        
+        @synchronized(_connectedXMPP) {
+            [_connectedXMPP removeObject:account];
+            DDLogVerbose(@"removed account from _connectedXMPP");
+        }
     }
 }
 

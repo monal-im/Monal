@@ -55,19 +55,38 @@
 
 -(void) displayLastMessage:(MLMessage* _Nullable) lastMessage forContact:(MLContact*) contact
 {
-    NSString* senderOfLastGroupMsg;     // set to nick of sender in a group chat, if this is a group chat (1:1 MUST be nil)
-    if(lastMessage.isMuc)
-         senderOfLastGroupMsg = lastMessage.contactDisplayName;
-
     if(lastMessage)
     {
+        if(lastMessage.timestamp)
+        {
+            self.time.text = [self formattedDateWithSource:lastMessage.timestamp];
+            self.time.hidden = NO;
+        }
+        else
+            self.time.hidden = YES;
+        
         if(lastMessage.retracted)
         {
             NSString* retractedStatus = NSLocalizedString(@"This message got retracted", @"");
             [self showStatusTextItalic:retractedStatus withItalicRange:NSMakeRange(0, retractedStatus.length)];
+            return;
         }
-        else if([lastMessage.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
+        else if ([lastMessage.messageType isEqualToString:kMessageTypeMessageDraft])
+        {
+            NSString* draftPreviewPrefix = NSLocalizedString(@"Draft:", @"");
+            NSString* draftPreview = [NSString stringWithFormat:@"%@ %@", draftPreviewPrefix, lastMessage.messageText];
+            [self showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, draftPreviewPrefix.length)];
+            return;
+        }
+        
+        NSString* senderOfLastGroupMsg;     // set to nick of sender in a group chat, if this is a group chat (1:1 MUST be nil)
+        if(lastMessage.isMuc)
+            senderOfLastGroupMsg = lastMessage.contactDisplayName;
+        
+        if([lastMessage.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
             [self showStatusText:NSLocalizedString(@"🔗 A Link", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
+        else if([lastMessage.messageType isEqualToString:kMessageTypeGeo])
+            [self showStatusText:NSLocalizedString(@"📍 A Location", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
         else if([lastMessage.messageType isEqualToString:kMessageTypeFiletransfer])
         {
             if(lastMessage.fileInfo.isImage)
@@ -81,14 +100,6 @@
             else
                 [self showStatusText:NSLocalizedString(@"📁 A File", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
         }
-        else if ([lastMessage.messageType isEqualToString:kMessageTypeMessageDraft])
-        {
-            NSString* draftPreviewPrefix = NSLocalizedString(@"Draft:", @"");
-            NSString* draftPreview = [NSString stringWithFormat:@"%@ %@", draftPreviewPrefix, lastMessage.messageText];
-            [self showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, draftPreviewPrefix.length)];
-        }
-        else if([lastMessage.messageType isEqualToString:kMessageTypeGeo])
-            [self showStatusText:NSLocalizedString(@"📍 A Location", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
         else
         {
             if([lastMessage.messageText hasPrefix:@"/me "])
@@ -101,13 +112,6 @@
                 [self showStatusText:lastMessage.messageText inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             }
         }
-        if(lastMessage.timestamp)
-        {
-            self.time.text = [self formattedDateWithSource:lastMessage.timestamp];
-            self.time.hidden = NO;
-        }
-        else
-            self.time.hidden = YES;
     }
     else
     {

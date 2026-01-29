@@ -279,9 +279,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     _runningMamQueries = [NSMutableDictionary new];
     _inCatchup = [NSMutableDictionary new];
     _mdsData = [NSMutableDictionary new];
-    _pipeliningState = kPipelinedNothing;
-    _cachedStreamFeaturesBeforeAuth = nil;
-    _cachedStreamFeaturesAfterAuth = nil;
+    [self resetAuthPipelining];
     _timersToCancelOnDisconnect = [NSMutableArray new];
     _supportedSaslMechanisms = [NSSet new];
     _supportedFastMechanisms = [NSSet new];
@@ -343,6 +341,13 @@ static NSRegularExpression* fastTokenRemovalRegex;
     DDLogInfo(@"Done deallocating account %@ object %@", self.accountID, self);
 }
 
+-(void) resetAuthPipelining
+{
+    _pipeliningState = kPipelinedNothing;
+    _cachedStreamFeaturesBeforeAuth = nil;
+    _cachedStreamFeaturesAfterAuth = nil;
+}
+
 -(MLContact*) contact
 {
     return [MLContact createContactFromJid:self.connectionProperties.identity.jid andAccountID:self.accountID];
@@ -389,9 +394,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 {
     DDLogError(@"Server returned invalid xml!");
     DDLogDebug(@"Setting _pipeliningState to kPipelinedNothing and clearing _cachedStreamFeaturesBeforeAuth and _cachedStreamFeaturesAfterAuth...");
-    _pipeliningState = kPipelinedNothing;
-    _cachedStreamFeaturesBeforeAuth = nil;
-    _cachedStreamFeaturesAfterAuth = nil;
+    [self resetAuthPipelining];
     [self postError:NSLocalizedString(@"Server returned invalid xml!", @"") withIsSevere:NO];
     [self reconnect];
     return;
@@ -1049,9 +1052,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [self.pubsub invalidateQueue];
             
             //clear pipeline cache
-            self->_pipeliningState = kPipelinedNothing;
-            self->_cachedStreamFeaturesBeforeAuth = nil;
-            self->_cachedStreamFeaturesAfterAuth = nil;
+            [self resetAuthPipelining];
             
             //clear all reconnection handlers
             @synchronized(self->_reconnectionHandlers) {
@@ -1186,9 +1187,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 [self.pubsub invalidateQueue];
                 
                 //clear pipeline cache
-                self->_pipeliningState = kPipelinedNothing;
-                self->_cachedStreamFeaturesBeforeAuth = nil;
-                self->_cachedStreamFeaturesAfterAuth = nil;
+                [self resetAuthPipelining];
                 
                 //clear all reconnection handlers
                 @synchronized(self->_reconnectionHandlers) {
@@ -2586,9 +2585,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             
             //clear pipeline cache to make sure we have a fresh restart next time
             xmppPipeliningState oldPipeliningState = _pipeliningState;
-            _pipeliningState = kPipelinedNothing;
-            _cachedStreamFeaturesBeforeAuth = nil;
-            _cachedStreamFeaturesAfterAuth = nil;
+            [self resetAuthPipelining];
             
             //don't report error but reconnect if we pipelined stuff that is not correct anymore...
             if(oldPipeliningState != kPipelinedNothing)
@@ -2677,9 +2674,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 
                 //clear pipeline cache to make sure we have a fresh restart next time
                 xmppPipeliningState oldPipeliningState = _pipeliningState;
-                _pipeliningState = kPipelinedNothing;
-                _cachedStreamFeaturesBeforeAuth = nil;
-                _cachedStreamFeaturesAfterAuth = nil;
+                [self resetAuthPipelining];
                 
                 //don't report error but reconnect if we pipelined stuff that is not correct anymore...
                 if(oldPipeliningState != kPipelinedNothing)
@@ -2775,9 +2770,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             
             //clear pipeline cache to make sure we have a fresh restart next time
             xmppPipeliningState oldPipeliningState = _pipeliningState;
-            _pipeliningState = kPipelinedNothing;
-            _cachedStreamFeaturesBeforeAuth = nil;
-            _cachedStreamFeaturesAfterAuth = nil;
+            [self resetAuthPipelining];
             
             //don't report error but reconnect if we pipelined stuff that is not correct anymore...
             if(oldPipeliningState != kPipelinedNothing)
@@ -3064,9 +3057,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
             DDLogWarn(@"Got secure XMPP stream error %@: %@", errorReason, errorText);
             DDLogDebug(@"Setting _pipeliningState to kPipelinedNothing and clearing _cachedStreamFeaturesBeforeAuth and _cachedStreamFeaturesAfterAuth...");
-            _pipeliningState = kPipelinedNothing;
-            _cachedStreamFeaturesBeforeAuth = nil;
-            _cachedStreamFeaturesAfterAuth = nil;
+            [self resetAuthPipelining];
             NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
                 message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
@@ -3209,9 +3200,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         
         //clear pipeline cache to make sure we have a fresh restart next time
         xmppPipeliningState oldPipeliningState = self->_pipeliningState;
-        self->_pipeliningState = kPipelinedNothing;
-        self->_cachedStreamFeaturesBeforeAuth = nil;
-        self->_cachedStreamFeaturesAfterAuth = nil;
+        [self resetAuthPipelining];
         
         if(oldPipeliningState != kPipelinedNothing)
         {
@@ -3404,6 +3393,16 @@ static NSRegularExpression* fastTokenRemovalRegex;
                     }
             }
             
+            //XEP-0509 (config versioning, useful for letting the server know we used auth pipelining
+            //so that the server won't count it as failed auth attempt and punish us)
+            MLXMLNode* configVersion = nil;
+            NSString* configVersionString = [parsedStanza findFirst:@"{urn:xmpp:iap:0}config-version@value"];
+            if(configVersionString != nil && self->_pipeliningState != kPipelinedNothing)
+                configVersion = [[MLXMLNode alloc] initWithElement:@"config-version" andNamespace:@"urn:xmpp:iap:0" withAttributes:@{
+                    @"scheme": @"opaque",
+                    @"value": configVersionString,
+                } andChildren:@[] andData:nil];
+            
             //try to authenticate using FAST
             //but only use FAST if we don't want to do a SCRAM upgrade via XEP-0480
             //and don't use FAST in high security environment (e.g. the preventLeaksBeforeAuth setting is YES)
@@ -3440,6 +3439,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                             //no count attribute because we don't do any 0rtt TLS here
                             [[MLXMLNode alloc] initWithElement:@"fast" andNamespace:@"urn:xmpp:fast:0"],
                             nilWrapper(sasl2UserAgent),
+                            nilWrapper(configVersion),
                         ]
                         andData:nil
                     ];
@@ -3480,6 +3480,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                             andChildren:@[
                                 [[MLXMLNode alloc] initWithElement:@"initial-response" andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFirstMessageWithNoMatchingChannelBindingFound:noMatchingChannelBindingFound andChannelBinding:[self channelBindingToUse]]]],
                                 nilWrapper(sasl2UserAgent),
+                                nilWrapper(configVersion),
                             ]
                             andData:nil
                         ];
@@ -3700,9 +3701,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             case MLHtStatusResponderMessageError:
                 DDLogWarn(@"Fast token invalid, reconnecting to flush pipeline and use normal SCRAM...");
                 //clear pipeline cache to make sure we have a fresh restart next time
-                _pipeliningState = kPipelinedNothing;
-                _cachedStreamFeaturesBeforeAuth = nil;
-                _cachedStreamFeaturesAfterAuth = nil;
+                [self resetAuthPipelining];
                 //clear FAST token (it was reported to be invalid by the server) --> use SCRAM on next login
                 [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
                 [self reconnect];
@@ -3728,9 +3727,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         DDLogError(@"SCRAM/HT says this server-final-message/responder-message was wrong: %@", message);
         
         //clear pipeline cache to make sure we have a fresh restart next time
-        _pipeliningState = kPipelinedNothing;
-        _cachedStreamFeaturesBeforeAuth = nil;
-        _cachedStreamFeaturesAfterAuth = nil;
+        [self resetAuthPipelining];
         
         //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
         //deactivate the account if requested, too

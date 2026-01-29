@@ -469,6 +469,23 @@ static NSMutableDictionary* _typingNotifications;
         sentByOwnOmemoDevice = ((NSNumber*)[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|uint"]).unsignedIntValue == [account.omemo getDeviceId].unsignedIntValue;
 #endif
     
+    //handle fallback body of incoming reactions
+    //(only ignore the fallback body, if it covers the whole body, else ignore the reaction and show the body as normal message)
+    BOOL isReaction = [messageNode check:@"{urn:xmpp:reactions:0}reactions"];
+    if(isReaction && [messageNode check:@"{urn:xmpp:fallback:0}fallback<for=urn:xmpp:reactions:0>/body"])
+    {
+        NSString* fallbackBody = decrypted != nil ? decrypted : [messageNode findFirst:@"body#"];
+        NSNumber* start = [messageNode findFirst:@"{urn:xmpp:fallback:0}fallback<for=urn:xmpp:reactions:0>/body@start"];
+        NSNumber* end = [messageNode findFirst:@"{urn:xmpp:fallback:0}fallback<for=urn:xmpp:reactions:0>/body@end"];
+        if((start == nil || start.unsignedIntValue == 0) && (end == nil || (fallbackBody != nil && end.unsignedIntValue == [fallbackBody length])))
+            DDLogInfo(@"Ignoring fallback body on reaction...");
+        else
+        {
+            DDLogWarn(@"Ignoring reaction with fallback body! The fallback body will be handled like a normal message.");
+            isReaction = NO;
+        }
+    }
+    
     BOOL possiblyUpdatedStanzaId = NO;
     
     //handle message retraction (XEP-0424)
@@ -546,7 +563,7 @@ static NSMutableDictionary* _typingNotifications;
             DDLogWarn(@"Got faked tombstone without server supporting them, ignoring it!");
     }
     //handle incoming reactions
-    else if([messageNode check:@"{urn:xmpp:reactions:0}reactions"])
+    else if([messageNode check:@"{urn:xmpp:reactions:0}reactions"] && !([messageNode check:@"body#"] || decrypted))
     {
         NSString* reactionId = [messageNode findFirst:@"{urn:xmpp:reactions:0}reactions@id"];
         NSOrderedSet* reactions = [NSOrderedSet orderedSetWithArray:[messageNode find:@"{urn:xmpp:reactions:0}reactions<id=%@>/reaction#", reactionId]];
@@ -573,8 +590,6 @@ static NSMutableDictionary* _typingNotifications;
             DDLogWarn(@"Ignoring incoming reaction: neither participantJid nor occupant-id provided!");
         else if(reactionId == nil)
             DDLogError(@"Received reaction without id attribute, implementation error in sender!");
-        else if([messageNode check:@"body#"] || decrypted)
-            DDLogWarn(@"Ignoring reaction with fallback body! The fallback body will be handled like a normal message.");
         else
         {
             DDLogDebug(@"Searching for history ID of messageIdOrStanzaId=%@, inChat=%@", reactionId, possiblyUnknownContact);

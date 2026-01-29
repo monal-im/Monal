@@ -927,7 +927,7 @@ static NSDateFormatter* dbFormatter;
 -(NSDictionary* _Nullable) getDraftMessageDictionaryForJid:(NSString*) jid onAccount:(NSNumber*) accountID
 {
     return [self.db idReadTransaction:^{
-        NSArray* results = [self.db executeReader:@"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType FROM buddylist AS bl INNER JOIN activechats AS ac ON bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name WHERE ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';" andArguments:@[accountID, jid]];
+        NSArray* results = [self.db executeReader:@"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType, bl.account_id, bl.buddy_name FROM buddylist AS bl INNER JOIN activechats AS ac ON bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name WHERE ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';" andArguments:@[accountID, jid]];
         if([results count])
         {
             NSMutableDictionary* message = [(NSDictionary*)results[0] mutableCopy];

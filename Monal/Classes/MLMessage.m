@@ -109,6 +109,8 @@ static NSMutableDictionary* _singletonCache;
         MLMessage* message = [self new];
         // Fill only the properties useful for a draft message
         // The timestamp is used when rendering MLContactCell, among other things
+        message.accountID = dic[@"account_id"];
+        message.buddyName = dic[@"buddy_name"];
         message.messageText = dic[@"message"];
         message.messageType = dic[@"messageType"];
         message.timestamp = dic[@"thetime"];

@@ -610,7 +610,7 @@ static NSMutableDictionary* _typingNotifications;
                     @"reactionsUpdate": @YES,
                     @"reactions": reactions,
                     @"reactingContact": reactingContact,
-                    @"changedReactions": changedReactions,
+                    @"changedReactions": nilWrapper(changedReactions),
                 }];
             }
             else

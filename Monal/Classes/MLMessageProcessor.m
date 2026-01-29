@@ -563,7 +563,7 @@ static NSMutableDictionary* _typingNotifications;
             DDLogWarn(@"Got faked tombstone without server supporting them, ignoring it!");
     }
     //handle incoming reactions
-    else if([messageNode check:@"{urn:xmpp:reactions:0}reactions"] && !([messageNode check:@"body#"] || decrypted))
+    else if(isReaction)
     {
         NSString* reactionId = [messageNode findFirst:@"{urn:xmpp:reactions:0}reactions@id"];
         NSOrderedSet* reactions = [NSOrderedSet orderedSetWithArray:[messageNode find:@"{urn:xmpp:reactions:0}reactions<id=%@>/reaction#", reactionId]];

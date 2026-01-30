@@ -840,10 +840,13 @@ static NSMutableDictionary* _typingNotifications;
                     @"showAlert": @(NO),
                     @"contact": possiblyUnknownContact,
                     @"LMCReplaced": @NO,
-                    @"stanzaId": stanzaid,
+                    @"stanzaId": nilWrapper(stanzaid),
                     @"reactionsUpdate": @NO,
                 }];
-            DDLogDebug(@"Managed to update stanzaid of message (or stanzaid already known): %@", message);
+            if(stanzaid)
+                DDLogDebug(@"Managed to update stanzaid of message (or stanzaid already known): %@", message);
+            else
+                DDLogWarn(@"MUC reflection without a stanzaid! This likely means that the MUC server doesn't support stanzaids. message: %@", message);
         }
     }
     

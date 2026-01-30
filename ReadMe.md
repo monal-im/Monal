@@ -35,17 +35,15 @@ Here you can read about further [support of the development](https://github.com/
 
 ### Translations
 
-Appstore metadata can be translated:
-- [Instructions for Monal](appstore_metadata)
-- [Instructions for Quicksy](appstore_quicksy_metadata).
-
-Translations of the app itself are hosted and managed via [Weblate](https://hosted.weblate.org/engage/monal/).  
+Translations of the app itself as well as the appstore description and even the changelog displayed inside the appstore
+are hosted and managed via [Weblate](https://hosted.weblate.org/engage/monal/).
+Feel free to translate Monal to your language!  
 
 [![Detailed translation status](https://hosted.weblate.org/widgets/monal/-/multi-auto.svg)](https://hosted.weblate.org/engage/monal/?utm_source=widget)
 
 ### Platform information
 
-Monal always supports the two latest MacOS and iOS major releases.
+Monal always supports the two latest major releases of macOS and iOS.
 
 ### Supported XEPs
 

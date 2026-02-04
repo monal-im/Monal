@@ -220,15 +220,6 @@ final class WebRTCClient: NSObject {
 //         let videoTransceiver = self.peerConnection.addTransceiver(of:.video, init:RTCRtpTransceiverInit())!
 //         videoTransceiver.sender.track = videoTrack
         
-        let capabilities = WebRTCClient.factory.rtpSenderCapabilities(forKind: kRTCMediaStreamTrackKindVideo)
-        let codecs = capabilities.codecs
-        let preferredCodecs = codecs.filter { $0.name=="VP8" }
-        do {
-            try videoTransceiver.setCodecPreferences(preferredCodecs)
-        } catch {
-            DDLogError("Error setting codec preferences: \(String(describing:error))")
-        }
-        
         self.remoteVideoTrack = videoTransceiver.receiver.track as? RTCVideoTrack
     }
     

@@ -9,6 +9,7 @@ edition = "2021"
 crate-type = ["staticlib", "lib"]
 
 [dependencies]
+indexmap = {version = "2.13"}
 serde = {version = "1.0"}
 serde_derive = {version = "1.0"}
 quick-xml = { version = "0.39", features = ["serialize", "overlapped-lists"] }

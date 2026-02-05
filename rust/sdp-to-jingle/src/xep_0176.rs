@@ -143,7 +143,7 @@ pub struct JingleTransportCandidate {
     protocol: String, // transport: SdpAttributeCandidateTransport
     #[serde(rename = "@rel-addr", skip_serializing_if = "Option::is_none")]
     raddr: Option<String>, // raddr: Option<Address>
-    #[serde(rename = "@rel_port", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "@rel-port", skip_serializing_if = "Option::is_none")]
     rport: Option<u32>,
     #[serde(rename = "@type")]
     c_type: JingleTransportCandidateType,

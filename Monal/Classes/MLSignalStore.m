@@ -574,6 +574,7 @@
 -(NSNumber*) getTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey
 {
     return [self.sqliteDatabase idReadTransaction:^{
+        DDLogVerbose(@"Getting trust level for: accountID=%@, deviceId=%@, name=%@, identityKey=%@", self.accountID, @(address.deviceId), address.name, identityKey);
         return [self.sqliteDatabase executeScalar:(@"SELECT \
                 CASE \
                     WHEN (trustLevel=0) THEN 0 \

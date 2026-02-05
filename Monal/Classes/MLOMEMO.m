@@ -686,7 +686,7 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
             [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
             
             NSData* newIdentity = [self.monalSignalStore getIdentityForAddress:address];
-            if(oldIdentity == nil || ![oldIdentity isEqual:newIdentity])
+            if(oldIdentity == nil || (newIdentity != nil && ![oldIdentity isEqual:newIdentity]))
             {
                 NSString* trustLevel = trustLevels2Text[[self.monalSignalStore getTrustLevel:address identityKey:newIdentity]];
                 [self postOMEMOMessageForUser:jid withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new %@ device with id: %@", @"OMEMO warning shown inside chat view"), trustLevel, rid]];
@@ -698,7 +698,7 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
             {
                 //only show warning, if we don't already know this deviceid
                 //(e.g. a really new device, not a devicelist removal followed by adding it back)
-                if((oldIdentity == nil || ![oldIdentity isEqual:newIdentity]) && [rid unsignedIntValue] != self.monalSignalStore.deviceid)
+                if((oldIdentity == nil || (newIdentity != nil && ![oldIdentity isEqual:newIdentity])) && [rid unsignedIntValue] != self.monalSignalStore.deviceid)
                 {
                     NSString* trustLevel = trustLevels2Text[[self.monalSignalStore getTrustLevel:address identityKey:newIdentity]];
                     DDLogWarn(@"Got new %@ deviceid %@ for own account %@", trustLevel, rid, jid);

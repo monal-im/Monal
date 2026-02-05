@@ -1217,19 +1217,7 @@
             DDLogError(@"Failed to convert raw sdp candidate to jingle, ignoring this candidate: %@", candidate);
             return;
         }
-#ifdef IS_ALPHA
-        if([contentNode check:@"{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate<protocol=tcp>"])
-        {
-            //add tcptype because that attribute is apparently not supported by our mozilla sdp lib
-            MLXMLNode* candidateNode = [contentNode findFirst:@"{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate"];
-            if([candidate.sdp containsString:@"typ host tcptype active"])
-                candidateNode.attributes[@"tcptype"] = @"active";
-            else if([candidate.sdp containsString:@"typ host tcptype passive"])
-                candidateNode.attributes[@"tcptype"] = @"passive";
-            else
-                DDLogWarn(@"Unknown type-tcptype combination!");
-        }
-#else
+#ifndef IS_ALPHA
         if([contentNode check:@"{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate<protocol=tcp>"])
         {
             DDLogError(@"Ignoring raw sdp candidate, because it's using tcp instead of udp: %@", candidate);
@@ -1395,15 +1383,7 @@
 {
     RTCIceCandidate* incomingCandidate = nil;
     NSString* rawSdp = [HelperTools xml2candidate:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:self.direction==MLCallDirectionIncoming];
-#ifdef IS_ALPHA
-    if([iqNode check:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate<protocol=tcp>"])
-    {
-        NSString* type = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate@type"];
-        NSString* tcptype = [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate@tcptype"];
-        DDLogDebug(@"Patching raw sdp type=%@ to contain tcptype: %@", type, tcptype);
-        rawSdp = [rawSdp stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"typ %@", type] withString:[NSString stringWithFormat:@"typ %@ tcptype %@", type, tcptype]];
-    }
-#else
+#ifndef IS_ALPHA
     if([iqNode check:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate<protocol=tcp>"])
     {
         DDLogWarn(@"Got tcp candidate, ignoring: %@", [iqNode findFirst:@"{urn:xmpp:jingle:1}jingle/content/{urn:xmpp:jingle:transports:ice-udp:1}transport/candidate"]);

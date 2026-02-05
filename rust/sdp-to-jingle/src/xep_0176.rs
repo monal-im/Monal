@@ -4,7 +4,7 @@ use serde_derive::{Deserialize, Serialize};
 use webrtc_sdp::{
     address::Address,
     attribute_type::{
-        SdpAttributeCandidate, SdpAttributeCandidateTransport, SdpAttributeCandidateType,
+        SdpAttributeCandidate, SdpAttributeCandidateTransport, SdpAttributeCandidateType, SdpAttributeCandidateTcpType
     },
     error::SdpParserInternalError,
 };
@@ -147,6 +147,8 @@ pub struct JingleTransportCandidate {
     rport: Option<u32>,
     #[serde(rename = "@type")]
     c_type: JingleTransportCandidateType,
+    #[serde(rename = "@tcp-type", skip_serializing_if = "Option::is_none")]
+    tcp_type: Option<JingleTransportCandidateTcpType>,
 }
 
 impl JingleTransportCandidate {
@@ -178,6 +180,7 @@ impl JingleTransportCandidate {
             raddr: candidate.raddr.as_ref().map(|addr| format!("{}", addr)),
             rport: candidate.rport,
             c_type: JingleTransportCandidateType::new_from_sdp(&candidate.c_type),
+            tcp_type: candidate.tcp_type.as_ref().map(|v| JingleTransportCandidateTcpType::new_from_sdp(&v)),
         })
     }
 
@@ -211,7 +214,7 @@ impl JingleTransportCandidate {
                 },
             },
             rport: self.rport,
-            tcp_type: None, //tcp transport is not specced in any xep
+            tcp_type: self.tcp_type.as_ref().map(|v| v.to_sdp()), //tcp transport is not specced in any xep
             generation: Some(self.generation),
             ufrag,
             networkcost: None,              //not specced in xep-0176
@@ -246,6 +249,34 @@ impl JingleTransportCandidateType {
             Self::Srflx => SdpAttributeCandidateType::Srflx,
             Self::Prflx => SdpAttributeCandidateType::Prflx,
             Self::Relay => SdpAttributeCandidateType::Relay,
+        }
+    }
+}
+
+// *** xep-0176
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum JingleTransportCandidateTcpType {
+    Active,
+    Passive,
+    #[serde(rename = "so")]
+    Simultaneous,
+}
+
+impl JingleTransportCandidateTcpType {
+    pub fn new_from_sdp(tcp_type: &SdpAttributeCandidateTcpType) -> Self {
+        match tcp_type {
+            SdpAttributeCandidateTcpType::Active => Self::Active,
+            SdpAttributeCandidateTcpType::Passive => Self::Passive,
+            SdpAttributeCandidateTcpType::Simultaneous => Self::Simultaneous,
+        }
+    }
+
+    pub fn to_sdp(&self) -> SdpAttributeCandidateTcpType {
+        match self {
+            Self::Active => SdpAttributeCandidateTcpType::Active,
+            Self::Passive => SdpAttributeCandidateTcpType::Passive,
+            Self::Simultaneous => SdpAttributeCandidateTcpType::Simultaneous,
         }
     }
 }

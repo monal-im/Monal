@@ -1047,6 +1047,8 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         [NSDictionary class],
         [NSMutableSet class],
         [NSSet class],
+        [NSMutableOrderedSet class],
+        [NSOrderedSet class],
         [NSMutableArray class],
         [NSArray class],
         [NSNumber class],

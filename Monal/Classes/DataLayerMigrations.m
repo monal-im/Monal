@@ -1055,7 +1055,7 @@
         
         //make sure all muc messages in our history db have an occupant id
         [self updateDB:db withDataLayer:dataLayer toVersion:7.006 withBlock:^{
-            NSArray<NSNumber*>* missingOccupantIds = [db executeScalarReader:@"SELECT message_history_id FROM message_history AS M WHERE (occupant_id = NULL OR occupant_id = '') AND EXISTS(SELECT 1 FROM buddylist AS B WHERE M.account_id = B.account_id AND M.buddy_name = B.buddy_name AND B.Muc);"];
+            NSArray<NSNumber*>* missingOccupantIds = [db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE (occupant_id IS NULL OR occupant_id = '') AND buddy_name IN (SELECT buddy_name FROM buddylist WHERE Muc=1);"];
             DDLogWarn(@"History IDs of messages with missing occupant IDs during DB migration: %@", missingOccupantIds);
             for(NSNumber* historyId in missingOccupantIds)
                 [db executeNonQuery:@"UPDATE message_history SET occupant_id=? WHERE message_history_id=?;" andArguments:@[[[NSUUID UUID] UUIDString], historyId]];

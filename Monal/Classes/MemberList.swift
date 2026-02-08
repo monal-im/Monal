@@ -177,11 +177,11 @@ struct MemberList: View {
                                 account.mucProcessor.inviteUser(contact.contactJid, inMuc: self.muc.contactJid)
                             }
                         }.catch { error in
-                            showAlert(title:Text("Error inviting user!"), description:Text("\(String(describing:error))"))
+                            showAlert(title:Text("Error inviting user!"), description:Text(error.localizedDescription))
                         }
                         return Guarantee.value(())
                     }.catch { error in
-                        showAlert(title:Text("Error unblocking user!"), description:Text("\(String(describing:error))"))
+                        showAlert(title:Text("Error unblocking user!"), description:Text(error.localizedDescription))
                     }
                 } else if newAffiliation == "outcast" {
                     showActionSheet(title: Text("Block user?"), description: Text("Do you want to block this user from entering this group/channel?")) {
@@ -191,7 +191,7 @@ struct MemberList: View {
                                 account.mucProcessor.setAffiliation(newAffiliation, ofUser:contact.contactJid, inMuc:self.muc.contactJid)
                             }
                         }.catch { error in
-                            showAlert(title:Text("Error blocking user!"), description:Text("\(String(describing:error))"))
+                            showAlert(title:Text("Error blocking user!"), description:Text(error.localizedDescription))
                         }
                     }
                 } else {
@@ -201,7 +201,7 @@ struct MemberList: View {
                             account.mucProcessor.setAffiliation(newAffiliation, ofUser:contact.contactJid, inMuc:self.muc.contactJid)
                         }
                     }.catch { error in
-                        showAlert(title:Text("Error changing affiliation!"), description:Text("\(String(describing:error))"))
+                        showAlert(title:Text("Error changing affiliation!"), description:Text(error.localizedDescription))
                     }
                 }
             }
@@ -230,10 +230,10 @@ struct MemberList: View {
                                                 account.mucProcessor.inviteUser(member.contactJid, inMuc: self.muc.contactJid)
                                             }
                                         }.catch { error in
-                                            showAlert(title:Text("Error inviting new member!"), description:Text("\(String(describing:error))"))
+                                            showAlert(title:Text("Error inviting new member!"), description:Text(error.localizedDescription))
                                         }
                                     }.catch { error in
-                                        showAlert(title:Text("Error adding new member!"), description:Text("\(String(describing:error))"))
+                                        showAlert(title:Text("Error adding new member!"), description:Text(error.localizedDescription))
                                     }
                                 } else {
                                     showPromisingLoadingOverlay(self.overlay, headlineView: Text("Inviting new participant"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
@@ -241,7 +241,7 @@ struct MemberList: View {
                                             account.mucProcessor.inviteUser(member.contactJid, inMuc: self.muc.contactJid)
                                         }
                                     }.catch { error in
-                                        showAlert(title:Text("Error inviting new participant!"), description:Text("\(String(describing:error))"))
+                                        showAlert(title:Text("Error inviting new participant!"), description:Text(error.localizedDescription))
                                     }
                                 }
                             }
@@ -296,7 +296,7 @@ struct MemberList: View {
                                 account.mucProcessor.setAffiliation("none", ofUser: member.contactJid, inMuc: self.muc.contactJid)
                             }
                         }.catch { error in
-                            showAlert(title:Text("Error removing user!"), description:Text("\(String(describing:error))"))
+                            showAlert(title:Text("Error removing user!"), description:Text(error.localizedDescription))
                         }
                     }
                 })

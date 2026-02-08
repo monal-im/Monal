@@ -1,8 +1,10 @@
 use std::{
     any,
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     net::{IpAddr, Ipv4Addr},
 };
+
+use indexmap::IndexMap;
 
 use serde_derive::{Deserialize, Serialize};
 use webrtc_sdp::{
@@ -482,9 +484,9 @@ pub struct JingleRtpSessions {
     #[serde(rename = "$value", skip_serializing_if = "Vec::is_empty", default)]
     item: Vec<JingleRtpSessionsValue>,
     #[serde(skip)]
-    payload_helper: HashMap<u8, JingleRtpSessionsPayloadType>,
+    payload_helper: IndexMap<u8, JingleRtpSessionsPayloadType>,
     #[serde(skip)]
-    ssrc_helper: HashMap<u32, JingleSsrc>,
+    ssrc_helper: IndexMap<u32, JingleSsrc>,
 }
 
 impl JingleRtpSessions {
@@ -493,8 +495,8 @@ impl JingleRtpSessions {
             xmlns: "urn:xmpp:jingle:apps:rtp:1".to_string(),
             media: JingleRtpSessionMedia::new_from_sdp(sdp_media),
             item: Vec::new(),
-            payload_helper: HashMap::new(),
-            ssrc_helper: HashMap::new(),
+            payload_helper: IndexMap::new(),
+            ssrc_helper: IndexMap::new(),
         }
     }
 
@@ -517,7 +519,7 @@ impl JingleRtpSessions {
         let p_t = self
             .payload_helper
             .entry(id)
-            .or_insert(JingleRtpSessionsPayloadType::new(id));
+            .or_insert_with(|| JingleRtpSessionsPayloadType::new(id));
         p_t
     }
 
@@ -528,7 +530,7 @@ impl JingleRtpSessions {
     }
 
     fn get_ssrc(&mut self, id: u32) -> &mut JingleSsrc {
-        let ssrc = self.ssrc_helper.entry(id).or_insert(JingleSsrc::new(id));
+        let ssrc = self.ssrc_helper.entry(id).or_insert_with(|| JingleSsrc::new(id));
         ssrc
     }
 
@@ -596,7 +598,8 @@ impl JingleRtpSessions {
                 jingle.add_extmap_allow_mixed();
             }
 
-            let mut attribute_map: HashMap<u8, Vec<SdpAttribute>> = HashMap::new();
+            /*
+            let mut attribute_map: IndexMap<u8, Vec<SdpAttribute>> = IndexMap::new();
             let format_ids = match media.get_formats() {
                 SdpFormatList::Strings(_) => {
                     // Ignore data-channel
@@ -604,9 +607,11 @@ impl JingleRtpSessions {
                 }
                 SdpFormatList::Integers(formats) => formats,
             };
+            println!("SdpFormatList: {:?}", format_ids);
             for format in format_ids {
                 attribute_map.insert(*format as u8, Vec::new());
             }
+            */
 
             let mut media_transport = JingleTransport::new();
             let mut fingerprint = JingleTranportFingerprint::new();
@@ -680,10 +685,10 @@ impl JingleRtpSessions {
                         }
                     }
                     SdpAttribute::RemoteCandidate(_) => {}
-                    SdpAttribute::Rtpmap(rtmap) => {
+                    SdpAttribute::Rtpmap(rtpmap) => {
                         jingle
-                            .get_payload_type(rtmap.payload_type)
-                            .fill_from_sdp_rtpmap(rtmap);
+                            .get_payload_type(rtpmap.payload_type)
+                            .fill_from_sdp_rtpmap(rtpmap);
                     }
                     SdpAttribute::Rtcp(_) => {}
                     SdpAttribute::Rtcpfb(fb) => {

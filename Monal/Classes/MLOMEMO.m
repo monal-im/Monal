@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 static const size_t MIN_OMEMO_KEYS = 80;
 static const size_t MAX_OMEMO_KEYS = 100;
 static const int KEY_SIZE = 16;
+static NSDictionary* trustLevels2Text = nil;
 
 @interface MLOMEMO ()
 {
@@ -41,6 +42,17 @@ static const int KEY_SIZE = 16;
 @end
 
 @implementation MLOMEMO
+
++(void) initialize
+{
+    trustLevels2Text = @{
+        @MLOmemoNotTrusted: NSLocalizedString(@"untrusted", @"OMEMO warning shown inside chat view"),
+        @MLOmemoToFU: NSLocalizedString(@"automatically trusted", @"OMEMO warning shown inside chat view"),
+        @MLOmemoToFUButNoMsgSeenInTime: NSLocalizedString(@"automatically trusted", @"OMEMO warning shown inside chat view"),
+        @MLOmemoTrusted: NSLocalizedString(@"trusted", @"OMEMO warning shown inside chat view"),
+        @MLOmemoTrustedButNoMsgSeenInTime: NSLocalizedString(@"trusted", @"OMEMO warning shown inside chat view"),
+    };
+}
 
 -(MLOMEMO*) initWithAccount:(xmpp*) account;
 {
@@ -223,6 +235,7 @@ static const int KEY_SIZE = 16;
         {
             [self generateNewKeysIfNeeded];     //generate new prekeys if needed and publish them
             [self repairQueuedSessions];
+            [self cleanupOwnOldDevices];
         }
     }
 #endif
@@ -443,6 +456,23 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
     [self sendFetchUpdateNotificationForJid:jid];
 $$
 
+-(void) postOMEMOMessageForUser:(NSString*) jid withMessage:(NSString*) omemoMessage
+{
+    if(![[DataLayer sharedInstance] isContactInList:jid forAccount:self.account.accountNo]) {
+        [[DataLayer sharedInstance] addContact:jid forAccount:self.account.accountNo nickname:nil];
+    }
+    NSString* newMessageID = [[NSUUID UUID] UUIDString];
+    NSNumber* historyId = [[DataLayer sharedInstance] addMessageHistoryTo:jid forAccount:self.account.accountNo withMessage:omemoMessage actuallyFrom:jid withId:newMessageID encrypted:NO messageType:kMessageTypeStatus mimeType:nil size:nil];
+
+    MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+    MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:self.account.accountNo];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:self.account userInfo:@{
+        @"message": message,
+        @"showAlert": @(NO),
+        @"contact": contact,
+    }];
+}
+
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString*) source
 {
     DDLogVerbose(@"Processing omemo devices from %@: %@", source, receivedDevices);
@@ -477,6 +507,7 @@ $$
         if(![source isEqualToString:self.account.connectionProperties.identity.jid] || deviceId.unsignedIntValue != self.monalSignalStore.deviceid)
         {
             DDLogDebug(@"Removing device %@", deviceId);
+            [self postOMEMOMessageForUser:source withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Device %@ is now inactive, because it is no longer advertised by your contact", @"OMEMO warning shown inside chat view"), deviceId]];
             SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:deviceId.unsignedIntValue];
             [self.monalSignalStore markDeviceAsDeleted:address];
         }
@@ -502,30 +533,6 @@ $$
 
 -(void) handleOwnDevicelistUpdate:(NSSet<NSNumber*>*) receivedDevices
 {
-    //check for new deviceids not previously known, but only if this isn't the first login we see a devicelist
-    //this has to be a property of the xmpp class to persist it even across state resets
-    if(self.account.hasSeenOmemoDeviceListAfterOwnDeviceid)
-    {
-        NSMutableSet<NSNumber*>* newDevices = [receivedDevices mutableCopy];
-        [newDevices minusSet:self.ownDeviceList];
-        //alert for all devices now still listed in newDevices
-        for(NSNumber* device in newDevices)
-            if([device unsignedIntValue] != self.monalSignalStore.deviceid)
-            {
-                DDLogWarn(@"Got new deviceid %@ for own account %@", device, self.account.connectionProperties.identity.jid);
-                UNMutableNotificationContent* content = [UNMutableNotificationContent new];
-                content.title = NSLocalizedString(@"New omemo device", @"");;
-                content.subtitle = self.account.connectionProperties.identity.jid;
-                content.body = [NSString stringWithFormat:NSLocalizedString(@"Detected a new omemo device on your account: %@", @""), device];
-                content.sound = [UNNotificationSound defaultSound];
-                content.categoryIdentifier = @"simple";
-                UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"newOwnOmemoDevice::%@::%@", self.account.connectionProperties.identity.jid, device] content:content trigger:nil];
-                NSError* error = [HelperTools postUserNotificationRequest:request];
-                if(error)
-                    DDLogError(@"Error posting new deviceid notification: %@", error);
-            }
-    }
-    
     //update own devicelist (this can be an empty list, if the list on our server is empty)
     self.ownDeviceList = [receivedDevices mutableCopy];
     //this has to be a property of the xmpp class to persist it even across state resets
@@ -549,6 +556,30 @@ $$
     }
 
     [self notifyKnownDevicesUpdated:self.account.connectionProperties.identity.jid];
+    
+    [self cleanupOwnOldDevices];
+}
+
+-(void) cleanupOwnOldDevices
+{
+    NSString* jid = self.account.connectionProperties.identity.jid;
+    for(NSNumber* device in [self.ownDeviceList copy])
+    {
+        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)device.unsignedIntValue];
+        NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
+        if(!identity)
+        {
+            //TODO: is it correct to rebuild broken(?) session here, too?
+            [self rebuildSessionWithJid:jid forRid:device];
+            continue;
+        }
+        int trust = [self.monalSignalStore getTrustLevel:address identityKey:identity].intValue;
+        
+        //remove own old devices (these clients will add thei id back, if they are still active)
+        //this is what conversations does, too
+        if(trust == MLOmemoToFUButNoMsgSeenInTime || trust == MLOmemoTrustedButNoMsgSeenInTime)
+            [self bulkDeleteDeviceForSource:jid andRid:device];
+    }
 }
 
 -(void) publishOwnDeviceList
@@ -635,6 +666,10 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
     }
     else
     {
+        //only show warning, if we don't already know this deviceid (e.g. a really new device, not a bundle fetch due to a session repair)
+        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)rid.unsignedIntValue];
+        NSData* oldIdentity = [self.monalSignalStore getIdentityForAddress:address];
+
         //check that a corresponding buddy exists -> prevent foreign key errors
         MLXMLNode* receivedKeys = data[@"current"];
         if(receivedKeys == nil && data.count == 1)
@@ -647,7 +682,39 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
             DDLogWarn(@"More than one bundle item found from %@ rid: %@, ignoring all items!", jid, rid);
         
         if(receivedKeys)
+        {
             [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
+            
+            NSData* newIdentity = [self.monalSignalStore getIdentityForAddress:address];
+            if(newIdentity != nil && (oldIdentity == nil || ![oldIdentity isEqual:newIdentity]))
+            {
+                NSString* trustLevel = trustLevels2Text[[self.monalSignalStore getTrustLevel:address identityKey:newIdentity]];
+                [self postOMEMOMessageForUser:jid withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new %@ device with id: %@", @"OMEMO warning shown inside chat view"), trustLevel, rid]];
+            }
+            
+            //check for new deviceids not previously known, but only if this isn't the first login we see a devicelist
+            //this has to be a property of the xmpp class to persist it even across state resets
+            if(self.account.hasSeenOmemoDeviceListAfterOwnDeviceid && [jid isEqualToString:self.account.connectionProperties.identity.jid])
+            {
+                //only show warning, if we don't already know this deviceid
+                //(e.g. a really new device, not a devicelist removal followed by adding it back)
+                if(newIdentity != nil && ((oldIdentity == nil || ![oldIdentity isEqual:newIdentity]) && [rid unsignedIntValue] != self.monalSignalStore.deviceid))
+                {
+                    NSString* trustLevel = trustLevels2Text[[self.monalSignalStore getTrustLevel:address identityKey:newIdentity]];
+                    DDLogWarn(@"Got new %@ deviceid %@ for own account %@", trustLevel, rid, jid);
+                    UNMutableNotificationContent* content = [UNMutableNotificationContent new];
+                    content.title = NSLocalizedString(@"New omemo device", @"");;
+                    content.subtitle = jid;
+                    content.body = [NSString stringWithFormat:NSLocalizedString(@"Detected a new %@ omemo device on your account: %@", @"OMEMO warning shown as notification"), trustLevel, rid];
+                    content.sound = [UNNotificationSound defaultSound];
+                    content.categoryIdentifier = @"simple";
+                    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"newOwnOmemoDevice::%@::%@", jid, rid] content:content trigger:nil];
+                    NSError* error = [HelperTools postUserNotificationRequest:request];
+                    if(error)
+                        DDLogError(@"Error posting new deviceid notification: %@", error);
+                }
+            }
+        }
         else
         {
             DDLogWarn(@"Could not find any bundle in pubsub data from %@ rid: %@, data=%@", jid, rid, data);
@@ -747,7 +814,7 @@ $$
 
     if(preKeyIds == nil || preKeyIds.count == 0)
     {
-        DDLogWarn(@"Could not create array of preKeyIds, ignoring: preKeyIds=%@ %lu", preKeyIds, (unsigned long)preKeyIds.count);
+        DDLogWarn(@"Could not create array of preKeyIds, ignoring %lu preKeyIds: %@", (unsigned long)preKeyIds.count, preKeyIds);
         return;
     }
     
@@ -789,7 +856,6 @@ $$
             continue;
         }
         // mark session as functional
-        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)rid.unsignedIntValue];
         [self.monalSignalStore markBundleAsFixed:address];
 
         //found and imported a working key --> try to (re)build a new session proactively (or repair a broken one)
@@ -887,6 +953,21 @@ $$
     }
 }
 
+$$instance_handler(omemoBundlePublished, account.omemo, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(success)
+    {
+        DDLogInfo(@"Successfully published own omemo bundle...");
+        [self.monalSignalStore deleteUsedPrekeys];
+    }
+    else
+        DDLogError(@"Unable to published own omemo bundle: %@; %@", errorReason, errorIq);
+    
+    
+$$
+$$instance_handler(omemoBundlePublishedInvalidation, account.omemo, $$ID(xmpp*, account), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    DDLogInfo(@"Failed to publish own omemo bundle, publish was invalidated");
+$$
+
 -(void) sendOMEMOBundle
 {
     MLAssert(self.monalSignalStore.deviceid > 0, @"Tried to publish own bundle without knowing my own deviceid!");
@@ -910,7 +991,7 @@ $$
     ] andData:nil] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", self.monalSignalStore.deviceid] withConfigOptions:@{
         @"pubsub#persist_items": @"true",
         @"pubsub#access_model": @"open"
-    }];
+    } andHandler:$newHandlerWithInvalidation(self, omemoBundlePublished, omemoBundlePublishedInvalidation)];
 }
 
 /*
@@ -921,12 +1002,13 @@ $$
 {
     // generate new keys if less than MIN_OMEMO_KEYS are available
     unsigned int preKeyCount = [self.monalSignalStore getPreKeyCount];
+    int lastPreyKedId = [self.monalSignalStore getHighestPreyKeyId];
+    DDLogDebug(@"Current prekey count: %u, lastPreyKedId=%d", preKeyCount, lastPreyKedId);
     if(preKeyCount < MIN_OMEMO_KEYS)
     {
         SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
 
         // Generate new keys so that we have a total of MAX_OMEMO_KEYS keys again
-        int lastPreyKedId = [self.monalSignalStore getHighestPreyKeyId];
         if(MAX_OMEMO_KEYS < preKeyCount)
         {
             DDLogWarn(@"OMEMO MAX_OMEMO_KEYs has changed: MAX: %zu current: %u", MAX_OMEMO_KEYS, preKeyCount);
@@ -949,9 +1031,129 @@ $$
     return NO;
 }
 
+-(NSMutableDictionary<NSNumber*, NSNumber*>*) checkTrustOfAllDevices:(NSSet<NSNumber*>*) devices ofJid:(NSString*) encryptForJid
+{
+    NSMutableDictionary* trustLevels = [NSMutableDictionary new];
+    for(NSNumber* device in devices)
+    {
+        //do not encrypt for our own device (MUST be scoped by jid for omemo 2)
+        if(device.unsignedIntValue == self.monalSignalStore.deviceid)
+            continue;
+        
+        if(self.state.openBundleFetches[encryptForJid] != nil && [self.state.openBundleFetches[encryptForJid] containsObject:device])
+        {
+            DDLogWarn(@"Ignoring deviceid %@ of %@ for KeyTransportElement: bundle fetch still pending...", device, encryptForJid);
+            continue;
+        }
+        
+        SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.unsignedIntValue];
+
+        NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
+        if(!identity)
+        {
+            showErrorOnAlpha(self.account, @"Could not get Identity for: %@ device id %@", encryptForJid, device);
+            //TODO: is it correct to rebuild broken(?) session here, too?
+            [self rebuildSessionWithJid:encryptForJid forRid:device];
+            continue;
+        }
+        
+        //check trust level
+        trustLevels[device] = [self.monalSignalStore getTrustLevel:address identityKey:identity];
+    }
+    return trustLevels;
+}
+
+-(NSMutableDictionary<NSString*, NSMutableSet<NSNumber*>*>*) createRecipientDeviceMapFromContactDeviceMap:(NSDictionary<NSString*, NSSet<NSNumber*>*>*) contactDeviceMap withOutgoing:(BOOL) outgoing
+{
+    //query trust for all given contacts' devices
+    NSMutableDictionary<NSString*, NSMutableDictionary<NSNumber*, NSNumber*>*>* contactTrustMap = [NSMutableDictionary new];
+    for(NSString* recipient in contactDeviceMap)
+    {
+        NSMutableDictionary* trustMap = [self checkTrustOfAllDevices:contactDeviceMap[recipient] ofJid:recipient];
+        DDLogVerbose(@"Checked trust of devices of %@: %@", recipient, trustMap);
+        contactTrustMap[recipient] = trustMap;
+    }
+    
+    //check tofu state for tofu-only recipients (but only do so in mucs, e.g. more than one recipient)
+    NSMutableSet<NSString*>* tofuOnlyRecipients = [NSMutableSet new];
+    BOOL tofuOnlyRecipientAllowed = YES;
+    if(contactTrustMap.count > 1 && ![[HelperTools defaultsDB] boolForKey:@"allowMixedTrustInGroups"])
+        for(NSString* recipient in contactTrustMap)
+        {
+            BOOL tofuOnlyContact = YES;
+            for(NSNumber* device in contactTrustMap[recipient])
+            {
+                int trust = contactTrustMap[recipient][device].intValue;
+                if(!(trust == MLOmemoToFU || trust == MLOmemoToFUButRemoved || trust == MLOmemoToFUButNoMsgSeenInTime))
+                    tofuOnlyContact = NO;
+            }
+            if(tofuOnlyContact)
+                [tofuOnlyRecipients addObject:recipient];
+            else
+                tofuOnlyRecipientAllowed = NO;
+        }
+    DDLogVerbose(@"Trust state: tofuOnlyRecipientAllowed=%@, tofuOnlyRecipients=%@", bool2str(tofuOnlyRecipientAllowed), tofuOnlyRecipients);
+    
+    //add devices allowed, ignoring tofu-only recipients (in mucs), if requested to do so
+    NSMutableDictionary<NSString*, NSMutableSet<NSNumber*>*>* recipientDeviceMap = [NSMutableDictionary new];
+    for(NSString* recipient in contactTrustMap)
+    {
+        if(!tofuOnlyRecipientAllowed && [tofuOnlyRecipients containsObject:recipient])
+            continue;
+        for(NSNumber* device in contactTrustMap[recipient])
+        {
+            int trustLevel = contactTrustMap[recipient][device].intValue;
+            if(![MLSignalStore acceptedTrustLevel:trustLevel withTofu:YES andOutgoing:outgoing])
+                continue;
+            if(recipientDeviceMap[recipient] == nil)
+                recipientDeviceMap[recipient] = [NSMutableSet new];
+            [recipientDeviceMap[recipient] addObject:device];
+        }
+    }
+    
+    DDLogVerbose(@"Returning recipient device map: %@", recipientDeviceMap);
+    return recipientDeviceMap;
+}
+
+-(NSMutableSet<NSNumber*>*) getRecipientDevices:(NSString*) recipient
+{
+    NSMutableSet<NSNumber*>* recipientDevices = [NSMutableSet new];
+    [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithValidSession:recipient]];
+    // add devices with known but old broken session to trigger a bundle refetch
+    [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:recipient]];
+    return recipientDevices;
+}
+
+-(NSMutableDictionary<NSString*, NSSet<NSNumber*>*>*) getContactDeviceMapForContactJid:(NSString*) contactJid
+{
+    NSMutableSet<NSString*>* recipients = [NSMutableSet new];
+    if([[DataLayer sharedInstance] isBuddyMuc:contactJid forAccount:self.account.accountNo])
+        for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:contactJid forAccountId:self.account.accountNo])
+        {
+            if(participant[@"participant_jid"])
+                [recipients addObject:participant[@"participant_jid"]];
+            else if(participant[@"member_jid"])
+                [recipients addObject:participant[@"member_jid"]];
+        }
+    else
+        [recipients addObject:contactJid];
+    
+    //remove own jid from recipients (our own devices get special treatment)
+    [recipients removeObject:self.account.connectionProperties.identity.jid];
+    
+    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [NSMutableDictionary new];
+    for(NSString* recipient in recipients)
+    {
+        NSMutableSet<NSNumber*>* recipientDevices = [self getRecipientDevices:recipient];
+        if(recipientDevices && recipientDevices.count > 0)
+            contactDeviceMap[recipient] = recipientDevices;
+    }
+    
+    return contactDeviceMap;
+}
+
 -(MLXMLNode* _Nullable) encryptString:(NSString* _Nullable) message toDeviceids:(NSDictionary<NSString*, NSSet<NSNumber*>*>*) contactDeviceMap
 {
-    
     MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted" andNamespace:@"eu.siacs.conversations.axolotl"];
 
     MLEncryptedPayload* encryptedPayload;
@@ -991,11 +1193,12 @@ $$
         [[MLXMLNode alloc] initWithElement:@"iv" andData:[HelperTools encodeBase64WithData:encryptedPayload.iv]],
     ] andData:nil];
 
-    //add encryption for all given contacts' devices
-    for(NSString* recipient in contactDeviceMap)
+    //add encryption for all given contacts' devices that have been accepted
+    NSMutableDictionary<NSString*, NSMutableSet<NSNumber*>*>* recipientDeviceMap = [self createRecipientDeviceMapFromContactDeviceMap:contactDeviceMap withOutgoing:YES];
+    for(NSString* recipient in recipientDeviceMap)
     {
-        DDLogVerbose(@"Adding encryption for devices of %@: %@", recipient, contactDeviceMap[recipient]);
-        [self addEncryptionKeyForAllDevices:contactDeviceMap[recipient] encryptForJid:recipient withEncryptedPayload:encryptedPayload withXMLHeader:header];
+        DDLogVerbose(@"Adding encryption for devices of %@: %@", recipient, recipientDeviceMap[recipient]);
+        [self addEncryptionKeyForAllDevices:recipientDeviceMap[recipient] encryptForJid:recipient withEncryptedPayload:encryptedPayload withXMLHeader:header];
     }
     
     [encrypted addChildNode:header];
@@ -1016,33 +1219,7 @@ $$
         [messageNode setStoreHint];
     }
     
-    NSMutableSet<NSString*>* recipients = [NSMutableSet new];
-    if([[DataLayer sharedInstance] isBuddyMuc:toContact forAccount:self.account.accountNo])
-        for(NSDictionary* participant in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:toContact forAccountId:self.account.accountNo])
-        {
-            if(participant[@"participant_jid"])
-                [recipients addObject:participant[@"participant_jid"]];
-            else if(participant[@"member_jid"])
-                [recipients addObject:participant[@"member_jid"]];
-        }
-    else
-        [recipients addObject:toContact];
-    
-    //remove own jid from recipients (our own devices get special treatment via myDevices NSSet below)
-    [recipients removeObject:self.account.connectionProperties.identity.jid];
-    
-    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [NSMutableDictionary new];
-    for(NSString* recipient in recipients)
-    {
-        //contactDeviceMap
-        NSMutableSet<NSNumber*>* recipientDevices = [NSMutableSet new];
-        [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithValidSession:recipient]];
-        // add devices with known but old broken session to trigger a bundle refetch
-        [recipientDevices addObjectsFromArray:[self.monalSignalStore knownDevicesWithPendingBrokenSessionHandling:recipient]];
-
-         if(recipientDevices && recipientDevices.count > 0)
-            contactDeviceMap[recipient] = recipientDevices;
-    }
+    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [self getContactDeviceMapForContactJid:toContact];
 
     //check if we found omemo keys of at least one of the recipients or more than 1 own device, otherwise don't encrypt anything
     NSSet<NSNumber*>* myDevices = [self knownDevicesForAddressName:self.account.connectionProperties.identity.jid];
@@ -1081,55 +1258,32 @@ $$
     //encrypt message for all given deviceids
     for(NSNumber* device in devices)
     {
-        //do not encrypt for our own device (MUST be scoped by jid for omemo 2)
-        if(device.unsignedIntValue == self.monalSignalStore.deviceid)
-            continue;
-        
-        if(self.state.openBundleFetches[encryptForJid] != nil && [self.state.openBundleFetches[encryptForJid] containsObject:device])
-        {
-            DDLogWarn(@"Ignoring deviceid %@ of %@ for KeyTransportElement: bundle fetch still pending...", device, encryptForJid);
-            continue;
-        }
-        
         SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.unsignedIntValue];
-
-        NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
-        if(!identity)
+        SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
+        NSError* error;
+        SignalCiphertext* deviceEncryptedKey = [cipher encryptData:encryptedPayload.key error:&error];
+        if(error)
         {
-            showErrorOnAlpha(self.account, @"Could not get Identity for: %@ device id %@", encryptForJid, device);
-            //TODO: is it correct to rebuild broken(?) session here, too?
+            //only show errors not being of type "unknown error"
+            if(![error.domain isEqualToString:@"org.whispersystems.SignalProtocol"] || error.code != 0)
+                showErrorOnAlpha(self.account, @"Error while adding encryption key for jid: %@ device: %@ error: %@", encryptForJid, device, error);
             [self rebuildSessionWithJid:encryptForJid forRid:device];
             continue;
         }
-        //only encrypt for devices that are trusted (tofu or explicitly)
-        if([self.monalSignalStore isTrustedIdentity:address identityKey:identity])
-        {
-            SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
-            NSError* error;
-            SignalCiphertext* deviceEncryptedKey = [cipher encryptData:encryptedPayload.key error:&error];
-            if(error)
-            {
-                //only show errors not being of type "unknown error"
-                if(![error.domain isEqualToString:@"org.whispersystems.SignalProtocol"] || error.code != 0)
-                    showErrorOnAlpha(self.account, @"Error while adding encryption key for jid: %@ device: %@ error: %@", encryptForJid, device, error);
-                [self rebuildSessionWithJid:encryptForJid forRid:device];
-                continue;
-            }
-            [xmlHeader addChildNode:[[MLXMLNode alloc] initWithElement:@"key" withAttributes:@{
-                @"rid": [NSString stringWithFormat:@"%@", device],
-                @"prekey": (deviceEncryptedKey.type == SignalCiphertextTypePreKeyMessage ? @"1" : @"0"),
-            } andChildren:@[] andData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]]];
-            
-            //record this deviceid as used for encryption (it doesn't need any further key transport element potentially already queued)
-            [usedRids addObject:device];
-        }
+        [xmlHeader addChildNode:[[MLXMLNode alloc] initWithElement:@"key" withAttributes:@{
+            @"rid": [NSString stringWithFormat:@"%@", device],
+            @"prekey": (deviceEncryptedKey.type == SignalCiphertextTypePreKeyMessage ? @"1" : @"0"),
+        } andChildren:@[] andData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]]];
+        
+        //record this deviceid as used for encryption (it doesn't need any further key transport element potentially already queued)
+        [usedRids addObject:device];
     }
     
     //remove queued key transport element entry
     [self removeQueuedKeyTransportElementsFor:encryptForJid andDevices:usedRids];
 }
 
--(NSString* _Nullable) decryptOmemoEnvelope:(MLXMLNode*) envelope forSenderJid:(NSString*) senderJid andReturnErrorString:(BOOL) returnErrorString
+-(NSString* _Nullable) decryptOmemoEnvelope:(MLXMLNode*) envelope forSenderJid:(NSString*) senderJid inMuc:(NSString* _Nullable) mucJid andReturnErrorString:(BOOL) returnErrorString
 {
     DDLogVerbose(@"OMEMO envelope: %@", envelope);
     
@@ -1147,6 +1301,18 @@ $$
     BOOL isKeyTransportElement = ![envelope check:@"payload"];
     NSNumber* sid = [envelope findFirst:@"header@sid|uint"];
 
+    //check if we trust this sender before trying to decrypt the content (we need to check our own devices for tofu, too)
+    NSMutableDictionary<NSString*, NSSet<NSNumber*>*>* contactDeviceMap = [self getContactDeviceMapForContactJid:(mucJid != nil ? mucJid : senderJid)];
+    NSSet<NSNumber*>* myDevices = [self knownDevicesForAddressName:self.account.connectionProperties.identity.jid];
+    if(myDevices.count > 1)
+        contactDeviceMap[self.account.connectionProperties.identity.jid] = myDevices;
+    NSMutableDictionary<NSString*, NSMutableSet<NSNumber*>*>* recipientDeviceMap = [self createRecipientDeviceMapFromContactDeviceMap:contactDeviceMap withOutgoing:NO];
+    if(![recipientDeviceMap[senderJid] containsObject:sid])
+    {
+        DDLogWarn(@"Received message from '%@' (possibly in muc: %@) device %@, but not trusted: ignoring!", senderJid, mucJid, sid);
+        return !returnErrorString ? nil : [NSString stringWithFormat:NSLocalizedString(@"Could not decrypt because you didn't trust the sender's device %u.", @""), sid.unsignedIntValue];
+    }
+    
     SignalAddress* address = [[SignalAddress alloc] initWithName:senderJid deviceId:(uint32_t)sid.unsignedIntValue];
 
     if(!self.signalContext)
@@ -1163,7 +1329,7 @@ $$
     BOOL devicePreKey = [[envelope findFirst:@"header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid] boolValue];
     
     DDLogVerbose(@"Decrypting using:\nrid=%u --> messageKey=%@\nrid=%u --> isPreKey=%@", self.monalSignalStore.deviceid, messageKey, self.monalSignalStore.deviceid, bool2str(devicePreKey));
-
+    
     if(!messageKey && isKeyTransportElement)
     {
         DDLogVerbose(@"Received KeyTransportElement without our own rid included --> Ignore it");
@@ -1241,6 +1407,9 @@ $$
                     [self.state.queuedSessionRepairs[senderJid] removeObject:sid];
                 }
             }
+            
+            //mark used prekeys for removal
+            [self.monalSignalStore deletePreKeyWithId:devicePreKey];
 
             //key transport elements have an empty payload --> nothing to return as decrypted
             if(isKeyTransportElement)
@@ -1252,6 +1421,11 @@ $$
                 return nil;
 #endif
             }
+            
+            //make sure the dh ratchet always advances, even on "receive only" devices
+            //--> force a key transport message with 1% probability (~ every 100th message)
+            if(arc4random_uniform(100)==42)
+                [self sendKeyTransportElement:senderJid forRids:[NSSet setWithArray:@[sid]]];
 
             //some clients have the auth parameter in the ciphertext?
             if(decryptedKey.length == 16 * 2)
@@ -1298,6 +1472,7 @@ $$
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid
 {
     NSString* senderJid = nil;
+    NSString* mucJid = nil;
     if([messageNode check:@"/<type=groupchat>"])
     {
         if(mucParticipantJid == nil)
@@ -1309,13 +1484,13 @@ $$
             return nil;
 #endif
         }
-        else
-            senderJid = mucParticipantJid;
+        senderJid = mucParticipantJid;
+        mucJid = messageNode.fromUser;
     }
     else
         senderJid = messageNode.fromUser;
     
-    return [self decryptOmemoEnvelope:[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted"] forSenderJid:senderJid andReturnErrorString:YES];
+    return [self decryptOmemoEnvelope:[messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted"] forSenderJid:senderJid inMuc:mucJid andReturnErrorString:YES];
 }
 
 $$instance_handler(handleDevicelistUnsubscribe, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, jid), $$BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
@@ -1366,7 +1541,8 @@ $$
 //interfaces for UI
 -(BOOL) isTrustedIdentity:(SignalAddress*) address identityKey:(NSData*) identityKey
 {
-    return [self.monalSignalStore isTrustedIdentity:address identityKey:identityKey];
+    int trustLevel = [self.monalSignalStore getTrustLevel:address identityKey:identityKey].intValue;
+    return [MLSignalStore acceptedTrustLevel:trustLevel withTofu:YES andOutgoing:NO];
 }
 
 -(NSNumber*) getTrustLevel:(SignalAddress*) address identityKey:(NSData*) identityKey
@@ -1409,18 +1585,25 @@ $$
 
 -(void) deleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid
 {
+    [self bulkDeleteDeviceForSource:source andRid:rid];
+    if([source isEqualToString:self.account.connectionProperties.identity.jid])
+        [self publishOwnDeviceList];
+}
+
+-(void) bulkDeleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid
+{
     //we should not delete our own device
     if([source isEqualToString:self.account.connectionProperties.identity.jid] && rid.unsignedIntValue == self.monalSignalStore.deviceid)
         return;
+    DDLogInfo(@"Deleting deviceid %@ of contact %@...", rid, source);
     //handle removal of own deviceids
     if([source isEqualToString:self.account.connectionProperties.identity.jid])
-    {
         [self.ownDeviceList removeObject:rid];
-        [self publishOwnDeviceList];
-    }
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid.unsignedIntValue];
-    [self.monalSignalStore deleteDeviceforAddress:address];
+    //don't delete the identity record to not trigger spurious "detected a new omemo device on your account"
+    //notifications in handleOwnDevicelistUpdate if a device was briefly removed from our devicelist before it was added back in
+    [self.monalSignalStore markDeviceAsDeleted:address];
     [self.monalSignalStore deleteSessionRecordForAddress:address];
     [self notifyKnownDevicesUpdated:address.name];
 }
@@ -1430,9 +1613,7 @@ $$
 {
     NSSet<NSNumber*>* devices = [self knownDevicesForAddressName:jid];
     for(NSNumber* device in devices)
-    {
-        [self deleteDeviceForSource:jid andRid:device];
-    }
+        [self bulkDeleteDeviceForSource:jid andRid:device];
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];

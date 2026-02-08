@@ -12,6 +12,7 @@
 #import "DataLayer.h"
 #import "MLSQLite.h"
 #import "HelperTools.h"
+#import "MLOMEMO.h"
 
 @interface MLSignalStore()
 {
@@ -29,6 +30,20 @@
     
     //make sure the datalayer has migrated the database file to the app group location first
     [DataLayer initialize];
+}
+
++(BOOL) acceptedTrustLevel:(int) trustLevel withTofu:(BOOL) withTofu andOutgoing:(BOOL) outgoing
+{
+    //for better UX never refuse to encrypt/decrypt from/to old devices
+    if(withTofu)
+        return
+            trustLevel == MLOmemoTrusted ||
+            trustLevel == MLOmemoTrustedButNoMsgSeenInTime ||
+            trustLevel == MLOmemoToFU ||
+            trustLevel == MLOmemoToFUButNoMsgSeenInTime;
+    return
+        trustLevel == MLOmemoTrusted ||
+        trustLevel == MLOmemoTrustedButNoMsgSeenInTime;
 }
 
 //this is the getter of our readonly "sqliteDatabase" property always returning the thread-local instance of the MLSQLite class
@@ -90,9 +105,9 @@
 {
     [self.sqliteDatabase voidWriteTransaction:^{
         // remove old keys that have been remove a long time ago from pubsub
-        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND pubSubRemovalTimestamp <= unixepoch('now', '-14 day');" andArguments:@[self.accountId]];
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND unixepoch(pubSubRemovalTimestamp) <= unixepoch('now', '-14 day');" andArguments:@[self.accountId]];
         // mark old unused keys to be removed from pubsub
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND creationTimestamp<= unixepoch('now','-14 day');" andArguments:@[self.accountId]];
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND unixepoch(creationTimestamp) <= unixepoch('now','-14 day');" andArguments:@[self.accountId]];
     }];
 }
 
@@ -240,7 +255,7 @@
                     AND contactName=? \
                     AND removedFromDeviceList IS NULL \
                     AND brokenSession=true \
-                    AND (lastFailedBundleFetch IS NULL OR lastFailedBundleFetch <= unixepoch('now', '-5 day'))\
+                    AND (lastFailedBundleFetch IS NULL OR unixepoch(lastFailedBundleFetch) <= unixepoch('now', '-5 day'))\
             ;" andArguments:@[self.accountId, jid]];
     }];
 }
@@ -297,15 +312,25 @@
     return prekey ? YES : NO;
 }
 
-/**
- * Delete a PreKey record from local storage.
- */
+
 -(BOOL) deletePreKeyWithId:(uint32_t) preKeyId
 {
     DDLogDebug(@"Marking prekey %lu as deleted", (unsigned long)preKeyId);
     // only mark the key for deletion -> key should be removed from pubSub
     return [self.sqliteDatabase boolWriteTransaction:^{
         BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP, keyUsed=1 WHERE account_id=? AND prekeyid=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+        [self reloadCachedPrekeys];
+        return ret;
+    }];
+}
+
+/**
+ * Delete a PreKey record from local storage.
+ */
+-(BOOL) deleteUsedPrekeys
+{
+    return [self.sqliteDatabase boolWriteTransaction:^{
+        BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=1 AND pubSubRemovalTimestamp IS NULL;" andArguments:@[self.accountId]];
         [self reloadCachedPrekeys];
         return ret;
     }];
@@ -408,10 +433,22 @@
         NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
         if(dbIdentity)
             return YES;
-        // Set every new identity to TOFU to increase user experience
+        // if at least one fingerprint isn't TOFU new fingerprints shouldn't be trusted
+        // if all fingerprints are TOFU -> trust new ones with TOFU as well
         return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity \
-            (account_id, contactName, contactDeviceId, identity, trustLevel) \
-            VALUES (?, ?, ?, ?, ?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], identityKey, [NSNumber numberWithInt:MLOmemoInternalToFU]]];
+            (account_id, contactName, contactDeviceId, identity, lastReceivedMsg, trustLevel) \
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, \
+                (SELECT CASE \
+                    WHEN COUNT(contactDeviceId) == 0 THEN 1 \
+                    ELSE 0 \
+                END \
+                FROM signalContactIdentity \
+                WHERE \
+                    account_id=? \
+                    AND contactName=? \
+                    AND trustLevel!=1 \
+                ) \
+            );" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], identityKey, self.accountId, address.name]];
     }];
 }
 
@@ -427,9 +464,13 @@
  */
 -(BOOL) isTrustedIdentity:(SignalAddress*) address identityKey:(NSData*) identityKey;
 {
+    //this method gets called by the C implementation of libsignal when *sending* messages (apparently not when receiving?).
+    //this means, libsignal doesn't send messages to devices we return NO for, but happily receives and decrypts messages
+    //from these devices.
+    //we already fixed this behavior by explicitly checking the deviceids for sending/receiving in MLOMEMO,
+    //but still call acceptedTrustLevel: here, too, for good measures
     int trustLevel = [self getTrustLevel:address identityKey:identityKey].intValue;
-    // For better UX trust ToFU devices even if we did not receive msg in a long time
-    return (trustLevel == MLOmemoTrusted || trustLevel == MLOmemoToFU || trustLevel == MLOmemoToFUButNoMsgSeenInTime);
+    return [[self class] acceptedTrustLevel:trustLevel withTofu:YES andOutgoing:YES];
 }
 
 -(NSData*) getIdentityForAddress:(SignalAddress*) address
@@ -536,13 +577,13 @@
         return [self.sqliteDatabase executeScalar:(@"SELECT \
                 CASE \
                     WHEN (trustLevel=0) THEN 0 \
-                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= unixepoch('now', '-90 day'))) THEN 100 \
+                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR unixepoch(lastReceivedMsg) >= unixepoch('now', '-90 day'))) THEN 100 \
                     WHEN (trustLevel=1 AND removedFromDeviceList IS NOT NULL) THEN 101 \
-                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < unixepoch('now', '-90 day'))) THEN 102 \
+                    WHEN (trustLevel=1 AND removedFromDeviceList IS NULL AND (unixepoch(lastReceivedMsg) < unixepoch('now', '-90 day'))) THEN 102 \
                     WHEN (COUNT(*)=0) THEN 100 \
-                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= unixepoch('now', '-90 day'))) THEN 200 \
+                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR unixepoch(lastReceivedMsg) >= unixepoch('now', '-90 day'))) THEN 200 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NOT NULL) THEN 201 \
-                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < unixepoch('now', '-90 day'))) THEN 202 \
+                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (unixepoch(lastReceivedMsg) < unixepoch('now', '-90 day'))) THEN 202 \
                     ELSE 0 \
                 END \
                 FROM signalContactIdentity \

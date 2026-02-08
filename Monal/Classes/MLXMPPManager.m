@@ -71,6 +71,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //upgrade default omemo on
     [self upgradeBoolUserSettingsIfUnset:@"OMEMODefaultOn" toDefault:YES];
     
+    //upgrade special omemo settings
+    [self upgradeBoolUserSettingsIfUnset:@"allowMixedTrustInGroups" toDefault:YES];
+    [self upgradeBoolUserSettingsIfUnset:@"allowUnverifiedCalls" toDefault:YES];
+    
     // upgrade udp logger
     [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerHostname" toDefault:@""];

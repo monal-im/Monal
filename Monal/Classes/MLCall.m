@@ -223,17 +223,10 @@
 -(void) setSpeaker:(BOOL) speaker
 {
     @synchronized(self) {
-        DDLogError(@"*** setSpeaker:%@ called...", bool2str(speaker));
         if(self.webRTCClient == nil || self.audioSession == nil)
-        {
-            DDLogError(@"*** setSpeaker: not ready: %@, %@", self.webRTCClient, self.audioSession);
             return;
-        }
         if(_speaker == speaker)
-        {
-            DDLogError(@"*** setSpeaker: called but identical...");
             return;
-        }
         _speaker = speaker;
         if(_speaker)
             [self.webRTCClient speakerOn];
@@ -484,7 +477,7 @@
     [[RTCAudioSession sharedInstance] unlockForConfiguration];
     if(self.callType == MLCallTypeVideo)
     {
-        DDLogError(@"*** Activating speaker...");
+        DDLogInfo(@"*** Video call detected, activating speaker...");
         self.speaker = YES;
     }
 }
@@ -883,7 +876,7 @@
         DDLogDebug(@"WebRTC reported local SDP '%@', sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:sdp.sdp withInitiator:YES];
-        if(children.count == 0)
+        if(children == nil || children.count == 0)
         {
             DDLogError(@"Could not serialize local SDP to XML!");
             [self handleEndCallActionWithReason:MLCallFinishReasonError];
@@ -900,10 +893,10 @@
             self.encryptionState = MLCallEncryptionStateClear;
         
         XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
-        [sdpIQ addChildNode:[self sanitizeJingleNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+        [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
             @"action": @"session-initiate",
             @"sid": self.jmiid,
-        } andChildren:children andData:nil]]];
+        } andChildren:children andData:nil]];
         @synchronized(self.candidateQueueLock) {
             self.localSDP = sdpIQ;
         }
@@ -1568,6 +1561,14 @@
                     return;
                 }
             }
+            
+            //all calls in encrypted chats eventually reach this point (either as session-initiate or as session-accept)
+            //--> check if we allow unverified calls and abort if the call is unverified and this isn't allowed
+            if(![[HelperTools defaultsDB] boolForKey:@"allowUnverifiedCalls"] && self.encryptionState == MLCallEncryptionStateClear)
+            {
+                [self handleEndCallActionWithReason:MLCallFinishReasonSecurityError];
+                return;
+            }
         }
         else
             self.encryptionState = MLCallEncryptionStateClear;
@@ -1591,12 +1592,12 @@
         if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-accept>"])
         {
             type = @"answer";
-            rawSDP = [HelperTools xml2sdp:[self sanitizeJingleNode:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"]] withInitiator:NO];
+            rawSDP = [HelperTools xml2sdp:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:NO];
         }
         else if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-initiate>"])
         {
             type = @"offer";
-            rawSDP = [HelperTools xml2sdp:[self sanitizeJingleNode:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"]] withInitiator:YES];
+            rawSDP = [HelperTools xml2sdp:[iqNode findFirst:@"{urn:xmpp:jingle:1}jingle"] withInitiator:YES];
         }
     }
     //handle session-terminate: fake jmi finish message and handle it
@@ -1710,10 +1711,10 @@
                     [self.account send:[[XMPPIQ alloc] initAsResponseTo:iqNode]];
                     
                     XMPPIQ* sdpIQ = [[XMPPIQ alloc] initWithType:kiqSetType to:self.fullRemoteJid];
-                    [sdpIQ addChildNode:[self sanitizeJingleNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+                    [sdpIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
                         @"action": @"session-accept",
                         @"sid": self.jmiid,
-                    } andChildren:children andData:nil]]];
+                    } andChildren:children andData:nil]];
                     [self.account send:sdpIQ];
                     
                     @synchronized(self.candidateQueueLock) {
@@ -1765,15 +1766,22 @@
 
 -(MLCallEncryptionState) encryptionTypeForDeviceid:(NSNumber* _Nonnull) deviceid
 {
+    //problem is: an attacking server could simply strip out the omemo deviceid from the <proceed> to downgrade us to a non-verified call
+    //dropping calls from a device not trusted but known, would not improve security because the attacker using that device could simply
+    //strip off the omemo deviceid from the <proceed>
+    //--> simply report those calls as unverified (MLCallEncryptionStateClear)
+    //if configured to not allow unverified calls, we drop all MLCallEncryptionStateClear calls in processIncomingSDP
+    
     NSNumber* trustLevel = [self.account.omemo getTrustLevelForJid:self.contact.contactJid andDeviceId:deviceid];
+    DDLogVerbose(@"Trust level: %@", trustLevel);
+    
     if(trustLevel == nil)
         return MLCallEncryptionStateClear;
-    switch(trustLevel.intValue)
-    {
-        case MLOmemoTrusted: return MLCallEncryptionStateTrusted;
-        case MLOmemoToFU: return MLCallEncryptionStateToFU;
-        default: return MLCallEncryptionStateClear;
-    }
+    else if([MLSignalStore acceptedTrustLevel:trustLevel.intValue withTofu:NO andOutgoing:(self.direction == MLCallDirectionOutgoing)])
+        return MLCallEncryptionStateTrusted;
+    else if([MLSignalStore acceptedTrustLevel:trustLevel.intValue withTofu:YES andOutgoing:(self.direction == MLCallDirectionOutgoing)])
+        return MLCallEncryptionStateToFU;
+    return MLCallEncryptionStateClear;
 }
 
 -(BOOL) encryptFingerprintsInChildren:(NSArray<MLXMLNode*>*) children
@@ -1820,7 +1828,7 @@
             DDLogWarn(@"More than one OMEMO envelope found!");
             return NO;
         }
-        NSString* decryptedFingerprint = [self.account.omemo decryptOmemoEnvelope:[fingerprintNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted"] forSenderJid:self.contact.contactJid andReturnErrorString:NO];
+        NSString* decryptedFingerprint = [self.account.omemo decryptOmemoEnvelope:[fingerprintNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted"] forSenderJid:self.contact.contactJid inMuc:nil andReturnErrorString:NO];
         if(decryptedFingerprint == nil)
         {
             DDLogWarn(@"Could not decrypt OMEMO encrypted fingerprint!");
@@ -1835,19 +1843,6 @@
     //this is only true if at least one fingerprint could be found and decrypted
     //(that could be false, if the remote did something weird or a MITM changed something)
     return retval;
-}
-
--(MLXMLNode*) sanitizeJingleNode:(MLXMLNode*) jingleNode
-{
-    //modify jingle to only include VP8, VP9 and H264 codecs
-    //in particular this means: not having any error correction codecs: these cause black video streams
-    NSArray* allowedCodecs = @[@"VP8"];//, @"VP9", @"H264"];
-    MLXMLNode* sanitizedNode = [jingleNode copy];
-    for(MLXMLNode* videoNode in [sanitizedNode find:@"content/{urn:xmpp:jingle:apps:rtp:1}description<media=video>"])
-        for(MLXMLNode* payloadNode in [videoNode find:@"payload-type"])
-            if(![allowedCodecs containsObject:[payloadNode findFirst:@"/@name"]])
-                [videoNode removeChildNode:payloadNode];
-    return sanitizedNode;
 }
 
 @end

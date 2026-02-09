@@ -901,7 +901,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     if([typeHint conformsToType:UTTypeAudio])
         notificationAttachment = [notificationAttachment stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtension:info.fileExtension]];
     UIImage* image = nil;
-    if([info.mimeType hasPrefix:@"image/svg"])
+    if(info.isSVGImage)
     {
         NSString* pngAttachment = [attachmentDir stringByAppendingPathComponent:[attachmentBasename stringByAppendingPathExtensionForType:UTTypePNG]];
         DDLogVerbose(@"Preparing for notification attachment(%@): converting downloaded file from svg at '%@' to png at '%@'...", typeHint, info.cacheFilePath, pngAttachment);

@@ -36,6 +36,7 @@ typedef NS_ENUM(NSUInteger, DownloadState) {
 @property (nonatomic, readonly) UTType* _Nullable utType;
 
 @property (nonatomic, readonly) BOOL isImage;
+@property (nonatomic, readonly) BOOL isSVGImage;
 @property (nonatomic, readonly) BOOL isAudio;
 @property (nonatomic, readonly) BOOL isVideo;
 @property (nonatomic, readonly) BOOL isPDF;

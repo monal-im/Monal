@@ -87,12 +87,12 @@
             [self.thumbnailImage addSubview:_animatedImageView];
             self.thumbnailImage.contentMode = UIViewContentModeScaleAspectFit;
         }
-        else if([info.mimeType hasPrefix:@"image/"])
+        else if(info.isImage)
         {
             self.link = msg.messageText;
             AnyPromise* imagePromise = nil;
             // this code already runs in the main queue --> we can't use PMKHang
-            if([info.mimeType hasPrefix:@"image/svg"])
+            if(info.isSVGImage)
                 imagePromise = [HelperTools renderUIImageFromSVGURL:[NSURL fileURLWithPath:info.cacheFilePath]];
             else
                 imagePromise = [AnyPromise promiseWithValue:[[UIImage alloc] initWithContentsOfFile:info.cacheFilePath]];

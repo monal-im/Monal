@@ -281,6 +281,16 @@ static NSMutableDictionary* _singletonCache;
     return [NSSet setWithObjects:@"mimeType", nil];
 }
 
+-(BOOL) isSVGImage
+{
+    return [self.mimeType hasPrefix:@"image/svg"];
+}
+
++(NSSet*) keyPathsForValuesAffectingIsSVGImage
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
+}
+
 -(BOOL) isAudio
 {
     return [self.mimeType hasPrefix:@"audio/"];

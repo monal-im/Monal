@@ -280,7 +280,7 @@ struct ContactDetails: View {
                 Section {
                     Text("You currently aren't allowed to write messages in this Channel.")
                     Button {
-                        showPromisingLoadingOverlay(overlay, headline:"Requesting Voice") {
+                        let _ = showPromisingLoadingOverlay(overlay, headline:"Requesting Voice") {
                             Guarantee { $0(account.mucProcessor.requestVoice(inMuc:contact.obj.contactJid)) }
                         }
                     } label: {

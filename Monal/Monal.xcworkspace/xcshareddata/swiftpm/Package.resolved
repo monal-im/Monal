@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
           "branch": "main",
-          "revision": "9852f899cea836194c67597fe5e2a1d9e72797c7",
+          "revision": "17c3e387c131005fb0efe7265dc148e3542765ec",
           "version": null
         }
       },
@@ -35,15 +35,6 @@
           "branch": null,
           "revision": "0fccfdc93a01c8555cec86bf2c64caee30c23704",
           "version": "0.9.11"
-        }
-      },
-      {
-        "package": "Kingfisher",
-        "repositoryURL": "https://github.com/onevcat/Kingfisher",
-        "state": {
-          "branch": null,
-          "revision": "d30a5fad881137e2267f96a8e3fc35c58999bb94",
-          "version": "8.6.2"
         }
       },
       {

@@ -519,16 +519,6 @@ public class SwiftHelpers: NSObject {
     }
 }
 
-//TODO: remove this
-public extension UIImage {
-    func thumbnail(size: CGSize) -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-        defer { UIGraphicsEndImageContext() }
-        draw(in: CGRect(origin: .zero, size: size))
-        return UIGraphicsGetImageFromCurrentImageContext()
-    }
-}
-
 // **********************************************
 // **************** rust bridges ****************
 // **********************************************

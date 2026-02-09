@@ -681,7 +681,7 @@ struct ChatView: View {
 
                 if ownRole == kMucRoleVisitor {
                     Button {
-                        showPromisingLoadingOverlay(overlay, headline:"Requesting Voice") {
+                        let _ = showPromisingLoadingOverlay(overlay, headline:"Requesting Voice") {
                             Guarantee { $0(contact.obj.account?.mucProcessor.requestVoice(inMuc:contact.obj.contactJid)) }
                         }
                     } label: {

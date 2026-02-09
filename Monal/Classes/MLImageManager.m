@@ -226,7 +226,7 @@
 
 -(NSString*) fileNameforThumbnailOfMessage:(MLMessage*) message
 {
-    return [NSString stringWithFormat:@"%@.png", message.messageDBId.stringValue];
+    return [NSString stringWithFormat:@"%@.heic", message.messageDBId.stringValue];
 }
 
 -(NSURL*) setThumbnailOfMessage:(MLMessage*) message withData:(NSData* _Nullable) data

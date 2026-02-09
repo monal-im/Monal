@@ -504,9 +504,9 @@ $$
     MLFiletransferInfo* info = msg.fileInfo;
     DDLogDebug(@"Deleting file in cache: %@", info.cacheFilePath);
     [_fileManager removeItemAtPath:info.cacheFilePath error:nil];
-    if([info.mimeType hasPrefix:@"video/"])
+    if(info.isVideo || info.isImage)
     {
-        DDLogVerbose(@"Deleting video thumbnail stored at %@", msg.fileInfo.thumbnailURL.path);
+        DDLogVerbose(@"Deleting attachment thumbnail stored at %@", msg.fileInfo.thumbnailURL.path);
         [_fileManager removeItemAtPath:msg.fileInfo.thumbnailURL.path error:nil];
     }
 }

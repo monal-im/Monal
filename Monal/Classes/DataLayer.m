@@ -2384,7 +2384,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     
     return [self.db idReadTransaction:^{
-        NSString* query = @"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=? GROUP BY message ORDER BY message_history_id ASC;";
+        NSString* query = @"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=? GROUP BY message ORDER BY message_history_id DESC;";
         NSArray* params = @[kMessageTypeFiletransfer, accountID, contact];
         
         NSMutableArray* retval = [NSMutableArray new];

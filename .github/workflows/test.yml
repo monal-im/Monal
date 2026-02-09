@@ -6,6 +6,7 @@ on:
       - develop
       - beta
       - stable
+      - quicksy
   push:
     branches:
       - develop

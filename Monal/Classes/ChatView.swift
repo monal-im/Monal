@@ -650,7 +650,6 @@ struct ChatView: View {
                                     .resizable()
                                     .scaledToFill()
                                     .frame(width: 35, height: 35)
-                                    .clipShape(Circle())
 
                                 VStack(alignment: .leading, spacing: 0) {
                                     Text(contact.contactDisplayName as String)

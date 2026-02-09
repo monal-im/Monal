@@ -4,8 +4,9 @@ name: quicksy.build-push
 # Controls when the action will run.
 on:
   # Triggers the workflow on push
-  push:
-    branches: [ stable ]
+  #DISABLED UNTIL 7.0 RELEASE
+  #push:
+  #  branches: [ stable ]
 
   workflow_dispatch:
 

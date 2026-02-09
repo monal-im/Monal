@@ -45,86 +45,27 @@ struct MediaGalleryView: View {
     }
 }
 
-class MediaItem: Identifiable, ObservableObject {
-    let id = UUID()
-    let fileInfo: MLFiletransferInfo
-    @Published var thumbnail: UIImage?
-
-    init(fileInfo: MLFiletransferInfo) {
-        self.fileInfo = fileInfo
-        self.thumbnail = nil
-        Task { @MainActor in
-            await generateThumbnail()
-        }
-    }
-
-    @MainActor
-    func generateThumbnail() async {
-        guard let cacheFilePath = fileInfo.cacheFilePath else {
-            DDLogError("Failed to get cacheFilePath for: \(fileInfo)")
-            self.thumbnail = UIImage(systemName: "exclamationmark.triangle")
-            return
-        }
-
-        if fileInfo.isImage {
-            if let image = UIImage(contentsOfFile: cacheFilePath) {
-                self.thumbnail = image
-            } else {
-                DDLogError("Failed to generate image thumbnail for: \(fileInfo)")
-                self.thumbnail = UIImage(systemName: "photo")
-            }
-            return
-        } else if fileInfo.isVideo {
-            if let thumbnail = await videoPreview(for:fileInfo) {
-                self.thumbnail = thumbnail
-            } else {
-                DDLogError("Failed to generate video thumbnail for: \(fileInfo)")
-                self.thumbnail = UIImage(systemName: "video")
-            }
-            return
-        }
-
-        DDLogError("Unsupported mime type: \(fileInfo.mimeType ?? "(unknown)")")
-        self.thumbnail = UIImage(systemName: "doc")
-    }
-
-    @MainActor
-    func videoPreview(for fileInfo: MLFiletransferInfo) async -> UIImage? {
-        let moviePath = URL(fileURLWithPath: fileInfo.cacheFilePath!)
-        DDLogInfo("Trying to generate video thumbnail for: \(String(describing:fileInfo))")
-        
-        let payload: NSDictionary? = try? await HelperTools.addUploadItemPreview(
-            forItem:moviePath,
-            provider:nil,
-            andPayload:[:]
-        ).toTypedPromise().asyncOnMainActor()
-        guard let image = payload?["preview"] as? UIImage else {
-            return try? await HelperTools.generateVideoThumbnail(
-                fromFile:fileInfo.cacheFilePath!,
-                havingMimeType:fileInfo.mimeType! ,
-                andFileExtension:fileInfo.fileExtension
-            ).toTypedPromise().asyncOnMainActor()
-        }
-        return image
-    }
-}
-
 struct MediaItemView: View {
-    @StateObject private var item: MediaItem
+    @StateObject private var fileInfo: ObservableKVOWrapper<MLFiletransferInfo>
 
     init(fileInfo: MLFiletransferInfo) {
-        _item = StateObject(wrappedValue: MediaItem(fileInfo: fileInfo))
+        _fileInfo = StateObject(wrappedValue: ObservableKVOWrapper(fileInfo))
     }
 
     var body: some View {
         ZStack {
             Group {
-                if let thumbnail = item.thumbnail {
-                    Image(uiImage: thumbnail)
-                        .resizable()
-                        //.scaledToFit()        //leaves empty room around image if not having a square format
-                        .scaledToFill()         //this is what the ios gallery app uses (will crop the edges of that preview)
-                } else {
+                if (fileInfo.thumbnailURL as URL?) != nil {
+                    AsyncImage(url: fileInfo.thumbnailURL) { image in
+                        image
+                            .resizable()
+                            //.scaledToFit()        //leaves empty room around image if not having a square format
+                            .scaledToFill()         //this is what the ios gallery app uses (will crop the edges of that preview)
+                    } placeholder: { //placeholder while the thumbnail is being loaded from disk
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                    }
+                } else { //placeholder if the thumbnailURL is nil, for example while the thumbnail is being generated
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle())
                 }
@@ -134,7 +75,7 @@ struct MediaItemView: View {
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
             
             // Add play icon overlay for video files
-            if item.fileInfo.isVideo {
+            if fileInfo.isVideo {
                 Image(systemName: "play.circle.fill")
                     .resizable()
                     .frame(width: 30, height: 30)
@@ -147,15 +88,15 @@ struct MediaItemView: View {
 }
 
 struct MediaItemDetailView: View {
-    @StateObject private var item: MediaItem
+    @StateObject private var fileInfo: ObservableKVOWrapper<MLFiletransferInfo>
     @StateObject private var dismisser = SheetDismisserProtocol()
     
     init(fileInfo: MLFiletransferInfo) {
-        _item = StateObject(wrappedValue: MediaItem(fileInfo: fileInfo))
+        _fileInfo = StateObject(wrappedValue: ObservableKVOWrapper(fileInfo))
     }
 
     var body: some View {
-        ImageViewerWrapper(info: item.fileInfo as MLFiletransferInfo, dismisser: dismisser)
+        ImageViewerWrapper(info: fileInfo, dismisser: dismisser)
             .onAppear {
                 let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
                 if let hostingController = appDelegate.getTopViewController() as? UIHostingController<AnyView> {
@@ -199,12 +140,12 @@ struct MediaItemSwipeView: View {
 }
 
 struct ImageViewerWrapper: View {
-    let info: MLFiletransferInfo
+    @ObservedObject var info: ObservableKVOWrapper<MLFiletransferInfo>
     let dismisser: SheetDismisserProtocol
     
     var body: some View {
         Group {
-            if info.downloadState == DownloadState.complete {
+            if info.downloadState as DownloadState.RawValue == DownloadState.complete.rawValue {
                 try? ImageViewer(delegate: dismisser, info: info)
             } else {
                 Text("Invalid file data")
@@ -212,5 +153,3 @@ struct ImageViewerWrapper: View {
         }
     }
 }
-
-

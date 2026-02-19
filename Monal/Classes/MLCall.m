@@ -1367,16 +1367,44 @@
         return;
     }
     
+    //always fake candidate iqs to only contain one single candidate, even if multiple ones are listed (seems to be allowed as per XEP-0176)
+    NSMutableArray<XMPPIQ*>* candidates = [NSMutableArray new];
+    for(MLXMLNode* content in [iqNode find:@"{urn:xmpp:jingle:1}jingle/content"])
+    {
+        MLXMLNode* transport = [content findFirst:@"{urn:xmpp:jingle:transports:ice-udp:1}transport"];
+        for(MLXMLNode* candidate in [transport find:@"{urn:xmpp:jingle:transports:ice-udp:1}candidate"])
+        {
+            XMPPIQ* fakeCandidateIQ = [[XMPPIQ alloc] initWithType:kiqSetType];
+            fakeCandidateIQ.from = self.fullRemoteJid;
+            fakeCandidateIQ.to = self.account.connectionProperties.identity.fullJid;
+            MLXMLNode* shallowTransport = [transport shallowCopyWithData:YES];
+            [shallowTransport addChildNode:[transport removeChildNode:candidate]];
+            MLXMLNode* shallowContent = [content shallowCopyWithData:YES];
+            [shallowContent addChildNode:shallowTransport];
+            [fakeCandidateIQ addChildNode:[[MLXMLNode alloc] initWithElement:@"jingle" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+                @"action": @"transport-info",
+                @"sid": self.jmiid,
+            } andChildren:@[shallowContent] andData:nil]];
+            DDLogDebug(@"Adding faked incoming ICE candidate iq to candidates list: %@", fakeCandidateIQ);
+            [candidates addObject:fakeCandidateIQ];
+        }
+    }
+    
     @synchronized(self.candidateQueueLock) {
         //queue candidate if sdp offer or answer have not been processed yet
         if(self.remoteSDP == nil || self.localSDP == nil)
         {
-            DDLogDebug(@"Adding incoming ICE candidate iq to candidate queue: %@", iqNode);
-            [self.incomingCandidateQueue addObject:iqNode];
+            for(XMPPIQ* candidateIq in candidates)
+            {
+                DDLogDebug(@"Adding incoming ICE candidate iq to candidate queue: %@", candidateIq);
+                [self.incomingCandidateQueue addObject:candidateIq];
+            }
             return;
         }
     }
-    [self processRemoteICECandidate:iqNode];
+    
+    for(XMPPIQ* candidateIq in candidates)
+        [self processRemoteICECandidate:candidateIq];
 }
 
 -(void) processRemoteICECandidate:(XMPPIQ*) iqNode

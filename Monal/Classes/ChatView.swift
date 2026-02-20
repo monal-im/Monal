@@ -598,12 +598,11 @@ struct ChatView: View {
                     return Guarantee.value(())
                 }
                 if blockOnModeration, let participantJid = mlMessage.participantJid {
-                    promise.done { _ in
+                    let _ = promise.done { _ in
                         showPromisingLoadingOverlay(self.overlay, headlineView: Text("Blocking user"), descriptionView: Text("Blocking \(participantJid)")) {
                             DDLogVerbose("Changing affiliation of \(participantJid) to: \(String(describing:kMucAffiliationOutcast))...")
                             return account.mucProcessor.setAffiliation(kMucAffiliationOutcast, ofUser:participantJid, inMuc:contact.obj.contactJid).toTypedPromise()
-                        }
-                        .catch { error in
+                        }.catch { error in
                             alertPrompt = AlertPrompt(
                                 title: Text("Error blocking user!"),
                                 message: Text(error.localizedDescription),
@@ -720,7 +719,7 @@ struct ChatView: View {
                             activeChats.call(contact.obj, withUIKitSender:nil)
                         }
                     } label: {
-                        if (voipProcessor.activeCalls as [MLCall]).contains { $0.isEqual(to:contact.obj) } {
+                        if (voipProcessor.activeCalls as [MLCall]).contains(where:{ $0.isEqual(to:contact.obj) }) {
                             Image(systemName: "phone.connection.fill")
                         } else {
                             Image(systemName: "phone.fill")

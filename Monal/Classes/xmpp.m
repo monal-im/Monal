@@ -3401,16 +3401,21 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark stanza handling
 
-// -(AnyPromise*) sendIq:(XMPPIQ*) iq
-// {
-//     return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
-//         [self sendIq:iq withResponseHandler:^(XMPPIQ* response) {
-//             resolve(response);
-//         } andErrorHandler:^(XMPPIQ* error) {
-//             resolve(error);
-//         }];
-//     }];
-// }
+-(AnyPromise*) sendIq:(XMPPIQ*) iq
+{
+    return [self sendIq:iq withErrorDescription:nil];
+}
+
+-(AnyPromise*) sendIq:(XMPPIQ*) iq withErrorDescription:(NSString*) description
+{
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        [self sendIq:iq withResponseHandler:^(XMPPIQ* response) {
+            resolve(response);
+        } andErrorHandler:^(XMPPIQ* error) {
+            resolve([HelperTools getNSErrorFrom:error withDescription:description]);
+        }];
+    }];
+}
 
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
 {
@@ -5779,6 +5784,14 @@ NSString* const kStanza = @"stanza";
 {
     self.statusMessage = message;
     [self sendPresence];
+}
+
+-(AnyPromise*) pingPushserver
+{
+    NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
+    XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType to:selectedPushServer];
+    [ping setPing];
+    return [self sendIq:ping withErrorDescription:@"Ping error"];
 }
 
 -(NSString*) description

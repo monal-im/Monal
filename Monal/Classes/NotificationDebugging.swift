@@ -25,6 +25,7 @@ struct NotificationDebugging: View {
     
     @State private var pushPermissionEnabled = false // state because we get this value through an async call
     @State private var showPushToken = false
+    @State var runningPings: [String:any View]
     
     @ObservedObject var notificationDebuggingDefaultsDB = NotificationDebuggingDefaultsDB()
     
@@ -35,6 +36,7 @@ struct NotificationDebugging: View {
 
         // push server selector
         self.availablePushServers = HelperTools.getAvailablePushServers()
+        self.runningPings = [:]
     }
     
     var body: some View {
@@ -106,14 +108,35 @@ struct NotificationDebugging: View {
                     }
                 }
             }
-#if DEBUG
             Section(header: Text("Debugging").font(.title3)) {
+                Button("Ping push servers") {
+                    for account in self.xmppAccountInfo {
+                        runningPings[account.connectionProperties.identity.jid] = Text("Running...")
+                        account.pingPushserver().done { _ in
+                            runningPings[account.connectionProperties.identity.jid] = Text("Successful").foregroundColor(.green)
+                        }.catch { error in
+                            runningPings[account.connectionProperties.identity.jid] = Text(error.localizedDescription).foregroundColor(.red)
+                        }
+                    }
+                }
+                
+                if self.runningPings.count > 0 {
+                    VStack(alignment: .leading, spacing:10) {
+                        ForEach(self.runningPings.sorted(by:{ $0.0 < $1.0 }), id: \.key) { key, view in
+                            HStack {
+                                Text("\(String(describing:key)): ")
+                                AnyView(view)
+                            }
+                        }
+                    }
+                }
+#if DEBUG
                 Button("Reregister push token") {
                     UIApplication.shared.unregisterForRemoteNotifications()
                     UIApplication.shared.registerForRemoteNotifications()
                 }
-            }
 #endif
+            }
         }
         .navigationBarTitle(Text("Notifications"))
         .onAppear(perform: {

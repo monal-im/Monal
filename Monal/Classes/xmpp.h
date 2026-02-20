@@ -150,6 +150,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
  Adds the stanza to the output Queue
  */
 -(void) send:(MLXMLNode*) stanza;
+-(AnyPromise*) sendIq:(XMPPIQ*) iq;
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler;
 -(void) sendIq:(XMPPIQ*) iq withHandler:(MLHandler* _Nullable) handler;
 
@@ -204,6 +205,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
  */
 -(void) enablePush;
 -(void) disablePush;
+-(AnyPromise*) pingPushserver;
 
 -(void) mamFinishedFor:(NSString*) archiveJid;
 

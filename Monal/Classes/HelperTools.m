@@ -664,6 +664,12 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     return message;
 }
 
++(NSError*) getNSErrorFrom:(XMPPStanza*) stanza withDescription:(NSString*) description
+{
+    NSString* errorMessage = [HelperTools extractXMPPError:stanza withDescription:description];
+    return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+}
+
 +(void) initSystem
 {
     BOOL enableDefaultLogAndCrashFramework = YES;

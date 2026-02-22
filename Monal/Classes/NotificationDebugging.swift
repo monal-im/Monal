@@ -109,6 +109,7 @@ struct NotificationDebugging: View {
                 }
             }
             Section(header: Text("Debugging").font(.title3)) {
+                Text("Using the ping button will reveal your JID(s) to our push servers!")
                 Button("Ping push servers") {
                     for account in self.xmppAccountInfo {
                         runningPings[account.connectionProperties.identity.jid] = Text("Running...")

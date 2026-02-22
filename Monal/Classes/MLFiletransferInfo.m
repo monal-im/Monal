@@ -177,7 +177,7 @@ static NSMutableDictionary* _singletonCache;
     // Generate the thumbnail now, but try to ensure that only one thread is doing the generation
     // Also, prevent retries in the case of an error (to avoid repeated failures)
     // Note that isGeneratingThumbnail is not thread safe.
-    if(!self.isGeneratingThumbnail)
+    if(!self.isGeneratingThumbnail && self.downloadState == DownloadStateComplete)
     {
         self.isGeneratingThumbnail = YES;
         [HelperTools generateVideoThumbnailFromFile:self.cacheFilePath havingMimeType:self.mimeType andFileExtension:self.fileExtension]

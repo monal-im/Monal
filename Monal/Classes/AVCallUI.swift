@@ -27,6 +27,108 @@ struct VideoView: UIViewRepresentable {
     }
 }
 
+final class VideoSizeObserver: NSObject, ObservableObject, RTCVideoViewDelegate {
+    @Published var aspectRatio: CGFloat = 16.0 / 9.0
+
+    func videoView(_ videoView: RTCVideoRenderer, didChangeVideoSize size: CGSize) {
+        guard size.height > 0 else { return }
+        DispatchQueue.main.async {
+            self.aspectRatio = size.width / size.height
+        }
+    }
+}
+
+struct RTCVideoContainerView: UIViewRepresentable {
+    let videoView: RTCMTLVideoView
+    @ObservedObject var observer: VideoSizeObserver
+
+    func makeUIView(context: Context) -> RTCMTLVideoView {
+        videoView.videoContentMode = .scaleAspectFill
+        videoView.clipsToBounds = true
+        videoView.delegate = observer
+        return videoView
+    }
+
+    func updateUIView(_ uiView: RTCMTLVideoView, context: Context) {}
+}
+
+struct DraggablePiPVideoView<StackedView: View>: View {
+
+    let videoView: RTCMTLVideoView
+    let topPadding: CGFloat
+    let rightPadding: CGFloat
+    @Binding var controlsVisible: Bool
+    let stackedView: () -> StackedView
+    let onDoubleTap: () -> Void
+
+    @StateObject private var observer = VideoSizeObserver()
+    @State private var offset: CGSize = .zero
+    @GestureState private var dragOffset: CGSize = .zero
+    
+    init(
+        videoView: RTCMTLVideoView,
+        topPadding: CGFloat,
+        rightPadding: CGFloat,
+        controlsVisible: Binding<Bool>,
+        @ViewBuilder stackedView: @escaping () -> StackedView,
+        onDoubleTap: @escaping () -> Void
+    ) {
+        self.videoView = videoView
+        self.topPadding = topPadding
+        self.rightPadding = rightPadding
+        self._controlsVisible = controlsVisible
+        self.stackedView = stackedView
+        self.onDoubleTap = onDoubleTap
+    }
+    
+    var body: some View {
+        let width = UIScreen.main.bounds.size.width / 3
+        let height = width / observer.aspectRatio
+
+        let initialX = (UIScreen.main.bounds.size.width - width) / 2 - rightPadding
+        let initialY = -(UIScreen.main.bounds.size.height - height) / 2 + topPadding
+
+        ZStack {
+            RTCVideoContainerView(
+                videoView: videoView,
+                observer: observer
+            )
+            .aspectRatio(observer.aspectRatio, contentMode: .fit)
+            .frame(width: width)
+            .background(Color.black)
+
+            Group {
+                if controlsVisible {
+                    stackedView()
+                }
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(color: .black.opacity(0.4), radius: 12, x: 0, y: 6)
+        .offset(
+            x: initialX + offset.width + dragOffset.width,
+            y: initialY + offset.height + dragOffset.height
+        )
+        .onTapGesture(count: 2, perform: onDoubleTap)
+        .gesture(DragGesture().updating($dragOffset) { value, state, _ in
+            state = value.translation
+        }.onEnded { value in
+            offset.width += value.translation.width
+            offset.height += value.translation.height
+
+//             let maxX = (UIScreen.main.bounds.size.width - width) / 2 - rightPadding
+//             let maxY = (UIScreen.main.bounds.size.height - height) / 2 - topPadding
+// 
+//             offset.width = min(max(offset.width, -maxX), maxX)
+//             offset.height = min(max(offset.height, -maxY), maxY)
+        })
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: offset)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
+    }
+}
+
+
 struct AVCallUI: View {
     @StateObject private var appDelegate: ObservableKVOWrapper<MonalAppDelegate>
     @StateObject private var call: ObservableKVOWrapper<MLCall>
@@ -34,13 +136,25 @@ struct AVCallUI: View {
     @State private var showMicAlert = false
     @State private var showSecurityHelpAlert: MLCallEncryptionState? = nil
     @State private var controlsVisible = true
-    @State private var localRendererLocation: CGPoint = CGPoint(
-        x: UIScreen.main.bounds.size.width - (UIScreen.main.bounds.size.width/5.0/2.0 + 24.0),
-        y: UIScreen.main.bounds.size.height/5.0/2.0 + 16.0
-    )
     @State private var cameraPosition: AVCaptureDevice.Position = .front
     @State private var sendingVideo = true
     @State private var videoRenderingStarted = false
+    
+    //2 times 32px space between buttons and 16px left and right padding of whole button bar
+    private let maxButtonSize = (UIScreen.main.bounds.size.width - 3*32) / 3.0
+    //only 1/3 of the size of our DraggablePiPVideoView, which is 1/3 of the screen width
+    private let maxCameraSwitchButtonSize = (UIScreen.main.bounds.size.width / 3.0) / 3.0
+    @ScaledMetric(relativeTo:.body) private var size32px: CGFloat = 32
+    @ScaledMetric(relativeTo:.body) private var size20px: CGFloat = 20
+    @ScaledMetric(relativeTo:.body) private var size28px: CGFloat = 28
+    @ScaledMetric(relativeTo:.body) private var size64px: CGFloat = 64
+    @ScaledMetric(relativeTo:.body) private var size7px: CGFloat = 7
+    @ScaledMetric(relativeTo:.body) private var size16px: CGFloat = 16
+    @ScaledMetric(relativeTo:.body) private var size100px: CGFloat = 100
+    @ScaledMetric(relativeTo:.body) private var size150px: CGFloat = 150
+    @ScaledMetric(relativeTo:.body) private var size200px: CGFloat = 200
+    @ScaledMetric(relativeTo:.body) private var localVideoSizeFactor: CGFloat = 1
+    
     private var ringingPlayer: AVAudioPlayer!
     private var busyPlayer: AVAudioPlayer!
     private var errorPlayer: AVAudioPlayer!
@@ -62,13 +176,20 @@ struct AVCallUI: View {
         //use the complete screen for remote video
         self.remoteRenderer = RTCMTLVideoView(frame: UIScreen.main.bounds)
         self.remoteRenderer.videoContentMode = .scaleAspectFill
+        self.remoteRenderer.clipsToBounds = true
         
         self.localRenderer = RTCMTLVideoView(frame: UIScreen.main.bounds)
         self.localRenderer.videoContentMode = .scaleAspectFill
+        self.localRenderer.clipsToBounds = true
         
         self.ringingPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"ringing", withExtension:"wav", subdirectory:"CallSounds")!)
         self.busyPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"busy", withExtension:"wav", subdirectory:"CallSounds")!)
         self.errorPlayer = try! AVAudioPlayer(contentsOf:Bundle.main.url(forResource:"error", withExtension:"wav", subdirectory:"CallSounds")!)
+/*        
+        _localRendererOffset = State(wrappedValue: CGPoint(
+            x: UIScreen.main.bounds.size.width - (UIScreen.main.bounds.size.width/(5.0/localVideoSizeFactor)/2.0 + 24.0),
+            y: UIScreen.main.bounds.size.height/(5.0/localVideoSizeFactor)/2.0 + 16.0
+        ))*/
     }
     
     func maybeStartRenderer() {
@@ -177,6 +298,165 @@ struct AVCallUI: View {
         }
     }
 
+    @ViewBuilder
+    func callDirectionView() -> some View {
+        VStack {
+            Spacer().frame(height: 8)
+            switch MLCallDirection(rawValue:call.direction) {
+                case .incoming:
+                    Image(systemName: "phone.arrow.down.left")
+                        .resizable()
+                        .frame(width: size20px, height: size20px)
+                        .foregroundColor(.primary)
+                case .outgoing:
+                    Image(systemName: "phone.arrow.up.right")
+                        .resizable()
+                        .frame(width: size20px, height: size20px)
+                        .foregroundColor(.primary)
+                default:        //should never be reached
+                    Text("")
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func encryptionStateView() -> some View {
+        VStack {
+            Spacer().frame(height: 8)
+            Button(action: {
+                //show dialog explaining different encryption states
+                self.showSecurityHelpAlert = MLCallEncryptionState(rawValue:call.encryptionState)
+            }, label: {
+                switch MLCallEncryptionState(rawValue:call.encryptionState) {
+                    case .unknown:
+                        Text("")
+                    case .clear:
+                        Spacer().frame(width: 10)
+                        Image(systemName: "xmark.shield.fill")
+                            .resizable()
+                            .frame(width: size20px, height: size20px)
+                            .foregroundColor(.red)
+                    case .toFU:
+                        Spacer().frame(width: 10)
+                        Image(systemName: "checkmark.shield.fill")
+                            .resizable()
+                            .frame(width: size20px, height: size20px)
+                            .foregroundColor(.yellow)
+                    case .trusted:
+                        Spacer().frame(width: 10)
+                        Image(systemName: "checkmark.shield.fill")
+                            .resizable()
+                            .frame(width: size20px, height: size20px)
+                            .foregroundColor(.green)
+                    default:        //should never be reached
+                        Text("")
+                }
+            })
+        }
+    }
+    
+    @ViewBuilder
+    func backToChatView() -> some View {
+        VStack {
+            Spacer().frame(height: 8)
+            Button(action: {
+                if let activeChats = self.appDelegate.obj.activeChats {
+                    //make sure we don't animate anything
+                    activeChats.dismissCompleteViewChain(withAnimation: false) {
+                        activeChats.presentChat(with:self.contact.obj)
+                    }
+                } else {
+                    //self.delegate.dismissWithoutAnimation()
+                    unreachable("active chats should always be accessible from AVCallUI!")
+                }
+            }, label: {
+                Image(systemName: "text.bubble")
+                    .resizable()
+                    .frame(width: size28px, height: size28px)
+                    .foregroundColor(.primary)
+            })
+        }
+    }
+    
+    @ViewBuilder
+    func speakerButtonView() -> some View {
+        Button(action: {
+            call.speaker = !call.speaker
+        }) {
+            Image(systemName: "speaker.wave.2.circle.fill")
+                .resizable()
+                .frame(width: min(size64px, maxButtonSize), height: min(size64px, maxButtonSize))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(call.speaker ? .black : .white, call.speaker ? .white : .black)
+                .shadow(radius: size7px)
+        }
+        .buttonStyle(BorderlessButtonStyle())
+    }
+    
+    @ViewBuilder
+    func endcallButtonView() -> some View {
+        Button(action: {
+            call.obj.end()
+            self.delegate.dismissWithoutAnimation()
+        }) {
+            Image(systemName: "phone.down.circle.fill")
+                .resizable()
+                .frame(width: min(size64px, maxButtonSize), height: min(size64px, maxButtonSize))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.white, .red)
+                .shadow(radius: size7px)
+        }
+        .buttonStyle(BorderlessButtonStyle())
+    }
+    
+    @ViewBuilder
+    func microphoneButtonView() -> some View {
+        Button(action: {
+            call.muted = !call.muted
+        }) {
+            Image(systemName: "mic.slash.circle.fill")
+                .resizable()
+                .frame(width: min(size64px, maxButtonSize), height: min(size64px, maxButtonSize))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(call.muted ? .black : .white, call.muted ? .white : .black)
+                .shadow(radius: size7px)
+        }
+        .buttonStyle(BorderlessButtonStyle())
+    }
+    
+    @ViewBuilder
+    func retryButtonView() -> some View {
+        Button(action: {
+            self.delegate.dismissWithoutAnimation()
+            if let activeChats = self.appDelegate.obj.activeChats {
+                activeChats.call(contact.obj, with:MLCallType(rawValue:call.callType)!)
+            }                            
+        }) {
+            Image(systemName: "arrow.clockwise.circle.fill")
+                .resizable()
+                .frame(width: min(size64px, maxButtonSize), height: min(size64px, maxButtonSize))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.white, .green)
+                .shadow(radius: size7px)
+        }
+        .buttonStyle(BorderlessButtonStyle())
+    }
+    
+    @ViewBuilder
+    func closeButtonView() -> some View {
+        Button(action: {
+            delegate.dismissWithoutAnimation()
+        }) {
+            Image(systemName: "x.circle.fill")
+                .resizable()
+                .frame(width: min(size64px, maxButtonSize), height: min(size64px, maxButtonSize))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.white, .red)
+                .shadow(radius: size7px)
+        }
+        .buttonStyle(BorderlessButtonStyle())
+    }
+    
     var body: some View {
         ZStack {
             Color.background
@@ -186,12 +466,12 @@ struct AVCallUI: View {
                 VideoView(renderer:self.remoteRenderer)
                     .ignoresSafeArea()
                 
-                ZStack {
-                    VideoView(renderer:self.localRenderer)
-                        //this will sometimes only honor the width and ignore the height
-                        .frame(width: UIScreen.main.bounds.size.width/5.0, height: UIScreen.main.bounds.size.height/5.0)
-                    
-                    if controlsVisible {
+                DraggablePiPVideoView(
+                    videoView: self.localRenderer,
+                    topPadding: 48,
+                    rightPadding: 20,
+                    controlsVisible: $controlsVisible,
+                    stackedView: {
                         Button(action: {
                             if cameraPosition == .front {
                                 cameraPosition = .back
@@ -200,117 +480,69 @@ struct AVCallUI: View {
                             }
                             stopRenderer()
                             maybeStartRenderer()
-                        }, label: {
+                        }) {
                             Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
                                 .resizable()
-                                .frame(width: 32.0, height: 32.0)
+                                .frame(width: min(size32px, maxCameraSwitchButtonSize), height: min(size32px, maxCameraSwitchButtonSize))
                                 .foregroundColor(.primary)
-                        })
+                                //16px is half of 32px --> use the same max constraint for simplicity
+                                .padding(min(size16px, maxCameraSwitchButtonSize/2.0))
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                    }, onDoubleTap: {
+                        if sendingVideo {
+                            call.obj.hideVideo()
+                        } else {
+                            call.obj.showVideo()
+                        }
+                        sendingVideo = !sendingVideo
                     }
-                }
-                .position(localRendererLocation)
-                .gesture(DragGesture().onChanged { value in
-                    self.localRendererLocation = value.location
-                })
-                .onTapGesture(count: 2) {
-                    if sendingVideo {
-                        call.obj.hideVideo()
-                    } else {
-                        call.obj.showVideo()
-                    }
-                    sendingVideo = !sendingVideo
-                }
+                )
             }
             
             if MLCallType(rawValue:call.callType) == .audio ||
             (MLCallType(rawValue:call.callType) == .video && (MLCallState(rawValue:call.state) != .connected || controlsVisible)) {
                 VStack {
                     Group {
-                        Spacer().frame(height: 16)
+                        Spacer().frame(height: 24)
                         
-                        HStack(alignment: .top) {
-                            Spacer().frame(width:20)
+                        ViewThatFits(in: .horizontal) {
+                            HStack(alignment: .top) {
+                                Spacer().frame(width:20)
+                                callDirectionView()
+                                encryptionStateView()
+                                Spacer()
+                                Text(contact.contactDisplayName as String)
+                                    .font(.largeTitle)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                backToChatView()
+                                Spacer().frame(width:20)
+                            }
                             
-                            VStack {
-                                Spacer().frame(height: 8)
-                                switch MLCallDirection(rawValue:call.direction) {
-                                    case .incoming:
-                                        Image(systemName: "phone.arrow.down.left")
-                                            .resizable()
-                                            .frame(width: 20.0, height: 20.0)
-                                            .foregroundColor(.primary)
-                                    case .outgoing:
-                                        Image(systemName: "phone.arrow.up.right")
-                                            .resizable()
-                                            .frame(width: 20.0, height: 20.0)
-                                            .foregroundColor(.primary)
-                                    default:        //should never be reached
-                                        Text("")
+                           VStack {
+                                HStack(alignment: .top) {
+                                    Spacer().frame(width:20)
+                                    callDirectionView()
+                                    encryptionStateView()
+                                    Spacer()
+                                    backToChatView()
+                                    Spacer().frame(width:20)
+                                }
+                                
+                                Spacer().frame(height: 16)
+                                
+                                HStack(alignment: .top) {
+                                    Spacer().frame(width:20)
+                                    Text(contact.contactDisplayName as String)
+                                        .font(.largeTitle)
+                                        .foregroundColor(.primary)
+                                    Spacer().frame(width:20)
                                 }
                             }
-                            
-                            VStack {
-                                Spacer().frame(height: 8)
-                                Button(action: {
-                                    //show dialog explaining different encryption states
-                                    self.showSecurityHelpAlert = MLCallEncryptionState(rawValue:call.encryptionState)
-                                }, label: {
-                                    switch MLCallEncryptionState(rawValue:call.encryptionState) {
-                                        case .unknown:
-                                            Text("")
-                                        case .clear:
-                                            Spacer().frame(width: 10)
-                                            Image(systemName: "xmark.shield.fill")
-                                                .resizable()
-                                                .frame(width: 20.0, height: 20.0)
-                                                .foregroundColor(.red)
-                                        case .toFU:
-                                            Spacer().frame(width: 10)
-                                            Image(systemName: "checkmark.shield.fill")
-                                                .resizable()
-                                                .frame(width: 20.0, height: 20.0)
-                                                .foregroundColor(.yellow)
-                                        case .trusted:
-                                            Spacer().frame(width: 10)
-                                            Image(systemName: "checkmark.shield.fill")
-                                                .resizable()
-                                                .frame(width: 20.0, height: 20.0)
-                                                .foregroundColor(.green)
-                                        default:        //should never be reached
-                                            Text("")
-                                    }
-                                })
-                            }
-                            
-                            Spacer()
-                            
-                            Text(contact.contactDisplayName as String)
-                                .font(.largeTitle)
-                                .foregroundColor(.primary)
-                            
-                            Spacer()
-                            
-                            VStack {
-                                Spacer().frame(height: 8)
-                                Button(action: {
-                                    if let activeChats = self.appDelegate.obj.activeChats {
-                                        //make sure we don't animate anything
-                                        activeChats.dismissCompleteViewChain(withAnimation: false) {
-                                            activeChats.presentChat(with:self.contact.obj)
-                                        }
-                                    } else {
-                                        //self.delegate.dismissWithoutAnimation()
-                                        unreachable("active chats should always be accessible from AVCallUI!")
-                                    }
-                                }, label: {
-                                    Image(systemName: "text.bubble")
-                                        .resizable()
-                                        .frame(width: 28.0, height: 28.0)
-                                        .foregroundColor(.primary)
-                                })
-                            }
-                            
-                            Spacer().frame(width:20)
                         }
                         
                         Spacer().frame(height: 16)
@@ -402,15 +634,25 @@ struct AVCallUI: View {
                                 Text("")
                         }
                         
-                        Spacer().frame(height: 48)
+                        Spacer().frame(height: 32)
                         
                         if MLCallType(rawValue:call.callType) == .audio || MLCallState(rawValue:call.state) != .connected {
                             Image(uiImage: contact.avatar)
                                 .resizable()
-                                .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, minHeight: 100, idealHeight: 150, maxHeight: 200, alignment: .center)
+                                .frame(
+                                    minWidth:       size32px,
+                                    idealWidth:     size150px,
+                                    maxWidth:       size200px,
+                                    minHeight:      size32px,
+                                    idealHeight:    size150px,
+                                    maxHeight:      size200px,
+                                    alignment:      .center
+                                )
                                 .scaledToFit()
-                                .shadow(radius: 7)
+                                .shadow(radius: size7px)
                         }
+                        
+                        Spacer().frame(height: 32)
                         
                         Spacer()
                     }
@@ -418,36 +660,9 @@ struct AVCallUI: View {
                     if MLCallState(rawValue:call.state) == .finished {
                         HStack() {
                             Spacer()
-                            
-                            Button(action: {
-                                self.delegate.dismissWithoutAnimation()
-                                if let activeChats = self.appDelegate.obj.activeChats {
-                                    activeChats.call(contact.obj, with:MLCallType(rawValue:call.callType)!)
-                                }                            
-                            }) {
-                                Image(systemName: "arrow.clockwise.circle.fill")
-                                    .resizable()
-                                    .frame(width: 64.0, height: 64.0)
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, .green)
-                                    .shadow(radius: 7)
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                            
+                            retryButtonView()
                             Spacer().frame(width: 64)
-
-                            Button(action: {
-                                delegate.dismissWithoutAnimation()
-                            }) {
-                                Image(systemName: "x.circle.fill")
-                                    .resizable()
-                                    .frame(width: 64.0, height: 64.0)
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, .red)
-                                    .shadow(radius: 7)
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
-                            
+                            closeButtonView()
                             Spacer()
                         }
                     } else {
@@ -455,54 +670,22 @@ struct AVCallUI: View {
                             Spacer()
                             
                             if MLCallState(rawValue:call.state) == .connected || MLCallState(rawValue:call.state) == .reconnecting {
-                                Button(action: {
-                                    call.muted = !call.muted
-                                }) {
-                                    Image(systemName: "mic.slash.circle.fill")
-                                        .resizable()
-                                        .frame(width: 64.0, height: 64.0)
-                                        .symbolRenderingMode(.palette)
-                                        .foregroundStyle(call.muted ? .black : .white, call.muted ? .white : .black)
-                                        .shadow(radius: 7)
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
-                                
+                                microphoneButtonView()
                                 Spacer().frame(width: 32)
                             }
                             
-                            Button(action: {
-                                call.obj.end()
-                                self.delegate.dismissWithoutAnimation()
-                            }) {
-                                Image(systemName: "phone.down.circle.fill")
-                                    .resizable()
-                                    .frame(width: 64.0, height: 64.0)
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, .red)
-                                    .shadow(radius: 7)
-                            }
-                            .buttonStyle(BorderlessButtonStyle())
+                            endcallButtonView()
                             
                             if MLCallState(rawValue:call.state) == .connected || MLCallState(rawValue:call.state) == .reconnecting {
                                 Spacer().frame(width: 32)
-                                Button(action: {
-                                    call.speaker = !call.speaker
-                                }) {
-                                    Image(systemName: "speaker.wave.2.circle.fill")
-                                        .resizable()
-                                        .frame(width: 64.0, height: 64.0)
-                                        .symbolRenderingMode(.palette)
-                                        .foregroundStyle(call.speaker ? .black : .white, call.speaker ? .white : .black)
-                                        .shadow(radius: 7)
-                                }
-                                .buttonStyle(BorderlessButtonStyle())
+                                speakerButtonView()
                             }
                             
                             Spacer()
                         }
                     }
                     
-                    Spacer().frame(height: 16)
+                    Spacer().frame(height: 24)
                 }
             }
         }
@@ -521,7 +704,7 @@ struct AVCallUI: View {
                 HStack {
                     Image(systemName: "xmark.shield.fill")
                         .resizable()
-                        .frame(width: 20.0, height: 20.0)
+                        .frame(width: size20px, height: size20px)
                         .foregroundColor(.red)
                     Spacer().frame(width: 10)
                     Text("Red x-mark shield:")
@@ -532,7 +715,7 @@ struct AVCallUI: View {
                 HStack {
                     Image(systemName: "checkmark.shield.fill")
                         .resizable()
-                        .frame(width: 20.0, height: 20.0)
+                        .frame(width: size20px, height: size20px)
                         .foregroundColor(.yellow)
                     Spacer().frame(width: 10)
                     Text("Yellow checkmark shield:")
@@ -543,7 +726,7 @@ struct AVCallUI: View {
                 HStack {
                     Image(systemName: "checkmark.shield.fill")
                         .resizable()
-                        .frame(width: 20.0, height: 20.0)
+                        .frame(width: size20px, height: size20px)
                         .foregroundColor(.green)
                     Spacer().frame(width: 10)
                     Text("Green checkmark shield:")

@@ -82,11 +82,16 @@ struct DraggablePiPVideoView<StackedView: View>: View {
     }
     
     var body: some View {
-        let width = UIScreen.main.bounds.size.width / 3
+        //size of our video
+        let width = UIScreen.main.bounds.size.width / 3.0
         let height = width / observer.aspectRatio
 
         let initialX = (UIScreen.main.bounds.size.width - width) / 2 - rightPadding
         let initialY = -(UIScreen.main.bounds.size.height - height) / 2 + topPadding
+        
+        //used for clamping
+        let minX = -(UIScreen.main.bounds.size.width + width) / 2 + rightPadding * 2
+        let maxY = (UIScreen.main.bounds.size.height - height) - topPadding * 2
 
         ZStack {
             RTCVideoContainerView(
@@ -115,12 +120,10 @@ struct DraggablePiPVideoView<StackedView: View>: View {
         }.onEnded { value in
             offset.width += value.translation.width
             offset.height += value.translation.height
-
-//             let maxX = (UIScreen.main.bounds.size.width - width) / 2 - rightPadding
-//             let maxY = (UIScreen.main.bounds.size.height - height) / 2 - topPadding
-// 
-//             offset.width = min(max(offset.width, -maxX), maxX)
-//             offset.height = min(max(offset.height, -maxY), maxY)
+            
+            //clamp values
+            offset.width = max(min(offset.width, 0), minX)
+            offset.height = min(max(offset.height, 0), maxY)
         })
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: offset)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

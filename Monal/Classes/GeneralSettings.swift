@@ -141,6 +141,7 @@ class GeneralSettingsDefaultsDB: ObservableObject {
 
 struct GeneralSettings: View {
     @ObservedObject var generalSettingsDefaultsDB = GeneralSettingsDefaultsDB()
+    @ScaledMetric(relativeTo:.body) private var size20px: CGFloat = 20
     
     var body: some View {
         Form {
@@ -150,7 +151,7 @@ struct GeneralSettings: View {
                         Image(systemName: "hand.tap.fill")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 20, height: 20)
+                            .frame(width: size20px, height: size20px)
                         Text("User Interface")
                     }
                 }
@@ -159,7 +160,7 @@ struct GeneralSettings: View {
                         Image(systemName: "shield.checkerboard")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 20, height: 20)
+                            .frame(width: size20px, height: size20px)
                         Text("Security")
                     }
                 }
@@ -168,7 +169,7 @@ struct GeneralSettings: View {
                         Image(systemName: "eye")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 20, height: 20)
+                            .frame(width: size20px, height: size20px)
                         Text("Privacy")
                     }
                 }
@@ -177,7 +178,7 @@ struct GeneralSettings: View {
                         Image(systemName: "text.bubble")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 20, height: 20)
+                            .frame(width: size20px, height: size20px)
                         Text("Notifications")
                     }
                 }
@@ -186,7 +187,7 @@ struct GeneralSettings: View {
                         Image(systemName: "paperclip")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 20, height: 20)
+                            .frame(width: size20px, height: size20px)
                         Text("Attachments")
                     }
                 }
@@ -198,7 +199,7 @@ struct GeneralSettings: View {
                         Image(systemName: "gear")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 20, height: 20)
+                            .frame(width: size20px, height: size20px)
                         #if targetEnvironment(macCatalyst)
                             Text("Open macOS settings")
                         #else

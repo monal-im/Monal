@@ -1670,7 +1670,7 @@
     //handle session-terminate: fake jmi finish message and handle it
     else if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action=session-terminate>"])
     {
-        if(self.jmiProceed == nil)
+        if(self.jmiProceed != nil)
         {
             DDLogDebug(@"Got jingle session-terminate after jmi proceed, faking incoming jmi:finish for Conversations compatibility...");
             XMPPMessage* jmiNode = [[XMPPMessage alloc] initWithType:kMessageChatType to:self.account.connectionProperties.identity.jid];

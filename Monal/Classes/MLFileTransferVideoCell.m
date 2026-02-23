@@ -65,7 +65,8 @@ AVPlayer *avplayer;
     
     __block AVURLAsset* videoAsset = nil;
     //the completion is calles synchronously
-    [HelperTools createAVURLAssetFromFile:fileUrlStr havingMimeType:mimeType andFileExtension:nil withCompletionHandler:^(AVURLAsset* asset) {
+    NSString* fileExtension = [fileName pathExtension];
+    [HelperTools createAVURLAssetFromFile:fileUrlStr havingMimeType:mimeType andFileExtension:(fileExtension.length > 0 ? fileExtension : nil) withCompletionHandler:^(AVURLAsset* asset) {
         videoAsset = asset;
     }];
     if(videoAsset == nil)

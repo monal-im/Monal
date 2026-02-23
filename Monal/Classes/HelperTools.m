@@ -1151,13 +1151,9 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         return completion(nil);
     }
     
-    //create the AVURLAsset and invoke the callback using it
-    completion([AVURLAsset URLAssetWithURL:fileUrl options:@{}]);
-    
-    //remove file afterwards and just log errors if removal of symlink fails
-    [[NSFileManager defaultManager] removeItemAtURL:symlinkUrl error:&error];
-    if(error != nil)
-        DDLogError(@"Could not clean up symlink file '%@' pointing to '%@': %@", symlinkUrl, fileUrl, error);
+    //create the AVURLAsset and invoke the callback using the symlink URL carrying the desired extension.
+    //Do not delete the symlink here: AVAsset loading is often asynchronous and may still need it afterwards.
+    completion([AVURLAsset URLAssetWithURL:symlinkUrl options:@{}]);
 }
 
 +(AnyPromise*) computeMediaDurationFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension

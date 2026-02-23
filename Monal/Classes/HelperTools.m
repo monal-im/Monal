@@ -1115,49 +1115,8 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         //generate an AVURLAsset using the modern ios 17 method to attach a mime type to an AVURLAsset
         return completion([AVURLAsset URLAssetWithURL:fileUrl options:@{AVURLAssetOverrideMIMETypeKey: mimeType}]);
     }
-    
-    //TODO: instead of this symlink method hack, we *maybe* could use the AVURLAssetOutOfBandMIMETypeKey in place of
-    //TODO: AVURLAssetOverrideMIMETypeKey on ios 16, BUT: that symbol isn't public and may be catched by apple review
-    //TODO: (but it makes our code way cleaner than using this symlink stuff)
-    DDLogDebug(@"Generating thumbnail with symlink method...");
-    if(fileExtension == nil)
-    {
-        //this will return nil if the mime type isn't known by apple
-        fileExtension = [[UTType typeWithMIMEType:mimeType] preferredFilenameExtension];
-        //--> bail out if this is still nil
-        if(fileExtension == nil)
-        {
-            DDLogWarn(@"Could not get file extension for file, not creating AVURLAsset...");
-            return completion(nil);
-        }
-    }
-    
-    NSURL* symlinkUrl = [self getContainerURLForPathComponents:@[
-        @"documentCache",
-        [NSString stringWithFormat:@"tmp.avurlasset_symlink.%@.%@", fileUrl.lastPathComponent, fileExtension]
-    ]];
-    NSError* error = nil;
-    if([[NSFileManager defaultManager] fileExistsAtPath:symlinkUrl.path])
-        [[NSFileManager defaultManager] removeItemAtURL:symlinkUrl error:&error];
-    if(error != nil)
-    {
-        DDLogError(@"Could not delete old leftover symlink file at '%@': %@", symlinkUrl, error);
-        return completion(nil);
-    }
-    [[NSFileManager defaultManager] createSymbolicLinkAtURL:symlinkUrl withDestinationURL:fileUrl error:&error];
-    if(error != nil)
-    {
-        DDLogError(@"Could not create symlink file '%@' pointing to '%@': %@", symlinkUrl, fileUrl, error);
-        return completion(nil);
-    }
-    
-    //create the AVURLAsset and invoke the callback using it
-    completion([AVURLAsset URLAssetWithURL:fileUrl options:@{}]);
-    
-    //remove file afterwards and just log errors if removal of symlink fails
-    [[NSFileManager defaultManager] removeItemAtURL:symlinkUrl error:&error];
-    if(error != nil)
-        DDLogError(@"Could not clean up symlink file '%@' pointing to '%@': %@", symlinkUrl, fileUrl, error);
+    else
+        return completion([AVURLAsset URLAssetWithURL:fileUrl options:@{@"AVURLAssetOutOfBandMIMETypeKey": mimeType}]);
 }
 
 +(AnyPromise*) computeMediaDurationFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension

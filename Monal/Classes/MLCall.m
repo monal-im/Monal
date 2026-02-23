@@ -287,14 +287,12 @@
 
 -(xmpp*) account
 {
-    @synchronized(self) {
-        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-        MLAssert(account != nil, @"Account of call must be listed in MLXMPPManager connected accounts!", (@{
-            @"contact": nilWrapper(self.contact),
-            @"call": nilWrapper(self),
-        }));
-        return account;
-    }
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    MLAssert(account != nil, @"Account of call must be listed in MLXMPPManager connected accounts!", (@{
+        @"contact": nilWrapper(self.contact),
+        @"call": nilWrapper(self),
+    }));
+    return account;
 }
 -(void) startCallDuartionTimer
 {

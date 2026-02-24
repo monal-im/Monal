@@ -529,6 +529,12 @@ void swizzle(Class c, SEL orig, SEL new)
     return message;
 }
 
++(NSError*) getNSErrorFrom:(XMPPStanza*) stanza withDescription:(NSString*) description
+{
+    NSString* errorMessage = [HelperTools extractXMPPError:stanza withDescription:description];
+    return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+}
+
 +(void) initSystem
 {
     BOOL enableDefaultLogAndCrashFramework = YES;

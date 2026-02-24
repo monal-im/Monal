@@ -562,6 +562,7 @@ $$
 
 -(void) cleanupOwnOldDevices
 {
+    NSMutableArray* deletedDevices = [NSMutableArray new];
     NSString* jid = self.account.connectionProperties.identity.jid;
     for(NSNumber* device in [self.ownDeviceList copy])
     {
@@ -578,8 +579,14 @@ $$
         //remove own old devices (these clients will add thei id back, if they are still active)
         //this is what conversations does, too
         if(trust == MLOmemoToFUButNoMsgSeenInTime || trust == MLOmemoTrustedButNoMsgSeenInTime)
+        {
             [self bulkDeleteDeviceForSource:jid andRid:device];
+            [deletedDevices addObject:device];
+        }
     }
+    //publish our changes, but only if we actually changed someting
+    if(deletedDevices.count > 0)
+        [self publishOwnDeviceList];
 }
 
 -(void) publishOwnDeviceList

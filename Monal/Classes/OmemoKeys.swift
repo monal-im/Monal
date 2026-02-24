@@ -13,6 +13,8 @@ struct OmemoKeysEntry: View {
     
     @State private var trustLevel: NSNumber
     @State private var showAlert: Alert?
+    @ScaledMetric(relativeTo:.body) private var size30px: CGFloat = 30
+    @ScaledMetric(relativeTo:.body) private var size11px: CGFloat = 11
 
     private let deviceId: NSNumber
     private let fingerprint: Data
@@ -121,10 +123,10 @@ struct OmemoKeysEntry: View {
     
     func getTrustLevelIcon(_ iconName: String, _ iconColor: Color) -> some View {
         return Image(systemName: iconName)
-            .frame(width: 30, height: 30, alignment: .center)
+            .frame(width: size30px, height: size30px, alignment: .center)
             .foregroundColor(Color.primary)
-            .background(Color.accentColor)
-            .cornerRadius(30)
+            .background(iconColor)
+            .cornerRadius(size30px)
     }
 
     func getDeviceIconForOwnDevice() -> some View {
@@ -138,7 +140,7 @@ struct OmemoKeysEntry: View {
         }
         return Image(systemName: deviceImage)
             .resizable()
-            .frame(width: 30, height: 30, alignment: .center)
+            .frame(width: size30px, height: size30px, alignment: .center)
             .foregroundColor(Color.primary)
     }
 
@@ -162,7 +164,7 @@ struct OmemoKeysEntry: View {
                     HStack(alignment:.center) {
                         Text(fingerprintString)
                             .font(Font.init(
-                                UIFont.monospacedSystemFont(ofSize: 11.0, weight: .regular)
+                                UIFont.monospacedSystemFont(ofSize: size11px, weight: .regular)
                             ))
                         if(self.isBrokenSession) {
                             Text("Encrypted session to this device broken beyond repair.").foregroundColor(.red)

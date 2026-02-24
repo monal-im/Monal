@@ -8,28 +8,52 @@
 
 import OrderedCollections
 
+class NotificationDebuggingDefaultsDB: ObservableObject {
+    @defaultsDB("lastAppexStart")
+    var lastAppexStart: Date?
+    
+    @defaultsDB("selectedPushServer")
+    var selectedPushServer: String
+}
+
 struct NotificationDebugging: View {
     private let applePushEnabled: Bool
     private let applePushToken: String
     private let xmppAccountInfo: [xmpp]
-
+    
     private let availablePushServers: Dictionary<String, String>
-
+    
     @State private var pushPermissionEnabled = false // state because we get this value through an async call
     @State private var showPushToken = false
+    @State var runningPings: [String:any View]
+    
+    @ObservedObject var notificationDebuggingDefaultsDB = NotificationDebuggingDefaultsDB()
+    
+    init() {
+        self.applePushEnabled = MLXMPPManager.sharedInstance().hasAPNSToken;
+        self.applePushToken = MLXMPPManager.sharedInstance().pushToken;
+        self.xmppAccountInfo = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
 
-    @State private var selectedPushServer: String
-
+        // push server selector
+        self.availablePushServers = HelperTools.getAvailablePushServers()
+        self.runningPings = [:]
+    }
+    
     var body: some View {
         Form {
             Group {
                 Section(header: Text("Status").font(.title3)) {
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing:10) {
                         buildNotificationStateLabel(Text("Apple Push Service"), isWorking: self.applePushEnabled);
                         Divider()
                         Text("Apple push service should always be on. If it is off, your device can not talk to Apple's server.").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
                         if !self.applePushEnabled, let apnsError = MLXMPPManager.sharedInstance().apnsError {
                             Text("Error: \(String(describing:apnsError))").foregroundColor(.red).font(.footnote)
+                        }
+                        if let lastAppexStart = notificationDebuggingDefaultsDB.lastAppexStart {
+                            Text("Last incoming push: \(String(describing:lastAppexStart))").foregroundColor(.gray).font(.footnote)
+                        } else {
+                            Text("Last incoming push: unknown").foregroundColor(.gray).font(.footnote)
                         }
                     }.onTapGesture(count: 2, perform: {
                         showPushToken = true
@@ -71,28 +95,49 @@ struct NotificationDebugging: View {
                 }
             }
             Section(header: Text("Pushserver Region").font(.title3)) {
-                Picker(selection: $selectedPushServer, label: Text("Push Server")) {
+                Picker(selection: $notificationDebuggingDefaultsDB.selectedPushServer, label: Text("Push Server")) {
                     ForEach(self.availablePushServers.sorted(by: >), id: \.key) { pushServerFqdn, pushServerName in
                         Text(pushServerName).tag(pushServerFqdn)
                     }
                 }.pickerStyle(.menu)//.menuStyle(.borderlessButton)
-                .onChange(of: selectedPushServer) { pushServerFqdn in
-                    DDLogDebug("Selected \(pushServerFqdn) as push server")
-                    HelperTools.defaultsDB().setValue(pushServerFqdn, forKey: "selectedPushServer")
+                .onChange(of: notificationDebuggingDefaultsDB.selectedPushServer) { pushServerFqdn in
+                    DDLogDebug("Selected \(pushServerFqdn) as push server...")
                     // enable push again to switch to the selected server
                     for account in self.xmppAccountInfo {
                         account.enablePush()
                     }
                 }
             }
-#if DEBUG
             Section(header: Text("Debugging").font(.title3)) {
+                Text("Using the ping button will reveal your JID(s) to our push servers!")
+                Button("Ping push servers") {
+                    for account in self.xmppAccountInfo {
+                        runningPings[account.connectionProperties.identity.jid] = Text("Running...")
+                        account.pingPushserver().done { _ in
+                            runningPings[account.connectionProperties.identity.jid] = Text("Successful").foregroundColor(.green)
+                        }.catch { error in
+                            runningPings[account.connectionProperties.identity.jid] = Text(error.localizedDescription).foregroundColor(.red)
+                        }
+                    }
+                }
+                
+                if self.runningPings.count > 0 {
+                    VStack(alignment: .leading, spacing:10) {
+                        ForEach(self.runningPings.sorted(by:{ $0.0 < $1.0 }), id: \.key) { key, view in
+                            HStack {
+                                Text("\(String(describing:key)): ")
+                                AnyView(view)
+                            }
+                        }
+                    }
+                }
+#if DEBUG
                 Button("Reregister push token") {
                     UIApplication.shared.unregisterForRemoteNotifications()
                     UIApplication.shared.registerForRemoteNotifications()
                 }
-            }
 #endif
+            }
         }
         .navigationBarTitle(Text("Notifications"))
         .onAppear(perform: {
@@ -100,16 +145,6 @@ struct NotificationDebugging: View {
                 self.pushPermissionEnabled = (settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional);
             }
         });
-    }
-
-    init() {
-        self.applePushEnabled = MLXMPPManager.sharedInstance().hasAPNSToken;
-        self.applePushToken = MLXMPPManager.sharedInstance().pushToken;
-        self.xmppAccountInfo = MLXMPPManager.sharedInstance().connectedXMPP as! [xmpp]
-
-        // push server selector
-        self.availablePushServers = HelperTools.getAvailablePushServers()
-        self.selectedPushServer = HelperTools.defaultsDB().object(forKey: "selectedPushServer") as! String
     }
 }
 

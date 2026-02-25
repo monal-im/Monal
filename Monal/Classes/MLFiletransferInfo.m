@@ -162,6 +162,9 @@ static NSMutableDictionary* _singletonCache;
 }
 
 -(NSURL*) thumbnailURL {
+    if(!self.isImage && !self.isVideo)
+        return nil;
+
     // return thumbnail cached in memory.
     if(_thumbnailURL != nil)
         return _thumbnailURL;
@@ -180,14 +183,20 @@ static NSMutableDictionary* _singletonCache;
     if(!self.isGeneratingThumbnail)
     {
         self.isGeneratingThumbnail = YES;
-        [HelperTools generateVideoThumbnailFromFile:self.cacheFilePath havingMimeType:self.mimeType andFileExtension:self.fileExtension]
+        [HelperTools generateThumbnailFromFile:self]
         .then(^(UIImage* image) {
-            NSData* imageData = UIImagePNGRepresentation(image);
+            NSData* imageData;
+            // Use HEIC for better compression, if it's available
+            if(@available(iOS 17.0, *))
+                imageData = UIImageHEICRepresentation(image);
+            else
+                imageData = UIImageJPEGRepresentation(image, 0.8);
+
             // The following instruction triggers a ChatView update
             self.thumbnailURL = [[MLImageManager sharedInstance] setThumbnailOfMessage:self.message withData:imageData];
             self.isGeneratingThumbnail = NO;
         }).catch(^(NSError* error) {
-            DDLogError(@"Could not create video thumbnail: %@", error);
+            DDLogError(@"Could not create attachment thumbnail: %@", error);
         });
     }
 
@@ -277,6 +286,16 @@ static NSMutableDictionary* _singletonCache;
 }
 
 +(NSSet*) keyPathsForValuesAffectingIsImage
+{
+    return [NSSet setWithObjects:@"mimeType", nil];
+}
+
+-(BOOL) isSVGImage
+{
+    return [self.mimeType hasPrefix:@"image/svg"];
+}
+
++(NSSet*) keyPathsForValuesAffectingIsSVGImage
 {
     return [NSSet setWithObjects:@"mimeType", nil];
 }

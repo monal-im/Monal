@@ -51,6 +51,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import <monalxmpp/MLContact.h>
 #import <monalxmpp/MLMessage.h>
 #import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/MLFiletransferInfo.h>
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/OmemoState.h>
 #import <monalxmpp/MLUDPLogger.h>
@@ -1134,7 +1135,55 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     }];
 }
 
-+(AnyPromise*) generateVideoThumbnailFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension
++(AnyPromise*) generateThumbnailFromFile:(MLFiletransferInfo*) fileInfo
+{
+    if(fileInfo.isImage)
+        return [HelperTools generateThumbnailFromImageFile:fileInfo];
+    else if(fileInfo.isVideo)
+        return [HelperTools generateThumbnailFromVideoFile:fileInfo.cacheFilePath havingMimeType:fileInfo.mimeType andFileExtension:fileInfo.fileExtension];
+    else
+        unreachable(@"Trying to generate a thumbnail for a file that is neither an image nor a video");
+}
+
++(AnyPromise*) generateThumbnailFromImageFile:(MLFiletransferInfo*) fileInfo
+{
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        AnyPromise* imagePromise = nil;
+        if(fileInfo.isSVGImage)
+            imagePromise = [HelperTools renderUIImageFromSVGURL:fileInfo.fileURL];
+        else
+            imagePromise = [AnyPromise promiseWithValue:[[UIImage alloc] initWithContentsOfFile:fileInfo.cacheFilePath]];
+        imagePromise.then(^(UIImage* image) {
+             if(image == nil && fileInfo.isSVGImage)
+                return resolve([NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: @"Could not load SVG image to generate its thumbnail."}]);
+
+            // The size passed to prepareThumbnailOfSize: is the maximum dimensions, because the method
+            // preserves the original aspect ratio.
+            // For example, if we pass it 200x200 size and a 2:1 image, the output will be a 200x100 thumbnail
+            // So, we calculate the size that should be passed to the method, such that its output has 200x200 as
+            // a minimum size. i.e. in the previous example that would be 400x200
+            // That ensures that the thumbnail will look as good as possible in the ChatView
+            // (which currently crops the thumbnail to 204x200, and in some cases (using SFS) 204x100 or 100x100)
+            CGFloat scale = [UIScreen mainScreen].scale;
+            CGFloat minSize = 200 * scale; // minimum width and height are both 200
+            CGFloat aspectRatio = image.size.width / image.size.height;
+            CGSize targetSize;
+            if(aspectRatio > 1.0)
+                targetSize = CGSizeMake(minSize * aspectRatio, minSize);
+            else
+                targetSize = CGSizeMake(minSize, minSize / aspectRatio);
+
+            [image prepareThumbnailOfSize:targetSize completionHandler:^(UIImage* thumbnail) {
+                if(thumbnail == nil)
+                    return resolve([NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: @"Could not generate thumbnail of image file"}]);
+                else
+                    return resolve(thumbnail);
+            }];
+        });
+    }];
+}
+
++(AnyPromise*) generateThumbnailFromVideoFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension;
 {
     return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
         [self createAVURLAssetFromFile:file havingMimeType:mimeType andFileExtension:fileExtension withCompletionHandler:^(AVURLAsset* asset) {
@@ -1237,7 +1286,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
             NSString* mimeType = [UTType typeWithFilenameExtension:url.pathExtension].preferredMIMEType;
             if(!mimeType)
                 mimeType = @"application/octet-stream";
-            [self generateVideoThumbnailFromFile:url.path havingMimeType:mimeType andFileExtension:url.pathExtension].then(^(UIImage* image) {
+            [self generateThumbnailFromVideoFile:url.path havingMimeType:mimeType andFileExtension:url.pathExtension].then(^(UIImage* image) {
                 payload[@"preview"] = image;
                 DDLogVerbose(@"Managed to generate thumbnail for url=%@ using generateVideoThumbnailFromFile: %@", url, image);
                 [url stopAccessingSecurityScopedResource];

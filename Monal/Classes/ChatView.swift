@@ -860,8 +860,7 @@ class ChatViewMessage: ExyteChat.Message {
             if innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo {
                 switch(fileInfo.downloadState as DownloadState.RawValue) {
                     case DownloadState.complete.rawValue:
-                        let mimeType = fileInfo.mimeType as String
-                        if mimeType.starts(with: "audio/") || mimeType.starts(with: "image/") || mimeType.starts(with: "video/") {
+                        if fileInfo.isAudio || fileInfo.isImage || fileInfo.isVideo {
                             return ""
                         } else {
                             return """
@@ -947,19 +946,13 @@ class ChatViewMessage: ExyteChat.Message {
                 MLFiletransfer.checkMimeTypeAndSize(forHistoryID: innerMessage.messageDBId)
                 return []
             }
-            let fileURL = fileInfo.fileURL as URL
-            let cacheId = fileInfo.cacheId as String
-            let attachmentUUID = HelperTools.stringToUUID(cacheId).uuidString
-            switch fileInfo.mimeType as String {
-                case let mimeType where mimeType.starts(with: "image/"):
-                    let attachment = Attachment(id: attachmentUUID, url: fileURL, type: .image)
-                    return [attachment]
-                case let mimeType where mimeType.starts(with: "video/"):
-                    let thumbnail = fileInfo.thumbnailURL as URL? ?? URL(string: "about:blank")!
-                    let attachment = Attachment(id: attachmentUUID, thumbnail: thumbnail, full: fileURL, type: .video, mimeType: mimeType)
-                    return [attachment]
-                default:
-                    return []
+            if fileInfo.isImage || fileInfo.isVideo {
+                let attachmentType: AttachmentType = fileInfo.isImage ? .image : .video
+                let thumbnailURL = fileInfo.thumbnailURL as URL? ?? URL(string: "about:blank")!
+                let attachment = Attachment(id: fileInfo.cacheId, thumbnail: thumbnailURL, full: fileInfo.fileURL, type: attachmentType, mimeType: fileInfo.mimeType)
+                return [attachment]
+            } else {
+                return []
             }
         }
         set {}
@@ -973,11 +966,10 @@ class ChatViewMessage: ExyteChat.Message {
             guard (fileInfo.downloadState as DownloadState.RawValue) == DownloadState.complete.rawValue else {
                 return nil
             }
-            guard (fileInfo.mimeType as String).starts(with: "audio/") else {
+            guard fileInfo.isAudio else {
                 return nil
             }
-            let fileURL = fileInfo.fileURL as URL
-            return Recording(duration: fileInfo.mediaDuration, url: fileURL, mimeType: fileInfo.mimeType)
+            return Recording(duration: fileInfo.mediaDuration, url: fileInfo.fileURL, mimeType: fileInfo.mimeType)
         }
         set {}
     }

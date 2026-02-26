@@ -899,7 +899,7 @@
             self.localSDP = sdpIQ;
         }
         [self.account sendIq:sdpIQ withResponseHandler:^(XMPPIQ* result) {
-            DDLogDebug(@"Received SDP response for offer: %@", result);
+            DDLogDebug(@"Received response iq for SDP offer: %@", result);
         } andErrorHandler:^(XMPPIQ* error) {
             DDLogError(@"Got error for SDP offer: %@", error);
         }];
@@ -1741,7 +1741,11 @@
                         @"action": @"session-accept",
                         @"sid": self.jmiid,
                     } andChildren:children andData:nil]];
-                    [self.account send:sdpIQ];
+                    [self.account sendIq:sdpIQ withResponseHandler:^(XMPPIQ* result) {
+                        DDLogDebug(@"Received response iq for SDP asnwer: %@", result);
+                    } andErrorHandler:^(XMPPIQ* error) {
+                        DDLogError(@"Got error for SDP answer: %@", error);
+                    }];
                     
                     @synchronized(self.candidateQueueLock) {
                         self.localSDP = sdpIQ;

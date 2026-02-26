@@ -497,8 +497,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         }
         DDLogInfo(@"existing account, calling unfreeze");
         [existing unfreeze];
-        DDLogInfo(@"existing account, just pinging.");
-        [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        if(existing.accountState<kStateReconnecting)
+        {
+            DDLogInfo(@"disconnected existing account, reconnecting.");
+            [existing connect];
+        }
+        else
+        {
+            DDLogInfo(@"connected(?) existing account, just pinging.");
+            [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        }
         return;
     }
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);

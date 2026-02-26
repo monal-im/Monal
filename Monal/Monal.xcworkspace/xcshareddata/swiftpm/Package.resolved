@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "b1fa4ef41fe21b13120c034854042d12c43f66b2",
-          "version": "1.7.1"
+          "revision": "bbd81b6725ae874c69e9b8c8804d462356b55523",
+          "version": "1.10.1"
         }
       },
       {

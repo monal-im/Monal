@@ -1022,9 +1022,9 @@ class ChatViewUser: ExyteChat.User {
         }
         set {}
     }
-    override var avatarData: Data? {
+    override var avatarImage: UIImage? {
         get {
-            return (innerContact.avatar as UIImage?)?.pngData()
+            return innerContact.avatar as UIImage?
         }
         set {}
     }

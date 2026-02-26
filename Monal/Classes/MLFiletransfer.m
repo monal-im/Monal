@@ -500,15 +500,17 @@ $$
 {
     if(![msg.messageType isEqualToString:kMessageTypeFiletransfer])
         return;
-    DDLogInfo(@"Deleting file for url %@", msg.messageText);
     MLFiletransferInfo* info = msg.fileInfo;
-    DDLogDebug(@"Deleting file in cache: %@", info.cacheFilePath);
-    [_fileManager removeItemAtPath:info.cacheFilePath error:nil];
+    if(info.downloadState < DownloadStateComplete)
+        return;
+    DDLogInfo(@"Deleting file for url %@", msg.messageText);
     if([info.mimeType hasPrefix:@"video/"])
     {
         DDLogVerbose(@"Deleting video thumbnail stored at %@", msg.fileInfo.thumbnailURL.path);
         [_fileManager removeItemAtPath:msg.fileInfo.thumbnailURL.path error:nil];
     }
+    DDLogDebug(@"Deleting file in cache: %@", info.cacheFilePath);
+    [_fileManager removeItemAtPath:info.cacheFilePath error:nil];
 }
 
 +(MLHandler*) prepareDataUpload:(NSData*) data

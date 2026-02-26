@@ -580,13 +580,17 @@ $$
         //this is what conversations does, too
         if(trust == MLOmemoToFUButNoMsgSeenInTime || trust == MLOmemoTrustedButNoMsgSeenInTime)
         {
+            DDLogWarn(@"Device %@ is old, trust=%d --> deleting...", device, trust);
             [self bulkDeleteDeviceForSource:jid andRid:device];
             [deletedDevices addObject:device];
         }
     }
     //publish our changes, but only if we actually changed someting
     if(deletedDevices.count > 0)
+    {
+        DDLogInfo(@"Deleted at least one device in our own devicelist, publishing the cleaned up devicelist now...");
         [self publishOwnDeviceList];
+    }
 }
 
 -(void) publishOwnDeviceList

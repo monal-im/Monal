@@ -1434,8 +1434,10 @@ $$
             }
             
             //make sure the dh ratchet always advances, even on "receive only" devices
-            //--> force a key transport message with 1% probability (~ every 100th message)
-            if(arc4random_uniform(100)==42)
+            //--> force a key transport message with 1% probability
+            //that means after 100 messages there is a 87% probability we sent at least one key transport message
+            //and after 200 messages the probability for at least one key transport message is 98% (its 99,9% after 341 messages)
+            if(arc4random_uniform(50)==42)
                 [self sendKeyTransportElement:senderJid forRids:[NSSet setWithArray:@[sid]]];
 
             //some clients have the auth parameter in the ciphertext?

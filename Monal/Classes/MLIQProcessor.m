@@ -181,7 +181,6 @@
     //WARNING: be careful adding stateless result handlers here (those can impose security risks!)
     
     DDLogWarn(@"Got unhandled result IQ: %@", iqNode);
-    [self respondWithErrorTo:iqNode onAccount:account];
 }
 
 +(void) processErrorIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account

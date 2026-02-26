@@ -286,6 +286,8 @@ static NSDictionary* trustLevels2Text = nil;
     [self checkBundleFetchCount];
     
     DDLogVerbose(@"New state: %@", self.state);
+    
+    [self cleanupOwnOldDevices];
 }
 
 -(void) retriggerKeyTransportElementsForJid:(NSString*) jid
@@ -308,6 +310,8 @@ static NSDictionary* trustLevels2Text = nil;
         [self.state.queuedKeyTransportElements removeObjectForKey:jid];
         [self sendKeyTransportElement:jid forRids:rids];
     }
+    
+    [self cleanupOwnOldDevices];
 }
 
 $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
@@ -562,8 +566,30 @@ $$
 
 -(void) cleanupOwnOldDevices
 {
-    NSMutableArray* deletedDevices = [NSMutableArray new];
     NSString* jid = self.account.connectionProperties.identity.jid;
+    
+    //don't try to clean up in all these cases
+    @synchronized(self.state.queuedKeyTransportElements) {
+        if(self.state.queuedKeyTransportElements[jid] != nil && [self.state.queuedKeyTransportElements[jid] count] > 0)
+        {
+            DDLogWarn(@"Not cleaning up own old devices: key transport elements still queued!");
+            return;
+        }
+    }
+    @synchronized(self.state.queuedSessionRepairs) {
+        if(self.state.queuedSessionRepairs[jid] != nil && [self.state.queuedSessionRepairs[jid] count] > 0)
+        {
+            DDLogWarn(@"Not cleaning up own old devices: session repairs still queued!");
+            return;
+        }
+    }
+    if(self.state.openBundleFetches[jid] != nil && self.state.openBundleFetches[jid].count > 0)
+    {
+        DDLogWarn(@"Not cleaning up own old devices: bundle fetches still pending!");
+        return;
+    }
+    
+    NSMutableArray* deletedDevices = [NSMutableArray new];
     for(NSNumber* device in [self.ownDeviceList copy])
     {
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)device.unsignedIntValue];

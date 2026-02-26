@@ -155,7 +155,7 @@ struct AVCallUI: View {
     @ScaledMetric(relativeTo:.body) private var size16px: CGFloat = 16
     @ScaledMetric(relativeTo:.body) private var size100px: CGFloat = 100
     @ScaledMetric(relativeTo:.body) private var size150px: CGFloat = 150
-    @ScaledMetric(relativeTo:.body) private var size200px: CGFloat = 200
+    @ScaledMetric(relativeTo:.body) private var size2048px: CGFloat = 2048
     @ScaledMetric(relativeTo:.body) private var localVideoSizeFactor: CGFloat = 1
     
     private var ringingPlayer: AVAudioPlayer!
@@ -645,10 +645,10 @@ struct AVCallUI: View {
                                 .frame(
                                     minWidth:       size32px,
                                     idealWidth:     size150px,
-                                    maxWidth:       size200px,
+                                    maxWidth:       size2048px,
                                     minHeight:      size32px,
                                     idealHeight:    size150px,
-                                    maxHeight:      size200px,
+                                    maxHeight:      size2048px,
                                     alignment:      .center
                                 )
                                 .scaledToFit()

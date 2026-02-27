@@ -122,10 +122,26 @@ static NSMutableDictionary* _typingNotifications;
         return nil;
     }
     
-    if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"])
+    if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"] && !isMLhistory)
     {
         [account.pubsub handleHeadlineMessage:messageNode];
         return nil;
+    }
+    
+    //ignore messages older than our autodelete time
+    //(history backscrolling ones AND normal ones, both would otherwise disappear again immediately afterwards)
+    //do this before handling the message stanza: only non-MLhistory pubsub messages and error-type stanzas should be processed
+    //regardless of their age (but pubsub messages only if they aren't MLhistory ones)
+    NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
+    if(autodeleteInterval > 0)
+    {
+        NSDate* pastDate = [NSDate dateWithTimeIntervalSinceNow:-autodeleteInterval];
+        NSDate* messageTimestamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
+        if(messageTimestamp != nil && [messageTimestamp compare:pastDate] == NSOrderedAscending)
+        {
+            DDLogInfo(@"Ignoring incoming message being too old (probably an MLhistory one)...");
+            return nil;
+        }
     }
     
     //ignore messages from our own device, see this github issue: https://github.com/monal-im/Monal/issues/941

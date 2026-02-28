@@ -38,6 +38,13 @@ static NSMutableDictionary* currentTransactions;
     DDLogInfo(@"sqlite initialize: using mysql lib version: %s", sqlite3_libversion());
 }
 
++(void) debugTransactions
+{
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    DDLogVerbose(@"threadData: %@", threadData);
+    DDLogVerbose(@"currentTransactions: %@", currentTransactions);
+}
+
 //every thread gets its own instance having its own db connection
 //this allows for concurrent reads/writes
 +(id) sharedInstanceForFile:(NSString*) dbFile

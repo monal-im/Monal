@@ -101,6 +101,8 @@ static NSMutableDictionary* _singletonCache;
 
     self.mimeType = @"";
     self.size = @0;
+    // Trigger a KVO notification by calling the setter.
+    // Observers will call the getter and obtain the real value.
     self.downloadState = DownloadStateUndefined;
     self.mediaDuration = 0.0;
     self.thumbnailURL = nil;
@@ -114,27 +116,19 @@ static NSMutableDictionary* _singletonCache;
 
     updateIfIdNotEqual(self.mimeType, [dic objectForKey:@"mime_type"]);
     updateIfIdNotEqual(self.size, [dic objectForKey:@"size"]);
-    // Reset the cached value of downloadState. This will cause it to be recalculated on next read access
-    // (which will happen soon due to the KVO notification emitted by calling the setter)
+    // Trigger a KVO notification by calling the setter.
+    // Observers will call the getter and obtain the real value.
     self.downloadState = DownloadStateUndefined;
 }
 
 -(DownloadState) downloadState
 {
-    // return already cached value.
-    if(_downloadState != DownloadStateUndefined)
-        return _downloadState;
-
-    DownloadState state;
-    if(self.cacheFilePath)
-        state = DownloadStateComplete;
-    else if(self.size && self.mimeType && ![self.mimeType isEqualToString:@""])
-        state = DownloadStateHeaders;
+    if(self.cacheFilePath != nil)
+        return DownloadStateComplete;
+    else if(self.size != nil && self.mimeType != nil && self.mimeType.length > 0)
+        return DownloadStateHeaders;
     else
-        state = DownloadStateNone;
-
-    self.downloadState = state;
-    return _downloadState;
+        return DownloadStateNone;
 }
 
 -(double) mediaDuration {

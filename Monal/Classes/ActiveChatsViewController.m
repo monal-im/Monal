@@ -613,8 +613,11 @@ static NSMutableSet* _pushWarningDisplayed;
                 [insertContactToArray insertObject:contact atIndex:0];
                 [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationRight];
                 //make sure to fully refresh to remove the empty dataset (yes this will trigger on first chat pinning, too, but that does no harm)
+                //but make sure to not do this nested inside our current performBatchUpdates call!
                 if(oldCount == 0)
-                    [self refreshDisplay];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self refreshDisplay];
+                    });
             }
         } completion:^(BOOL finished) {
             if(completion) completion(finished);

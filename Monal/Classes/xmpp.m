@@ -1033,7 +1033,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 
             //reset smacks state to sane values (this can be done even if smacks is not supported)
             [self initSM3];
-            self.unAckedStanzas = stanzas;
+            [self replaceUnackedStanzasWith:stanzas];
             
             //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
             @synchronized(self->_iqHandlers) {
@@ -1168,7 +1168,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 
                 //reset smacks state to sane values (this can be done even if smacks is not supported)
                 [self initSM3];
-                self.unAckedStanzas = stanzas;
+                [self replaceUnackedStanzasWith:stanzas];
                 
                 //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
                 @synchronized(self->_iqHandlers) {
@@ -1688,7 +1688,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] - [self.unAckedStanzas count]];
         //Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
         //It may also result in mutation on iteration
-        [self.unAckedStanzas removeAllObjects];
+        [self replaceUnackedStanzasWith:[NSMutableArray new]];
         for(NSDictionary* dic in sendCopy)
             [self send:(XMPPStanza*)[dic objectForKey:kStanza]];
         DDLogInfo(@"Done resending unacked stanzas...");
@@ -1816,7 +1816,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             }
 
             [iterationArray removeObjectsInArray:discard];
-            self.unAckedStanzas = iterationArray;
+            [self replaceUnackedStanzasWith:iterationArray];
 
             //persist these changes (but only if we actually made some changes)
             if([discard count])
@@ -4256,7 +4256,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
             self.lastOutboundStanza = [dic objectForKey:@"lastOutboundStanza"];
             NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
-            self.unAckedStanzas = [stanzas mutableCopy];
+            [self replaceUnackedStanzasWith:[stanzas mutableCopy]];
             self.streamID = [dic objectForKey:@"streamID"];
             if([dic objectForKey:@"isDoingFullReconnect"])
             {
@@ -4483,11 +4483,32 @@ static NSRegularExpression* fastTokenRemovalRegex;
         self.lastHandledInboundStanza = [NSNumber numberWithInteger:0];
         self.lastHandledOutboundStanza = [NSNumber numberWithInteger:0];
         self.lastOutboundStanza = [NSNumber numberWithInteger:0];
-        self.unAckedStanzas = [NSMutableArray new];
+        [self replaceUnackedStanzasWith:[NSMutableArray new]];
         self.streamID = nil;
         _smacksAckHandler = [NSMutableArray new];
         DDLogDebug(@"initSM3 done");
     }
+}
+
+-(NSMutableArray*) replaceUnackedStanzasWith:(NSMutableArray*) newUnackedStanzas
+{
+    @synchronized(_stateLockObject) {
+        //this might take a long time since it throws away all self.unAckedStanzas and thus calls dealloc on each of them in each nesting level
+        //--> move deallocation into a background thread
+        NSMutableArray* __block oldUnacked = self.unAckedStanzas;
+        self.unAckedStanzas = newUnackedStanzas;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+            DDLogVerbose(@"Sleeping 500ms before throwing away old unAckedStanzas...");
+            [NSThread sleepForTimeInterval:0.500];
+            let count = [oldUnacked count];
+            DDLogVerbose(@"Now throwing away %lu old unAckedStanzas...", count);
+            NSDate* start = [NSDate date];
+            oldUnacked = nil;
+            NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:start];
+            DDLogVerbose(@"All %lu old unAckedStanzas were successfully deallocated in %.3f seconds...", count, elapsed);
+        });
+    }
+    return newUnackedStanzas;
 }
 
 -(void) bindResource:(NSString*) resource

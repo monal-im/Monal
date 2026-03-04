@@ -1010,7 +1010,7 @@ NSString* const kStanza = @"stanza";
 
             //reset smacks state to sane values (this can be done even if smacks is not supported)
             [self initSM3];
-            self.unAckedStanzas = stanzas;
+            [self replaceUnackedStanzasWith:stanzas];
             
             //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
             @synchronized(self->_iqHandlers) {
@@ -1142,7 +1142,7 @@ NSString* const kStanza = @"stanza";
 
                 //reset smacks state to sane values (this can be done even if smacks is not supported)
                 [self initSM3];
-                self.unAckedStanzas = stanzas;
+                [self replaceUnackedStanzasWith:stanzas];
                 
                 //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
                 @synchronized(self->_iqHandlers) {
@@ -1670,7 +1670,7 @@ NSString* const kStanza = @"stanza";
         self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] - [self.unAckedStanzas count]];
         //Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
         //It may also result in mutation on iteration
-        [self.unAckedStanzas removeAllObjects];
+        [self replaceUnackedStanzasWith:[NSMutableArray new]];
         for(NSDictionary* dic in sendCopy)
             [self send:(XMPPStanza*)[dic objectForKey:kStanza]];
         DDLogInfo(@"Done resending unacked stanzas...");
@@ -1804,7 +1804,7 @@ NSString* const kStanza = @"stanza";
             }
 
             [iterationArray removeObjectsInArray:discard];
-            self.unAckedStanzas = iterationArray;
+            [self replaceUnackedStanzasWith:iterationArray];
 
             //persist these changes (but only if we actually made some changes)
             if([discard count])
@@ -3843,7 +3843,7 @@ NSString* const kStanza = @"stanza";
             self.lastOutboundStanza = [dic objectForKey:@"lastOutboundStanza"];
             DDLogError(@"Collecting stanzas...");
             NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
-            self.unAckedStanzas = [stanzas mutableCopy];
+            [self replaceUnackedStanzasWith:[stanzas mutableCopy]];
             DDLogError(@"Done collecting stanzas...");
             self.streamID = [dic objectForKey:@"streamID"];
             if([dic objectForKey:@"isDoingFullReconnect"])
@@ -4115,12 +4115,30 @@ NSString* const kStanza = @"stanza";
         self.lastHandledInboundStanza = [NSNumber numberWithInteger:0];
         self.lastHandledOutboundStanza = [NSNumber numberWithInteger:0];
         self.lastOutboundStanza = [NSNumber numberWithInteger:0];
-        self.unAckedStanzas = [NSMutableArray new];
+        [self replaceUnackedStanzasWith:[NSMutableArray new]];
         self.streamID = nil;
         _smacksAckHandler = [NSMutableArray new];
         DDLogDebug(@"initSM3 done");
     }
     DDLogVerbose(@"After @synchronized of _stateLockObject...");
+}
+
+-(NSMutableArray*) replaceUnackedStanzasWith:(NSMutableArray*) newUnackedStanzas
+{
+    @synchronized(_stateLockObject) {
+        //this might take a long time since it throws away all self.unAckedStanzas and thus calls dealloc on each of them in each nesting level
+        //--> move deallocation into a background thread
+        NSMutableArray* __block oldUnacked = self.unAckedStanzas;
+        self.unAckedStanzas = newUnackedStanzas;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+            DDLogVerbose(@"Sleeping 500ms before throwing away old unAckedStanzas...");
+            [NSThread sleepForTimeInterval:0.500];
+            DDLogVerbose(@"Now throwing away old unAckedStanzas...");
+            oldUnacked = nil;
+            DDLogVerbose(@"All old unAckedStanzas successfully deallocated now...");
+        });
+    }
+    return newUnackedStanzas;
 }
 
 -(void) bindResource:(NSString*) resource

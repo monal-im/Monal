@@ -2441,6 +2441,10 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     KSCrash* handler = [KSCrash sharedInstance];
     handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
     handler.monitoring = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
+    //don't try to debug zombies if not in debug mode
+#ifndef DEBUG
+    handler.monitoring = handler.monitoring & (~KSCrashMonitorTypeZombie);
+#endif
     handler.onCrash = crash_callback;
     //this can trigger crashes on macos < 13 (e.g. mac catalyst < 16) (and possibly ios < 16)
 #if !TARGET_OS_MACCATALYST

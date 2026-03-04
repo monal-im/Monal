@@ -4056,9 +4056,12 @@ NSString* const kStanza = @"stanza";
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
             DDLogVerbose(@"Sleeping 500ms before throwing away old unAckedStanzas...");
             [NSThread sleepForTimeInterval:0.500];
-            DDLogVerbose(@"Now throwing away old unAckedStanzas...");
+            let count = [oldUnacked count];
+            DDLogVerbose(@"Now throwing away %lu old unAckedStanzas...", count);
+            NSDate* start = [NSDate date];
             oldUnacked = nil;
-            DDLogVerbose(@"All old unAckedStanzas successfully deallocated now...");
+            NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:start];
+            DDLogVerbose(@"All %lu old unAckedStanzas were successfully deallocated in %.3f seconds...", count, elapsed);
         });
     }
     return newUnackedStanzas;

@@ -59,46 +59,48 @@
 
 -(void) readingThreadMain
 {
-    //read other end of pipe and copy data into cocoa lumberjack
-    DDLogDebug(@"Starting outfd %d reading loop...", fileno(self->_stream));
-    while(![[NSThread currentThread] isCancelled])
-    {
-        NSData* data = [self->_pipe fileHandleForReading].availableData;
-        if([data length] == 0)
+    @autoreleasepool {
+        //read other end of pipe and copy data into cocoa lumberjack
+        DDLogDebug(@"Starting outfd %d reading loop...", fileno(self->_stream));
+        while(![[NSThread currentThread] isCancelled])
         {
-            DDLogWarn(@"EOF reached");
-            break;
-        }
-        
-        NSString* logstr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        NSArray* parts = [logstr componentsSeparatedByString:self->_eofMarkerUUID];
-        for(NSString* logpart in parts)
-        {
-            //don't separate by \n, this will often stuff normal logmessages in between our lines even if they belong together
-            //for(NSString* line in [logpart componentsSeparatedByString:@"\n"])
-            NSString* line = logpart;
+            NSData* data = [self->_pipe fileHandleForReading].availableData;
+            if([data length] == 0)
             {
-                //ignore empty parts (e.g. eof marker or \n at end of string)
-                if([line length] == 0)
-                    continue;
-                if(self->_stream == stdout) 
-                    DDLogStdout(@"%@", line);
-                else if(self->_stream == stderr) 
-                    DDLogStderr(@"%@", line);
-                else
-                    DDLogVerbose(@"UNKNOWN_STREAM: %@", line);
+                DDLogWarn(@"EOF reached");
+                break;
             }
+            
+            NSString* logstr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            NSArray* parts = [logstr componentsSeparatedByString:self->_eofMarkerUUID];
+            for(NSString* logpart in parts)
+            {
+                //don't separate by \n, this will often stuff normal logmessages in between our lines even if they belong together
+                //for(NSString* line in [logpart componentsSeparatedByString:@"\n"])
+                NSString* line = logpart;
+                {
+                    //ignore empty parts (e.g. eof marker or \n at end of string)
+                    if([line length] == 0)
+                        continue;
+                    if(self->_stream == stdout) 
+                        DDLogStdout(@"%@", line);
+                    else if(self->_stream == stderr) 
+                        DDLogStderr(@"%@", line);
+                    else
+                        DDLogVerbose(@"UNKNOWN_STREAM: %@", line);
+                }
+            }
+            //a flush token was detected, signal we received it
+            if([parts count] > 1)
+                [self signalFlushCompleted];
         }
-        //a flush token was detected, signal we received it
-        if([parts count] > 1)
-            [self signalFlushCompleted];
+        self->_valid = NO;
+        DDLogDebug(@"Stopped outfd %d reading loop...", fileno(self->_stream));
+        [self signalFlushCompleted];
+        
+        //recover original file descriptor for good measure (leaving stdout and stderr in closed state can exhibit unexpected behavour)
+        dup2(self->_origStreamFileno, fileno(self->_stream));
     }
-    self->_valid = NO;
-    DDLogDebug(@"Stopped outfd %d reading loop...", fileno(self->_stream));
-    [self signalFlushCompleted];
-    
-    //recover original file descriptor for good measure (leaving stdout and stderr in closed state can exhibit unexpected behavour)
-    dup2(self->_origStreamFileno, fileno(self->_stream));
 }
 
 -(void) flush

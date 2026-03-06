@@ -2552,7 +2552,7 @@ enum msgSentState {
     retractAction.image = [[[UIImage systemImageNamed:@"arrow.uturn.backward.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
 
     UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"Chat msg action") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        [[DataLayer sharedInstance] deleteMessageHistoryLocally:message.messageDBId];
+        [message deleteLocally];
 
         [self->_messageTable beginUpdates];
         [self.messageList removeObjectAtIndex:indexPath.row];

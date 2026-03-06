@@ -85,6 +85,12 @@ static NSObject* _hardlinkingSyncObject;
 
         NSURLSession* session = [HelperTools createEphemeralURLSession];
         [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data __unused, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            if(msg.retracted || msg.deletedLocally)
+            {
+                DDLogDebug(@"Ignoring mimeType/size check results because the corresponding message was retracted or deleted while fetching the headers. historyId = %@", historyId);
+                [self markAsComplete:historyId];
+                return;
+            }
             if(error != nil)
             {
                 DDLogError(@"Failed to fetch headers of %@ at %@: %@", msg, url, error);
@@ -186,6 +192,14 @@ static NSObject* _hardlinkingSyncObject;
         // set app defined description for download size checks
         [session setSessionDescription:url];
         NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            if(msg.retracted || msg.deletedLocally)
+            {
+                DDLogDebug(@"Discarding downloaded file because its message was retracted or deleted during the download. historyId = %@", historyId);
+                // No need to remove the attachment thumbnail because it hasn't been generated.
+                [_fileManager removeItemAtPath:location.path error:nil];
+                [self markAsComplete:historyId];
+                return;
+            }
             if(error)
             {
                 DDLogError(@"File download for %@ failed: %@", msg, error);

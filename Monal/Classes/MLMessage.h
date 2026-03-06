@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(MLMessage*) createMessageFromHistoryID:(NSNumber*) historyID;
 +(NSArray<MLMessage*>*) createMessagesFromHistoryIDs:(NSArray<NSNumber*>*) historyIDs;
 +(MLMessage*) createNewStatusMessageForContact:(MLContact*) contact withText:(NSString*) text;
+-(void) deleteLocally;
 
 +(BOOL) supportsSecureCoding;
 
@@ -78,6 +79,13 @@ The of the message in the DB , should be int
 @property (nonatomic, copy) NSArray<MLReactionsEntry*>* reactions;
 
 @property (nonatomic, assign) BOOL retracted;
+
+/**
+ Sometimes a message is deleted from the db, but its MLMessage instance remains in memory
+ e.g. when a filetransfer message is deleted while its file is being downloaded.
+ This property allows handling thoses cases properly.
+ */
+@property (nonatomic, assign) BOOL deletedLocally;
 
 //TODO: remove, once our old chatview gets removed
 @property (nonatomic, copy) NSURL* url;

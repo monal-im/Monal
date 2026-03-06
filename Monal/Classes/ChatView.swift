@@ -458,7 +458,7 @@ struct ChatView: View {
                 case .delete:
                     Task { @MainActor in
                         await Task.detached(priority: .userInitiated) {
-                            DataLayer.sharedInstance().deleteMessageHistoryLocally(mlMessage.messageDBId)
+                            mlMessage.deleteLocally()
                         }.value
 
                         self.messages.removeAll(where: {$0.id == message.id})

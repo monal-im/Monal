@@ -183,6 +183,12 @@ static NSMutableDictionary* _singletonCache;
     [[MLNotificationQueue currentQueue] removeObserver:self];
 }
 
+-(void) deleteLocally
+{
+    [[DataLayer sharedInstance] deleteMessageHistoryLocally:self.messageDBId];
+    self.deletedLocally = YES;
+}
+
 -(void) handleMessageUpdate:(NSNotification*) notification
 {
     NSDictionary* data = notification.userInfo;

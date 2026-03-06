@@ -3872,7 +3872,7 @@ NSString* const kStanza = @"stanza";
             @synchronized(_iqHandlers) {
                 DDLogError(@"Inside iq handlers @synchronized...");
                 //remove all current persistent handlers...
-                NSMutableDictionary* handlersCopy = [_iqHandlers copy];
+                NSMutableDictionary* __block handlersCopy = [_iqHandlers copy];
                 for(NSString* iqid in handlersCopy)
                     if(handlersCopy[iqid][@"handler"] != nil)
                         [_iqHandlers removeObjectForKey:iqid];
@@ -3884,6 +3884,11 @@ NSString* const kStanza = @"stanza";
                     persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", persistentIqHandlers[iqid][@"timeout"], persistentIqHandlers[iqid][@"handler"]];
                 }
                 DDLogError(@"replaced persistent handlers from state...");
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+                    DDLogVerbose(@"Throwing away old persistent handlers...");
+                    handlersCopy = nil;
+                    DDLogVerbose(@"All old persistent handlers successfully deallocated now...");
+                });
             }
             
             DDLogError(@"after iq handers @synchronized and before reconnection handlers @synchronized...");

@@ -598,6 +598,11 @@ struct ChatView: View {
             Button(action: {
                 let promise = showPromisingLoadingOverlay(self.overlay, headline: "Retracting message", description: "") {
                     self.account.moderateMessage(mlMessage, withReason: moderationReason)
+                    // Reset moderationReason to its default value only after the moderation was sent
+                    // (`promise` executes after the rest of the `action` closure. So we don't want to
+                    // reset moderationReason when the alert is dismissed like other State variables,
+                    // because the moderation isn't sent yet at that point.)
+                    moderationReason = "Spam"
                     return Guarantee.value(())
                 }
                 if blockOnModeration, let participantJid = mlMessage.participantJid {
@@ -614,10 +619,8 @@ struct ChatView: View {
                         }
                     }
                 }
-                
-                // Reset the State variables to their default values, as the alert is dismissed
+                // Reset the State variables (except moderationReason) to their default values, as the alert is dismissed
                 messageToModerate = nil
-                moderationReason = "Spam"
                 blockOnModeration = true
             }) {
                 Text("Moderate")

@@ -6,8 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import OrderedCollections
-
 struct ContactPickerEntry: View {
     let contact : ObservableKVOWrapper<MLContact>
     let isPicked: Bool

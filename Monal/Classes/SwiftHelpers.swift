@@ -11,6 +11,7 @@
 @_exported import CocoaLumberjackSwift
 @_exported import Logging
 @_exported import PromiseKit
+@_exported import OrderedCollections
 import CocoaLumberjackSwiftLogBackend
 import LibMonalRustSwiftBridge
 import Combine

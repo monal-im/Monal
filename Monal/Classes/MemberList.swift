@@ -6,8 +6,6 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import OrderedCollections
-
 struct ActionSheetPrompt {
     var title: Text = Text("")
     var message: Text = Text("")

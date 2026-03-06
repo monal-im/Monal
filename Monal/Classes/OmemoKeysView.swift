@@ -6,8 +6,6 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import OrderedCollections
-
 struct OmemoKeysEntryView: View {
     private let contactJid: String
     

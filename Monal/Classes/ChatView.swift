@@ -351,7 +351,10 @@ struct ChatView: View {
                     }
                 } else {
                     DDLogVerbose("Got backscrolling mam response: \(returnedMessages.count) messages: \(String(describing:returnedMessages))")
-                    self.messages.insert(contentsOf: returnedMessages.map {ChatViewMessage($0)}, at: 0)
+                    // When backscrolling in 1-1 chats, the oldest stanzaId may not correspond to the earliest
+                    // message we have, because messages we send don't have a stanzaId => There's a risk of
+                    // getting duplicate messages in the messages array => we need to deduplicate.
+                    self.messages = OrderedSet(returnedMessages.map {ChatViewMessage($0)} + self.messages).elements
                 }
             }
             .catch { error in

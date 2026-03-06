@@ -5,7 +5,6 @@
 //  Created by Friedrich Altheide on 24.12.21.
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
-import OrderedCollections
 
 @ViewBuilder
 func resourceRowElement(_ k: String, _ v: some View, space: CGFloat = 5) -> some View {

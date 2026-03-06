@@ -6,8 +6,6 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
-import OrderedCollections
-
 struct ChannelMemberList: View {
     private let account: xmpp
     @State private var ownAffiliation: String;

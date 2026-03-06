@@ -6,8 +6,6 @@
 //  Copyright © 2022 Monal.im. All rights reserved.
 //
 
-import OrderedCollections
-
 class NotificationDebuggingDefaultsDB: ObservableObject {
     @defaultsDB("lastAppexStart")
     var lastAppexStart: Date?

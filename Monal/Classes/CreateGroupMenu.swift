@@ -6,8 +6,6 @@
 //  Copyright © 2022 monal-im.org. All rights reserved.
 //
 
-import OrderedCollections
-
 struct CreateGroupMenu: View {
     private var appDelegate: MonalAppDelegate
     private var delegate: SheetDismisserProtocol

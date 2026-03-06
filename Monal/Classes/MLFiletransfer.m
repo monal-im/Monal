@@ -61,6 +61,11 @@ static NSObject* _hardlinkingSyncObject;
         DDLogError(@"historyId %@ does not yield an MLMessage object, aborting", historyId);
         return;
     }
+    if(msg.retracted || msg.deletedLocally)
+    {
+        DDLogWarn(@"Canceling mimeType check because the message was retracted or deleted locally. historyId = %@", historyId);
+        return;
+    }
     url = [self genCanonicalUrl:msg.messageText];
     @synchronized(_expectedDownloadSizes) {
         if(_expectedDownloadSizes[url] == nil)

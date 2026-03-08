@@ -20,6 +20,7 @@
 
 #import "MLStream.h"
 #import "MLPipe.h"
+#import "MLDelayedDealloc.h"
 #import "MLProcessLock.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
@@ -1022,17 +1023,7 @@ NSString* const kStanza = @"stanza";
             [self replaceUnackedStanzasWith:stanzas];
             
             //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-            @synchronized(self->_iqHandlers) {
-                for(NSString* iqid in [self->_iqHandlers allKeys])
-                {
-                    DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                    if(self->_iqHandlers[iqid][@"handler"] != nil)
-                        $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self), $ID(reason, @"disconnect"));
-                    else if(self->_iqHandlers[iqid][@"errorHandler"])
-                        ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
-                }
-                self->_iqHandlers = [NSMutableDictionary new];
-            }
+            [self invalidateIQHandlersWithReason:@"disconnect"];
             
             //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
             [self.pubsub invalidateQueue];
@@ -1117,6 +1108,7 @@ NSString* const kStanza = @"stanza";
                             ((monal_iq_handler_t)data[@"errorHandler"])(nil);
                     }
                     [self->_iqHandlers removeObjectForKey:iqid];
+                    [MLDelayedDealloc delayFor:data];
                 }
             }
         }
@@ -1154,17 +1146,7 @@ NSString* const kStanza = @"stanza";
                 [self replaceUnackedStanzasWith:stanzas];
                 
                 //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-                @synchronized(self->_iqHandlers) {
-                    for(NSString* iqid in [self->_iqHandlers allKeys])
-                    {
-                        DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                        if(self->_iqHandlers[iqid][@"handler"] != nil)
-                            $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self), $ID(reason, @"disconnect"));
-                        else if(self->_iqHandlers[iqid][@"errorHandler"])
-                            ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
-                    }
-                    self->_iqHandlers = [NSMutableDictionary new];
-                }
+                [self invalidateIQHandlersWithReason:@"disconnect"];
                 
                 //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
                 [self.pubsub invalidateQueue];
@@ -1352,6 +1334,27 @@ NSString* const kStanza = @"stanza";
     {
         [[DataLayer sharedInstance] persistState:newState forAccount:self.accountNo];
         [self readState];               //better safe than sorry
+    }
+}
+
+-(void) invalidateIQHandlersWithReason:(NSString*) reason
+{
+    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
+    @synchronized(_iqHandlers) {
+        //make sure this works even if the invalidation handlers add a new iq to the list
+        NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
+        [_iqHandlers removeAllObjects];
+        
+        for(NSString* iqid in handlersCopy)
+        {
+            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+            if(handlersCopy[iqid][@"handler"] != nil)
+                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self), $ID(reason));
+            else if(handlersCopy[iqid][@"errorHandler"])
+                ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
+        }
+        
+        [MLDelayedDealloc delayFor:handlersCopy];
     }
 }
 
@@ -3855,6 +3858,10 @@ NSString* const kStanza = @"stanza";
                     _iqHandlers[iqid] = [persistentIqHandlers[iqid] mutableCopy];
                     persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", persistentIqHandlers[iqid][@"timeout"], persistentIqHandlers[iqid][@"handler"]];
                 }
+                
+                //this might take a long time since it throws away all handlers and their associated data, which might be deeply nested MLXMLNodes
+                //--> move deallocation into a background thread
+                [MLDelayedDealloc delayFor:handlersCopy];
             }
             
             @synchronized(self->_reconnectionHandlers) {
@@ -4065,18 +4072,8 @@ NSString* const kStanza = @"stanza";
     @synchronized(_stateLockObject) {
         //this might take a long time since it throws away all self.unAckedStanzas and thus calls dealloc on each of them in each nesting level
         //--> move deallocation into a background thread
-        NSMutableArray* __block oldUnacked = self.unAckedStanzas;
+        [MLDelayedDealloc delayFor:self.unAckedStanzas];
         self.unAckedStanzas = newUnackedStanzas;
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-            DDLogVerbose(@"Sleeping 500ms before throwing away old unAckedStanzas...");
-            [NSThread sleepForTimeInterval:0.500];
-            let count = [oldUnacked count];
-            DDLogVerbose(@"Now throwing away %lu old unAckedStanzas...", count);
-            NSDate* start = [NSDate date];
-            oldUnacked = nil;
-            NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:start];
-            DDLogVerbose(@"All %lu old unAckedStanzas were successfully deallocated in %.3f seconds...", count, elapsed);
-        });
     }
     return newUnackedStanzas;
 }
@@ -4098,22 +4095,7 @@ NSString* const kStanza = @"stanza";
     //delete old resources because we get new presences once we're done initializing the session
     [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
     
-    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-    @synchronized(_iqHandlers) {
-        //make sure this works even if the invalidation handlers add a new iq to the list
-        NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
-        [_iqHandlers removeAllObjects];
-        
-        for(NSString* iqid in handlersCopy)
-        {
-            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-            if(handlersCopy[iqid][@"handler"] != nil)
-                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self), $ID(reason, @"bind"));
-            else if(handlersCopy[iqid][@"errorHandler"])
-                ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
-        }
-        
-    }
+    [self invalidateIQHandlersWithReason:@"bind"];
     
     //invalidate pubsub queue (a pubsub operation will be either invalidated by an iq handler above OR by the invalidation here, but never twice!)
     [self.pubsub invalidateQueue];

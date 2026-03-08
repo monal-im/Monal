@@ -859,6 +859,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
 -(void) unfreeze
 {
     @synchronized(self) {
+        NSCondition* condition = [NSCondition new];
+        [condition lock];
         DDLogInfo(@"Unfreezing account: %@", self);
         
         //make sure we don't have any race conditions by dispatching this to our receive queue
@@ -880,6 +882,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 [self unfreezeParseQueue];
                 
                 [self unfreezeSendQueue];
+                
+                //unblock waiting outer thread
+                [condition lock];
+                [condition signal];
+                [condition unlock];
             }
         }];
         unfreezeOperation.queuePriority = NSOperationQueuePriorityVeryHigh;     //make sure this will become the first operation executed once unfrozen
@@ -887,6 +894,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
         
         //unfreeze receive queue and execute block added above
         self->_receiveQueue.suspended = NO;
+        
+        //wait for completion signal
+        [condition wait];
+        [condition unlock];
     }
 }
 

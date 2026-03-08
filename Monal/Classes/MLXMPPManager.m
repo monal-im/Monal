@@ -460,8 +460,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
-        [xmppAccount unfreeze];
-        [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        [self ensureConnectFor:xmppAccount];
         [xmppAccount setClientActive];
     }
     
@@ -500,6 +499,27 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     return nil;
 }
 
+-(void) ensureConnectFor:(xmpp*) existing
+{
+    if(self.isConnectBlocked)
+    {
+        DDLogWarn(@"connect blocked, ignoring");
+        return;
+    }
+    DDLogInfo(@"existing account, calling unfreeze");
+    [existing unfreeze];
+    if(existing.accountState<kStateReconnecting)
+    {
+        DDLogInfo(@"disconnected existing account, reconnecting.");
+        [existing connect];
+    }
+    else
+    {
+        DDLogInfo(@"connected(?) existing account, just pinging.");
+        [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+    }
+}
+
 -(void) connectAccount:(NSNumber*) accountID
 {
     NSDictionary* account = [[DataLayer sharedInstance] detailsForAccount:accountID];
@@ -519,23 +539,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             DDLogInfo(@"existing but disabled account, ignoring");
             return;
         }
-        if(_isConnectBlocked)
-        {
-            DDLogWarn(@"connect blocked, ignoring");
-            return;
-        }
-        DDLogInfo(@"existing account, calling unfreeze");
-        [existing unfreeze];
-        if(existing.accountState<kStateReconnecting)
-        {
-            DDLogInfo(@"disconnected existing account, reconnecting.");
-            [existing connect];
-        }
-        else
-        {
-            DDLogInfo(@"connected(?) existing account, just pinging.");
-            [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-        }
+        [self ensureConnectFor:existing];
         return;
     }
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);

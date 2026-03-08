@@ -29,6 +29,7 @@
 @interface MLMucProcessor()
 {
     __weak xmpp* _account;
+    BOOL _smacksResumption;
     //persistent state
     NSObject* _stateLockObject;
     NSMutableDictionary* _roomFeatures;
@@ -87,7 +88,9 @@ static NSDictionary* _optionalGroupConfigOptions;
     _lastPing = [NSDate date];
     _noUpdateBookmarks = [NSMutableSet new];
     _hasFetchedBookmarks = NO;
+    _smacksResumption = YES;
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleHasLoggedIn:) name:kMLIsLoggedInNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleResourceBound:) name:kMLResourceBoundNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSessionInit:) name:kMLSessionInitNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleCatchupDone:) name:kMonalFinishedCatchup object:nil];
@@ -147,6 +150,14 @@ static NSDictionary* _optionalGroupConfigOptions;
     }
 }
 
+-(void) handleHasLoggedIn:(NSNotification*) notification
+{
+    //this event will be called as soon as we are successfully authenticated, but BEFORE handleResourceBound: will be called
+    //NOTE: handleResourceBound: won't be called for smacks resumptions at all
+    if(_account == ((xmpp*)notification.object))
+        _smacksResumption = YES;        //will be reset to NO, in handleResourceBound
+}
+
 -(void) handleResourceBound:(NSNotification*) notification
 {
     //this event will be called as soon as we are bound, but BEFORE mam catchup happens
@@ -172,6 +183,9 @@ static NSDictionary* _optionalGroupConfigOptions;
             
             //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
             _hasFetchedBookmarks = NO;
+            
+            //mark this as non-smacks reconnect
+            _smacksResumption = NO;
         }
     }
 }
@@ -179,7 +193,8 @@ static NSDictionary* _optionalGroupConfigOptions;
 -(void) handleSessionInit:(NSNotification*) notification
 {
     //this event will be called as soon as we are bound AND smacks is enabled/resumed
-    if(_account == ((xmpp*)notification.object))
+    //but: we only want to join rooms if this was a non-smacks reconnect (we only want to periodically ping mucs when smacks resuming)
+    if(_account == ((xmpp*)notification.object) && !_smacksResumption)
     {
         //join MUCs from (current) muc_favorites db, the pending bookmarks fetch will join the remaining currently unknown mucs
         for(NSString* room in [[DataLayer sharedInstance] listMucsForAccount:_account.accountID])

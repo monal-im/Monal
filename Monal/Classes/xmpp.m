@@ -500,7 +500,6 @@ NSString* const kStanza = @"stanza";
     //only check unacked count if needed (this makes sure we don't hold the state lock unnecessarily and block the main thread)
     if(retval)
     {
-        DDLogVerbose(@"Before @synchronized of _stateLockObject...");
         @synchronized(_stateLockObject) {
             NSUInteger unacked = [self.unAckedStanzas count];
             if(unacked)
@@ -509,7 +508,6 @@ NSString* const kStanza = @"stanza";
                 unackedCount = @(unacked);
             }
         }
-        DDLogVerbose(@"After @synchronized of _stateLockObject...");
     }
     _lastIdleState = retval;
     DDLogVerbose(@("%@ --> Idle check:\n"
@@ -1636,16 +1634,13 @@ NSString* const kStanza = @"stanza";
 
 -(void) addSmacksHandler:(monal_void_block_t) handler
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         [self addSmacksHandler:handler forValue:self.lastOutboundStanza];
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(void) addSmacksHandler:(monal_void_block_t) handler forValue:(NSNumber*) value
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         if([value integerValue] < [self.lastOutboundStanza integerValue])
         {
@@ -1657,12 +1652,10 @@ NSString* const kStanza = @"stanza";
         NSDictionary* dic = @{@"value":value, @"handler":handler};
         [_smacksAckHandler addObject:dic];
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(void) resendUnackedStanzas
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         DDLogInfo(@"Resending unacked stanzas...");
         NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
@@ -1676,14 +1669,12 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"Done resending unacked stanzas...");
         [self persistState];
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(void) resendUnackedMessageStanzasOnly:(NSMutableArray*) stanzas
 {
     if(stanzas)
     {
-        DDLogVerbose(@"Before @synchronized of _stateLockObject...");
         @synchronized(_stateLockObject) {
             DDLogWarn(@"Resending unacked message stanzas only...");
             NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
@@ -1701,13 +1692,11 @@ NSString* const kStanza = @"stanza";
             //or contain all the resent stanzas (e.g. only resume failed)
             [self persistState];
         }
-        DDLogVerbose(@"After @synchronized of _stateLockObject...");
     }
 }
 
 -(BOOL) shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         DDLogInfo(@"Checking for important unacked stanzas...");
         for(NSDictionary* dic in self.unAckedStanzas)
@@ -1722,7 +1711,6 @@ NSString* const kStanza = @"stanza";
                 return YES;
         }
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     //no important stanzas found
     return NO;
 }
@@ -1730,7 +1718,6 @@ NSString* const kStanza = @"stanza";
 -(BOOL) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
     NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         //sanity check
         MLAssert(([self.unAckedStanzas count]+[self.lastHandledOutboundStanza unsignedIntValue])==[self.lastOutboundStanza unsignedIntValue], @"Calculated outgoing stanza count and counted one differ!", (@{
@@ -1821,7 +1808,6 @@ NSString* const kStanza = @"stanza";
             }
         [_smacksAckHandler removeObjectsInArray:ackHandlerToCall];
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     
     //call registered smacksAckHandler that got sorted out
     for(NSDictionary* dic in ackHandlerToCall)
@@ -1837,7 +1823,6 @@ NSString* const kStanza = @"stanza";
 {
     //caution: this could be called from sendQueue, too!
     MLXMLNode* rNode;
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         unsigned long unackedCount = (unsigned long)[self.unAckedStanzas count];
         if(self.accountState >= kStateInitStarted && self.connectionProperties.supportsSM3 &&
@@ -1850,7 +1835,6 @@ NSString* const kStanza = @"stanza";
         else
             DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     if(rNode)
         [self send:rNode];
 }
@@ -1872,13 +1856,11 @@ NSString* const kStanza = @"stanza";
         return;
     
     NSDictionary* dic;
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         dic = @{
             @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
         };
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     MLXMLNode* aNode = [[MLXMLNode alloc] initWithElement:@"a" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
     if(queuedSend)
         [self send:aNode];
@@ -1915,7 +1897,6 @@ NSString* const kStanza = @"stanza";
             if(h==nil)
                 return [self invalidXMLError];
             
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //remove acked messages
                 [self removeAckedStanzasFromQueue:h];
@@ -1923,7 +1904,6 @@ NSString* const kStanza = @"stanza";
                 self.smacksRequestInFlight = NO;        //ack returned
                 [self requestSMAck:NO];                 //request ack again (will only happen if queue is not empty)
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
         }
         else if([parsedStanza check:@"/{jabber:client}presence"] && self.accountState >= kStateInitStarted)
         {
@@ -2175,7 +2155,6 @@ NSString* const kStanza = @"stanza";
             {
                 //wrap everything in lock instead of writing the boolean result into a temp var because incrementLastHandledStanza
                 //is wrapped in this lock, too (and we don't call anything else here)
-                DDLogVerbose(@"Before @synchronized of _stateLockObject...");
                 @synchronized(_stateLockObject) {
                     if(_runningMamQueries[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]] == nil)
                     {
@@ -2186,7 +2165,6 @@ NSString* const kStanza = @"stanza";
                         return;
                     }
                 }
-                DDLogVerbose(@"After @synchronized of _stateLockObject...");
                 
                 //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
                 messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
@@ -2402,7 +2380,6 @@ NSString* const kStanza = @"stanza";
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"] && self.accountState == kStateBound)
         {
             NSMutableArray* stanzas;
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //save old unAckedStanzas queue before it is cleared
                 stanzas = self.unAckedStanzas;
@@ -2419,7 +2396,6 @@ NSString* const kStanza = @"stanza";
                 //persist these changes (streamID and initSM3)
                 [self persistState];
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
 
             //init session and query disco, roster etc.
             [self initSession];
@@ -2447,13 +2423,11 @@ NSString* const kStanza = @"stanza";
             [[MLNotificationQueue currentQueue] postNotificationName:kMLSessionInitNotice object:self];
             [self accountStatusChanged];
 
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //remove already delivered stanzas and resend the (still) unacked ones
                 [self removeAckedStanzasFromQueue:h];
                 [self resendUnackedStanzas];
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
             
             //publish new csi and last active state (but only do so when not in an extension
             //because the last active state does not change when inside an extension)
@@ -2470,7 +2444,6 @@ NSString* const kStanza = @"stanza";
             //ping all mucs to check if we are still connected (XEP-0410)
             [self.mucProcessor pingAllMucs];
             
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
                 //all stanzas the *server* wanted to replay have been received, too
@@ -2506,7 +2479,6 @@ NSString* const kStanza = @"stanza";
                     }
                 }];
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
             
             //initialize stanza counter for statistics
             [self initCatchupStats];
@@ -2517,7 +2489,6 @@ NSString* const kStanza = @"stanza";
             
             __block BOOL error = NO;
             self.resuming = NO;
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //invalidate stream id
                 self.streamID = nil;
@@ -2529,7 +2500,6 @@ NSString* const kStanza = @"stanza";
                 //persist these changes
                 [self persistState];
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
 
             //don't try to bind, if removeAckedStanzasFromQueue returned an error (it will trigger a reconnect in these cases)
             if(!error)
@@ -3341,7 +3311,6 @@ NSString* const kStanza = @"stanza";
     }
     
     MLXMLNode* resumeNode = nil;
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         //test if smacks is supported and allows resume
         if(self.connectionProperties.supportsSM3 && self.streamID)
@@ -3354,7 +3323,6 @@ NSString* const kStanza = @"stanza";
             self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
         }
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     if(resumeNode)
         [self send:resumeNode];
     else
@@ -3817,7 +3785,6 @@ NSString* const kStanza = @"stanza";
 
 -(void) realReadState
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         DDLogVerbose(@"%@ --> realReadState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
@@ -3848,14 +3815,16 @@ NSString* const kStanza = @"stanza";
                 self.isDoingFullReconnect = isDoingFullReconnect.boolValue;
             }
             
-            //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
-            if(self.lastHandledInboundStanza == nil || self.lastHandledOutboundStanza == nil || self.lastOutboundStanza == nil || !self.unAckedStanzas)
-            {
+            @synchronized(_stateLockObject) {
+                //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
+                if(self.lastHandledInboundStanza == nil || self.lastHandledOutboundStanza == nil || self.lastOutboundStanza == nil || !self.unAckedStanzas)
+                {
 #ifndef IS_ALPHA
-                [self initSM3];
+                    [self initSM3];
 #else
-                @throw [NSException exceptionWithName:@"RuntimeError" reason:@"corrupt smacks state" userInfo:dic];
+                    @throw [NSException exceptionWithName:@"RuntimeError" reason:@"corrupt smacks state" userInfo:dic];
 #endif
+                }
             }
             
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
@@ -4016,7 +3985,6 @@ NSString* const kStanza = @"stanza";
         
         DDLogVerbose(@"%@ --> realReadState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 +(NSMutableDictionary*) invalidateState:(NSDictionary*) dic
@@ -4052,7 +4020,6 @@ NSString* const kStanza = @"stanza";
     //don't ack messages twice
     if(delayedReplay)
         return;
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         if(self.connectionProperties.supportsSM3)
         {
@@ -4063,13 +4030,11 @@ NSString* const kStanza = @"stanza";
         }
         [self persistState];        //make sure we persist our state, even if smacks is not supported
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(void) initSM3
 {
     //initialize smacks state
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         self.lastHandledInboundStanza = [NSNumber numberWithInteger:0];
         self.lastHandledOutboundStanza = [NSNumber numberWithInteger:0];
@@ -4079,7 +4044,6 @@ NSString* const kStanza = @"stanza";
         _smacksAckHandler = [NSMutableArray new];
         DDLogDebug(@"initSM3 done");
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(NSMutableArray*) replaceUnackedStanzasWith:(NSMutableArray*) newUnackedStanzas

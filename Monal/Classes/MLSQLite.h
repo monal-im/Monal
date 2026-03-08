@@ -16,8 +16,6 @@ typedef BOOL (^monal_sqlite_bool_operations_t)(void);
 
 @interface MLSQLite : NSObject
 
-+(void) debugTransactions;
-
 +(id) sharedInstanceForFile:(NSString*) dbFile;
 
 -(void) voidReadTransaction:(monal_void_block_t) operations;

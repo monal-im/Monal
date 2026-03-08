@@ -209,6 +209,8 @@
 		84E8870C2EEADD34006A61FC /* HT.m in Sources */ = {isa = PBXBuildFile; fileRef = 84E8870B2EEADD34006A61FC /* HT.m */; };
 		84E8870D2EEADD34006A61FC /* HT.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E8870A2EEADD34006A61FC /* HT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84E8870E2EEADD8F006A61FC /* SCRAM.h in Headers */ = {isa = PBXBuildFile; fileRef = 848904AA289C82DB0097E19C /* SCRAM.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		84EC7FBD2F5A9458008ACC3F /* MLDelayedDealloc.m in Sources */ = {isa = PBXBuildFile; fileRef = 84EC7FBC2F5A9458008ACC3F /* MLDelayedDealloc.m */; };
+		84EC7FBE2F5A9458008ACC3F /* MLDelayedDealloc.h in Headers */ = {isa = PBXBuildFile; fileRef = 84EC7FBB2F5A9458008ACC3F /* MLDelayedDealloc.h */; };
 		84F194D12C15197200F0A994 /* FrameUp in Frameworks */ = {isa = PBXBuildFile; productRef = 84F194D02C15197200F0A994 /* FrameUp */; };
 		84FC37552897521500634E3E /* snprintf.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FC37542897521400634E3E /* snprintf.m */; };
 		84FC37572897523500634E3E /* metamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC37562897523500634E3E /* metamacros.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -657,6 +659,8 @@
 		84E5AF1A2EE63FCF00FF1E4A /* MLReactionsEntry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReactionsEntry.h; sourceTree = "<group>"; };
 		84E8870A2EEADD34006A61FC /* HT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HT.h; sourceTree = "<group>"; };
 		84E8870B2EEADD34006A61FC /* HT.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HT.m; sourceTree = "<group>"; };
+		84EC7FBB2F5A9458008ACC3F /* MLDelayedDealloc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDelayedDealloc.h; sourceTree = "<group>"; };
+		84EC7FBC2F5A9458008ACC3F /* MLDelayedDealloc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDelayedDealloc.m; sourceTree = "<group>"; };
 		84F194C32C0FE70900F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Main.strings"; sourceTree = "<group>"; };
 		84F194C42C0FE74500F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/Settings.strings"; sourceTree = "<group>"; };
 		84F194C52C0FE78B00F0A994 /* es-AR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "external/es-AR.lproj/iosShare.strings"; sourceTree = "<group>"; };
@@ -1321,6 +1325,8 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				84EC7FBB2F5A9458008ACC3F /* MLDelayedDealloc.h */,
+				84EC7FBC2F5A9458008ACC3F /* MLDelayedDealloc.m */,
 				8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */,
 				8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */,
 				8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */,
@@ -1571,6 +1577,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84CAED6D2ECAC5E500F4FCBF /* XMPPIQ.h in Headers */,
+				84EC7FBE2F5A9458008ACC3F /* MLDelayedDealloc.h in Headers */,
 				8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */,
 				C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */,
 				84E5AF1B2EE63FCF00FF1E4A /* MLReactionsEntry.h in Headers */,
@@ -2303,6 +2310,7 @@
 				54179CC0251CBAFA008F398E /* XMPPStanza.m in Sources */,
 				26CC57CB23A0892800ABB92A /* MLPresenceProcessor.m in Sources */,
 				26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */,
+				84EC7FBD2F5A9458008ACC3F /* MLDelayedDealloc.m in Sources */,
 				540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */,
 				26CC57CA23A0892800ABB92A /* MLIQProcessor.m in Sources */,
 				26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */,

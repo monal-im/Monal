@@ -10,6 +10,7 @@
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/MLHandler.h>
 #import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLDelayedDealloc.h>
 
 #define HANDLER_VERSION 1
 
@@ -30,6 +31,10 @@ NSString* type_to_classname(NSString* type)
 -(instancetype) init
 {
     self = [super init];
+    
+    //always delay own deallocation to not block receive/send queues or any other queues
+    [MLDelayedDealloc delayFor:self];
+    
     return self;
 }
 
@@ -178,7 +183,7 @@ NSString* type_to_classname(NSString* type)
 
 -(instancetype) initWithCoder:(NSCoder*) coder
 {
-    self = [super init];
+    self = [self init];
     _internalData = [coder decodeObjectForKey:@"internalData"];
     _invalidated = [coder decodeBoolForKey:@"invalidated"];
     return self;

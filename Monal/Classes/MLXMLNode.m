@@ -11,10 +11,11 @@
 #import <monalxmpp/MLXMLNode.h>
 
 #import <monalxmpp/HelperTools.h>
-#import "XMPPIQ.h"
-#import "XMPPMessage.h"
+#import <monalxmpp/XMPPIQ.h>
+#import <monalxmpp/XMPPMessage.h>
 #import <monalxmpp/XMPPPresence.h>
 #import <monalxmpp/XMPPDataForm.h>
+#import <monalxmpp/MLDelayedDealloc.h>
 
 @import UIKit.UIApplication;
 
@@ -107,6 +108,9 @@ static NSRegularExpression* attributeFilterRegex;
     self.cache = [NSCache new];
     self.queryEntryCache = [NSCache new];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMemoryPressureNotification) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+    
+    //always delay own deallocation to not block receive/send queues or any other queues
+    [MLDelayedDealloc delayFor:self];
 }
 
 -(id) init

@@ -2615,10 +2615,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
             DDLogInfo(@"Got SASL1 Success");
             DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
             
+            //increment state
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
             [self accountStatusChanged];
             
+            //cleanup
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
             {
@@ -2849,9 +2851,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
             DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
             self.connectionProperties.channelBindingTypes = channelBindings;
             
-            //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
-            [self.connectionProperties.identity bindJid:[parsedStanza findFirst:@"authorization-identifier#"] onAccount:self];
-            
             //record SDDP support
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
@@ -2870,6 +2869,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 }] forService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
             }
             
+            //increment state
+            self->_accountState = kStateLoggedIn;
+            [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
+            [self accountStatusChanged];
+            
+            //clean up
             self->_scramHandler = nil;
             self->_htHandler = nil;
             self->_fastTokenRequested = nil;
@@ -2891,12 +2896,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
             _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
             
+            //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
+            [self.connectionProperties.identity bindJid:[parsedStanza findFirst:@"authorization-identifier#"] onAccount:self];
+            
             //only increment account state if we are still trying to login (calling bindJid could have triggered a disconnect)
-            if(self->_accountState == kStateHasStream)
+            if(self->_accountState >= kStateHasStream)
             {
-                self->_accountState = kStateLoggedIn;
-                [self accountStatusChanged];
-                
                 //SASL2 inlined resume
                 if(self.resuming && [parsedStanza check:@"{urn:xmpp:sm:3}resumed"])
                 {
@@ -2968,7 +2973,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 }
             }
             else
-                DDLogWarn(@"Not setting accountState to kStateLoggedIn, because we are no longer in kStateHasStream!");
+                DDLogWarn(@"Ignoring SASL2 inlined elements, because we are no longer connected!");
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}continue"])
         {

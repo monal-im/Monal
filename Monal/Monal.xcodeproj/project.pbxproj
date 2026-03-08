@@ -237,8 +237,6 @@
 		C1850EB825F38A2D003D506A /* MonalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1850EB725F38A2D003D506A /* MonalUITests.swift */; };
 		C1850EC625F3C5EB003D506A /* TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1850EC525F3C5EB003D506A /* TestHelper.swift */; };
 		C18967C72B81F61B0073C7C5 /* ChannelMemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */; };
-		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
-		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
 		C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1943A4B25309A9D0036172F /* MLReloadCell.m */; };
 		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
 		C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B940E926144AF500E9D290 /* AESGCMTest.m */; };
@@ -731,8 +729,6 @@
 		C1850EB925F38A2D003D506A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C1850EC525F3C5EB003D506A /* TestHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHelper.swift; sourceTree = "<group>"; };
 		C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelMemberList.swift; sourceTree = "<group>"; };
-		C18E7578245E8AE900AE8FB7 /* MLPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPipe.h; sourceTree = "<group>"; };
-		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
 		C1943A4A25309A9D0036172F /* MLReloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReloadCell.h; sourceTree = "<group>"; };
 		C1943A4B25309A9D0036172F /* MLReloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLReloadCell.m; sourceTree = "<group>"; };
 		C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatViewHelper.h; sourceTree = "<group>"; };
@@ -1343,8 +1339,6 @@
 				540BD0D124D8D1F20087A743 /* IPC.h */,
 				541E4CBB254AA08600FD7B28 /* MLSQLite.h */,
 				540A3FAC24D674BD0008965D /* MLSQLite.m */,
-				C18E7579245E8AE900AE8FB7 /* MLPipe.m */,
-				C18E7578245E8AE900AE8FB7 /* MLPipe.h */,
 				C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */,
 				C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */,
 				540E139F24CDCDB30038FDA0 /* MLProcessLock.m */,
@@ -1616,7 +1610,6 @@
 				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
 				849DFCFA2EEBC1ED008821AF /* MLNotificationManager.h in Headers */,
 				5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */,
-				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
 				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
 				544656BD25349133006B2953 /* XMPPDataForm.h in Headers */,
 				541B6AB5262BC9040038B936 /* MLStream.h in Headers */,
@@ -2341,7 +2334,6 @@
 				389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */,
 				84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
-				C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */,
 				8418B5642C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m in Sources */,
 				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,
 				C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */,

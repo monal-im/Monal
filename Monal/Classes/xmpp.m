@@ -21,7 +21,6 @@
 #import <monalxmpp/MLOMEMO.h>
 
 #import <monalxmpp/MLStream.h>
-#import <monalxmpp/MLPipe.h>
 #import <monalxmpp/MLProcessLock.h>
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/HelperTools.h>
@@ -5413,7 +5412,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 break;
             }
             DDLogInfo(@"%@ Stream %@ encountered eof, trying to reconnect via parse queue in 1 second", [stream class], stream);
-            //use a timer to make sure the incoming data was pushed *through* the MLPipe and reached the parseQueue
+            //use a timer to make sure the incoming data was pushed *through* the rust xml parser and reached the parseQueue
             //already when pushing our reconnect block onto the parseQueue
             //this timer will only be created once on every connect cycle (and removed from our timers list on reconnect/disconnect)
             [self addTimerToCancelOnDisconnect:createTimer(1.0, (^{

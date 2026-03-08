@@ -2571,10 +2571,12 @@ NSString* const kStanza = @"stanza";
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
             
+            //increment state
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
             [self accountStatusChanged];
             
+            //cleanup
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
             {
@@ -2788,15 +2790,18 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
             self.connectionProperties.channelBindingTypes = channelBindings;
             
-            //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
-            [self.connectionProperties.identity bindJid:[parsedStanza findFirst:@"authorization-identifier#"] onAccount:self];
-            
             //record SDDP support
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
+            //increment state
+            self->_accountState = kStateLoggedIn;
+            [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
+            [self accountStatusChanged];
+            
+            //clean up
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
             //only increment account state if we are still trying to login (calling bindJid could have triggered a disconnect)
@@ -2820,8 +2825,6 @@ NSString* const kStanza = @"stanza";
             //NOTE: we don't have any stream restart when using SASL2
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
             _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
-            
-            [self accountStatusChanged];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}continue"])
         {

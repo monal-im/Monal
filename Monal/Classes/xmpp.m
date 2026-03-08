@@ -3823,7 +3823,6 @@ NSString* const kStanza = @"stanza";
         NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
         if(dic)
         {
-            DDLogError(@"Inside dic if...");
             //check state version
             int oldVersion = [dic[@"VERSION"] intValue];
             if(oldVersion != STATE_VERSION)
@@ -3836,28 +3835,22 @@ NSString* const kStanza = @"stanza";
                     self.hasSeenOmemoDeviceListAfterOwnDeviceid = YES;
             }
             
-            DDLogError(@"Collecting smacks state...");
             //collect smacks state
             self.lastHandledInboundStanza = [dic objectForKey:@"lastHandledInboundStanza"];
             self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
             self.lastOutboundStanza = [dic objectForKey:@"lastOutboundStanza"];
-            DDLogError(@"Collecting stanzas...");
             NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
             [self replaceUnackedStanzasWith:[stanzas mutableCopy]];
-            DDLogError(@"Done collecting stanzas...");
             self.streamID = [dic objectForKey:@"streamID"];
             if([dic objectForKey:@"isDoingFullReconnect"])
             {
-                DDLogError(@"Inside is doing full reconnect...");
                 NSNumber* isDoingFullReconnect = [dic objectForKey:@"isDoingFullReconnect"];
                 self.isDoingFullReconnect = isDoingFullReconnect.boolValue;
             }
             
-            DDLogError(@"Checking for corrupt smacks state...");
             //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
             if(self.lastHandledInboundStanza == nil || self.lastHandledOutboundStanza == nil || self.lastOutboundStanza == nil || !self.unAckedStanzas)
             {
-                DDLogError(@"Inside corrupt smacks state...");
 #ifndef IS_ALPHA
                 [self initSM3];
 #else
@@ -3865,164 +3858,127 @@ NSString* const kStanza = @"stanza";
 #endif
             }
             
-            DDLogError(@"Handling iq handlers...");
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
             NSMutableDictionary* persistentIqHandlerDescriptions = [NSMutableDictionary new];
-            DDLogError(@"Before iq handlers @synchronized...");
             @synchronized(_iqHandlers) {
-                DDLogError(@"Inside iq handlers @synchronized...");
                 //remove all current persistent handlers...
                 NSMutableDictionary* __block handlersCopy = [_iqHandlers copy];
                 for(NSString* iqid in handlersCopy)
                     if(handlersCopy[iqid][@"handler"] != nil)
                         [_iqHandlers removeObjectForKey:iqid];
-                DDLogError(@"all persistent handlers removed...");
                 //...and replace them with persistent handlers loaded from state
                 for(NSString* iqid in persistentIqHandlers)
                 {
                     _iqHandlers[iqid] = [persistentIqHandlers[iqid] mutableCopy];
                     persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", persistentIqHandlers[iqid][@"timeout"], persistentIqHandlers[iqid][@"handler"]];
                 }
-                DDLogError(@"replaced persistent handlers from state...");
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-                    DDLogVerbose(@"Throwing away old persistent handlers...");
-                    handlersCopy = nil;
-                    DDLogVerbose(@"All old persistent handlers successfully deallocated now...");
-                });
             }
-            
-            DDLogError(@"after iq handers @synchronized and before reconnection handlers @synchronized...");
             
             @synchronized(self->_reconnectionHandlers) {
-                DDLogError(@"inside reconnection handlers @synchronized...");
                 [_reconnectionHandlers removeAllObjects];
                 [_reconnectionHandlers addObjectsFromArray:[dic objectForKey:@"reconnectionHandlers"]];
-                DDLogError(@"did work...");
             }
-            DDLogError(@"after reconnection handlers @synchronized...");
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
             self.connectionProperties.serverDiscoFeatures = [dic objectForKey:@"serverDiscoFeatures"];
             self.connectionProperties.accountDiscoFeatures = [dic objectForKey:@"accountDiscoFeatures"];
-            DDLogError(@"after disco update 1...");
             
             self.connectionProperties.discoveredServices = [[dic objectForKey:@"discoveredServices"] mutableCopy];
             self.connectionProperties.discoveredStunTurnServers = [[dic objectForKey:@"discoveredStunTurnServers"] mutableCopy];
             self.connectionProperties.discoveredAdhocCommands = [[dic objectForKey:@"discoveredAdhocCommands"] mutableCopy];
             self.connectionProperties.serverVersion = [dic objectForKey:@"serverVersion"];
-            DDLogError(@"after disco upodate 2...");
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
             self.connectionProperties.conferenceServers = [[dic objectForKey:@"conferenceServers"] mutableCopy];
-            DDLogError(@"after server update...");
             
             if([dic objectForKey:@"loggedInOnce"])
             {
                 NSNumber* loggedInOnce = [dic objectForKey:@"loggedInOnce"];
                 _loggedInOnce = loggedInOnce.boolValue;
             }
-            DDLogError(@"after logged in once...");
             
             if([dic objectForKey:@"usingCarbons2"])
             {
                 NSNumber* carbonsNumber = [dic objectForKey:@"usingCarbons2"];
                 self.connectionProperties.usingCarbons2 = carbonsNumber.boolValue;
             }
-            DDLogError(@"after carbons2...");
             
             if([dic objectForKey:@"supportsBookmarksCompat"])
             {
                 NSNumber* compatNumber = [dic objectForKey:@"supportsBookmarksCompat"];
                 self.connectionProperties.supportsBookmarksCompat = compatNumber.boolValue;
             }
-            DDLogError(@"after bookmarks compat...");
             
             if([dic objectForKey:@"pushEnabled"])
             {
                 NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
                 self.connectionProperties.pushEnabled = pushEnabled.boolValue;
             }
-            DDLogError(@"after push enabled...");
             
             if([dic objectForKey:@"supportsPubSub"])
             {
                 NSNumber* supportsPubSub = [dic objectForKey:@"supportsPubSub"];
                 self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
             }
-            DDLogError(@"after supports push...");
             
             if([dic objectForKey:@"supportsPubSubMax"])
             {
                 NSNumber* supportsPubSubMax = [dic objectForKey:@"supportsPubSubMax"];
                 self.connectionProperties.supportsPubSubMax = supportsPubSubMax.boolValue;
             }
-            DDLogError(@"after supports pubsub max...");
             
             if([dic objectForKey:@"supportsModernPubSub"])
             {
                 NSNumber* supportsModernPubSub = [dic objectForKey:@"supportsModernPubSub"];
                 self.connectionProperties.supportsModernPubSub = supportsModernPubSub.boolValue;
             }
-            DDLogError(@"after supports modern pubsub...");
             
             if([dic objectForKey:@"supportsHTTPUpload"])
             {
                 NSNumber* supportsHTTPUpload = [dic objectForKey:@"supportsHTTPUpload"];
                 self.connectionProperties.supportsHTTPUpload = supportsHTTPUpload.boolValue;
             }
-            DDLogError(@"after supports http upload...");
             
             if([dic objectForKey:@"lastInteractionDate"])
                 _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
-            DDLogError(@"after last interaction date...");
             
             if([dic objectForKey:@"accountDiscoDone"])
             {
                 NSNumber* accountDiscoDone = [dic objectForKey:@"accountDiscoDone"];
                 self.connectionProperties.accountDiscoDone = accountDiscoDone.boolValue;
             }
-            DDLogError(@"after account disco done...");
             
             if([dic objectForKey:@"pubsubData"])
                 [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
-            DDLogError(@"after pubsub data...");
             
             if([dic objectForKey:@"mucState"])
                 [self.mucProcessor setInternalState:[dic objectForKey:@"mucState"]];
-            DDLogError(@"after muc state...");
             
             if([dic objectForKey:@"runningCapsQueries"])
                 _runningCapsQueries = [[dic objectForKey:@"runningCapsQueries"] mutableCopy];
-            DDLogError(@"after running caps queries...");
             
             if([dic objectForKey:@"runningMamQueries"])
                 _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
-            DDLogError(@"after runing mam queries...");
             
             if([dic objectForKey:@"inCatchup"])
                 _inCatchup = [[dic objectForKey:@"inCatchup"] mutableCopy];
-            DDLogError(@"after in catchup...");
             
             if([dic objectForKey:@"mdsData"])
                 _mdsData = [[dic objectForKey:@"mdsData"] mutableCopy];
-            DDLogError(@"after mds data...");
             
             if([dic objectForKey:@"cachedStreamFeaturesBeforeAuth"])
                 _cachedStreamFeaturesBeforeAuth = [dic objectForKey:@"cachedStreamFeaturesBeforeAuth"];
             if([dic objectForKey:@"cachedStreamFeaturesAfterAuth"])
                 _cachedStreamFeaturesAfterAuth = [dic objectForKey:@"cachedStreamFeaturesAfterAuth"];
-            DDLogError(@"after cached features...");
             
             if([dic objectForKey:@"omemoState"] && self.omemo)
                 self.omemo.state = [dic objectForKey:@"omemoState"];
-            DDLogError(@"after omemo state...");
             
             if([dic objectForKey:@"hasSeenOmemoDeviceListAfterOwnDeviceid"])
             {
                 NSNumber* hasSeenOmemoDeviceListAfterOwnDeviceid = [dic objectForKey:@"hasSeenOmemoDeviceListAfterOwnDeviceid"];
                 self.hasSeenOmemoDeviceListAfterOwnDeviceid = hasSeenOmemoDeviceListAfterOwnDeviceid.boolValue;
             }
-            DDLogError(@"after has seen devicelist after own deviceid...");
             
             //debug output
             DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\t_cachedStreamFeaturesBeforeAuth=%@\n\t_cachedStreamFeaturesAfterAuth=%@\n",
@@ -4049,12 +4005,10 @@ NSString* const kStanza = @"stanza";
                 bool2str(self->_cachedStreamFeaturesBeforeAuth!=nil),
                 bool2str(self->_cachedStreamFeaturesAfterAuth!=nil)
             );
-            DDLogError(@"before printing unacked stanzas...");
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
                     DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], [dic objectForKey:kStanza]);
         }
-        DDLogError(@"after if dic...");
         
         //always reset handler and smacksRequestInFlight when loading smacks state
         _smacksAckHandler = [NSMutableArray new];

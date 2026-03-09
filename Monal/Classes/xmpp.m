@@ -20,6 +20,7 @@
 
 #import "MLStream.h"
 #import "MLPipe.h"
+#import "MLDelayedDealloc.h"
 #import "MLProcessLock.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
@@ -500,7 +501,6 @@ NSString* const kStanza = @"stanza";
     //only check unacked count if needed (this makes sure we don't hold the state lock unnecessarily and block the main thread)
     if(retval)
     {
-        DDLogVerbose(@"Before @synchronized of _stateLockObject...");
         @synchronized(_stateLockObject) {
             NSUInteger unacked = [self.unAckedStanzas count];
             if(unacked)
@@ -509,7 +509,6 @@ NSString* const kStanza = @"stanza";
                 unackedCount = @(unacked);
             }
         }
-        DDLogVerbose(@"After @synchronized of _stateLockObject...");
     }
     _lastIdleState = retval;
     DDLogVerbose(@("%@ --> Idle check:\n"
@@ -838,6 +837,8 @@ NSString* const kStanza = @"stanza";
 -(void) unfreeze
 {
     @synchronized(self) {
+        NSCondition* condition = [NSCondition new];
+        [condition lock];
         DDLogInfo(@"Unfreezing account: %@", self);
         
         //make sure we don't have any race conditions by dispatching this to our receive queue
@@ -859,6 +860,11 @@ NSString* const kStanza = @"stanza";
                 [self unfreezeParseQueue];
                 
                 [self unfreezeSendQueue];
+                
+                //unblock waiting outer thread
+                [condition lock];
+                [condition signal];
+                [condition unlock];
             }
         }];
         unfreezeOperation.queuePriority = NSOperationQueuePriorityVeryHigh;     //make sure this will become the first operation executed once unfrozen
@@ -866,6 +872,10 @@ NSString* const kStanza = @"stanza";
         
         //unfreeze receive queue and execute block added above
         self->_receiveQueue.suspended = NO;
+        
+        //wait for completion signal
+        [condition wait];
+        [condition unlock];
     }
 }
 
@@ -1013,17 +1023,7 @@ NSString* const kStanza = @"stanza";
             [self replaceUnackedStanzasWith:stanzas];
             
             //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-            @synchronized(self->_iqHandlers) {
-                for(NSString* iqid in [self->_iqHandlers allKeys])
-                {
-                    DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                    if(self->_iqHandlers[iqid][@"handler"] != nil)
-                        $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self), $ID(reason, @"disconnect"));
-                    else if(self->_iqHandlers[iqid][@"errorHandler"])
-                        ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
-                }
-                self->_iqHandlers = [NSMutableDictionary new];
-            }
+            [self invalidateIQHandlersWithReason:@"disconnect"];
             
             //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
             [self.pubsub invalidateQueue];
@@ -1108,6 +1108,7 @@ NSString* const kStanza = @"stanza";
                             ((monal_iq_handler_t)data[@"errorHandler"])(nil);
                     }
                     [self->_iqHandlers removeObjectForKey:iqid];
+                    [MLDelayedDealloc delayFor:data];
                 }
             }
         }
@@ -1145,17 +1146,7 @@ NSString* const kStanza = @"stanza";
                 [self replaceUnackedStanzasWith:stanzas];
                 
                 //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-                @synchronized(self->_iqHandlers) {
-                    for(NSString* iqid in [self->_iqHandlers allKeys])
-                    {
-                        DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                        if(self->_iqHandlers[iqid][@"handler"] != nil)
-                            $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self), $ID(reason, @"disconnect"));
-                        else if(self->_iqHandlers[iqid][@"errorHandler"])
-                            ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
-                    }
-                    self->_iqHandlers = [NSMutableDictionary new];
-                }
+                [self invalidateIQHandlersWithReason:@"disconnect"];
                 
                 //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
                 [self.pubsub invalidateQueue];
@@ -1343,6 +1334,27 @@ NSString* const kStanza = @"stanza";
     {
         [[DataLayer sharedInstance] persistState:newState forAccount:self.accountNo];
         [self readState];               //better safe than sorry
+    }
+}
+
+-(void) invalidateIQHandlersWithReason:(NSString*) reason
+{
+    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
+    @synchronized(_iqHandlers) {
+        //make sure this works even if the invalidation handlers add a new iq to the list
+        NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
+        [_iqHandlers removeAllObjects];
+        
+        for(NSString* iqid in handlersCopy)
+        {
+            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+            if(handlersCopy[iqid][@"handler"] != nil)
+                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self), $ID(reason));
+            else if(handlersCopy[iqid][@"errorHandler"])
+                ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
+        }
+        
+        [MLDelayedDealloc delayFor:handlersCopy];
     }
 }
 
@@ -1636,16 +1648,13 @@ NSString* const kStanza = @"stanza";
 
 -(void) addSmacksHandler:(monal_void_block_t) handler
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         [self addSmacksHandler:handler forValue:self.lastOutboundStanza];
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(void) addSmacksHandler:(monal_void_block_t) handler forValue:(NSNumber*) value
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         if([value integerValue] < [self.lastOutboundStanza integerValue])
         {
@@ -1657,12 +1666,10 @@ NSString* const kStanza = @"stanza";
         NSDictionary* dic = @{@"value":value, @"handler":handler};
         [_smacksAckHandler addObject:dic];
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(void) resendUnackedStanzas
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         DDLogInfo(@"Resending unacked stanzas...");
         NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
@@ -1676,14 +1683,12 @@ NSString* const kStanza = @"stanza";
         DDLogInfo(@"Done resending unacked stanzas...");
         [self persistState];
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(void) resendUnackedMessageStanzasOnly:(NSMutableArray*) stanzas
 {
     if(stanzas)
     {
-        DDLogVerbose(@"Before @synchronized of _stateLockObject...");
         @synchronized(_stateLockObject) {
             DDLogWarn(@"Resending unacked message stanzas only...");
             NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
@@ -1701,13 +1706,11 @@ NSString* const kStanza = @"stanza";
             //or contain all the resent stanzas (e.g. only resume failed)
             [self persistState];
         }
-        DDLogVerbose(@"After @synchronized of _stateLockObject...");
     }
 }
 
 -(BOOL) shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         DDLogInfo(@"Checking for important unacked stanzas...");
         for(NSDictionary* dic in self.unAckedStanzas)
@@ -1722,7 +1725,6 @@ NSString* const kStanza = @"stanza";
                 return YES;
         }
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     //no important stanzas found
     return NO;
 }
@@ -1730,7 +1732,6 @@ NSString* const kStanza = @"stanza";
 -(BOOL) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
     NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         //sanity check
         MLAssert(([self.unAckedStanzas count]+[self.lastHandledOutboundStanza unsignedIntValue])==[self.lastOutboundStanza unsignedIntValue], @"Calculated outgoing stanza count and counted one differ!", (@{
@@ -1821,7 +1822,6 @@ NSString* const kStanza = @"stanza";
             }
         [_smacksAckHandler removeObjectsInArray:ackHandlerToCall];
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     
     //call registered smacksAckHandler that got sorted out
     for(NSDictionary* dic in ackHandlerToCall)
@@ -1837,7 +1837,6 @@ NSString* const kStanza = @"stanza";
 {
     //caution: this could be called from sendQueue, too!
     MLXMLNode* rNode;
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         unsigned long unackedCount = (unsigned long)[self.unAckedStanzas count];
         if(self.accountState >= kStateInitStarted && self.connectionProperties.supportsSM3 &&
@@ -1850,7 +1849,6 @@ NSString* const kStanza = @"stanza";
         else
             DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     if(rNode)
         [self send:rNode];
 }
@@ -1872,13 +1870,11 @@ NSString* const kStanza = @"stanza";
         return;
     
     NSDictionary* dic;
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         dic = @{
             @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
         };
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     MLXMLNode* aNode = [[MLXMLNode alloc] initWithElement:@"a" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
     if(queuedSend)
         [self send:aNode];
@@ -1915,7 +1911,6 @@ NSString* const kStanza = @"stanza";
             if(h==nil)
                 return [self invalidXMLError];
             
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //remove acked messages
                 [self removeAckedStanzasFromQueue:h];
@@ -1923,7 +1918,6 @@ NSString* const kStanza = @"stanza";
                 self.smacksRequestInFlight = NO;        //ack returned
                 [self requestSMAck:NO];                 //request ack again (will only happen if queue is not empty)
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
         }
         else if([parsedStanza check:@"/{jabber:client}presence"] && self.accountState >= kStateInitStarted)
         {
@@ -2175,7 +2169,6 @@ NSString* const kStanza = @"stanza";
             {
                 //wrap everything in lock instead of writing the boolean result into a temp var because incrementLastHandledStanza
                 //is wrapped in this lock, too (and we don't call anything else here)
-                DDLogVerbose(@"Before @synchronized of _stateLockObject...");
                 @synchronized(_stateLockObject) {
                     if(_runningMamQueries[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]] == nil)
                     {
@@ -2186,7 +2179,6 @@ NSString* const kStanza = @"stanza";
                         return;
                     }
                 }
-                DDLogVerbose(@"After @synchronized of _stateLockObject...");
                 
                 //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
                 messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
@@ -2402,7 +2394,6 @@ NSString* const kStanza = @"stanza";
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"] && self.accountState == kStateBound)
         {
             NSMutableArray* stanzas;
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //save old unAckedStanzas queue before it is cleared
                 stanzas = self.unAckedStanzas;
@@ -2419,7 +2410,6 @@ NSString* const kStanza = @"stanza";
                 //persist these changes (streamID and initSM3)
                 [self persistState];
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
 
             //init session and query disco, roster etc.
             [self initSession];
@@ -2447,13 +2437,11 @@ NSString* const kStanza = @"stanza";
             [[MLNotificationQueue currentQueue] postNotificationName:kMLSessionInitNotice object:self];
             [self accountStatusChanged];
 
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //remove already delivered stanzas and resend the (still) unacked ones
                 [self removeAckedStanzasFromQueue:h];
                 [self resendUnackedStanzas];
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
             
             //publish new csi and last active state (but only do so when not in an extension
             //because the last active state does not change when inside an extension)
@@ -2470,7 +2458,6 @@ NSString* const kStanza = @"stanza";
             //ping all mucs to check if we are still connected (XEP-0410)
             [self.mucProcessor pingAllMucs];
             
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
                 //all stanzas the *server* wanted to replay have been received, too
@@ -2506,7 +2493,6 @@ NSString* const kStanza = @"stanza";
                     }
                 }];
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
             
             //initialize stanza counter for statistics
             [self initCatchupStats];
@@ -2517,7 +2503,6 @@ NSString* const kStanza = @"stanza";
             
             __block BOOL error = NO;
             self.resuming = NO;
-            DDLogVerbose(@"Before @synchronized of _stateLockObject...");
             @synchronized(_stateLockObject) {
                 //invalidate stream id
                 self.streamID = nil;
@@ -2529,7 +2514,6 @@ NSString* const kStanza = @"stanza";
                 //persist these changes
                 [self persistState];
             }
-            DDLogVerbose(@"After @synchronized of _stateLockObject...");
 
             //don't try to bind, if removeAckedStanzasFromQueue returned an error (it will trigger a reconnect in these cases)
             if(!error)
@@ -2601,10 +2585,12 @@ NSString* const kStanza = @"stanza";
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
             
+            //increment state
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
             [self accountStatusChanged];
             
+            //cleanup
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
             {
@@ -2818,15 +2804,18 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
             self.connectionProperties.channelBindingTypes = channelBindings;
             
-            //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
-            [self.connectionProperties.identity bindJid:[parsedStanza findFirst:@"authorization-identifier#"] onAccount:self];
-            
             //record SDDP support
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
+            //increment state
+            self->_accountState = kStateLoggedIn;
+            [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
+            [self accountStatusChanged];
+            
+            //clean up
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
             //only increment account state if we are still trying to login (calling bindJid could have triggered a disconnect)
@@ -2850,8 +2839,6 @@ NSString* const kStanza = @"stanza";
             //NOTE: we don't have any stream restart when using SASL2
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
             _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
-            
-            [self accountStatusChanged];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}continue"])
         {
@@ -3341,7 +3328,6 @@ NSString* const kStanza = @"stanza";
     }
     
     MLXMLNode* resumeNode = nil;
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         //test if smacks is supported and allows resume
         if(self.connectionProperties.supportsSM3 && self.streamID)
@@ -3354,7 +3340,6 @@ NSString* const kStanza = @"stanza";
             self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
         }
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
     if(resumeNode)
         [self send:resumeNode];
     else
@@ -3817,13 +3802,11 @@ NSString* const kStanza = @"stanza";
 
 -(void) realReadState
 {
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         DDLogVerbose(@"%@ --> realReadState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
         if(dic)
         {
-            DDLogError(@"Inside dic if...");
             //check state version
             int oldVersion = [dic[@"VERSION"] intValue];
             if(oldVersion != STATE_VERSION)
@@ -3836,193 +3819,156 @@ NSString* const kStanza = @"stanza";
                     self.hasSeenOmemoDeviceListAfterOwnDeviceid = YES;
             }
             
-            DDLogError(@"Collecting smacks state...");
             //collect smacks state
             self.lastHandledInboundStanza = [dic objectForKey:@"lastHandledInboundStanza"];
             self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
             self.lastOutboundStanza = [dic objectForKey:@"lastOutboundStanza"];
-            DDLogError(@"Collecting stanzas...");
             NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
             [self replaceUnackedStanzasWith:[stanzas mutableCopy]];
-            DDLogError(@"Done collecting stanzas...");
             self.streamID = [dic objectForKey:@"streamID"];
             if([dic objectForKey:@"isDoingFullReconnect"])
             {
-                DDLogError(@"Inside is doing full reconnect...");
                 NSNumber* isDoingFullReconnect = [dic objectForKey:@"isDoingFullReconnect"];
                 self.isDoingFullReconnect = isDoingFullReconnect.boolValue;
             }
             
-            DDLogError(@"Checking for corrupt smacks state...");
-            //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
-            if(self.lastHandledInboundStanza == nil || self.lastHandledOutboundStanza == nil || self.lastOutboundStanza == nil || !self.unAckedStanzas)
-            {
-                DDLogError(@"Inside corrupt smacks state...");
+            @synchronized(_stateLockObject) {
+                //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
+                if(self.lastHandledInboundStanza == nil || self.lastHandledOutboundStanza == nil || self.lastOutboundStanza == nil || !self.unAckedStanzas)
+                {
 #ifndef IS_ALPHA
-                [self initSM3];
+                    [self initSM3];
 #else
-                @throw [NSException exceptionWithName:@"RuntimeError" reason:@"corrupt smacks state" userInfo:dic];
+                    @throw [NSException exceptionWithName:@"RuntimeError" reason:@"corrupt smacks state" userInfo:dic];
 #endif
+                }
             }
             
-            DDLogError(@"Handling iq handlers...");
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
             NSMutableDictionary* persistentIqHandlerDescriptions = [NSMutableDictionary new];
-            DDLogError(@"Before iq handlers @synchronized...");
             @synchronized(_iqHandlers) {
-                DDLogError(@"Inside iq handlers @synchronized...");
                 //remove all current persistent handlers...
                 NSMutableDictionary* __block handlersCopy = [_iqHandlers copy];
                 for(NSString* iqid in handlersCopy)
                     if(handlersCopy[iqid][@"handler"] != nil)
                         [_iqHandlers removeObjectForKey:iqid];
-                DDLogError(@"all persistent handlers removed...");
                 //...and replace them with persistent handlers loaded from state
                 for(NSString* iqid in persistentIqHandlers)
                 {
                     _iqHandlers[iqid] = [persistentIqHandlers[iqid] mutableCopy];
                     persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", persistentIqHandlers[iqid][@"timeout"], persistentIqHandlers[iqid][@"handler"]];
                 }
-                DDLogError(@"replaced persistent handlers from state...");
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-                    DDLogVerbose(@"Throwing away old persistent handlers...");
-                    handlersCopy = nil;
-                    DDLogVerbose(@"All old persistent handlers successfully deallocated now...");
-                });
+                
+                //this might take a long time since it throws away all handlers and their associated data, which might be deeply nested MLXMLNodes
+                //--> move deallocation into a background thread
+                [MLDelayedDealloc delayFor:handlersCopy];
             }
-            
-            DDLogError(@"after iq handers @synchronized and before reconnection handlers @synchronized...");
             
             @synchronized(self->_reconnectionHandlers) {
-                DDLogError(@"inside reconnection handlers @synchronized...");
                 [_reconnectionHandlers removeAllObjects];
                 [_reconnectionHandlers addObjectsFromArray:[dic objectForKey:@"reconnectionHandlers"]];
-                DDLogError(@"did work...");
             }
-            DDLogError(@"after reconnection handlers @synchronized...");
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
             self.connectionProperties.serverDiscoFeatures = [dic objectForKey:@"serverDiscoFeatures"];
             self.connectionProperties.accountDiscoFeatures = [dic objectForKey:@"accountDiscoFeatures"];
-            DDLogError(@"after disco update 1...");
             
             self.connectionProperties.discoveredServices = [[dic objectForKey:@"discoveredServices"] mutableCopy];
             self.connectionProperties.discoveredStunTurnServers = [[dic objectForKey:@"discoveredStunTurnServers"] mutableCopy];
             self.connectionProperties.discoveredAdhocCommands = [[dic objectForKey:@"discoveredAdhocCommands"] mutableCopy];
             self.connectionProperties.serverVersion = [dic objectForKey:@"serverVersion"];
-            DDLogError(@"after disco upodate 2...");
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
             self.connectionProperties.conferenceServers = [[dic objectForKey:@"conferenceServers"] mutableCopy];
-            DDLogError(@"after server update...");
             
             if([dic objectForKey:@"loggedInOnce"])
             {
                 NSNumber* loggedInOnce = [dic objectForKey:@"loggedInOnce"];
                 _loggedInOnce = loggedInOnce.boolValue;
             }
-            DDLogError(@"after logged in once...");
             
             if([dic objectForKey:@"usingCarbons2"])
             {
                 NSNumber* carbonsNumber = [dic objectForKey:@"usingCarbons2"];
                 self.connectionProperties.usingCarbons2 = carbonsNumber.boolValue;
             }
-            DDLogError(@"after carbons2...");
             
             if([dic objectForKey:@"supportsBookmarksCompat"])
             {
                 NSNumber* compatNumber = [dic objectForKey:@"supportsBookmarksCompat"];
                 self.connectionProperties.supportsBookmarksCompat = compatNumber.boolValue;
             }
-            DDLogError(@"after bookmarks compat...");
             
             if([dic objectForKey:@"pushEnabled"])
             {
                 NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
                 self.connectionProperties.pushEnabled = pushEnabled.boolValue;
             }
-            DDLogError(@"after push enabled...");
             
             if([dic objectForKey:@"supportsPubSub"])
             {
                 NSNumber* supportsPubSub = [dic objectForKey:@"supportsPubSub"];
                 self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
             }
-            DDLogError(@"after supports push...");
             
             if([dic objectForKey:@"supportsPubSubMax"])
             {
                 NSNumber* supportsPubSubMax = [dic objectForKey:@"supportsPubSubMax"];
                 self.connectionProperties.supportsPubSubMax = supportsPubSubMax.boolValue;
             }
-            DDLogError(@"after supports pubsub max...");
             
             if([dic objectForKey:@"supportsModernPubSub"])
             {
                 NSNumber* supportsModernPubSub = [dic objectForKey:@"supportsModernPubSub"];
                 self.connectionProperties.supportsModernPubSub = supportsModernPubSub.boolValue;
             }
-            DDLogError(@"after supports modern pubsub...");
             
             if([dic objectForKey:@"supportsHTTPUpload"])
             {
                 NSNumber* supportsHTTPUpload = [dic objectForKey:@"supportsHTTPUpload"];
                 self.connectionProperties.supportsHTTPUpload = supportsHTTPUpload.boolValue;
             }
-            DDLogError(@"after supports http upload...");
             
             if([dic objectForKey:@"lastInteractionDate"])
                 _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
-            DDLogError(@"after last interaction date...");
             
             if([dic objectForKey:@"accountDiscoDone"])
             {
                 NSNumber* accountDiscoDone = [dic objectForKey:@"accountDiscoDone"];
                 self.connectionProperties.accountDiscoDone = accountDiscoDone.boolValue;
             }
-            DDLogError(@"after account disco done...");
             
             if([dic objectForKey:@"pubsubData"])
                 [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
-            DDLogError(@"after pubsub data...");
             
             if([dic objectForKey:@"mucState"])
                 [self.mucProcessor setInternalState:[dic objectForKey:@"mucState"]];
-            DDLogError(@"after muc state...");
             
             if([dic objectForKey:@"runningCapsQueries"])
                 _runningCapsQueries = [[dic objectForKey:@"runningCapsQueries"] mutableCopy];
-            DDLogError(@"after running caps queries...");
             
             if([dic objectForKey:@"runningMamQueries"])
                 _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
-            DDLogError(@"after runing mam queries...");
             
             if([dic objectForKey:@"inCatchup"])
                 _inCatchup = [[dic objectForKey:@"inCatchup"] mutableCopy];
-            DDLogError(@"after in catchup...");
             
             if([dic objectForKey:@"mdsData"])
                 _mdsData = [[dic objectForKey:@"mdsData"] mutableCopy];
-            DDLogError(@"after mds data...");
             
             if([dic objectForKey:@"cachedStreamFeaturesBeforeAuth"])
                 _cachedStreamFeaturesBeforeAuth = [dic objectForKey:@"cachedStreamFeaturesBeforeAuth"];
             if([dic objectForKey:@"cachedStreamFeaturesAfterAuth"])
                 _cachedStreamFeaturesAfterAuth = [dic objectForKey:@"cachedStreamFeaturesAfterAuth"];
-            DDLogError(@"after cached features...");
             
             if([dic objectForKey:@"omemoState"] && self.omemo)
                 self.omemo.state = [dic objectForKey:@"omemoState"];
-            DDLogError(@"after omemo state...");
             
             if([dic objectForKey:@"hasSeenOmemoDeviceListAfterOwnDeviceid"])
             {
                 NSNumber* hasSeenOmemoDeviceListAfterOwnDeviceid = [dic objectForKey:@"hasSeenOmemoDeviceListAfterOwnDeviceid"];
                 self.hasSeenOmemoDeviceListAfterOwnDeviceid = hasSeenOmemoDeviceListAfterOwnDeviceid.boolValue;
             }
-            DDLogError(@"after has seen devicelist after own deviceid...");
             
             //debug output
             DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\tsupportsBookmarksCompat=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\t_cachedStreamFeaturesBeforeAuth=%@\n\t_cachedStreamFeaturesAfterAuth=%@\n",
@@ -4049,12 +3995,10 @@ NSString* const kStanza = @"stanza";
                 bool2str(self->_cachedStreamFeaturesBeforeAuth!=nil),
                 bool2str(self->_cachedStreamFeaturesAfterAuth!=nil)
             );
-            DDLogError(@"before printing unacked stanzas...");
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
                     DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], [dic objectForKey:kStanza]);
         }
-        DDLogError(@"after if dic...");
         
         //always reset handler and smacksRequestInFlight when loading smacks state
         _smacksAckHandler = [NSMutableArray new];
@@ -4062,7 +4006,6 @@ NSString* const kStanza = @"stanza";
         
         DDLogVerbose(@"%@ --> realReadState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 +(NSMutableDictionary*) invalidateState:(NSDictionary*) dic
@@ -4098,7 +4041,6 @@ NSString* const kStanza = @"stanza";
     //don't ack messages twice
     if(delayedReplay)
         return;
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         if(self.connectionProperties.supportsSM3)
         {
@@ -4109,13 +4051,11 @@ NSString* const kStanza = @"stanza";
         }
         [self persistState];        //make sure we persist our state, even if smacks is not supported
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(void) initSM3
 {
     //initialize smacks state
-    DDLogVerbose(@"Before @synchronized of _stateLockObject...");
     @synchronized(_stateLockObject) {
         self.lastHandledInboundStanza = [NSNumber numberWithInteger:0];
         self.lastHandledOutboundStanza = [NSNumber numberWithInteger:0];
@@ -4125,7 +4065,6 @@ NSString* const kStanza = @"stanza";
         _smacksAckHandler = [NSMutableArray new];
         DDLogDebug(@"initSM3 done");
     }
-    DDLogVerbose(@"After @synchronized of _stateLockObject...");
 }
 
 -(NSMutableArray*) replaceUnackedStanzasWith:(NSMutableArray*) newUnackedStanzas
@@ -4133,15 +4072,8 @@ NSString* const kStanza = @"stanza";
     @synchronized(_stateLockObject) {
         //this might take a long time since it throws away all self.unAckedStanzas and thus calls dealloc on each of them in each nesting level
         //--> move deallocation into a background thread
-        NSMutableArray* __block oldUnacked = self.unAckedStanzas;
+        [MLDelayedDealloc delayFor:self.unAckedStanzas];
         self.unAckedStanzas = newUnackedStanzas;
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-            DDLogVerbose(@"Sleeping 500ms before throwing away old unAckedStanzas...");
-            [NSThread sleepForTimeInterval:0.500];
-            DDLogVerbose(@"Now throwing away old unAckedStanzas...");
-            oldUnacked = nil;
-            DDLogVerbose(@"All old unAckedStanzas successfully deallocated now...");
-        });
     }
     return newUnackedStanzas;
 }
@@ -4163,22 +4095,7 @@ NSString* const kStanza = @"stanza";
     //delete old resources because we get new presences once we're done initializing the session
     [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
     
-    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-    @synchronized(_iqHandlers) {
-        //make sure this works even if the invalidation handlers add a new iq to the list
-        NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
-        [_iqHandlers removeAllObjects];
-        
-        for(NSString* iqid in handlersCopy)
-        {
-            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-            if(handlersCopy[iqid][@"handler"] != nil)
-                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self), $ID(reason, @"bind"));
-            else if(handlersCopy[iqid][@"errorHandler"])
-                ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
-        }
-        
-    }
+    [self invalidateIQHandlersWithReason:@"bind"];
     
     //invalidate pubsub queue (a pubsub operation will be either invalidated by an iq handler above OR by the invalidation here, but never twice!)
     [self.pubsub invalidateQueue];

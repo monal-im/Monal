@@ -357,19 +357,11 @@ static NSDateFormatter* dbFormatter;
         return nil;
     NSString* query = @"SELECT state from account where account_id=?";
     NSArray* params = @[accountNo];
-    DDLogVerbose(@"Outside of transaction: Reading account state: %@", accountNo);
-    [MLSQLite debugTransactions];
     NSData* data = (NSData*)[self.db idReadTransaction:^{
-        DDLogVerbose(@"Inside of transaction: Reading account state: %@", accountNo);
         return [self.db executeScalar:query andArguments:params];
     }];
-    DDLogVerbose(@"After transaction: Reading account state: %@ --> %@", accountNo, data);
     if(data)
-    {
-        NSMutableDictionary* retval = [HelperTools unserializeData:data];
-        DDLogVerbose(@"After unserializeData: Reading account state: %@", accountNo);
-        return retval;
-    }
+        return [HelperTools unserializeData:data];
     return nil;
 }
 

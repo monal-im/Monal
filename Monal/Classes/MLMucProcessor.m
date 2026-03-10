@@ -29,6 +29,7 @@
 {
     __weak xmpp* _account;
     BOOL _smacksResumption;
+    BOOL _shouldFetchBookmarks;
     //persistent state
     NSObject* _stateLockObject;
     NSMutableDictionary* _roomFeatures;
@@ -40,7 +41,6 @@
     NSMutableDictionary* _changingName;
     NSDate* _lastPing;
     NSMutableSet* _noUpdateBookmarks;
-    BOOL _hasFetchedBookmarks;
     //these won't be persisted because it is only for the ui
     NSMutableDictionary* _uiHandler;
 }
@@ -86,7 +86,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     _uiHandler = [NSMutableDictionary new];
     _lastPing = [NSDate date];
     _noUpdateBookmarks = [NSMutableSet new];
-    _hasFetchedBookmarks = NO;
+    _shouldFetchBookmarks = NO;
     _smacksResumption = YES;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleHasLoggedIn:) name:kMLIsLoggedInNotice object:nil];
@@ -124,7 +124,6 @@ static NSDictionary* _optionalGroupConfigOptions;
         _changingName = [state[@"changingName"] mutableCopy];
         _lastPing = state[@"lastPing"];
         _noUpdateBookmarks = [state[@"noUpdateBookmarks"] mutableCopy];
-        _hasFetchedBookmarks = [state[@"hasFetchedBookmarks"] boolValue];
     }
 }
 
@@ -142,7 +141,6 @@ static NSDictionary* _optionalGroupConfigOptions;
             @"changingName": [_changingName copy],
             @"lastPing": _lastPing,
             @"noUpdateBookmarks": [_noUpdateBookmarks copy],
-            @"hasFetchedBookmarks": @(_hasFetchedBookmarks),
         };
         //DDLogVerbose(@"Returning MUC state: %@", state);
         return state;
@@ -154,7 +152,10 @@ static NSDictionary* _optionalGroupConfigOptions;
     //this event will be called as soon as we are successfully authenticated, but BEFORE handleResourceBound: will be called
     //NOTE: handleResourceBound: won't be called for smacks resumptions at all
     if(_account == ((xmpp*)notification.object))
+    {
         _smacksResumption = YES;        //will be reset to NO, in handleResourceBound
+        _shouldFetchBookmarks = NO;     //will be reset to YES in handleResourceBound
+    }
 }
 
 -(void) handleResourceBound:(NSNotification*) notification
@@ -181,7 +182,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             //don't clear _firstJoin and _noUpdateBookmarks to make sure half-joined mucs are still added to muc bookmarks
             
             //load all bookmarks 2 items as soon as our catchup is done (+notify only provides one/the last item)
-            _hasFetchedBookmarks = NO;
+            _shouldFetchBookmarks = YES;
             
             //mark this as non-smacks reconnect
             _smacksResumption = NO;
@@ -208,7 +209,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     {
         //fake incoming bookmarks push by pulling all bookmarks2 items (but only if we want to use bookmarks2 instead of old-style boommarks)
         //don't use [self updateBookmarks] to not update anything (e.g. readd a bookmark removed by another client)
-        if(!_hasFetchedBookmarks && _account.connectionProperties.supportsBookmarksCompat)
+        if(_shouldFetchBookmarks && _account.connectionProperties.supportsBookmarksCompat)
             [_account.pubsub fetchNode:@"urn:xmpp:bookmarks:1" from:_account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, bookmarks2Handler, $ID(type, @"publish"))];
     }
 }

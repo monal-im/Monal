@@ -2804,8 +2804,10 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
             self.connectionProperties.channelBindingTypes = channelBindings;
             
-            //record SDDP support
-            self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
+            //record SDDP support, but only if it could have been used at all (HT doesn't have SSDP)
+            //we persist this property in our account state, so it will remain the way it was when we last did an ordinary SCRAM login
+            if(self->_scramHandler.finishedSuccessfully)
+                self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
@@ -3731,6 +3733,7 @@ NSString* const kStanza = @"stanza";
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsModernPubSub] forKey:@"supportsModernPubSub"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsSSDP] forKey:@"supportsSSDP"];
             [values setObject:[self->_inCatchup copy] forKey:@"inCatchup"];
             [values setObject:[self->_mdsData copy] forKey:@"mdsData"];
             
@@ -3880,6 +3883,12 @@ NSString* const kStanza = @"stanza";
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
             self.connectionProperties.conferenceServers = [[dic objectForKey:@"conferenceServers"] mutableCopy];
+            
+            if([dic objectForKey:@"supportsSSDP"])
+            {
+                NSNumber* supportsSSDP = [dic objectForKey:@"supportsSSDP"];
+                self.connectionProperties.supportsSSDP = supportsSSDP.boolValue;
+            }
             
             if([dic objectForKey:@"loggedInOnce"])
             {

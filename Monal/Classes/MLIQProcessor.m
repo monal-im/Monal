@@ -250,8 +250,7 @@ $$
 $$class_handler(handleMAMBackscrollingResultInvalidation, $$ID(xmpp*, account), $$ID(MLContact*, contact), $$PROMISE(promise))
     DDLogError(@"Got backscrolling mam error for %@", contact.contactJid);
     NSString* errorMessage = [NSString stringWithFormat:NSLocalizedString(@"Could not fetch more old chat history for '%@' from the server archive. Please try again.", @""), contact.contactJid];
-    NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
-    [promise reject:error];
+    [promise reject:[HelperTools getNSErrorFrom:nil withDescription:errorMessage]];
 $$
 
 $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(MLContact*, contact), $_ID(NSMutableOrderedSet*, historyIdsOfAlreadyRetreivedMessages), $$PROMISE(promise))
@@ -281,15 +280,15 @@ $$class_handler(handleMAMBackscrollingResult, $$ID(xmpp*, account), $$ID(XMPPIQ*
     if([iqNode check:@"/<type=error>"] && retrievedBodiesOverall == 0
         && ![iqNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
     {
-        NSString* errorMessage = [HelperTools extractXMPPError:iqNode withDescription:NSLocalizedString(@"Could not fetch more old history for this chat from the server archive. Please try again later.", @"")];
-        NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
-        [promise reject:error];
+        NSString* errorMessage = [NSString stringWithFormat:NSLocalizedString(@"Could not fetch more old chat history for '%@' from the server archive", @""), contact.contactJid];
+        [promise reject:[HelperTools getNSErrorFrom:iqNode withDescription:errorMessage]];
     }
     else
     {
         if(retrievedBodiesOverall == 0)
         {
-            //if we did not retrieve any body messages we don't need to process metadata sanzas (if any), but signal we reached the end of our archive
+            //if we did not retrieve any body messages we don't need to process metadata stanzas (if any),
+            //but signal we reached the end of our archive
             DDLogDebug(@"Reached upper end of mam:2 archive");
             [promise fulfill:@[]];
             return;
@@ -881,8 +880,7 @@ $$class_handler(handlePasswordChangeInvalidation, $$ID(xmpp*, account), $$ID(NSS
     DDLogError(@"Could not change the password of '%@'", jid);
     [SAMKeychain deletePasswordForService:kMonalTmpKeychainName account:uuid];
     NSString* errorMessage = [NSString stringWithFormat:NSLocalizedString(@"Could not change the password of '%@'. Please try again.", @""), jid];
-    NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
-    [promise reject:error];
+    [promise reject:[HelperTools getNSErrorFrom:nil withDescription:errorMessage]];
 $$
 
 $$class_handler(handlePasswordChange, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, uuid), $$PROMISE(promise))
@@ -891,9 +889,8 @@ $$class_handler(handlePasswordChange, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode
     {
         DDLogError(@"Changing the password of '%@' returned error: %@", jid, [iqNode findFirst:@"error"]);
         [SAMKeychain deletePasswordForService:kMonalTmpKeychainName account:uuid];
-        NSString* errorMessage = [HelperTools extractXMPPError:iqNode withDescription:[NSString stringWithFormat:NSLocalizedString(@"Could not change the password of '%@'", @""), jid]];
-        NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
-        [promise reject:error];
+        NSString* errorMessage = [NSString stringWithFormat:NSLocalizedString(@"Could not change the password of '%@'", @""), jid];
+        [promise reject:[HelperTools getNSErrorFrom:iqNode withDescription:errorMessage]];
     }
     else
     {

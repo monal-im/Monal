@@ -1344,7 +1344,7 @@ $$
 $$instance_handler(handleAffiliationUpdateResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid), $$PROMISE(promise))
     DDLogError(@"Failed to change affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
     NSString* errorString = [NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@': please try again", @""), jid, roomJid, affiliation];
-    [promise reject:[NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}]];
+    [promise reject:[HelperTools getNSErrorFrom:nil withDescription:errorString]];
 $$
 
 $$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, affiliation), $$ID(NSString*, jid), $$ID(NSString*, roomJid), $$PROMISE(promise))
@@ -1352,7 +1352,7 @@ $$instance_handler(handleAffiliationUpdateResult, account.mucProcessor, $$ID(xmp
     {
         DDLogError(@"Failed to change affiliation of '%@' in '%@' to '%@': %@", jid, roomJid, affiliation, [iqNode findFirst:@"error"]);
         NSString* errorString = [HelperTools extractXMPPError:iqNode withDescription:[NSString stringWithFormat:NSLocalizedString(@"Failed to change affiliation of '%@' in '%@' to '%@'", @""), jid, roomJid, affiliation]];
-        [promise reject:[NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}]];
+        [promise reject:[HelperTools getNSErrorFrom:iqNode withDescription:errorString]];
         return;
     }
     DDLogInfo(@"Successfully changed affiliation of '%@' in '%@' to '%@'", jid, roomJid, affiliation);
@@ -1410,8 +1410,7 @@ $$
 
 $$instance_handler(handleAvatarPublishResultInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room), $$PROMISE(promise))
     NSString* errorString = [NSString stringWithFormat:NSLocalizedString(@"Failed to publish avatar image for group/channel %@: please try again", @""), room];
-    NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}];
-    [promise reject:error];
+    [promise reject:[HelperTools getNSErrorFrom:nil withDescription:errorString]];
 $$
 
 $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$PROMISE(promise))
@@ -1419,8 +1418,7 @@ $$instance_handler(handleAvatarPublishResult, account.mucProcessor, $$ID(xmpp*, 
     {
         DDLogError(@"Publishing avatar for muc '%@' returned error: %@", iqNode.fromUser, [iqNode findFirst:@"error"]);
         NSString* errorString = [NSString stringWithFormat:NSLocalizedString(@"Failed to publish avatar image for group/channel %@", @""), iqNode.fromUser];
-        NSError* error = [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorString}];
-        [promise reject:error];
+        [promise reject:[HelperTools getNSErrorFrom:iqNode withDescription:errorString]];
         return;
     }
     DDLogInfo(@"Successfully published avatar for muc: %@", iqNode.fromUser);

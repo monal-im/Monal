@@ -650,7 +650,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 #endif
 }
 
-+(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString*) description
++(NSString*) extractXMPPError:(XMPPStanza* _Nullable) stanza withDescription:(NSString*) description
 {
     if(description == nil || [description isEqualToString:@""])
         description = @"XMPP Error";
@@ -664,7 +664,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     return message;
 }
 
-+(NSError*) getNSErrorFrom:(XMPPStanza*) stanza withDescription:(NSString*) description
++(NSError*) getNSErrorFrom:(XMPPStanza* _Nullable) stanza withDescription:(NSString*) description
 {
     NSString* errorMessage = [HelperTools extractXMPPError:stanza withDescription:description];
     return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage, @"stanza": stanza}];

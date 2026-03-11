@@ -1374,7 +1374,7 @@ NSString* const kStanza = @"stanza";
     {
         DDLogInfo(@"%@: creating parser delegate", self->_logtag);
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
-            DDLogVerbose(@"%@: Parse finished for new <%@> stanza...", self->_logtag, parsedStanza.element);
+            DDLogVerbose(@"%@: Parse finished for new <%@> stanza (id=%@)...", self->_logtag, parsedStanza.element, [parsedStanza findFirst:@"/@id"]);
             
             //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
             //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,

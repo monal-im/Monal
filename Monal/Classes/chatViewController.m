@@ -3461,7 +3461,6 @@ enum msgSentState {
         if([subview isKindOfClass:[UILabel class]]){
             UILabel *infoLabel = (UILabel*)subview;
             [infoLabel setText:[NSString stringWithFormat:NSLocalizedString(@"%02d:%02d (long press to abort)", @""), durationMinutes, durationSeconds]];
-            [infoLabel setTextColor:[UIColor blackColor]];
         }
     }
 }

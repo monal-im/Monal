@@ -162,21 +162,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
 @property (nonatomic, assign) BOOL bind2Inlined;
 
 /**
- h to go out in r stanza
- */
-@property (nonatomic, strong) NSNumber* lastHandledInboundStanza;
-
-/**
- h from a stanza
- */
-@property (nonatomic, strong) NSNumber* lastHandledOutboundStanza;
-
-/**
- internal counter that should match lastHandledOutboundStanza
- */
-@property (nonatomic, strong) NSNumber* lastOutboundStanza;
-
-/**
  Array of NSDictionary with stanzas that have not been acked.
  NSDictionary {queueID, stanza}
  */
@@ -2445,6 +2430,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
                     self.streamID = [parsedStanza findFirst:@"/@id"];
                 else
                     self.streamID = nil;
+                
+                //record statistics
+                self.connectionProperties.smacksSessionEstablished = [NSDate date];
 
                 //persist these changes (streamID and initSM3)
                 [self persistState];
@@ -2632,6 +2620,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
             [self accountStatusChanged];
+            
+            //record statistics
+            self.connectionProperties.lastLogin = [NSDate date];
             
             //cleanup
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
@@ -2888,6 +2879,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
             [self accountStatusChanged];
+            
+            //record statistics
+            self.connectionProperties.lastLogin = [NSDate date];
             
             //clean up
             self->_scramHandler = nil;
@@ -4159,6 +4153,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 [values setObject:[self->_reconnectionHandlers copy] forKey:@"reconnectionHandlers"];
             }
 
+            //store statistics
+            [values setValue:self.connectionProperties.smacksSessionEstablished forKey:@"smacksSessionEstablished"];
+            [values setValue:self.connectionProperties.lastLogin forKey:@"lastLogin"];
+            
             [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
             [values setValue:[self.connectionProperties.serverDiscoFeatures copy] forKey:@"serverDiscoFeatures"];
             [values setValue:[self.connectionProperties.accountDiscoFeatures copy] forKey:@"accountDiscoFeatures"];
@@ -4321,6 +4319,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 [_reconnectionHandlers removeAllObjects];
                 [_reconnectionHandlers addObjectsFromArray:[dic objectForKey:@"reconnectionHandlers"]];
             }
+            
+            //read statistics
+            self.connectionProperties.smacksSessionEstablished = [dic objectForKey:@"smacksSessionEstablished"];
+            self.connectionProperties.lastLogin = [dic objectForKey:@"lastLogin"];
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
             self.connectionProperties.serverDiscoFeatures = [dic objectForKey:@"serverDiscoFeatures"];

@@ -55,7 +55,7 @@ private struct ServerDetailsEntry: View {
 }
 
 struct ServerDetails: View {
-    let  xmppAccount: xmpp
+    @StateObject var xmppAccount: ObservableKVOWrapper<xmpp>
 
     private func showServerVersionInfoView(connection: MLXMPPConnection) -> some View {
         let serverVersion = connection.serverVersion
@@ -72,6 +72,43 @@ struct ServerDetails: View {
                 status: .normal
             )
         )
+    }
+    
+    @ViewBuilder
+    private func getServerStatisticsData(connection: MLXMPPConnection) -> some View {
+        let lastLogin = connection.lastLogin != nil ? "\(DateFormatter.localizedString(from: connection.lastLogin!, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short))" : NSLocalizedString("<unknown>", comment: "server details - connection statistics")
+        let smacksSessionEstablished = connection.smacksSessionEstablished != nil ? "\(DateFormatter.localizedString(from: connection.smacksSessionEstablished!, dateStyle: DateFormatter.Style.short, timeStyle: DateFormatter.Style.short))" : NSLocalizedString("<unknown>", comment: "server details - connection statistics")
+        let lastOutboundStanza = (xmppAccount.lastOutboundStanza as NSNumber).uintValue
+        let lastHandledOutboundStanza = (xmppAccount.lastHandledOutboundStanza as NSNumber).uintValue
+        let lastHandledInboundStanza = (xmppAccount.lastHandledInboundStanza as NSNumber).uintValue
+        let unacked = lastOutboundStanza - lastHandledOutboundStanza
+        let entries = [
+            EntryData(
+                title: NSLocalizedString("Last login", comment: "server details - connection statistics"),
+                description: "\(lastLogin)",
+                status: .normal
+            ),
+            EntryData(
+                title: NSLocalizedString("Stream management session established", comment: "server details - connection statistics"),
+                description: "\(smacksSessionEstablished)",
+                status: .normal
+            ),
+            EntryData(
+                title: NSLocalizedString("Stanzas sent / unacked / received in this session", comment: "server details - connection statistics"),
+                description: "\(lastOutboundStanza) / \(unacked) / \(lastHandledInboundStanza)",
+                status: .normal
+            ),
+        ]
+        
+        ForEach(entries) { entryData in
+            VStack(alignment: .leading) {
+                Text(entryData.title)
+                    .font(.headline)
+                Text(entryData.description)
+                    .font(.caption)
+            }
+            .listRowBackground(entryData.color)
+        }
     }
 
     private func getXEPEntryData(connection: MLXMPPConnection) -> [EntryData] {
@@ -262,8 +299,8 @@ struct ServerDetails: View {
         return result
     }
 
-    private func getSRVEntryData(xmppAccount: xmpp) -> [EntryData] {
-        guard xmppAccount.discoveredServersList.count > 0 else {
+    private func getSRVEntryData(xmppAccount: ObservableKVOWrapper<xmpp>) -> [EntryData] {
+        guard (xmppAccount.discoveredServersList as [[String: Any]]? ?? []).count > 0 else {
             return [
                 EntryData(
                     title: NSLocalizedString("None", comment: ""),
@@ -275,7 +312,7 @@ struct ServerDetails: View {
 
         var result: [EntryData] = []
         var foundCurrentConn: Bool = false
-        for srvEntry in (xmppAccount.discoveredServersList as? [[String: Any]] ?? []) {
+        for srvEntry in (xmppAccount.discoveredServersList as [[String: Any]]? ?? []) {
             let hostname = srvEntry["server"] as? String ?? ""
             let port = srvEntry["port"] as? NSNumber ?? 5222
             let isSecure = srvEntry["isSecure"] as? Bool ?? false
@@ -284,9 +321,9 @@ struct ServerDetails: View {
             var entryStatus = Status.normal
 
             // 'connectServer()' has been renamed to 'connect()'
-            if (xmppAccount.connectionProperties.server.connect() == hostname &&
-                xmppAccount.connectionProperties.server.connectPort() == port &&
-                xmppAccount.connectionProperties.server.isDirectTLS() == isSecure
+            if (xmppAccount.obj.connectionProperties.server.connect() == hostname &&
+                xmppAccount.obj.connectionProperties.server.connectPort() == port &&
+                xmppAccount.obj.connectionProperties.server.isDirectTLS() == isSecure
             ) {
                 entryStatus = .success
                 foundCurrentConn = true
@@ -386,7 +423,7 @@ struct ServerDetails: View {
         return result
     }
 
-    private func getChannelBindingEntryData(xmppAccount: xmpp, connection: MLXMPPConnection) -> [EntryData] {
+    private func getChannelBindingEntryData(xmppAccount: ObservableKVOWrapper<xmpp>, connection: MLXMPPConnection) -> [EntryData] {
         guard connection.channelBindingTypes.count > 0 else {
             return [
                 EntryData(
@@ -399,7 +436,7 @@ struct ServerDetails: View {
 
         var result: [EntryData] = []
         let channelBindingTypes = connection.channelBindingTypes as? [String: Bool] ?? [:]
-        let supportedChannelBindingTypes = xmppAccount.supportedChannelBindingTypes as? [String] ?? []
+        let supportedChannelBindingTypes = xmppAccount.supportedChannelBindingTypes as [String]? ?? []
         for (type, used) in channelBindingTypes.sortedByKey() {
             let supported = supportedChannelBindingTypes.contains(type)
             var description: String
@@ -425,9 +462,13 @@ struct ServerDetails: View {
     }
 
     var body: some View {
-        let connection = xmppAccount.connectionProperties
+        let connection = xmppAccount.connectionProperties as MLXMPPConnection
 
         List {
+            Section(header: Text("These are your connection statistics.")) {
+                getServerStatisticsData(connection: connection)
+            }
+            
             Section(header: Text("This is the software running on your server.")) {
                 showServerVersionInfoView(connection: connection)
             }

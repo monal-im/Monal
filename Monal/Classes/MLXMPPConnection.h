@@ -68,6 +68,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL supportsSSDP;
 @property (nonatomic, strong) NSString* tlsVersion;
 
+@property (nonatomic, strong) NSDate* _Nullable smacksSessionEstablished;
+@property (nonatomic, strong) NSDate* _Nullable lastLogin;
+
 -(id) initWithServer:(MLXMPPServer*) server andIdentity:(MLXMPPIdentity*) identity;
 
 @end

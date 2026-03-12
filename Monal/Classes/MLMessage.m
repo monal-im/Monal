@@ -44,7 +44,9 @@ static NSMutableDictionary* _singletonCache;
         }
         
         MLMessage* message = [self createMessageFromDatabaseWithHistoryID:historyID];
-        _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:message];
+        @synchronized(_singletonCache) {
+            _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:message];
+        }
         
         //fill reactions *after* adding this message to our singleton cache to not create an endless loop
         //(the reactions reference back to this message, but don't store a reference, so no retain cycle)

@@ -884,14 +884,14 @@ class SwiftuiInterface : NSObject {
     @objc
     func makeServerDetailsView(for xmppAccount: xmpp) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-            host.rootView = AnyView(UIKitWorkaround(ServerDetails(xmppAccount: xmppAccount)))
+        host.rootView = AnyView(UIKitWorkaround(ServerDetails(xmppAccount: ObservableKVOWrapper<xmpp>(xmppAccount))))
         return host
     }
 
     @objc
     func makeBlockedUsersView(for xmppAccount: xmpp) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-            host.rootView = AnyView(UIKitWorkaround(BlockedUsers(xmppAccount: xmppAccount)))
+        host.rootView = AnyView(UIKitWorkaround(BlockedUsers(xmppAccount: xmppAccount)))
         return host
     }
 

@@ -107,6 +107,11 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, strong, readonly) NSString* capsHash;
 @property (nullable, nonatomic, strong, readonly) NSArray* supportedChannelBindingTypes;
 
+//for statistics
+@property (nonatomic, strong) NSNumber* lastHandledInboundStanza;
+@property (nonatomic, strong) NSNumber* lastHandledOutboundStanza;
+@property (nonatomic, strong) NSNumber* lastOutboundStanza;
+
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountID:(NSNumber*) accountID;
 
 -(void) freezeParseQueue;

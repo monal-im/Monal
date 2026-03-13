@@ -20,6 +20,7 @@
 
 #import "MLStream.h"
 #import "MLPipe.h"
+#import "MLDelayedDealloc.h"
 #import "MLProcessLock.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
@@ -836,6 +837,8 @@ NSString* const kStanza = @"stanza";
 -(void) unfreeze
 {
     @synchronized(self) {
+        NSCondition* condition = [NSCondition new];
+        [condition lock];
         DDLogInfo(@"Unfreezing account: %@", self);
         
         //make sure we don't have any race conditions by dispatching this to our receive queue
@@ -857,6 +860,11 @@ NSString* const kStanza = @"stanza";
                 [self unfreezeParseQueue];
                 
                 [self unfreezeSendQueue];
+                
+                //unblock waiting outer thread
+                [condition lock];
+                [condition signal];
+                [condition unlock];
             }
         }];
         unfreezeOperation.queuePriority = NSOperationQueuePriorityVeryHigh;     //make sure this will become the first operation executed once unfrozen
@@ -864,6 +872,10 @@ NSString* const kStanza = @"stanza";
         
         //unfreeze receive queue and execute block added above
         self->_receiveQueue.suspended = NO;
+        
+        //wait for completion signal
+        [condition wait];
+        [condition unlock];
     }
 }
 
@@ -1008,20 +1020,10 @@ NSString* const kStanza = @"stanza";
 
             //reset smacks state to sane values (this can be done even if smacks is not supported)
             [self initSM3];
-            self.unAckedStanzas = stanzas;
+            [self replaceUnackedStanzasWith:stanzas];
             
             //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-            @synchronized(self->_iqHandlers) {
-                for(NSString* iqid in [self->_iqHandlers allKeys])
-                {
-                    DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                    if(self->_iqHandlers[iqid][@"handler"] != nil)
-                        $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self), $ID(reason, @"disconnect"));
-                    else if(self->_iqHandlers[iqid][@"errorHandler"])
-                        ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
-                }
-                self->_iqHandlers = [NSMutableDictionary new];
-            }
+            [self invalidateIQHandlersWithReason:@"disconnect"];
             
             //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
             [self.pubsub invalidateQueue];
@@ -1106,6 +1108,7 @@ NSString* const kStanza = @"stanza";
                             ((monal_iq_handler_t)data[@"errorHandler"])(nil);
                     }
                     [self->_iqHandlers removeObjectForKey:iqid];
+                    [MLDelayedDealloc delayFor:data];
                 }
             }
         }
@@ -1140,20 +1143,10 @@ NSString* const kStanza = @"stanza";
 
                 //reset smacks state to sane values (this can be done even if smacks is not supported)
                 [self initSM3];
-                self.unAckedStanzas = stanzas;
+                [self replaceUnackedStanzasWith:stanzas];
                 
                 //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-                @synchronized(self->_iqHandlers) {
-                    for(NSString* iqid in [self->_iqHandlers allKeys])
-                    {
-                        DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                        if(self->_iqHandlers[iqid][@"handler"] != nil)
-                            $invalidate(self->_iqHandlers[iqid][@"handler"], $ID(account, self), $ID(reason, @"disconnect"));
-                        else if(self->_iqHandlers[iqid][@"errorHandler"])
-                            ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
-                    }
-                    self->_iqHandlers = [NSMutableDictionary new];
-                }
+                [self invalidateIQHandlersWithReason:@"disconnect"];
                 
                 //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
                 [self.pubsub invalidateQueue];
@@ -1344,6 +1337,27 @@ NSString* const kStanza = @"stanza";
     }
 }
 
+-(void) invalidateIQHandlersWithReason:(NSString*) reason
+{
+    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
+    @synchronized(_iqHandlers) {
+        //make sure this works even if the invalidation handlers add a new iq to the list
+        NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
+        [_iqHandlers removeAllObjects];
+        
+        for(NSString* iqid in handlersCopy)
+        {
+            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+            if(handlersCopy[iqid][@"handler"] != nil)
+                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self), $ID(reason));
+            else if(handlersCopy[iqid][@"errorHandler"])
+                ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
+        }
+        
+        [MLDelayedDealloc delayFor:handlersCopy];
+    }
+}
+
 #pragma mark XMPP
 
 -(void) prepareXMPPParser
@@ -1360,7 +1374,7 @@ NSString* const kStanza = @"stanza";
     {
         DDLogInfo(@"%@: creating parser delegate", self->_logtag);
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
-            DDLogVerbose(@"%@: Parse finished for new <%@> stanza...", self->_logtag, parsedStanza.element);
+            DDLogVerbose(@"%@: Parse finished for new <%@> stanza (id=%@)...", self->_logtag, parsedStanza.element, [parsedStanza findFirst:@"/@id"]);
             
             //don't parse any more if we reached > 50 stanzas already parsed and waiting in parse queue
             //this makes ure we don't need to much memory while parsing a flood of stanzas and, in theory,
@@ -1663,7 +1677,7 @@ NSString* const kStanza = @"stanza";
         self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] - [self.unAckedStanzas count]];
         //Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
         //It may also result in mutation on iteration
-        [self.unAckedStanzas removeAllObjects];
+        [self replaceUnackedStanzasWith:[NSMutableArray new]];
         for(NSDictionary* dic in sendCopy)
             [self send:(XMPPStanza*)[dic objectForKey:kStanza]];
         DDLogInfo(@"Done resending unacked stanzas...");
@@ -1791,7 +1805,7 @@ NSString* const kStanza = @"stanza";
             }
 
             [iterationArray removeObjectsInArray:discard];
-            self.unAckedStanzas = iterationArray;
+            [self replaceUnackedStanzasWith:iterationArray];
 
             //persist these changes (but only if we actually made some changes)
             if([discard count])
@@ -2571,10 +2585,12 @@ NSString* const kStanza = @"stanza";
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL Success");
             
+            //increment state
             self->_accountState = kStateLoggedIn;
             [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
             [self accountStatusChanged];
             
+            //cleanup
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
             {
@@ -2788,15 +2804,18 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
             self.connectionProperties.channelBindingTypes = channelBindings;
             
-            //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
-            [self.connectionProperties.identity bindJid:[parsedStanza findFirst:@"authorization-identifier#"] onAccount:self];
-            
             //record SDDP support
             self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
+            //increment state
+            self->_accountState = kStateLoggedIn;
+            [[MLNotificationQueue currentQueue] postNotificationName:kMLIsLoggedInNotice object:self];
+            [self accountStatusChanged];
+            
+            //clean up
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
             //only increment account state if we are still trying to login (calling bindJid could have triggered a disconnect)
@@ -2820,8 +2839,6 @@ NSString* const kStanza = @"stanza";
             //NOTE: we don't have any stream restart when using SASL2
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
             _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
-            
-            [self accountStatusChanged];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}continue"])
         {
@@ -3401,16 +3418,21 @@ NSString* const kStanza = @"stanza";
 
 #pragma mark stanza handling
 
-// -(AnyPromise*) sendIq:(XMPPIQ*) iq
-// {
-//     return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
-//         [self sendIq:iq withResponseHandler:^(XMPPIQ* response) {
-//             resolve(response);
-//         } andErrorHandler:^(XMPPIQ* error) {
-//             resolve(error);
-//         }];
-//     }];
-// }
+-(AnyPromise*) sendIq:(XMPPIQ*) iq
+{
+    return [self sendIq:iq withErrorDescription:nil];
+}
+
+-(AnyPromise*) sendIq:(XMPPIQ*) iq withErrorDescription:(NSString*) description
+{
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        [self sendIq:iq withResponseHandler:^(XMPPIQ* response) {
+            resolve(response);
+        } andErrorHandler:^(XMPPIQ* error) {
+            resolve([HelperTools getNSErrorFrom:error withDescription:description]);
+        }];
+    }];
+}
 
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
 {
@@ -3802,7 +3824,7 @@ NSString* const kStanza = @"stanza";
             self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
             self.lastOutboundStanza = [dic objectForKey:@"lastOutboundStanza"];
             NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
-            self.unAckedStanzas = [stanzas mutableCopy];
+            [self replaceUnackedStanzasWith:[stanzas mutableCopy]];
             self.streamID = [dic objectForKey:@"streamID"];
             if([dic objectForKey:@"isDoingFullReconnect"])
             {
@@ -3826,7 +3848,7 @@ NSString* const kStanza = @"stanza";
             NSMutableDictionary* persistentIqHandlerDescriptions = [NSMutableDictionary new];
             @synchronized(_iqHandlers) {
                 //remove all current persistent handlers...
-                NSMutableDictionary* handlersCopy = [_iqHandlers copy];
+                NSMutableDictionary* __block handlersCopy = [_iqHandlers copy];
                 for(NSString* iqid in handlersCopy)
                     if(handlersCopy[iqid][@"handler"] != nil)
                         [_iqHandlers removeObjectForKey:iqid];
@@ -3836,6 +3858,10 @@ NSString* const kStanza = @"stanza";
                     _iqHandlers[iqid] = [persistentIqHandlers[iqid] mutableCopy];
                     persistentIqHandlerDescriptions[iqid] = [NSString stringWithFormat:@"%@: %@", persistentIqHandlers[iqid][@"timeout"], persistentIqHandlers[iqid][@"handler"]];
                 }
+                
+                //this might take a long time since it throws away all handlers and their associated data, which might be deeply nested MLXMLNodes
+                //--> move deallocation into a background thread
+                [MLDelayedDealloc delayFor:handlersCopy];
             }
             
             @synchronized(self->_reconnectionHandlers) {
@@ -4034,11 +4060,22 @@ NSString* const kStanza = @"stanza";
         self.lastHandledInboundStanza = [NSNumber numberWithInteger:0];
         self.lastHandledOutboundStanza = [NSNumber numberWithInteger:0];
         self.lastOutboundStanza = [NSNumber numberWithInteger:0];
-        self.unAckedStanzas = [NSMutableArray new];
+        [self replaceUnackedStanzasWith:[NSMutableArray new]];
         self.streamID = nil;
         _smacksAckHandler = [NSMutableArray new];
         DDLogDebug(@"initSM3 done");
     }
+}
+
+-(NSMutableArray*) replaceUnackedStanzasWith:(NSMutableArray*) newUnackedStanzas
+{
+    @synchronized(_stateLockObject) {
+        //this might take a long time since it throws away all self.unAckedStanzas and thus calls dealloc on each of them in each nesting level
+        //--> move deallocation into a background thread
+        [MLDelayedDealloc delayFor:self.unAckedStanzas];
+        self.unAckedStanzas = newUnackedStanzas;
+    }
+    return newUnackedStanzas;
 }
 
 -(void) bindResource:(NSString*) resource
@@ -4058,22 +4095,7 @@ NSString* const kStanza = @"stanza";
     //delete old resources because we get new presences once we're done initializing the session
     [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
     
-    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-    @synchronized(_iqHandlers) {
-        //make sure this works even if the invalidation handlers add a new iq to the list
-        NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
-        [_iqHandlers removeAllObjects];
-        
-        for(NSString* iqid in handlersCopy)
-        {
-            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-            if(handlersCopy[iqid][@"handler"] != nil)
-                $invalidate(handlersCopy[iqid][@"handler"], $ID(account, self), $ID(reason, @"bind"));
-            else if(handlersCopy[iqid][@"errorHandler"])
-                ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
-        }
-        
-    }
+    [self invalidateIQHandlersWithReason:@"bind"];
     
     //invalidate pubsub queue (a pubsub operation will be either invalidated by an iq handler above OR by the invalidation here, but never twice!)
     [self.pubsub invalidateQueue];
@@ -5779,6 +5801,14 @@ NSString* const kStanza = @"stanza";
 {
     self.statusMessage = message;
     [self sendPresence];
+}
+
+-(AnyPromise*) pingPushserver
+{
+    NSString* selectedPushServer = [[HelperTools defaultsDB] objectForKey:@"selectedPushServer"];
+    XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType to:selectedPushServer];
+    [ping setPing];
+    return [self sendIq:ping withErrorDescription:@"Ping error"];
 }
 
 -(NSString*) description

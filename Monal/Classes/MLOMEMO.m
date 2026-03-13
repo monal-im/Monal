@@ -286,6 +286,8 @@ static NSDictionary* trustLevels2Text = nil;
     [self checkBundleFetchCount];
     
     DDLogVerbose(@"New state: %@", self.state);
+    
+    [self cleanupOwnOldDevices];
 }
 
 -(void) retriggerKeyTransportElementsForJid:(NSString*) jid
@@ -308,6 +310,8 @@ static NSDictionary* trustLevels2Text = nil;
         [self.state.queuedKeyTransportElements removeObjectForKey:jid];
         [self sendKeyTransportElement:jid forRids:rids];
     }
+    
+    [self cleanupOwnOldDevices];
 }
 
 $$instance_handler(devicelistHandler, account.omemo, $$ID(xmpp*, account), $$ID(NSString*, node), $$ID(NSString*, jid), $$ID(NSString*, type), $_ID((NSDictionary<NSString*, MLXMLNode*>*), data))
@@ -563,6 +567,29 @@ $$
 -(void) cleanupOwnOldDevices
 {
     NSString* jid = self.account.connectionProperties.identity.jid;
+    
+    //don't try to clean up in all these cases
+    @synchronized(self.state.queuedKeyTransportElements) {
+        if(self.state.queuedKeyTransportElements[jid] != nil && [self.state.queuedKeyTransportElements[jid] count] > 0)
+        {
+            DDLogWarn(@"Not cleaning up own old devices: key transport elements still queued!");
+            return;
+        }
+    }
+    @synchronized(self.state.queuedSessionRepairs) {
+        if(self.state.queuedSessionRepairs[jid] != nil && [self.state.queuedSessionRepairs[jid] count] > 0)
+        {
+            DDLogWarn(@"Not cleaning up own old devices: session repairs still queued!");
+            return;
+        }
+    }
+    if(self.state.openBundleFetches[jid] != nil && self.state.openBundleFetches[jid].count > 0)
+    {
+        DDLogWarn(@"Not cleaning up own old devices: bundle fetches still pending!");
+        return;
+    }
+    
+    NSMutableArray* deletedDevices = [NSMutableArray new];
     for(NSNumber* device in [self.ownDeviceList copy])
     {
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)device.unsignedIntValue];
@@ -578,7 +605,17 @@ $$
         //remove own old devices (these clients will add thei id back, if they are still active)
         //this is what conversations does, too
         if(trust == MLOmemoToFUButNoMsgSeenInTime || trust == MLOmemoTrustedButNoMsgSeenInTime)
+        {
+            DDLogWarn(@"Device %@ is old, trust=%d --> deleting...", device, trust);
             [self bulkDeleteDeviceForSource:jid andRid:device];
+            [deletedDevices addObject:device];
+        }
+    }
+    //publish our changes, but only if we actually changed someting
+    if(deletedDevices.count > 0)
+    {
+        DDLogInfo(@"Deleted at least one device in our own devicelist, publishing the cleaned up devicelist now...");
+        [self publishOwnDeviceList];
     }
 }
 
@@ -1423,8 +1460,10 @@ $$
             }
             
             //make sure the dh ratchet always advances, even on "receive only" devices
-            //--> force a key transport message with 1% probability (~ every 100th message)
-            if(arc4random_uniform(100)==42)
+            //--> force a key transport message with 1% probability
+            //that means after 100 messages there is a 87% probability we sent at least one key transport message
+            //and after 200 messages the probability for at least one key transport message is 98% (its 99,9% after 341 messages)
+            if(arc4random_uniform(50)==42)
                 [self sendKeyTransportElement:senderJid forRids:[NSSet setWithArray:@[sid]]];
 
             //some clients have the auth parameter in the ciphertext?

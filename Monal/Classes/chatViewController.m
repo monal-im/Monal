@@ -3409,6 +3409,14 @@ enum msgSentState {
 
 -(void) notifyStop:(NSURL* _Nullable) fileURL
 {
+    //switch back to default audio settings destroyed by recorder
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [HelperTools configureDefaultAudioSession];
+        MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
+        DDLogVerbose(@"Setting audio state to MLAudioStateNormal...");
+        appDelegate.audioState = MLAudioStateNormal;
+    });
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_isRecording = NO;
         [self.audioRecoderInfoView removeFromSuperview];
@@ -3453,20 +3461,27 @@ enum msgSentState {
         if([subview isKindOfClass:[UILabel class]]){
             UILabel *infoLabel = (UILabel*)subview;
             [infoLabel setText:[NSString stringWithFormat:NSLocalizedString(@"%02d:%02d (long press to abort)", @""), durationMinutes, durationSeconds]];
-            [infoLabel setTextColor:[UIColor blackColor]];
         }
     }
 }
 
 -(void) notifyResult:(BOOL)isSuccess error:(NSString*) errorMsg
 {
+    //switch back to default audio settings destroyed by recorder
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [HelperTools configureDefaultAudioSession];
+        MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
+        DDLogVerbose(@"Setting audio state to MLAudioStateNormal...");
+        appDelegate.audioState = MLAudioStateNormal;
+    });
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_isRecording = NO;
         NSString* alertTitle = @"";
         if(isSuccess) {
-            alertTitle = NSLocalizedString(@"Recode Success", @"");
+            alertTitle = NSLocalizedString(@"Recording succeeded", @"");
         } else {
-            alertTitle = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Recode Fail:", @""), errorMsg];
+            alertTitle = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Recording failed: ", @""), errorMsg];
         }
 
         UIAlertController* audioRecoderAlert = [UIAlertController alertControllerWithTitle:alertTitle

@@ -97,9 +97,9 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0048.html" />
-        <xmpp:status>complete</xmpp:status>
+        <xmpp:status>removed</xmpp:status>
         <xmpp:version>1.2</xmpp:version>
-        <xmpp:since>5.0</xmpp:since>
+        <xmpp:since>7.0</xmpp:since>
       </xmpp:SupportedXep>
     </implements>
     <implements>

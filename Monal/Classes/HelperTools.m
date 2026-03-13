@@ -529,6 +529,12 @@ void swizzle(Class c, SEL orig, SEL new)
     return message;
 }
 
++(NSError*) getNSErrorFrom:(XMPPStanza*) stanza withDescription:(NSString*) description
+{
+    NSString* errorMessage = [HelperTools extractXMPPError:stanza withDescription:description];
+    return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+}
+
 +(void) initSystem
 {
     BOOL enableDefaultLogAndCrashFramework = YES;
@@ -696,16 +702,18 @@ void swizzle(Class c, SEL orig, SEL new)
             NSCondition* condition = [NSCondition new];
             [condition lock];
             NSThread* newRunloopThread = [[NSThread alloc] initWithBlock:^{
-                //we don't need an @synchronized block around this because the @synchronized block of the outer thread
-                //waits until we signal our condition (e.g. no other thread can race with us)
-                NSRunLoop* localLoop = runloops[@(identifier)] = [NSRunLoop currentRunLoop];
-                [condition lock];
-                [condition signal];
-                [condition unlock];
-                while(YES)
-                {
-                    [localLoop run];
-                    usleep(10000);          //sleep 10ms if we ever return from our runloop to not consume too much cpu
+                @autoreleasepool {
+                    //we don't need an @synchronized block around this because the @synchronized block of the outer thread
+                    //waits until we signal our condition (e.g. no other thread can race with us)
+                    NSRunLoop* localLoop = runloops[@(identifier)] = [NSRunLoop currentRunLoop];
+                    [condition lock];
+                    [condition signal];
+                    [condition unlock];
+                    while(YES)
+                    {
+                        [localLoop run];
+                        usleep(10000);          //sleep 10ms if we ever return from our runloop to not consume too much cpu
+                    }
                 }
             }];
             //configure and start thread
@@ -2156,6 +2164,11 @@ void swizzle(Class c, SEL orig, SEL new)
     KSCrash* handler = [KSCrash sharedInstance];
     handler.basePath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
     handler.monitoring = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
+    //don't try to debug zombies if not in debug mode
+//#ifndef DEBUG
+#ifndef IS_ALPHA
+    handler.monitoring = handler.monitoring & (~KSCrashMonitorTypeZombie);
+#endif
     handler.onCrash = crash_callback;
     //this can trigger crashes on macos < 13 (e.g. mac catalyst < 16) (and possibly ios < 16)
 #if !TARGET_OS_MACCATALYST

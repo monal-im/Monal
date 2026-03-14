@@ -789,6 +789,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     MLAssert([elements count] > 1, @"Got invalid jid", (@{@"jid": nilWrapper(jid), @"elements": elements}));
     NSString* domain = ((NSString*)[elements objectAtIndex:1]).lowercaseString;
 
+    //THE FOLLOWING ARE OUTDATED THOUGHTS, WE CURRENTLY WANT TO ALLOW PLAIN AND ONLY BLOCK PLAIN FOR KNOWN PLAIN-OFF SERVERS
     //we don't want to set kPlainActivated (not even according to our preload list) and default to plain_activated=false,
     //because the error message will warn the user and direct them to the advanced account creation menu to activate PLAIN
     //if they still want to connect to this server
@@ -798,7 +799,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //TODO: use preload list and allow PLAIN for all others once enough domains are on this list
     //allow plain for all servers not on preload list, since prosody with SASL2 wasn't even released yet
     BOOL defaultPlainActivated = YES;
-    BOOL plainActivated = ([domain isEqualToString:@"yax.im"] || [domain isEqualToString:@"quicksy.im"]) ? YES : defaultPlainActivated;
+    BOOL plainActivated = ([domain isEqualToString:@"yax.im"] || [domain isEqualToString:@"quicksy.im"] || [domain isEqualToString:@"conversations.im"]) ? NO : defaultPlainActivated;
 
     return [self login:jid password:password hardcodedServer:nil hardcodedPort:nil forceDirectTLS:NO allowPlainAuth:plainActivated];
 }

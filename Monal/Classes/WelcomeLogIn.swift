@@ -241,9 +241,9 @@ struct WelcomeLogIn: View {
                                     Text("Allow MITM-prone PLAIN authentication")
                                 }
                                 // TODO: use the SCRAM preload list instead of hardcoding servers
-                                .disabled(["conversations.im"].contains(jidDomainPart.lowercased()))
+                                .disabled(["yax.im", "conversations.im"].contains(jidDomainPart.lowercased()))
                                 .onChange(of: jid) { _ in
-                                    if ["conversations.im"].contains(jidDomainPart.lowercased()) {
+                                    if ["yax.im", "conversations.im"].contains(jidDomainPart.lowercased()) {
                                         allowPlainAuth = false
                                     }
                                 }

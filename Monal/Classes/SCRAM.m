@@ -101,7 +101,7 @@
     else
         _gssHeader = [NSString stringWithFormat:@"p=%@,,", channelBindingType];
     //the g attribute is a random grease to check if servers are rfc compliant (e.g. accept optional attributes)
-    _clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@,g=%@", [self quote:_username], _nonce, [NSUUID UUID].UUIDString];
+    _clientFirstMessageBare = [NSString stringWithFormat:@"n=%@,r=%@", [self quote:_username], _nonce];
     return [NSString stringWithFormat:@"%@%@", _gssHeader, _clientFirstMessageBare];
 }
 
@@ -157,7 +157,7 @@
     
     //calculate authMessage (e.g. client-first-message-bare + "," + server-first-message + "," + client-final-message-without-proof)
     //the x attribute is a random grease to check if servers are rfc compliant (e.g. accept optional attributes)
-    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@,x=%@", [HelperTools encodeBase64WithData:gssHeaderWithChannelBindingData], _nonce, [NSUUID UUID].UUIDString];
+    NSString* clientFinalMessageWithoutProof = [NSString stringWithFormat:@"c=%@,r=%@", [HelperTools encodeBase64WithData:gssHeaderWithChannelBindingData], _nonce];
     NSString* authMessage = [NSString stringWithFormat:@"%@,%@,%@", _clientFirstMessageBare, _serverFirstMessage, clientFinalMessageWithoutProof];
     
     //calculate clientSignature (e.g. HMAC(StoredKey, AuthMessage))
@@ -907,6 +907,27 @@
     s->_gssHeader = @"p=tls-exporter,,";
     
     s->_serverFirstMessage = @"r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6,s=QSXCR+Q6sek8bf92,i=4096,h=G6k/rBLDqgOhRRaCuuatSDFkJ08=";
+    s->_nonce = @"12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6";
+    s->_salt = [HelperTools dataWithBase64EncodedString:@"QSXCR+Q6sek8bf92"];
+    s->_iterationCount = 4096;
+    s->_serverFirstMessageParsed = YES;
+    
+    NSString* client_final_msg = [s clientFinalMessageWithChannelBindingData:[@"THIS IS FAKE CB DATA" dataUsingEncoding:NSUTF8StringEncoding]];
+    DDLogError(@"client_final_msg: %@", client_final_msg);
+    DDLogError(@"_expectedServerSignature: %@", s->_expectedServerSignature);
+    
+    [HelperTools flushLogsWithTimeout:0.250];
+    exit(0);
+}
+
++(void) TDPXepOutput
+{
+    SCRAM* s = [[self alloc] initWithUsername:@"user" password:@"pencil" andMethod:@"SCRAM-SHA-1-PLUS"];
+    
+    s->_clientFirstMessageBare = @"n=user,r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6";
+    s->_gssHeader = @"p=tls-exporter,,";
+    
+    s->_serverFirstMessage = @"r=12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6,s=QSXCR+Q6sek8bf92,i=4096,h=G6k/rBLDqgOhRRaCuuatSDFkJ08=,t=0304";
     s->_nonce = @"12C4CD5C-E38E-4A98-8F6D-15C38F51CCC6a09117a6-ac50-4f2f-93f1-93799c2bddf6";
     s->_salt = [HelperTools dataWithBase64EncodedString:@"QSXCR+Q6sek8bf92"];
     s->_iterationCount = 4096;

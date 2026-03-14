@@ -339,8 +339,8 @@ enum DummySettingsRows {
     if(self.statusMessage)
         [dic setObject:[self.statusMessage stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:@"statusMessage"];
     
-    //conversations.im already supports sasl2 and scram ## TODO: use SCRAM preload list
-    [dic setObject:([domain.lowercaseString isEqualToString:@"conversations.im"] ? @NO : @(self.plainActivated)) forKey:kPlainActivated];
+    //conversations.im and yax,im already support sasl2 and scram ## TODO: use SCRAM preload list
+    [dic setObject:([domain.lowercaseString isEqualToString:@"yax.im"] || [domain.lowercaseString isEqualToString:@"conversations.im"] ? @NO : @(self.plainActivated)) forKey:kPlainActivated];
     
     if(!self.editMode)
     {

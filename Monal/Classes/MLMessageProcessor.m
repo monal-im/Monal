@@ -680,8 +680,8 @@ static NSMutableDictionary* _typingNotifications;
         NSString* lowercaseBody = [body lowercaseString];
         if(body && [body isEqualToString:[messageNode findFirst:@"{jabber:x:oob}x/url#"]] && [lowercaseBody hasPrefix:@"https://"])
             messageType = kMessageTypeFiletransfer;
-        //messages without spaces are potentially special ones
-        else if([body rangeOfString:@" "].location == NSNotFound)
+        //messages without whitespace are potentially special ones
+        else if([body rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location == NSNotFound)
         {
             if([lowercaseBody hasPrefix:@"geo:"])
                 messageType = kMessageTypeGeo;

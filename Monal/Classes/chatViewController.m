@@ -1215,7 +1215,7 @@ enum msgSentState {
         {
             // Send trimmed message
             NSString* lowercaseCleanString = [cleanString lowercaseString];
-            if([lowercaseCleanString rangeOfString:@" "].location == NSNotFound && [lowercaseCleanString hasPrefix:@"https://"])
+            if([lowercaseCleanString rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location == NSNotFound && [lowercaseCleanString hasPrefix:@"https://"])
                 [self sendMessage:cleanString withType:kMessageTypeUrl];
             else
                 [self sendMessage:cleanString withType:kMessageTypeText];

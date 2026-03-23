@@ -500,7 +500,9 @@ $$
     u_int16_t i=(u_int16_t)arc4random();
     NSString* randomID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
     NSString* fileExtension = fileInfo.fileExtension;
+    fileExtension = [fileExtension substringToIndex:min(8, fileExtension.length)];
     NSString* fileBasename = [fileInfo.filename stringByDeletingPathExtension];
+    fileBasename = [fileBasename substringToIndex:min(64, fileBasename.length)];
     [hardlinkPathComponents addObject:[[NSString stringWithFormat:@"%@_%@", fileBasename, randomID] stringByAppendingPathExtension:fileExtension]];
     
     MLAssert(fileInfo.cacheFilePath != nil, @"cacheFilePath should never be empty here!", (@{@"fileInfo": fileInfo}));

@@ -1334,6 +1334,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 -(void) addBackgroundTask
 {
     [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
+        [self updateBackgroundState];       //make sure we are in the correct state
+        
         //don't start uikit bg task if it's already running
         if(self->_bgTask != UIBackgroundTaskInvalid)
             DDLogVerbose(@"Not starting UIKit background task, already running: %d", (int)self->_bgTask);
@@ -1344,6 +1346,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             self->_bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
                 DDLogWarn(@"BG WAKE EXPIRING");
                 [DDLog flushLog];
+                [self updateBackgroundState];       //make sure we are in the correct state
                 
                 @synchronized(self) {
                     //ui background tasks expire at the same time as background processing/refreshing tasks
@@ -1398,6 +1401,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         strongify(task);
         DDLogWarn(@"*** BGPROCESSING EXPIRED ***");
         [DDLog flushLog];
+        [self updateBackgroundState];       //make sure we are in the correct state
         
         DDLogVerbose(@"Dispatching to main queue...");
         [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
@@ -1502,6 +1506,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         strongify(task);
         DDLogWarn(@"*** BGREFRESHING EXPIRED ***");
         [DDLog flushLog];
+        [self updateBackgroundState];       //make sure we are in the correct state
         
         DDLogVerbose(@"Dispatching to main queue...");
         [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
@@ -1594,6 +1599,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundProcessingTask usingQueue:dispatch_get_main_queue() launchHandler:^(BGTask *task) {
         //resume logging and other core tasks
         [HelperTools signalResumption];
+        [self updateBackgroundState];       //make sure we are in the correct state
         
         DDLogDebug(@"RUNNING BGPROCESSING LAUNCH HANDLER");
         DDLogInfo(@"BG time available: %f", [UIApplication sharedApplication].backgroundTimeRemaining);
@@ -1617,6 +1623,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundRefreshingTask usingQueue:dispatch_get_main_queue() launchHandler:^(BGTask *task) {
         //resume logging and other core tasks
         [HelperTools signalResumption];
+        [self updateBackgroundState];       //make sure we are in the correct state
         
         DDLogDebug(@"RUNNING BGREFRESHING LAUNCH HANDLER");
         DDLogInfo(@"BG time available: %f", [UIApplication sharedApplication].backgroundTimeRemaining);
@@ -1697,6 +1704,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 {
     //resume logging and other core tasks
     [HelperTools signalResumption];
+    [self updateBackgroundState];       //make sure we are in the correct state
     
     if(![HelperTools isInBackground])
     {
@@ -1732,6 +1740,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             @"timer": createTimer(GRACEFUL_TIMEOUT, (^{
                 DDLogWarn(@"### Wakeup timer triggered for ID %@ ###", completionId);
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    [self updateBackgroundState];       //make sure we are in the correct state
                     @synchronized(self) {
                         DDLogInfo(@"Handling wakeup completion %@", completionId);
                         BOOL background = [HelperTools isInBackground];
@@ -1784,6 +1793,16 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         };
         DDLogInfo(@"Added timer %@ to wakeup completion list...", completionId);
     }
+}
+
+-(void) updateBackgroundState
+{
+    [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+            [[MLXMPPManager sharedInstance] nowBackgrounded];
+        else
+            [[MLXMPPManager sharedInstance] nowForegrounded];
+    }];
 }
 
 

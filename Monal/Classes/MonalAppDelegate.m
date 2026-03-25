@@ -1025,42 +1025,38 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         _wasFrozen = NO;
     }
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        //make sure the progress HUD is displayed before freezing the main thread
-        //only proceed with foregrounding if the NotificationServiceExtension is not running
-        [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-        if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
-        {
-            DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
-            [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
-                [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-            }];
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            //cancel already running background timer, we are now foregrounded again
-            [self stopBackgroundTimer];
-            
-            [self addBackgroundTask];
-            [[MLXMPPManager sharedInstance] nowForegrounded];           //NOTE: this will unfreeze all queues in our accounts
-            
-            //open call ui using first call if at least one call is present
-            NSArray<MLCall*>* activeCalls = self.voipProcessor.activeCalls;
-            for(MLCall* call in activeCalls)
-            {
-                [self.activeChats presentCall:call];
-                break;
-            }
-            
-            //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
-            //this must be done *after* [[MLXMPPManager sharedInstance] nowForegrounded] to make sure an already open chat view
-            //knows it is now foregrounded (we obviously don't mark messages as read if a chat view is in background while still loaded/"visible")
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-            
-            if(loadingHUD != nil)
-                loadingHUD.hidden = YES;
-        });
-    });
+    //make sure the progress HUD is displayed before freezing the main thread
+    //only proceed with foregrounding if the NotificationServiceExtension is not running
+    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension" withLoopHandler:^{
+            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+        }];
+    }
+    
+    //cancel already running background timer, we are now foregrounded again
+    [self stopBackgroundTimer];
+    
+    [self addBackgroundTask];
+    [[MLXMPPManager sharedInstance] nowForegrounded];           //NOTE: this will unfreeze all queues in our accounts
+    
+    //open call ui using first call if at least one call is present
+    NSArray<MLCall*>* activeCalls = self.voipProcessor.activeCalls;
+    for(MLCall* call in activeCalls)
+    {
+        [self.activeChats presentCall:call];
+        break;
+    }
+    
+    //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
+    //this must be done *after* [[MLXMPPManager sharedInstance] nowForegrounded] to make sure an already open chat view
+    //knows it is now foregrounded (we obviously don't mark messages as read if a chat view is in background while still loaded/"visible")
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+    
+    if(loadingHUD != nil)
+        loadingHUD.hidden = YES;
 }
 
 -(void) nowReallyBackgrounded

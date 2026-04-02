@@ -14,7 +14,7 @@ struct RichAlertView<T, TitleContent, BodyContent, ButtonContent>: ViewModifier 
     let alertTitle: (T) -> TitleContent
     let alertBody: (T) -> BodyContent
     let alertButtons: (T) -> ButtonContent
-    @State private var scrollViewContentSize: CGSize = .zero
+    @State private var forceRedraw: Bool = false
     
     public func body(content: Content) -> some View {
         return ZStack(alignment: .center) {
@@ -66,6 +66,13 @@ struct RichAlertView<T, TitleContent, BodyContent, ButtonContent>: ViewModifier 
             }
         }
         .transition(.opacity)
+        .id(forceRedraw)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification).receive(on: RunLoop.main)) { _ in
+            forceRedraw.toggle()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification).receive(on: RunLoop.main)) { _ in
+            forceRedraw.toggle()
+        }
     }
 }
 

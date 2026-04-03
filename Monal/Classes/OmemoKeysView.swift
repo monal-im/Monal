@@ -468,17 +468,16 @@ class OmemoKeysForChat: ObservableObject {
             NotificationCenter.default.publisher(for: NSNotification.Name(kMonalOmemoStateUpdated))
                 .receive(on: DispatchQueue.main)
                 .sink() { _ in
-                    guard let account = self.viewContact?.obj.account as xmpp? else {
-                        return
+                    if let account = self.viewContact?.obj.account as xmpp? {
+                        self.updateContactDevices()
                     }
-                    self.updateContactDevices() },
+                },
             NotificationCenter.default.publisher(for: NSNotification.Name(kMonalMucParticipantsAndMembersUpdated))
                 .receive(on: DispatchQueue.main)
                 .sink() { _ in
-                    guard let account = self.viewContact?.obj.account as xmpp? else {
-                        return
+                    if let account = self.viewContact?.obj.account as xmpp? {
+                        self.updateContactDevices()
                     }
-                    self.updateContactDevices()
                 },
         ]
     }

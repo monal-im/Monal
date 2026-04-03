@@ -147,37 +147,37 @@ $$
 -(void) testGivenPrimitiveOptionalArgument01
 {
     MLHandler* handler = $newHandler([self class], handlerTestGivenPrimitiveOptionalArgument01);
-    XCTAssertNoThrow(expressify($call(handler, $INTEGER(dummy, 42)), "giving optional primitive dummy argument should not trigger an exception");
+    XCTAssertNoThrow(expressify($call(handler, $INTEGER(dummy, 42))), "giving optional primitive dummy argument should not trigger an exception");
 }
 
-$$class_handler(handlerTestGivenPrimitiveMandatoryArgument01, $INTEGER(dummy))
+$$class_handler(handlerTestGivenPrimitiveMandatoryArgument01, $$INTEGER(dummy))
     XCTAssertTrue(dummy==42, "given mandatory primitive argument should be 42");
 $$
 
 -(void) testGivenPrimitiveMandatoryArgument01
 {
     MLHandler* handler = $newHandler([self class], handlerTestGivenPrimitiveMandatoryArgument01);
-    XCTAssertNoThrow(expressify($call(handler, $INTEGER(dummy, 42)), "giving mandatory primitive dummy argument should not trigger an exception");
+    XCTAssertNoThrow(expressify($call(handler, $INTEGER(dummy, 42))), "giving mandatory primitive dummy argument should not trigger an exception");
 }
 
-$$class_handler(handlerTestMissingPrimitiveMandatoryArgument01, $INTEGER(dummy))
+$$class_handler(handlerTestMissingPrimitiveMandatoryArgument01, $$INTEGER(dummy))
     XCTAssertTrue(NO, "this should never be reached, mandatory primitive argument wasn't given");
 $$
 
 -(void) testMissingPrimitiveMandatoryArgument01
 {
     MLHandler* handler = $newHandler([self class], handlerTestMissingPrimitiveMandatoryArgument01);
-    XCTAssertThrow(expressify($call(handler), "missing mandatory primitive dummy argument should trigger an exception");
+    XCTAssertThrows(expressify($call(handler)), "missing mandatory primitive dummy argument should trigger an exception");
 }
 
-$$class_handler(handlerTestMissingPrimitiveMandatoryArgument02, $BOOL(dummy))
+$$class_handler(handlerTestMissingPrimitiveMandatoryArgument02, $$BOOL(dummy))
     XCTAssertTrue(NO, "this should never be reached, mandatory primitive argument wasn't given");
 $$
 
 -(void) testMissingPrimitiveMandatoryArgument02
 {
     MLHandler* handler = $newHandler([self class], handlerTestMissingPrimitiveMandatoryArgument02);
-    XCTAssertThrow(expressify($call(handler), "missing mandatory primitive dummy argument should trigger an exception");
+    XCTAssertThrows(expressify($call(handler)), "missing mandatory primitive dummy argument should trigger an exception");
 }
 
 $$class_handler(handlerTestWithInvalidation01, $_ID(NSString*, dummy))

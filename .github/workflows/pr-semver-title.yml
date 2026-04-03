@@ -35,7 +35,7 @@ jobs:
           echo "prNumber=$prNumber" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Fetch pull request title
         id: pr_title
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           PR_NUMBER: ${{ steps.find_pr.outputs.prNumber }}
         with:

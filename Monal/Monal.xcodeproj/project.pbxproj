@@ -3874,6 +3874,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -4232,6 +4233,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -4324,6 +4326,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -4343,6 +4346,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -4363,6 +4367,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;
@@ -4652,6 +4657,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
 				PRODUCT_NAME = MonalUITests;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_SWIFT_SYMBOLS = NO;

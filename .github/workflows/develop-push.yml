@@ -33,7 +33,7 @@ jobs:
       actions: write # needed to upload artifacts
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           clean: true
           submodules: true
@@ -96,22 +96,24 @@ jobs:
         run: xcrun notarytool submit ./Monal/build/app/Monal.alpha.zip --wait --team-id S8D843U34Y --key "/Users/ci/appstoreconnect/apiKey.p8" --key-id "$(cat /Users/ci/appstoreconnect/apiKeyId.txt)" --issuer "$(cat /Users/ci/appstoreconnect/apiIssuerId.txt)"
       - name: Update monal homebrew alpha repo
         run: scripts/updateAlphaHomebrew.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-         name: monal-catalyst
+         name: Monal.alpha.tar
          path: "Monal/build/app/Monal.alpha.tar"
+         archive: false
          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-         name: monal-ios
+         name: Monal.alpha.ipa
          path: "Monal/build/ipa/Monal.alpha.ipa"
+         archive: false
          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
          name: monal-catalyst-dsym
          path: Monal/build/macos_Monal.Alpha.xcarchive/dSYMs
          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
          name: monal-ios-dsym
          path: Monal/build/ios_Monal.Alpha.xcarchive/dSYMs

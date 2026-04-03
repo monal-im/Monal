@@ -34,7 +34,7 @@ jobs:
       contents: write # needed for git push
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           clean: true
           submodules: true
@@ -157,17 +157,18 @@ jobs:
         run: chmod +x ./scripts/build.sh
       - name: Run build
         run: ./scripts/build.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-          name: monal-ios
+          name: Monal.ipa
           path: Monal/build/ipa/Monal.ipa
+          archive: false
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: monal-catalyst-dsym
           path: Monal/build/macos_Monal.xcarchive/dSYMs
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: monal-ios-dsym
           path: Monal/build/ios_Monal.xcarchive/dSYMs
@@ -250,15 +251,17 @@ jobs:
           stapler validate "$APP_DIR"
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP_DIR" "../$APP_NAME.zip"
           cd ../../../..
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-          name: monal-catalyst-zip
+          name: Monal.zip
           path: Monal/build/app/Monal.zip
+          archive: false
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-          name: monal-catalyst-pkg
+          name: Monal.pkg
           path: Monal/build/app/Monal.pkg
+          archive: false
           if-no-files-found: error
       - name: Upload new catalyst beta to monal-im.org
         env:
@@ -300,7 +303,7 @@ jobs:
       contents: write # needed for git push in updateLocalization
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           clean: true
           submodules: true

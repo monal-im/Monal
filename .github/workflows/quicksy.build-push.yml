@@ -27,7 +27,7 @@ jobs:
       contents: write # needed for git push
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           clean: true
           submodules: true
@@ -125,12 +125,13 @@ jobs:
         run: chmod +x ./scripts/build.sh
       - name: Run build
         run: ./scripts/build.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-          name: quicksy-ios
+          name: Quicksy.ipa
           path: Monal/build/ipa/Quicksy.ipa
+          archive: false
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: quicksy-ios-dsym
           path: Monal/build/ios_Quicksy.xcarchive/dSYMs

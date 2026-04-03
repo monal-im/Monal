@@ -14,7 +14,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout Beta Branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           clean: true
           submodules: true
@@ -56,7 +56,7 @@ jobs:
           echo "__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
       - name: Find Existing Pull Request
         id: find_pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -76,7 +76,7 @@ jobs:
               core.setOutput('prNumber', null);
       - name: Create or Update Pull Request
         id: create_or_update_pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           PR_NUMBER: ${{ steps.find_pr.outputs.prNumber }}
           PR_TITLE: ${{ steps.get_commits.outputs.buildVersion }}
@@ -124,7 +124,7 @@ jobs:
             }
             core.setOutput('prNumber', pullRequest.data.number);
       - name: Add Label to Pull Request
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           PR_NUMBER: ${{ steps.create_or_update_pr.outputs.prNumber }}
         with:

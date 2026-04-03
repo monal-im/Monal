@@ -59,7 +59,7 @@ if [ "$BUILD_SCHEME" != "Quicksy" ]; then
         -destination 'generic/platform=macOS,variant=Mac Catalyst,name=Any Mac' \
         -archivePath "build/macos_$APP_NAME.xcarchive" \
         -allowProvisioningUpdates \
-        clean archive \
+        archive \
         BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
         SUPPORTS_MACCATALYST=YES \
         2>&1 | xcbeautify
@@ -110,7 +110,7 @@ NSUnbufferedIO=YES xcrun xcodebuild \
     -configuration $BUILD_TYPE \
     -archivePath "build/ios_$APP_NAME.xcarchive" \
     -allowProvisioningUpdates \
-    clean archive \
+    archive \
     2>&1 | xcbeautify
 
 echo ""

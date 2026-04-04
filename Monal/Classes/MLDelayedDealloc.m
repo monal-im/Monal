@@ -158,7 +158,7 @@ static inline __attribute__((always_inline)) void AddContainerChildren(NSValue* 
 {
     [retval addObject:obj];
     if([(__bridge id)[obj pointerValue] isKindOfClass:[NSArray class]])
-        for(id child in (__bridge NSArray*)[obj pointerValue])
+        for(id child in [(__bridge NSArray*)[obj pointerValue] copy])
             AddContainerChildren([NSValue valueWithNonretainedObject:child], retval);
     if([(__bridge id)[obj pointerValue] isKindOfClass:[NSSet class]])
         for(id child in [(__bridge NSSet*)[obj pointerValue] allObjects])

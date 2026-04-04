@@ -47,6 +47,15 @@
         }
       },
       {
+        "package": "SVGKit",
+        "repositoryURL": "https://github.com/SVGKit/SVGKit",
+        "state": {
+          "branch": "3.x",
+          "revision": "dacecaad4d0d42f49b50df0143d65e664bd13ca4",
+          "version": null
+        }
+      },
+      {
         "package": "SVGView",
         "repositoryURL": "https://github.com/exyte/SVGView",
         "state": {

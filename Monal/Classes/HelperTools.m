@@ -69,6 +69,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @import SAMKeychain;
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
+@import SVGKit;
 
 @interface KSCrash()
 @property(nonatomic,readwrite,retain) NSString* basePath;
@@ -793,13 +794,25 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 //this wrapper is needed, because MLChatImageCell can't import our monalxmpp-Swift bridging header, but importing HelperTools is okay
 +(AnyPromise*) renderUIImageFromSVGURL:(NSURL* _Nullable) url
 {
-    return [SwiftHelpers _renderUIImageFromSVGURL:url];
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        if(url == nil)
+            resolve(nil);
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            resolve([SVGKImage imageWithContentsOfURL:url].UIImage);
+        });
+    }];
 }
 
 //this wrapper is needed, because MLChatImageCell can't import our monalxmpp-Swift bridging header, but importing HelperTools is okay
 +(AnyPromise*) renderUIImageFromSVGData:(NSData* _Nullable) data
 {
-    return [SwiftHelpers _renderUIImageFromSVGData:data];
+    return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+        if(data == nil)
+            resolve(nil);
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            resolve([SVGKImage imageWithData:data].UIImage);
+        });
+    }];
 }
 
 +(void) busyWaitForOperationQueue:(NSOperationQueue*) queue

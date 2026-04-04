@@ -15,9 +15,8 @@
 import CocoaLumberjackSwiftLogBackend
 import LibMonalRustSwiftBridge
 import Combine
-//needed to render SVG to UIImage
+//needed to use Binding type
 import SwiftUI
-import SVGView
 
 public typealias monal_timer_block_t = @convention(block) (MLDelayableTimer?) -> Void;
 public typealias monal_void_block_t = @convention(block) () -> Void;
@@ -474,49 +473,6 @@ public class SwiftHelpers: NSObject {
         setRustPanicHandler({(text: String, backtrace: String) in
             HelperTools.handleRustPanic(withText: text, andBacktrace:backtrace)
         });
-    }
-    
-    //we use the main actor here, because ImageRenderer needs to run in the main actor
-    //(and we don't want to overcomplicate things here by using a Task and returning a Promise)
-    @MainActor
-    private static func _renderSVG<T: View>(_ svgView: T) -> UIImage? {
-        var image: UIImage? = nil
-        if HelperTools.isAppExtension() {
-            image = ImageRenderer(content:svgView.scaledToFit().frame(width: 320, height: 200)).uiImage
-            DDLogDebug("We are in appex: mirroring SVG image on Y axis...");
-            image = HelperTools.mirrorImage(onXAxis:image)
-        } else {
-            image = ImageRenderer(content:svgView.scaledToFit().frame(width: 1280, height: 960)).uiImage
-        }
-        return image
-    }
-    
-    //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
-    //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
-    @objc(_renderUIImageFromSVGURL:)
-    public static func _renderUIImageFromSVG(url: URL?) -> AnyPromise {
-        return AnyPromise(Promise<UIImage?> { seal in
-            guard let url = url, let svgView = SVGParser.parse(contentsOf: url)?.toSwiftUI() else {
-                return seal.fulfill(nil)
-            }
-            Task {
-                return seal.fulfill(await self._renderSVG(svgView))
-            }
-        })
-    }
-    
-    //this is wrapped by HelperTools.renderUIImage(fromSVGURL) / [HelperTools renderUIImageFromSVGURL:]
-    //because MLChatImageCell wasn't able to import the monalxmpp-Swift bridging header somehow (but importing HelperTools works just fine)
-    @objc(_renderUIImageFromSVGData:)
-    public static func _renderUIImageFromSVG(data: Data?) -> AnyPromise {
-        return AnyPromise(Promise<UIImage?> { seal in
-            guard let data = data, let svgView = SVGParser.parse(data: data)?.toSwiftUI() else {
-                return seal.fulfill(nil)
-            }
-            Task {
-                return seal.fulfill(await self._renderSVG(svgView))
-            }
-        })
     }
 }
 

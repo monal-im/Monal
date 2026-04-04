@@ -201,6 +201,10 @@ void swizzle(Class c, SEL orig, SEL new);
 
 +(NSURLSession*) createEphemeralURLSession;
 
++(NSString*) hardwareString;
+
++(NSString*) generateQuicksyAuthorizationWithNumber:(NSString*) number installationId:(NSString*) installationId userAgent:(NSString*) userAgent andDevice:(NSString*) device;
+
 @end
 
 NS_ASSUME_NONNULL_END

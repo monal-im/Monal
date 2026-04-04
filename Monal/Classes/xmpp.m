@@ -511,11 +511,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
     {
         @synchronized(_stateLockObject) {
             NSUInteger unacked = [self.unAckedStanzas count];
+            unackedCount = @(unacked);
             if(unacked)
-            {
                 retval = NO;
-                unackedCount = @(unacked);
-            }
         }
     }
     _lastIdleState = retval;

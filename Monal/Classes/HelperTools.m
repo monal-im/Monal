@@ -2168,11 +2168,12 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     if(log_activity)
     {
         dispatch_async(dispatch_queue_create_with_target("im.monal.activityLog", DISPATCH_QUEUE_SERIAL, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)), ^{
-            unsigned long counter = 1;
-            while(counter++)
+            unsigned long counter = 0;
+            while(YES)
             {
                 DDLogInfo(@"activity: %lu, memory used / available: %.3fMiB / %.3fMiB", counter, [self report_memory], (CGFloat)os_proc_available_memory() / 1048576);
                 [NSThread sleepForTimeInterval:1];
+                counter++;
             }
         });
     }

@@ -60,6 +60,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import <monalxmpp/IPC.h>
 #import <monalxmpp/MLDelayableTimer.h>
 #import <monalxmpp/Quicksy_Country.h>
+#import "secrets.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -3466,6 +3467,27 @@ a=%@\r\n", mid, candidate];
             [reactionsList addObject:substring];
     }];
     return reactionsList;
+}
+
++(NSString*) hardwareString
+{
+    size_t size = 100;
+    char* hw_machine = malloc(size);
+    int name[] = {CTL_HW, HW_MACHINE};
+    sysctl(name, 2, hw_machine, &size, NULL, 0);
+    NSString* hardware = [NSString stringWithUTF8String:hw_machine];
+    free(hw_machine);
+    return hardware;
+}
+
++(NSString*) generateQuicksyAuthorizationWithNumber:(NSString*) number installationId:(NSString*) installationId userAgent:(NSString*) userAgent andDevice:(NSString*) device
+{
+    return [self encodeBase64WithData:[self sha256HmacForKey:[self dataWithBase64EncodedString:QUICKSY_API_SECRET] andData:[[NSString stringWithFormat:@"%@\0%@\0%@\0%@",
+        number,
+        installationId,
+        userAgent,
+        device
+    ] dataUsingEncoding:NSUTF8StringEncoding]]];
 }
 
 @end

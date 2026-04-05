@@ -2583,6 +2583,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
             @"urn:xmpp:message-retract:1",
             @"urn:xmpp:message-correct:0",
             @"urn:xmpp:reactions:0",
+            @"urn:xmpp:fallback:0",
         ] mutableCopy];
         if([[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"])
             [featuresArray addObject:@"urn:xmpp:idle:1"];

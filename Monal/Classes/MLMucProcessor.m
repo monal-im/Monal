@@ -488,7 +488,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
             return YES;     //don't process this further
         }
-        DDLogInfo(@"--> joinging %@...", messageNode.fromUser);
+        DDLogInfo(@"--> joining %@...", messageNode.fromUser);
         [self sendDiscoQueryFor:messageNode.fromUser withJoin:YES andBookmarksUpdate:YES];
         return YES;     //stop processing in MLMessageProcessor
     }

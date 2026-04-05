@@ -20,6 +20,7 @@
     NSString* _password;
     NSString* _nonce;
     NSString* _ssdpString;
+    NSString* _tdpString;
     
     NSString* _clientFirstMessageBare;
     NSString* _gssHeader;
@@ -60,9 +61,11 @@
         DDLogError(@"SASLPrep failed for password, using empty password!");
     _nonce = [NSUUID UUID].UUIDString;
     _ssdpString = nil;
+    _tdpString = nil;
     _serverFirstMessageParsed = NO;
     _finishedSuccessfully = NO;
     _ssdpSupported = NO;
+    _tdpSupported = NO;
     return self;
 }
 
@@ -80,6 +83,12 @@
     }
     _ssdpString = [ssdpString copy];
     DDLogVerbose(@"SDDP string is now: %@", _ssdpString);
+}
+
+-(void) setTLSVersion:(uint16_t) version
+{
+    _tdpString = [NSString stringWithFormat:@"%04x", version];
+    DDLogVerbose(@"TDP string is now: %@", _tdpString);
 }
 
 -(NSString*) clientFirstMessageWithNoMatchingChannelBindingFound:(BOOL) noMatchingChannelBindingFound andChannelBinding:(NSString* _Nullable) channelBindingType
@@ -130,6 +139,13 @@
         NSString* ssdpHash =[HelperTools encodeBase64WithData:[self hash:[_ssdpString dataUsingEncoding:NSUTF8StringEncoding]]];
         if(![HelperTools constantTimeCompareAttackerString:msg[@"h"] withKnownString:ssdpHash])
             return MLScramStatusSSDPTriggered;
+    }
+    //check if tls downgrade protection triggered, if provided
+    if(msg[@"t"] != nil && _tdpString != nil)
+    {
+        _tdpSupported = YES;
+        if(![HelperTools constantTimeCompareAttackerString:msg[@"t"] withKnownString:_tdpString])
+            return MLScramStatusTDPTriggered;
     }
     if(_iterationCount < 4096)
         return MLScramStatusIterationCountInsecure;

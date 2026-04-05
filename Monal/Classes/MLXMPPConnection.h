@@ -66,6 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSDictionary* fastMethods;
 @property (nonatomic, strong) NSDictionary* channelBindingTypes;
 @property (nonatomic, assign) BOOL supportsSSDP;
+@property (nonatomic, assign) BOOL supportsTDP;
 @property (nonatomic, strong) NSString* tlsVersion;
 
 @property (nonatomic, strong) NSDate* _Nullable smacksSessionEstablished;

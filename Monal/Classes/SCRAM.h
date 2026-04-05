@@ -16,6 +16,7 @@ typedef NS_ENUM(NSUInteger, MLScramStatus) {
     MLScramStatusNonceError,
     MLScramStatusUnsupportedMAttribute,
     MLScramStatusSSDPTriggered,
+    MLScramStatusTDPTriggered,
     MLScramStatusIterationCountInsecure,
     MLScramStatusServerFirstOK,
     //server-final-message
@@ -28,6 +29,7 @@ typedef NS_ENUM(NSUInteger, MLScramStatus) {
 +(NSArray*) supportedMechanismsIncludingChannelBinding:(BOOL) include;
 -(instancetype) initWithUsername:(NSString*) username password:(NSString*) password andMethod:(NSString*) method;
 -(void) setSSDPMechanisms:(NSArray<NSString*>*) mechanisms andChannelBindingTypes:(NSArray<NSString*>* _Nullable) cbTypes;
+-(void) setTLSVersion:(uint16_t) version;
 
 -(NSString*) clientFirstMessageWithNoMatchingChannelBindingFound:(BOOL) noMatchingChannelBindingFound andChannelBinding:(NSString* _Nullable) channelBindingType;
 -(MLScramStatus) parseServerFirstMessage:(NSString*) str;
@@ -39,6 +41,7 @@ typedef NS_ENUM(NSUInteger, MLScramStatus) {
 @property (nonatomic, readonly) BOOL serverFirstMessageParsed;
 @property (nonatomic, readonly) BOOL finishedSuccessfully;
 @property (nonatomic, readonly) BOOL ssdpSupported;
+@property (nonatomic, readonly) BOOL tdpSupported;
 
 +(void) SSDPXepOutput;
 +(void) TDPXepOutput;

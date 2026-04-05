@@ -2665,6 +2665,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             NSString* innerSASLData = [[NSString alloc] initWithData:[parsedStanza findFirst:@"/{urn:xmpp:sasl:2}challenge#|base64"] encoding:NSUTF8StringEncoding];
             switch([self->_scramHandler parseServerFirstMessage:innerSASLData]) {
                 case MLScramStatusSSDPTriggered: deactivate_account = YES; message = NSLocalizedString(@"Detected ongoing MITM attack via SSDP, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
+                case MLScramStatusTDPTriggered: deactivate_account = YES; message = NSLocalizedString(@"Detected ongoing MITM attack via TDP, aborting authentication and disabling account to limit damage. You should try to reenable your account once you are in a clean networking environment again.", @""); break;
                 case MLScramStatusNonceError: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (nonce error), disconnecting!", @"parenthesis should remain in english"); break;
                 case MLScramStatusUnsupportedMAttribute: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (m-attr error), disconnecting!", @"parenthesis should remain in english"); break;
                 case MLScramStatusIterationCountInsecure: deactivate_account = NO; message = NSLocalizedString(@"Error handling SASL challenge of server (iteration count too low), disconnecting!", @"parenthesis should remain in english"); break;
@@ -2809,8 +2810,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
                 self.connectionProperties.channelBindingTypes = channelBindings;
                 
-                //record SDDP support
+                //record SDDP and TDP support
                 self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
+                self.connectionProperties.supportsTDP = self->_scramHandler.tdpSupported;
                 
                 //record TLS version
                 self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
@@ -2853,10 +2855,13 @@ static NSRegularExpression* fastTokenRemovalRegex;
             DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
             self.connectionProperties.channelBindingTypes = channelBindings;
             
-            //record SDDP support, but only if it could have been used at all (HT doesn't have SSDP)
+            //record SDDP and TDP support, but only if it could have been used at all (HT doesn't have TDP/SSDP)
             //we persist this property in our account state, so it will remain the way it was when we last did an ordinary SCRAM login
             if(self->_scramHandler.finishedSuccessfully)
+            {
                 self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
+                self.connectionProperties.supportsTDP = self->_scramHandler.tdpSupported;
+            }
             
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
@@ -3485,6 +3490,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
                         //set ssdp data for downgrade protection
                         //_supportedChannelBindings will be nil, if XEP-0440 is not supported by our server (which should never happen because XEP-0440 is mandatory for SASL2)
                         [self->_scramHandler setSSDPMechanisms:[self->_supportedSaslMechanisms allObjects] andChannelBindingTypes:[self->_supportedChannelBindings allObjects]];
+                        //set tls version for downgrade protection
+                        [self->_scramHandler setTLSVersion:((MLStream*)self->_oStream).tlsVersion];
                         authenticate = [[MLXMLNode alloc]
                             initWithElement:@"authenticate"
                             andNamespace:@"urn:xmpp:sasl:2"
@@ -4181,6 +4188,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsSSDP] forKey:@"supportsSSDP"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsTDP] forKey:@"supportsTDP"];
             [values setObject:[self->_inCatchup copy] forKey:@"inCatchup"];
             [values setObject:[self->_mdsData copy] forKey:@"mdsData"];
             
@@ -4340,6 +4348,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
             {
                 NSNumber* supportsSSDP = [dic objectForKey:@"supportsSSDP"];
                 self.connectionProperties.supportsSSDP = supportsSSDP.boolValue;
+            }
+            
+            if([dic objectForKey:@"supportsTDP"])
+            {
+                NSNumber* supportsTDP = [dic objectForKey:@"supportsTDP"];
+                self.connectionProperties.supportsTDP = supportsTDP.boolValue;
             }
             
             if([dic objectForKey:@"loggedInOnce"])

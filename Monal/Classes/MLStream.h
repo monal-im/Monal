@@ -20,7 +20,9 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) connectWithSNIDomain:(NSString*) SNIDomain connectHost:(NSString*) host connectPort:(NSNumber*) port tls:(BOOL) tls inputStream:(NSInputStream* _Nullable * _Nonnull) inputStream  outputStream:(NSOutputStream* _Nullable * _Nonnull) outputStream logtag:(id _Nullable) logtag;
 -(void) startTLS;
 @property(readonly) BOOL hasTLS;
+@property(readonly) uint16_t tlsVersion;
 @property(readonly) BOOL isTLS13;
+@property(readonly) BOOL isTLS12;
 @property(readonly) BOOL acceptedTlsEarlyData;
 
 @property(nullable, readonly) NSArray* supportedChannelBindingTypes;

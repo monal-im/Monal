@@ -2914,12 +2914,15 @@ a=%@\r\n", mid, candidate];
 
 +(NSString*) generateQuicksyAuthorizationWithNumber:(NSString*) number installationId:(NSString*) installationId userAgent:(NSString*) userAgent andDevice:(NSString*) device
 {
-    return [self encodeBase64WithData:[self sha256HmacForKey:[self dataWithBase64EncodedString:QUICKSY_API_SECRET] andData: [[NSString stringWithFormat:@"%@\0%@\0%@\0%@",
+    NSString* authString = [NSString stringWithFormat:@"%@\0%@\0%@\0%@",
         number,
         installationId,
         userAgent,
         device
-    ] dataUsingEncoding:NSUTF8StringEncoding]]];
+    ];
+    NSString* authToken = [self encodeBase64WithData:[self sha256HmacForKey:[self dataWithBase64EncodedString:QUICKSY_API_SECRET] andData:[authString dataUsingEncoding:NSUTF8StringEncoding]]];
+    DDLogVerbose(@"authString=%@, authToken=%@", authString, authToken);
+    return authToken;
 }
 
 @end

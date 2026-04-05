@@ -3413,7 +3413,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             //XEP-0509 (config versioning, useful for letting the server know we used auth pipelining
             //so that the server won't count it as failed auth attempt and punish us)
             MLXMLNode* configVersion = nil;
-            NSString* configVersionString = [parsedStanza findFirst:@"{urn:xmpp:iap:0}config-version@value"];
+            NSString* configVersionString = [parsedStanza findFirst:@"{urn:xmpp:iap:0}config-version<scheme=opaque>@value"];
             if(configVersionString != nil && self->_pipeliningState != kPipelinedNothing)
                 configVersion = [[MLXMLNode alloc] initWithElement:@"config-version" andNamespace:@"urn:xmpp:iap:0" withAttributes:@{
                     @"scheme": @"opaque",

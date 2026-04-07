@@ -592,6 +592,10 @@ $$
     NSMutableArray* deletedDevices = [NSMutableArray new];
     for(NSNumber* device in [self.ownDeviceList copy])
     {
+        //ignore our very own device (we don't want to create a devicelist publishing loop creating xmpp stream congestion)
+        if(device.unsignedIntValue == self.monalSignalStore.deviceid)
+            continue;
+        
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)device.unsignedIntValue];
         NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
         if(!identity)

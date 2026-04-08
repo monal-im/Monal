@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
           "branch": "main",
-          "revision": "d5c4a7af2d3eeb7cae2b4e6fa4d12fc95ac41702",
+          "revision": "b5f8a2ca02ef05dc77713f9962057d6d58f159af",
           "version": null
         }
       },
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/apple/swift-collections.git",
         "state": {
           "branch": null,
-          "revision": "7b847a3b7008b2dc2f47ca3110d8c782fb2e5c7e",
-          "version": "1.3.0"
+          "revision": "6675bc0ff86e61436e615df6fc5174e043e57924",
+          "version": "1.4.1"
         }
       },
       {

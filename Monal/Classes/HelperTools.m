@@ -532,7 +532,7 @@ void swizzle(Class c, SEL orig, SEL new)
 +(NSError*) getNSErrorFrom:(XMPPStanza*) stanza withDescription:(NSString*) description
 {
     NSString* errorMessage = [HelperTools extractXMPPError:stanza withDescription:description];
-    return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+    return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage, @"stanza": nilWrapper(stanza)}];
 }
 
 +(void) initSystem

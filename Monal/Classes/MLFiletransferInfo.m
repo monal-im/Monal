@@ -156,6 +156,10 @@ static NSMutableDictionary* _singletonCache;
 }
 
 -(NSURL*) thumbnailURL {
+    // files that aren't downloaded shouldn't have a (locally generated) thumbnail
+    if(self.downloadState != DownloadStateComplete)
+        return nil;
+
     // return thumbnail cached in memory.
     if(_thumbnailURL != nil)
         return _thumbnailURL;
@@ -171,7 +175,7 @@ static NSMutableDictionary* _singletonCache;
     // Generate the thumbnail now, but try to ensure that only one thread is doing the generation
     // Also, prevent retries in the case of an error (to avoid repeated failures)
     // Note that isGeneratingThumbnail is not thread safe.
-    if(!self.isGeneratingThumbnail && self.downloadState == DownloadStateComplete)
+    if(!self.isGeneratingThumbnail)
     {
         self.isGeneratingThumbnail = YES;
         [HelperTools generateVideoThumbnailFromFile:self.cacheFilePath havingMimeType:self.mimeType andFileExtension:self.fileExtension]

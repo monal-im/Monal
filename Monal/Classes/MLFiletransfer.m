@@ -525,6 +525,8 @@ $$
     if(info.downloadState < DownloadStateComplete)
         return;
     DDLogInfo(@"Deleting file for url %@", msg.messageText);
+    // Delete the thumbnail before deleting the file, otherwise thumbnailURL will return nil
+    // and the thumbnail won't be deleted
     if([info.mimeType hasPrefix:@"video/"])
     {
         DDLogVerbose(@"Deleting video thumbnail stored at %@", msg.fileInfo.thumbnailURL.path);

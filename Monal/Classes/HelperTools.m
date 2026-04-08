@@ -669,7 +669,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 +(NSError*) getNSErrorFrom:(XMPPStanza* _Nullable) stanza withDescription:(NSString*) description
 {
     NSString* errorMessage = [HelperTools extractXMPPError:stanza withDescription:description];
-    return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage, @"stanza": stanza}];
+    return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage, @"stanza": nilWrapper(stanza)}];
 }
 
 +(void) initSystem

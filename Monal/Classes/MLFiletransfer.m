@@ -674,14 +674,7 @@ $$
         if([_fileManager fileExistsAtPath:cacheFilePath])
             return cacheFilePath;
     }
-    
-    //check for files having a different mime type but the same base url
-    NSString* predicateString = [NSString stringWithFormat:@"self BEGINSWITH '%@.'", urlPart];
-    NSArray* directoryContents = [_fileManager contentsOfDirectoryAtPath:_documentCacheDir error:nil];
-    NSPredicate* filter = [NSPredicate predicateWithFormat:predicateString];
-    for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
-        return [_documentCacheDir stringByAppendingPathComponent:file];
-    
+
     //nothing found
     DDLogVerbose(@"Could not find cache file for url '%@' having mime type '%@'...", url, mimeType);
     return nil;

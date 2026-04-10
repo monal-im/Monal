@@ -63,7 +63,7 @@ static NSMutableDictionary* _singletonCache;
         }
         NSDictionary* dic = [[DataLayer sharedInstance] getFiletransferInfoForHistoryId:message.messageDBId];
         // dic shouldn't be nil unless there's an implementation error.
-        MLAssert(dic != nil, @"A row in the filetransfer_info db table MUST exist for a filetransfer message!");
+        MLAssert(dic != nil, @"A row in the filetransfer_info db table MUST exist for a filetransfer message!", @{@"historyId": message.messageDBId});
         fileInfo = [MLFiletransferInfo new];
         fileInfo.historyId = [dic objectForKey:@"message_history_id"];
         fileInfo.mimeType = [dic objectForKey:@"mime_type"];

@@ -1527,7 +1527,7 @@ static NSDateFormatter* dbFormatter;
         return;
     [self.db voidWriteTransaction:^{
         MLMessage* message = [MLMessage createMessageFromHistoryID:historyId];
-        MLAssert([message.messageType isEqualToString:kMessageTypeFiletransfer], @"Can't set mimeType and size of a message that isn't a file transfer!");
+        MLAssert([message.messageType isEqualToString:kMessageTypeFiletransfer], @"Can't set mimeType and size of a message that isn't a file transfer!", @{@"historyId": historyId});
         DDLogVerbose(@"Setting mime type '%@' and size %@ for history id %@", mimeType, size, historyId);
         NSString* query = @"UPDATE filetransfer_info SET mime_type=?, size=? WHERE message_history_id=?;";
         [self.db executeNonQuery:query andArguments:@[mimeType, size, historyId]];

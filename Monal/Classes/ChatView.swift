@@ -584,7 +584,7 @@ struct ChatView: View {
         .richAlert(isPresented: $messageToModerate, title:Text("Moderating message")) { mlMessage in
             VStack(alignment: .leading) {
                 Text("Enter the moderation reason:")
-                TextField(NSLocalizedString("Spam", comment: "placeholder when adding account"), text: $moderationReason, onEditingChanged: { isEditingReason = $0 })
+                TextField(NSLocalizedString("Spam", comment: "placeholder for the message moderation reason"), text: $moderationReason, onEditingChanged: { isEditingReason = $0 })
                 .submitLabel(.continue)
                 .addClearButton(isEditing: isEditingReason, text: $moderationReason)
                 

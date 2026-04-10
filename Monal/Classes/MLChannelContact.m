@@ -115,8 +115,6 @@ static NSMutableDictionary* _singletonCache;
         NSDictionary* participantInfo = [[DataLayer sharedInstance] getParticipantForOccupant:self.occupantId inRoom:self.mucContact.contactJid forAccountID:self.mucContact.accountID];
         if(participantInfo != nil)
             self.nick = participantInfo[@"room_nick"];
-        else
-            self.nick = self.occupantId;        //fallback (should never happen when receiving this notification)
     }
 }
 

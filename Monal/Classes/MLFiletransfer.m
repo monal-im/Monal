@@ -797,7 +797,7 @@ $$
         DDLogWarn(@"Failed to get url components, returning empty url!");
         return @"";
     }
-    urlComponents.fragment = @"";       //make sure we don't leak urlfragments to upload server
+    urlComponents.fragment = nil;       //make sure we don't leak urlfragments to upload server
     return urlComponents.string;
 }
 

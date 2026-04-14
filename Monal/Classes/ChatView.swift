@@ -159,7 +159,7 @@ struct ChatView: View {
                 return [.resend, .delete]
             }
             var availableActions: [MessageAction] = []
-            if !message.text.isEmpty {
+            if message.hasText {
                 availableActions.append(.copy)
             }
 
@@ -551,15 +551,11 @@ struct ChatView: View {
             DDLogDebug("Checking if we can react to: \(String(describing:mlMessage)) --> \(String(describing:retval))")
             return retval
         })
-        // For some reason, the ExyteChat audio recorder works only if the codec is set to FLAC, ALAC, or LinearPCM
-        .setRecorderSettings(RecorderSettings(audioFormatID: kAudioFormatFLAC))
-        .showNetworkConnectionProblem(false)
-        .enableLoadMore(pageSize: 10) { message in
-            await MainActor.run {
-                loadHistory()
-            }
+        .showUsername(contact.isMuc)
+        .linkPreviewsEnabled(false) //disabled for now due to https://github.com/exyte/Chat/issues/208
+        .enableLoadMore(offset: 10) {
+            loadHistory()
         }
-//         .messageUseMarkdown(messageUseMarkdown: true)
         .sheet(item: $selectedContactForContactDetails) { selectedContact in
             AnyView(AddTopLevelNavigation(withDelegate:nil, to:ContactDetails(delegate:nil, contact:selectedContact)))
         }
@@ -860,36 +856,42 @@ class ChatViewMessage: ExyteChat.Message {
     let innerMessage: ObservableKVOWrapper<MLMessage>
     let fileInfo: ObservableKVOWrapper<MLFiletransferInfo>?
     private var subscriptions: Set<AnyCancellable> = Set()
-    override var text: String {
-        get {
-            if innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo {
-                switch(fileInfo.downloadState as DownloadState.RawValue) {
-                    case DownloadState.complete.rawValue:
-                        let mimeType = fileInfo.mimeType as String
-                        if mimeType.starts(with: "audio/") || mimeType.starts(with: "image/") || mimeType.starts(with: "video/") {
-                            return ""
-                        } else {
-                            return """
-                                [File transfer with a file type that's not yet supported for displaying]
-                                \(innerMessage.obj.encrypted ? "" : "Link: \(innerMessage.messageText as String)")
-                            """
-                        }
-                    case DownloadState.headers.rawValue:
-                        let humanReadableSize = (fileInfo.size as NSNumber).int64Value.formatted(.byteCount(style: .file))
+    var text: String {
+        if innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo {
+            switch(fileInfo.downloadState as DownloadState.RawValue) {
+                case DownloadState.complete.rawValue:
+                    let mimeType = fileInfo.mimeType as String
+                    if mimeType.starts(with: "audio/") || mimeType.starts(with: "image/") || mimeType.starts(with: "video/") {
+                        return ""
+                    } else {
                         return """
-                        [File transfer; auto-downloading if the settings allow it...]
-                        Size: \(humanReadableSize)
-                        MimeType: \(fileInfo.mimeType as String)
-                        \(innerMessage.encrypted ? "" : "Link: \(fileInfo.downloadURL as String)")
+                            [File transfer with a file type that's not yet supported for displaying]
+                            \(innerMessage.obj.encrypted ? "" : "Link: \(innerMessage.messageText as String)")
                         """
-                    case DownloadState.none.rawValue:
-                        return "[File transfer; checking the size...]"
-                    default:
-                        // .invalid case
-                        unreachable()
-                }
+                    }
+                case DownloadState.headers.rawValue:
+                    let humanReadableSize = (fileInfo.size as NSNumber).int64Value.formatted(.byteCount(style: .file))
+                    return """
+                    [File transfer; auto-downloading if the settings allow it...]
+                    Size: \(humanReadableSize)
+                    MimeType: \(fileInfo.mimeType as String)
+                    \(innerMessage.encrypted ? "" : "Link: \(fileInfo.downloadURL as String)")
+                    """
+                case DownloadState.none.rawValue:
+                    return "[File transfer; checking the size...]"
+                default:
+                    // .invalid case
+                    unreachable()
             }
-            return innerMessage.retracted ? NSLocalizedString("This message got retracted", comment: "") : innerMessage.messageText
+        }
+        return innerMessage.retracted ? NSLocalizedString("This message got retracted", comment: "") : innerMessage.messageText
+    }
+    override var hasText: Bool {
+        return !text.isEmpty
+    }
+    override var attributedText: AttributedString {
+        get {
+            return text.linkify()
         }
         set {}
     }

@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
           "branch": "main",
-          "revision": "b5f8a2ca02ef05dc77713f9962057d6d58f159af",
+          "revision": "3de48fee8bdcb816eee813037a2c4a7a26d2da89",
           "version": null
         }
       },
@@ -42,7 +42,7 @@
         "repositoryURL": "https://github.com/monal-im/MediaPicker.git",
         "state": {
           "branch": "main",
-          "revision": "78869f8a07b2d7e8c78fe97f50c4b7122425678f",
+          "revision": "2d482aac360297922424d3a1ae0255f3abdbe6ee",
           "version": null
         }
       },

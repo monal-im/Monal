@@ -88,7 +88,7 @@ public extension String {
     /**
      Returns an attributed version of the string, where the links are clickable.
      */
-    func linkify() -> AttributedString {
+    func linkify(linkColor: Color = .accentColor) -> AttributedString {
         var attributed = AttributedString(self)
         if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
             let range = NSRange(self.startIndex..., in: self)
@@ -96,7 +96,7 @@ public extension String {
                 if let match = match, let url = match.url, let range = Range(match.range, in: attributed) {
                     attributed[range].link = url
                     attributed[range].underlineStyle = .single
-                    attributed[range].foregroundColor = Color("monalGreen")
+                    attributed[range].foregroundColor = linkColor
                 }
             }
         }

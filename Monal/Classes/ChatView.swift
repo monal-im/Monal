@@ -415,8 +415,6 @@ struct ChatView: View {
                 }
                 messages.append(ChatViewMessage(newMLMessage))
             }
-        } messageBuilder: { message, viewModel, positionInUserGroup, positionInMessagesSection, positionInCommentsGroup, showContextMenuClosure, messageActionClosure, showAttachmentClosure in
-            MessageView(message: (message as! ChatViewMessage), viewModel: viewModel, positionInUserGroup: positionInUserGroup, positionInMessagesSection: positionInMessagesSection)
         } messageMenuAction: { (action: MessageAction, defaultActionClosure, message) in
             let mlMessage = (message as! ChatViewMessage).innerMessage.obj
             let messageDBId = mlMessage.messageDBId
@@ -768,6 +766,7 @@ struct ChatView: View {
             }
         }
         .toolbarRole(.editor)       //make sure to never show the title of the previous view in the back bar button
+        .canContainExternalLinks()
         .addLoadingOverlay(overlay)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -1053,36 +1052,5 @@ class ChatViewUser: ExyteChat.User {
     }
     public var description: String {
         return "ChatViewUser<\(String(describing:self.innerContact))>"
-    }
-}
-
-struct MessageView: View {
-    @StateObject var message: ChatViewMessage
-    @ObservedObject var viewModel: ExyteChat.ChatViewModel
-    let positionInUserGroup: PositionInUserGroup
-    let positionInMessagesSection: PositionInMessagesSection
-    init(message: ChatViewMessage, viewModel: ChatViewModel, positionInUserGroup: PositionInUserGroup, positionInMessagesSection: PositionInMessagesSection) {
-        _message = StateObject(wrappedValue: message)
-        self.viewModel = viewModel
-        self.positionInUserGroup = positionInUserGroup
-        self.positionInMessagesSection = positionInMessagesSection
-    }
-    var body: some View {
-        ExyteChat.MessageView(
-            viewModel: viewModel,
-            message: message,
-            positionInUserGroup: positionInUserGroup,
-            positionInMessagesSection: positionInMessagesSection,
-            chatType: .conversation,
-            avatarSize: 32,
-            tapAvatarClosure: nil,
-            messageStyler: { $0.linkify() },
-            shouldShowLinkPreview: { _ in false },  //disabled for now due to https://github.com/exyte/Chat/issues/208
-            isDisplayingMessageMenu: false,
-            showMessageTimeView: true,
-            messageLinkPreviewLimit: 8,
-            font: UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
-        )
-        .canContainExternalLinks()
     }
 }

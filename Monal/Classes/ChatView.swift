@@ -891,7 +891,9 @@ class ChatViewMessage: ExyteChat.Message {
     }
     override var attributedText: AttributedString {
         get {
-            return text.linkify()
+            // Keep outgoing links in the same color as outgoing text (white) for readability
+            let linkColor: Color = self.user.isCurrentUser ? .white : .accentColor
+            return text.linkify(linkColor: linkColor)
         }
         set {}
     }

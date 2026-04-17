@@ -1122,6 +1122,8 @@
                 //update device id in db
                 [db executeNonQuery:@"UPDATE flags SET value=? WHERE name='device_id';" andArguments:@[current_id]];
             }
+            else
+                DDLogInfo(@"Device id not changed: %@", current_id);
         }
         
         //check if db version changed and invalidate state, if so

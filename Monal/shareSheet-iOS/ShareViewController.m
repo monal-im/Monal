@@ -46,6 +46,8 @@
     //log startup
     DDLogInfo(@"Share Sheet Extension started: %@", [HelperTools appBuildVersionInfoFor:MLVersionTypeLog]);
     [DDLog flushLog];
+    
+    MLAssert([HelperTools deviceUUIDAccessibleOrAllowedEmpty:YES] == YES, @"device UUID should always be accessible or empty when using the share extension!");
 }
 
 -(void) viewDidLoad

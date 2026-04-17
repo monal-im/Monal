@@ -1016,7 +1016,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSDictionary* _Nullable) getParticipantForOccupant:(NSString*) occupant inRoom:(NSString*) room forAccountId:(NSNumber*) accountNo
 {
-    if(!occupant || !occupant || accountNo == nil)
+    if(!occupant || !room || accountNo == nil)
         return nil;
     return [self.db idReadTransaction:^{
         NSArray* result = [self.db executeReader:@"SELECT * FROM muc_participants WHERE account_id=? AND room=? AND occupant_id=?;" andArguments:@[accountNo, room, occupant]];

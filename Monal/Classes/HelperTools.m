@@ -532,7 +532,7 @@ void swizzle(Class c, SEL orig, SEL new)
 +(NSError*) getNSErrorFrom:(XMPPStanza*) stanza withDescription:(NSString*) description
 {
     NSString* errorMessage = [HelperTools extractXMPPError:stanza withDescription:description];
-    return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+    return [NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: errorMessage, @"stanza": nilWrapper(stanza)}];
 }
 
 +(void) initSystem
@@ -2580,19 +2580,43 @@ void swizzle(Class c, SEL orig, SEL new)
     NSString* deviceUUID = [SAMKeychain passwordForService:kMonalDeviceUUIDKeychainName account:kDeviceUUIDKeychainAccount error:&error];
     if(error)
     {
+        //should never trigger, since all relevant entry points into our framework call deviceUUIDAccessibleOrAllowedEmpty upon start
+        MLAssert(error.code == errSecItemNotFound, @"Unexpected keychain error!", (@{@"error": error}));
+        
         //The keychain is empty (due to a device migration for example)
-        NSUUID* newDeviceUUID = nilDefault([[UIDevice currentDevice] identifierForVendor], [NSUUID UUID]);
+        DDLogInfo(@"Keychain item storing the device UUID not found, regenerating it: %@", error);
+        NSUUID* newDeviceUUID = [[UIDevice currentDevice] identifierForVendor];
+        if(newDeviceUUID == nil)
+        {
+            newDeviceUUID = [NSUUID UUID];
+            DDLogWarn(@"Could not use identifierForVendor generated a new uuid and hoping for the best: %@", newDeviceUUID);
+        }
+        else
+            DDLogInfo(@"Using identifierForVendor and hoping it didn't change if we still are on the same device: %@", newDeviceUUID);
+        
         //Save the new device UUID in the special keychain, which uses a `ThisDeviceOnly` accessibility.
         //This accessibility ensures we can't migrate this keychain to another device
         NSError* deviceUUIDSavingError;
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly];
         [SAMKeychain setPassword:[newDeviceUUID UUIDString] forService:kMonalDeviceUUIDKeychainName account:kDeviceUUIDKeychainAccount error:&deviceUUIDSavingError];
-        if(deviceUUIDSavingError)
-            DDLogError(@"Failed to save the device UUID in the keychain, error: %@", deviceUUIDSavingError);
+        
+        //don't proceed if the new uuid could not be saved or something else isn't stable
+        //(we don't want to spuriously generate new omemo keys/identities!)
+        MLAssert(deviceUUIDSavingError == nil, @"Failed to save the device UUID in the keychain", (@{@"error": deviceUUIDSavingError}));
+        NSUUID* retrieved = [self deviceUUID];
+        MLAssert([retrieved isEqual:newDeviceUUID], @"Failed to retrive newly stored device UUID!", (@{@"retrieved": retrieved, @"stored": newDeviceUUID}));
+        
         return newDeviceUUID;
     }
     else
         return [[NSUUID alloc] initWithUUIDString:deviceUUID];
+}
+
++(BOOL) deviceUUIDAccessibleOrAllowedEmpty:(BOOL) allowed
+{
+    NSError* error;
+    [SAMKeychain passwordForService:kMonalDeviceUUIDKeychainName account:kDeviceUUIDKeychainAccount error:&error];
+    return error == nil || (allowed && error.code == errSecItemNotFound);
 }
 
 +(NSNumber*) currentTimestampInSeconds

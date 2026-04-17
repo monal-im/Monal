@@ -486,7 +486,9 @@ $$
     u_int16_t i=(u_int16_t)arc4random();
     NSString* randomID = [HelperTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]];
     NSString* fileExtension = [fileInfo[@"filename"] pathExtension];
+    fileExtension = [fileExtension substringToIndex:min(8, fileExtension.length)];
     NSString* fileBasename = [fileInfo[@"filename"] stringByDeletingPathExtension];
+    fileBasename = [fileBasename substringToIndex:min(64, fileBasename.length)];
     [hardlinkPathComponents addObject:[[NSString stringWithFormat:@"%@_%@", fileBasename, randomID] stringByAppendingPathExtension:fileExtension]];
     
     MLAssert(fileInfo[@"cacheFile"] != nil, @"cacheFile should never be empty here!", (@{@"fileInfo": fileInfo}));
@@ -759,14 +761,7 @@ $$
         if([_fileManager fileExistsAtPath:cacheFile])
             return cacheFile;
     }
-    
-    //check for files having a different mime type but the same base url
-    NSString* predicateString = [NSString stringWithFormat:@"self BEGINSWITH '%@.'", urlPart];
-    NSArray* directoryContents = [_fileManager contentsOfDirectoryAtPath:_documentCacheDir error:nil];
-    NSPredicate* filter = [NSPredicate predicateWithFormat:predicateString];
-    for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
-        return [_documentCacheDir stringByAppendingPathComponent:file];
-    
+
     //nothing found
     DDLogVerbose(@"Could not find cache file for url '%@' having mime type '%@'...", url, mimeType);
     return nil;
@@ -795,7 +790,7 @@ $$
         DDLogWarn(@"Failed to get url components, returning empty url!");
         return @"";
     }
-    urlComponents.fragment = @"";       //make sure we don't leak urlfragments to upload server
+    urlComponents.fragment = nil;       //make sure we don't leak urlfragments to upload server
     return urlComponents.string;
 }
 

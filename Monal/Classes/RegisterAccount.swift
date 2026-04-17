@@ -204,11 +204,11 @@ struct RegisterAccount: View {
                         kDirectTLS: false,
                         //creating an account involves transfering the password in cleartext only secured by TLS
                         //--> logging in directly afterwards using PLAIN doesn't make the situation any worse ==> allow it
-                        //conversations.im already supports sasl2 and scram ## TODO: use SCRAM preload list
+                        //conversations.im and yax.im already support sasl2 and scram ## TODO: use SCRAM preload list
                         //using the preload list in this case won't solve the situation, but increase the attack cost because
                         //stripping off SASL2 won't suffice anymore (the attacker will have to use the password sniffed during account creation
                         //to fake the SCRAM HMAC sent to both client and server)
-                        kPlainActivated: self.actualServer == "conversations.im" ? false : true,
+                        kPlainActivated: !["yax.im", "conversations.im"].contains(self.actualServer),
                     ] as [String : Any]
 
                     let accountNo = DataLayer.sharedInstance().addAccount(with: dic);

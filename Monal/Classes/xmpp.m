@@ -1398,21 +1398,22 @@ static NSRegularExpression* fastTokenRemovalRegex;
             //should create a backpressure ino the tcp stream, too
             //the calculated sleep time gives every stanza in the queue ~10ms to be handled (based on statistics)
             BOOL wasSleeping = NO;
+            CGFloat availableMemory = (CGFloat)os_proc_available_memory() / 1048576;
             while(self.accountState >= kStateConnected)
             {
                 //use a much smaller limit while in appex because memory there is limited to ~32MiB
                 unsigned long operationCount = [self->_parseQueue operationCount];
                 double usedMemory = [HelperTools report_memory];
-                if(!(operationCount > 50 || (appex && usedMemory > 16 && operationCount > MAX(2, 24 - usedMemory))))
+                if(!(operationCount > 256 || (appex && usedMemory > (0.5*availableMemory) && operationCount > MAX(2, (0.75*availableMemory) - usedMemory))))
                     break;
                 
-                double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                DDLogInfo(@"%@: Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
+                double waittime = (double)[self->_parseQueue operationCount] / 256.0;
+                DDLogWarn(@"%@: Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, availableMemory);
                 [NSThread sleepForTimeInterval:waittime];
                 wasSleeping = YES;
             }
             if(wasSleeping)
-                DDLogInfo(@"%@: Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                DDLogWarn(@"%@: Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], availableMemory);
             
             if(self.accountState < kStateConnected)
             {

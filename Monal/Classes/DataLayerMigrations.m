@@ -612,7 +612,7 @@
         //NOTE: next reconnect is now(!) due to the upgraded db version
         [self updateDB:db withDataLayer:dataLayer toVersion:5.113 withBlock:^{
             [db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
-            [[MLImageManager sharedInstance] removeAllIcons];
+            [[MLImageManager sharedInstance] removeAllContactIcons];
         }];
 
         // migrate account_id column in blocklistCache to integer
@@ -1088,8 +1088,13 @@
             );"];
             [db executeNonQuery:@"CREATE INDEX IF NOT EXISTS buddyIdIndex ON 'buddy_groups'('buddy_id');"];
         }];
-        
-        
+
+        // Allow storing the avatar hashes of MUC participants
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.010 withBlock:^{
+            [db executeNonQuery:@"ALTER TABLE muc_participants ADD COLUMN iconhash VARCHAR(200) NULL DEFAULT NULL;"];
+        }];
+
+
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs
         if(![[HelperTools defaultsDB] boolForKey:@"isSandboxAPNS"])

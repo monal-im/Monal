@@ -887,6 +887,23 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(NSString*) getAvatarHashForOccupant:(NSString*) occupantId inRoom:(NSString*) room forAccount:(NSNumber*) accountID
+{
+    return [self.db idReadTransaction:^{
+        NSString* hash = [self.db executeScalar:@"SELECT iconhash FROM muc_participants WHERE account_id=? AND room=? and occupant_id=?;" andArguments:@[accountID, room, occupantId]];
+        if(!hash)
+            hash = @"";     //hashes should never be nil
+        return hash;
+    }];
+}
+
+-(void) clearAvatarHashForOccupant:(NSString*) occupantId inRoom:(NSString*) room forAccount:(NSNumber*) accountID
+{
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"UPDATE muc_participants SET iconhash='' WHERE account_id=? AND room=? AND occupant_id=?;" andArguments:@[accountID, room, occupantId]];
+    }];
+}
+
 -(BOOL) isContactInList:(NSString*) buddy forAccount:(NSNumber*) accountID
 {
     return [self.db boolReadTransaction:^{
@@ -1004,6 +1021,7 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"UPDATE muc_participants SET participant_jid=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[nilWrapper(participant[@"jid"]), accountID, room, participant[@"nick"]]];
         [self.db executeNonQuery:@"UPDATE muc_participants SET affiliation=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[nilWrapper(participant[@"affiliation"]), accountID, room, participant[@"nick"]]];
         [self.db executeNonQuery:@"UPDATE muc_participants SET role=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[nilWrapper(participant[@"role"]), accountID, room, participant[@"nick"]]];
+        [self.db executeNonQuery:@"UPDATE muc_participants SET iconhash=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[nilWrapper(participant[@"avatar_hash"]), accountID, room, participant[@"nick"]]];
     }];
 }
 
@@ -1181,11 +1199,11 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) updateOwnOccupantID:(NSString* _Nullable) occupantID forMuc:(NSString*) room onAccountID:(NSNumber*) accountID
+-(BOOL) updateOwnOccupantId:(NSString* _Nullable) occupantId forMuc:(NSString*) room onAccountID:(NSNumber*) accountID
 {
     return [self.db boolWriteTransaction:^{
         NSString* query = @"UPDATE buddylist SET muc_occupant_id=? WHERE account_id=? AND buddy_name=? AND muc=1;";
-        NSArray* params = @[nilWrapper(occupantID), accountID, room];
+        NSArray* params = @[nilWrapper(occupantId), accountID, room];
         return [self.db executeNonQuery:query andArguments:params];
     }];
 }

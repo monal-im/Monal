@@ -134,7 +134,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(UIView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler;
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length;
 +(double) report_memory;
-+(UIColor*) generateColorFromJid:(NSString*) jid;
++(UIColor*) generateColorFromString:(NSString*) inputString;
 +(NSString*) bytesToHuman:(int64_t) bytes;
 +(NSString*) stringFromToken:(NSData*) tokenIn;
 +(NSString* _Nullable) exportIPCDatabase;

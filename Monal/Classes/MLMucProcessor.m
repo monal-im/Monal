@@ -23,8 +23,8 @@
 #import <monalxmpp/MLOMEMO.h>
 #import <monalxmpp/MLImageManager.h>
 
-//monal version 7.x state counter: 010
-#define CURRENT_MUC_STATE_VERSION @7010
+//monal version 7.x state counter: 011
+#define CURRENT_MUC_STATE_VERSION @7011
 
 @interface MLMucProcessor()
 {
@@ -42,6 +42,7 @@
     NSMutableDictionary* _changingName;
     NSDate* _lastPing;
     NSMutableSet* _noUpdateBookmarks;
+    NSMutableArray<NSDictionary*>* _pendingAvatarQueries;
     //these won't be persisted because it is only for the ui
     NSMutableDictionary* _uiHandler;
 }
@@ -89,6 +90,7 @@ static NSDictionary* _optionalGroupConfigOptions;
     _noUpdateBookmarks = [NSMutableSet new];
     _shouldFetchBookmarks = NO;
     _smacksResumption = YES;
+    _pendingAvatarQueries = [NSMutableArray new];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleHasLoggedIn:) name:kMLIsLoggedInNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleResourceBound:) name:kMLResourceBoundNotice object:nil];
@@ -125,6 +127,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         _changingName = [state[@"changingName"] mutableCopy];
         _lastPing = state[@"lastPing"];
         _noUpdateBookmarks = [state[@"noUpdateBookmarks"] mutableCopy];
+        _pendingAvatarQueries = [state[@"pendingAvatarQueries"] mutableCopy];
     }
 }
 
@@ -142,6 +145,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             @"changingName": [_changingName copy],
             @"lastPing": _lastPing,
             @"noUpdateBookmarks": [_noUpdateBookmarks copy],
+            @"pendingAvatarQueries": [_pendingAvatarQueries copy],
         };
         //DDLogVerbose(@"Returning MUC state: %@", state);
         return state;
@@ -404,7 +408,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             item[@"nick"] = presenceNode.fromResource;
             if([_roomFeatures[presenceNode.fromUser] containsObject:@"urn:xmpp:occupant-id:0"])
                 item[@"occupant_id"] = [presenceNode findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
-            
+
             //check for own role/affiliation change and send out a notification, if so
             NSString* oldAffiliation = nil;
             NSString* oldRole = nil;
@@ -413,7 +417,36 @@ static NSDictionary* _optionalGroupConfigOptions;
                 oldAffiliation= [[DataLayer sharedInstance] getOwnAffiliationInGroupOrChannel:mucContact];
                 oldRole = [[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:mucContact];
             }
-            
+
+            // Handle participant avatar updates
+            // We only display participant avatars when occupantIds are available
+            // So ignore avatar updates if occupantIds are unsupported
+            if(item[@"occupant_id"] != nil)
+            {
+                NSString* occupantId = item[@"occupant_id"];
+                //check vcard hash
+                NSString* newHash = [presenceNode findFirst:@"{vcard-temp:x:update}x/photo#"];
+                if(newHash != nil)
+                    item[@"avatar_hash"] = newHash;
+
+                NSString* oldHash = [[DataLayer sharedInstance] getAvatarHashForOccupant:occupantId inRoom:presenceNode.fromUser forAccount:_account.accountID];
+                DDLogVerbose(@"Checking if the avatar hash in presence '%@' of muc participant '%@' (occupantId: '%@') equals the stored hash '%@'...", newHash, presenceNode.from, occupantId, oldHash);
+                if(newHash != nil && ![newHash isEqualToString:oldHash])
+                {
+                    DDLogVerbose(@"Got new avatar hash '%@' for muc participant '%@' (occupantId: '%@')", newHash, presenceNode.from, occupantId);
+                    [self fetchAvatarForParticipant:presenceNode.from havingOccupantId:occupantId];
+                }
+                else if(newHash == nil && oldHash != nil && ![oldHash isEqualToString:@""])
+                {
+                    [[MLImageManager sharedInstance] setAvatarForOccupant:occupantId inRoom:presenceNode.fromUser forAccount:_account.accountID WithData:nil];
+                    DDLogDebug(@"Avatar of muc participant '%@' (occupantId: '%@') was deleted successfully", presenceNode.from, occupantId);
+                }
+                else
+                {
+                    DDLogDebug(@"Avatar hash '%@' of muc participant '%@' (occupantId: '%@') did not change, not updating avatar...", newHash, presenceNode.from, occupantId);
+                }
+            }
+
             //handle participant updates
             if([presenceNode check:@"/<type=unavailable>"] || item[@"affiliation"] == nil)
             {
@@ -952,7 +985,7 @@ $$
                     if([_roomFeatures[node.fromUser] containsObject:@"urn:xmpp:occupant-id:0"])
                         occupantId = [node findFirst:@"{urn:xmpp:occupant-id:0}occupant-id@id"];
                 }
-                [[DataLayer sharedInstance] updateOwnOccupantID:occupantId forMuc:node.fromUser onAccountID:_account.accountID];
+                [[DataLayer sharedInstance] updateOwnOccupantId:occupantId forMuc:node.fromUser onAccountID:_account.accountID];
                 
                 DDLogDebug(@"Updating muc contact...");
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:_account userInfo:@{
@@ -1690,14 +1723,118 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
     }
 $$
 
+-(void) fetchAvatarForParticipant:(NSString*) fullJid havingOccupantId:(NSString*) occupantId
+{
+    XMPPIQ* vcardQuery = [[XMPPIQ alloc] initWithType:kiqGetType to:fullJid];
+    [vcardQuery setVcardQuery];
+    // Fetch participant avatars one by one to avoid flooding the server with iqs which
+    // would significantly delay other iqs we'd send afterwards e.g. MAM queries
+    @synchronized(_stateLockObject) {
+        // Don't add the query if it's already in the pending queries queue
+        // This can happen if the presence of the participant is received again while its avatar
+        // query is still pending e.g. if you disable an account an re-enable it (due to the
+        // presence flood of the re-join)
+        for(NSDictionary* pendingQuery in _pendingAvatarQueries)
+        {
+            if([occupantId isEqualToString:pendingQuery[@"occupantId"]]
+                && [vcardQuery.to isEqualToString:((XMPPIQ*)pendingQuery[@"query"]).to])
+                return;
+        }
+        [_pendingAvatarQueries addObject:@{@"query": vcardQuery, @"occupantId": occupantId}];
+        if(_pendingAvatarQueries.count == 1)
+        {
+            // The queue contains only the query we just added; meaning it was initially empty
+            // => send the query
+            DDLogVerbose(@"Sending avatar query to '%@' (occupantId: '%@'). Avatar queue size: 1", fullJid, occupantId);
+            [_account sendIq:vcardQuery withHandler:$newHandlerWithInvalidation(self, handleParticipantVcardResponse, handleParticipantVcardResponseInvalidation, $ID(fullJid), $ID(occupantId))];
+        }
+    }
+}
+
+-(void) sendTheNextPendingAvatarQuery
+{
+    @synchronized(_stateLockObject) {
+        [_pendingAvatarQueries removeObjectAtIndex:0];
+        if(_pendingAvatarQueries.count > 0)
+        {
+            XMPPIQ* query = _pendingAvatarQueries[0][@"query"];
+            NSString* occupantId = _pendingAvatarQueries[0][@"occupantId"];
+            DDLogVerbose(@"Sending avatar query to '%@' (occupantId: '%@'). Avatar queue size: %lu", query.to, occupantId, _pendingAvatarQueries.count);
+            [_account sendIq:query withHandler:$newHandlerWithInvalidation(self, handleParticipantVcardResponse, handleParticipantVcardResponseInvalidation, $ID(fullJid, query.to), $ID(occupantId))];
+        }
+    }
+}
+
+$$instance_handler(handleParticipantVcardResponseInvalidation, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, fullJid), $$ID(NSString*, occupantId))
+    DDLogError(@"Failed to retrieve avatar of muc participant '%@' (occupantId: '%@')", fullJid, occupantId);
+    [self sendTheNextPendingAvatarQuery];
+$$
+
+$$instance_handler(handleParticipantVcardResponse, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, occupantId))
+    [self sendTheNextPendingAvatarQuery];
+
+    // Ignore the vcard response if we're no longer joined to the room
+    // We send the next pending avatar query even in this case because the next query
+    // might be for a participant in another room
+    if(![self isJoined:iqNode.fromUser] && ![self isJoining:iqNode.fromUser])
+        return;
+
+    BOOL deleteAvatar = ![iqNode check:@"{vcard-temp}vCard/PHOTO/BINVAL"];
+
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Failed to retrieve avatar of muc participant '%@' (occupantId: '%@'), error: %@", iqNode.from, occupantId, [iqNode findFirst:@"error"]);
+        deleteAvatar = YES;
+    }
+
+    if(deleteAvatar)
+    {
+        [[MLImageManager sharedInstance] setAvatarForOccupant:occupantId inRoom:iqNode.fromUser forAccount:_account.accountID WithData:nil];
+        [[DataLayer sharedInstance] clearAvatarHashForOccupant:occupantId inRoom:iqNode.fromUser forAccount:_account.accountID];
+        DDLogDebug(@"Avatar of muc participant '%@' (occupantId: '%@') was deleted successfully", iqNode.from, occupantId);
+    }
+    else
+    {
+        //this should be small enough to not crash the appex when loading the image from file later on but large enough to have excellent quality
+        NSData* imageData = [iqNode findFirst:@"{vcard-temp}vCard/PHOTO/BINVAL#|base64"];
+        if([HelperTools isAppExtension] && imageData.length > 128 * 1024)
+        {
+            DDLogWarn(@"Not processing avatar image data of muc participant '%@' (occupantId: '%@') because it is too big to be handled in appex (%lu bytes), rescheduling it to be fetched in mainapp", iqNode.from, occupantId, (unsigned long)imageData.length);
+            [_account addReconnectionHandler:$newHandler(self, fetchParticipantAvatarAgain, $ID(fulljid, iqNode.from), $ID(occupantId))];
+            return;
+        }
+
+        //this will consume a large portion of ram because it will be represented as uncomressed bitmap
+        UIImage* image = [UIImage imageWithData:imageData];
+        if(image == nil)
+        {
+            DDLogWarn(@"Failed to load avatar of muc participant '%@' (occupantId: '%@')", iqNode.from, occupantId);
+            return;
+        }
+
+        //this upper limit is roughly 1.4MiB memory (600x600 with 4 byte per pixel)
+        if(![HelperTools isAppExtension] || image.size.width * image.size.height < 600 * 600)
+        {
+            NSData* imageData = [HelperTools resizeAvatarImage:image withCircularMask:YES toMaxBase64Size:256000];
+            [[MLImageManager sharedInstance] setAvatarForOccupant:occupantId inRoom:iqNode.fromUser forAccount:_account.accountID WithData:imageData];
+            DDLogDebug(@"Avatar of muc participant '%@' (occupantId: '%@') was fetched and updated successfully", iqNode.from, occupantId);
+        }
+        else
+        {
+            DDLogWarn(@"Not loading avatar image of muc participant '%@' (occupantId: '%@') because it is too big to be processed in appex (%lux%lu pixels), rescheduling it to be fetched in mainapp", iqNode.from, occupantId, (unsigned long)image.size.width, (unsigned long)image.size.height);
+            [_account addReconnectionHandler:$newHandler(self, fetchParticipantAvatarAgain, $ID(fulljid, iqNode.from), $ID(occupantId))];
+        }
+    }
+$$
+
 -(void) fetchAvatarForRoom:(NSString*) room
 {
     XMPPIQ* vcardQuery = [[XMPPIQ alloc] initWithType:kiqGetType to:room];
     [vcardQuery setVcardQuery];
-    [_account sendIq:vcardQuery withHandler:$newHandler(self, handleVcardResponse)];
+    [_account sendIq:vcardQuery withHandler:$newHandler(self, handleRoomVcardResponse)];
 }
 
-$$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
+$$instance_handler(handleRoomVcardResponse, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
     BOOL deleteAvatar = ![iqNode check:@"{vcard-temp}vCard/PHOTO/BINVAL"];
     
     if([iqNode check:@"/<type=error>"])
@@ -1724,7 +1861,7 @@ $$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, accoun
         if([HelperTools isAppExtension] && imageData.length > 128 * 1024)
         {
             DDLogWarn(@"Not processing avatar image data of muc '%@' because it is too big to be handled in appex (%lu bytes), rescheduling it to be fetched in mainapp", iqNode.fromUser, (unsigned long)imageData.length);
-            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid, iqNode.fromUser))];
+            [_account addReconnectionHandler:$newHandler(self, fetchRoomAvatarAgain, $ID(jid, iqNode.fromUser))];
             return;
         }
         
@@ -1747,20 +1884,30 @@ $$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, accoun
         else
         {
             DDLogWarn(@"Not loading avatar image of muc '%@' because it is too big to be processed in appex (%lux%lu pixels), rescheduling it to be fetched in mainapp", iqNode.fromUser, (unsigned long)image.size.width, (unsigned long)image.size.height);
-            [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid, iqNode.fromUser))];
+            [_account addReconnectionHandler:$newHandler(self, fetchRoomAvatarAgain, $ID(jid, iqNode.fromUser))];
         }
     }
 $$
 
 //this handler will simply retry the vcard fetch attempt if in mainapp
-$$instance_handler(fetchAvatarAgain, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, jid))
+$$instance_handler(fetchRoomAvatarAgain, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, jid))
     if([HelperTools isAppExtension])
     {
         DDLogWarn(@"Not loading avatar image of '%@' because we are still in appex, rescheduling it again!", jid);
-        [_account addReconnectionHandler:$newHandler(self, fetchAvatarAgain, $ID(jid))];
+        [_account addReconnectionHandler:$newHandler(self, fetchRoomAvatarAgain, $ID(jid))];
     }
     else
         [self fetchAvatarForRoom:jid];
+$$
+
+$$instance_handler(fetchParticipantAvatarAgain, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, fullJid), $$ID(NSString*, occupantId))
+    if([HelperTools isAppExtension])
+    {
+        DDLogWarn(@"Not loading avatar image of muc participant '%@' (occupantId: '%@') because we are still in appex, rescheduling it again!", fullJid, occupantId);
+        [_account addReconnectionHandler:$newHandler(self, fetchParticipantAvatarAgain, $ID(fullJid), $ID(occupantId))];
+    }
+    else
+        [self fetchAvatarForParticipant:fullJid havingOccupantId:occupantId];
 $$
 
 -(void) handleError:(NSString*) description forMuc:(NSString*) room withNode:(XMPPStanza*) node andIsSevere:(BOOL) isSevere

@@ -86,6 +86,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     DDLogInfo(@"calling MonalAppDelegate configureBackgroundTasks");
     [self configureBackgroundTasks];
     
+    MLAssert([HelperTools deviceUUIDAccessibleOrAllowedEmpty:YES] == YES, @"device UUID should always be accessible or empty when opening the app!");
+    
     return self;
 }
 

@@ -773,7 +773,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     //TODO: use preload list and allow PLAIN for all others once enough domains are on this list
     //allow plain for all servers not on preload list, since prosody with SASL2 wasn't even released yet
     NSNumber* defaultPlainActivated = @YES;
-    BOOL plainActivated =  ? NO : defaultPlainActivated;
     [dic setObject:(([domain isEqualToString:@"yax.im"] || [domain isEqualToString:@"quicksy.im"] || [domain isEqualToString:@"conversations.im"]) ? @NO : defaultPlainActivated) forKey:kPlainActivated];
 
     NSNumber* accountNo = [[DataLayer sharedInstance] addAccountWithDictionary:dic];

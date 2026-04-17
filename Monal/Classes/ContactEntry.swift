@@ -9,43 +9,29 @@
 struct ContactEntry<AdditionalContent: View>: View {
     let selfnotesPrefix: Bool
     let fallback: String?
+    let avatar: UIImage?
     @ViewBuilder let additionalContent: () -> AdditionalContent
     @ScaledMetric(relativeTo:.body) private var size40px: CGFloat = 40
     
     @StateObject var contact: ObservableKVOWrapper<MLContact>
     
-    init(contact:MLContact, selfnotesPrefix: Bool = true, fallback: String? = nil) where AdditionalContent == EmptyView {
-        self.init(contact:contact, selfnotesPrefix:selfnotesPrefix, fallback:fallback, additionalContent:{ EmptyView() })
+    init(contact: MLContact, selfnotesPrefix: Bool = true, fallback: String? = nil, withAvatar avatar: UIImage? = nil) where AdditionalContent == EmptyView {
+        self.init(contact: contact, selfnotesPrefix: selfnotesPrefix, fallback: fallback, withAvatar: avatar, additionalContent: { EmptyView() })
     }
-    
-    init(contact:MLContact, fallback: String?) where AdditionalContent == EmptyView {
-        self.init(contact:contact, selfnotesPrefix:true, fallback:fallback, additionalContent:{ EmptyView() })
-    }
-    
-    init(contact:MLContact, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
-        self.init(contact:contact, selfnotesPrefix:true, additionalContent:additionalContent)
-    }
-    
-    init(contact:MLContact, fallback: String?, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
-        self.init(contact:contact, selfnotesPrefix:true, fallback:fallback, additionalContent:additionalContent)
-    }
-    
-    init(contact:MLContact, selfnotesPrefix: Bool, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
-        self.init(contact:contact, selfnotesPrefix:selfnotesPrefix, fallback:nil, additionalContent:additionalContent)
-    }
-    
-    init(contact:MLContact, selfnotesPrefix: Bool, fallback: String?, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
+
+    init(contact: MLContact, selfnotesPrefix: Bool = true, fallback: String? = nil, withAvatar avatar: UIImage? = nil, @ViewBuilder additionalContent: @escaping () -> AdditionalContent) {
         //create our own observable object to not trigger rendering for changes, not observed by us, but by an outer view
         _contact = StateObject(wrappedValue: ObservableKVOWrapper<MLContact>(contact))
         self.selfnotesPrefix = selfnotesPrefix
         self.fallback = fallback
+        self.avatar = avatar
         self.additionalContent = additionalContent
     }
     
     var body:some View {
         ZStack(alignment: .topLeading) {
             HStack(alignment: .center) {
-                Image(uiImage: contact.avatar)
+                Image(uiImage: self.avatar ?? self.contact.avatar)
                     .resizable()
                     .frame(width: size40px, height: size40px, alignment: .center)
                 VStack(alignment: .leading) {

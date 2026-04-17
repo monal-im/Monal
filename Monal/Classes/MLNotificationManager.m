@@ -805,7 +805,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     //DDLogDebug(@"Intent is now: %@", intent);
     if(message.isMuc)
     {
-        if(contact.hasAvatar && contact.avatar != nil)
+        if(contact.avatar != nil)
         {
             DDLogDebug(@"Using muc avatar image: %@", contact.avatar);
             [intent setImage:[INImage imageWithImageData:UIImagePNGRepresentation(contact.avatar)] forParameterNamed:@"speakableGroupName"];

@@ -266,10 +266,6 @@ struct MemberList: View {
                 }
                 
                 ForEach(memberList, id:\.self) { contact in
-                    var isDeletable: Bool {
-                        ownUserHasAffiliationToRemove(contact: contact)
-                    }
-
                     if !contact.isSelf {
                         HStack {
                             HStack {
@@ -300,18 +296,23 @@ struct MemberList: View {
                                 view
                             }
                         }
-                        .swipeActions(allowsFullSwipe: false) {
-                            Button("Delete") {
-                                showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[contact], roles[contact]))?"), description: self.muc.mucType == kMucTypeGroup ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
-                                    showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[contact], roles[contact]))"), descriptionView: Text("Removing \(contact.contactJid as String)...")) {
-                                        account.mucProcessor.setAffiliation(kMucAffiliationNone, ofUser: contact.contactJid, inMuc: self.muc.contactJid)
-                                    }.catch { error in
-                                        showAlert(title:Text("Error removing user!"), description:Text(error.localizedDescription))
+                        .applyClosure { view in
+                            if ownUserHasAffiliationToRemove(contact: contact) {
+                                view.swipeActions(allowsFullSwipe: false) {
+                                    Button("Delete") {
+                                        showActionSheet(title: Text("Remove \(mucAffiliationToString(affiliations[contact], roles[contact]))?"), description: self.muc.mucType == kMucTypeGroup ? Text("Do you want to remove that user from this group? That user won't be able to enter it again until added back to the group.") : Text("Do you want to remove that user from this channel? That user will be able to enter it again if you don't block them.")) {
+                                            showPromisingLoadingOverlay(self.overlay, headlineView: Text("Removing \(mucAffiliationToString(affiliations[contact], roles[contact]))"), descriptionView: Text("Removing \(contact.contactJid as String)...")) {
+                                                account.mucProcessor.setAffiliation(kMucAffiliationNone, ofUser: contact.contactJid, inMuc: self.muc.contactJid)
+                                            }.catch { error in
+                                                showAlert(title:Text("Error removing user!"), description:Text(error.localizedDescription))
+                                            }
+                                        }
                                     }
+                                    .tint(.red)
                                 }
+                            } else {
+                                view
                             }
-                            .tint(.red)
-                            .disabled(!isDeletable)
                         }
                     }
                 }

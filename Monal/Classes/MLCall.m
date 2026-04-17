@@ -460,7 +460,7 @@
     DDLogInfo(@"Activating audio session now: %@", audioSession);
     [[RTCAudioSession sharedInstance] lockForConfiguration];
     NSUInteger options = 0;
-    options |= AVAudioSessionCategoryOptionAllowBluetooth;
+    options |= AVAudioSessionCategoryOptionAllowBluetoothHFP;
     options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
     options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
     options |= AVAudioSessionCategoryOptionAllowAirPlay;

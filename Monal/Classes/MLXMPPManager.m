@@ -15,6 +15,7 @@
 #import <monalxmpp/xmpp.h>
 #import "XMPPMessage.h"
 #import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLImageManager.h>
 #import "MLNotificationManager.h"
 #import <monalxmpp/MLOMEMO.h>
 #import <monalxmpp/monalxmpp-Swift.h>
@@ -898,6 +899,9 @@ $$
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountID];
         [contact removeShareInteractions];
+
+        //delete the avatar of the contact
+        [[MLImageManager sharedInstance] setIconForContact:contact WithData:nil];
         
         //notify the UI
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{

@@ -28,6 +28,7 @@
 -(void) cleanupHashes;
 -(void) removeAllContactIcons;
 -(void) deleteAvatarsOfRoom:(MLContact* _Nonnull) roomContact;
+-(void) deleteAvatarsOfAccount:(NSNumber* _Nonnull) accountID;
 
 /**
  Takes the string from the xmpp icon vcard info and stores it in an appropropriate place. 

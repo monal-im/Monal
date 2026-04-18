@@ -214,6 +214,23 @@
     [fileManager removeItemAtPath:writablePath error:nil];
 }
 
+-(void) deleteAvatarsOfAccount:(NSNumber*) accountID
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+
+    // delete the contact avatar
+    //documents directory/buddyicons/accountID/
+    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+    writablePath = [writablePath stringByAppendingPathComponent:accountID.stringValue];
+    [fileManager removeItemAtPath:writablePath error:nil];
+
+    // delete the room participant avatars
+    //documents directory/muc_participant_avatars/accountID/
+    writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"muc_participant_avatars"];
+    writablePath = [writablePath stringByAppendingPathComponent:accountID.stringValue];
+    [fileManager removeItemAtPath:writablePath error:nil];
+}
+
 #pragma mark chat bubbles
 
 -(UIImage*) inboundImage

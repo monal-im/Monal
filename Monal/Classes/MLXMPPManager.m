@@ -853,6 +853,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 {
     [self disconnectAccount:accountID withExplicitLogout:YES];
     [[DataLayer sharedInstance] removeAccount:accountID];
+    [[MLImageManager sharedInstance] deleteAvatarsOfAccount:accountID];
     [SAMKeychain deletePasswordForService:kMonalKeychainName account:accountID.stringValue];
     [HelperTools removeAllShareInteractionsForAccountID:accountID];
     // trigger UI removal

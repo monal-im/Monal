@@ -157,8 +157,10 @@ class KVOObserver: NSObject {
 }
 
 @dynamicMemberLookup
-public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable, CustomStringConvertible, Identifiable {
+public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable, Equatable, CustomStringConvertible, Identifiable //, Observation.Observable
+{
     public let obj: ObjType
+//     private let _$observationRegistrar = Observation.ObservationRegistrar()
     private var observedMembers: NSMutableSet = NSMutableSet()
     private var observers: [KVOObserver] = Array()
     
@@ -194,14 +196,17 @@ public class ObservableKVOWrapper<ObjType:NSObject>: ObservableObject, Hashable,
         }
     }
     
-    private func getWrapper(for member:String) -> AnyObject? {
+    private nonisolated func getWrapper(for member:String) -> AnyObject? {
         addObserverForMember(member)
+//         _$observationRegistrar.access(self, keyPath:member)
         //DDLogDebug("Returning value for dynamicMember \(member): \(String(describing:self.obj.value(forKey:member)))")
         return self.obj.value(forKey:member) as AnyObject?
     }
     
-    private func setWrapper(for member:String, value:AnyObject?) {
-        self.obj.setValue(value, forKey:member)
+    private nonisolated func setWrapper(for member:String, value:AnyObject?) {
+//         try _$observationRegistrar.withMutation(of:self, keyPath:member) {
+            self.obj.setValue(value, forKey:member)
+//         }
     }
 
     public subscript<T>(member: String) -> T {

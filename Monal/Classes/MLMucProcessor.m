@@ -2013,6 +2013,7 @@ $$
     else
     {
         [[DataLayer sharedInstance] removeBuddy:room forAccount:_account.accountID];
+        [[MLImageManager sharedInstance] deleteAvatarsOfRoom:contact];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:_account userInfo:@{
             @"contact": contact
         }];

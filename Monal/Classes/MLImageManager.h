@@ -27,6 +27,7 @@
 +(MLImageManager* _Nonnull) sharedInstance;
 -(void) cleanupHashes;
 -(void) removeAllContactIcons;
+-(void) deleteAvatarsOfRoom:(MLContact* _Nonnull) roomContact;
 
 /**
  Takes the string from the xmpp icon vcard info and stores it in an appropropriate place. 

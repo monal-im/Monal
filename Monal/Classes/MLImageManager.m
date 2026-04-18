@@ -194,6 +194,26 @@
         DDLogError(@"Got error while trying to delete all contact avatar files: %@", error);
 }
 
+-(void) deleteAvatarsOfRoom:(MLContact*) roomContact
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+
+    // delete the room avatar
+    //documents directory/buddyicons/accountID/contact
+    NSString* filename = [self fileNameforContact:roomContact];
+    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+    writablePath = [writablePath stringByAppendingPathComponent:roomContact.accountID.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:filename];
+    [fileManager removeItemAtPath:writablePath error:nil];
+
+    // delete participant avatars
+    //documents directory/muc_participant_avatars/accountID/room/
+    writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"muc_participant_avatars"];
+    writablePath = [writablePath stringByAppendingPathComponent:roomContact.accountID.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:roomContact.contactJid];
+    [fileManager removeItemAtPath:writablePath error:nil];
+}
+
 #pragma mark chat bubbles
 
 -(UIImage*) inboundImage

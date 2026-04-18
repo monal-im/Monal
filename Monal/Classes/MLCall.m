@@ -475,8 +475,11 @@
     [[RTCAudioSession sharedInstance] unlockForConfiguration];
     if(self.callType == MLCallTypeVideo)
     {
-        DDLogInfo(@"*** Video call detected, activating speaker...");
-        self.speaker = YES;
+        DDLogInfo(@"*** Video call detected, activating speaker in 500ms...");
+        createTimer(0.5, (^{
+            DDLogInfo(@"*** Video call detected, NOW activating speaker...");
+            self.speaker = YES;
+        }));
     }
 }
 

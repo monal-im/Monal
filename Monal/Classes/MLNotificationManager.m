@@ -302,12 +302,13 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     BOOL showAlert = notification.userInfo[@"showAlert"] ? [notification.userInfo[@"showAlert"] boolValue] : NO;
     BOOL LMCReplaced = notification.userInfo[@"LMCReplaced"] ? [notification.userInfo[@"LMCReplaced"] boolValue] : NO;
-    [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:showAlert andSound:YES andLMCReplaced:LMCReplaced];
     
+    //this is either a reactions update or a new message, never both
     if([notification.userInfo[@"reactionsUpdate"] boolValue])
     {
-        //only show notifications for reactions to own messages and only, if configured to do so
-        if(!message.inbound && [[HelperTools defaultsDB] boolForKey:@"showNotificationsForReactions"] && ([HelperTools isNotInFocus] || ![message isEqualToContact:self.currentContact]))
+        //only show notifications for reactions from other people to our own messages, but only if configured to do so
+        //showAlert will be NO if this is our own reaction and YES it it is from somebody else
+        if(!message.inbound && showAlert && [[HelperTools defaultsDB] boolForKey:@"showNotificationsForReactions"] && ([HelperTools isNotInFocus] || ![message isEqualToContact:self.currentContact]))
         {
             DDLogVerbose(@"Notification manager will show notification for reaction: %@", notification.userInfo[@"changedReactions"]);
             [self showNotificationForReactions:notification.userInfo[@"changedReactions"]];
@@ -315,6 +316,8 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         else
             DDLogVerbose(@"Notification manager will NOT show notification for reaction: %@", notification.userInfo[@"changedReactions"]);
     }
+    else
+        [self internalMessageHandlerWithMessage:message andAccount:xmppAccount showAlert:showAlert andSound:YES andLMCReplaced:LMCReplaced];
 }
 
 -(void) internalMessageHandlerWithMessage:(MLMessage*) message andAccount:(xmpp*) xmppAccount showAlert:(BOOL) showAlert andSound:(BOOL) sound andLMCReplaced:(BOOL) LMCReplaced

@@ -640,7 +640,7 @@ static NSMutableDictionary* _typingNotifications;
                         changedReactions = reactionsEntry;
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{
                     @"message": [MLMessage createMessageFromHistoryID:historyId],
-                    @"showAlert": @NO,
+                    @"showAlert": @(inbound),
                     @"contact": possiblyUnknownContact,
                     @"LMCReplaced": @NO,
                     @"reactionsUpdate": @YES,

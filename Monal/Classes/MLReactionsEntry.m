@@ -109,7 +109,7 @@
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"Reactions to {%@} from {%@} at %@: %@",
+    return [NSString stringWithFormat:@"Reactions in chat {%@} from {%@} at %@: %@",
         self.message,
         self.contact,
         self.timestamp,

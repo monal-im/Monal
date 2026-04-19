@@ -565,15 +565,20 @@ static NSMutableDictionary* _typingNotifications;
                             checkForDuplicates:[messageNode check:@"{urn:xmpp:sid:0}origin-id"] || (stanzaid != nil)
             ];
             
-            //...then retract this message (e.g. mark as retracted)
-            [[DataLayer sharedInstance] retractMessageHistory:historyIdToRetract];
-            
-            //update ui
-            DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
-                @"historyId": historyIdToRetract,
-                @"contact": possiblyUnknownContact,
-            }];
+            if(historyIdToRetract == nil)
+                DDLogError(@"Tried to process retraction tombstone by adding empty message to history at id %@, but a duplicate message with stanzaid=%@ and messageId=%@ and originId=%@ was already there: that should never happen!", historyIdToUse, stanzaid, messageId, [messageNode findFirst:@"{urn:xmpp:sid:0}origin-id"]);
+            else
+            {
+                //...then retract this message (e.g. mark as retracted)
+                [[DataLayer sharedInstance] retractMessageHistory:historyIdToRetract];
+                
+                //update ui
+                DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
+                    @"historyId": historyIdToRetract,
+                    @"contact": possiblyUnknownContact,
+                }];
+            }
         }
         else
             DDLogWarn(@"Got faked tombstone without server supporting them, ignoring it!");

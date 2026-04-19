@@ -1316,7 +1316,7 @@ static NSDateFormatter* dbFormatter;
     return [self.db idWriteTransaction:^{
         if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound occupantId:occupantId andJid:buddyName onAccount:accountID] == nil)
         {
-            NSString* dateString = [DataLayer dateStringWithMessageDate:messageDate];
+            NSString* dateString = [DataLayer dateStringWithMessageDate:messageDate andSourceDate:[NSDate date] andSourceTimeZone:[NSTimeZone systemTimeZone]];
             NSString* query;
             NSArray* params;
             if(historyId != nil)
@@ -1350,13 +1350,12 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
-+(NSString*) dateStringWithMessageDate:(NSDate*) messageDate
++(NSString*) dateStringWithMessageDate:(NSDate*) messageDate andSourceDate:(NSDate*) sourceDate andSourceTimeZone:(NSTimeZone*) sourceTimeZone
 {
     //this is always from a contact
     NSDateFormatter* formatter = [NSDateFormatter new];
     [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
-    NSDate* sourceDate = [NSDate date];
     NSDate* destinationDate;
     if(messageDate)
     {
@@ -1366,7 +1365,6 @@ static NSDateFormatter* dbFormatter;
     }
     else
     {
-        NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
         NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
 
         NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];

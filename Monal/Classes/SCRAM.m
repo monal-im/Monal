@@ -179,15 +179,15 @@
     MLAssert(!_finishedSuccessfully, @"SCRAM handler finished already!");
     MLAssert(_serverFirstMessageParsed, @"SCRAM handler did not parsed server-first-message yet!");
     NSDictionary* msg = [self parseScramString:str withKeysRegex:@"^(e|v)*$"];
-    //wrong v-value
-    if(![HelperTools constantTimeCompareAttackerString:msg[@"v"] withKnownString:_expectedServerSignature])
-        return MLScramStatusWrongServerProof;
-    //server sent a SCRAM error
+    //server sent a SCRAM error (v can be empty in this case)
     if(msg[@"e"] != nil)
     {
         DDLogError(@"SCRAM error: '%@'", msg[@"e"]);
         return MLScramStatusServerError;
     }
+    //wrong v-value (can be empty on error case)
+    if(![HelperTools constantTimeCompareAttackerString:msg[@"v"] withKnownString:_expectedServerSignature])
+        return MLScramStatusWrongServerProof;
     //everything was successful
     _finishedSuccessfully = YES;
     return MLScramStatusServerFinalOK;

@@ -683,6 +683,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) updatePassword:(NSString*) password forAccount:(NSNumber*) accountID
 {
+    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
     [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountID.stringValue];
     xmpp* xmpp = [self getEnabledAccountForID:accountID];
     [xmpp.connectionProperties.identity updatPassword:password];
@@ -841,6 +842,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 {
     if(accountID != nil && password != nil)
     {
+        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
         [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountID.stringValue];
         [self connectAccount:accountID];
     }

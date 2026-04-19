@@ -362,6 +362,7 @@ enum DummySettingsRows {
                 if(accountID != nil)
                 {
                     self.accountID = accountID;
+                    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
                     [SAMKeychain setPassword:self.password forService:kMonalKeychainName account:self.accountID.stringValue];
                     if(self.enabled)
                     {

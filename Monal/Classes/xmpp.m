@@ -1228,6 +1228,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
         [self->_iStream setDelegate:nil];
         [self->_oStream setDelegate:nil];
         
+        //remove from runloop
+        [self->_iStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
+        [self->_oStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
+        
         //sadly closing the output stream does not unblock a hanging [_oStream write:maxLength:] call
         //blocked by an ios/max runtime race condition with starttls
         DDLogInfo(@"closing output stream");
@@ -1237,9 +1241,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
         }
         @catch(id theException)
         {
-            DDLogError(@"Exception in ostream close");
+            DDLogError(@"Exception in ostream close: %@", theException);
         }
-        self->_oStream=nil;
         
         DDLogInfo(@"closing input stream");
         @try
@@ -1248,18 +1251,15 @@ static NSRegularExpression* fastTokenRemovalRegex;
         }
         @catch(id theException)
         {
-            DDLogError(@"Exception in istream close");
+            DDLogError(@"Exception in istream close: %@", theException);
         }
-        self->_iStream=nil;
         
-        //clean up send queue now that the delegate was removed (_streamHasSpace can not switch to YES now)
+        //clean up send queue now that the delegate was removed (_streamHasSpace can not switch to YES now) and the connection closed
         [self cleanupSendQueue];
-        
-        //remove from runloop *after* cleaning up sendQueue (maybe this fixes a rare crash)
-        [self->_iStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
-        [self->_oStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
 
         DDLogInfo(@"resetting internal stream state to disconnected");
+        self->_iStream=nil;
+        self->_oStream=nil;
         self->_startTLSComplete = NO;
         self->_catchupDone = NO;
         self->_accountState = kStateDisconnected;

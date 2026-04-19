@@ -64,7 +64,9 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
         //cancel server thread and wake it up to let it terminate properly
         if(_sharedInstance.serverThread)
             [_sharedInstance.serverThread cancel];
+        [_sharedInstance->_serverThreadCondition lock];
         [_sharedInstance->_serverThreadCondition signal];
+        [_sharedInstance->_serverThreadCondition unlock];
         //deallocate everything
         _responseHandlers = nil;
         _sharedInstance = nil;
@@ -241,7 +243,9 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
 -(void) incomingDarwinNotification:(NSString*) name
 {
     DDLogDebug(@"Got incoming darwin notification: %@", name);
+    [_serverThreadCondition lock];
     [_serverThreadCondition signal];        //wake up server thread to process new messages
+    [_serverThreadCondition unlock];
 }
 
 -(NSDictionary*) readNextMessage
@@ -253,7 +257,9 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
             return data;
         //wait for wakeup (incoming darwin notification or thread termination)
         DDLogVerbose(@"IPC readNextMessage waiting for wakeup via darwin notification");
+        [_serverThreadCondition lock];
         [_serverThreadCondition wait];
+        [_serverThreadCondition unlock];
     }
     return nil;     //thread cancelled
 }

@@ -3328,33 +3328,41 @@ a=%@\r\n", mid, candidate];
 //see https://nachtimwald.com/2017/04/02/constant-time-string-comparison-in-c/
 +(BOOL) constantTimeCompareAttackerPointer:(void*) p1 withLength:(NSUInteger) p1Length andKnownPointer:(void*) p2 withLength:(NSUInteger) p2Length
 {
-    if(p1 == nil || p2 == nil)
+    if(p1 == nil || p2 == nil || p1Length == 0 || p2Length == 0)
         return NO;
     
-    p1Length--;
-    p2Length--;
     const uint8_t* s1 = p1;
     const uint8_t* s2 = p2;
-    volatile uint8_t m = 0;
+    size_t p1len = p1Length - 1;
+    size_t p2len = p2Length - 1;
+    
+    volatile size_t m = 0;
     volatile size_t i = 0;
     volatile size_t j = 0;
-    volatile size_t k = 0;    
+    volatile size_t k = 0;
+    volatile size_t l = 0;
     
+    m |= p1len ^ p2len;
     while(1)
     {
         //this will only turn on bits in m, but never turn them off
-        m |= s1[i] ^ s2[j];
+        m |= s1[i] ^ s2[k];
+        
+        //break if we reached the end of both bytearrays
+        if(((i ^ p1len) | (k ^ p2len)) == 0)
+            break;
+        
+        //always balance increments even if s1 is shorter than s2
+        if(i != p1len)
+            i++;
+        if(i == p1len)
+            j++;
         
         //always balance increments even if s2 is shorter than s1
-        if(j != p2Length)
-            j++;
-        if(j == p2Length)
+        if(k != p2len)
             k++;
-        
-        //use length instead of null-byte
-        if(i == p1Length)
-            break;
-        i++;
+        if(k == p2len)
+            l++;
     }
     
     return m == 0;      //check if we never turned on any bit in m
@@ -3364,7 +3372,9 @@ a=%@\r\n", mid, candidate];
 {
     if(str1 == nil || str2 == nil)
         return NO;
-    return [self constantTimeCompareAttackerPointer:(void*)str1.UTF8String withLength:str1.length andKnownPointer:(void*)str2.UTF8String withLength:str2.length];
+    NSData* data1 = [str1 dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* data2 = [str2 dataUsingEncoding:NSUTF8StringEncoding];
+    return [self constantTimeCompareAttackerData:data1 withKnownData:data2];
 }
     
 +(BOOL) constantTimeCompareAttackerData:(NSData* _Nonnull) data1 withKnownData:(NSData* _Nonnull) data2

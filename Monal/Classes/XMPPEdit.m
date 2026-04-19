@@ -825,9 +825,7 @@ enum DummySettingsRows {
         switch(newIndexPath.row)
         {
             case SettingsServerDetailsRow: {
-                xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
-                UIViewController* serverDetailsView = [[SwiftuiInterface new] makeServerDetailsViewFor:xmppAccount];
-                [self showDetailViewController:serverDetailsView sender:self];
+                [self showServerDetails];
                 break;
             }
         }
@@ -893,13 +891,29 @@ enum DummySettingsRows {
         switch(indexPath.row)
         {
             case SettingsServerDetailsRow: {
-                xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
-                UIViewController* serverDetailsView = [[SwiftuiInterface new] makeServerDetailsViewFor:xmppAccount];
-                [self showDetailViewController:serverDetailsView sender:self];
+                [self showServerDetails];
                 break;
             }
         }
     }
+}
+
+-(void) showServerDetails
+{
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getEnabledAccountForID:self.accountID];
+    if(xmppAccount == nil || xmppAccount.connectionProperties == nil)
+    {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error Removing Account", @"")
+                                                                            message:NSLocalizedString(@"Your account must be enabled and connected, to be removed from the server!", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action __unused) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
+    }
+    
+    UIViewController* serverDetailsView = [[SwiftuiInterface new] makeServerDetailsViewFor:xmppAccount];
+    [self showDetailViewController:serverDetailsView sender:self];
 }
 
 

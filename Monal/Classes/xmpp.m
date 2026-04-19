@@ -103,6 +103,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     //internal handlers and flags
     MLDelayableTimer* _loginTimer;
     MLDelayableTimer* _pingTimer;
+    monal_void_block_t _pingDelayTimer;
     MLDelayableTimer* _reconnectTimer;
     NSMutableArray* _timersToCancelOnDisconnect;
     NSMutableArray* _smacksAckHandler;
@@ -1550,8 +1551,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
 
 -(void) sendPing:(double) timeout
 {
-    static monal_void_block_t delayTimer = nil;        //it doesn't matter if this has a race condition
-    
     DDLogVerbose(@"sendPing called");
     [self dispatchAsyncOnReceiveQueue: ^{
         DDLogVerbose(@"sendPing called - now inside receiveQueue");
@@ -1585,19 +1584,19 @@ static NSRegularExpression* fastTokenRemovalRegex;
         }
         else if([self->_parseQueue operationCount] > 0)
         {
-            if(delayTimer != nil)
+            if(self->_pingDelayTimer != nil)
                 DDLogWarn(@"Ping already delayed, ignoring additional ping...");
             else
             {
                 NSUInteger delayBy = min((NSUInteger)timeout, [self->_parseQueue operationCount]);
                 DDLogWarn(@"parseQueue overflow, delaying ping by 4 seconds.");
-                delayTimer = createTimer(delayBy, (^{
-                    [self removeTimerToCancelOnDisconnect:delayTimer];
-                    delayTimer = nil;
+                self->_pingDelayTimer = createTimer(delayBy, (^{
+                    [self removeTimerToCancelOnDisconnect:self->_pingDelayTimer];
+                    self->_pingDelayTimer = nil;
                     DDLogDebug(@"ping delay expired, retrying ping.");
                     [self sendPing:timeout];
                 }));
-                [self addTimerToCancelOnDisconnect:delayTimer];
+                [self addTimerToCancelOnDisconnect:self->_pingDelayTimer];
             }
         }
         else

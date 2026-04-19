@@ -460,7 +460,7 @@
     DDLogInfo(@"Activating audio session now: %@", audioSession);
     [[RTCAudioSession sharedInstance] lockForConfiguration];
     NSUInteger options = 0;
-    options |= AVAudioSessionCategoryOptionAllowBluetooth;
+    options |= AVAudioSessionCategoryOptionAllowBluetoothHFP;
     options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
     options |= AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers;
     options |= AVAudioSessionCategoryOptionAllowAirPlay;
@@ -475,8 +475,11 @@
     [[RTCAudioSession sharedInstance] unlockForConfiguration];
     if(self.callType == MLCallTypeVideo)
     {
-        DDLogInfo(@"*** Video call detected, activating speaker...");
-        self.speaker = YES;
+        DDLogInfo(@"*** Video call detected, activating speaker in 500ms...");
+        createTimer(0.5, (^{
+            DDLogInfo(@"*** Video call detected, NOW activating speaker...");
+            self.speaker = YES;
+        }));
     }
 }
 

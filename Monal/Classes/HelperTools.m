@@ -3013,36 +3013,62 @@ a=%@\r\n", mid, candidate];
 }
 
 //see https://nachtimwald.com/2017/04/02/constant-time-string-comparison-in-c/
++(BOOL) constantTimeCompareAttackerPointer:(void*) p1 withLength:(NSUInteger) p1Length andKnownPointer:(void*) p2 withLength:(NSUInteger) p2Length
+{
+    if(p1 == nil || p2 == nil || p1Length == 0 || p2Length == 0)
+        return NO;
+    
+    const uint8_t* s1 = p1;
+    const uint8_t* s2 = p2;
+    size_t p1len = p1Length - 1;
+    size_t p2len = p2Length - 1;
+    
+    volatile size_t m = 0;
+    volatile size_t i = 0;
+    volatile size_t j = 0;
+    volatile size_t k = 0;
+    volatile size_t l = 0;
+    
+    m |= p1len ^ p2len;
+    while(1)
+    {
+        //this will only turn on bits in m, but never turn them off
+        m |= s1[i] ^ s2[k];
+        
+        //break if we reached the end of both bytearrays
+        if(((i ^ p1len) | (k ^ p2len)) == 0)
+            break;
+        
+        //always balance increments even if s1 is shorter than s2
+        if(i != p1len)
+            i++;
+        if(i == p1len)
+            j++;
+        
+        //always balance increments even if s2 is shorter than s1
+        if(k != p2len)
+            k++;
+        if(k == p2len)
+            l++;
+    }
+    
+    return m == 0;      //check if we never turned on any bit in m
+}
+
 +(BOOL) constantTimeCompareAttackerString:(NSString* _Nonnull) str1 withKnownString:(NSString* _Nonnull) str2
 {
     if(str1 == nil || str2 == nil)
         return NO;
+    NSData* data1 = [str1 dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* data2 = [str2 dataUsingEncoding:NSUTF8StringEncoding];
+    return [self constantTimeCompareAttackerData:data1 withKnownData:data2];
+}
     
-    const char* s1 = str1.UTF8String;
-    const char* s2 = str2.UTF8String;
-    volatile int m = 0;
-    volatile size_t i = 0;
-    volatile size_t j = 0;
-    volatile size_t k = 0;    
-    
-    while(1)
-    {
-        //this will only turn on bits in m, but never turn them off
-        m |= s1[i] ^ s2[j];
-        
-        //
-        if(s1[i] == '\0')
-            break;
-        i++;
-        
-        //always balance increments even if s2 is shorter than s1
-        if(s2[j] != '\0')
-            j++;
-        if(s2[j] == '\0')
-            k++;
-    }
-    
-    return m == 0;      //check if we never turned on any bit in m
++(BOOL) constantTimeCompareAttackerData:(NSData* _Nonnull) data1 withKnownData:(NSData* _Nonnull) data2
+{
+    if(data1 == nil || data2 == nil)
+        return NO;
+    return [self constantTimeCompareAttackerPointer:(void*)data1.bytes withLength:data1.length andKnownPointer:(void*)data2.bytes withLength:data2.length];
 }
 
 +(BOOL) isIP:(NSString*) host

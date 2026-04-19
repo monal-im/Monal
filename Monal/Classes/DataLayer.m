@@ -2536,7 +2536,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     return [self.db idReadTransaction:^{
         NSString* likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
-        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND (message LIKE ? OR messageType LIKE ?) AND buddy_name=? ORDER BY timestamp ASC;";
+        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND message LIKE ? AND buddy_name=? ORDER BY timestamp ASC;";
         NSArray* params = @[contact.accountId, likeString, contact.contactJid];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
         return [self messagesForHistoryIDs:results];

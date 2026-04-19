@@ -62,6 +62,13 @@
                 [_input close];
                 _input = nil;
             }
+        }
+        @catch(id theException)
+        {
+            DDLogError(@"Exception while closing input pipe end: %@", theException);
+        }
+        @try
+        {
             if(_output)
             {
                 DDLogInfo(@"Closing pipe: output end");
@@ -74,7 +81,7 @@
         }
         @catch(id theException)
         {
-            DDLogError(@"Exception while closing pipe: %@", theException);
+            DDLogError(@"Exception while closing output pipe end: %@", theException);
         }
     }
 }

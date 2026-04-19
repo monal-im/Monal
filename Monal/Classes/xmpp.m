@@ -2773,13 +2773,26 @@ static NSRegularExpression* fastTokenRemovalRegex;
             message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
             DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
             
+            if(_htHandler != nil)
+            {
+                DDLogWarn(@"We tried to use (maybe pipelined) FAST to authenticate, retry without FAST according to XEP-0484 business rules...");
+                //clear FAST token --> use SCRAM on next login
+                [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
+            }
+            
             //clear pipeline cache to make sure we have a fresh restart next time
             xmppPipeliningState oldPipeliningState = _pipeliningState;
             [self resetAuthPipelining];
             
-            //don't report error but reconnect if we pipelined stuff that is not correct anymore...
-            if(oldPipeliningState != kPipelinedNothing)
+            //don't report error but reconnect if we pipelined stuff that is not correct anymore or FAST failed...
+            if(oldPipeliningState != kPipelinedNothing || _htHandler != nil)
             {
+                //clean up
+                self->_scramHandler = nil;
+                self->_htHandler = nil;
+                self->_fastTokenRequested = nil;
+                self->_blockToCallOnTCPOpen = nil;
+                
                 DDLogWarn(@"Reconnecting to flush pipeline...");
                 [self reconnect];
             }
@@ -2819,6 +2832,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
+                
+                //clean up
+                self->_scramHandler = nil;
+                self->_htHandler = nil;
+                self->_fastTokenRequested = nil;
+                self->_blockToCallOnTCPOpen = nil;
             }
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}success"])
@@ -2872,6 +2891,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 NSString* token = [parsedStanza findFirst:@"{urn:xmpp:fast:0}token@token"];
                 NSString* expiry = [parsedStanza findFirst:@"{urn:xmpp:fast:0}token@expiry|datetime"];
                 DDLogInfo(@"Got new FAST token with expiry: %@", expiry);
+                
                 [SAMKeychain setPasswordData:[HelperTools serializeObject:@{
                     @"token": token,
                     @"mechanism": _fastTokenRequested,
@@ -3463,20 +3483,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
                     
                     //authenticating using FAST always means we accept a new token for token rotation, too
                     self->_fastTokenRequested = tokenData[@"mechanism"];
-                    
-                    //always request a new fast token if supported by server
-                    //fast token rotation means an attacker who stole our token will be locked out as soon as we authenticate again
-                    //but only accept the exact same token mechanism as the one we already posses and use to authenticate
-                    //or a better one better to prevent downgrades!
-                    /*
-                    if([parsedStanza check:@"{urn:xmpp:sasl:2}authentication/inline/{urn:xmpp:fast:0}fast"])
-                    {
-                        self->_fastTokenRequested = tokenData[@"mechanism"];
-                        [authenticate addChildNode:[[MLXMLNode alloc] initWithElement:@"request-token" andNamespace:@"urn:xmpp:fast:0" withAttributes:@{
-                            @"mechanism": tokenData[@"mechanism"],
-                        } andChildren:@[] andData:nil]];
-                    }
-                    */
                 }
             }
             

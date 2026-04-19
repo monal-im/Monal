@@ -1233,7 +1233,6 @@ NSString* const kStanza = @"stanza";
         {
             DDLogError(@"Exception in ostream close");
         }
-        self->_oStream=nil;
         
         //clean up send queue now that the delegate was removed (_streamHasSpace can not switch to YES now)
         [self cleanupSendQueue];
@@ -1242,6 +1241,7 @@ NSString* const kStanza = @"stanza";
         [self->_oStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
 
         DDLogInfo(@"resetting internal stream state to disconnected");
+        self->_oStream=nil;
         self->_startTLSComplete = NO;
         self->_catchupDone = NO;
         self->_accountState = kStateDisconnected;

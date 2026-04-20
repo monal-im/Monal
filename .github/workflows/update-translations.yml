@@ -13,18 +13,11 @@ jobs:
   updateTranslations:
     # The type of runner that the job will run on
     runs-on: self-hosted
-    env:
-      APP_NAME: "Monal"
-      APP_DIR: "Monal.app"
-      BUILD_TYPE: "Beta"
-      EXPORT_OPTIONS_CATALYST_APPSTORE: "../scripts/exportOptions/Stable_Catalyst_ExportOptions.plist"
-      EXPORT_OPTIONS_CATALYST_APP_EXPORT: "../scripts/exportOptions/Beta_Catalyst_ExportOptions.plist"
-      EXPORT_OPTIONS_IOS: "../scripts/exportOptions/Beta_iOS_ExportOptions.plist"
     permissions:
       contents: write # needed for git push in updateLocalization
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           clean: true
           submodules: true

@@ -634,7 +634,7 @@ static NSDateFormatter* dbFormatter;
 -(NSArray<NSString*>*) resourcesForContact:(MLContact* _Nonnull) contact
 {
     return [self.db idReadTransaction:^{
-        NSArray<NSString*>* resources = [self.db executeScalarReader:@"SELECT resource FROM buddy_resources AS A INNER JOIN buddylist AS B ON a.buddy_id=b.buddy_id WHERE  buddy_name=?;" andArguments:@[contact.contactJid]];
+        NSArray<NSString*>* resources = [self.db executeScalarReader:@"SELECT resource FROM buddy_resources AS A INNER JOIN buddylist AS B ON a.buddy_id=b.buddy_id WHERE account_id=? AND buddy_name=?;" andArguments:@[contact.accountId, contact.contactJid]];
         return resources;
     }];
 }

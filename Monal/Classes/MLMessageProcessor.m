@@ -270,7 +270,7 @@ static NSMutableDictionary* _typingNotifications;
         if(![[[DataLayer sharedInstance] listMucsForAccount:account.accountID] containsObject:messageNode.fromUser])
         {
             // ignore message
-            DDLogWarn(@"Ignoring groupchat message from %@", messageNode.toUser);
+            DDLogWarn(@"Ignoring groupchat message from %@", messageNode.fromUser);
             return nil;
         }
     }

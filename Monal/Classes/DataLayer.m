@@ -1979,7 +1979,7 @@ static NSDateFormatter* dbFormatter;
 -(void) updateUsedPushServer:(NSString*) pushServer forAccount:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
-        [self.db executeScalarReader:@"UPDATE account SET registeredPushServer=? WHERE account_id=?;" andArguments:@[pushServer, accountNo]];
+        [self.db executeNonQuery:@"UPDATE account SET registeredPushServer=? WHERE account_id=?;" andArguments:@[pushServer, accountNo]];
     }];
 }
 

@@ -1910,8 +1910,7 @@ static NSDateFormatter* dbFormatter;
 -(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSNumber*) accountID withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withOccupantId:(NSString* _Nullable) occupantId andId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size
 {
     //Message_history going out, from is always the local user. always read and not sent
-    NSArray* parts = [[[NSDate date] description] componentsSeparatedByString:@" "];
-    NSString* dateTime = [NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0], [parts objectAtIndex:1]];
+    NSString* dateTime = [dbFormatter stringFromDate:[NSDate date]];
     NSString* query = @"INSERT INTO message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, occupant_id, unread, sent, messageid, messageType, encrypted, displayMarkerWanted) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?);";
     NSArray* params = @[accountID, to, [NSNumber numberWithBool:NO], dateTime, message, actualfrom, nilWrapper(occupantId), [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES]];
     return [self.db idWriteTransaction:^{

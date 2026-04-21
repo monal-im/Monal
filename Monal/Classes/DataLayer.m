@@ -412,7 +412,7 @@ static NSDateFormatter* dbFormatter;
             cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
         if([cleanNickName length] > 50)
-            toPass = [cleanNickName substringToIndex:49];
+            toPass = [cleanNickName substringToIndex:50];
         else
             toPass = cleanNickName;
         
@@ -693,7 +693,7 @@ static NSDateFormatter* dbFormatter;
     {
         //data length check
         if([[presenceObj findFirst:@"show#"] length] > 20)
-            toPass = [[presenceObj findFirst:@"show#"] substringToIndex:19];
+            toPass = [[presenceObj findFirst:@"show#"] substringToIndex:20];
         else
             toPass = [presenceObj findFirst:@"show#"];
     }
@@ -757,7 +757,7 @@ static NSDateFormatter* dbFormatter;
     {
         //data length check
         if([[presenceObj findFirst:@"status#"] length] > 200)
-            toPass = [[presenceObj findFirst:@"status#"] substringToIndex:199];
+            toPass = [[presenceObj findFirst:@"status#"] substringToIndex:200];
         else
             toPass = [presenceObj findFirst:@"status#"];
     }
@@ -831,7 +831,7 @@ static NSDateFormatter* dbFormatter;
     NSString* toPass;
     NSString* cleanFullName = [fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if([cleanFullName length]>50)
-        toPass = [cleanFullName substringToIndex:49];
+        toPass = [cleanFullName substringToIndex:50];
     else
         toPass = cleanFullName;
 

@@ -1123,7 +1123,9 @@
 
 -(BOOL) isEqual:(id _Nullable) object
 {
-    if(self == object)
+    if(object == nil)
+        return NO;
+    else if(self == object)
         return YES;
     else if([object isKindOfClass:[MLContact class]])
         return [self isEqualToContact:(MLContact*)object];

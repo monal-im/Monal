@@ -70,7 +70,7 @@
 -(void) untrustAllDevicesFrom:(NSString* _Nonnull) jid;
 -(NSNumber* _Nonnull) getTrustLevel:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nonnull) identityKey;
 
--(int) getHighestPreyKeyId;
+-(int) getHighestPreKeyId;
 -(unsigned int) getPreKeyCount;
 
 -(void) cleanupKeys;

@@ -139,7 +139,8 @@ NSString* type_to_classname(NSString* type)
     //default arguments of the caller
     [inv setArgument:(void* _Nonnull)&args atIndex:2];
     //bound arguments of the handler
-    NSDictionary* boundArgs = _internalData[@"boundArguments"];
+    //make sure we use a copy because we don't want to leak changes of our bound arguments dict into already running invocations
+    NSDictionary* boundArgs = [_internalData[@"boundArguments"] copy];
     [inv setArgument:(void* _Nonnull)&boundArgs atIndex:3];
     //now call it
     [inv invoke];

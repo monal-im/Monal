@@ -1066,6 +1066,17 @@
             [db executeNonQuery:@"UPDATE signalContactIdentity SET lastReceivedMsg=CURRENT_TIMESTAMP WHERE lastReceivedMsg IS NULL;"];
         }];
         
+        //gegenerate the table with proper NULL contraint (will be automatically populated by next login)
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.008 withBlock:^{
+            [db executeNonQuery:@"DROP TABLE IF EXISTS blocklistCache;"];
+            [db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
+                'account_id' INTEGER NOT NULL, \
+                'blocked_jid' TEXT NOT NULL CHECK(LENGTH(blocked_jid) > 0), \
+                UNIQUE('account_id','blocked_jid'), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+            );"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

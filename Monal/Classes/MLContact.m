@@ -204,9 +204,14 @@ static NSMutableDictionary* _singletonCache;
         // default is local part, see https://docs.modernxmpp.org/client/design/#contexts
         NSDictionary* jidParts = [HelperTools splitJid:account.connectionProperties.identity.jid];
         displayName = jidParts[@"node"];
+        if(!displayName || !displayName.length)
+        {
+            //if the node is empty, use the host instead, this should NEVER be empty
+            displayName = jidParts[@"host"];
+        }
     }
     DDLogVerbose(@"Calculated ownDisplayName for '%@': %@", account.connectionProperties.identity.jid, displayName);
-    return nilDefault(displayName, @"");
+    return emptyDefault(displayName, @"", @"?");        //should never trigger, but just to be sure
 }
 
 +(MLContact*) createContactFromDatabaseWithJid:(NSString*) jid andAccountID:(NSNumber*) accountID

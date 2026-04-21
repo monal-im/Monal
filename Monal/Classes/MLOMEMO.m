@@ -1059,7 +1059,7 @@ $$
 {
     // generate new keys if less than MIN_OMEMO_KEYS are available
     unsigned int preKeyCount = [self.monalSignalStore getPreKeyCount];
-    int lastPreyKedId = [self.monalSignalStore getHighestPreyKeyId];
+    int lastPreyKedId = [self.monalSignalStore getHighestPreKeyId];
     DDLogDebug(@"Current prekey count: %u, lastPreyKedId=%d", preKeyCount, lastPreyKedId);
     if(preKeyCount < MIN_OMEMO_KEYS)
     {

@@ -3,6 +3,8 @@
 //  Monal
 //
 //  Created by Thilo Molitor on 31.07.20.
+//  Loosely based on https://ddeville.me/2015/02/interprocess-communication-on-ios-with-berkeley-sockets/
+//  and https://ddeville.me/2015/02/interprocess-communication-on-ios-with-mach-messages/
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 

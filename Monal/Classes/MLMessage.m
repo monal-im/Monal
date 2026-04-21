@@ -424,9 +424,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(NSUInteger) hash
 {
-    return [self.accountID hash] ^ [self.buddyName hash] ^ (self.inbound ? 1 : 0) ^
-           [self.actualFrom hash] ^ [self.messageText hash] ^ [self.messageId hash] ^
-           [self.stanzaId hash];
+    return [self.accountID hash] ^ [self.buddyName hash] ^ (self.inbound ? 1 : 0) ^ [self.actualFrom hash];
 }
 
 -(NSString*) id

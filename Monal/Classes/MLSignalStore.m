@@ -73,7 +73,7 @@
         NSData* idKeyPrivate = [row objectForKey:@"identityPrivateKey"];
         
         NSError* error;
-        self.identityKeyPair = [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:nil];
+        self.identityKeyPair = [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:&error];
         if(error)
         {
             DDLogError(@"prekey error %@", error);
@@ -121,12 +121,13 @@
     for (NSDictionary* row in keys)
     {
         SignalPreKey* key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
-        [array addObject:key];
+        if(key != nil)
+            [array addObject:key];
     }
     return array; 
 }
 
--(int) getHighestPreyKeyId
+-(int) getHighestPreKeyId
 {
     NSNumber* highestId = [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT prekeyid FROM signalPreKey WHERE account_id=? ORDER BY prekeyid DESC LIMIT 1;" andArguments:@[self.accountID]];

@@ -3,8 +3,6 @@
 //  monalxmpp
 //
 //  Created by Thilo Molitor on 26.07.20.
-//  Loosely based on https://ddeville.me/2015/02/interprocess-communication-on-ios-with-berkeley-sockets/
-//  and https://ddeville.me/2015/02/interprocess-communication-on-ios-with-mach-messages/
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
@@ -42,6 +40,8 @@ static volatile int _ownLockFD;
     _ownLockPath = calloc(strlen(path)+1, sizeof(*_ownLockPath));
     strncpy(_ownLockPath, path, strlen(path));
     DDLogInfo(@"Set _ownLockPath to '%s'...", _ownLockPath);
+    
+    _ownLockFD = -1;
 }
 
 +(void) lock
@@ -49,7 +49,7 @@ static volatile int _ownLockFD;
     int lock;
     DDLogVerbose(@"Locking process (_ownLockPath=%s)...", _ownLockPath);
     @synchronized(self) {
-        if(_ownLockFD != 0)
+        if(_ownLockFD >= 0)
         {
             lock = flock(_ownLockFD, LOCK_EX | LOCK_NB);
             if(lock == 0)
@@ -59,8 +59,8 @@ static volatile int _ownLockFD;
             }
             @throw [NSException exceptionWithName:@"LockingError" reason:[NSString stringWithFormat:@"flock returned: %d (%d) on file: %s", lock, errno, _ownLockPath] userInfo:nil];
         }
-        _ownLockFD = open(_ownLockPath, O_CREAT, S_IRWXU | S_IRWXG);
-        if(_ownLockFD == 0)
+        _ownLockFD = open(_ownLockPath, O_CREAT | O_RDONLY, S_IRWXU | S_IRWXG);
+        if(_ownLockFD < 0)
             @throw [NSException exceptionWithName:@"LockingError" reason:[NSString stringWithFormat:@"failed to fopen file (%d): %s", errno, _ownLockPath] userInfo:nil];
         lock = flock(_ownLockFD, LOCK_EX | LOCK_NB);
         if(lock != 0)
@@ -73,10 +73,10 @@ static volatile int _ownLockFD;
 {
     DDLogVerbose(@"Unlocking process (_ownLockPath=%s)...", _ownLockPath);
     @synchronized(self) {
-        if(_ownLockFD != 0)
+        if(_ownLockFD >= 0)
         {
             close(_ownLockFD);
-            _ownLockFD = 0;
+            _ownLockFD = -1;
         }
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
@@ -86,8 +86,8 @@ static volatile int _ownLockFD;
 {
     char const* path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:[_locksDir stringByAppendingPathComponent:processName]];
     DDLogVerbose(@"Checking if remote %@ is running (path=%s)...", processName, path);
-    int fd = open(path, O_CREAT, S_IRWXU | S_IRWXG);
-    if(fd == 0)
+    int fd = open(path, O_CREAT | O_RDONLY, S_IRWXU | S_IRWXG);
+    if(fd < 0)
         @throw [NSException exceptionWithName:@"LockingError" reason:[NSString stringWithFormat:@"failed to fopen file (%d): %s", errno, path] userInfo:@{@"processName": processName}];
     int lock = flock(fd, LOCK_EX | LOCK_NB);
     //try again if the file was not locked
@@ -114,7 +114,7 @@ static volatile int _ownLockFD;
     {
         if(handler)
             handler();
-        [self sleep:1.0];
+        [self sleep:0.250];
     }
 }
 

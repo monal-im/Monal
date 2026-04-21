@@ -131,7 +131,8 @@ static NSMutableDictionary* _singletonCache;
         return DownloadStateNone;
 }
 
--(double) mediaDuration {
+-(double) mediaDuration
+{
     // return already cached value.
     if(_mediaDuration != 0.0)
         return _mediaDuration;
@@ -139,9 +140,11 @@ static NSMutableDictionary* _singletonCache;
     // Compute the duration, but try to ensure that only one thread is doing so
     // Also prevent further retries in the case of an error
     // Note that isComputingMediaDuration is not thread safe
-    if(!self.isComputingMediaDuration) {
+    NSString* cacheFilePath = self.cacheFilePath;
+    if(!self.isComputingMediaDuration && cacheFilePath != nil)
+    {
         self.isComputingMediaDuration = YES;
-        [HelperTools computeMediaDurationFromFile:self.cacheFilePath havingMimeType:self.mimeType andFileExtension:self.fileExtension]
+        [HelperTools computeMediaDurationFromFile:cacheFilePath havingMimeType:self.mimeType andFileExtension:self.fileExtension]
         .then(^(NSNumber* duration) {
             // The following instruction triggers a ChatView update
             self.mediaDuration = duration.doubleValue;
@@ -155,7 +158,8 @@ static NSMutableDictionary* _singletonCache;
     return _mediaDuration;
 }
 
--(NSURL*) thumbnailURL {
+-(NSURL*) thumbnailURL
+{
     // files that aren't downloaded shouldn't have a (locally generated) thumbnail
     if(self.downloadState != DownloadStateComplete)
         return nil;
@@ -175,10 +179,11 @@ static NSMutableDictionary* _singletonCache;
     // Generate the thumbnail now, but try to ensure that only one thread is doing the generation
     // Also, prevent retries in the case of an error (to avoid repeated failures)
     // Note that isGeneratingThumbnail is not thread safe.
-    if(!self.isGeneratingThumbnail)
+    NSString* cacheFilePath = self.cacheFilePath;
+    if(!self.isGeneratingThumbnail && cacheFilePath != nil)
     {
         self.isGeneratingThumbnail = YES;
-        [HelperTools generateVideoThumbnailFromFile:self.cacheFilePath havingMimeType:self.mimeType andFileExtension:self.fileExtension]
+        [HelperTools generateVideoThumbnailFromFile:cacheFilePath havingMimeType:self.mimeType andFileExtension:self.fileExtension]
         .then(^(UIImage* image) {
             NSData* imageData = UIImagePNGRepresentation(image);
             // The following instruction triggers a ChatView update
@@ -228,7 +233,10 @@ static NSMutableDictionary* _singletonCache;
 
 -(NSString* _Nullable) cacheId
 {
-    return [self.cacheFilePath lastPathComponent];
+    NSString* cacheFilePath = self.cacheFilePath;
+    if(cacheFilePath == nil)
+        return nil;
+    return [cacheFilePath lastPathComponent];
 }
 
 +(NSSet*) keyPathsForValuesAffectingCacheId
@@ -238,7 +246,10 @@ static NSMutableDictionary* _singletonCache;
 
 -(NSURL* _Nullable) fileURL
 {
-    return [NSURL fileURLWithPath:self.cacheFilePath];
+    NSString* cacheFilePath = self.cacheFilePath;
+    if(cacheFilePath == nil)
+        return nil;
+    return [NSURL fileURLWithPath:cacheFilePath];
 }
 
 +(NSSet*) keyPathsForValuesAffectingFileURL

@@ -85,7 +85,9 @@
 
 -(BOOL) isEqual:(id) object
 {
-    if(self == object)
+    if(object == nil)
+        return NO;
+    else if(self == object)
         return YES;
     else if([object isKindOfClass:[MLReactionsEntry class]])
         return [self isEqualToReactionsEntry:object];
@@ -98,8 +100,7 @@
 
 -(NSUInteger) hash
 {
-    return [self.historyId hash] ^ [self.user hash] ^ [self.contact hash] ^
-           [self.reactions hash] ^ [self.mucNick hash] ^ [self.timestamp hash];
+    return [self.historyId hash] ^ [self.user hash] ^ [self.reactions hash];
 }
 
 -(NSString*) id

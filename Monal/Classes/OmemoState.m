@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(instancetype) init
 {
-    self = [super self];
+    self = [super init];
     self.queuedKeyTransportElements = [NSMutableDictionary new];
     self.openBundleFetches = [NSMutableDictionary new];
     self.openDevicelistFetches = [NSMutableSet new];

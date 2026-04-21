@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/cocoalumberjack/cocoalumberjack",
         "state": {
           "branch": null,
-          "revision": "a9ed4b6f9bdedce7d77046f43adfb8ce1fd54114",
-          "version": "3.9.0"
+          "revision": "c5f2ed4d219866117e135cf648180dc7b66739d3",
+          "version": "3.9.1"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
           "branch": "main",
-          "revision": "3de48fee8bdcb816eee813037a2c4a7a26d2da89",
+          "revision": "dbdbddc6a79b3d53f5b926ec16bf1f1cacbeac77",
           "version": null
         }
       },
@@ -51,13 +51,13 @@
         "repositoryURL": "https://github.com/SVGKit/SVGKit",
         "state": {
           "branch": "3.x",
-          "revision": "dacecaad4d0d42f49b50df0143d65e664bd13ca4",
+          "revision": "f835442588b60654f977bf5b47ebd9314824dae8",
           "version": null
         }
       },
       {
         "package": "SVGView",
-        "repositoryURL": "https://github.com/exyte/SVGView",
+        "repositoryURL": "https://github.com/exyte/SVGView.git",
         "state": {
           "branch": null,
           "revision": "6465962facdd25cb96eaebc35603afa2f15d2c0d",
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "bbd81b6725ae874c69e9b8c8804d462356b55523",
-          "version": "1.10.1"
+          "revision": "5073617dac96330a486245e4c0179cb0a6fd2256",
+          "version": "1.12.0"
         }
       },
       {

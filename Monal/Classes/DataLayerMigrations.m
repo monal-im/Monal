@@ -1077,6 +1077,18 @@
             );"];
         }];
         
+        //allow for storage of roster groups - needed for upgrades from stable, since upgrade 6.407 was already
+        //occupied by a backported change listed as 7.007 in here
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.009 withBlock:^{
+            [db executeNonQuery:@"CREATE TABLE IF NOT EXISTS 'buddy_groups' ( \
+                'buddy_id' INTEGER NOT NULL, \
+                'group_name' VARCHAR(50) NOT NULL, \
+                FOREIGN KEY('buddy_id') REFERENCES 'buddylist'('buddy_id') ON DELETE CASCADE, \
+                PRIMARY KEY('buddy_id', 'group_name') \
+            );"];
+            [db executeNonQuery:@"CREATE INDEX IF NOT EXISTS buddyIdIndex ON 'buddy_groups'('buddy_id');"];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

@@ -9,6 +9,7 @@
 import UniformTypeIdentifiers
 import SVGView
 import AVKit
+import ExyteChat
 
 struct GifRepresentation: Transferable {
     let getData: () -> Data

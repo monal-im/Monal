@@ -899,7 +899,7 @@
         }];
         
         //allow for storage of roster groups
-        [self updateDB:db withDataLayer:dataLayer toVersion:6.407 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.994 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE 'buddy_groups' ( \
                 'buddy_id' INTEGER NOT NULL, \
                 'group_name' VARCHAR(50) NOT NULL, \
@@ -910,13 +910,13 @@
         }];
         
         //add own occupant-id to database
-        [self updateDB:db withDataLayer:dataLayer toVersion:6.408 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.995 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN muc_occupant_id VARCHAR(128) NULL DEFAULT NULL;"];
         }];
         
         //allow NULL values for optional fields and make this explicit
         //we don't need to migrate data because of our non-smacks reconnect on db upgrade
-        [self updateDB:db withDataLayer:dataLayer toVersion:6.409 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.996 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE muc_participants DROP COLUMN participant_jid;"];
             [db executeNonQuery:@"ALTER TABLE muc_participants DROP COLUMN affiliation;"];
             [db executeNonQuery:@"ALTER TABLE muc_participants DROP COLUMN role;"];
@@ -937,7 +937,7 @@
         }];
 
         //simplify the blocklistCache table
-        [self updateDB:db withDataLayer:dataLayer toVersion:6.410 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.997 withBlock:^{
             //the cache is regenerated on log-in, thus there is no need to migrate the data
             [db executeNonQuery:@"DROP TABLE blocklistCache;"];
             [db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
@@ -950,13 +950,13 @@
 
         //a contact's blocked state is deduced directly from the blocklistCache table.
         //as such, this column is redundant.
-        [self updateDB:db withDataLayer:dataLayer toVersion:6.411 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.998 withBlock:^{
             [db executeNonQuery:@"ALTER TABLE buddylist DROP COLUMN 'blocked';"];
         }];
 
         // Allow persistence of MLPromises.
         // This is needed so they can be exchanged between the main app and app extension.
-        [self updateDB:db withDataLayer:dataLayer toVersion:6.412 withBlock:^{
+        [self updateDB:db withDataLayer:dataLayer toVersion:6.999 withBlock:^{
             [db executeNonQuery:@"CREATE TABLE 'promises' (\
                 'uuid' CHAR(36) PRIMARY KEY, \
                 'promise' BLOB NOT NULL \

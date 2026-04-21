@@ -73,7 +73,7 @@
         NSData* idKeyPrivate = [row objectForKey:@"identityPrivateKey"];
         
         NSError* error;
-        self.identityKeyPair = [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:nil];
+        self.identityKeyPair = [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:&error];
         if(error)
         {
             DDLogError(@"prekey error %@", error);

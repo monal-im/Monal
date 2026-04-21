@@ -55,7 +55,9 @@
 
 -(BOOL) isEqual:(id _Nullable) object
 {
-    if(object == nil || self == object)
+    if(object == nil)
+        return NO;
+    else if(self == object)
         return YES;
     else if([object isKindOfClass:[MLContactSoftwareVersionInfo class]])
         return [self.fromJid isEqualToString:((MLContactSoftwareVersionInfo*)object).fromJid] && [self.resource isEqualToString:((MLContactSoftwareVersionInfo*)object).resource];

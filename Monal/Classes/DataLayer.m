@@ -397,7 +397,7 @@ static NSDateFormatter* dbFormatter;
             cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
         if([cleanNickName length] > 50)
-            toPass = [cleanNickName substringToIndex:49];
+            toPass = [cleanNickName substringToIndex:50];
         else
             toPass = cleanNickName;
         

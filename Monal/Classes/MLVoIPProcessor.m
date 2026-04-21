@@ -425,7 +425,7 @@ static NSMutableDictionary* _pendingCalls;
             // parse challenge
             NSError* challengeJsonErr;
             NSDictionary* challenge = [NSJSONSerialization JSONObjectWithData:data options:0 error:&challengeJsonErr];
-            if(challengeJsonErr != nil && [challenge objectForKey:@"challenge"] != nil)
+            if(challengeJsonErr != nil || [challenge objectForKey:@"challenge"] == nil)
             {
                 DDLogWarn(@"Could not parse turn challenge, only using stun: %@", challengeJsonErr);
                 [self createWebRTCClientForCall:call usingICEServers:iceServers];

@@ -268,7 +268,7 @@
 -(int) deleteAllSessionsForAddressName:(NSString*) addressName
 {
     return [[self.sqliteDatabase idWriteTransaction:^{
-        NSNumber* count = (NSNumber*) [self.sqliteDatabase executeScalar:@"COUNT * FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
+        NSNumber* count = (NSNumber*) [self.sqliteDatabase executeScalar:@"SELECT COUNT(*) FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
         [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
         return count;
     }] intValue];

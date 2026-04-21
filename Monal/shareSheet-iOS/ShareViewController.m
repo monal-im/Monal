@@ -125,9 +125,9 @@
                     recipientFound = YES;
                     break;
                 }
-                if(recipientFound == YES)
-                    break;
             }
+            if(recipientFound == YES)
+                break;
         }
     }
     

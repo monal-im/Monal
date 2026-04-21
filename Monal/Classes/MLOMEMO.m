@@ -1465,9 +1465,6 @@ $$
                 }
             }
             
-            //mark used prekeys for removal
-            [self.monalSignalStore deletePreKeyWithId:devicePreKey];
-
             //key transport elements have an empty payload --> nothing to return as decrypted
             if(isKeyTransportElement)
             {

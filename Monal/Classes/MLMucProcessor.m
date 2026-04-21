@@ -272,6 +272,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             return YES;
         NSInteger oldValue = ((NSNumber*)_changingName[room]).integerValue;
         _changingName[room] = @(max(0, oldValue - 1));
+        //only return YES if there was no running name change (and NO if at least one was running)
         if(oldValue == 0)
             return YES;
         return NO;

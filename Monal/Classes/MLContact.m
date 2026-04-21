@@ -537,7 +537,7 @@ static NSMutableDictionary* _singletonCache;
     return [self.contactJid isEqualToString:account.connectionProperties.identity.jid];
 }
 
-+(NSSet*) keyPathsForValuesAffectingIsSelfChat
++(NSSet*) keyPathsForValuesAffectingIsSelf
 {
     return [NSSet setWithObjects:@"contactJid", @"account", nil];
 }

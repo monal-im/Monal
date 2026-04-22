@@ -98,7 +98,7 @@ struct NotificationDebugging: View {
                         Text(pushServerName).tag(pushServerFqdn)
                     }
                 }.pickerStyle(.menu)//.menuStyle(.borderlessButton)
-                .onChange(of: notificationDebuggingDefaultsDB.selectedPushServer) { pushServerFqdn in
+                .onChange(of: notificationDebuggingDefaultsDB.selectedPushServer) { _ , pushServerFqdn in
                     DDLogDebug("Selected \(pushServerFqdn) as push server...")
                     // enable push again to switch to the selected server
                     for account in self.xmppAccountInfo {

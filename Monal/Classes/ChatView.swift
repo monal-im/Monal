@@ -117,7 +117,6 @@ struct ChatView: View {
     @State private var messageInsertionTimer: Timer?
     @State private var ownRole = kMucRoleNone
     @State private var inputText = ""
-    @State private var oldInputText = ""
     @State private var isTyping = false
     @State private var typingTimer: Timer?
 
@@ -881,10 +880,7 @@ struct ChatView: View {
                 )
             }
         }
-        .onChange(of: inputText) { newValue in
-            //TODO: use the new .onChange instead of this workaround once the minimum version is iOS 17.0
-            let oldValue = oldInputText
-            oldInputText = newValue
+        .onChange(of: inputText) { oldValue, newValue in
             // Don't send a typing notification if the only change is deletion of characters from the end.
             // This results in better UX, and avoids sending a typing notification after the automatic
             // clearing of the input text when sending a message.

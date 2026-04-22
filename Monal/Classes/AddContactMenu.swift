@@ -192,8 +192,10 @@ struct AddContactMenu: View {
                         .addClearButton(isEditing: isEditingJid, text:$toAdd)
                         .disabled(scannedFingerprints != nil)
                         .foregroundColor(scannedFingerprints != nil ? .secondary : .primary)
-                        .onChange(of: toAdd) { _ in toAdd = toAdd.replacingOccurrences(of: " ", with: "") }
-                    
+                        .onChange(of: toAdd) {
+                            toAdd = toAdd.replacingOccurrences(of: " ", with: "")
+                        }
+
                     if scannedFingerprints != nil && scannedFingerprints!.count > 0 {
                         Section(header: Text("A contact was scanned through the QR code scanner")) {
                             Toggle(isOn: $importScannedFingerprints) {

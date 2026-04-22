@@ -82,7 +82,7 @@ NSString* type_to_classname(NSString* type)
     _internalData[@"boundArguments"] = [self sanitizeArguments:args];
 }
 
--(void) callWithArguments:(NSDictionary* _Nullable) args
+-(id _Nullable) callWithArguments:(NSDictionary* _Nullable) args
 {
     MLAssert(_internalData[@"delegate"] && _internalData[@"handlerName"], @"Tried to call MLHandler while delegate and/or handlerName was not set!", @{@"handler": _internalData});
     [self checkInvalidation];
@@ -94,8 +94,9 @@ NSString* type_to_classname(NSString* type)
             @"delegate": _internalData[@"delegate"],
             @"handlerSelector": NSStringFromSelector(sel),
         }];
+    NSMethodSignature* sig = [delegate methodSignatureForSelector:sel];
     DDLogVerbose(@"Calling handler %@...", self);
-    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:sel]];
+    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:sig];
     [inv setTarget:delegate];
     [inv setSelector:sel];
     //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
@@ -107,12 +108,18 @@ NSString* type_to_classname(NSString* type)
     [inv setArgument:(void* _Nonnull)&boundArgs atIndex:3];
     //now call it
     [inv invoke];
+    //and extract the return value
+    __unsafe_unretained id tempObject = nil;
+    if(sig.methodReturnLength)
+        [inv getReturnValue:&tempObject];
+    id retval = tempObject;
+    return retval;
 }
 
--(void) invalidateWithArguments:(NSDictionary* _Nullable) args
+-(id _Nullable) invalidateWithArguments:(NSDictionary* _Nullable) args
 {
     if(!(_internalData[@"delegate"] && _internalData[@"invalidationName"]))
-        return;
+        return nil;
     [self checkInvalidation];
     args = [self sanitizeArguments:args];
     id delegate = NSClassFromString(_internalData[@"delegate"]);
@@ -124,7 +131,8 @@ NSString* type_to_classname(NSString* type)
             @"invalidationSelector": NSStringFromSelector(sel),
         }];
     DDLogVerbose(@"Calling invalidation %@...", self);
-    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[delegate methodSignatureForSelector:sel]];
+    NSMethodSignature* sig = [delegate methodSignatureForSelector:sel];
+    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:sig];
     [inv setTarget:delegate];
     [inv setSelector:sel];
     //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
@@ -136,6 +144,12 @@ NSString* type_to_classname(NSString* type)
     //now call it
     [inv invoke];
     _invalidated = YES;
+    //and extract the return value
+    __unsafe_unretained id tempObject = nil;
+    if(sig.methodReturnLength)
+        [inv getReturnValue:&tempObject];
+    id retval = tempObject;
+    return retval;
 }
 
 -(NSString*) id
@@ -207,11 +221,19 @@ NSString* type_to_classname(NSString* type)
     return NSSelectorFromString([NSString stringWithFormat:@"MLHandler_%@_withArguments:andBoundArguments:", handlerName]);
 }
 
-+(void) throwDynamicExceptionForType:(NSString*) type andVar:(NSString*) varName andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
++(void) throwDynamicUnpackingExceptionForType:(NSString*) type andVar:(NSString*) varName andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
     NSString* text = [NSString stringWithFormat:@"Dynamic unpacking exception triggered for '%@' var '%@' at %@:%d in %s", type, varName, [HelperTools sanitizeFilePath:file], line, func];
     DDLogError(@"%@", text);
     @throw [NSException exceptionWithName:text reason:text userInfo:userInfo];
+}
+
++(NSString*) throwDynamicPackingExceptionForType:(NSString*) type andVar:(NSString*) varName andUserData:(id) userInfo andFile:(char*) file andLine:(int) line andFunc:(char*) func
+{
+    NSString* text = [NSString stringWithFormat:@"Dynamic packing exception triggered for '%@' var '%@' at %@:%d in %s", type, varName, [HelperTools sanitizeFilePath:file], line, func];
+    DDLogError(@"%@", text);
+    @throw [NSException exceptionWithName:text reason:text userInfo:userInfo];
+    return [NSString stringWithFormat:@"Wrong type packed for type '%@' name '%@' at %@:%d in %s", type, varName, [HelperTools sanitizeFilePath:file], line, func];
 }
 
 @end

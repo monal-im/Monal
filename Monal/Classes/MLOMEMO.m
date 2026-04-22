@@ -511,12 +511,20 @@ $$
         if(![source isEqualToString:self.account.connectionProperties.identity.jid] || deviceId.unsignedIntValue != self.monalSignalStore.deviceid)
         {
             DDLogDebug(@"Removing device %@", deviceId);
-            [self postOMEMOMessageForUser:source withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Device %@ is now inactive, because it is no longer advertised by your contact", @"OMEMO warning shown inside chat view"), deviceId]];
             SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:deviceId.unsignedIntValue];
+            NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
+            int trust = -1;
+            if(identity)
+                trust = [self.monalSignalStore getTrustLevel:address identityKey:identity].intValue;
             [self.monalSignalStore markDeviceAsDeleted:address];
+            
+            //only warn for deleted devices, if if was a non-tofu one (and trust could be read from db aka the identity was known)
+            //we ignore MLOmemoToFUButRemoved because its obviously already deleted
+            if(!(trust == -1 || trust == MLOmemoToFU || trust == MLOmemoToFUButNoMsgSeenInTime))
+                [self postOMEMOMessageForUser:source withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Device %@ is now inactive, because it is no longer advertised by your contact", @"OMEMO warning shown inside chat view"), deviceId]];
         }
     }
-        
+    
     //remove deviceids from queuedSessionRepairs list if these devices are no longer available
     @synchronized(self.state.queuedSessionRepairs) {
         if(self.state.queuedSessionRepairs[source] != nil)
@@ -592,6 +600,10 @@ $$
     NSMutableArray* deletedDevices = [NSMutableArray new];
     for(NSNumber* device in [self.ownDeviceList copy])
     {
+        //ignore our very own device (we don't want to create a devicelist publishing loop creating xmpp stream congestion)
+        if(device.unsignedIntValue == self.monalSignalStore.deviceid)
+            continue;
+        
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)device.unsignedIntValue];
         NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
         if(!identity)
@@ -725,8 +737,16 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
             NSData* newIdentity = [self.monalSignalStore getIdentityForAddress:address];
             if(newIdentity != nil && (oldIdentity == nil || ![oldIdentity isEqual:newIdentity]))
             {
-                NSString* trustLevel = trustLevels2Text[[self.monalSignalStore getTrustLevel:address identityKey:newIdentity]];
-                [self postOMEMOMessageForUser:jid withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new %@ device with id: %@", @"OMEMO warning shown inside chat view"), trustLevel, rid]];
+                int trust = [self.monalSignalStore getTrustLevel:address identityKey:newIdentity].intValue;
+                
+                //don't show new omemo device status message if it is TofU
+                //(it won't be automatically tofu as soon as at least one device was manually verified,
+                //in that case it will automatically be untrusted and a corresponding statusmessage be displayed)
+                if(!(trust == MLOmemoToFU || trust == MLOmemoToFUButNoMsgSeenInTime))
+                {
+                    NSString* trustLevel = trustLevels2Text[@(trust)];
+                    [self postOMEMOMessageForUser:jid withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new %@ device with id: %@", @"OMEMO warning shown inside chat view"), trustLevel, rid]];
+                }
             }
             
             //check for new deviceids not previously known, but only if this isn't the first login we see a devicelist

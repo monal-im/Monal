@@ -460,6 +460,22 @@ static BOOL warnUnclean = NO;
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
++(BOOL) getWarnedNotUnlockedFirstTime
+{
+    //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
+    //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
+    NSNumber* warned = [[NSUserDefaults standardUserDefaults] objectForKey:@"warned_not_unlocked"];
+    return warned != nil && warned.boolValue;
+}
+
++(void) setWarnedNotUnlockedFirstTime:(BOOL) warned
+{
+    //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
+    //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
+    [[NSUserDefaults standardUserDefaults] setBool:warned forKey:@"warned_not_unlocked"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
 -(id) init
 {
     DDLogInfo(@"Initializing notification service extension class");
@@ -528,13 +544,42 @@ static BOOL warnUnclean = NO;
                 warnUnclean = NO;       //try again on error
         }
 #endif
-        
-        //proxy to push singleton
-        DDLogDebug(@"proxying to incomingPush");
-        [DDLog flushLog];
-        [[PushSingleton instance] incomingPush:contentHandler];
-        DDLogDebug(@"incomingPush proxy completed");
-        [DDLog flushLog];
+
+        //check if the device uuid can be accessed and show a warning, if not (first device unlock after reboot not happened yet)
+        //don't allow it to be empty --> we don't need an NSE anyways, if the main app never started and created that uuid
+        if(![HelperTools deviceUUIDAccessibleOrAllowedEmpty:NO])
+        {
+            DDLogError(@"Device still locked after boot, device UUID not accessible!");
+            
+            if(![NotificationService getWarnedNotUnlockedFirstTime])
+            {
+                UNMutableNotificationContent* errorContent = [UNMutableNotificationContent new];
+                errorContent.title = NSLocalizedString(@"Device Locked", @"");
+                errorContent.body = NSLocalizedString(@"You need to unlock your device once after boot to receive messages!", @"");
+                errorContent.sound = [UNNotificationSound defaultSound];
+                UNNotificationRequest* errorRequest = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:errorContent trigger:nil];
+                NSError* error = [HelperTools postUserNotificationRequest:errorRequest];
+                if(error)
+                    DDLogError(@"Error posting local still locked after boot error notification: %@", error);
+                else
+                    [NotificationService setWarnedNotUnlockedFirstTime:YES];       //only stop notification duplicates if the notificatio was posted successfully
+            }
+            
+            DDLogInfo(@"Committing suicide...");
+            exit(0);
+        }
+        else
+        {
+            //we are unlocked now, allow a new notification after next reboot
+            [NotificationService setWarnedNotUnlockedFirstTime:NO];
+            
+            //proxy to push singleton
+            DDLogDebug(@"proxying to incomingPush");
+            [DDLog flushLog];
+            [[PushSingleton instance] incomingPush:contentHandler];
+            DDLogDebug(@"incomingPush proxy completed");
+            [DDLog flushLog];
+        }
     }
 }
 

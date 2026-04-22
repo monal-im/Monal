@@ -97,6 +97,7 @@ NSString* const kStanza = @"stanza";
     //internal handlers and flags
     MLDelayableTimer* _loginTimer;
     MLDelayableTimer* _pingTimer;
+    monal_void_block_t _pingDelayTimer;
     MLDelayableTimer* _reconnectTimer;
     NSMutableArray* _timersToCancelOnDisconnect;
     NSMutableArray* _smacksAckHandler;
@@ -1233,7 +1234,6 @@ NSString* const kStanza = @"stanza";
         {
             DDLogError(@"Exception in ostream close");
         }
-        self->_oStream=nil;
         
         //clean up send queue now that the delegate was removed (_streamHasSpace can not switch to YES now)
         [self cleanupSendQueue];
@@ -1242,6 +1242,7 @@ NSString* const kStanza = @"stanza";
         [self->_oStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
 
         DDLogInfo(@"resetting internal stream state to disconnected");
+        self->_oStream=nil;
         self->_startTLSComplete = NO;
         self->_catchupDone = NO;
         self->_accountState = kStateDisconnected;
@@ -1381,21 +1382,22 @@ NSString* const kStanza = @"stanza";
             //should create a backpressure ino the tcp stream, too
             //the calculated sleep time gives every stanza in the queue ~10ms to be handled (based on statistics)
             BOOL wasSleeping = NO;
+            CGFloat availableMemory = (CGFloat)os_proc_available_memory() / 1048576;
             while(self.accountState >= kStateConnected)
             {
                 //use a much smaller limit while in appex because memory there is limited to ~32MiB
                 unsigned long operationCount = [self->_parseQueue operationCount];
                 double usedMemory = [HelperTools report_memory];
-                if(!(operationCount > 50 || (appex && usedMemory > 16 && operationCount > MAX(2, 24 - usedMemory))))
+                if(!(operationCount > 256 || (appex && usedMemory > (0.5*availableMemory) && operationCount > MAX(2, (0.75*availableMemory) - usedMemory))))
                     break;
                 
-                double waittime = (double)[self->_parseQueue operationCount] / 100.0;
-                DDLogInfo(@"%@: Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, (CGFloat)os_proc_available_memory() / 1048576);
+                double waittime = (double)[self->_parseQueue operationCount] / 256.0;
+                DDLogWarn(@"%@: Sleeping %f seconds because parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, waittime, (unsigned long)[self->_parseQueue operationCount], usedMemory, availableMemory);
                 [NSThread sleepForTimeInterval:waittime];
                 wasSleeping = YES;
             }
             if(wasSleeping)
-                DDLogInfo(@"%@: Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+                DDLogWarn(@"%@: Sleeping has ended, parse queue has %lu entries and used/available memory: %.3fMiB / %.3fMiB...", self->_logtag, (unsigned long)[self->_parseQueue operationCount], [HelperTools report_memory], availableMemory);
             
             if(self.accountState < kStateConnected)
             {
@@ -1544,8 +1546,6 @@ NSString* const kStanza = @"stanza";
 
 -(void) sendPing:(double) timeout
 {
-    static monal_void_block_t delayTimer = nil;        //it doesn't matter if this has a race condition
-    
     DDLogVerbose(@"sendPing called");
     [self dispatchAsyncOnReceiveQueue: ^{
         DDLogVerbose(@"sendPing called - now inside receiveQueue");
@@ -1579,18 +1579,18 @@ NSString* const kStanza = @"stanza";
         }
         else if([self->_parseQueue operationCount] > 4)
         {
-            if(delayTimer != nil)
+            if(self->_pingDelayTimer != nil)
                 DDLogWarn(@"Ping already delayed, ignoring additional ping...");
             else
             {
                 DDLogWarn(@"parseQueue overflow, delaying ping by 4 seconds.");
-                delayTimer = createTimer(4.0, (^{
-                    [self removeTimerToCancelOnDisconnect:delayTimer];
-                    delayTimer = nil;
+                self->_pingDelayTimer = createTimer(4.0, (^{
+                    [self removeTimerToCancelOnDisconnect:self->_pingDelayTimer];
+                    self->_pingDelayTimer = nil;
                     DDLogDebug(@"ping delay expired, retrying ping.");
                     [self sendPing:timeout];
                 }));
-                [self addTimerToCancelOnDisconnect:delayTimer];
+                [self addTimerToCancelOnDisconnect:self->_pingDelayTimer];
             }
         }
         else
@@ -2804,8 +2804,10 @@ NSString* const kStanza = @"stanza";
             DDLogInfo(@"Saving channel-binding types list: %@", channelBindings);
             self.connectionProperties.channelBindingTypes = channelBindings;
             
-            //record SDDP support
-            self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
+            //record SDDP support, but only if it could have been used at all (HT doesn't have SSDP)
+            //we persist this property in our account state, so it will remain the way it was when we last did an ordinary SCRAM login
+            if(self->_scramHandler.finishedSuccessfully)
+                self.connectionProperties.supportsSSDP = self->_scramHandler.ssdpSupported;
             
             //record TLS version
             self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
@@ -2818,11 +2820,6 @@ NSString* const kStanza = @"stanza";
             //clean up
             self->_scramHandler = nil;
             self->_blockToCallOnTCPOpen = nil;     //just to be sure but not strictly necessary
-            //only increment account state if we are still trying to login (calling bindJid could have triggered a disconnect)
-            if(self->_accountState == kStateHasStream)
-                self->_accountState = kStateLoggedIn;
-            else
-                DDLogWarn(@"Not setting accountState to kStateLoggedIn, because we are no longer in kStateHasStream!");
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
             if(_loginTimer)
             {
@@ -3731,6 +3728,7 @@ NSString* const kStanza = @"stanza";
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsModernPubSub] forKey:@"supportsModernPubSub"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
+            [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsSSDP] forKey:@"supportsSSDP"];
             [values setObject:[self->_inCatchup copy] forKey:@"inCatchup"];
             [values setObject:[self->_mdsData copy] forKey:@"mdsData"];
             
@@ -3880,6 +3878,12 @@ NSString* const kStanza = @"stanza";
             
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
             self.connectionProperties.conferenceServers = [[dic objectForKey:@"conferenceServers"] mutableCopy];
+            
+            if([dic objectForKey:@"supportsSSDP"])
+            {
+                NSNumber* supportsSSDP = [dic objectForKey:@"supportsSSDP"];
+                self.connectionProperties.supportsSSDP = supportsSSDP.boolValue;
+            }
             
             if([dic objectForKey:@"loggedInOnce"])
             {

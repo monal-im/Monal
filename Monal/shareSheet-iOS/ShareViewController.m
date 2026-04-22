@@ -46,6 +46,8 @@
     //log startup
     DDLogInfo(@"Share Sheet Extension started: %@", [HelperTools appBuildVersionInfoFor:MLVersionTypeLog]);
     [DDLog flushLog];
+    
+    MLAssert([HelperTools deviceUUIDAccessibleOrAllowedEmpty:YES] == YES, @"device UUID should always be accessible or empty when using the share extension!");
 }
 
 -(void) viewDidLoad
@@ -72,7 +74,22 @@
     // list all contacts, not only active chats
     // that will clutter the list of selectable contacts, but you can always use sirikit interactions
     // to get the recently used contacts listed
-    self.recipients = [[DataLayer sharedInstance] contactList];
+    NSArray<MLContact*>* allContacts = [[DataLayer sharedInstance] contactList];
+#ifdef IS_QUICKSY
+    self.recipients = allContacts;
+#else
+    NSMutableArray<MLContact*>* contactsToDisplay = [NSMutableArray new];
+    //ignore all contacts not at least in any roster state: e.g. subscribedTo or asking state
+    //OR is subscribedFrom (e.g. we approved them already, but they don't approve us)
+    //order pinned before unpinned ones
+    for(MLContact* contact in allContacts)
+        if(((contact.isSubscribedTo || contact.hasOutgoingContactRequest) || contact.isSubscribedFrom) && contact.isPinned)
+            [contactsToDisplay addObject:contact];
+    for(MLContact* contact in allContacts)
+        if(((contact.isSubscribedTo || contact.hasOutgoingContactRequest) || contact.isSubscribedFrom) && !contact.isPinned)
+            [contactsToDisplay addObject:contact];
+    self.recipients = [contactsToDisplay copy];
+#endif
     self.accounts = [[DataLayer sharedInstance] enabledAccountList];
 
     if(self.intentContact != nil)

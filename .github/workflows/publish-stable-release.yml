@@ -24,12 +24,14 @@ jobs:
       #     echo ${{ github.event.client_payload.appVersionNumber }}
       - name: Load release info
         id: releasenotes
+        env:
+          APP_VERSION_NUMBER: ${{ github.event.client_payload.appVersionNumber }}
         run: |
-          buildNumber="$(fastlane run app_store_build_number api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" app_identifier:"G7YU7X7KRJ.SworIM" live:false version:"${{ github.event.client_payload.appVersionNumber }}" 2>&1 | tee /dev/stderr | grep Result | sed -E 's/^.*Result: ([0-9]+).*$/\1/g')"
+          buildNumber="$(fastlane run app_store_build_number api_key_path:"/Users/ci/appstoreconnect/key.json" team_id:"S8D843U34Y" app_identifier:"G7YU7X7KRJ.SworIM" live:false version:"${APP_VERSION_NUMBER}" 2>&1 | tee /dev/stderr | grep Result | sed -E 's/^.*Result: ([0-9]+).*$/\1/g')"
           mkdir -p /Users/ci/releases
           OUTPUT_FILE="/Users/ci/releases/$buildNumber.output"
           touch "$OUTPUT_FILE"
-          cat "$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
+          cat "$OUTPUT_FILE" | tee /dev/stderr >> "$GITHUB_OUTPUT"
 
   promoteDraftRelease:
     name: Promote draft release to live release
@@ -37,16 +39,18 @@ jobs:
     needs: [extractChangelog]
     permissions:
       contents: write
+    env:
+      RELEASE_ID: ${{ needs.extractChangelog.outputs.release-id }}
     steps:
       - name: Promote draft release to live release
         run: |
-          echo "ID: ${{ needs.extractChangelog.outputs.release-id }}"
+          echo "ID: ${RELEASE_ID}"
           curl -L \
             -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.extractChangelog.outputs.release-id }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}" \
             -d '{"draft": false, "prerelease": false, "make_latest": true}'
 
   notifyMuc:
@@ -76,9 +80,10 @@ jobs:
         id: changelog
         env:
           NOTES: ${{ needs.extractChangelog.outputs.release-notes }}
+          RELEASE_TAG: ${{ needs.extractChangelog.outputs.release-tag }}
         run: |
           if [ "${#NOTES}" -gt 400 ]; then
-            NOTES="To see the complete list of bugfixes and improvements, check our releases page: https://github.com/monal-im/Monal/releases/tag/${{ needs.extractChangelog.outputs.release-tag }}"
+            NOTES="To see the complete list of bugfixes and improvements, check our releases page: https://github.com/monal-im/Monal/releases/tag/${RELEASE_TAG}"
           fi
           echo "notes<<__EOF__" | tee /dev/stderr >> "$GITHUB_OUTPUT"
           echo "$NOTES" >> "$GITHUB_OUTPUT"
@@ -93,7 +98,11 @@ jobs:
           visibility: "public"
           language: "en"
       - name: Get toot information
+        env:
+          TOOT_ID: ${{ steps.toot.outputs.id }}
+          TOOT_URL: ${{ steps.toot.outputs.url }}
+          SCHEDULED_AT: ${{ steps.toot.outputs.scheduled_at }}
         run: |
-          echo "Toot ID: ${{ steps.toot.outputs.id }}"
-          echo "Toot URL: ${{ steps.toot.outputs.url }}"
-          echo "Scheduled at: ${{ steps.toot.outputs.scheduled_at }}"
+          echo "Toot ID: ${TOOT_ID}"
+          echo "Toot URL: ${TOOT_URL}"
+          echo "Scheduled at: ${SCHEDULED_AT}"

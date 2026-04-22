@@ -267,7 +267,7 @@ static NSMutableDictionary* _typingNotifications;
         if(![[[DataLayer sharedInstance] listMucsForAccount:account.accountNo] containsObject:messageNode.fromUser])
         {
             // ignore message
-            DDLogWarn(@"Ignoring groupchat message from %@", messageNode.toUser);
+            DDLogWarn(@"Ignoring groupchat message from %@", messageNode.fromUser);
             return nil;
         }
     }
@@ -531,16 +531,21 @@ static NSMutableDictionary* _typingNotifications;
                             checkForDuplicates:[messageNode check:@"{urn:xmpp:sid:0}origin-id"] || (stanzaid != nil)
             ];
             
-            //...then retract this message (e.g. mark as retracted)
-            [[DataLayer sharedInstance] retractMessageHistory:historyIdToRetract];
-            
-            //update ui
-            DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
-                @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
-                @"historyId": historyIdToRetract,
-                @"contact": possiblyUnknownContact,
-            }];
+            if(historyIdToRetract == nil)
+                DDLogError(@"Tried to process retraction tombstone by adding empty message to history at id %@, but a duplicate message with stanzaid=%@ and messageId=%@ and originId=%@ was already there: that should never happen!", historyIdToUse, stanzaid, messageId, [messageNode findFirst:@"{urn:xmpp:sid:0}origin-id"]);
+            else
+            {
+                //...then retract this message (e.g. mark as retracted)
+                [[DataLayer sharedInstance] retractMessageHistory:historyIdToRetract];
+                
+                //update ui
+                DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyIdToRetract);
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
+                    @"message": [[[DataLayer sharedInstance] messagesForHistoryIDs:@[historyIdToRetract]] firstObject],
+                    @"historyId": historyIdToRetract,
+                    @"contact": possiblyUnknownContact,
+                }];
+            }
         }
         else
             DDLogWarn(@"Got faked tombstone without server supporting them, ignoring it!");
@@ -577,8 +582,8 @@ static NSMutableDictionary* _typingNotifications;
         NSString* lowercaseBody = [body lowercaseString];
         if(body && [body isEqualToString:[messageNode findFirst:@"{jabber:x:oob}x/url#"]] && [lowercaseBody hasPrefix:@"https://"])
             messageType = kMessageTypeFiletransfer;
-        //messages without spaces are potentially special ones
-        else if([body rangeOfString:@" "].location == NSNotFound)
+        //messages without whitespace are potentially special ones
+        else if([body rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].location == NSNotFound)
         {
             if([lowercaseBody hasPrefix:@"geo:"])
                 messageType = kMessageTypeGeo;

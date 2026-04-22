@@ -634,7 +634,7 @@ static NSDateFormatter* dbFormatter;
 -(NSArray<NSString*>*) resourcesForContact:(MLContact* _Nonnull) contact
 {
     return [self.db idReadTransaction:^{
-        NSArray<NSString*>* resources = [self.db executeScalarReader:@"SELECT resource FROM buddy_resources AS A INNER JOIN buddylist AS B ON a.buddy_id=b.buddy_id WHERE  buddy_name=?;" andArguments:@[contact.contactJid]];
+        NSArray<NSString*>* resources = [self.db executeScalarReader:@"SELECT resource FROM buddy_resources AS A INNER JOIN buddylist AS B ON a.buddy_id=b.buddy_id WHERE account_id=? AND buddy_name=?;" andArguments:@[contact.accountId, contact.contactJid]];
         return resources;
     }];
 }
@@ -1016,7 +1016,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSDictionary* _Nullable) getParticipantForOccupant:(NSString*) occupant inRoom:(NSString*) room forAccountId:(NSNumber*) accountNo
 {
-    if(!occupant || !occupant || accountNo == nil)
+    if(!occupant || !room || accountNo == nil)
         return nil;
     return [self.db idReadTransaction:^{
         NSArray* result = [self.db executeReader:@"SELECT * FROM muc_participants WHERE account_id=? AND room=? AND occupant_id=?;" andArguments:@[accountNo, room, occupant]];
@@ -1778,8 +1778,7 @@ static NSDateFormatter* dbFormatter;
 -(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSNumber*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString*) mimeType size:(NSNumber*) size
 {
     //Message_history going out, from is always the local user. always read and not sent
-    NSArray* parts = [[[NSDate date] description] componentsSeparatedByString:@" "];
-    NSString* dateTime = [NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0], [parts objectAtIndex:1]];
+    NSString* dateTime = [dbFormatter stringFromDate:[NSDate date]];
     if(mimeType && size != nil)
         size = @(0);
     NSString* query;
@@ -1980,7 +1979,7 @@ static NSDateFormatter* dbFormatter;
 -(void) updateUsedPushServer:(NSString*) pushServer forAccount:(NSNumber*) accountNo
 {
     [self.db voidWriteTransaction:^{
-        [self.db executeScalarReader:@"UPDATE account SET registeredPushServer=? WHERE account_id=?;" andArguments:@[pushServer, accountNo]];
+        [self.db executeNonQuery:@"UPDATE account SET registeredPushServer=? WHERE account_id=?;" andArguments:@[pushServer, accountNo]];
     }];
 }
 
@@ -2536,7 +2535,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     return [self.db idReadTransaction:^{
         NSString* likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
-        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND (message LIKE ? OR messageType LIKE ?) AND buddy_name=? ORDER BY timestamp ASC;";
+        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND message LIKE ? AND buddy_name=? ORDER BY timestamp ASC;";
         NSArray* params = @[contact.accountId, likeString, contact.contactJid];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
         return [self messagesForHistoryIDs:results];

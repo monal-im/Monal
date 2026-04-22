@@ -1126,13 +1126,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 +(void) createAVURLAssetFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension withCompletionHandler:(void(^)(AVURLAsset* _Nullable)) completion
 {
     NSURL* fileUrl = [NSURL fileURLWithPath:file];
-    if(@available(iOS 17.0, macCatalyst 17.0, *))
-    {
-        //generate an AVURLAsset using the modern ios 17 method to attach a mime type to an AVURLAsset
-        return completion([AVURLAsset URLAssetWithURL:fileUrl options:@{AVURLAssetOverrideMIMETypeKey: mimeType}]);
-    }
-    else
-        return completion([AVURLAsset URLAssetWithURL:fileUrl options:@{@"AVURLAssetOutOfBandMIMETypeKey": mimeType}]);
+    return completion([AVURLAsset URLAssetWithURL:fileUrl options:@{AVURLAssetOverrideMIMETypeKey: mimeType}]);
 }
 
 +(AnyPromise*) computeMediaDurationFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension

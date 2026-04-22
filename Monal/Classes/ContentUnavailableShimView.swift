@@ -61,17 +61,9 @@ struct ContentUnavailableShimView: View {
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 20)
         }
-        .applyClosure {view in
-            if #available(iOS 17, *) {
-                view.containerRelativeFrame(.horizontal) { size, axis in
-                    size * 0.8
-                }
-            } else {
-                HStack {
-                    Spacer().frame(width: 32)
-                    view
-                    Spacer().frame(width: 32)
-                }
+        .applyClosure { view in
+            view.containerRelativeFrame(.horizontal) { size, axis in
+                size * 0.8
             }
         }
     }

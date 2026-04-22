@@ -66,7 +66,7 @@ struct BackgroundSettings: View {
                             }
                         }
                         .accessibilityLabel(Text("Change Background Image"))
-                        .onChange(of:selectedItem) { newItem in
+                        .onChange(of:selectedItem) { _ , newItem in
                             // Retrive selected asset in the form of Data
                             newItem?.loadTransferable(type:Data.self) { result in
                                 guard let data = try? result.get() else {
@@ -87,7 +87,7 @@ struct BackgroundSettings: View {
             }
         }
         .navigationBarTitle(contact != nil ? Text("Chat Background") : Text("Default Background"))
-        .onChange(of:inputImage) { _ in
+        .onChange(of:inputImage) {
             MLImageManager.sharedInstance().saveBackgroundImageData(inputImage?.pngData(), for:self.contact?.obj)
         }
     }

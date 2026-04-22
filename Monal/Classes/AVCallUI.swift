@@ -748,7 +748,7 @@ struct AVCallUI: View {
             self.errorPlayer.numberOfLoops = 6
             
             //ask for mic permissions
-            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+            AVAudioApplication.requestRecordPermission { granted in
                 if !granted {
                     showMicAlert = true
                 }
@@ -769,12 +769,12 @@ struct AVCallUI: View {
                 stopRenderer()
             }
         }
-        .onChange(of: MLCallState(rawValue:call.state)) { state in
-            DDLogVerbose("call state changed: \(String(describing:call.state as NSNumber))")
+        .onChange(of: MLCallState(rawValue:call.state)) { oldState, newState in
+            DDLogVerbose("call state changed from \(String(describing: oldState)) to \(String(describing: newState))")
             handleStateChange(call.obj.state, appDelegate.obj.audioState)
         }
-        .onChange(of: MLAudioState(rawValue:appDelegate.audioState)) { audioState in
-            DDLogVerbose("audioState changed: \(String(describing:appDelegate.audioState as NSNumber))")
+        .onChange(of: MLAudioState(rawValue:appDelegate.audioState)) { oldState, newState in
+            DDLogVerbose("audioState changed from \(String(describing: oldState)) to \(String(describing: newState))")
             handleStateChange(call.obj.state, appDelegate.obj.audioState)
         }
     }

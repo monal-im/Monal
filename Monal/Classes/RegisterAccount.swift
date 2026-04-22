@@ -308,12 +308,12 @@ struct RegisterAccount: View {
                                         }
                                     }
                                 }
-                                .onChange(of: selectedServerIndex, perform: { (_) in
+                                .onChange(of: selectedServerIndex) {
                                     self.captchaImg = nil
                                     self.captchaText = ""
                                     self.xmppAccount = nil
                                     self.registerToken = nil
-                                })
+                                }
                                 .labelsHidden()
                                 .pickerStyle(.inline)
                             }

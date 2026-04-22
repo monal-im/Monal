@@ -244,7 +244,7 @@ struct Quicksy_RegisterAccount: View {
                         TextField("Phone Number", text: $phoneNumber)
                             .focused($phoneNumberFocused)
                             .keyboardType(.numberPad)
-                            .onChange(of: phoneNumber) { newValue in
+                            .onChange(of: phoneNumber) { _ , newValue in
                                 let filtered = newValue.filter { "0123456789".contains($0) }
                                 if filtered != newValue {
                                     phoneNumber = filtered
@@ -334,7 +334,7 @@ struct Quicksy_RegisterAccount: View {
                         TextField("Pin", text: $pin)
                             .focused($phoneNumberFocused)
                             .keyboardType(.numberPad)
-                            .onChange(of: pin) { newValue in
+                            .onChange(of: pin) { _ , newValue in
                                 let filtered = newValue.filter { "0123456789".contains($0) }
                                 if filtered != newValue {
                                     pin = filtered

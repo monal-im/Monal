@@ -106,7 +106,7 @@ struct BlockedUsers: View {
             )
             // If .onDisappear is applied to the alert or any of its subviews, its perform action won't
             // get executed until the whole Blocked Users view is dismissed. Therefore .onChange is used instead
-            .onChange(of: showAddingToBlocklistForm) { _ in
+            .onChange(of: showAddingToBlocklistForm) {
                 if !showAddingToBlocklistForm {
                     // The alert has been dismissed
                     jidToBlock = ""

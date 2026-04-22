@@ -242,12 +242,12 @@ struct WelcomeLogIn: View {
                                 }
                                 // TODO: use the SCRAM preload list instead of hardcoding servers
                                 .disabled(["yax.im", "conversations.im"].contains(jidDomainPart.lowercased()))
-                                .onChange(of: jid) { _ in
+                                .onChange(of: jid) {
                                     if ["yax.im", "conversations.im"].contains(jidDomainPart.lowercased()) {
                                         allowPlainAuth = false
                                     }
                                 }
-                                .onChange(of: allowPlainAuth) { _ in
+                                .onChange(of: allowPlainAuth) {
                                     if allowPlainAuth {
                                         showPlainAuthWarningAlert()
                                     }

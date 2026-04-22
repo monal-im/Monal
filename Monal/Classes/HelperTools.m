@@ -1128,9 +1128,7 @@ void swizzle(Class c, SEL orig, SEL new)
                 }
                 DDLogInfo(@"Got %@ gif image item: %@", isInPlace ? @"(in place)" : @"(copied)", item);
                 payload[@"type"] = @"file";
-                prepareFile(item).then(^(NSMutableDictionary* payload) {
-                    resolve(payload);
-                });
+                prepareFile(item).then(resolve);
                 return;
             }];
         }
@@ -1145,9 +1143,7 @@ void swizzle(Class c, SEL orig, SEL new)
                 }
                 DDLogInfo(@"Got audiovisual item: %@", item);
                 payload[@"type"] = @"audiovisual";
-                prepareFile(item).then(^(NSMutableDictionary* payload) {
-                    resolve(payload);
-                });
+                prepareFile(item).then(resolve);
                 return;
             }];
         }
@@ -1200,9 +1196,7 @@ void swizzle(Class c, SEL orig, SEL new)
                     }
                     else
                     {
-                        prepareFile(item).then(^(NSMutableDictionary* payload) {
-                            resolve(payload);
-                        });
+                        prepareFile(item).then(resolve);
                         return;
                     }
                     if(error != nil)
@@ -1236,9 +1230,7 @@ void swizzle(Class c, SEL orig, SEL new)
                         }
                         DDLogInfo(@"Got contact item NSURL: %@", item);
                         payload[@"type"] = @"contact";
-                        prepareFile(item).then(^(NSMutableDictionary* payload) {
-                            resolve(payload);
-                        });
+                        prepareFile(item).then(resolve);
                         return;
                     }];
                 }
@@ -1262,9 +1254,7 @@ void swizzle(Class c, SEL orig, SEL new)
                 }
                 DDLogInfo(@"Got file url item: %@", item);
                 payload[@"type"] = @"file";
-                prepareFile(item).then(^(NSMutableDictionary* payload) {
-                    resolve(payload);
-                });
+                prepareFile(item).then(resolve);
                 return;
             }];
         }
@@ -1281,9 +1271,7 @@ void swizzle(Class c, SEL orig, SEL new)
                 {
                     DDLogInfo(@"Got finder file url item: %@", item);
                     payload[@"type"] = @"file";
-                    prepareFile((NSURL*)item).then(^(NSMutableDictionary* payload) {
-                        resolve(payload);
-                    });
+                    prepareFile((NSURL*)item).then(resolve);
                     return;
                 }
                 else
@@ -1323,9 +1311,7 @@ void swizzle(Class c, SEL orig, SEL new)
                 }
                 DDLogInfo(@"Got direct text file item: %@", item);
                 payload[@"type"] = @"file";
-                prepareFile(item).then(^(NSMutableDictionary* payload) {
-                    resolve(payload);
-                });
+                prepareFile(item).then(resolve);
             }];
         }
         else

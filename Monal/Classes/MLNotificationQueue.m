@@ -101,7 +101,7 @@
             {
                 case 2:
                     //-(void) handler;
-                    ((void (*)(id, SEL))entry.imp)(entry.observer, entry.selector);;
+                    ((void (*)(id, SEL))entry.imp)(entry.observer, entry.selector);
                     break;
                 case 3:
                     //-(void) handler:(NSNotification*);
@@ -169,7 +169,7 @@
                 if(entry.observer == observer)
                 {
                     DDLogDebug(@"Removing observer for notification %@: %@", name, entry);
-                    [_directObservers[name] removeObject:observer];
+                    [_directObservers[name] removeObject:entry];
                 }
         }
     }

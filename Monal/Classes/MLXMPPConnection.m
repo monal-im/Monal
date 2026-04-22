@@ -53,14 +53,16 @@
 -(NSArray<NSDictionary*>*) conferenceServerIdentities
 {
     NSMutableArray<NSDictionary*>* result = [NSMutableArray array];
-
-    for (NSString* jid in self.conferenceServers) {
+    for(NSString* jid in self.conferenceServers)
+    {
         NSDictionary* entry = [self.conferenceServers[jid] findFirst:@"identity@@"];
-        NSMutableDictionary* mutableEntry = [entry mutableCopy];
-        mutableEntry[@"jid"] = jid;
-        [result addObject:mutableEntry];
+        if(entry != nil)
+        {
+            NSMutableDictionary* mutableEntry = [entry mutableCopy];
+            mutableEntry[@"jid"] = jid;
+            [result addObject:mutableEntry];
+        }
     }
-
     return [result copy];
 }
 

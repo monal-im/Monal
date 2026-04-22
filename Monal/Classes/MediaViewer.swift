@@ -143,7 +143,7 @@ class CustomAVPlayer: ObservableObject {
         
         // Create asset with MIME type
         let videoAsset = AVURLAsset(url: videoFileUrl, options: [
-            "AVURLAssetOutOfBandMIMETypeKey": mimeType
+            AVURLAssetOverrideMIMETypeKey: mimeType
         ])
         
         // Create player and player view controller

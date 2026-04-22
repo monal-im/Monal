@@ -1548,20 +1548,18 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         }
         else if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
         {
-            [provider loadItemForTypeIdentifier:UTTypePlainText.identifier options:nil completionHandler:^(NSString*  _Nullable item, NSError* _Null_unspecified error) {
+            [provider loadFileRepresentationForTypeIdentifier:UTTypePlainText.identifier completionHandler:^(NSURL* _Nullable item, NSError* _Null_unspecified error) {
                 if(error != nil || item == nil)
                 {
                     DDLogError(@"Error extracting item from NSItemProvider: %@", error);
                     payload[@"error"] = error;
                     return resolve(payload);
                 }
-                DDLogInfo(@"Got direct text item: %@", item);
-                payload[@"type"] = @"text";
-                payload[@"data"] = item;
-                [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
+                DDLogInfo(@"Got direct text file item: %@", item);
+                payload[@"type"] = @"file";
+                prepareFile(item).then(^(NSMutableDictionary* payload) {
                     resolve(payload);
                 });
-                return;
             }];
         }
         else

@@ -1123,7 +1123,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     return retval;
 }
 
-+(void) createAVURLAssetFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension withCompletionHandler:(void(^)(AVURLAsset* _Nullable)) completion
++(void) createAVURLAssetFromFile:(NSString*) file havingMimeType:(NSString*) mimeType withCompletionHandler:(void(^)(AVURLAsset* _Nullable)) completion
 {
     NSURL* fileUrl = [NSURL fileURLWithPath:file];
     return completion([AVURLAsset URLAssetWithURL:fileUrl options:@{AVURLAssetOverrideMIMETypeKey: mimeType}]);
@@ -1132,7 +1132,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 +(AnyPromise*) computeMediaDurationFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension
 {
     return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
-        [self createAVURLAssetFromFile:file havingMimeType:mimeType andFileExtension:fileExtension withCompletionHandler:^(AVURLAsset* asset) {
+        [self createAVURLAssetFromFile:file havingMimeType:mimeType withCompletionHandler:^(AVURLAsset* asset) {
             if(asset == nil)
                 return resolve([NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: @"Could not create AVURLAsset"}]);
 
@@ -1147,7 +1147,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 +(AnyPromise*) generateVideoThumbnailFromFile:(NSString*) file havingMimeType:(NSString*) mimeType andFileExtension:(NSString* _Nullable) fileExtension
 {
     return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
-        [self createAVURLAssetFromFile:file havingMimeType:mimeType andFileExtension:fileExtension withCompletionHandler:^(AVURLAsset* asset) {
+        [self createAVURLAssetFromFile:file havingMimeType:mimeType withCompletionHandler:^(AVURLAsset* asset) {
             if(asset == nil)
                 return resolve([NSError errorWithDomain:@"Monal" code:0 userInfo:@{NSLocalizedDescriptionKey: @"Could not create AVURLAsset"}]);
             

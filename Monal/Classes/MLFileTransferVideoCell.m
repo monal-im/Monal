@@ -64,8 +64,8 @@ AVPlayer *avplayer;
     }
     
     __block AVURLAsset* videoAsset = nil;
-    //the completion is calles synchronously
-    [HelperTools createAVURLAssetFromFile:fileUrlStr havingMimeType:mimeType andFileExtension:nil withCompletionHandler:^(AVURLAsset* asset) {
+    //the completion is called synchronously
+    [HelperTools createAVURLAssetFromFile:fileUrlStr havingMimeType:mimeType withCompletionHandler:^(AVURLAsset* asset) {
         videoAsset = asset;
     }];
     if(videoAsset == nil)

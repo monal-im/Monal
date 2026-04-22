@@ -1361,9 +1361,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                 }
                 DDLogInfo(@"Got %@ gif image item: %@", isInPlace ? @"(in place)" : @"(copied)", item);
                 payload[@"type"] = @"file";
-                prepareFile(item).then(^(NSMutableDictionary* payload) {
-                    resolve(payload);
-                });
+                prepareFile(item).then(resolve);
                 return;
             }];
         }
@@ -1378,9 +1376,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                 }
                 DDLogInfo(@"Got audiovisual item: %@", item);
                 payload[@"type"] = @"audiovisual";
-                prepareFile(item).then(^(NSMutableDictionary* payload) {
-                    resolve(payload);
-                });
+                prepareFile(item).then(resolve);
                 return;
             }];
         }
@@ -1433,9 +1429,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                     }
                     else
                     {
-                        prepareFile(item).then(^(NSMutableDictionary* payload) {
-                            resolve(payload);
-                        });
+                        prepareFile(item).then(resolve);
                         return;
                     }
                     if(error != nil)
@@ -1469,9 +1463,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                         }
                         DDLogInfo(@"Got contact item NSURL: %@", item);
                         payload[@"type"] = @"contact";
-                        prepareFile(item).then(^(NSMutableDictionary* payload) {
-                            resolve(payload);
-                        });
+                        prepareFile(item).then(resolve);
                         return;
                     }];
                     return;
@@ -1496,9 +1488,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                 }
                 DDLogInfo(@"Got file url item: %@", item);
                 payload[@"type"] = @"file";
-                prepareFile(item).then(^(NSMutableDictionary* payload) {
-                    resolve(payload);
-                });
+                prepareFile(item).then(resolve);
                 return;
             }];
         }
@@ -1515,9 +1505,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                 {
                     DDLogInfo(@"Got finder file url item: %@", item);
                     payload[@"type"] = @"file";
-                    prepareFile((NSURL*)item).then(^(NSMutableDictionary* payload) {
-                        resolve(payload);
-                    });
+                    prepareFile((NSURL*)item).then(resolve);
                     return;
                 }
                 else
@@ -1557,9 +1545,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                 }
                 DDLogInfo(@"Got direct text file item: %@", item);
                 payload[@"type"] = @"file";
-                prepareFile(item).then(^(NSMutableDictionary* payload) {
-                    resolve(payload);
-                });
+                prepareFile(item).then(resolve);
             }];
         }
         else

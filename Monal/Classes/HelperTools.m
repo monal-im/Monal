@@ -1275,17 +1275,16 @@ void swizzle(Class c, SEL orig, SEL new)
     }
     else if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
     {
-        [provider loadItemForTypeIdentifier:UTTypePlainText.identifier options:nil completionHandler:^(NSString*  _Nullable item, NSError* _Null_unspecified error) {
+        [provider loadFileRepresentationForTypeIdentifier:UTTypePlainText.identifier completionHandler:^(NSURL* _Nullable item, NSError* _Null_unspecified error) {
             if(error != nil || item == nil)
             {
                 DDLogError(@"Error extracting item from NSItemProvider: %@", error);
                 payload[@"error"] = error;
                 return completion(payload);
             }
-            DDLogInfo(@"Got direct text item: %@", item);
-            payload[@"type"] = @"text";
-            payload[@"data"] = item;
-            return [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload withCompletionHandler:completion];
+            DDLogInfo(@"Got direct text file item: %@", item);
+            payload[@"type"] = @"file";
+            return prepareFile(item);
         }];
     }
     else

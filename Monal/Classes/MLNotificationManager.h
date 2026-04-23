@@ -18,7 +18,7 @@
 
 +(MLNotificationManager*) sharedInstance;
 
-@property (nonatomic, strong) MLContact* currentContact;
+@property (atomic, strong) MLContact* currentContact;
 -(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId;
 
 @end

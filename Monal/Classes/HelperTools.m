@@ -1215,7 +1215,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         [QLThumbnailGenerator.sharedGenerator saveBestRepresentationForRequest:request toFileAtURL:tmpURL withContentType:UTTypePNG.identifier completionHandler:^(NSError *error) {
             if(error == nil)
             {
-                UIImage* result = [UIImage imageWithContentsOfFile:[url path]];
+                UIImage* result = [UIImage imageWithContentsOfFile:[tmpURL path]];
                 [[NSFileManager defaultManager] removeItemAtURL:tmpURL error:nil];      //remove temporary file, we don't need it anymore
                 if(result != nil)
                 {

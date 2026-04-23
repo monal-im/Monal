@@ -83,9 +83,11 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
 -(void) sendMessage:(NSString*) name withData:(NSData* _Nullable) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t _Nullable) responseHandler
 {
     NSNumber* id = [self writeIpcMessage:name withData:data andResponseId:[NSNumber numberWithInt:0] to:destination];
-    //save response handler for later execution (if one is specified)
-    if(responseHandler)
-        _responseHandlers[id] = responseHandler;
+    @synchronized(self) {
+        //save response handler for later execution (if one is specified)
+        if(responseHandler)
+            _responseHandlers[id] = responseHandler;
+    }
 }
 
 -(void) sendBroadcastMessage:(NSString*) name withData:(NSData* _Nullable) data
@@ -212,19 +214,23 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center __unused, v
             //handle all responses (don't trigger a kMonalIncomingIPC for responses)
             if(message[@"response_to"] && [message[@"response_to"] intValue] > 0)
             {
-                //call response handler if one is present (ignore the spurious response otherwise)
-                if(_responseHandlers[message[@"response_to"]])
-                {
-                    IPC_response_handler_t responseHandler = (IPC_response_handler_t)_responseHandlers[message[@"response_to"]];
-                    if(responseHandler)
+                @synchronized(self) {
+                    //call response handler if one is present (ignore the spurious response otherwise)
+                    if(_responseHandlers[message[@"response_to"]])
                     {
-                        //responses handlers are only valid for the maximum RTT of messages (+ some safety margin)
-                        createTimer(MSG_TIMEOUT*2 + 1, (^{
-                            [_responseHandlers removeObjectForKey:message[@"response_to"]];
-                        }));
-                        dispatch_async(_ipcQueues[queueName], ^{
-                            responseHandler(message);
-                        });
+                        IPC_response_handler_t responseHandler = (IPC_response_handler_t)_responseHandlers[message[@"response_to"]];
+                        if(responseHandler)
+                        {
+                            //responses handlers are only valid for the maximum RTT of messages (+ some safety margin)
+                            createTimer(MSG_TIMEOUT*2 + 1, (^{
+                                @synchronized(self) {
+                                    [_responseHandlers removeObjectForKey:message[@"response_to"]];
+                                }
+                            }));
+                            dispatch_async(_ipcQueues[queueName], ^{
+                                responseHandler(message);
+                            });
+                        }
                     }
                 }
             }

@@ -245,7 +245,7 @@
         return [HelperTools sha256HmacForKey:key andData:data];
     if([_method isEqualToString:@"SCRAM-SHA-512"])
         return [HelperTools sha512HmacForKey:key andData:data];
-    NSAssert(NO, @"Unexpected error: unsupported SCRAM hash method!", (@{@"method": nilWrapper(_method)}));
+    MLAssert(NO, @"Unexpected error: unsupported SCRAM hash method!", (@{@"method": nilWrapper(_method)}));
     return nil;
 }
 
@@ -257,7 +257,7 @@
         return [HelperTools sha256:data];
     if([_method isEqualToString:@"SCRAM-SHA-512"])
         return [HelperTools sha512:data];
-    NSAssert(NO, @"Unexpected error: unsupported SCRAM hash method!", (@{@"method": nilWrapper(_method)}));
+    MLAssert(NO, @"Unexpected error: unsupported SCRAM hash method!", (@{@"method": nilWrapper(_method)}));
     return nil;
 }
 
@@ -268,6 +268,9 @@
     NSMutableDictionary* retval = [NSMutableDictionary new];
     for(NSString* component in [str componentsSeparatedByString:@","])
     {
+        //return empty dictionary on malformed attributes to make sure it doesn't lead to successful authentications
+        if(component.length < 3 || [component characterAtIndex:1] != '=')
+            return @{};
         NSString* attribute = [component substringToIndex:1];
         NSString* value = [component substringFromIndex:2];
         retval[attribute] = [self unquote:value];

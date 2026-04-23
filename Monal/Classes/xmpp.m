@@ -1913,10 +1913,13 @@ NSString* const kStanza = @"stanza";
             
             @synchronized(_stateLockObject) {
                 //remove acked messages
-                [self removeAckedStanzasFromQueue:h];
-
-                self.smacksRequestInFlight = NO;        //ack returned
-                [self requestSMAck:NO];                 //request ack again (will only happen if queue is not empty)
+                //don't try to continue, if removeAckedStanzasFromQueue returned an error (it will trigger a reconnect in these cases)
+                BOOL error = [self removeAckedStanzasFromQueue:h];
+                if(!error)
+                {
+                    self.smacksRequestInFlight = NO;        //ack returned
+                    [self requestSMAck:NO];                 //request ack again (will only happen if queue is not empty)
+                }
             }
         }
         else if([parsedStanza check:@"/{jabber:client}presence"] && self.accountState >= kStateInitStarted)
@@ -2439,7 +2442,9 @@ NSString* const kStanza = @"stanza";
 
             @synchronized(_stateLockObject) {
                 //remove already delivered stanzas and resend the (still) unacked ones
-                [self removeAckedStanzasFromQueue:h];
+                //but don't try to continue, if removeAckedStanzasFromQueue returned an error (it will trigger a reconnect in these cases)
+                if([self removeAckedStanzasFromQueue:h])
+                    return;
                 [self resendUnackedStanzas];
             }
             

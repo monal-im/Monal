@@ -119,7 +119,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification __unused) {
         @synchronized(self) {
             NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-            if([threadData[@"_sqliteTransactionsRunning"][self->_dbFile] intValue] > 1)
+            if([threadData[@"_sqliteTransactionsRunning"][self->_dbFile] intValue] > 0)
             {
                 DDLogError(@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open");
                 @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
@@ -172,7 +172,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     @synchronized(self) {
         NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-        if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
+        if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 0)
         {
             DDLogError(@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open");
             @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open" userInfo:threadData];

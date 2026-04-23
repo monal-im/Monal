@@ -17,7 +17,7 @@
 #define BUFFER_SIZE 4096
 
 @interface MLSharedStreamState : NSObject
-@property (atomic, strong) id<NSStreamDelegate> delegate;
+@property (atomic, weak) id<NSStreamDelegate> delegate;
 @property (atomic, strong) NSRunLoop* runLoop;
 @property (atomic) NSRunLoopMode runLoopMode;
 @property (atomic, strong) NSError* error;
@@ -31,9 +31,6 @@
 @end
 
 @interface MLStream()
-{
-    id<NSStreamDelegate> _delegate;
-}
 @property (atomic, strong) MLSharedStreamState* shared_state;
 @property (atomic) BOOL open_called;
 @property (atomic) BOOL closed;
@@ -401,13 +398,12 @@
 
 -(void) generateEvent:(NSStreamEvent) event
 {
-    @synchronized(self.shared_state) {
-        [super generateEvent:event];
-        //generate the first NSStreamEventHasSpaceAvailable event directly after our NSStreamEventOpenCompleted event
-        //(the network framework buffers outgoing data itself, e.g. it is always writable)
-        if(event == NSStreamEventOpenCompleted && [self hasSpaceAvailable])
-            [super generateEvent:NSStreamEventHasSpaceAvailable];
-    }
+    //no @synchronized needed, because super generateEvent (and hasSpaceAvailable) already have their own ones
+    [super generateEvent:event];
+    //generate the first NSStreamEventHasSpaceAvailable event directly after our NSStreamEventOpenCompleted event
+    //(the network framework buffers outgoing data itself, e.g. it is always writable)
+    if(event == NSStreamEventOpenCompleted && [self hasSpaceAvailable])
+        [super generateEvent:NSStreamEventHasSpaceAvailable];
 }
 
 @end
@@ -665,7 +661,6 @@
     @synchronized(self.shared_state) {
         self.open_called = NO;
         self.closed = NO;
-        self.delegate = self;
     }
     return self;
 }
@@ -695,7 +690,12 @@
         {
             //schedule the delegate calls in the runloop that was registered
             CFRunLoopPerformBlock([self.shared_state.runLoop getCFRunLoop], (__bridge CFStringRef)self.shared_state.runLoopMode, ^{
-                [self->_delegate stream:self handleEvent:event];
+                id<NSStreamDelegate> delegate = nil;
+                @synchronized(self.shared_state) {
+                    delegate = self.shared_state.delegate;
+                }
+                if(delegate != nil)
+                    [delegate stream:self handleEvent:event];
             });
             //trigger wakeup of runloop to execute the block as soon as possible
             CFRunLoopWakeUp([self.shared_state.runLoop getCFRunLoop]);
@@ -753,9 +753,9 @@
 
 -(void) setDelegate:(id<NSStreamDelegate>) delegate
 {
-    _delegate = delegate;
-    if(_delegate == nil)
-        _delegate = self;
+    @synchronized(self.shared_state) {
+        self.shared_state.delegate = delegate;
+    }
 }
 
 -(void) scheduleInRunLoop:(NSRunLoop*) loop forMode:(NSRunLoopMode) mode
@@ -900,7 +900,11 @@
         __block NSData* cert = nil;
         sec_protocol_metadata_access_peer_certificate_chain(s_metadata, ^(sec_certificate_t certificate) {
             if(cert == nil)
-                cert = (__bridge_transfer NSData*)SecCertificateCopyData(sec_certificate_copy_ref(certificate));
+            {
+                SecCertificateRef certRef = sec_certificate_copy_ref(certificate);
+                cert = (__bridge_transfer NSData*)SecCertificateCopyData(certRef);
+                CFRelease(certRef);
+            }
         });
         MLCrypto* crypto = [MLCrypto new];
         NSString* signatureAlgo = [crypto getSignatureAlgoOfCert:cert];
@@ -956,12 +960,6 @@
             return [HelperTools sha256:cert];
         }
     }
-}
-
--(void) stream:(NSStream*) stream handleEvent:(NSStreamEvent) event
-{
-    //ignore event in this dummy delegate
-    DDLogVerbose(@"ignoring event in dummy delegate: %@ --> %ld", stream, (long)event);
 }
 
 @end

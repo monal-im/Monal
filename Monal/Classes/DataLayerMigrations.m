@@ -1089,6 +1089,55 @@
             [db executeNonQuery:@"CREATE INDEX IF NOT EXISTS buddyIdIndex ON 'buddy_groups'('buddy_id');"];
         }];
         
+        //fix jid column having the wrong type
+        [self updateDB:db withDataLayer:dataLayer toVersion:7.010 withBlock:^{
+            [db executeNonQuery:@"DROP TABLE voice_requests;"];
+            [db executeNonQuery:@"DROP TRIGGER remove_voice_requests_on_own_role_change_insert;"];
+            [db executeNonQuery:@"DROP TRIGGER remove_voice_requests_on_own_role_change_update;"];
+            
+            [db executeNonQuery:@"CREATE TABLE 'voice_requests' (\
+                'account_id' INTEGER NOT NULL, \
+                'room' VARCHAR(128) NOT NULL, \
+                'jid' VARCHAR(128) NOT NULL, \
+                'nick' TEXT DEFAULT NULL,\
+                PRIMARY KEY('account_id', 'room', 'jid'), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+            );"];
+            
+            [db executeNonQuery:@"CREATE TRIGGER remove_voice_requests_on_own_role_change_insert \
+                AFTER INSERT ON muc_participants \
+                FOR EACH ROW \
+                WHEN EXISTS ( \
+                    SELECT 1 \
+                    FROM account AS A \
+                    WHERE \
+                        A.account_id = NEW.account_id \
+                        AND (A.username || '@' || A.domain) = NEW.participant_jid \
+                        AND NEW.role != 'moderator' \
+                ) \
+                BEGIN \
+                    DELETE FROM voice_requests WHERE account_id = NEW.account_id AND room = NEW.room; \
+                END;"
+            ];
+            
+            [db executeNonQuery:@"CREATE TRIGGER remove_voice_requests_on_own_role_change_update \
+                AFTER UPDATE ON muc_participants \
+                FOR EACH ROW \
+                WHEN EXISTS ( \
+                    SELECT 1 \
+                    FROM account AS A \
+                    WHERE \
+                        A.account_id = NEW.account_id \
+                        AND (A.username || '@' || A.domain) = NEW.participant_jid \
+                        AND NEW.role != 'moderator' \
+                ) \
+                BEGIN \
+                    DELETE FROM voice_requests WHERE account_id = NEW.account_id AND room = NEW.room; \
+                END;"
+            ];
+        }];
+        
         
         //check if device id changed and invalidate state, if so
         //but do so only for non-sandbox (e.g. non-development) installs

@@ -15,6 +15,7 @@
 #import <monalxmpp/xmpp.h>
 #import "XMPPMessage.h"
 #import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLImageManager.h>
 #import "MLNotificationManager.h"
 #import <monalxmpp/MLOMEMO.h>
 #import <monalxmpp/monalxmpp-Swift.h>
@@ -852,6 +853,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 {
     [self disconnectAccount:accountID withExplicitLogout:YES];
     [[DataLayer sharedInstance] removeAccount:accountID];
+    [[MLImageManager sharedInstance] deleteAvatarsOfAccount:accountID];
     [SAMKeychain deletePasswordForService:kMonalKeychainName account:accountID.stringValue];
     [HelperTools removeAllShareInteractionsForAccountID:accountID];
     // trigger UI removal
@@ -898,6 +900,9 @@ $$
         //remove from DB
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountID];
         [contact removeShareInteractions];
+
+        //delete the avatar of the contact
+        [[MLImageManager sharedInstance] setIconForContact:contact WithData:nil];
         
         //notify the UI
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:account userInfo:@{

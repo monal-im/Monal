@@ -22,6 +22,7 @@ struct MemberList: View {
     @State private var roles: Dictionary<ObservableKVOWrapper<MLContact>, String>
     @State private var online: Dictionary<ObservableKVOWrapper<MLContact>, Bool>
     @State private var nicknames: Dictionary<ObservableKVOWrapper<MLContact>, String>
+    @State private var occupantIds: Dictionary<ObservableKVOWrapper<MLContact>, String>
     @State private var navigationActive: ObservableKVOWrapper<MLContact>?
     @State private var showAlert = false
     @State private var alertPrompt = AlertPrompt(dismissLabel: Text("Close"))
@@ -39,6 +40,7 @@ struct MemberList: View {
         _roles = State(wrappedValue:[:])
         _online = State(wrappedValue:[:])
         _nicknames = State(wrappedValue:[:])
+        _occupantIds = State(wrappedValue:[:])
     }
     
     func updateMemberlist() {
@@ -49,16 +51,18 @@ struct MemberList: View {
         roles.removeAll(keepingCapacity:true)
         online.removeAll(keepingCapacity:true)
         nicknames.removeAll(keepingCapacity:true)
+        occupantIds.removeAll(keepingCapacity:true)
         for memberInfo in Array(DataLayer.sharedInstance().getMembersAndParticipants(ofMuc:self.muc.contactJid, forAccountID:account.accountID)) {
             DDLogVerbose("Got member/participant entry: \(String(describing:memberInfo))")
             guard let jid = memberInfo["participant_jid"] as? String ?? memberInfo["member_jid"] as? String else {
                 continue
             }
             let contact = ObservableKVOWrapper(MLContact.createContact(fromJid:jid, andAccountID:account.accountID))
-            nicknames[contact] = memberInfo["room_nick"] as? String
             if !memberList.contains(contact) {
                 continue
             }
+            nicknames[contact] = memberInfo["room_nick"] as? String
+            occupantIds[contact] = memberInfo["occupant_id"] as? String
             affiliations[contact] = memberInfo["affiliation"] as? String ?? kMucAffiliationNone
             roles[contact] = memberInfo["role"] as? String ?? kMucRoleNone
             if let num = memberInfo["online"] as? NSNumber {
@@ -269,7 +273,9 @@ struct MemberList: View {
                     if !contact.isSelf {
                         HStack {
                             HStack {
-                                ContactEntry(contact:contact.obj, fallback:nicknames[contact]) {
+                                let showVcardTempAvatar = self.muc.mucType == kMucTypeChannel && nicknames[contact] != nil
+                                let avatar: UIImage? = showVcardTempAvatar ? MLImageManager.sharedInstance().getAvatarForOccupant(occupantIds[contact], inRoom: self.muc.contactJid, havingNick: nicknames[contact]!, forAccount: self.muc.accountID) : nil
+                                ContactEntry(contact: contact.obj, fallback: nicknames[contact], withAvatar: avatar) {
                                     Text("Affiliation: \(mucAffiliationToString(affiliations[contact], roles[contact]))\(!(online[contact] ?? false) ? Text(" (offline)") : Text(""))")
                                         //.foregroundColor(Color(UIColor.secondaryLabel))
                                         .font(.footnote)

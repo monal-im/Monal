@@ -103,6 +103,8 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSNumber*) accountID;
 -(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSNumber*) accountID;
+-(NSString*) getAvatarHashForOccupant:(NSString*) occupantId inRoom:(NSString*) room forAccount:(NSNumber*) accountID;
+-(void) clearAvatarHashForOccupant:(NSString*) occupantId inRoom:(NSString*) room forAccount:(NSNumber*) accountID;
 
 -(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountID withComment:(NSString*) comment;
 -(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountID;
@@ -133,7 +135,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSNumber*) accountID;
 -(BOOL) updateOwnNickName:(NSString*) nick forMuc:(NSString*) room forAccount:(NSNumber*) accountID;
 
--(BOOL) updateOwnOccupantID:(NSString* _Nullable) occupantID forMuc:(NSString*) room onAccountID:(NSNumber*) accountID;
+-(BOOL) updateOwnOccupantId:(NSString* _Nullable) occupantId forMuc:(NSString*) room onAccountID:(NSNumber*) accountID;
 -(NSString* _Nullable) getOwnOccupantIdForMuc:(NSString*) room onAccountID:(NSNumber*) accountID;
 
 -(BOOL) updateMucSubject:(NSString*) subject forAccount:(NSNumber*) accountID andRoom:(NSString*) room;

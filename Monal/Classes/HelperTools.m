@@ -1763,7 +1763,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     return 1.0;     //dummy value
 }
 
-+(UIColor*) generateColorFromJid:(NSString*) jid
++(UIColor*) generateColorFromString:(NSString*) inputString
 {
     //cache generated colors
     static NSMutableDictionary* cache;
@@ -1771,11 +1771,11 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     dispatch_once(&onceToken, ^{
         cache = [NSMutableDictionary new];
     });
-    if(cache[jid] != nil)
-        return cache[jid];
+    if(cache[inputString] != nil)
+        return cache[inputString];
     
     //XEP-0392 implementation
-    NSData* hash = [self sha1:[jid dataUsingEncoding:NSUTF8StringEncoding]];
+    NSData* hash = [self sha1:[inputString dataUsingEncoding:NSUTF8StringEncoding]];
     uint16_t rawHue = CFSwapInt16LittleToHost(*(uint16_t*)[hash bytes]);
     double hue = (rawHue / 65536.0) * 360.0;
     double saturation = 100.0;
@@ -1783,7 +1783,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     
     double r, g, b;
     hsluv2rgb(hue, saturation, lightness, &r, &g, &b);
-    return cache[jid] = [UIColor colorWithRed:r green:g blue:b alpha:1];
+    return cache[inputString] = [UIColor colorWithRed:r green:g blue:b alpha:1];
 }
 
 +(NSString*) bytesToHuman:(int64_t) bytes

@@ -113,6 +113,11 @@
     [self resetCachedBackgroundImageForContact:[MLContact createContactFromJid:contact andAccountID:accountID]];
 }
 
+-(void) purgeCacheForOccupant:(NSString*) occupantId inRoom:(NSString*) room
+{
+    [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", room, occupantId]];
+}
+
 -(void) cleanupHashes
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
@@ -141,17 +146,89 @@
             if(error)
                 DDLogError(@"Error deleting orphan avatar file: %@", error);
         }
+
+        //clean up orphan hashes and orphan avatar files of muc participants
+        if(contact.isMuc)
+        {
+            NSArray* participants = [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:contact.contactJid forAccountID:contact.accountID];
+            //documents directory/muc_participant_avatars/accountID/room/occupantId
+            NSString* rootPath = [self.documentsDirectory stringByAppendingPathComponent:@"muc_participant_avatars"];
+            rootPath = [rootPath stringByAppendingPathComponent:contact.accountID.stringValue];
+            rootPath = [rootPath stringByAppendingPathComponent:contact.contactJid];
+            for(NSDictionary* participant in participants)
+            {
+                NSString* occupantId = participant[@"occupant_id"];
+                if(occupantId == nil || [occupantId isEqualToString:@""])
+                    continue;
+
+                writablePath = [rootPath stringByAppendingPathComponent:[self fileNameForOccupant:occupantId]];
+                hasHash = participant[@"iconhash"] != nil && ![@"" isEqualToString:participant[@"iconhash"]];
+
+                if(hasHash && ![fileManager isReadableFileAtPath:writablePath])
+                {
+                    DDLogDebug(@"Deleting orphan hash '%@' of muc participant: %@/%@", participant[@"iconhash"], participant[@"room"], participant[@"room_nick"]);
+                    //delete avatar hash from db if the file containing our image data vanished
+                    [[DataLayer sharedInstance] clearAvatarHashForOccupant:occupantId inRoom:participant[@"room"] forAccount:contact.accountID];
+                }
+
+                if(!hasHash && [fileManager isReadableFileAtPath:writablePath])
+                {
+                    DDLogDebug(@"Deleting orphan avatar file '%@' of muc participant: %@/%@", writablePath, participant[@"room"], participant[@"room_nick"]);
+                    NSError* error;
+                    [fileManager removeItemAtPath:writablePath error:&error];
+                    if(error)
+                        DDLogError(@"Error deleting orphan avatar file: %@", error);
+                }
+            }
+        }
     }
 }
 
--(void) removeAllIcons
+-(void) removeAllContactIcons
 {
     NSError* error;
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
     [fileManager removeItemAtPath:writablePath error:&error];
     if(error)
-        DDLogError(@"Got error while trying to delete all avatar files: %@", error);
+        DDLogError(@"Got error while trying to delete all contact avatar files: %@", error);
+}
+
+-(void) deleteAvatarsOfRoom:(MLContact*) roomContact
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+
+    // delete the room avatar
+    //documents directory/buddyicons/accountID/contact
+    NSString* filename = [self fileNameforContact:roomContact];
+    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+    writablePath = [writablePath stringByAppendingPathComponent:roomContact.accountID.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:filename];
+    [fileManager removeItemAtPath:writablePath error:nil];
+
+    // delete participant avatars
+    //documents directory/muc_participant_avatars/accountID/room/
+    writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"muc_participant_avatars"];
+    writablePath = [writablePath stringByAppendingPathComponent:roomContact.accountID.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:roomContact.contactJid];
+    [fileManager removeItemAtPath:writablePath error:nil];
+}
+
+-(void) deleteAvatarsOfAccount:(NSNumber*) accountID
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+
+    // delete the contact avatar
+    //documents directory/buddyicons/accountID/
+    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+    writablePath = [writablePath stringByAppendingPathComponent:accountID.stringValue];
+    [fileManager removeItemAtPath:writablePath error:nil];
+
+    // delete the room participant avatars
+    //documents directory/muc_participant_avatars/accountID/
+    writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"muc_participant_avatars"];
+    writablePath = [writablePath stringByAppendingPathComponent:accountID.stringValue];
+    [fileManager removeItemAtPath:writablePath error:nil];
 }
 
 #pragma mark chat bubbles
@@ -175,19 +252,11 @@
 
 #pragma mark user icons
 
--(UIImage*) generateDummyIconForContact:(MLContact*) contact
+-(UIImage*) generatePlaceholderAvatarForString:(NSString*) inputString withInitial:(NSString*) initialCharacter
 {
-    NSString* contactLetter;
+    MLAssert(initialCharacter != nil && initialCharacter.length == 1, @"initialCharacter string does not represent a character");
 
-    if(contact.isSelf)
-    {
-        xmpp* account = contact.account;
-        contactLetter = [[[MLContact ownDisplayNameForAccount:account] substringToIndex:1] uppercaseString];
-    }
-    else
-        contactLetter = [[[contact contactDisplayName] substringToIndex:1] uppercaseString];
-
-    UIColor* background = [HelperTools generateColorFromJid:contact.contactJid];
+    UIColor* background = [HelperTools generateColorFromString:inputString];
     UIColor* foreground = [UIColor blackColor];
     if(![background isLightColor])
         foreground = [UIColor whiteColor];
@@ -210,18 +279,43 @@
             NSForegroundColorAttributeName: foreground,
             NSParagraphStyleAttributeName: paragraphStyle
         };
-        CGSize textSize = [contactLetter sizeWithAttributes:attributes];
+        CGSize textSize = [initialCharacter sizeWithAttributes:attributes];
         CGRect textRect = CGRectMake(floorf((float)(renderer.format.bounds.size.width - textSize.width) / 2),
                                     floorf((float)(renderer.format.bounds.size.height - textSize.height) / 2),
                                     textSize.width,
                                     textSize.height);
-        [contactLetter drawInRect:textRect withAttributes:attributes];
+        [initialCharacter drawInRect:textRect withAttributes:attributes];
     }];
+}
+
+-(UIImage*) generateDummyIconForContact:(MLContact*) contact
+{
+    NSString* initial = [[contact.contactDisplayNameWithoutSelfnotesPrefix substringToIndex:1] uppercaseString];
+    return [self generatePlaceholderAvatarForString:contact.contactJid withInitial:initial];
+}
+
+-(UIImage*) generatePlaceholderAvatarForNick:(NSString*) nick
+{
+    NSString* initial = [[nick substringToIndex:1] uppercaseString];
+    return [self generatePlaceholderAvatarForString:nick withInitial:initial];
+}
+
+-(UIImage*) generatePlaceholderAvatarForOccupantId:(NSString*) occupantId andNick:(NSString*) nick
+{
+    NSString* initial = [[nick substringToIndex:1] uppercaseString];
+    return [self generatePlaceholderAvatarForString:occupantId withInitial:initial];
 }
 
 -(NSString*) fileNameforContact:(MLContact*) contact
 {
     return [NSString stringWithFormat:@"%@_%@.png", contact.accountID.stringValue, [contact.contactJid lowercaseString]];;
+}
+
+-(NSString*) fileNameForOccupant:(NSString*) occupantId
+{
+    // Replace forward slashes with "__" because a forward slash is a path separator
+    NSString* escapedOccupantId = [occupantId stringByReplacingOccurrencesOfString:@"/" withString:@"__"];
+    return [NSString stringWithFormat:@"%@.png", escapedOccupantId];
 }
 
 -(NSString*) fileNameforThumbnailOfMessage:(MLMessage*) message
@@ -293,7 +387,41 @@
     
     //remove from cache if its there
     [self.iconCache removeObjectForKey:[NSString stringWithFormat:@"%@_%@", contact.accountID, contact]];
-    
+}
+
+-(void) setAvatarForOccupant:(NSString*) occupantId inRoom:(NSString*) room forAccount:(NSNumber*) accountID WithData:(NSData* _Nullable) data
+{
+    MLAssert(occupantId != nil && ![occupantId isEqualToString:@""], @"The occupantId can't be empty when saving MUC participant avatars");
+
+    //documents directory/muc_participant_avatars/accountID/room/occupantId
+    NSString* filename = [self fileNameForOccupant:occupantId];
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+
+    NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"muc_participant_avatars"];
+    writablePath = [writablePath stringByAppendingPathComponent:accountID.stringValue];
+    writablePath = [writablePath stringByAppendingPathComponent:room];
+
+    NSError* error;
+    [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
+    [HelperTools configureFileProtectionFor:writablePath];
+    writablePath = [writablePath stringByAppendingPathComponent:filename];
+
+    if([fileManager fileExistsAtPath:writablePath])
+        [fileManager removeItemAtPath:writablePath error:nil];
+
+    if(data)
+    {
+        if([data writeToFile:writablePath atomically:NO])
+        {
+            [HelperTools configureFileProtectionFor:writablePath];
+            DDLogVerbose(@"wrote image to file: %@", writablePath);
+        }
+        else
+            DDLogError(@"failed to write image to file: %@", writablePath);
+    }
+
+    //remove from cache if its there
+    [self purgeCacheForOccupant:occupantId inRoom:room];
 }
 
 -(BOOL) hasIconForContact:(MLContact*) contact
@@ -388,6 +516,43 @@
     return toreturn;
 }
 
+-(UIImage*) getAvatarForOccupant:(NSString* _Nullable) occupantId inRoom:(NSString*) room havingNick:(NSString*) nick forAccount:(NSNumber*) accountID
+{
+    if(occupantId == nil || [occupantId isEqualToString:@""])
+    {
+        return [self generatePlaceholderAvatarForNick:nick];
+    }
+
+    NSString* filename = [self fileNameForOccupant:occupantId];
+
+    UIImage* toreturn = nil;
+
+    NSString* cacheKey = [NSString stringWithFormat:@"%@_%@", room, occupantId];
+
+    //check cache
+    toreturn = [self.iconCache objectForKey:cacheKey];
+    if(!toreturn)
+    {
+        NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"muc_participant_avatars"];
+        writablePath = [writablePath stringByAppendingPathComponent:accountID.stringValue];
+        writablePath = [writablePath stringByAppendingPathComponent:room];
+        writablePath = [writablePath stringByAppendingPathComponent:filename];
+
+        DDLogVerbose(@"Loading avatar image at: %@", writablePath);
+        UIImage* savedImage = [UIImage imageWithContentsOfFile:writablePath];
+
+        if(savedImage)
+            toreturn = savedImage;
+        else
+            toreturn = [self generatePlaceholderAvatarForOccupantId:occupantId andNick:nick];
+
+        //uiimage is cached if avaialable, but only if not in appex due to memory limits therein
+        if(toreturn && ![HelperTools isAppExtension])
+            [self.iconCache setObject:toreturn forKey:cacheKey];
+    }
+    MLAssert(toreturn != nil, @"Returned avatar image can't be nil!");
+    return toreturn;
+}
 
 -(void) saveBackgroundImageData:(NSData* _Nullable) data forContact:(MLContact* _Nullable) contact
 {

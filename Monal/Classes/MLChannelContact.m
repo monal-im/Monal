@@ -10,6 +10,7 @@
 #import <monalxmpp/HelperTools.h>
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/MLImageManager.h>
 #import <monalxmpp/MLChannelContact.h>
 #import <monalxmpp/MLContact.h>
 #import <monalxmpp/MLMessage.h>
@@ -156,13 +157,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(UIImage*) avatar
 {
-    return nil;
-//     // return already cached image
-//     if(_avatar != nil)
-//         return _avatar;
-//     // load avatar from MLImageManager (use self.avatar instead of _avatar to make sure KVO works properly)
-//     self.avatar = [[MLImageManager sharedInstance] getIconForContact:self];
-//     return _avatar;
+    return [[MLImageManager sharedInstance] getAvatarForOccupant:self.occupantId inRoom:self.mucContact.contactJid havingNick:self.nick forAccount:self.mucContact.accountID];
 }
 
 +(NSSet*) keyPathsForValuesAffectingAvatar

@@ -1131,10 +1131,11 @@ enum msgSentState {
     {
         //clean error because this seems to be a retry (to be filled again, if error persists)
         [[DataLayer sharedInstance] clearErrorOfMessageId:newMessageID];
-        for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+        NSArray* messageListCopy = [self.messageList copy];     //we don't want to crash on mutation while iterating
+        for(size_t msgIdx = [messageListCopy count]; msgIdx > 0; msgIdx--)
         {
             // find msg that should be updated
-            MLMessage* msg = [self.messageList objectAtIndex:(msgIdx - 1)];
+            MLMessage* msg = [messageListCopy objectAtIndex:(msgIdx - 1)];
             if([msg.messageId isEqualToString:newMessageID])
             {
                 msg.errorType = @"";
@@ -1763,10 +1764,11 @@ enum msgSentState {
                 self.messageList = [NSMutableArray new];
 
             //update already existent message
-            for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+            NSArray* messageListCopy = [self.messageList copy];     //we don't want to crash on mutation while iterating
+            for(size_t msgIdx = [messageListCopy count]; msgIdx > 0; msgIdx--)
             {
                 // find msg that should be updated
-                MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
+                MLMessage* msgInList = [messageListCopy objectAtIndex:(msgIdx - 1)];
                 if([msgInList.messageDBId intValue] == [message.messageDBId intValue])
                 {
                     //update table entry
@@ -1816,10 +1818,11 @@ enum msgSentState {
 
     DDLogDebug(@"Got deleted message notice for history id %ld and message id %@", (long)[dic[@"historyId"] intValue], dic[@"historyId"]);
 
-    for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+    NSArray* messageListCopy = [self.messageList copy];     //we don't want to crash on mutation while iterating
+    for(size_t msgIdx = [messageListCopy count]; msgIdx > 0; msgIdx--)
     {
         // find msg that should be deleted
-        MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
+        MLMessage* msgInList = [messageListCopy objectAtIndex:(msgIdx - 1)];
         if([msgInList.messageDBId intValue] == [dic[@"historyId"] intValue])
         {
             //update table entry
@@ -1836,11 +1839,12 @@ enum msgSentState {
 
 -(void) updateMsgState:(NSString *) messageId withEvent:(size_t) event withOptDic:(NSDictionary*) dic
 {
+    NSArray* messageListCopy = [self.messageList copy];     //we don't want to crash on mutation while iterating
     NSIndexPath* indexPath;
-    for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+    for(size_t msgIdx = [messageListCopy count]; msgIdx > 0; msgIdx--)
     {
         // find msg that should be updated
-        MLMessage* msg = [self.messageList objectAtIndex:(msgIdx - 1)];
+        MLMessage* msg = [messageListCopy objectAtIndex:(msgIdx - 1)];
         if([msg.messageId isEqualToString:messageId])
         {
             indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
@@ -1892,11 +1896,12 @@ enum msgSentState {
 
     DDLogDebug(@"Got filetransfer message update for history id %ld: %@ (%@)", (long)[msg.messageDBId intValue], msg.fileInfo.mimeType, msg.fileInfo.size);
 
+    NSArray* messageListCopy = [self.messageList copy];     //we don't want to crash on mutation while iterating
     NSIndexPath* indexPath;
-    for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+    for(size_t msgIdx = [messageListCopy count]; msgIdx > 0; msgIdx--)
     {
         // find msg that should be updated
-        MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
+        MLMessage* msgInList = [messageListCopy objectAtIndex:(msgIdx - 1)];
         if([msgInList.messageDBId intValue] == [msg.messageDBId intValue])
         {
             //update table entry

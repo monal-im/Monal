@@ -1059,8 +1059,8 @@ $$
 {
     // generate new keys if less than MIN_OMEMO_KEYS are available
     unsigned int preKeyCount = [self.monalSignalStore getPreKeyCount];
-    int lastPreyKedId = [self.monalSignalStore getHighestPreKeyId];
-    DDLogDebug(@"Current prekey count: %u, lastPreyKedId=%d", preKeyCount, lastPreyKedId);
+    int lastPreKeyId = [self.monalSignalStore getHighestPreKeyId];
+    DDLogDebug(@"Current prekey count: %u, lastPreKeyId=%d", preKeyCount, lastPreKeyId);
     if(preKeyCount < MIN_OMEMO_KEYS)
     {
         SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
@@ -1078,7 +1078,7 @@ $$
             return NO;
         }
         // Start generating with keyId > last send key id
-        self.monalSignalStore.preKeys = [signalHelper generatePreKeysWithStartingPreKeyId:(lastPreyKedId + 1) count:cntKeysNeeded];
+        self.monalSignalStore.preKeys = [signalHelper generatePreKeysWithStartingPreKeyId:(lastPreKeyId + 1) count:cntKeysNeeded];
         [self.monalSignalStore saveValues];
 
         // send out new omemo bundle

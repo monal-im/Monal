@@ -270,7 +270,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
         //SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
         case(SQLITE_INTEGER):
         {
-            NSNumber* returnInt = [NSNumber numberWithInt:sqlite3_column_int(statement, column)];
+            NSNumber* returnInt = [NSNumber numberWithLongLong:sqlite3_column_int64(statement, column)];
             return returnInt;
         }
         case(SQLITE_FLOAT):

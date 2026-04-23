@@ -221,10 +221,21 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
         if([obj isKindOfClass:[NSNumber class]])
         {
             NSNumber* number = (NSNumber*)obj;
-            if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]) != SQLITE_OK)
+            if(CFNumberIsFloatType((CFNumberRef)number))
             {
-                DDLogError(@"number bind error: %@", number);
-                [self throwErrorForQuery:query andArguments:args];
+                if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]) != SQLITE_OK)
+                {
+                    DDLogError(@"double number bind error: %@", number);
+                    [self throwErrorForQuery:query andArguments:args];
+                }
+            }
+            else
+            {
+                if(sqlite3_bind_int64(statement, (signed)idx+1, [number longLongValue]) != SQLITE_OK)
+                {
+                    DDLogError(@"int64 number bind error: %@", number);
+                    [self throwErrorForQuery:query andArguments:args];
+                }
             }
         }
         else if([obj isKindOfClass:[NSString class]])

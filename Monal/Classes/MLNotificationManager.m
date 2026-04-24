@@ -247,7 +247,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
                     resolve(@(MLNotificationStatePending));
                     return;
                 }
-                resolve(@(MLNotificationStateNone));
+            resolve(@(MLNotificationStateNone));
         }];
     }]];
     
@@ -261,7 +261,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
                     resolve(@(MLNotificationStateDelivered));
                     return;
                 }
-                resolve(@(MLNotificationStateNone));
+            resolve(@(MLNotificationStateNone));
         }];
     }]];
     
@@ -407,10 +407,9 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         for(MLMessage* msg in messages)
         {
             if([msg.messageType isEqualToString:kMessageTypeStatus])
-                return;
+                continue;
             
             NSString* idval = [self identifierWithMessage:msg];
-            
             DDLogVerbose(@"Removing pending/delivered notification for message '%@' with identifier '%@'...", msg.messageId, idval);
             [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
             [center removeDeliveredNotificationsWithIdentifiers:@[idval]];

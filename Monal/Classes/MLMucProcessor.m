@@ -1641,6 +1641,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
         }
         return;
     }
+    //we need to check for the rsm/last element because of a weird ejabberd bug sending complete=false, but no rsm last element
     if(![[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] && [iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
     {
         DDLogVerbose(@"Paging through muc mam catchup results at %@ with after: %@", iqNode.fromUser, [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
@@ -1649,7 +1650,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [_account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
     }
-    else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
+    else
     {
         DDLogVerbose(@"Muc mam catchup of %@ finished", iqNode.fromUser);
         [_account mamFinishedFor:iqNode.fromUser];

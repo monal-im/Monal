@@ -922,6 +922,13 @@
 {
     //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h
     [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
+        if(sdp == nil)
+        {
+            DDLogError(@"Could not generate local SDP!");
+            [self handleEndCallActionWithReason:MLCallFinishReasonError];
+            return;
+        }
+        
         DDLogDebug(@"WebRTC reported local SDP '%@', sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:sdp.sdp withInitiator:YES];
@@ -1746,6 +1753,13 @@
             if(self.direction == MLCallDirectionIncoming)
             {
                 [self.webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
+                    if(localSdp == nil)
+                    {
+                        DDLogError(@"Could not generate local SDP!");
+                        [self handleEndCallActionWithReason:MLCallFinishReasonError];
+                        return;
+                    }
+                    
                     DDLogDebug(@"Sending SDP answer back...");
                     NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:localSdp.sdp withInitiator:NO];
                     //we got a session-initiate jingle iq

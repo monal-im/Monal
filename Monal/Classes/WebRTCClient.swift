@@ -128,11 +128,13 @@ final class WebRTCClient: NSObject {
     
     // MARK: Signaling
     @objc
-    func offer(completion: @escaping (_ sdp: RTCSessionDescription) -> Void) {
+    func offer(completion: @escaping (_ sdp: RTCSessionDescription?) -> Void) {
         let constrains = RTCMediaConstraints(mandatoryConstraints: self.mediaConstrains,
                                              optionalConstraints: nil)
         self.peerConnection.offer(for: constrains) { (sdp, error) in
             guard let sdp = sdp else {
+                DDLogError("Could not generate SDP: \(error)")
+                completion(nil)
                 return
             }
             
@@ -143,11 +145,13 @@ final class WebRTCClient: NSObject {
     }
     
     @objc
-    func answer(completion: @escaping (_ sdp: RTCSessionDescription) -> Void)  {
+    func answer(completion: @escaping (_ sdp: RTCSessionDescription?) -> Void)  {
         let constrains = RTCMediaConstraints(mandatoryConstraints: self.mediaConstrains,
                                              optionalConstraints: nil)
         self.peerConnection.answer(for: constrains) { (sdp, error) in
             guard let sdp = sdp else {
+                DDLogError("Could not generate SDP: \(error)")
+                completion(nil)
                 return
             }
             

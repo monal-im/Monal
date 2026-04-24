@@ -755,7 +755,13 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
             //add other group members (except the sender)
             for(NSDictionary* member in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountID:message.accountID])
             {
-                MLContact* contactInGroup = [MLContact createContactFromJid:emptyDefault(member[@"participant_jid"], @"", member[@"member_jid"]) andAccountID:message.accountID];
+                NSString* jid = emptyDefault(member[@"participant_jid"], @"", member[@"member_jid"]);
+                if(jid == nil)
+                {
+                    DDLogError(@"Jid should not be nil for member of MUC '%@': %@", message.buddyName, member);
+                    continue;
+                }
+                MLContact* contactInGroup = [MLContact createContactFromJid:jid andAccountID:message.accountID];
                 if(![contactInGroup isEqualToContact:senderContactInGroup])
                     [recipients addObject:[self makeINPersonWithContact:contactInGroup andDisplayName:member[@"room_nick"] andAccount:account]];
             }

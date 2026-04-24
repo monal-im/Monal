@@ -519,6 +519,13 @@
     }];
 }
 
+-(NSDate*) getLastSuccessfulDecryptTime:(SignalAddress*) address
+{
+    return [NSDate dateWithTimeIntervalSince1970:[[self.sqliteDatabase idReadTransaction:^{
+        return [self.sqliteDatabase executeScalar:@"SELECT unixepoch(lastReceivedMsg) FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, @(address.deviceId), address.name]];
+    }] doubleValue]];
+}
+
 -(void) markSessionAsBroken:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{

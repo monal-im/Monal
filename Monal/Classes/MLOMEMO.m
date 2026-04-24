@@ -1606,6 +1606,11 @@ $$
     return [self.monalSignalStore getTrustLevel:address identityKey:identityKey];
 }
 
+-(NSDate*) getLastSuccessfulDecryptTime:(SignalAddress*) address
+{
+    return [self.monalSignalStore getLastSuccessfulDecryptTime:address];
+}
+
 // add OMEMO identity manually to our signalstore
 // only intended to be called from OMEMO QR scan UI
 -(void) addIdentityManually:(SignalAddress*) address identityKey:(NSData* _Nonnull) identityKey

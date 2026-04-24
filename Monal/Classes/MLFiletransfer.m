@@ -95,6 +95,8 @@ static NSObject* _hardlinkingSyncObject;
             }
             NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
+            if(mimeType)                                                                                                                                                                 
+                mimeType = [[mimeType componentsSeparatedByString:@";"] firstObject];
             NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithLongLong:([[headers objectForKey:@"Content-Length"] longLongValue])] : @(-1);
             if(!mimeType)       //default mime type if none was returned by http server
                 mimeType = @"application/octet-stream";
@@ -198,6 +200,8 @@ static NSObject* _hardlinkingSyncObject;
             
             NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
+            if(mimeType)                                                                                                                                                                 
+                mimeType = [[mimeType componentsSeparatedByString:@";"] firstObject];
             if(!mimeType)
                 mimeType = @"application/octet-stream";
             

@@ -49,7 +49,7 @@ struct NotificationDebugging: View {
                             Text("Error: \(String(describing:apnsError))").foregroundColor(.red).font(.footnote)
                         }
                         if let lastAppexStart = notificationDebuggingDefaultsDB.lastAppexStart {
-                            Text("Last incoming push: \(String(describing:lastAppexStart))").foregroundColor(.gray).font(.footnote)
+                            Text("Last incoming push: \(lastAppexStart, format:.dateTime)").foregroundColor(.gray).font(.footnote)
                         } else {
                             Text("Last incoming push: unknown").foregroundColor(.gray).font(.footnote)
                         }

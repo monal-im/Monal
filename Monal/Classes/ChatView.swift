@@ -661,9 +661,11 @@ struct ChatView: View {
                                             .font(.footnote)
                                             .foregroundColor(Color(hex: "AFB3B8"))
                                     } else if let lastInteractionDate:Date = contact.lastInteractionTime {
-                                        Text(HelperTools.formatLastInteraction(lastInteractionDate))
-                                            .font(.footnote)
-                                            .foregroundColor(Color(hex: "AFB3B8"))
+                                        TimelineView(.periodic(from: lastInteractionDate, by: 60.0)) { _ in
+                                            Text(HelperTools.formatLastInteraction(contact.lastInteractionTime))
+                                                .font(.footnote)
+                                                .foregroundColor(Color(hex: "AFB3B8"))
+                                        }
                                     }
                                 }
                             }

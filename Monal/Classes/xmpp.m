@@ -2897,11 +2897,13 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 NSString* expiry = [parsedStanza findFirst:@"{urn:xmpp:fast:0}token@expiry|datetime"];
                 DDLogInfo(@"Got new FAST token with expiry: %@", expiry);
                 
-                [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly];
-                [SAMKeychain setPasswordData:[HelperTools serializeObject:@{
-                    @"token": token,
-                    @"mechanism": _fastTokenRequested,
-                }] forService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
+                @synchronized(kSAMKeychainErrorDomain) {
+                    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly];
+                    [SAMKeychain setPasswordData:[HelperTools serializeObject:@{
+                        @"token": token,
+                        @"mechanism": _fastTokenRequested,
+                    }] forService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
+                }
             }
             
             //increment state
@@ -5164,8 +5166,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
     //temporarily store the new password in the keychain.
     //this way, we don't store the password in the db when serializing the handler
     NSString* uuid = [[NSUUID UUID] UUIDString];
-    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly];
-    [SAMKeychain setPassword:newPass forService:kMonalTmpKeychainName account:uuid];
+    @synchronized(kSAMKeychainErrorDomain) {
+        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly];
+        [SAMKeychain setPassword:newPass forService:kMonalTmpKeychainName account:uuid];
+    }
 
     [self sendIq:iqNode withHandler:$newHandlerWithInvalidation(MLIQProcessor, handlePasswordChange,handlePasswordChangeInvalidation, $ID(uuid), $PROMISE(promise))];
     return [promise toAnyPromise];

@@ -2897,8 +2897,10 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         //Save the new device UUID in the special keychain, which uses a `ThisDeviceOnly` accessibility.
         //This accessibility ensures we can't migrate this keychain to another device
         NSError* deviceUUIDSavingError;
-        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly];
-        [SAMKeychain setPassword:[newDeviceUUID UUIDString] forService:kMonalDeviceUUIDKeychainName account:kDeviceUUIDKeychainAccount error:&deviceUUIDSavingError];
+        @synchronized(kSAMKeychainErrorDomain) {
+            [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly];
+            [SAMKeychain setPassword:[newDeviceUUID UUIDString] forService:kMonalDeviceUUIDKeychainName account:kDeviceUUIDKeychainAccount error:&deviceUUIDSavingError];
+        }
         
         //don't proceed if the new uuid could not be saved or something else isn't stable
         //(we don't want to spuriously generate new omemo keys/identities!)

@@ -1586,7 +1586,15 @@ $$
 
 $$instance_handler(handleJoinTimeout, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not join group/channel '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
-    //don't remove the muc, this could be a temporary (network induced) error
+    
+    //don't remove the muc, this could be a temporary (network induced) error, but mark it as not joining anymore
+    @synchronized(_stateLockObject) {
+        if(_joining[room] != nil)
+        {
+            DDLogInfo(@"Aborting join of room '%@' on account %@ due to timeout", room, _account);
+            [self removeRoomFromJoining:room];
+        }
+    }
 $$
 
 $$instance_handler(handleMembersList, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, type))

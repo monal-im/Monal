@@ -81,6 +81,12 @@ static NSMutableDictionary* _singletonCache;
     return self;
 }
 
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+
 -(void) handleFiletransferUpdate:(NSNotification*) notification
 {
     NSDictionary* data = notification.userInfo;

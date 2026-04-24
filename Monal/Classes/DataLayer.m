@@ -73,6 +73,7 @@ static NSDateFormatter* dbFormatter;
     dbPath = writableDBPath;
     dbFormatter = [NSDateFormatter new];
     [dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [dbFormatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
     [dbFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 }
 
@@ -1248,6 +1249,7 @@ static NSDateFormatter* dbFormatter;
             //this is always from a contact
             NSDateFormatter* formatter = [NSDateFormatter new];
             [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+            [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
             NSDate* sourceDate = [NSDate date];
             NSDate* destinationDate;
             if(messageDate)

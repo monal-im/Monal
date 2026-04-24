@@ -1115,8 +1115,9 @@
         @"id": self.jmiid,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"cancel"]
-        ] andData:nil]
+            [[MLXMLNode alloc] initWithElement:@"expired"]
+        ] andData:nil],
+        [[MLXMLNode alloc] initWithElement:@"tie-break"]
     ] andData:nil]];
     [jmiNode setStoreHint];
     [self.account send:jmiNode];

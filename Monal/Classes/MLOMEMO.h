@@ -40,6 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) addIdentityManually:(SignalAddress*) address identityKey:(NSData* _Nonnull) identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
+-(NSDate*) getLastSuccessfulDecryptTime:(SignalAddress*) address;
 -(NSNumber* _Nullable) getTrustLevelForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceid;
 -(NSData*) getIdentityForAddress:(SignalAddress*) address;
 -(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) rid;

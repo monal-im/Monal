@@ -29,7 +29,7 @@ struct OneClickRegistration: View {
     let appLogoId = "AppLogo"
 #endif
 
-    @ObservedObject var oneClickState = OneClickState()
+    @StateObject var oneClickState = OneClickState()
     @State private var selectedServerIndex = Int.random(in: 0 ..< XMPPServer.count)
     private var actualServer: String {
         return OneClickRegistration.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]!

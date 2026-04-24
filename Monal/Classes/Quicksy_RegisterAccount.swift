@@ -69,7 +69,7 @@ struct Quicksy_RegisterAccount: View {
     var delegate: SheetDismisserProtocol
     var countries: [Quicksy_Country] = []
     @StateObject private var overlay = LoadingOverlayState()
-    @ObservedObject var state = Quicksy_State()
+    @StateObject var state = Quicksy_State()
     @State private var currentIndex = 0
     @State var selectedCountry: Quicksy_Country?
     @State var phoneNumber: String = ""

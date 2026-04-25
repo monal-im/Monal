@@ -798,9 +798,10 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
         if(url == nil)
             resolve(nil);
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            resolve([SVGKImage imageWithContentsOfURL:url].UIImage);
-        });
+        else
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                resolve([SVGKImage imageWithContentsOfURL:url].UIImage);
+            });
     }];
 }
 

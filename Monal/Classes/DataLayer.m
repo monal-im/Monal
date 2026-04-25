@@ -1603,10 +1603,10 @@ static NSDateFormatter* dbFormatter;
         if(msg == nil)
             return NO;
         
-        //only allow LMC if the correction message has the same encryption or better state as the original message
+        //we always allow LMC, even if the message is older
         if(historyBaseID != nil)
         {
-            //only allow LMC for the 3 newest messages of this contact (or of us)
+            //only allow LMC if the correction message has the same encryption or better state as the original message
             editAllowed = (NSNumber*)[self.db executeScalar:@"\
                 SELECT \
                     CASE \
@@ -1614,7 +1614,7 @@ static NSDateFormatter* dbFormatter;
                         ELSE 0 \
                     END \
                 FROM \
-                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? AND message_history_id<? ORDER BY message_history_id ASC) \
+                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? AND message_history_id<? ORDER BY message_history_id DESC) \
                 WHERE \
                     message_history_id=? LIMIT 1; \
                 " andArguments:@[@(encrypted), @(encrypted), msg.accountId, msg.buddyName, historyBaseID, historyID]];

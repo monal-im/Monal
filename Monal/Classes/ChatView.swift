@@ -607,6 +607,9 @@ struct ChatView: View {
             return retval
         })
         .showUsername(contact.isMuc)
+        .tapAvatarClosure { user, _ in
+            inputText += "\(user.name), "
+        }
         .linkPreviewsEnabled(false) //disabled for now due to https://github.com/exyte/Chat/issues/208
         .inputViewText($inputText)
         .enableLoadMore(offset: 10) {

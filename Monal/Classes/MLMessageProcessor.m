@@ -872,7 +872,10 @@ static NSMutableDictionary* _typingNotifications;
                     NSString* jid = messageNode.fromUser;
                     //abort old timer on new isTyping or isNotTyping message
                     if(_typingNotifications[messageNode.fromUser])
+                    {
                         ((monal_void_block_t) _typingNotifications[messageNode.fromUser])();
+                        [_typingNotifications removeObjectForKey:messageNode.fromUser];
+                    }
                     //start a new timer for every isTyping message
                     if(composing)
                     {

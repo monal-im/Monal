@@ -367,10 +367,7 @@ NSString* const kiqErrorType = @"error";
 -(void) setRemoveVcardAvatar
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"vCard" andNamespace:@"vcard-temp" withAttributes:@{} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"PHOTO" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"PHOTO" andData:nil],
-            [[MLXMLNode alloc] initWithElement:@"BINVAL" andData:nil],
-        ] andData:nil]
+        [[MLXMLNode alloc] initWithElement:@"PHOTO" andData:nil]
     ] andData:nil]];
 }
 
@@ -378,7 +375,7 @@ NSString* const kiqErrorType = @"error";
 {
     [self addChildNode:[[MLXMLNode alloc] initWithElement:@"vCard" andNamespace:@"vcard-temp" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"PHOTO" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"PHOTO" andData:imageType],
+            [[MLXMLNode alloc] initWithElement:@"TYPE" andData:imageType],
             [[MLXMLNode alloc] initWithElement:@"BINVAL" andData:[HelperTools encodeBase64WithData:imageData]],
         ] andData:nil]
     ] andData:nil]];

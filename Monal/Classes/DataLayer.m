@@ -916,7 +916,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountID
+-(NSString* _Nullable) loadMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountID
 {
     return [self.db idReadTransaction:^{
         NSString* query = @"SELECT messageDraft FROM buddylist WHERE account_id=? AND buddy_name=?;";

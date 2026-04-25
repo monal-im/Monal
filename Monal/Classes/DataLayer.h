@@ -105,7 +105,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSNumber*) accountID;
 
 -(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountID withComment:(NSString*) comment;
--(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountID;
+-(NSString* _Nullable) loadMessageDraft:(NSString*) buddy forAccount:(NSNumber*) accountID;
 -(NSDictionary* _Nullable) getDraftMessageDictionaryForJid:(NSString*) jid onAccount:(NSNumber*) accountID;
 
 #pragma mark - MUC

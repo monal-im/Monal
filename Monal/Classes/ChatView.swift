@@ -83,6 +83,9 @@ extension MonalView {
 class ChatViewDefaultsDB: ObservableObject {
     @defaultsDB("SendLastChatState")
     var sendLastChatState: Bool
+
+    @defaultsDB("showKeyboardOnChatOpen")
+    var showKeyboardOnChatOpen: Bool
 }
 
 struct ChatView: View {
@@ -606,6 +609,7 @@ struct ChatView: View {
             DDLogDebug("Checking if we can react to: \(String(describing:mlMessage)) --> \(String(describing:retval))")
             return retval
         })
+        .autoFocusTextInputOnChatOpen(chatViewDefaultsDB.showKeyboardOnChatOpen)
         .showUsername(contact.isMuc)
         .tapAvatarClosure { user, _ in
             inputText += "\(user.name), "

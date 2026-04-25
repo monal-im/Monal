@@ -493,7 +493,9 @@ static NSMutableDictionary* _typingNotifications;
         NSString* fallbackBody = decrypted != nil ? decrypted : [messageNode findFirst:@"body#"];
         NSNumber* start = [messageNode findFirst:@"{urn:xmpp:fallback:0}fallback<for=urn:xmpp:reactions:0>/body@start"];
         NSNumber* end = [messageNode findFirst:@"{urn:xmpp:fallback:0}fallback<for=urn:xmpp:reactions:0>/body@end"];
-        if((start == nil || start.unsignedIntValue == 0) && (end == nil || (fallbackBody != nil && end.unsignedIntValue == [fallbackBody length])))
+        //XEP-0426 requests us to count unicode codepoints, not grapheme clusters, UTF-16 code units or UTF-8 bytecounts
+        NSUInteger fallbackBodyLengthInCodepoints = [fallbackBody lengthOfBytesUsingEncoding:NSUTF32LittleEndianStringEncoding] / 4;
+        if((start == nil || start.unsignedIntValue == 0) && (end == nil || (fallbackBody != nil && end.unsignedIntValue == fallbackBodyLengthInCodepoints)))
             DDLogInfo(@"Ignoring fallback body on reaction...");
         else
         {

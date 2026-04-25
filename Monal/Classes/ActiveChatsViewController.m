@@ -201,6 +201,7 @@ static NSMutableSet* _pushWarningDisplayed;
         
         //search for old block to replace and remove it
         NSInteger index = -1;
+        BOOL found = NO;
         for(NSDictionary* blockInfo in _blockQueue)
         {
             index++;
@@ -208,10 +209,11 @@ static NSMutableSet* _pushWarningDisplayed;
             {
                 DDLogDebug(@"Found blockInfo at index %d: %@", (int)index, blockInfo);
                 [self->_blockQueue removeObjectAtIndex:index];
+                found = YES;
                 break;
             }
         }
-        if(index == -1)
+        if(!found)
         {
             if(appendOnUnknown)
             {

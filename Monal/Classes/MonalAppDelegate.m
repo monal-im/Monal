@@ -543,8 +543,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     NSArray* itemParts = [item componentsSeparatedByString:@"="];
                     NSString* name = itemParts[0];
                     NSString* value = @"";
+                    //rejoin parts, only the first '=' is a real separator
                     if([itemParts count] > 1)
-                        value = itemParts[1];
+                        value = [[itemParts subarrayWithRange:NSMakeRange(1, itemParts.count - 1)] componentsJoinedByString:@"="];
                     DDLogVerbose(@"URI part '%@' = '%@'", name, value);
                     if([name isEqualToString:@"register"])
                         isRegister = YES;

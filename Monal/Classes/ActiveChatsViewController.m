@@ -165,7 +165,9 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) resetViewQueue
 {
-    [_blockQueue removeAllObjects];
+    @synchronized(_blockQueue) {
+        [_blockQueue removeAllObjects];
+    }
 }
 
 -(void) prependToViewQueue:(view_queue_block_t) block withId:(MLViewID) viewId andFile:(char*) file andLine:(int) line andFunc:(char*) func

@@ -90,6 +90,8 @@ static NSObject* _hardlinkingSyncObject;
 
         NSURLSession* session = [HelperTools createEphemeralURLSession];
         [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data __unused, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            [session finishTasksAndInvalidate];     //needed for garbage collection of url session
+            
             if(msg.retracted || msg.deletedLocally)
             {
                 DDLogDebug(@"Ignoring mimeType/size check results because the corresponding message was retracted or deleted while fetching the headers. historyId = %@", historyId);
@@ -199,6 +201,9 @@ static NSObject* _hardlinkingSyncObject;
         // set app defined description for download size checks
         [session setSessionDescription:url];
         NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            [_expectedDownloadSizes removeObjectForKey:session.sessionDescription];
+            [session finishTasksAndInvalidate];     //needed for garbage collection of url session
+            
             if(msg.retracted || msg.deletedLocally)
             {
                 DDLogDebug(@"Discarding downloaded file because its message was retracted or deleted during the download. historyId = %@", historyId);

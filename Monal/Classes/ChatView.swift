@@ -80,9 +80,14 @@ extension MonalView {
 }
 */
 
+class ChatViewDefaultsDB: ObservableObject {
+    @defaultsDB("SendLastChatState")
+    var sendLastChatState: Bool
+}
 
 struct ChatView: View {
     @Environment(\.presentationMode) private var presentationMode
+    @ObservedObject var chatViewDefaultsDB = ChatViewDefaultsDB()
     
     private var account: xmpp
     @StateObject var voipProcessor: ObservableKVOWrapper<MLVoIPProcessor>
@@ -106,6 +111,9 @@ struct ChatView: View {
     @State private var messageInsertionTimer: Timer?
     @State private var ownRole = kMucRoleNone
     @State private var inputText = ""
+    @State private var oldInputText = ""
+    @State private var isTyping = false
+    @State private var typingTimer: Timer?
 
     init(contact: ObservableKVOWrapper<MLContact>) {
         _contact = StateObject(wrappedValue:contact)
@@ -302,6 +310,37 @@ struct ChatView: View {
         self.backgroundImage = background
     }
 
+    private func sendChatState(isTyping: Bool) {
+        // Do not send when the user disabled the feature
+        guard chatViewDefaultsDB.sendLastChatState else {
+            return
+        }
+
+        // Changed state? --> send typing notification
+        if isTyping != self.isTyping {
+            DDLogVerbose("Sending chatstate isTyping=\(isTyping)")
+            MLXMPPManager.sharedInstance().sendChatState(isTyping, to:self.contact.obj)
+        }
+
+        // Set internal state
+        self.isTyping = isTyping
+
+        // Cancel old timer if existing
+        typingTimer?.invalidate()
+
+        // Start new timer if we are currently typing
+        if isTyping {
+            typingTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
+                // No typing interaction in 5 seconds? --> send out active chatstate (e.g. typing ended)
+                if self.isTyping {
+                    self.isTyping = false
+                    DDLogVerbose("Sending chatstate isTyping=false");
+                    MLXMPPManager.sharedInstance().sendChatState(false, to:self.contact.obj)
+                }
+            }
+        }
+    }
+
     private func findOldestStanzaId() -> String? {
         //not all messages in history db have a stanzaId (messages sent by this monal instance won't have one for example)
         //--> search for the oldest message having a stanzaId and use that one
@@ -427,6 +466,7 @@ struct ChatView: View {
                     return
                 }
                 messages.append(ChatViewMessage(newMLMessage))
+                sendChatState(isTyping: false)
                 // Clear the draft to show the newly sent message in active chats
                 DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:"")
             }
@@ -818,6 +858,7 @@ struct ChatView: View {
                 MLNotificationManager.sharedInstance().currentContact = nil
             }
             messageInsertionTimer?.invalidate()
+            sendChatState(isTyping: false)
             DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:self.inputText)
             // Update active chats to show the new draft
             MLNotificationQueue.current().post(
@@ -825,6 +866,24 @@ struct ChatView: View {
                 object: self.account,
                 userInfo: ["contact": self.contact.obj]
             )
+        }
+        .onChange(of: inputText) { newValue in
+            //TODO: use the new .onChange instead of this workaround once the minimum version is iOS 17.0
+            let oldValue = oldInputText
+            oldInputText = newValue
+            // Don't send a typing notification if the only change is deletion of characters from the end.
+            // This results in better UX, and avoids sending a typing notification after the automatic
+            // clearing of the input text when sending a message.
+            if oldValue.count > newValue.count && oldValue.starts(with: newValue) {
+                return
+            }
+            // Workaround to avoid sending a typing notification when inserting the draft on chat open.
+            // Side-effect: if the user pastes from the clipboard while the input text is empty, a typing
+            // notification won't be sent unless they type more characters.
+            if oldValue.isEmpty && newValue.count > 1 {
+                return
+            }
+            sendChatState(isTyping: true)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalOmemoFetchingStateUpdate)).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let notificationJid = notification.userInfo?["jid"] as? String {
@@ -897,6 +956,7 @@ struct ChatView: View {
             NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification).receive(on: RunLoop.main)
         )) { notification in
             DDLogVerbose("ChatView of chat \(contact.obj.contactJid) received \(notification.name.rawValue)")
+            sendChatState(isTyping: false)
             DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:self.inputText)
             // Update active chats to show the new draft
             MLNotificationQueue.current().post(

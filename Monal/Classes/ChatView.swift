@@ -105,7 +105,8 @@ struct ChatView: View {
     @State private var isUploadingFile = false
     @State private var messageInsertionTimer: Timer?
     @State private var ownRole = kMucRoleNone
-    
+    @State private var inputText = ""
+
     init(contact: ObservableKVOWrapper<MLContact>) {
         _contact = StateObject(wrappedValue:contact)
         _voipProcessor = StateObject(wrappedValue:ObservableKVOWrapper((UIApplication.shared.delegate as! MonalAppDelegate).voipProcessor!))
@@ -426,6 +427,8 @@ struct ChatView: View {
                     return
                 }
                 messages.append(ChatViewMessage(newMLMessage))
+                // Clear the draft to show the newly sent message in active chats
+                DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:"")
             }
         } messageMenuAction: { (action: MessageAction, defaultActionClosure, message) in
             let mlMessage = (message as! ChatViewMessage).innerMessage.obj
@@ -565,6 +568,7 @@ struct ChatView: View {
         })
         .showUsername(contact.isMuc)
         .linkPreviewsEnabled(false) //disabled for now due to https://github.com/exyte/Chat/issues/208
+        .inputViewText($inputText)
         .enableLoadMore(offset: 10) {
             loadHistory()
         }
@@ -794,6 +798,10 @@ struct ChatView: View {
             loadChatBackground()
 
             checkOmemoSupport(withAlert:false)
+            let messageDraft = DataLayer.sharedInstance().loadMessageDraft(self.contact.contactJid, forAccount:self.account.accountID)
+            if let messageDraft, !messageDraft.isEmpty {
+                self.inputText = messageDraft
+            }
             loadHistory()
             if self.contact.obj.isMuc {
                 ownRole = DataLayer.sharedInstance().getOwnRole(inGroupOrChannel: contact.obj) ?? kMucRoleNone
@@ -810,6 +818,13 @@ struct ChatView: View {
                 MLNotificationManager.sharedInstance().currentContact = nil
             }
             messageInsertionTimer?.invalidate()
+            DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:self.inputText)
+            // Update active chats to show the new draft
+            MLNotificationQueue.current().post(
+                name: Notification.Name(kMonalContactRefresh),
+                object: self.account,
+                userInfo: ["contact": self.contact.obj]
+            )
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalOmemoFetchingStateUpdate)).receive(on: RunLoop.main)) { notification in
             if let xmppAccount = notification.object as? xmpp, let notificationJid = notification.userInfo?["jid"] as? String {
@@ -876,6 +891,19 @@ struct ChatView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalBackgroundChanged)).receive(on: RunLoop.main)) { notification in
             loadChatBackground()
+        }
+        .onReceive(Publishers.Merge(
+            NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification).receive(on: RunLoop.main),
+            NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification).receive(on: RunLoop.main)
+        )) { notification in
+            DDLogVerbose("ChatView of chat \(contact.obj.contactJid) received \(notification.name.rawValue)")
+            DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:self.inputText)
+            // Update active chats to show the new draft
+            MLNotificationQueue.current().post(
+                name: Notification.Name(kMonalContactRefresh),
+                object: self.account,
+                userInfo: ["contact": self.contact.obj]
+            )
         }
     }
 }

@@ -689,6 +689,9 @@ struct ChatView: View {
                                 }
                             }
                         }
+                        // When used in the toolbar, the default button style doesn't have any size constraints.
+                        // => use a different button style to ensure the truncation of long contact names.
+                        .buttonStyle(.borderless)
                         Spacer()
                     }
                 }

@@ -95,6 +95,9 @@ struct ChatView: View {
     @State private var isEditingReason = false
     @State private var blockOnModeration = true
     @State private var messageToModerate: MLMessage?
+    // The initial value must not be nil. Otherwise background image rendering won't work correctly.
+    // The actual initialization happens in onAppear. It can safely be nil then.
+    @State private var backgroundImage: UIImage? = UIImage(systemName: "circle")
     @State var messages: [ChatViewMessage] = []
     @State var queuedNewMessages: [ChatViewMessage] = []
     @State private var voiceRequests: [[String: AnyObject]] = []
@@ -287,6 +290,15 @@ struct ChatView: View {
             }
         }
 #endif
+    }
+
+    private func loadChatBackground() {
+        var background: UIImage? = MLImageManager.sharedInstance().getBackgroundFor(self.contact.obj)
+        // Use the default background if this contact does not have its own
+        if background == nil {
+            background = MLImageManager.sharedInstance().getBackgroundFor(nil)
+        }
+        self.backgroundImage = background
     }
 
     private func findOldestStanzaId() -> String? {
@@ -556,6 +568,13 @@ struct ChatView: View {
         .enableLoadMore(offset: 10) {
             loadHistory()
         }
+        .chatTheme(
+            ChatTheme(
+                images: self.backgroundImage != nil ?
+                    .init(background: ChatTheme.Images.Background(Image(uiImage: self.backgroundImage!))) :
+                    .init()
+            )
+        )
         .sheet(item: $selectedContactForContactDetails) { selectedContact in
             AnyView(AddTopLevelNavigation(withDelegate:nil, to:ContactDetails(delegate:nil, contact:selectedContact)))
         }
@@ -769,6 +788,7 @@ struct ChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             MLNotificationManager.sharedInstance().currentContact = self.contact.obj
+            loadChatBackground()
 
             checkOmemoSupport(withAlert:false)
             loadHistory()
@@ -850,6 +870,9 @@ struct ChatView: View {
             if contact.isEqual(self.contact.obj) {
                 self.messages = []
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name(kMonalBackgroundChanged)).receive(on: RunLoop.main)) { notification in
+            loadChatBackground()
         }
     }
 }

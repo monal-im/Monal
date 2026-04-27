@@ -788,6 +788,9 @@ class SwiftuiInterface : NSObject {
     func makeChatView(for contact: MLContact) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
         host.rootView = AnyView(UIKitWorkaround(ChatView(contact:ObservableKVOWrapper<MLContact>(contact))))
+        // Clip to bounds to avoid the overflowing of the chat background during the chat opening animation
+        // (due to the use of .scaledToFill() on the background image)
+        host.view.clipsToBounds = true;
         return host
     }
     

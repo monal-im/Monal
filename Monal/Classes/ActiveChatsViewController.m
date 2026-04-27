@@ -324,6 +324,8 @@ static NSMutableSet* _pushWarningDisplayed;
     
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    self.navigationItem.backButtonTitle = @"";
+    self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
     
     MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
     appDelegate.activeChats = self;

@@ -784,28 +784,10 @@ public extension UIViewController {
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {
-    @StateObject private var sizeClass: ObservableKVOWrapper<SizeClassWrapper>
-    override init() {
-        let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
-        self._sizeClass = StateObject(wrappedValue: ObservableKVOWrapper<SizeClassWrapper>(activeChats.sizeClass))
-        super.init()
-    }
-
     @objc
     func makeChatView(for contact: MLContact) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        let isCompact = UIUserInterfaceSizeClass(rawValue: sizeClass.horizontal) == .compact
-        @ViewBuilder
-        var chatView: some View {
-            if isCompact {
-                ChatView(contact:ObservableKVOWrapper<MLContact>(contact))
-            } else {
-                NavigationStack {
-                    ChatView(contact:ObservableKVOWrapper<MLContact>(contact))
-                }
-            }
-        }
-        host.rootView = AnyView(chatView)
+        host.rootView = AnyView(UIKitWorkaround(ChatView(contact:ObservableKVOWrapper<MLContact>(contact))))
         return host
     }
     

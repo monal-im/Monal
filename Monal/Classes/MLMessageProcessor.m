@@ -156,6 +156,12 @@ static NSMutableDictionary* _typingNotifications;
         if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
             jmiContact = [MLContact createContactFromJid:messageNode.toUser andAccountNo:account.accountNo];
         
+        if(jmiContact.isGroup)
+        {
+            DDLogWarn(@"Ignoring incoming JMI propose coming from MUC jid: %@", jmiContact);
+            return nil;
+        }
+        
         //only handle *incoming* call proposals
         if([messageNode check:@"{urn:xmpp:jingle-message:0}propose"])
         {

@@ -793,13 +793,17 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
         }
     }
     
+    MLAssert(userFacingFilename != nil, @"userFacingFilename should never be nil!");
+
     //make sure we don't leak information about encrypted files
     NSString* sendMimeType = mimeType;
     if(encrypted)
+    {
         sendMimeType = @"application/octet-stream";
+        userFacingFilename = [NSString stringWithFormat:@"%@.%@", [[NSUUID UUID] UUIDString], userFacingFilename.pathExtension];
+    }
     
     MLAssert(fileData != nil, @"fileData should never be nil!");
-    MLAssert(userFacingFilename != nil, @"userFacingFilename should never be nil!");
     MLAssert(sendMimeType != nil, @"sendMimeType should never be nil!");
     
     DDLogDebug(@"Requesting file upload slot for mimeType %@", sendMimeType);

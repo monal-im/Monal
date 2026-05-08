@@ -784,10 +784,23 @@ public extension UIViewController {
 // Interfaces between ObjectiveC/Storyboards and SwiftUI
 @objc
 class SwiftuiInterface : NSObject {
+    let activeChats = (UIApplication.shared.delegate as! MonalAppDelegate).activeChats!
+
     @objc
     func makeChatView(for contact: MLContact) -> UIViewController {
         let host = UIHostingController(rootView:AnyView(EmptyView()))
-        host.rootView = AnyView(UIKitWorkaround(ChatView(contact:ObservableKVOWrapper<MLContact>(contact))))
+        let isCompact = UIUserInterfaceSizeClass(rawValue: activeChats.sizeClass.horizontal.rawValue) == .compact
+        @ViewBuilder
+        var chatView: some View {
+            if isCompact {
+                ChatView(contact:ObservableKVOWrapper<MLContact>(contact))
+            } else {
+                NavigationStack {
+                    ChatView(contact:ObservableKVOWrapper<MLContact>(contact))
+                }
+            }
+        }
+        host.rootView = AnyView(chatView)
         // Clip to bounds to avoid the overflowing of the chat background during the chat opening animation
         // (due to the use of .scaledToFill() on the background image)
         host.view.clipsToBounds = true;

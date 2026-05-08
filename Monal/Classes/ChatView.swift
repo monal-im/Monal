@@ -410,7 +410,7 @@ struct ChatView: View {
 
     var body: some View {
         ExyteChatView(messages: messages, chatType: .conversation, replyMode: .quote) { draft in
-            if !draft.medias.isEmpty || draft.recording != nil {
+            if !draft.medias.isEmpty || draft.recording != nil || !draft.files.isEmpty {
                 Task {
                     if draft.recording != nil {
                         await uploadAndSendFile(draft.recording!.url)
@@ -418,6 +418,9 @@ struct ChatView: View {
                     for media in draft.medias {
                         let localFileURL = await media.getURL()
                         await uploadAndSendFile(localFileURL)
+                    }
+                    for file in draft.files {
+                        await uploadAndSendFile(file.localURL)
                     }
                 }
             }
@@ -565,6 +568,12 @@ struct ChatView: View {
         })
         .showUsername(contact.isMuc)
         .linkPreviewsEnabled(false) //disabled for now due to https://github.com/exyte/Chat/issues/208
+        .checkFileSizeClosure { file in
+            MLFiletransfer.checkMimeTypeAndSize(forHistoryID: Int(file.id)! as NSNumber)
+        }
+        .downloadFileClosure { file in
+            MLFiletransfer.downloadFile(forHistoryID: Int(file.id)! as NSNumber)
+        }
         .enableLoadMore(offset: 10) {
             loadHistory()
         }
@@ -885,32 +894,8 @@ class ChatViewMessage: ExyteChat.Message {
     let fileInfo: ObservableKVOWrapper<MLFiletransferInfo>?
     private var subscriptions: Set<AnyCancellable> = Set()
     var text: String {
-        if innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo {
-            switch(fileInfo.downloadState as DownloadState.RawValue) {
-                case DownloadState.complete.rawValue:
-                    let mimeType = fileInfo.mimeType as String
-                    if mimeType.starts(with: "audio/") || mimeType.starts(with: "image/") || mimeType.starts(with: "video/") {
-                        return ""
-                    } else {
-                        return """
-                            [File transfer with a file type that's not yet supported for displaying]
-                            \(innerMessage.obj.encrypted ? "" : "Link: \(innerMessage.messageText as String)")
-                        """
-                    }
-                case DownloadState.headers.rawValue:
-                    let humanReadableSize = (fileInfo.size as NSNumber).int64Value.formatted(.byteCount(style: .file))
-                    return """
-                    [File transfer; auto-downloading if the settings allow it...]
-                    Size: \(humanReadableSize)
-                    MimeType: \(fileInfo.mimeType as String)
-                    \(innerMessage.encrypted ? "" : "Link: \(fileInfo.downloadURL as String)")
-                    """
-                case DownloadState.none.rawValue:
-                    return "[File transfer; checking the size...]"
-                default:
-                    // .invalid case
-                    unreachable()
-            }
+        if innerMessage.messageType == kMessageTypeFiletransfer && fileInfo != nil {
+            return ""
         }
         return innerMessage.retracted ? NSLocalizedString("This message got retracted", comment: "") : innerMessage.messageText
     }
@@ -935,7 +920,7 @@ class ChatViewMessage: ExyteChat.Message {
             let isError = errorType != nil && !errorType!.isEmpty
             switch(innerMessage) {
                 case let message where isError && !message.hasBeenReceived:
-                    return .error(DraftMessage(id: id, text: text, medias: [], recording: recording, replyMessage: replyMessage, createdAt: createdAt))
+                    return .error(DraftMessage(id: id, text: text, medias: [], files: [], recording: recording, replyMessage: replyMessage, createdAt: createdAt))
                 case let message where message.hasBeenDisplayed:
                     return .read
                 case let message where message.hasBeenReceived:
@@ -973,48 +958,66 @@ class ChatViewMessage: ExyteChat.Message {
         }
         set {}
     }
-    override var attachments: [Attachment] {
+    override var files: [File] {
         get {
             guard innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo else {
                 return []
             }
 
-            guard (fileInfo.downloadState as DownloadState.RawValue) == DownloadState.complete.rawValue else {
-                // TODO: show a proper button for mime type checks instead of doing this automatically
-                MLFiletransfer.checkMimeTypeAndSize(forHistoryID: innerMessage.messageDBId)
+            let downloadState = fileInfo.downloadState as DownloadState.RawValue
+            let fileID = innerMessage.obj.messageDBId.stringValue
+            let isBeingDownloaded = MLFiletransfer.isFileForHistoryId(inTransfer: innerMessage.messageDBId)
+            if downloadState == DownloadState.none.rawValue {
+                let file = File(id: fileID, localURL: nil, name: fileInfo.filename, downloadState: .none, isBeingDownloaded: isBeingDownloaded)
+                return [file]
+            } else if downloadState == DownloadState.headers.rawValue {
+                let file = File(id: fileID, localURL: nil, name: fileInfo.filename, downloadState: .headers,  isBeingDownloaded: isBeingDownloaded, mimeType: fileInfo.mimeType, size: (fileInfo.size as NSNumber).intValue)
+                return [file]
+            } else {
+                if fileInfo.isImage || fileInfo.isVideo || fileInfo.isAudio {
+                    // In these cases the file is included in the `attachments` or `recording` properties
+                    return []
+                }
+                let file = File(id: fileID, localURL: fileInfo.fileURL, name: fileInfo.filename, downloadState: .complete, mimeType: fileInfo.mimeType, size: (fileInfo.size as NSNumber).intValue)
+                return [file]
+            }
+        }
+        set {}
+    }
+
+    override var attachments: [Attachment] {
+        get {
+            guard innerMessage.messageType == kMessageTypeFiletransfer,
+                let fileInfo = fileInfo,
+                (fileInfo.downloadState as DownloadState.RawValue) == DownloadState.complete.rawValue,
+                fileInfo.isImage || fileInfo.isVideo else {
+                // images and videos with .none and .headers download state are included in the `files` property
                 return []
             }
-            let fileURL = fileInfo.fileURL as URL
-            let cacheId = fileInfo.cacheId as String
-            let attachmentUUID = HelperTools.stringToUUID(cacheId).uuidString
-            switch fileInfo.mimeType as String {
-                case let mimeType where mimeType.starts(with: "image/"):
-                    let attachment = Attachment(id: attachmentUUID, url: fileURL, type: .image)
-                    return [attachment]
-                case let mimeType where mimeType.starts(with: "video/"):
-                    let thumbnail = fileInfo.thumbnailURL as URL? ?? URL(string: "about:blank")!
-                    let attachment = Attachment(id: attachmentUUID, thumbnail: thumbnail, full: fileURL, type: .video, mimeType: mimeType)
-                    return [attachment]
-                default:
-                    return []
+
+            let attachmentID = innerMessage.obj.messageDBId.stringValue
+            if fileInfo.isImage {
+                let attachment = Attachment(id: attachmentID, url: fileInfo.fileURL, type: .image, mimeType: fileInfo.mimeType)
+                return [attachment]
+            } else {
+                let thumbnail = fileInfo.thumbnailURL as URL? ?? URL(string: "about:blank")!
+                let attachment = Attachment(id: attachmentID, thumbnail: thumbnail, full: fileInfo.fileURL, type: .video, mimeType: fileInfo.mimeType)
+                return [attachment]
             }
         }
         set {}
     }
     override var recording: Recording? {
         get {
-            guard innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo else {
+            guard innerMessage.messageType == kMessageTypeFiletransfer,
+                let fileInfo = fileInfo,
+                (fileInfo.downloadState as DownloadState.RawValue) == DownloadState.complete.rawValue,
+                fileInfo.isAudio else {
+                // audio files with .none and .headers download state are included in the `files` property
                 return nil
             }
 
-            guard (fileInfo.downloadState as DownloadState.RawValue) == DownloadState.complete.rawValue else {
-                return nil
-            }
-            guard (fileInfo.mimeType as String).starts(with: "audio/") else {
-                return nil
-            }
-            let fileURL = fileInfo.fileURL as URL
-            return Recording(duration: fileInfo.mediaDuration, url: fileURL, mimeType: fileInfo.mimeType)
+            return Recording(duration: fileInfo.mediaDuration, url: fileInfo.fileURL, mimeType: fileInfo.mimeType)
         }
         set {}
     }

@@ -54,15 +54,18 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 {
     NSMutableDictionary* _wakeupCompletions;
     UIBackgroundTaskIdentifier _bgTask;
-    BGTask* _bgProcessing;
-    BGTask* _bgRefreshing;
     monal_void_block_t _backgroundTimer;
-    MLContact* _contactToOpen;
-    monal_id_block_t _completionToCall;
     BOOL _shutdownPending;
     BOOL _wasFrozen;
     NotificationBannerQueue* _bannerQueue;
 }
+
+//these all need to be atomic to not fall into an "asm load -> arc free -> use-after-free pointer usage" race condition
+@property (atomic, strong) BGTask* bgProcessing;
+@property (atomic, strong) BGTask* bgRefreshing;
+@property (atomic, strong) MLContact* contactToOpen;
+@property (atomic, strong) monal_id_block_t completionToCall;
+
 @end
 
 @implementation MonalAppDelegate
@@ -491,7 +494,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 {
     DDLogDebug(@"Active chats did load...");
     _activeChats = (ActiveChatsViewController*)activeChats;
-    [self openChatOfContact:_contactToOpen withCompletion:_completionToCall];
+    [self openChatOfContact:self.contactToOpen withCompletion:self.completionToCall];
 }
 
 #pragma mark - handling urls
@@ -900,24 +903,24 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 -(void) openChatOfContact:(MLContact* _Nullable) contact withCompletion:(monal_id_block_t _Nullable) completion
 {
     if(contact != nil)
-        _contactToOpen = contact;
+        self.contactToOpen = contact;
     if(completion != nil)
-        _completionToCall = completion;
+        self.completionToCall = completion;
     
-    if(self.activeChats != nil && _contactToOpen != nil)
+    if(self.activeChats != nil && self.contactToOpen != nil)
     {
         // the timer makes sure the view is properly initialized when opning the chat
         createQueuedTimer(0.5, dispatch_get_main_queue(), (^{
-            if(self->_contactToOpen != nil)
+            if(self.contactToOpen != nil)
             {
                 DDLogDebug(@"Opening chat for contact %@", [contact contactJid]);
                 // open new chat
-                [(ActiveChatsViewController*)self.activeChats presentChatWithContact:self->_contactToOpen andCompletion:self->_completionToCall];
+                [(ActiveChatsViewController*)self.activeChats presentChatWithContact:self.contactToOpen andCompletion:self.completionToCall];
             }
             else
-                DDLogDebug(@"_contactToOpen changed to nil, not opening chat for contact %@", [contact contactJid]);
-            self->_contactToOpen = nil;
-            self->_completionToCall = nil;
+                DDLogDebug(@"self.contactToOpen changed to nil, not opening chat for contact %@", [contact contactJid]);
+            self.contactToOpen = nil;
+            self.completionToCall = nil;
         }));
     }
     else
@@ -964,23 +967,23 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     //in this case a possible syncError notification would be suppressed in checkIfBackgroundTaskIsStillNeeded
     //but since the user openend the app, we want these errors not being suppressed
     @synchronized(self) {
-        if(self->_bgProcessing != nil)
+        if(self.bgProcessing != nil)
         {
             DDLogDebug(@"Stopping bg processing task, we are foregrounded now");
             [DDLog flushLog];
-            BGTask* task = self->_bgProcessing;
-            self->_bgProcessing = nil;
+            BGTask* task = self.bgProcessing;
+            self.bgProcessing = nil;
             [task setTaskCompletedWithSuccess:YES];
             return;
         }
     }
     @synchronized(self) {
-        if(self->_bgRefreshing != nil)
+        if(self.bgRefreshing != nil)
         {
             DDLogDebug(@"Stopping bg refreshing task, we are foregrounded now");
             [DDLog flushLog];
-            BGTask* task = self->_bgRefreshing;
-            self->_bgRefreshing = nil;
+            BGTask* task = self.bgRefreshing;
+            self.bgRefreshing = nil;
             [task setTaskCompletedWithSuccess:YES];
             return;
         }
@@ -1261,7 +1264,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         
         //if we used a bg fetch/processing task, that means we did not get a push informing us about a waiting message
         //nor did the user interact with our app --> don't show possible sync warnings in this case (but delete old warnings if we are synced now)
-        [HelperTools updateSyncErrorsWithDeleteOnly:(self->_bgProcessing != nil || self->_bgRefreshing != nil) andWaitForCompletion:YES];
+        [HelperTools updateSyncErrorsWithDeleteOnly:(self.bgProcessing != nil || self.bgRefreshing != nil) andWaitForCompletion:YES];
         
         //use a synchronized block to disconnect only once
         @synchronized(self) {
@@ -1288,7 +1291,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 [HelperTools dispatchAsync:NO reentrantOnQueue:dispatch_get_main_queue() withBlock:^{
                     BOOL stopped = NO;
                     //make sure this will be done only once, even if we have an uikit bgtask and a bg fetch running simultaneously
-                    if(self->_bgTask != UIBackgroundTaskInvalid || self->_bgProcessing != nil || self->_bgRefreshing != nil)
+                    if(self->_bgTask != UIBackgroundTaskInvalid || self.bgProcessing != nil || self.bgRefreshing != nil)
                     {
                         //notify about pending app freeze (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
                         DDLogVerbose(@"Posting kMonalWillBeFreezed notification now...");
@@ -1303,21 +1306,21 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         [[UIApplication sharedApplication] endBackgroundTask:task];
                         stopped = YES;
                     }
-                    if(self->_bgProcessing != nil)
+                    if(self.bgProcessing != nil)
                     {
                         DDLogDebug(@"stopping backgroundProcessingTask");
                         [DDLog flushLog];
-                        BGTask* task = self->_bgProcessing;
-                        self->_bgProcessing = nil;
+                        BGTask* task = self.bgProcessing;
+                        self.bgProcessing = nil;
                         [task setTaskCompletedWithSuccess:YES];
                         stopped = YES;
                     }
-                    if(self->_bgRefreshing != nil)
+                    if(self.bgRefreshing != nil)
                     {
                         DDLogDebug(@"stopping backgroundRefreshingTask");
                         [DDLog flushLog];
-                        BGTask* task = self->_bgRefreshing;
-                        self->_bgRefreshing = nil;
+                        BGTask* task = self.bgRefreshing;
+                        self.bgRefreshing = nil;
                         [task setTaskCompletedWithSuccess:YES];
                         stopped = YES;
                     }
@@ -1355,11 +1358,11 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     //ui background tasks expire at the same time as background processing/refreshing tasks
                     //--> we have to check if a background processing/refreshing task is running and don't disconnect, if so
                     BOOL stopped = NO;
-                    if(self->_bgProcessing == nil && self->_bgRefreshing == nil)
+                    if(self.bgProcessing == nil && self.bgRefreshing == nil)
                     {
                         DDLogVerbose(@"Setting _shutdownPending to YES...");
                         self->_shutdownPending = YES;
-                        DDLogDebug(@"_bgProcessing == nil && _bgRefreshing == nil --> disconnecting and ending background task");
+                        DDLogDebug(@"self.bgProcessing == nil && self.bgRefreshing == nil --> disconnecting and ending background task");
                         
                         //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
                         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
@@ -1378,7 +1381,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         stopped = YES;
                     }
                     else
-                        DDLogDebug(@"_bgProcessing != nil || _bgRefreshing != nil --> not disconnecting");
+                        DDLogDebug(@"self.bgProcessing != nil || self.bgRefreshing != nil --> not disconnecting");
                     
                     DDLogDebug(@"stopping UIKit _bgTask");
                     [DDLog flushLog];
@@ -1398,7 +1401,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 {
     DDLogInfo(@"RUNNING BGPROCESSING SETUP HANDLER");
     
-    _bgProcessing = task;
+    self.bgProcessing = task;
     weakify(task);
     task.expirationHandler = ^{
         strongify(task);
@@ -1442,7 +1445,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 
                 DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
                 [DDLog flushLog];
-                self->_bgProcessing = nil;
+                self.bgProcessing = nil;
                 //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
                 [task setTaskCompletedWithSuccess:!background];
                 
@@ -1473,12 +1476,12 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 //         [[UIApplication sharedApplication] endBackgroundTask:task];
 //     }
     
-    if(self->_bgRefreshing != nil)
+    if(self.bgRefreshing != nil)
     {
         DDLogDebug(@"stopping bg refreshing task, not needed when running a (longer running) bg processing task");
         [DDLog flushLog];
-        BGTask* refreshingTask = self->_bgRefreshing;
-        self->_bgRefreshing = nil;
+        BGTask* refreshingTask = self.bgRefreshing;
+        self.bgRefreshing = nil;
         [refreshingTask setTaskCompletedWithSuccess:YES];
     }
     
@@ -1503,7 +1506,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 {
     DDLogInfo(@"RUNNING BGREFRESHING SETUP HANDLER");
     
-    _bgRefreshing = task;
+    self.bgRefreshing = task;
     weakify(task);
     task.expirationHandler = ^{
         strongify(task);
@@ -1547,7 +1550,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                 
                 DDLogDebug(@"stopping backgroundProcessingTask: %@", task);
                 [DDLog flushLog];
-                self->_bgRefreshing = nil;
+                self.bgRefreshing = nil;
                 //only signal success, if we are not in background anymore (otherwise we *really* expired without being idle)
                 [task setTaskCompletedWithSuccess:!background];
                 
@@ -1613,7 +1616,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             return;
         }
         @synchronized(self) {
-            if(self->_bgProcessing != nil)
+            if(self.bgProcessing != nil)
             {
                 DDLogDebug(@"Already running a bg processing task, stopping second bg processing task");
                 [task setTaskCompletedWithSuccess:YES];
@@ -1637,7 +1640,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             return;
         }
         @synchronized(self) {
-            if(self->_bgProcessing != nil)
+            if(self.bgProcessing != nil)
             {
                 DDLogDebug(@"Already running bg processing task, stopping new bg refreshing task");
                 [task setTaskCompletedWithSuccess:YES];
@@ -1645,7 +1648,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
             }
         }
         @synchronized(self) {
-            if(self->_bgRefreshing != nil)
+            if(self.bgRefreshing != nil)
             {
                 DDLogDebug(@"Already running a bg refreshing task, stopping second bg refreshing task");
                 [task setTaskCompletedWithSuccess:YES];
@@ -1750,11 +1753,11 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                         
                         //we have to check if an ui bg task or background processing/refreshing task is running and don't disconnect, if so
                         BOOL stopped = NO;
-                        if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid && self->_bgProcessing == nil && self->_bgRefreshing == nil)
+                        if(background && self->_voipProcessor.pendingCallsCount == 0 && self->_bgTask == UIBackgroundTaskInvalid && self.bgProcessing == nil && self.bgRefreshing == nil)
                         {
                             DDLogVerbose(@"Setting _shutdownPending to YES...");
                             self->_shutdownPending = YES;
-                            DDLogDebug(@"background && _bgTask == UIBackgroundTaskInvalid && _bgProcessing == nil && _bgRefreshing == nil --> disconnecting and feeding wakeup completion");
+                            DDLogDebug(@"background && _bgTask == UIBackgroundTaskInvalid && self.bgProcessing == nil && self.bgRefreshing == nil --> disconnecting and feeding wakeup completion");
                             
                             //this has to be before account disconnects, to detect which accounts are/are not idle (e.g. don't have/have a sync error)
                             BOOL wasIdle = [[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle];
@@ -1774,7 +1777,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                             stopped = YES;
                         }
                         else
-                            DDLogDebug(@"NOT (background && _bgTask == UIBackgroundTaskInvalid && _bgProcessing == nil && _bgRefreshing == nil) --> not disconnecting");
+                            DDLogDebug(@"NOT (background && _bgTask == UIBackgroundTaskInvalid && self.bgProcessing == nil && self.bgRefreshing == nil) --> not disconnecting");
                         
                         //call completion (should be done *after* the idle state check because it could freeze the app)
                         DDLogInfo(@"Calling wakeup completion handler...");
@@ -1786,7 +1789,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                             [HelperTools signalSuspension];
                         
                         //trigger disconnect if we are idle and no timer is blocking us now
-                        if(self->_bgTask != UIBackgroundTaskInvalid || self->_bgProcessing != nil || self->_bgRefreshing != nil)
+                        if(self->_bgTask != UIBackgroundTaskInvalid || self.bgProcessing != nil || self.bgRefreshing != nil)
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 [self checkIfBackgroundTaskIsStillNeeded];
                             });

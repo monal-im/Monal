@@ -12,13 +12,13 @@
 
 @interface MLDelayableTimer()
 {
-    NSTimer* _wrappedTimer;
-    monal_timer_block_t _Nullable _cancelHandler;
-    NSString* _Nullable _description;
-    NSTimeInterval _timeout;
-    NSTimeInterval _remainingTime;
-    NSUUID* _uuid;
 }
+@property (atomic, strong) NSTimer* wrappedTimer;
+@property (atomic, strong, nullable) monal_timer_block_t cancelHandler;
+@property (atomic, strong, nullable) NSString* descriptionSuffix;
+@property (atomic) NSTimeInterval timeout;
+@property (atomic) NSTimeInterval remainingTime;
+@property (atomic, strong) NSUUID* uuid;
 @end
 
 @implementation MLDelayableTimer
@@ -26,27 +26,33 @@
 -(instancetype) initWithHandler:(monal_timer_block_t) handler andCancelHandler:(monal_timer_block_t _Nullable) cancelHandler timeout:(NSTimeInterval) timeout tolerance:(NSTimeInterval) tolerance andDescription:(NSString* _Nullable) description
 {
     self = [super init];
-    _wrappedTimer = [NSTimer timerWithTimeInterval:timeout repeats:NO block:^(NSTimer* _) {
+    self.wrappedTimer = [NSTimer timerWithTimeInterval:timeout repeats:NO block:^(NSTimer* _) {
         handler(self);
     }];
-    _cancelHandler = cancelHandler;
-    _timeout = timeout;
-    _wrappedTimer.tolerance = tolerance;
-    _description = description;
-    _remainingTime = 0;
-    _uuid = [NSUUID UUID];
+    self.cancelHandler = cancelHandler;
+    self.timeout = timeout;
+    self.wrappedTimer.tolerance = tolerance;
+    self.descriptionSuffix = description;
+    self.remainingTime = 0;
+    self.uuid = [NSUUID UUID];
     return self;
+}
+
+-(void) dealloc
+{
+    //invalidate wrapped NSTimer
+    [self invalidate];
 }
 
 -(NSString*) description
 {
-    return [NSString stringWithFormat:@"%@(%G|%G) %@", [_uuid UUIDString], _timeout, _wrappedTimer.fireDate.timeIntervalSinceNow, _description];
+    return [NSString stringWithFormat:@"%@(%G|%G) %@", [self.uuid UUIDString], self.timeout, self.wrappedTimer.fireDate.timeIntervalSinceNow, self.descriptionSuffix];
 }
 
 -(void) start
 {
     @synchronized(self) {
-        if(!_wrappedTimer.valid)
+        if(!self.wrappedTimer.valid)
         {
             showErrorOnAlpha(nil, @"Could not start already fired timer: %@", self);
             return;
@@ -54,7 +60,7 @@
         DDLogDebug(@"Starting timer: %@", self);
         //scheduling and unscheduling of a timer must be done from the same thread --> use our runloop
         [self scheduleBlockInRunLoop:^{
-            [[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierTimer] addTimer:self->_wrappedTimer forMode:NSRunLoopCommonModes];
+            [[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierTimer] addTimer:self.wrappedTimer forMode:NSRunLoopCommonModes];
         }];
     }
 }
@@ -62,14 +68,14 @@
 -(void) trigger
 {
     @synchronized(self) {
-        if(!_wrappedTimer.valid)
+        if(!self.wrappedTimer.valid)
         {
             showErrorOnAlpha(nil, @"Could not trigger already fired timer: %@", self);
             return;
         }
         DDLogDebug(@"Triggering timer: %@", self);
         [self scheduleBlockInRunLoop:^{
-            [self->_wrappedTimer fire];
+            [self.wrappedTimer fire];
         }];
     }
 }
@@ -77,46 +83,46 @@
 -(void) pause
 {
     @synchronized(self) {
-        if(!_wrappedTimer.valid)
+        if(!self.wrappedTimer.valid)
         {
             DDLogWarn(@"Tried to pause already fired timer: %@", self);
             return;
         }
-        NSTimeInterval remaining = _wrappedTimer.fireDate.timeIntervalSinceNow;
-        if(remaining < _wrappedTimer.tolerance)
+        NSTimeInterval remaining = self.wrappedTimer.fireDate.timeIntervalSinceNow;
+        if(remaining < self.wrappedTimer.tolerance)
         {
             DDLogWarn(@"Tried to pause timer the exact second its firing: %@", self);
             return;
         }
-        _wrappedTimer.fireDate = NSDate.distantFuture;      //postpone timer virtually indefinitely
-        _remainingTime = remaining;
-        DDLogDebug(@"Paused timer: %@ (remaining time: %@)", self, @(_remainingTime));
+        self.wrappedTimer.fireDate = NSDate.distantFuture;      //postpone timer virtually indefinitely
+        self.remainingTime = remaining;
+        DDLogDebug(@"Paused timer: %@ (remaining time: %@)", self, @(self.remainingTime));
     }
 }
 
 -(void) resume
 {
     @synchronized(self) {
-        if(!_wrappedTimer.valid)
+        if(!self.wrappedTimer.valid)
         {
             DDLogWarn(@"Tried to resume already fired timer: %@", self);
             return;
         }
-        if(_remainingTime == 0)
+        if(self.remainingTime == 0)
         {
             DDLogWarn(@"Tried to resume non-paused timer: %@", self);
             return;
         }
-        _wrappedTimer.fireDate = [NSDate dateWithTimeIntervalSinceNow:_remainingTime];
-        _remainingTime = 0;
-        DDLogDebug(@"Resumed timer: %@ (remaining time: %@)", self, @(_remainingTime));
+        self.wrappedTimer.fireDate = [NSDate dateWithTimeIntervalSinceNow:self.remainingTime];
+        self.remainingTime = 0;
+        DDLogDebug(@"Resumed timer: %@ (remaining time: %@)", self, @(self.remainingTime));
     }
 }
 
 -(void) cancel
 {
     @synchronized(self) {
-        if(!_wrappedTimer.valid)
+        if(!self.wrappedTimer.valid)
         {
             DDLogWarn(@"Tried to cancel already fired timer: %@", self);
             return;
@@ -124,8 +130,8 @@
         DDLogDebug(@"Canceling timer: %@", self);
         [self invalidate];
         [self scheduleBlockInRunLoop:^{
-            if(self->_cancelHandler != nil)
-                self->_cancelHandler(self);
+            if(self.cancelHandler != nil)
+                self.cancelHandler(self);
         }];
     }
 }
@@ -133,7 +139,7 @@
 -(void) invalidate
 {
     @synchronized(self) {
-        if(!_wrappedTimer.valid)
+        if(!self.wrappedTimer.valid)
         {
             DDLogWarn(@"Could not invalidate already invalid timer: %@", self);
             return;
@@ -141,7 +147,7 @@
         //DDLogVerbose(@"Invalidating timer: %@", self);
         //scheduling and unscheduling of a timer must be done from the same thread --> use our runloop
         [self scheduleBlockInRunLoop:^{
-            [self->_wrappedTimer invalidate];
+            [self.wrappedTimer invalidate];
         }];
     }
 }

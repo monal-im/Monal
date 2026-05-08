@@ -81,15 +81,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
 @interface xmpp()
 {
     //network (stream) related stuff
-    NSInputStream* _iStream;
-    NSOutputStream* _oStream;
     NSMutableArray* _outputQueue;
     dispatch_queue_t _xmlParserFeedingQueue;
     // buffer for stanzas we can not (completely) write to the tcp socket
     BOOL _streamHasSpace;
 
     //parser and queue related stuff
-    XmlParserBridge* _xmlParser;
     MLBasePaser* _baseParserDelegate;
     NSOperationQueue* _parseQueue;
     NSOperationQueue* _receiveQueue;
@@ -98,13 +95,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
     //does not reset at disconnect
     BOOL _loggedInOnce;
     BOOL _isCSIActive;
-    NSDate* _lastInteractionDate;
     
     //internal handlers and flags
-    MLDelayableTimer* _loginTimer;
-    MLDelayableTimer* _pingTimer;
     monal_void_block_t _pingDelayTimer;
-    MLDelayableTimer* _reconnectTimer;
     NSMutableArray* _timersToCancelOnDisconnect;
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
@@ -122,7 +115,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
     NSMutableDictionary* _mamPageArrays;
     NSString* _internalID;
     NSString* _logtag;
-    NSMutableDictionary* _inCatchup;
     NSMutableDictionary* _mdsData;
     
     //registration related stuff
@@ -134,8 +126,6 @@ static NSRegularExpression* fastTokenRemovalRegex;
     xmppCompletion _regFormSubmitCompletion;
     
     //pipelining related stuff
-    MLXMLNode* _cachedStreamFeaturesBeforeAuth;
-    MLXMLNode* _cachedStreamFeaturesAfterAuth;
     xmppPipeliningState _pipeliningState;
     
     //scram related stuff
@@ -166,7 +156,19 @@ static NSRegularExpression* fastTokenRemovalRegex;
  Array of NSDictionary with stanzas that have not been acked.
  NSDictionary {queueID, stanza}
  */
-@property (nonatomic, strong) NSMutableArray* unAckedStanzas;
+@property (atomic, strong) NSMutableArray* unAckedStanzas;
+
+//these all need to be atomic to not fall into an "asm load -> arc free -> use-after-free pointer usage" race condition
+@property (atomic, strong) MLDelayableTimer* loginTimer;
+@property (atomic, strong) MLDelayableTimer* pingTimer;
+@property (atomic, strong) MLDelayableTimer* reconnectTimer;
+@property (atomic, strong) NSMutableDictionary* inCatchup;
+@property (atomic, strong) NSInputStream* iStream;
+@property (atomic, strong) NSOutputStream* oStream;
+@property (atomic, strong) XmlParserBridge* xmlParser;
+@property (atomic, strong) NSDate* lastInteractionDate;
+@property (atomic, strong) MLXMLNode* cachedStreamFeaturesBeforeAuth;
+@property (atomic, strong) MLXMLNode* cachedStreamFeaturesAfterAuth;
 
 @end
 
@@ -263,7 +265,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     _mamPageArrays = [NSMutableDictionary new];
     _runningCapsQueries = [NSMutableSet new];
     _runningMamQueries = [NSMutableDictionary new];
-    _inCatchup = [NSMutableDictionary new];
+    self.inCatchup = [NSMutableDictionary new];
     _mdsData = [NSMutableDictionary new];
     [self resetAuthPipelining];
     _timersToCancelOnDisconnect = [NSMutableArray new];
@@ -309,7 +311,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         DDLogVerbose(@"Called in background: CSI inactive");
         _isCSIActive = NO;
     }
-    _lastInteractionDate = [NSDate date];     //better default than 1970
+    self.lastInteractionDate = [NSDate date];     //better default than 1970
     
     self.statusMessage = @"";
 }
@@ -330,8 +332,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
 -(void) resetAuthPipelining
 {
     _pipeliningState = kPipelinedNothing;
-    _cachedStreamFeaturesBeforeAuth = nil;
-    _cachedStreamFeaturesAfterAuth = nil;
+    self.cachedStreamFeaturesBeforeAuth = nil;
+    self.cachedStreamFeaturesAfterAuth = nil;
 }
 
 -(MLContact*) contact
@@ -379,7 +381,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 -(void) invalidXMLError
 {
     DDLogError(@"Server returned invalid xml!");
-    DDLogDebug(@"Setting _pipeliningState to kPipelinedNothing and clearing _cachedStreamFeaturesBeforeAuth and _cachedStreamFeaturesAfterAuth...");
+    DDLogDebug(@"Setting _pipeliningState to kPipelinedNothing and clearing self.cachedStreamFeaturesBeforeAuth and self.cachedStreamFeaturesAfterAuth...");
     [self resetAuthPipelining];
     [self postError:NSLocalizedString(@"Server returned invalid xml!", @"") withIsSevere:NO];
     [self reconnect];
@@ -503,7 +505,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             ![_parseQueue operationCount] &&        //if something blocks the parse queue it is either an incoming stanza currently processed or waiting to be processed
             //[_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
             ![_sendQueue operationCount] &&
-            ![_inCatchup count]
+            ![self.inCatchup count]
         )
     )
         retval = YES;
@@ -526,7 +528,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             "\t[_parseQueue operationCount] = %lu\n"
             //"\t[_receiveQueue operationCount] = %lu\n"
             "\t[_sendQueue operationCount] = %lu\n"
-            "\t[[_inCatchup count] = %lu\n\t--> %@"
+            "\t[[self.inCatchup count] = %lu\n\t--> %@"
         ),
         self.accountID,
         bool2str(_accountState < kStateReconnecting),
@@ -536,7 +538,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         (unsigned long)[_parseQueue operationCount],
         //(unsigned long)[_receiveQueue operationCount],
         (unsigned long)[_sendQueue operationCount],
-        (unsigned long)[_inCatchup count],
+        (unsigned long)[self.inCatchup count],
         retval ? @"idle" : @"NOT IDLE"
     );
     return retval;
@@ -586,19 +588,19 @@ static NSRegularExpression* fastTokenRemovalRegex;
         DDLogInfo(@"streams created ok");
     
     if(localOStream)
-        _oStream = localOStream;
+        self.oStream = localOStream;
     if(localIStream)
-        _iStream = localIStream;
+        self.iStream = localIStream;
     
     //open sockets and start connecting (including TLS handshake if isDirectTLS==YES)
     DDLogInfo(@"opening TCP streams");
     _pipeliningState = kPipelinedNothing;
-    [_iStream setDelegate:self];
-    [_oStream setDelegate:self];
-    [_iStream scheduleInRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
-    [_oStream scheduleInRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
-    [_iStream open];
-    [_oStream open];
+    [self.iStream setDelegate:self];
+    [self.oStream setDelegate:self];
+    [self.iStream scheduleInRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
+    [self.oStream scheduleInRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
+    [self.iStream open];
+    [self.oStream open];
     DDLogInfo(@"TCP streams opened");
     
     //prepare xmpp parser (this is the first time for this connection --> we don't need to clear the receive queue)
@@ -610,11 +612,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
         [self startXMPPStreamWithXMLOpening:YES];
         
         //pipeline auth request onto our stream header if we have cached stream features available
-        if(_cachedStreamFeaturesBeforeAuth != nil)
+        if(self.cachedStreamFeaturesBeforeAuth != nil)
         {
-            DDLogDebug(@"Pipelining auth using cached stream features: %@", _cachedStreamFeaturesBeforeAuth);
+            DDLogDebug(@"Pipelining auth using cached stream features: %@", self.cachedStreamFeaturesBeforeAuth);
             _pipeliningState = kPipelinedAuth;
-            [self handleFeaturesBeforeAuth:_cachedStreamFeaturesBeforeAuth];
+            [self handleFeaturesBeforeAuth:self.cachedStreamFeaturesBeforeAuth];
         }
     }
     else
@@ -732,9 +734,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
 {
     @synchronized(_parseQueue) {
         //pause all timers before freezing the parse queue to not trigger timers that can not be handeld properly while frozen
-        [_loginTimer pause];
-        [_pingTimer pause];
-        [_reconnectTimer pause];
+        [self.loginTimer pause];
+        [self.pingTimer pause];
+        [self.reconnectTimer pause];
         
         //don't do this in a block on the parse queue because the parse queue could potentially have a significant amount of blocks waiting
         //to be synchronously dispatched to the receive queue and processed and we don't want to wait for all these stanzas to be processed
@@ -767,9 +769,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
         }];
         
         //resume all timers paused when freezing the parse queue
-        [_loginTimer resume];
-        [_pingTimer resume];
-        [_reconnectTimer resume];
+        [self.loginTimer resume];
+        [self.pingTimer resume];
+        [self.reconnectTimer resume];
     }
 }
 
@@ -892,11 +894,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
         return;
     
     //cancel old timer if existing and...
-    if(self->_loginTimer != nil)
-        [self->_loginTimer cancel];
+    if(self.loginTimer != nil)
+        [self.loginTimer cancel];
     //...replace it with new timer
-    self->_loginTimer = createDelayableTimer(CONNECT_TIMEOUT, (^{
-        self->_loginTimer = nil;
+    self.loginTimer = createDelayableTimer(CONNECT_TIMEOUT, (^{
+        self.loginTimer = nil;
         [self dispatchAsyncOnReceiveQueue: ^{
             DDLogInfo(@"Login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
             [self reconnect];
@@ -1074,15 +1076,15 @@ static NSRegularExpression* fastTokenRemovalRegex;
     //this has to be synchronous because we want to wait for the disconnect to complete before continuing and unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
         DDLogInfo(@"stopping running timers");
-        if(self->_loginTimer)
-            [self->_loginTimer cancel];     //cancel running login timer
-        self->_loginTimer = nil;
-        if(self->_pingTimer)
-            [self->_pingTimer cancel];      //cancel running ping timer
-        self->_pingTimer = nil;
-        if(self->_reconnectTimer)
-            [self->_reconnectTimer cancel]; //cancel running reconnect timer
-        self->_reconnectTimer = nil;
+        if(self.loginTimer)
+            [self.loginTimer cancel];     //cancel running login timer
+        self.loginTimer = nil;
+        if(self.pingTimer)
+            [self.pingTimer cancel];      //cancel running ping timer
+        self.pingTimer = nil;
+        if(self.reconnectTimer)
+            [self.reconnectTimer cancel]; //cancel running reconnect timer
+        self.reconnectTimer = nil;
         @synchronized(self->_timersToCancelOnDisconnect) {
             for(monal_void_block_t timer in self->_timersToCancelOnDisconnect)
                 timer();
@@ -1224,21 +1226,21 @@ static NSRegularExpression* fastTokenRemovalRegex;
         DDLogInfo(@"removing streams from runLoop and aborting parser");
 
         //prevent any new read or write
-        if(self->_xmlParser != nil)
-            self->_xmlParser = nil;
-        [self->_iStream setDelegate:nil];
-        [self->_oStream setDelegate:nil];
+        if(self.xmlParser != nil)
+            self.xmlParser = nil;
+        [self.iStream setDelegate:nil];
+        [self.oStream setDelegate:nil];
         
         //remove from runloop
-        [self->_iStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
-        [self->_oStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
+        [self.iStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
+        [self.oStream removeFromRunLoop:[HelperTools getExtraRunloopWithIdentifier:MLRunLoopIdentifierNetwork] forMode:NSDefaultRunLoopMode];
         
-        //sadly closing the output stream does not unblock a hanging [_oStream write:maxLength:] call
+        //sadly closing the output stream does not unblock a hanging [self.oStream write:maxLength:] call
         //blocked by an ios/max runtime race condition with starttls
         DDLogInfo(@"closing output stream");
         @try
         {
-            [self->_oStream close];
+            [self.oStream close];
         }
         @catch(id theException)
         {
@@ -1248,7 +1250,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         DDLogInfo(@"closing input stream");
         @try
         {
-            [self->_iStream close];
+            [self.iStream close];
         }
         @catch(id theException)
         {
@@ -1259,8 +1261,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
         [self cleanupSendQueue];
 
         DDLogInfo(@"resetting internal stream state to disconnected");
-        self->_iStream=nil;
-        self->_oStream=nil;
+        self.iStream=nil;
+        self.oStream=nil;
         self->_startTLSComplete = NO;
         self->_catchupDone = NO;
         self->_accountState = kStateDisconnected;
@@ -1319,8 +1321,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
         [self disconnectWithStreamError:streamError andExplicitLogout:NO];
 
         DDLogInfo(@"Trying to connect again in %G seconds...", wait);
-        self->_reconnectTimer = createDelayableTimer(wait, (^{
-            self->_reconnectTimer = nil;
+        self.reconnectTimer = createDelayableTimer(wait, (^{
+            self.reconnectTimer = nil;
             [self dispatchAsyncOnReceiveQueue: ^{
                 //there may be another connect/login operation in progress triggered from reachability or another timer
                 if(self.accountState<kStateReconnecting)
@@ -1329,7 +1331,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             }];
         }), (^{
             DDLogInfo(@"Reconnect got aborted: %@", self);
-            self->_reconnectTimer = nil;
+            self.reconnectTimer = nil;
             [self dispatchAsyncOnReceiveQueue: ^{
                 self->_reconnectInProgress = NO;
             }];
@@ -1382,10 +1384,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
 -(void) prepareXMPPParser
 {
     BOOL appex = [HelperTools isAppExtension];
-    if(_xmlParser != nil)
+    if(self.xmlParser != nil)
     {
         DDLogInfo(@"%@: resetting old xml parser", self->_logtag);
-        _xmlParser = nil;
+        self.xmlParser = nil;
         [_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we aborted the parser right now)
     }
     if(!_baseParserDelegate)
@@ -1496,7 +1498,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     }
     
     //create streaming parser
-    _xmlParser = [[XmlParserBridge alloc] initWith:_baseParserDelegate];
+    self.xmlParser = [[XmlParserBridge alloc] initWith:_baseParserDelegate];
 }
 
 -(void) startXMPPStreamWithXMLOpening:(BOOL) withXMLOpening
@@ -1577,7 +1579,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             DDLogInfo(@"ping attempted before logged in and bound, ignoring ping.");
             return;
         }
-        else if(self->_pingTimer)
+        else if(self.pingTimer)
         {
             DDLogInfo(@"ping already sent, ignoring second ping request.");
             return;
@@ -1602,8 +1604,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
         else
         {
             //start ping timer
-            self->_pingTimer = createDelayableTimer(timeout, (^{
-                self->_pingTimer = nil;
+            self.pingTimer = createDelayableTimer(timeout, (^{
+                self.pingTimer = nil;
                 [self dispatchAsyncOnReceiveQueue: ^{
                     //check if someone already called reconnect or disconnect while we were waiting for the ping
                     //(which was called while we still were >= kStateInitStarted)
@@ -1618,10 +1620,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
             }));
             monal_void_block_t handler = ^{
                 DDLogInfo(@"ping response received, all seems to be well");
-                if(self->_pingTimer)
+                if(self.pingTimer)
                 {
-                    [self->_pingTimer cancel];      //cancel timer (ping was successful)
-                    self->_pingTimer = nil;
+                    [self.pingTimer cancel];      //cancel timer (ping was successful)
+                    self.pingTimer = nil;
                 }
             };
             
@@ -1902,7 +1904,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     self->_catchupStanzaCounter++;
     
     //restart logintimer for every incoming stanza when not logged in (don't do anything without a running timer)
-    if(!delayedReplay && _loginTimer != nil && self->_accountState < kStateLoggedIn)
+    if(!delayedReplay && self.loginTimer != nil && self->_accountState < kStateLoggedIn)
         [self reinitLoginTimer];
     
     //only process most stanzas/nonzas after having a secure context
@@ -2294,16 +2296,16 @@ static NSRegularExpression* fastTokenRemovalRegex;
             MLAssert(![outerMessageNode.toUser containsString:@"/"], @"outerMessageNode.toUser contains resource!", outerMessageNode);
             
             //capture normal (non-mam-result) messages for later processing while we are doing a mam catchup (even headline messages)
-            //do so only while this archiveJid is listed in _inCatchup
+            //do so only while this archiveJid is listed in self.inCatchup
             //(of course we DON'T handle already delayed message stanzas here)
             if(!delayedReplay && (
                 (
                     ![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] &&
-                    _inCatchup[self.connectionProperties.identity.jid] != nil &&
+                    self.inCatchup[self.connectionProperties.identity.jid] != nil &&
                     ![outerMessageNode check:@"{urn:xmpp:mam:2}result"]
                 ) || (
                     [[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] &&
-                    _inCatchup[messageNode.fromUser] != nil &&
+                    self.inCatchup[messageNode.fromUser] != nil &&
                     ![outerMessageNode check:@"{urn:xmpp:mam:2}result"]
                 )
             )) {
@@ -2500,14 +2502,14 @@ static NSRegularExpression* fastTokenRemovalRegex;
                     DDLogInfo(@"Inside resume smacks handler: catchup *possibly* done (%@)", self.lastOutboundStanza);
                     //having no entry at all means catchup and replay are done
                     //if replay is not done yet, the kMonalFinishedCatchup notification will be triggered by the replay handler once the replay is finished
-                    if(self->_inCatchup[self.connectionProperties.identity.jid] == nil && !self->_catchupDone)
+                    if(self.inCatchup[self.connectionProperties.identity.jid] == nil && !self->_catchupDone)
                     {
                         DDLogInfo(@"Replay really done, now posting kMonalFinishedCatchup notification");
                         [self handleFinishedCatchup];
                     }
                     
-                    //handle all delayed replays not yet done and resume them (e.g. all _inCatchup entries being NO)
-                    NSDictionary* catchupCopy = [self->_inCatchup copy];
+                    //handle all delayed replays not yet done and resume them (e.g. all self.inCatchup entries being NO)
+                    NSDictionary* catchupCopy = [self.inCatchup copy];
                     for(NSString* archiveJid in catchupCopy)
                     {
                         if([catchupCopy[archiveJid] boolValue] == NO)  //NO means no mam catchup running, but delayed replay not yet done --> resume delayed replay
@@ -2569,7 +2571,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 return [self invalidXMLError];
             
             //record TLS version
-            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
+            self.connectionProperties.tlsVersion = [((MLStream*)self.oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self.oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-sasl}*$"];
             NSString* message = [parsedStanza findFirst:@"text#"];
@@ -2585,7 +2587,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                     message = NSLocalizedString(@"There was a SASL error on the server.", @"");
             }
             message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
-            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
+            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self.oStream) acceptedTlsEarlyData]));
             
             //clear pipeline cache to make sure we have a fresh restart next time
             xmppPipeliningState oldPipeliningState = _pipeliningState;
@@ -2613,11 +2615,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 return [self invalidXMLError];
             
             //record TLS version
-            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
+            self.connectionProperties.tlsVersion = [((MLStream*)self.oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self.oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             //perform logic to handle sasl success
             DDLogInfo(@"Got SASL1 Success");
-            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
+            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self.oStream) acceptedTlsEarlyData]));
             
             //increment state
             self->_accountState = kStateLoggedIn;
@@ -2629,10 +2631,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
             
             //cleanup
             _usableServersList = [NSMutableArray new];       //reset list to start again with the highest SRV priority on next connect
-            if(_loginTimer)
+            if(self.loginTimer)
             {
-                [self->_loginTimer cancel];     //we are now logged in --> cancel running login timer
-                _loginTimer = nil;
+                [self.loginTimer cancel];     //we are now logged in --> cancel running login timer
+                self.loginTimer = nil;
             }
             self->_loggedInOnce = YES;
             
@@ -2647,11 +2649,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
             if(_pipeliningState < kPipelinedResumeOrBind)
             {
                 //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
-                if(_cachedStreamFeaturesAfterAuth != nil)
+                if(self.cachedStreamFeaturesAfterAuth != nil)
                 {
-                    DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
+                    DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", self.cachedStreamFeaturesAfterAuth);
                     _pipeliningState = kPipelinedResumeOrBind;
-                    [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
+                    [self handleFeaturesAfterAuth:self.cachedStreamFeaturesAfterAuth];
                 }
             }
         }
@@ -2729,8 +2731,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
             NSData* channelBindingData = nil;
             //this can only be the case if it was closed shortly before handling this stanza (race condition)
             //in this case we'll abort the auth after handling the challenge, so not adding cb-data is fine here
-            if([((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen)
-                channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:[self channelBindingToUse]];
+            if([((MLStream*)self.oStream) streamStatus] == NSStreamStatusOpen)
+                channelBindingData = [((MLStream*)self.oStream) channelBindingDataForType:[self channelBindingToUse]];
             MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:xmpp:sasl:2" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithString:[self->_scramHandler clientFinalMessageWithChannelBindingData:channelBindingData]]];
             [self send:responseXML];
             
@@ -2749,11 +2751,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [self startXMPPStreamWithXMLOpening:NO];
             
             //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
-            if(_cachedStreamFeaturesAfterAuth != nil)
+            if(self.cachedStreamFeaturesAfterAuth != nil)
             {
-                DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
+                DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", self.cachedStreamFeaturesAfterAuth);
                 _pipeliningState = kPipelinedResumeOrBind;
-                [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
+                [self handleFeaturesAfterAuth:self.cachedStreamFeaturesAfterAuth];
             }
             */
         }
@@ -2776,7 +2778,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                     message = [NSString stringWithFormat:NSLocalizedString(@"Server returned SASL2 error '%@'.", @""), errorReason];
             }
             message = [NSString stringWithFormat:NSLocalizedString(@"Login error, account disabled: %@", @""), message];
-            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
+            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self.oStream) acceptedTlsEarlyData]));
             
             if(_htHandler != nil)
             {
@@ -2833,7 +2835,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 self.connectionProperties.supportsTDP = self->_scramHandler.tdpSupported;
                 
                 //record TLS version
-                self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
+                self.connectionProperties.tlsVersion = [((MLStream*)self.oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self.oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
                 
                 //make sure this error is reported, even if there are other SRV records left (we disconnect here and won't try again)
                 [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];
@@ -2851,7 +2853,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 return [self invalidXMLError];
             
             DDLogInfo(@"Got SASL2 Success");
-            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self->_oStream) acceptedTlsEarlyData]));
+            DDLogInfo(@"TLS early data accepted: %@", bool2str([((MLStream*)self.oStream) acceptedTlsEarlyData]));
             
             //check FAST responder-message or SCRAM server-final message for correctness if needed
             if(!self->_htHandler.finishedSuccessfully && !self->_scramHandler.finishedSuccessfully)
@@ -2888,7 +2890,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             }
             
             //record TLS version
-            self.connectionProperties.tlsVersion = [((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self->_oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
+            self.connectionProperties.tlsVersion = [((MLStream*)self.oStream) streamStatus] == NSStreamStatusOpen ? ([((MLStream*)self.oStream) isTLS13] ? @"1.3" : @"1.2") : @"unknown";
             
             //store FAST token, if requested and provided
             if(_fastTokenRequested != nil && [parsedStanza check:@"{urn:xmpp:fast:0}token"])
@@ -2920,10 +2922,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
             self->_fastTokenRequested = nil;
             self->_blockToCallOnTCPOpen = nil;              //just to be sure but not strictly necessary
             _usableServersList = [NSMutableArray new];      //reset list to start again with the highest SRV priority on next connect
-            if(_loginTimer)
+            if(self.loginTimer)
             {
-                [self->_loginTimer cancel];                 //we are now logged in --> cancel running login timer
-                _loginTimer = nil;
+                [self.loginTimer cancel];                 //we are now logged in --> cancel running login timer
+                self.loginTimer = nil;
             }
             self->_loggedInOnce = YES;
             
@@ -2934,7 +2936,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             
             //NOTE: we don't have any stream restart when using SASL2
             //NOTE: we don't need to pipeline anything here, because SASL2 sends out the new stream features immediately without a stream restart
-            _cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
+            self.cachedStreamFeaturesAfterAuth = nil;       //make sure we don't accidentally try to do pipelining
             
             //update user identity using authorization-identifier, including support for fullJids (as specified by BIND2)
             [self.connectionProperties.identity bindJid:[parsedStanza findFirst:@"authorization-identifier#"] onAccount:self];
@@ -3074,26 +3076,26 @@ static NSRegularExpression* fastTokenRemovalRegex;
             if(self.accountState < kStateLoggedIn)
             {
                 //handle features normally if we didn't have a cached copy for pipelining (but always refresh our cached copy)
-                if(_cachedStreamFeaturesBeforeAuth == nil)
+                if(self.cachedStreamFeaturesBeforeAuth == nil)
                 {
                     DDLogDebug(@"Handling NOT-pipelined stream features (before auth)...");
                     [self handleFeaturesBeforeAuth:parsedStanza];
                 }
                 else
                     DDLogDebug(@"Stream features (before auth) already read from cache, ignoring incoming stream features (but refreshing cache)...");
-                _cachedStreamFeaturesBeforeAuth = parsedStanza;
+                self.cachedStreamFeaturesBeforeAuth = parsedStanza;
             }
             else
             {
                 //handle features normally if we didn't have a cached copy for pipelining (but always refresh our cached copy)
-                if(_cachedStreamFeaturesAfterAuth == nil)
+                if(self.cachedStreamFeaturesAfterAuth == nil)
                 {
                     DDLogDebug(@"Handling NOT-pipelined stream features (after auth)...");
                     [self handleFeaturesAfterAuth:parsedStanza];
                 }
                 else
-                    DDLogDebug(@"Stream features (after auth) already read from cache, ignoring incoming stream features (but refreshing cache).\nCached: %@\nIncoming: %@", _cachedStreamFeaturesAfterAuth, parsedStanza);
-                _cachedStreamFeaturesAfterAuth = parsedStanza;
+                    DDLogDebug(@"Stream features (after auth) already read from cache, ignoring incoming stream features (but refreshing cache).\nCached: %@\nIncoming: %@", self.cachedStreamFeaturesAfterAuth, parsedStanza);
+                self.cachedStreamFeaturesAfterAuth = parsedStanza;
             }
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}error"])
@@ -3101,7 +3103,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
             NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
             DDLogWarn(@"Got secure XMPP stream error %@: %@", errorReason, errorText);
-            DDLogDebug(@"Setting _pipeliningState to kPipelinedNothing and clearing _cachedStreamFeaturesBeforeAuth and _cachedStreamFeaturesAfterAuth...");
+            DDLogDebug(@"Setting _pipeliningState to kPipelinedNothing and clearing self.cachedStreamFeaturesBeforeAuth and self.cachedStreamFeaturesAfterAuth...");
             [self resetAuthPipelining];
             NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
@@ -3153,10 +3155,10 @@ static NSRegularExpression* fastTokenRemovalRegex;
             //stop the old xml parser and clear the parse queue
             //if we do not do this we could be prone to mitm attacks injecting xml elements into the stream before it gets encrypted
             //such xml elements would then get processed as received *after* the TLS initialization
-            if(_xmlParser!=nil)
+            if(self.xmlParser!=nil)
             {
                 DDLogInfo(@"stopping old xml parser");
-                _xmlParser = nil;
+                self.xmlParser = nil;
                 //throw away all parsed but not processed stanzas (we aborted the parser right now)
                 //the xml parser will fill the parse queue synchronously while < kStateInitStarted
                 //--> no stanzas/nonzas will leak into the parse queue after resetting the parser and clearing the parse queue
@@ -3170,7 +3172,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             //while waiting for the tls handshake to complete
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 DDLogInfo(@"configuring/starting tls handshake");
-                MLStream* oStream = (MLStream*)self->_oStream;
+                MLStream* oStream = (MLStream*)self.oStream;
                 [oStream startTLS];
                 if(!oStream.hasTLS)
                 {
@@ -3202,11 +3204,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
                             [self startXMPPStreamWithXMLOpening:YES];
                             
                             //pipeline auth request onto our stream header if we have cached stream features available
-                            if(self->_cachedStreamFeaturesBeforeAuth != nil)
+                            if(self.cachedStreamFeaturesBeforeAuth != nil)
                             {
-                                DDLogDebug(@"Pipelining auth using cached stream features: %@", self->_cachedStreamFeaturesBeforeAuth);
+                                DDLogDebug(@"Pipelining auth using cached stream features: %@", self.cachedStreamFeaturesBeforeAuth);
                                 self->_pipeliningState = kPipelinedAuth;
-                                [self handleFeaturesBeforeAuth:self->_cachedStreamFeaturesBeforeAuth];
+                                [self handleFeaturesBeforeAuth:self.cachedStreamFeaturesBeforeAuth];
                             }
                         }];
                         [self unfreezeSendQueue];      //this will flush all stanzas added inside the db transaction and now waiting in the send queue
@@ -3464,8 +3466,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
                     NSString* cbMethodOfToken = fast2CbMapping[[tokenData[@"mechanism"] substringWithRange:NSMakeRange([tokenData[@"mechanism"] length]-4, 4)]];
                     //this can only be the case if it was closed shortly before handling this stanza (race condition)
                     //in this case we'll abort the auth after sending the authenticate element, so not adding cb-data is fine here
-                    if([((MLStream*)self->_oStream) streamStatus] == NSStreamStatusOpen)
-                        channelBindingData = [((MLStream*)self->_oStream) channelBindingDataForType:cbMethodOfToken];
+                    if([((MLStream*)self.oStream) streamStatus] == NSStreamStatusOpen)
+                        channelBindingData = [((MLStream*)self.oStream) channelBindingDataForType:cbMethodOfToken];
                     
                     DDLogInfo(@"Authenticating using FAST token with cb-type %@ and cb-data: %@", cbMethodOfToken, channelBindingData);
                     self->_htHandler = [[HT alloc]
@@ -3505,7 +3507,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                         //_supportedChannelBindings will be nil, if XEP-0440 is not supported by our server (which should never happen because XEP-0440 is mandatory for SASL2)
                         [self->_scramHandler setSSDPMechanisms:[self->_supportedSaslMechanisms allObjects] andChannelBindingTypes:[self->_supportedChannelBindings allObjects]];
                         //set tls version for downgrade protection
-                        [self->_scramHandler setTLSVersion:((MLStream*)self->_oStream).tlsVersion];
+                        [self->_scramHandler setTLSVersion:((MLStream*)self.oStream).tlsVersion];
                         authenticate = [[MLXMLNode alloc]
                             initWithElement:@"authenticate"
                             andNamespace:@"urn:xmpp:sasl:2"
@@ -3646,11 +3648,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [self startXMPPStreamWithXMLOpening:NO];
             
             //pipeline stream resume/bind after auth onto our stream header if we have cached stream features available
-            if(_cachedStreamFeaturesAfterAuth != nil)
+            if(self.cachedStreamFeaturesAfterAuth != nil)
             {
-                DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", _cachedStreamFeaturesAfterAuth);
+                DDLogDebug(@"Pipelining resume or bind using cached stream features: %@", self.cachedStreamFeaturesAfterAuth);
                 _pipeliningState = kPipelinedResumeOrBind;
-                [self handleFeaturesAfterAuth:_cachedStreamFeaturesAfterAuth];
+                [self handleFeaturesAfterAuth:self.cachedStreamFeaturesAfterAuth];
             }
             */
         }
@@ -3776,12 +3778,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
 //bridge needed fo MLServerDetails.m
 -(NSArray*) supportedChannelBindingTypes
 {
-    return [((MLStream*)self->_oStream) supportedChannelBindingTypes];
+    return [((MLStream*)self.oStream) supportedChannelBindingTypes];
 }
 
 -(NSString* _Nullable) channelBindingToUse
 {
-    NSArray* typesList = [((MLStream*)self->_oStream) supportedChannelBindingTypes];
+    NSArray* typesList = [((MLStream*)self.oStream) supportedChannelBindingTypes];
     if(typesList == nil || typesList.count == 0)
         return nil;     //we don't support any channel-binding for this TLS connection
     for(NSString* type in typesList)
@@ -4203,13 +4205,13 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsSSDP] forKey:@"supportsSSDP"];
             [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsTDP] forKey:@"supportsTDP"];
-            [values setObject:[self->_inCatchup copy] forKey:@"inCatchup"];
+            [values setObject:[self.inCatchup copy] forKey:@"inCatchup"];
             [values setObject:[self->_mdsData copy] forKey:@"mdsData"];
             
-            if(self->_cachedStreamFeaturesBeforeAuth != nil)
-                [values setObject:self->_cachedStreamFeaturesBeforeAuth forKey:@"cachedStreamFeaturesBeforeAuth"];
-            if(self->_cachedStreamFeaturesAfterAuth != nil)
-                [values setObject:self->_cachedStreamFeaturesAfterAuth forKey:@"cachedStreamFeaturesAfterAuth"];
+            if(self.cachedStreamFeaturesBeforeAuth != nil)
+                [values setObject:self.cachedStreamFeaturesBeforeAuth forKey:@"cachedStreamFeaturesBeforeAuth"];
+            if(self.cachedStreamFeaturesAfterAuth != nil)
+                [values setObject:self.cachedStreamFeaturesAfterAuth forKey:@"cachedStreamFeaturesAfterAuth"];
             
             if(self.connectionProperties.discoveredServices)
                 [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
@@ -4223,7 +4225,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             if(self.connectionProperties.serverVersion)
                 [values setObject:self.connectionProperties.serverVersion forKey:@"serverVersion"];
 
-            [values setObject:self->_lastInteractionDate forKey:@"lastInteractionDate"];
+            [values setObject:self.lastInteractionDate forKey:@"lastInteractionDate"];
             [values setValue:[NSDate date] forKey:@"stateSavedAt"];
             [values setValue:@(STATE_VERSION) forKey:@"VERSION"];
 
@@ -4236,7 +4238,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountID];
 
             //debug output
-            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\t_cachedStreamFeaturesBeforeAuth=%@\n\t_cachedStreamFeaturesAfterAuth=%@\n",
+            DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\tself.inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\tself.cachedStreamFeaturesBeforeAuth=%@\n\tself.cachedStreamFeaturesAfterAuth=%@\n",
                 self.accountID,
                 values[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -4245,7 +4247,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 self.lastOutboundStanza,
                 self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
                 self.streamID,
-                self->_lastInteractionDate,
+                self.lastInteractionDate,
                 persistentIqHandlerDescriptions,
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
@@ -4253,11 +4255,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 self.connectionProperties.supportsModernPubSub,
                 self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.accountDiscoDone,
-                self->_inCatchup,
+                self.inCatchup,
                 self.omemo.state,
                 bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid),
-                bool2str(self->_cachedStreamFeaturesBeforeAuth!=nil),
-                bool2str(self->_cachedStreamFeaturesAfterAuth!=nil)
+                bool2str(self.cachedStreamFeaturesBeforeAuth!=nil),
+                bool2str(self.cachedStreamFeaturesAfterAuth!=nil)
             );
             DDLogVerbose(@"%@ --> realPersistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountID, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
         }
@@ -4413,7 +4415,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             }
             
             if([dic objectForKey:@"lastInteractionDate"])
-                _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
+                self.lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
             
             if([dic objectForKey:@"accountDiscoDone"])
             {
@@ -4434,15 +4436,15 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
             
             if([dic objectForKey:@"inCatchup"])
-                _inCatchup = [[dic objectForKey:@"inCatchup"] mutableCopy];
+                self.inCatchup = [[dic objectForKey:@"inCatchup"] mutableCopy];
             
             if([dic objectForKey:@"mdsData"])
                 _mdsData = [[dic objectForKey:@"mdsData"] mutableCopy];
             
             if([dic objectForKey:@"cachedStreamFeaturesBeforeAuth"])
-                _cachedStreamFeaturesBeforeAuth = [dic objectForKey:@"cachedStreamFeaturesBeforeAuth"];
+                self.cachedStreamFeaturesBeforeAuth = [dic objectForKey:@"cachedStreamFeaturesBeforeAuth"];
             if([dic objectForKey:@"cachedStreamFeaturesAfterAuth"])
-                _cachedStreamFeaturesAfterAuth = [dic objectForKey:@"cachedStreamFeaturesAfterAuth"];
+                self.cachedStreamFeaturesAfterAuth = [dic objectForKey:@"cachedStreamFeaturesAfterAuth"];
             
             if([dic objectForKey:@"omemoState"] && self.omemo)
                 self.omemo.state = [dic objectForKey:@"omemoState"];
@@ -4454,7 +4456,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             }
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\t_inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\t_cachedStreamFeaturesBeforeAuth=%@\n\t_cachedStreamFeaturesAfterAuth=%@\n",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tisDoingFullReconnect=%@,\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsModernPubSub=%d\n\tsupportsPubSubMax=%d\n\taccountDiscoDone=%d\n\tself.inCatchup=%@\n\tomemo.state=%@\n\thasSeenOmemoDeviceListAfterOwnDeviceid=%@\n\tself.cachedStreamFeaturesBeforeAuth=%@\n\tself.cachedStreamFeaturesAfterAuth=%@\n",
                 self.accountID,
                 dic[@"stateSavedAt"],
                 bool2str(self.isDoingFullReconnect),
@@ -4463,7 +4465,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 self.lastOutboundStanza,
                 self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
                 self.streamID,
-                self->_lastInteractionDate,
+                self.lastInteractionDate,
                 persistentIqHandlerDescriptions,
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
@@ -4471,11 +4473,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 self.connectionProperties.supportsModernPubSub,
                 self.connectionProperties.supportsPubSubMax,
                 self.connectionProperties.accountDiscoDone,
-                self->_inCatchup,
+                self.inCatchup,
                 self.omemo.state,
                 bool2str(self.hasSeenOmemoDeviceListAfterOwnDeviceid),
-                bool2str(self->_cachedStreamFeaturesBeforeAuth!=nil),
-                bool2str(self->_cachedStreamFeaturesAfterAuth!=nil)
+                bool2str(self.cachedStreamFeaturesBeforeAuth!=nil),
+                bool2str(self.cachedStreamFeaturesAfterAuth!=nil)
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -4628,7 +4630,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     //clear old catchup state (technically all stanzas still in delayedMessageStanzas could have also been
     //in the parseQueue in the last run and deleted there)
     //--> no harm in deleting them when starting a new session (but DON'T DELETE them when resuming the old smacks session)
-    _inCatchup = [NSMutableDictionary new];
+    self.inCatchup = [NSMutableDictionary new];
     [[DataLayer sharedInstance] deleteDelayedMessageStanzasForAccount:self.accountID];
 }
 
@@ -4710,7 +4712,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     //send last interaction date if not currently active
     //and the user prefers to send out lastInteraction date
     if(!_isCSIActive && [[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"])
-        [presence setLastInteraction:_lastInteractionDate];
+        [presence setLastInteraction:self.lastInteractionDate];
     
     [self send:presence];
 }
@@ -4916,7 +4918,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         
         //to make sure this date is newer than the old saved one (even if we now falsely "tag" the beginning of our interaction, not the end)
         //if everything works out as it should and the app does not get killed, we will "tag" the end of our interaction as soon as the app is backgrounded
-        self->_lastInteractionDate = [NSDate date];
+        self.lastInteractionDate = [NSDate date];
         [self persistState];
         
         //this will broadcast our presence without idle element, because of _isCSIActive=YES
@@ -4937,7 +4939,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         }
         
         //save date as last interaction date (XEP-0319) (e.g. "tag" the end of our interaction)
-        self->_lastInteractionDate = [NSDate date];
+        self.lastInteractionDate = [NSDate date];
         [self persistState];
         
         //record new state
@@ -5298,12 +5300,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
         {
             DDLogVerbose(@"Stream %@ open completed", stream);
             //reset _streamHasSpace to its default value until the fist NSStreamEventHasSpaceAvailable event occurs
-            if(stream == _oStream)
+            if(stream == self.oStream)
             {
                 self->_streamHasSpace = NO;
                 
                 //restart logintimer when our output stream becomes readable (don't do anything without a running timer)
-                if(_loginTimer != nil && self->_accountState < kStateLoggedIn)
+                if(self.loginTimer != nil && self->_accountState < kStateLoggedIn)
                     [self reinitLoginTimer];
                 
                 //we want this to be sync instead of async to make sure we are in kStateConnected before sending anything
@@ -5323,7 +5325,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         //for writing
         case NSStreamEventHasSpaceAvailable:
         {
-            if(stream != _oStream)
+            if(stream != self.oStream)
             {
                 DDLogWarn(@"Ignoring NSStreamEventHasSpaceAvailable event on wrong stream %@", stream);
                 break;
@@ -5339,7 +5341,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         //for reading
         case NSStreamEventHasBytesAvailable:
         {
-            if(stream != _iStream)
+            if(stream != self.iStream)
             {
                 DDLogWarn(@"Ignoring NSStreamEventHasBytesAvailable event on wrong stream %@", stream);
                 break;
@@ -5347,7 +5349,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             dispatch_async(_xmlParserFeedingQueue, ^{
                 DDLogVerbose(@"Stream %@ has bytes to read", stream);
                 uint8_t buffer[kInputChunkSize+1];      //+1 for '\0' needed for logging the received raw bytes
-                NSInteger readLen = [self->_iStream read:buffer maxLength:kInputChunkSize];
+                NSInteger readLen = [self.iStream read:buffer maxLength:kInputChunkSize];
                 if(readLen <= 0)
                 {
                     DDLogWarn(@"Did not receive anything in NSStreamEventHasBytesAvailable event!");
@@ -5357,7 +5359,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 DDLogVerbose(@"RECV(%ld): %@", (long)readLen, [fastTokenRemovalRegex stringByReplacingMatchesInString:[NSString stringWithFormat:@"%s", buffer] options:0 range:NSMakeRange(0, readLen) withTemplate:@"<redacted-fast-element/>"]);
                 //this is zero-copy (but only valid for the lifetime of this function call)
                 //only a single copy is made, when the VecDequeue buffer gets extended on the rust side
-                [self->_xmlParser feedData:buffer withLength:readLen];
+                [self.xmlParser feedData:buffer withLength:readLen];
                 DDLogVerbose(@"XML parser returned...");
             });
             break;
@@ -5456,9 +5458,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
     NSInteger len = 0;
     do
     {
-        if(![_iStream hasBytesAvailable])
+        if(![self.iStream hasBytesAvailable])
             break;
-        len = [_iStream read:buffer maxLength:kInputChunkSize];
+        len = [self.iStream read:buffer maxLength:kInputChunkSize];
         DDLogDebug(@"iStream drained %ld bytes", (long)len);
         if(len > 0)
         {
@@ -5466,7 +5468,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             buffer[len] = '\0';      //null termination for log output of raw string
             DDLogDebug(@"iStream got raw drained string '%s'", buffer);
         }
-    } while(len > 0 && [_iStream hasBytesAvailable]);
+    } while(len > 0 && [self.iStream hasBytesAvailable]);
     DDLogDebug(@"iStream done draining %ld bytes", (long)drainedBytes);
 }
 
@@ -5525,7 +5527,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     }
     
     //restart logintimer for new write to our stream while not logged in (don't do anything without a running timer)
-    if(_loginTimer != nil && self->_accountState < kStateLoggedIn)
+    if(self.loginTimer != nil && self->_accountState < kStateLoggedIn)
         [self reinitLoginTimer];
 
     if(requestAck)
@@ -5552,7 +5554,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         DDLogVerbose(@"no space to write. returning.");
         return NO;      //no space to write --> stanza has to remain in _outputQueue
     }
-    if(!_oStream)
+    if(!self.oStream)
     {
         DDLogVerbose(@"no stream to write. returning.");
         return NO;		//no stream to write --> stanza has to remain in _outputQueue and possibly get dropped later on
@@ -5564,7 +5566,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     }
     
     //we have to use strlen to count bytes instead of utf8 codepoints
-    [_oStream write:(void*)messageOut.UTF8String maxLength:strlen((void*)messageOut.UTF8String)];
+    [self.oStream write:(void*)messageOut.UTF8String maxLength:strlen((void*)messageOut.UTF8String)];
     return YES;         //write complete --> stanza has to be removed from _outputQueue
 }
 
@@ -5744,7 +5746,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 
 -(void) delayIncomingMessageStanzasForArchiveJid:(NSString*) archiveJid
 {
-    _inCatchup[archiveJid] = @YES;      //catchup not done and replay not finished
+    self.inCatchup[archiveJid] = @YES;      //catchup not done and replay not finished
 }
 
 -(void) delayIncomingMessageStanzaUntilCatchupDone:(XMPPMessage*) originalParsedStanza
@@ -5776,7 +5778,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             if(delayedStanza == nil)
             {
                 DDLogInfo(@"Catchup finished for jid %@", archiveJid);
-                [self->_inCatchup removeObjectForKey:archiveJid];     //catchup done and replay finished
+                [self.inCatchup removeObjectForKey:archiveJid];     //catchup done and replay finished
                 
                 //handle cached mds data for this jid
                 if(self->_mdsData[archiveJid] != nil)
@@ -5818,7 +5820,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 {
     //we should be already in the receive queue, but just to make sure (sync dispatch will do nothing if we already are in the right queue)
     [self dispatchOnReceiveQueue:^{
-        self->_inCatchup[archiveJid] = @NO;       //catchup done, but replay not finished
+        self.inCatchup[archiveJid] = @NO;       //catchup done, but replay not finished
         //handle delayed message stanzas delivered while the mam catchup was in progress
         //the first call and all subsequent self-invocations are handled by dispatching it async to the receiveQueue
         //the async dispatching makes it possible to abort the replay by pushing a disconnect block etc. onto the receieve queue
@@ -5879,7 +5881,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         NSString* catchupJid = self.connectionProperties.identity.jid;
         if([[DataLayer sharedInstance] isBuddyMuc:jid forAccount:self.accountID])
             catchupJid = jid;
-        if(_inCatchup[catchupJid] == nil && _mdsData[jid] != nil)
+        if(self.inCatchup[catchupJid] == nil && _mdsData[jid] != nil)
             [self handleMdsData:_mdsData[jid] forJid:jid];
     }
 }

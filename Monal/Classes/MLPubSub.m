@@ -23,8 +23,8 @@
 {
     __weak xmpp* _account;
     NSMutableDictionary* _registeredHandlers;
-    NSMutableArray* _queue;
 }
+@property (atomic, strong) NSMutableArray* queue;
 @end
 
 @implementation MLPubSub
@@ -45,7 +45,7 @@ static NSDictionary* _defaultOptions;
     self = [super init];
     _account = account;
     _registeredHandlers = [NSMutableDictionary new];
-    _queue = [NSMutableArray new];
+    self.queue = [NSMutableArray new];
     //retry our pubsub operation as soon as possible
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleAccountDiscoReady:) name:kMonalAccountDiscoDone object:nil];
     return self;
@@ -86,9 +86,9 @@ static NSDictionary* _defaultOptions;
     //once as invalidation of the queued operation handler and once as the invalidation of an iq handler of this operation
     //note: these are two different handler object, hence the double invalidation would *not* be catched by the handler framework!
     NSArray* queue;
-    @synchronized(_queue) {
-        queue = [_queue copy];
-        _queue = [NSMutableArray new];
+    @synchronized(self.queue) {
+        queue = [self.queue copy];
+        self.queue = [NSMutableArray new];
     }
     for(MLHandler* handler in queue)
         $call(handler, $ID(account, _account));
@@ -105,7 +105,7 @@ $$
     if(account.accountState < kStateInitStarted || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedFetchNodeHandler, handleFetchInvalidation, $ID(node), $ID(jid), $ID(itemsList), $HANDLER(handler))];
+        [self.queue addObject:$newHandlerWithInvalidation(self, queuedFetchNodeHandler, handleFetchInvalidation, $ID(node), $ID(jid), $ID(itemsList), $HANDLER(handler))];
         return;
     }
 
@@ -153,7 +153,7 @@ $$
     if(account.accountState < kStateInitStarted || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedSubscribeToNodeHandler, handleSubscribeInvalidation, $ID(node), $ID(jid), $HANDLER(handler))];
+        [self.queue addObject:$newHandlerWithInvalidation(self, queuedSubscribeToNodeHandler, handleSubscribeInvalidation, $ID(node), $ID(jid), $HANDLER(handler))];
         return;
     }
     
@@ -194,7 +194,7 @@ $$
     if(!_account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedUnsubscribeFromNodeHandler, handleUnsubscribeInvalidation, $ID(node), $ID(jid), $HANDLER(handler))];
+        [self.queue addObject:$newHandlerWithInvalidation(self, queuedUnsubscribeFromNodeHandler, handleUnsubscribeInvalidation, $ID(node), $ID(jid), $HANDLER(handler))];
         return;
     }
     
@@ -236,7 +236,7 @@ $$
     if(account.accountState < kStateInitStarted || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedConfigureNodeHandler, handleConfigFormResultInvalidation, $ID(node), $ID(configOptions), $HANDLER(handler))];
+        [self.queue addObject:$newHandlerWithInvalidation(self, queuedConfigureNodeHandler, handleConfigFormResultInvalidation, $ID(node), $ID(configOptions), $HANDLER(handler))];
         return;
     }
     
@@ -280,7 +280,7 @@ $$
     if(!_account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedPublishItemHandler, handlePublishResultInvalidation, $ID(item), $ID(node), $ID(configOptions), $HANDLER(handler))];
+        [self.queue addObject:$newHandlerWithInvalidation(self, queuedPublishItemHandler, handlePublishResultInvalidation, $ID(item), $ID(node), $ID(configOptions), $HANDLER(handler))];
         return;
     }
     
@@ -313,7 +313,7 @@ $$
     if(account.accountState < kStateInitStarted || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedRetractItemWithIdHandler, handleRetractResultInvalidation, $ID(itemId), $ID(node), $HANDLER(handler))];
+        [self.queue addObject:$newHandlerWithInvalidation(self, queuedRetractItemWithIdHandler, handleRetractResultInvalidation, $ID(itemId), $ID(node), $HANDLER(handler))];
         return;
     }
     
@@ -350,7 +350,7 @@ $$
     if(account.accountState < kStateInitStarted || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedPurgeNodeNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];
+        [self.queue addObject:$newHandlerWithInvalidation(self, queuedPurgeNodeNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];
         return;
     }
     
@@ -384,7 +384,7 @@ $$
     if(account.accountState < kStateInitStarted || !account.connectionProperties.accountDiscoDone)
     {
         DDLogWarn(@"Queueing pubsub call until account disco is resolved...");
-        [_queue addObject:$newHandlerWithInvalidation(self, queuedDeleteNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];
+        [self.queue addObject:$newHandlerWithInvalidation(self, queuedDeleteNodeHandler, handlePurgeOrDeleteResultInvalidation, $ID(node), $HANDLER(handler))];
         return;
     }
     
@@ -407,10 +407,10 @@ $$
 
 -(NSDictionary*) getInternalData
 {
-    @synchronized(_queue) {
+    @synchronized(self.queue) {
         return @{
             @"version": CURRENT_PUBSUB_DATA_VERSION,
-            @"queue": [_queue copy],
+            @"queue": [self.queue copy],
         };
     }
 }
@@ -418,10 +418,10 @@ $$
 -(void) setInternalData:(NSDictionary*) data
 {
     DDLogDebug(@"Loading internal pubsub data");
-    @synchronized(_queue) {
+    @synchronized(self.queue) {
         if(!data[@"version"] || ![data[@"version"] isEqualToNumber:CURRENT_PUBSUB_DATA_VERSION])
             return;     //ignore old data
-        _queue = [data[@"queue"] mutableCopy];
+        self.queue = [data[@"queue"] mutableCopy];
     }
 }
 
@@ -431,9 +431,9 @@ $$
     //once as invalidation of the queued operation handler and once as the invalidation of an iq handler of this operation
     //note: these are two different handler object, hence the double invalidation would *not* be catched by the handler framework!
     NSArray* queue;
-    @synchronized(_queue) {
-        queue = [_queue copy];
-        _queue = [NSMutableArray new];
+    @synchronized(self.queue) {
+        queue = [self.queue copy];
+        self.queue = [NSMutableArray new];
     }
     for(MLHandler* handler in queue)
         $invalidate(handler, $ID(account, _account));

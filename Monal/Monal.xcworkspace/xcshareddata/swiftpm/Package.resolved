@@ -23,8 +23,8 @@
         "package": "Chat",
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
-          "branch": "main",
-          "revision": "babacaf8bc09c02cfbf74872f49f5dc8d6d14f80",
+          "branch": "files",
+          "revision": "efa9aa749510b1cdbf17320c23b448715abd6c74",
           "version": null
         }
       },

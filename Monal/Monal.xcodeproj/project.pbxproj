@@ -4831,7 +4831,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/monal-im/ExyteChat";
 			requirement = {
-				branch = main;
+				branch = files;
 				kind = branch;
 			};
 		};

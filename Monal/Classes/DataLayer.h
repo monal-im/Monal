@@ -291,6 +291,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSDate* _Nullable) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountID:(NSNumber* _Nonnull) accountID;
 -(NSDate* _Nullable) lastInteractionOfJid:(NSString* _Nonnull) jid andResource:(NSString* _Nonnull) resource forAccountID:(NSNumber* _Nonnull) accountID;
 -(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andResource:(NSString*) resource onAccountID:(NSNumber* _Nonnull) accountID;
+-(void) resetGlobalLastInteractionForJid:(NSString* _Nonnull) jid onAccountID:(NSNumber* _Nonnull) accountID;
 
 -(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSNumber*) accountID;
 -(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSNumber*) accountID;

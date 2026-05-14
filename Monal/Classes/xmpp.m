@@ -2114,12 +2114,18 @@ NSString* const kStanza = @"stanza";
                 }
                 
                 //handle last interaction time (this must be done *after* parsing the ver attribute to get the cached capabilities)
-                //but only do so if the urn:xmpp:idle:1 was supported by that resource (e.g. don't send out unneeded updates)
-                if(![presenceNode check:@"/@type"] && presenceNode.fromResource && [[DataLayer sharedInstance] checkCap:@"urn:xmpp:idle:1" forUser:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo])
+                //ignore special presences (unsubscribe/subscribe, unavailable etc.) not carrying an idle element
+                if(![presenceNode check:@"/@type"] && presenceNode.fromResource)
                 {
                     DDLogVerbose(@"Updating lastInteraction from normal presence...");
                     //findFirst: will return nil for lastInteraction = "online" --> DataLayer will handle that correctly
                     [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andResource:presenceNode.fromResource onAccountNo:self.accountNo];
+                    
+                    //reset last interaction if at least one resource is online and we don't know of any resource supporting the idle element
+                    //--> the user will have to connect with a supporting client to get the idle display back
+                    BOOL lastInteractionSupportedByAnyResource = [[DataLayer sharedInstance] checkCap:@"urn:xmpp:idle:1" forUser:presenceNode.fromUser onAccountNo:self.accountNo];
+                    if(!lastInteractionSupportedByAnyResource)
+                        [[DataLayer sharedInstance] resetGlobalLastInteractionForJid:presenceNode.fromUser onAccountID:self.accountNo];
                     
                     //inform other parts of our system that the lastInteraction timestamp has changed
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{

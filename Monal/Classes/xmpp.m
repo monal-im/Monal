@@ -235,7 +235,12 @@ static NSRegularExpression* fastTokenRemovalRegex;
 #else
         @"type": @"phone",
 #endif
+
+#ifdef IS_QUICKSY
+        @"name": @"Quicksy iOS",
+#else
         @"name": @"Monal",
+#endif
     } andChildren:@[] andData:nil];
     _capsFeatures = [HelperTools getOwnFeatureSet];
     NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];

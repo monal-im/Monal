@@ -73,7 +73,7 @@
         NSData* idKeyPrivate = [row objectForKey:@"identityPrivateKey"];
         
         NSError* error;
-        self.identityKeyPair = [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:nil];
+        self.identityKeyPair = [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:&error];
         if(error)
         {
             DDLogError(@"prekey error %@", error);
@@ -121,12 +121,13 @@
     for (NSDictionary* row in keys)
     {
         SignalPreKey* key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
-        [array addObject:key];
+        if(key != nil)
+            [array addObject:key];
     }
     return array; 
 }
 
--(int) getHighestPreyKeyId
+-(int) getHighestPreKeyId
 {
     NSNumber* highestId = [self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT prekeyid FROM signalPreKey WHERE account_id=? ORDER BY prekeyid DESC LIMIT 1;" andArguments:@[self.accountId]];
@@ -268,7 +269,7 @@
 -(int) deleteAllSessionsForAddressName:(NSString*) addressName
 {
     return [[self.sqliteDatabase idWriteTransaction:^{
-        NSNumber* count = (NSNumber*) [self.sqliteDatabase executeScalar:@"COUNT * FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
+        NSNumber* count = (NSNumber*) [self.sqliteDatabase executeScalar:@"SELECT COUNT(*) FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
         [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
         return count;
     }] intValue];
@@ -516,6 +517,13 @@
     [self.sqliteDatabase voidWriteTransaction:^{
         [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastReceivedMsg=CURRENT_TIMESTAMP, brokenSession=false WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     }];
+}
+
+-(NSDate*) getLastSuccessfulDecryptTime:(SignalAddress*) address
+{
+    return [NSDate dateWithTimeIntervalSince1970:[[self.sqliteDatabase idReadTransaction:^{
+        return [self.sqliteDatabase executeScalar:@"SELECT unixepoch(lastReceivedMsg) FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, @(address.deviceId), address.name]];
+    }] doubleValue]];
 }
 
 -(void) markSessionAsBroken:(SignalAddress*) address

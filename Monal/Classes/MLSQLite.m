@@ -87,7 +87,7 @@ static NSMutableDictionary* currentTransactions;
     [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification __unused) {
         @synchronized(self) {
             NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-            if([threadData[@"_sqliteTransactionsRunning"][self->_dbFile] intValue] > 1)
+            if([threadData[@"_sqliteTransactionsRunning"][self->_dbFile] intValue] > 0)
             {
                 DDLogError(@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open");
                 @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
@@ -124,7 +124,7 @@ static NSMutableDictionary* currentTransactions;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     @synchronized(self) {
         NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-        if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
+        if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 0)
         {
             DDLogError(@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open");
             @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
@@ -173,10 +173,21 @@ static NSMutableDictionary* currentTransactions;
         if([obj isKindOfClass:[NSNumber class]])
         {
             NSNumber* number = (NSNumber*)obj;
-            if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]) != SQLITE_OK)
+            if(CFNumberIsFloatType((CFNumberRef)number))
             {
-                DDLogError(@"number bind error: %@", number);
-                [self throwErrorForQuery:query andArguments:args];
+                if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]) != SQLITE_OK)
+                {
+                    DDLogError(@"double number bind error: %@", number);
+                    [self throwErrorForQuery:query andArguments:args];
+                }
+            }
+            else
+            {
+                if(sqlite3_bind_int64(statement, (signed)idx+1, [number longLongValue]) != SQLITE_OK)
+                {
+                    DDLogError(@"int64 number bind error: %@", number);
+                    [self throwErrorForQuery:query andArguments:args];
+                }
             }
         }
         else if([obj isKindOfClass:[NSString class]])
@@ -222,7 +233,7 @@ static NSMutableDictionary* currentTransactions;
         //SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
         case(SQLITE_INTEGER):
         {
-            NSNumber* returnInt = [NSNumber numberWithInt:sqlite3_column_int(statement, column)];
+            NSNumber* returnInt = [NSNumber numberWithLongLong:sqlite3_column_int64(statement, column)];
             return returnInt;
         }
         case(SQLITE_FLOAT):

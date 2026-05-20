@@ -874,6 +874,13 @@
 {
     //see https://webrtc.googlesource.com/src/+/refs/heads/main/sdk/objc/api/peerconnection/RTCSessionDescription.h
     [self.webRTCClient offerWithCompletion:^(RTCSessionDescription* sdp) {
+        if(sdp == nil)
+        {
+            DDLogError(@"Could not generate local SDP!");
+            [self handleEndCallActionWithReason:MLCallFinishReasonError];
+            return;
+        }
+        
         DDLogDebug(@"WebRTC reported local SDP '%@', sending to '%@': %@", [RTCSessionDescription stringForType:sdp.type], self.fullRemoteJid, sdp.sdp);
         
         NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:sdp.sdp withInitiator:YES];
@@ -1060,8 +1067,9 @@
         @"id": self.jmiid,
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"cancel"]
-        ] andData:nil]
+            [[MLXMLNode alloc] initWithElement:@"expired"]
+        ] andData:nil],
+        [[MLXMLNode alloc] initWithElement:@"tie-break"]
     ] andData:nil]];
     [jmiNode setStoreHint];
     [self.account send:jmiNode];
@@ -1123,7 +1131,9 @@
 
 -(BOOL) isEqual:(id _Nullable) object
 {
-    if(object == nil || self == object)
+    if(object == nil)
+        return NO;
+    else if(self == object)
         return YES;
     else if([object isKindOfClass:[MLContact class]])
         return [self isEqualToContact:(MLContact*)object];
@@ -1716,6 +1726,13 @@
             if(self.direction == MLCallDirectionIncoming)
             {
                 [self.webRTCClient answerWithCompletion:^(RTCSessionDescription* localSdp) {
+                    if(localSdp == nil)
+                    {
+                        DDLogError(@"Could not generate local SDP!");
+                        [self handleEndCallActionWithReason:MLCallFinishReasonError];
+                        return;
+                    }
+                    
                     DDLogDebug(@"Sending SDP answer back...");
                     NSArray<MLXMLNode*>* children = [HelperTools sdp2xml:localSdp.sdp withInitiator:NO];
                     //we got a session-initiate jingle iq

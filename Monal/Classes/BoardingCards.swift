@@ -26,7 +26,7 @@ struct OnboardingCard: Identifiable {
 struct OnboardingView: View {
     var delegate: SheetDismisserProtocol
     let cards: [OnboardingCard]
-    @ObservedObject var onboardingState = OnboardingState()
+    @StateObject var onboardingState = OnboardingState()
     @State private var currentIndex = 0
     
     var body: some View {
@@ -234,7 +234,7 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
 }
 
 struct TakeMeToSettingsView: View {
-    @ObservedObject var onboardingState = OnboardingState()
+    @StateObject var onboardingState = OnboardingState()
     var delegate: SheetDismisserProtocol
     
     var body: some View {

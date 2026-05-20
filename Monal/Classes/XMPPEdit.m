@@ -606,7 +606,6 @@ enum DummySettingsRows {
             case SettingsDisplayNameRow: {
                 [thecell initCell:NSLocalizedString(@"Display Name", @"") withTextField:self.rosterName andPlaceholder:@"" andTag:1];
                 thecell.cellLabel.text = NSLocalizedString(@"Display Name", @"");
-                thecell.textInputField.keyboardType = UIKeyboardTypeAlphabet;
                 break;
             }
             case SettingsStatusMessageRow: {

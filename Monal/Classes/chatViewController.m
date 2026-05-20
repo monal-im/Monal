@@ -1352,6 +1352,7 @@ enum msgSentState {
         if(self.sendLocation)
         {
             self.sendLocation = NO;
+            [self displayGPSHUD];
             [self.locationManager requestLocation];
         }
     }
@@ -1411,7 +1412,7 @@ enum msgSentState {
     if(self.locationManager == nil)
     {
         self.locationManager = [CLLocationManager new];
-        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation;
         self.locationManager.delegate = self;
     }
 }

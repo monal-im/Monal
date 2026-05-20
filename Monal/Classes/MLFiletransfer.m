@@ -95,7 +95,9 @@ static NSObject* _hardlinkingSyncObject;
             }
             NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
-            NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
+            if(mimeType)                                                                                                                                                                 
+                mimeType = [[mimeType componentsSeparatedByString:@";"] firstObject];
+            NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithLongLong:([[headers objectForKey:@"Content-Length"] longLongValue])] : @(-1);
             if(!mimeType)       //default mime type if none was returned by http server
                 mimeType = @"application/octet-stream";
             
@@ -198,6 +200,8 @@ static NSObject* _hardlinkingSyncObject;
             
             NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
+            if(mimeType)                                                                                                                                                                 
+                mimeType = [[mimeType componentsSeparatedByString:@";"] firstObject];
             if(!mimeType)
                 mimeType = @"application/octet-stream";
             
@@ -673,14 +677,15 @@ $$
     NSPredicate* filter = [NSPredicate predicateWithFormat:@"self BEGINSWITH 'tmp.'"];
     for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
     {
-        NSURL* fileUrl = [NSURL fileURLWithPath:file];
+        NSString* filePath = [_documentCacheDir stringByAppendingPathComponent:file];
+        NSURL* fileUrl = [NSURL fileURLWithPath:filePath];
         NSDate* fileDate;
         NSError* error;
         [fileUrl getResourceValue:&fileDate forKey:NSURLContentModificationDateKey error:&error];
         if(!error && [now timeIntervalSinceDate:fileDate]/86400 > 1)
         {
-            DDLogInfo(@"Deleting leftover tmp file at %@", [_documentCacheDir stringByAppendingPathComponent:file]);
-            [_fileManager removeItemAtPath:[_documentCacheDir stringByAppendingPathComponent:file] error:nil];
+            DDLogInfo(@"Deleting leftover tmp file at %@", filePath);
+            [_fileManager removeItemAtPath:filePath error:nil];
         }
     }
     

@@ -246,7 +246,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
                     resolve(@(MLNotificationStatePending));
                     return;
                 }
-                resolve(@(MLNotificationStateNone));
+            resolve(@(MLNotificationStateNone));
         }];
     }]];
     
@@ -260,7 +260,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
                     resolve(@(MLNotificationStateDelivered));
                     return;
                 }
-                resolve(@(MLNotificationStateNone));
+            resolve(@(MLNotificationStateNone));
         }];
     }]];
     
@@ -390,10 +390,9 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         for(MLMessage* msg in messages)
         {
             if([msg.messageType isEqualToString:kMessageTypeStatus])
-                return;
+                continue;
             
             NSString* idval = [self identifierWithMessage:msg];
-            
             DDLogVerbose(@"Removing pending/delivered notification for message '%@' with identifier '%@'...", msg.messageId, idval);
             [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
             [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
@@ -681,7 +680,13 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
             //add other group members
             for(NSDictionary* member in [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:message.buddyName forAccountId:message.accountId])
             {
-                MLContact* contactInGroup = [MLContact createContactFromJid:emptyDefault(member[@"participant_jid"], @"", member[@"member_jid"]) andAccountNo:message.accountId];
+                NSString* jid = emptyDefault(member[@"participant_jid"], @"", member[@"member_jid"]);
+                if(jid == nil)
+                {
+                    DDLogError(@"Jid should not be nil for member of MUC '%@': %@", message.buddyName, member);
+                    continue;
+                }
+                MLContact* contactInGroup = [MLContact createContactFromJid:jid andAccountNo:message.accountId];
                 [recipients addObject:[self makeINPersonWithContact:contactInGroup andDisplayName:member[@"room_nick"] andAccount:account]];
             }
         }

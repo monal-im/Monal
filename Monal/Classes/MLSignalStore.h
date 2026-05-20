@@ -55,6 +55,7 @@
 -(void) markDeviceAsDeleted:(SignalAddress* _Nonnull) address;
 -(void) removeDeviceDeletedMark:(SignalAddress* _Nonnull) address;
 -(void) updateLastSuccessfulDecryptTime:(SignalAddress* _Nonnull) address;
+-(NSDate* _Nonnull) getLastSuccessfulDecryptTime:(SignalAddress* _Nonnull) address;
 -(void) markSessionAsBroken:(SignalAddress* _Nonnull) address;
 -(void) markBundleAsFixed:(SignalAddress* _Nonnull) address;
 -(BOOL) isSessionBrokenForJid:(NSString* _Nonnull) jid andDeviceId:(NSNumber* _Nonnull) deviceId;
@@ -70,7 +71,7 @@
 -(void) untrustAllDevicesFrom:(NSString* _Nonnull) jid;
 -(NSNumber* _Nonnull) getTrustLevel:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nonnull) identityKey;
 
--(int) getHighestPreyKeyId;
+-(int) getHighestPreKeyId;
 -(unsigned int) getPreKeyCount;
 
 -(void) cleanupKeys;

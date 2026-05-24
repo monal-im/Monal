@@ -669,18 +669,30 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [self.connectionProperties.server updateConnectTLS:NO];
             DDLogInfo(@"NO SRV records found, using standard xmpp config: %@:%@ (using starttls)", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
         }
-    }
-    
-    // Show warning when xmpp-client srv entry prohibits connections
-    for(NSDictionary* row in _discoveredServersList)
-    {
-        // Check if entry "." == srv target
-        if(![[row objectForKey:@"isEnabled"] boolValue])
+        else
         {
-            DDLogInfo(@"SRV entry prohibits XMPP connection for server %@", self.connectionProperties.identity.domain);
-            //this is not severe on registration, but severe otherwise
-            [self postError:[NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for domain %@", @""), self.connectionProperties.identity.domain] withIsSevere:!(_registration || _registrationSubmission)];
-            return YES;
+            //check for dot records (check if entry "." == srv target) and filter out dot records
+            BOOL onlyDotsFound = YES;
+            NSMutableArray* nonDotList = [NSMutableArray new];
+            for(NSDictionary* row in _discoveredServersList)
+                if([[row objectForKey:@"isEnabled"] boolValue])
+                {
+                    [nonDotList addObject:row];
+                    onlyDotsFound = NO;
+                }
+            
+            //show warning when xmpp-client and xmpps-client srv entries prohibit connections (none of them serves only not-dot records)
+            if(onlyDotsFound)
+            {
+                DDLogInfo(@"SRV entry prohibits XMPP connection for server %@", self.connectionProperties.identity.domain);
+                //this is not severe on registration, but severe otherwise
+                [self postError:[NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for domain %@", @""), self.connectionProperties.identity.domain] withIsSevere:!(_registration || _registrationSubmission)];
+                return YES;
+            }
+            
+            //only update the servers list if we found one or more non-dot records (we don't want to do a plain A/AAAA
+            //fallback on next call to connectionTask
+            _discoveredServersList = nonDotList;
         }
     }
     

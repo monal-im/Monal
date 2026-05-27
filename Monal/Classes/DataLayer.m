@@ -73,6 +73,7 @@ static NSDateFormatter* dbFormatter;
     dbPath = writableDBPath;
     dbFormatter = [NSDateFormatter new];
     [dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [dbFormatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
     [dbFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 }
 
@@ -412,7 +413,7 @@ static NSDateFormatter* dbFormatter;
             cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
         if([cleanNickName length] > 50)
-            toPass = [cleanNickName substringToIndex:49];
+            toPass = [cleanNickName substringToIndex:50];
         else
             toPass = cleanNickName;
         
@@ -693,7 +694,7 @@ static NSDateFormatter* dbFormatter;
     {
         //data length check
         if([[presenceObj findFirst:@"show#"] length] > 20)
-            toPass = [[presenceObj findFirst:@"show#"] substringToIndex:19];
+            toPass = [[presenceObj findFirst:@"show#"] substringToIndex:20];
         else
             toPass = [presenceObj findFirst:@"show#"];
     }
@@ -757,7 +758,7 @@ static NSDateFormatter* dbFormatter;
     {
         //data length check
         if([[presenceObj findFirst:@"status#"] length] > 200)
-            toPass = [[presenceObj findFirst:@"status#"] substringToIndex:199];
+            toPass = [[presenceObj findFirst:@"status#"] substringToIndex:200];
         else
             toPass = [presenceObj findFirst:@"status#"];
     }
@@ -831,7 +832,7 @@ static NSDateFormatter* dbFormatter;
     NSString* toPass;
     NSString* cleanFullName = [fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if([cleanFullName length]>50)
-        toPass = [cleanFullName substringToIndex:49];
+        toPass = [cleanFullName substringToIndex:50];
     else
         toPass = cleanFullName;
 
@@ -1248,6 +1249,7 @@ static NSDateFormatter* dbFormatter;
             //this is always from a contact
             NSDateFormatter* formatter = [NSDateFormatter new];
             [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+            [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
             NSDate* sourceDate = [NSDate date];
             NSDate* destinationDate;
             if(messageDate)
@@ -1601,10 +1603,10 @@ static NSDateFormatter* dbFormatter;
         if(msg == nil)
             return NO;
         
-        //only allow LMC if the correction message has the same encryption or better state as the original message
+        //we always allow LMC, even if the message is older
         if(historyBaseID != nil)
         {
-            //only allow LMC for the 3 newest messages of this contact (or of us)
+            //only allow LMC if the correction message has the same encryption or better state as the original message
             editAllowed = (NSNumber*)[self.db executeScalar:@"\
                 SELECT \
                     CASE \
@@ -1612,7 +1614,7 @@ static NSDateFormatter* dbFormatter;
                         ELSE 0 \
                     END \
                 FROM \
-                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? AND message_history_id<? ORDER BY message_history_id ASC) \
+                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? AND message_history_id<? ORDER BY message_history_id DESC) \
                 WHERE \
                     message_history_id=? LIMIT 1; \
                 " andArguments:@[@(encrypted), @(encrypted), msg.accountId, msg.buddyName, historyBaseID, historyID]];
@@ -2368,10 +2370,10 @@ static NSDateFormatter* dbFormatter;
         NSNumber* globalIdle = [self.db executeScalar:@"SELECT lastInteraction FROM buddylist WHERE account_id=? AND buddy_name=? AND NOT (lastInteraction IS NULL OR lastInteraction==0);" andArguments:@[accountNo, jid]];
         
         //at least one online resource means the buddy is online
-        //if no online resource can be found use the newest timestamp as "idle since <...>" timestamp
-        //if this can also not be found, use the global timestamp and if this is NULL then return nil
-        //(meaning last interaction is unsupported and was every since we saw presences from this jid)
-        DDLogDebug(@"LastInteraction of %@ online=%@, idle=%@, globalIdle=%@", jid, online, idle, globalIdle);
+        //if no online resource can be found use the newest resource-based timestamp as "idle since <...>" timestamp
+        //if this also can't be found, use the global buddy-based timestamp and if this is NULL or 0 then return nil
+        //(meaning last interaction is unsupported and was ever since we saw presences from this jid)
+        DDLogDebug(@"LastInteraction of %@: online=%@, idle=%@, globalIdle=%@", jid, online, idle, globalIdle);
         if(online != nil)
             return [[NSDate date] initWithTimeIntervalSince1970:0] ;
         if(idle == nil)
@@ -2410,7 +2412,20 @@ static NSDateFormatter* dbFormatter;
     DDLogDebug(@"Setting lastInteraction of %@/%@ to %@...", jid, resource, timestamp);
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"UPDATE buddy_resources AS R SET lastInteraction=? WHERE EXISTS(SELECT * FROM buddylist AS B WHERE B.buddy_id=R.buddy_id AND B.account_id=? AND B.buddy_name=?) AND R.resource=?;" andArguments:@[timestamp, accountNo, jid, resource]];
-        [self.db executeNonQuery:@"UPDATE buddylist SET lastInteraction=? WHERE account_id=? AND buddy_name=? AND (lastInteraction IS NULL OR lastInteraction<?);" andArguments:@[timestamp, accountNo, jid, timestamp]];
+        //only update global timestamp, if this resource supports the protocol
+        if([self checkCap:@"urn:xmpp:idle:1" forUser:jid andResource:resource onAccountNo:accountNo])
+            [self.db executeNonQuery:@"UPDATE buddylist SET lastInteraction=? WHERE account_id=? AND buddy_name=? AND (lastInteraction IS NULL OR lastInteraction<?);" andArguments:@[timestamp, accountNo, jid, timestamp]];
+    }];
+}
+
+-(void) resetGlobalLastInteractionForJid:(NSString* _Nonnull) jid onAccountID:(NSNumber* _Nonnull) accountID
+{
+    MLAssert(jid != nil, @"jid should not be null");
+    MLAssert(accountID != nil, @"accountID should not be null");
+    
+    DDLogDebug(@"Resetting global lastInteraction of %@...", jid);
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"UPDATE buddylist SET lastInteraction=NULL WHERE account_id=? AND buddy_name=?;" andArguments:@[accountID, jid]];
     }];
 }
 

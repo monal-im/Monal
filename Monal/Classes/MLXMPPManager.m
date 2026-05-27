@@ -288,23 +288,31 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         {
             DDLogVerbose(@"reachable again");
             self->_hasConnectivity = YES;
+            
+            //handle all accounts in parallel and then wait for completion
+            dispatch_queue_t queue = dispatch_queue_create("im.monal.connectivity-change.reachable-again", DISPATCH_QUEUE_CONCURRENT);
             for(xmpp* xmppAccount in [self connectedXMPP])
             {
-                if(![HelperTools isAppExtension])
-                {
-                    //try to send a ping. if it fails, it will reconnect
-                    DDLogVerbose(@"manager pinging");
-                    [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-                }
-                else
-                {
-                    //don't reconnect if appex has frozen our queues!
-                    if(!xmppAccount.parseQueueFrozen)
-                        [xmppAccount reconnect:0];      //try to immediately reconnect, don't bother pinging
+                dispatch_async(queue, ^{
+                    if(![HelperTools isAppExtension])
+                    {
+                        //try to send a ping. if it fails, it will reconnect
+                        DDLogVerbose(@"manager pinging %@", xmppAccount);
+                        [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+                    }
                     else
-                        DDLogDebug(@"Not trying to reconnect in 0s, parse queue frozen!");
-                }
+                    {
+                        //don't reconnect if appex has frozen our queues!
+                        if(!xmppAccount.parseQueueFrozen)
+                            [xmppAccount reconnect:0];      //try to immediately reconnect, don't bother pinging
+                        else
+                            DDLogDebug(@"Not trying to reconnect %@ in 0s, parse queue frozen!", xmppAccount);
+                    }
+                });
             }
+            dispatch_barrier_sync(queue, ^{
+                DDLogVerbose(@"All accounts updated (inside barrier)");
+            });
             
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @YES}];
         }
@@ -313,10 +321,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             DDLogVerbose(@"NOT reachable");
             self->_hasConnectivity = NO;
             
-            DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
             //this will automatically start the app if connectivity gets restored
             //always force as soon as possible to make sure any missed pushes get compensated for
             //don't queue this notification because it should be handled immediately
+            DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
             [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundTask object:nil userInfo:@{@"force": @YES}];
             
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @NO}];
@@ -324,18 +332,28 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         else if(nw_path_get_status(path) == nw_path_status_satisfied)
         {
             DDLogVerbose(@"still reachable");
+            
             //when switching from wifi to mobile (or back) we sometimes don't have any unreachable state in between
             //--> reconnect directly because switching from wifi to mobile will cut the connection a few seconds after the switch anyways
             //NOTE: wait for 1 sec before reconnecting to compensate for multiple nw_path updates in a row
+            //also: handle all accounts in parallel and then wait for completion
+            dispatch_queue_t queue = dispatch_queue_create("im.monal.connectivity-change.still-reachable", DISPATCH_QUEUE_CONCURRENT);
             for(xmpp* xmppAccount in [self connectedXMPP])
-                //don't reconnect if appex has frozen our queues!
-                if(!xmppAccount.parseQueueFrozen)
-                {
-                    [NSThread sleepForTimeInterval:1];
-                    [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-                }
-                else
-                    DDLogDebug(@"Not pinging after 1s, parse queue frozen!");
+            {
+                dispatch_async(queue, ^{
+                    //don't reconnect if appex has frozen our queues!
+                    if(!xmppAccount.parseQueueFrozen)
+                    {
+                        [NSThread sleepForTimeInterval:1];
+                        [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+                    }
+                    else
+                        DDLogDebug(@"Not pinging %@ after 1s, parse queue frozen!", xmppAccount);
+                });
+            }
+            dispatch_barrier_sync(queue, ^{
+                DDLogVerbose(@"All accounts updated (inside barrier)");
+            });
             
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalConnectivityChange object:self userInfo:@{@"reachable": @YES}];
         }

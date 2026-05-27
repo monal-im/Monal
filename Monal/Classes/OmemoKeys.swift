@@ -22,6 +22,7 @@ struct OmemoKeysEntry: View {
     private let account: xmpp
     private let isOwnDevice: Bool
     private let isBrokenSession: Bool
+    private let lastSuccessfulDecryptTime: Date
     
     init(account: xmpp, contactJid: String, deviceId: NSNumber, isOwnDevice: Bool) {
         self.contactJid = contactJid
@@ -32,6 +33,7 @@ struct OmemoKeysEntry: View {
         self.trustLevel = account.omemo.getTrustLevel(self.address, identityKey: self.fingerprint)
         self.account = account
         self.isBrokenSession = account.omemo.isSessionBroken(forJid:contactJid, andDeviceId:deviceId)
+        self.lastSuccessfulDecryptTime = account.omemo.getLastSuccessfulDecryptTime(self.address)
     }
     
     func setTrustLevel(_ enableTrust: Bool) {
@@ -166,9 +168,18 @@ struct OmemoKeysEntry: View {
                             .font(Font.init(
                                 UIFont.monospacedSystemFont(ofSize: size11px, weight: .regular)
                             ))
-                        if(self.isBrokenSession) {
-                            Text("Encrypted session to this device broken beyond repair.").foregroundColor(.red)
-                        }
+                    }
+                    if #available(iOS 15, *) {
+                        Text("Last seen: \(lastSuccessfulDecryptTime, format:.dateTime)")
+                            .foregroundColor(.gray)
+                            .font(.footnote)
+                    } else {
+                        Text("Last seen: \(String(describing: lastSuccessfulDecryptTime))")
+                            .foregroundColor(.gray)
+                            .font(.footnote)
+                    }
+                    if(self.isBrokenSession) {
+                        Text("Encrypted session to this device broken beyond repair.").foregroundColor(.red)
                     }
                 }
                 .onTapGesture(count: 1) {

@@ -30,7 +30,7 @@
 #define prependToViewQueue(firstArg, ...)                           metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self prependToViewQueue:firstArg withId:MLViewIDUnspecified andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_prependToViewQueue(firstArg, __VA_ARGS__))
 #define _prependToViewQueue(ownId, block)                           [self prependToViewQueue:block withId:ownId andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
 #define appendToViewQueue(firstArg, ...)                            metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self appendToViewQueue:firstArg withId:MLViewIDUnspecified andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_appendToViewQueue(firstArg, __VA_ARGS__))
-#define _appendToViewQueue(ownId, block)                            [self prependToViewQueue:block withId:ownId andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
+#define _appendToViewQueue(ownId, block)                            [self appendToViewQueue:block withId:ownId andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
 #define appendingReplaceOnViewQueue(firstArg, secondArg, ...)       metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self replaceIdOnViewQueue:firstArg withBlock:secondArg havingId:MLViewIDUnspecified andAppendOnUnknown:YES withFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_appendingReplaceOnViewQueue(firstArg, secondArg, __VA_ARGS__))
 #define prependingReplaceOnViewQueue(firstArg, secondArg, ...)      metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self replaceIdOnViewQueue:firstArg withBlock:secondArg havingId:MLViewIDUnspecified andAppendOnUnknown:NO withFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_prependingReplaceOnViewQueue(firstArg, secondArg, __VA_ARGS__))
 #define _appendingReplaceOnViewQueue(replaceId, ownId, block)       [self replaceIdOnViewQueue:replaceId withBlock:block havingId:ownId andAppendOnUnknown:YES withFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
@@ -120,7 +120,9 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) resetViewQueue
 {
-    [_blockQueue removeAllObjects];
+    @synchronized(_blockQueue) {
+        [_blockQueue removeAllObjects];
+    }
 }
 
 -(void) prependToViewQueue:(view_queue_block_t) block withId:(MLViewID) viewId andFile:(char*) file andLine:(int) line andFunc:(char*) func
@@ -156,6 +158,7 @@ static NSMutableSet* _pushWarningDisplayed;
         
         //search for old block to replace and remove it
         NSInteger index = -1;
+        BOOL found = NO;
         for(NSDictionary* blockInfo in _blockQueue)
         {
             index++;
@@ -163,10 +166,11 @@ static NSMutableSet* _pushWarningDisplayed;
             {
                 DDLogDebug(@"Found blockInfo at index %d: %@", (int)index, blockInfo);
                 [self->_blockQueue removeObjectAtIndex:index];
+                found = YES;
                 break;
             }
         }
-        if(index == -1)
+        if(!found)
         {
             if(appendOnUnknown)
             {
@@ -275,6 +279,8 @@ static NSMutableSet* _pushWarningDisplayed;
     
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    self.navigationItem.backButtonTitle = @"";
+    self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
     
     MonalAppDelegate* appDelegate = (MonalAppDelegate*)[[UIApplication sharedApplication] delegate];
     appDelegate.activeChats = self;

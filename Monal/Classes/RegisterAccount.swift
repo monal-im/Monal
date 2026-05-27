@@ -31,7 +31,7 @@ struct RegisterAccount: View {
     static let XMPPServer: [Dictionary<String, String>] = [
         ["XMPPServer": "Input", "TermsSite_default": ""],
         ["XMPPServer": "conversations.im", "TermsSite_default": "https://account.conversations.im/privacy/"],
-        ["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"]
+        //["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"]
     ]
 
     private let xmppServerInputSelectLabel = Text("Manual input")

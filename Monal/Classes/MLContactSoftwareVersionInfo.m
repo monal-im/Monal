@@ -55,17 +55,22 @@
 
 -(BOOL) isEqual:(id _Nullable) object
 {
-    if(object == nil || self == object)
+    if(object == nil)
+        return NO;
+    else if(self == object)
         return YES;
     else if([object isKindOfClass:[MLContactSoftwareVersionInfo class]])
-        return [self.fromJid isEqualToString:((MLContactSoftwareVersionInfo*)object).fromJid] && [self.resource isEqualToString:((MLContactSoftwareVersionInfo*)object).resource];
+    {
+        MLContactSoftwareVersionInfo* other = ((MLContactSoftwareVersionInfo*)object);
+        return [self.fromJid isEqualToString:other.fromJid] && ((self.resource != nil && [self.resource isEqualToString:other.resource]) || (self.resource == nil && other.resource == nil));
+    }
     else
         return NO;
 }
 
 -(NSUInteger) hash
 {
-    return [self.fromJid hash] ^ [self.resource hash] ^ [self.appName hash] ^ [self.appVersion hash] ^ [self.platformOs hash] ^ [self.lastInteraction hash];
+    return [self.fromJid hash] ^ [self.resource hash];
 }
 
 -(NSString*) id

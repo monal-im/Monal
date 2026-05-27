@@ -272,6 +272,7 @@ static NSDictionary* _optionalGroupConfigOptions;
             return YES;
         NSInteger oldValue = ((NSNumber*)_changingName[room]).integerValue;
         _changingName[room] = @(max(0, oldValue - 1));
+        //only return YES if there was no running name change (and NO if at least one was running)
         if(oldValue == 0)
             return YES;
         return NO;
@@ -1585,7 +1586,15 @@ $$
 
 $$instance_handler(handleJoinTimeout, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not join group/channel '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
-    //don't remove the muc, this could be a temporary (network induced) error
+    
+    //don't remove the muc, this could be a temporary (network induced) error, but mark it as not joining anymore
+    @synchronized(_stateLockObject) {
+        if(_joining[room] != nil)
+        {
+            DDLogInfo(@"Aborting join of room '%@' on account %@ due to timeout", room, _account);
+            [self removeRoomFromJoining:room];
+        }
+    }
 $$
 
 $$instance_handler(handleMembersList, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, type))
@@ -1640,6 +1649,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
         }
         return;
     }
+    //we need to check for the rsm/last element because of a weird ejabberd bug sending complete=false, but no rsm last element
     if(![[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] && [iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])
     {
         DDLogVerbose(@"Paging through muc mam catchup results at %@ with after: %@", iqNode.fromUser, [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
@@ -1648,7 +1658,7 @@ $$instance_handler(handleCatchup, account.mucProcessor, $$ID(xmpp*, account), $$
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
         [_account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup, $BOOL(secondTry, NO))];
     }
-    else if([[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue])
+    else
     {
         DDLogVerbose(@"Muc mam catchup of %@ finished", iqNode.fromUser);
         [_account mamFinishedFor:iqNode.fromUser];
@@ -1663,7 +1673,7 @@ $$
 }
 
 $$instance_handler(handleVcardResponse, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode))
-    BOOL deleteAvatar = ![iqNode check:@"{vcard-temp}vCard/PHOTO/BINVAL"];
+    BOOL deleteAvatar = ![iqNode check:@"{vcard-temp}vCard/PHOTO/BINVAL#"];
     
     if([iqNode check:@"/<type=error>"])
     {

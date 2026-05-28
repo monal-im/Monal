@@ -471,7 +471,9 @@ struct ChatView: View {
                 messages.append(ChatViewMessage(newMLMessage))
                 sendChatState(isTyping: false)
                 // Clear the draft to show the newly sent message in active chats
-                DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:"")
+                DispatchQueue.global(qos: .userInitiated).async {
+                    DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:"")
+                }
             }
         } messageMenuAction: { (action: MessageAction, defaultActionClosure, message) in
             let mlMessage = (message as! ChatViewMessage).innerMessage.obj
@@ -866,13 +868,15 @@ struct ChatView: View {
             }
             messageInsertionTimer?.invalidate()
             sendChatState(isTyping: false)
-            DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:self.inputText)
-            // Update active chats to show the new draft
-            MLNotificationQueue.current().post(
-                name: Notification.Name(kMonalContactRefresh),
-                object: self.account,
-                userInfo: ["contact": self.contact.obj]
-            )
+            DispatchQueue.global(qos: .userInitiated).async {
+                DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:self.inputText)
+                // Update active chats to show the new draft
+                MLNotificationQueue.current().post(
+                    name: Notification.Name(kMonalContactRefresh),
+                    object: self.account,
+                    userInfo: ["contact": self.contact.obj]
+                )
+            }
         }
         .onChange(of: inputText) { newValue in
             //TODO: use the new .onChange instead of this workaround once the minimum version is iOS 17.0
@@ -964,13 +968,15 @@ struct ChatView: View {
         )) { notification in
             DDLogVerbose("ChatView of chat \(contact.obj.contactJid) received \(notification.name.rawValue)")
             sendChatState(isTyping: false)
-            DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:self.inputText)
-            // Update active chats to show the new draft
-            MLNotificationQueue.current().post(
-                name: Notification.Name(kMonalContactRefresh),
-                object: self.account,
-                userInfo: ["contact": self.contact.obj]
-            )
+            DispatchQueue.global(qos: .userInitiated).async {
+                DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:self.inputText)
+                // Update active chats to show the new draft
+                MLNotificationQueue.current().post(
+                    name: Notification.Name(kMonalContactRefresh),
+                    object: self.account,
+                    userInfo: ["contact": self.contact.obj]
+                )
+            }
         }
     }
 }

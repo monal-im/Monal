@@ -55,13 +55,13 @@ pub struct MonalXmlStreamParser {
 
 impl MonalXmlStreamParser {
     pub fn new(capacity: usize, max_token_length: usize) -> Self {
-        let mut parser = Parser::new();
+        let mut parser = Parser::with_options(Options {
+            max_token_length,
+            context: Some(global_context()),
+        });
         parser.set_text_buffering(true);
         Self {
-            parser: Parser::with_options(Options {
-                max_token_length,
-                context: Some(global_context()),
-            }),
+            parser,
             pending: VecDequeBuf::new(VecDeque::with_capacity(capacity)),
         }
     }

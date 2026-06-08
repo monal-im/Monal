@@ -38,7 +38,7 @@ static volatile int _ownLockFD;
     
     const char* path = [[NSFileManager defaultManager] fileSystemRepresentationWithPath:[_locksDir stringByAppendingPathComponent:processName]];
     _ownLockPath = calloc(strlen(path)+1, sizeof(*_ownLockPath));
-    strncpy(_ownLockPath, path, strlen(path));
+    strncpy(_ownLockPath, path, strlen(path)+1);
     DDLogInfo(@"Set _ownLockPath to '%s'...", _ownLockPath);
     
     _ownLockFD = -1;

@@ -985,7 +985,7 @@ class ChatViewMessage: ExyteChat.Message {
     let innerMessage: ObservableKVOWrapper<MLMessage>
     let fileInfo: ObservableKVOWrapper<MLFiletransferInfo>?
     private var subscriptions: Set<AnyCancellable> = Set()
-    var text: String {
+    override var text: String {
         if innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo {
             switch(fileInfo.downloadState as DownloadState.RawValue) {
                 case DownloadState.complete.rawValue:
@@ -1023,6 +1023,12 @@ class ChatViewMessage: ExyteChat.Message {
             // Keep outgoing links in the same color as outgoing text (white) for readability
             let linkColor: Color = self.user.isCurrentUser ? .white : .accentColor
             return text.linkify(linkColor: linkColor)
+        }
+        set {}
+    }
+    override var encrypted: Bool {
+        get {
+            return innerMessage.encrypted
         }
         set {}
     }

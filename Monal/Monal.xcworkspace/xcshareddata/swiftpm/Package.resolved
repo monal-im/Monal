@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/exyte/ActivityIndicatorView",
         "state": {
           "branch": null,
-          "revision": "36140867802ae4a1d2b11490bcbbefe058001d14",
-          "version": "1.2.1"
+          "revision": "15384b0f9ca3a9b072e12ab779d545e9717adba4",
+          "version": "2.0.0"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
           "branch": "main",
-          "revision": "6f732ebd0c128267f0c5d88b8ff60373cf24f436",
+          "revision": "5d0235c6ee0ad98ef84bd1fbb6fe3d31a46c6665",
           "version": null
         }
       },

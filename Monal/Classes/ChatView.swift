@@ -86,6 +86,9 @@ class ChatViewDefaultsDB: ObservableObject {
 
     @defaultsDB("showKeyboardOnChatOpen")
     var showKeyboardOnChatOpen: Bool
+
+    @defaultsDB("ShowURLPreview")
+    var showURLPreview: Bool
 }
 
 struct ChatView: View {
@@ -616,7 +619,7 @@ struct ChatView: View {
         .tapAvatarClosure { user, _ in
             inputText += "\(user.name), "
         }
-        .linkPreviewsEnabled(false) //disabled for now due to https://github.com/exyte/Chat/issues/208
+        .linkPreviewsEnabled(chatViewDefaultsDB.showURLPreview)
         .inputViewText($inputText)
         .enableLoadMore(offset: 10) {
             loadHistory()

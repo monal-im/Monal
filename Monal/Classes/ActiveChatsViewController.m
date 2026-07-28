@@ -361,6 +361,8 @@ static NSMutableSet* _pushWarningDisplayed;
     [self configureComposeButton];
 
     self.spinnerButton.customView = self.spinner;
+    self.spinnerButton.isAccessibilityElement = YES;
+    self.spinnerButton.accessibilityLabel = NSLocalizedString(@"Syncing", @"Accessibility label for the network/sync activity indicator shown in the chats toolbar when XMPP accounts or file transfers are active");
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;

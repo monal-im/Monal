@@ -1356,6 +1356,7 @@ static NSDateFormatter* dbFormatter;
     NSDateFormatter* formatter = [NSDateFormatter new];
     [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
+    [formatter setTimeZone:sourceTimeZone];
     NSDate* destinationDate;
     if(messageDate)
     {

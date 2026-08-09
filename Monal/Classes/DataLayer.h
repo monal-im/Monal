@@ -334,6 +334,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) removePromise:(MLPromise*) promise;
 -(void) removeAllPromises;
 -(MLPromise*) getPromise:(MLPromise*) promise;
++(NSString*) dateStringWithMessageDate:(NSDate* _Nullable) messageDate andSourceDate:(NSDate* _Nullable) sourceDate andSourceTimeZone:(NSTimeZone* _Nullable) sourceTimeZone;
 
 @end
 

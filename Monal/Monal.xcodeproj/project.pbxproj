@@ -97,7 +97,6 @@
 		3424B4EF2D232C14009F6503 /* HelperTools.h in Headers */ = {isa = PBXBuildFile; fileRef = C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		34BC08122C5E9BE30099FB85 /* ContentUnavailableShimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */; };
 		34C9CAA430293B5E00A87694 /* HelperToolsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C9CAA330293B5E00A87694 /* HelperToolsTest.swift */; };
-		34C9CAA630293BDA00A87694 /* DataLayerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C9CAA530293BDA00A87694 /* DataLayerTest.swift */; };
 		34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E58B4A2C68E7BC009A1634 /* ContactsView.swift */; };
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
@@ -548,7 +547,6 @@
 		341F44652CAF427500AA6C7D /* MLPromise.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPromise.m; sourceTree = "<group>"; };
 		34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentUnavailableShimView.swift; sourceTree = "<group>"; };
 		34C9CAA330293B5E00A87694 /* HelperToolsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperToolsTest.swift; sourceTree = "<group>"; };
-		34C9CAA530293BDA00A87694 /* DataLayerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataLayerTest.swift; sourceTree = "<group>"; };
 		34E58B4A2C68E7BC009A1634 /* ContactsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
 		3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXEPSlashMeHandler.h; sourceTree = "<group>"; };
 		38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXEPSlashMeHandler.m; sourceTree = "<group>"; };
@@ -1528,7 +1526,6 @@
 			isa = PBXGroup;
 			children = (
 				C1B940E926144AF500E9D290 /* AESGCMTest.m */,
-				34C9CAA530293BDA00A87694 /* DataLayerTest.swift */,
 				34C9CAA330293B5E00A87694 /* HelperToolsTest.swift */,
 				C1049198261301710054AC9E /* MLCryptoTest.swift */,
 				C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */,
@@ -2391,7 +2388,6 @@
 				84C6F6032D597FB20015575E /* ParserTest.m in Sources */,
 				C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */,
 				C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */,
-				34C9CAA630293BDA00A87694 /* DataLayerTest.swift in Sources */,
 				84C6F6052D597FD10015575E /* SDPTest.m in Sources */,
 				C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */,
 			);

@@ -1352,31 +1352,8 @@ static NSDateFormatter* dbFormatter;
 
 +(NSString*) dateStringWithMessageDate:(NSDate*) messageDate andSourceDate:(NSDate*) sourceDate andSourceTimeZone:(NSTimeZone*) sourceTimeZone
 {
-    //this is always from a contact
-    NSDateFormatter* formatter = [NSDateFormatter new];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
-    [formatter setTimeZone:sourceTimeZone];
-    NSDate* destinationDate;
-    if(messageDate)
-    {
-        //already GMT no need for conversion
-        destinationDate = messageDate;
-        [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    }
-    else
-    {
-        NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-
-        NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-        NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-        NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-
-        destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-    }
-    // note: if it isnt the same day we want to show the full  day
-    NSString* dateString = [formatter stringFromDate:destinationDate];
-    return dateString;
+    NSDate* destinationDate = messageDate ? messageDate : sourceDate;
+    return [dbFormatter stringFromDate:destinationDate];
 }
 
 -(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound occupantId:(NSString* _Nullable) occupantId andJid:(NSString*) jid onAccount:(NSNumber*) accountID

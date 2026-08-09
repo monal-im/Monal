@@ -1316,7 +1316,7 @@ static NSDateFormatter* dbFormatter;
     return [self.db idWriteTransaction:^{
         if(!checkForDuplicates || [self hasMessageForStanzaId:stanzaid orMessageID:messageid withInboundDir:inbound occupantId:occupantId andJid:buddyName onAccount:accountID] == nil)
         {
-            NSString* dateString = [DataLayer dateStringWithMessageDate:messageDate andSourceDate:[NSDate date] andSourceTimeZone:[NSTimeZone systemTimeZone]];
+            NSString* dateString = [DataLayer dateStringWithMessageDate:messageDate ? messageDate : [NSDate date]];
             NSString* query;
             NSArray* params;
             if(historyId != nil)
@@ -1350,9 +1350,8 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
-+(NSString*) dateStringWithMessageDate:(NSDate*) messageDate andSourceDate:(NSDate*) sourceDate andSourceTimeZone:(NSTimeZone*) sourceTimeZone
++(NSString*) dateStringWithMessageDate:(NSDate*) destinationDate
 {
-    NSDate* destinationDate = messageDate ? messageDate : sourceDate;
     return [dbFormatter stringFromDate:destinationDate];
 }
 

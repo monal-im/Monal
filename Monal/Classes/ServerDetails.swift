@@ -112,7 +112,7 @@ struct ServerDetails: View {
     }
 
     private func getXEPEntryData(connection: MLXMPPConnection) -> [EntryData] {
-        let maxFileUploadSize = HelperTools.bytes(toHuman: Int64(connection.uploadSize))
+        let maxFileUploadSize = connection.uploadSize.formatted(.byteCount(style: .file))
         let isUsingFast = (connection.fastMethods as? [String: Bool] ?? [:]).values.reduce(false, { $0 || $1 })
         let result: [EntryData] = [
             EntryData(

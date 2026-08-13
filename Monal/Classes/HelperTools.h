@@ -135,7 +135,6 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSData*) resizeAvatarImage:(UIImage* _Nullable) image withCircularMask:(BOOL) circularMask toMaxBase64Size:(unsigned long) length;
 +(double) report_memory;
 +(UIColor*) generateColorFromJid:(NSString*) jid;
-+(NSString*) bytesToHuman:(int64_t) bytes;
 +(NSString*) stringFromToken:(NSData*) tokenIn;
 +(NSString* _Nullable) exportIPCDatabase;
 +(void) configureFileProtection:(NSString*) protectionLevel forFile:(NSString*) file;

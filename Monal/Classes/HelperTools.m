@@ -1787,24 +1787,6 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     return cache[jid] = [UIColor colorWithRed:r green:g blue:b alpha:1];
 }
 
-+(NSString*) bytesToHuman:(int64_t) bytes
-{
-    NSArray* suffixes = @[@"B", @"KiB", @"MiB", @"GiB", @"TiB", @"PiB", @"EiB"];
-    NSString* prefix = @"";
-    double size = bytes;
-    if(size < 0)
-    {
-        prefix = @"-";
-        size *= -1;
-    }
-    for(NSString* suffix in suffixes)
-        if(size < 1024)
-            return [NSString stringWithFormat:@"%@%.1F %@", prefix, size, suffix];
-        else
-            size /= 1024.0;
-    return [NSString stringWithFormat:@"%lld B", bytes];
-}
-
 +(NSString*) stringFromToken:(NSData*) tokenIn
 {
     unsigned char* tokenBytes = (unsigned char*)[tokenIn bytes];

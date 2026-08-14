@@ -1,5 +1,4 @@
 PODS:
-  - ASN1Decoder (1.10.0)
   - DZNEmptyDataSet (1.8.1)
   - KSCrash/Core (1.17.7):
     - KSCrash/Reporting/Filters/Basic
@@ -57,7 +56,6 @@ PODS:
     - sqlite3/common
 
 DEPENDENCIES:
-  - ASN1Decoder
   - DZNEmptyDataSet
   - KSCrash/Core (~> 1.0)
   - KSCrash/Recording (~> 1.0)
@@ -74,7 +72,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - ASN1Decoder
     - DZNEmptyDataSet
     - KSCrash
     - MBProgressHUD
@@ -100,7 +97,6 @@ CHECKOUT OPTIONS:
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
 
 SPEC CHECKSUMS:
-  ASN1Decoder: 91cb1d781b5a178ea7375b2f1519e2bdaaa4c427
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   KSCrash: ea6fc545b7dbb916a141aaadd4343fb891141290
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
@@ -111,6 +107,6 @@ SPEC CHECKSUMS:
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   sqlite3: 5c6474cc334fec29bf7cc3050abf34284afeed19
 
-PODFILE CHECKSUM: 04802d09e29f2dbb09d099a2dc5231259812066c
+PODFILE CHECKSUM: efbb7c99942314aec4b370655703c1923c426ad4
 
 COCOAPODS: 1.17.0

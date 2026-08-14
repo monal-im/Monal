@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "ASN1Decoder",
+        "repositoryURL": "https://github.com/filom/ASN1Decoder",
+        "state": {
+          "branch": null,
+          "revision": "7e1523662c69d019a3299bbfb22fb824141dd1f6",
+          "version": "1.10.0"
+        }
+      },
+      {
         "package": "CocoaLumberjack",
         "repositoryURL": "https://github.com/cocoalumberjack/cocoalumberjack",
         "state": {

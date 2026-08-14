@@ -1756,7 +1756,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
  */
 +(BOOL) isBase64UnencodedSize:(unsigned long) unencodedSize biggerThanEncodedThreshold:(unsigned long) encodedThreshold
 {
-    return unencodedSize * 1.5 > encodedThreshold;
+    return unencodedSize * 3 > encodedThreshold * 2;
 }
 
 +(double) report_memory

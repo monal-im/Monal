@@ -95,6 +95,7 @@
 		3424B4ED2D232C07009F6503 /* MLVoIPProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 849A53E5287135D7007E941A /* MLVoIPProcessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4EE2D232C0F009F6503 /* MLCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 848717F2295ED64500B8D288 /* MLCall.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4EF2D232C14009F6503 /* HelperTools.h in Headers */ = {isa = PBXBuildFile; fileRef = C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		34745126302F641600F23210 /* NotificationBannerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 34745125302F641600F23210 /* NotificationBannerSwift */; };
 		34BC08122C5E9BE30099FB85 /* ContentUnavailableShimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */; };
 		34C9CAA430293B5E00A87694 /* HelperToolsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C9CAA330293B5E00A87694 /* HelperToolsTest.swift */; };
 		34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E58B4A2C68E7BC009A1634 /* ContactsView.swift */; };
@@ -865,6 +866,7 @@
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
 				84F194D12C15197200F0A994 /* FrameUp in Frameworks */,
 				C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */,
+				34745126302F641600F23210 /* NotificationBannerSwift in Frameworks */,
 				84AF79C22DF3C0A900FE3818 /* CropViewController in Frameworks */,
 				84774DFB2D1A956400B15E51 /* ExyteChat in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
@@ -1680,6 +1682,7 @@
 				84AF79C12DF3C0A900FE3818 /* CropViewController */,
 				84AF79C32DF3C0A900FE3818 /* TOCropViewController */,
 				84A8340B2F1156F5004738AE /* WebRTC */,
+				34745125302F641600F23210 /* NotificationBannerSwift */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1905,6 +1908,7 @@
 				84AF79C02DF3C0A900FE3818 /* XCRemoteSwiftPackageReference "TOCropViewController" */,
 				84A8340A2F1156F5004738AE /* XCRemoteSwiftPackageReference "WebRTC" */,
 				84F632EE2F80AAF900A59209 /* XCRemoteSwiftPackageReference "SVGKit" */,
+				34745124302F641600F23210 /* XCRemoteSwiftPackageReference "NotificationBanner" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4835,6 +4839,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		34745124302F641600F23210 /* XCRemoteSwiftPackageReference "NotificationBanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Daltron/NotificationBanner";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 3.2.0;
+			};
+		};
 		841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GeorgeElsham/ViewExtractor";
@@ -4902,6 +4914,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		34745125302F641600F23210 /* NotificationBannerSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 34745124302F641600F23210 /* XCRemoteSwiftPackageReference "NotificationBanner" */;
+			productName = NotificationBannerSwift;
+		};
 		8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LibMonalRustSwiftBridge;

@@ -1738,7 +1738,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         //now reduce quality until image data is smaller than provided size
         unsigned int i = 0;
         double qualityList[] = {0.96, 0.80, 0.64, 0.48, 0.32, 0.24, 0.16, 0.10, 0.09, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02, 0.01};
-        for(i = 0; (data == nil || (data.length * 1.5) > length) && i < sizeof(qualityList) / sizeof(qualityList[0]); i++)
+        for(i = 0; (data == nil || [HelperTools isBase64UnencodedSize:data.length biggerThanEncodedThreshold:length]) && i < sizeof(qualityList) / sizeof(qualityList[0]); i++)
         {
             DDLogDebug(@"Resizing new avatar to quality %f", qualityList[i]);
             data = UIImageJPEGRepresentation(resizedImage, qualityList[i]);
@@ -1747,6 +1747,16 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f for image: %@", (unsigned long)data.length, qualityList[i-1], resizedImage);
     }
     return data;
+}
+
+/**
+ return true if unencodedSize would likely be greater than the base64SizeThreshold, after being encoded into base64.
+
+ Taking a conservative upper estimate, base64 encoded data is approximately 1.5 times bigger than the raw binary data.
+ */
++(BOOL) isBase64UnencodedSize:(unsigned long) unencodedSize biggerThanEncodedThreshold:(unsigned long) encodedThreshold
+{
+    return unencodedSize * 1.5 > encodedThreshold;
 }
 
 +(double) report_memory

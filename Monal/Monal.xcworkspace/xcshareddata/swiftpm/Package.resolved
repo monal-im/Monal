@@ -38,12 +38,39 @@
         }
       },
       {
+        "package": "MarqueeLabel",
+        "repositoryURL": "https://github.com/cbpowell/MarqueeLabel",
+        "state": {
+          "branch": null,
+          "revision": "c6b4da400c00dfd5db7a4f6e4915ca531d95fc49",
+          "version": "4.5.3"
+        }
+      },
+      {
         "package": "ExyteMediaPicker",
         "repositoryURL": "https://github.com/monal-im/MediaPicker.git",
         "state": {
           "branch": "main",
           "revision": "2d482aac360297922424d3a1ae0255f3abdbe6ee",
           "version": null
+        }
+      },
+      {
+        "package": "NotificationBannerSwift",
+        "repositoryURL": "https://github.com/Daltron/NotificationBanner",
+        "state": {
+          "branch": null,
+          "revision": "a9ec5cd29b4669f5fdf3dcd494a08cea4776913c",
+          "version": "3.2.0"
+        }
+      },
+      {
+        "package": "SnapKit",
+        "repositoryURL": "https://github.com/SnapKit/SnapKit",
+        "state": {
+          "branch": null,
+          "revision": "2842e6e84e82eb9a8dac0100ca90d9444b0307f4",
+          "version": "5.7.1"
         }
       },
       {

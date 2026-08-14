@@ -86,6 +86,7 @@
 		340F0CA62D24267B006224D0 /* MLXMLNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 260C51D2177F44AD0039634B /* MLXMLNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		341F44662CAF427500AA6C7D /* MLPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = 341F44642CAF427500AA6C7D /* MLPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		341F44672CAF427500AA6C7D /* MLPromise.m in Sources */ = {isa = PBXBuildFile; fileRef = 341F44652CAF427500AA6C7D /* MLPromise.m */; };
+		3423E276302F7AA400E12E6D /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = 3423E275302F7AA400E12E6D /* FLAnimatedImage */; };
 		3424B4E72D232BE2009F6503 /* MLContact.h in Headers */ = {isa = PBXBuildFile; fileRef = 26611029238F17CA0030A4EE /* MLContact.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4E82D232BE7009F6503 /* DataLayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 2601D9A80FBF255D004DB939 /* DataLayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4E92D232BEB009F6503 /* xmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 260C51CF177F08F50039634B /* xmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -871,6 +872,7 @@
 				84774DFB2D1A956400B15E51 /* ExyteChat in Frameworks */,
 				C1F5C7AF2777638B0001F295 /* OrderedCollections in Frameworks */,
 				841898AA2957712000FEC77D /* ViewExtractor in Frameworks */,
+				3423E276302F7AA400E12E6D /* FLAnimatedImage in Frameworks */,
 				84AF79C42DF3C0A900FE3818 /* TOCropViewController in Frameworks */,
 				7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */,
 			);
@@ -1683,6 +1685,7 @@
 				84AF79C32DF3C0A900FE3818 /* TOCropViewController */,
 				84A8340B2F1156F5004738AE /* WebRTC */,
 				34745125302F641600F23210 /* NotificationBannerSwift */,
+				3423E275302F7AA400E12E6D /* FLAnimatedImage */,
 			);
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
@@ -1909,6 +1912,7 @@
 				84A8340A2F1156F5004738AE /* XCRemoteSwiftPackageReference "WebRTC" */,
 				84F632EE2F80AAF900A59209 /* XCRemoteSwiftPackageReference "SVGKit" */,
 				34745124302F641600F23210 /* XCRemoteSwiftPackageReference "NotificationBanner" */,
+				3423E274302F7AA400E12E6D /* XCRemoteSwiftPackageReference "FLAnimatedImage" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4839,6 +4843,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3423E274302F7AA400E12E6D /* XCRemoteSwiftPackageReference "FLAnimatedImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Flipboard/FLAnimatedImage";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.17;
+			};
+		};
 		34745124302F641600F23210 /* XCRemoteSwiftPackageReference "NotificationBanner" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Daltron/NotificationBanner";
@@ -4914,6 +4926,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3423E275302F7AA400E12E6D /* FLAnimatedImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3423E274302F7AA400E12E6D /* XCRemoteSwiftPackageReference "FLAnimatedImage" */;
+			productName = FLAnimatedImage;
+		};
 		34745125302F641600F23210 /* NotificationBannerSwift */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 34745124302F641600F23210 /* XCRemoteSwiftPackageReference "NotificationBanner" */;

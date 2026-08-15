@@ -7,13 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <KSCrash/KSCrash.h>
-#import <KSCrash/KSCrashReportFilterBasic.h>
-#import <KSCrash/KSCrashReportFilterJSON.h>
-#import <KSCrash/KSCrashReportFilterAppleFmt.h>
-#import <KSCrash/KSCrashReportFilterGZip.h>
-#import <KSCrash/KSCrashReportFields.h>
-#import <KSCrash/NSError+SimpleConstructor.h>
+#import <KSCrash.h>
+#import <KSCrashReportFilterBasic.h>
+#import <KSCrashReportFilterJSON.h>
+#import <KSCrashReportFilterAppleFmt.h>
+#import <KSCrashReportFilterGZip.h>
+#import <KSCrashReportFields.h>
+#import <NSError+SimpleConstructor.h>
 #import <MessageUI/MessageUI.h>
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/HelperTools.h>
@@ -22,7 +22,7 @@
 
 #define PART_SEPARATOR_FORMAT "\n\n-------- d049d576-9bf0-47dd-839f-dee6b07c1df9 -------- %@ -------- d049d576-9bf0-47dd-839f-dee6b07c1df9 --------\n\n"
 
-@interface KSCrashReportFilterAlert: NSObject <KSCrashReportFilter>
+@interface KSCrashReportFilterStartupAlert: NSObject <KSCrashReportFilter>
 +(instancetype) filter;
 @end
 
@@ -69,7 +69,7 @@
     id<KSCrashReportFilter> profrawFilter = [KSCrashReportFilterAddProfraw filter];
     NSString* profrawName = @"Profile (*.profraw)";
     handler.sink = [KSCrashReportFilterPipeline filterWithFilters:
-                        [KSCrashReportFilterAlert filter],
+                        [KSCrashReportFilterStartupAlert filter],
                         [KSCrashReportFilterCombine filterWithFiltersAndKeys:
                             dummyFilter, dummyFilterName,       //this dummy is needed to make the filter framework print the title of our aux data
                             auxInfoFilter, auxInfoName,
@@ -216,7 +216,7 @@
 
 @end
 
-@implementation KSCrashReportFilterAlert
+@implementation KSCrashReportFilterStartupAlert
 
 +(instancetype) filter
 {
@@ -230,7 +230,7 @@
     NSString* yesAnswer = NSLocalizedString(@"Sure, send it!", @"Crash reporting");
     NSString* noAnswer = NSLocalizedString(@"No, thanks", @"Crash reporting");
     
-    DDLogVerbose(@"KSCrashReportFilterAlert started...");
+    DDLogVerbose(@"KSCrashReportFilterStartupAlert started...");
     dispatch_async(dispatch_get_main_queue(), ^{
         UIAlertController* alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* yesAction = [UIAlertAction actionWithTitle:yesAnswer style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction* _Nonnull action) {
@@ -243,7 +243,7 @@
         [alertController addAction:noAction];
         [[(MonalAppDelegate*)[[UIApplication sharedApplication] delegate] getTopViewController] presentViewController:alertController animated:YES completion:NULL];
     });
-    DDLogVerbose(@"KSCrashReportFilterAlert finished...");
+    DDLogVerbose(@"KSCrashReportFilterStartupAlert finished...");
 }
 
 @end

@@ -56,6 +56,15 @@
         }
       },
       {
+        "package": "KSCrash",
+        "repositoryURL": "https://github.com/kstenerud/KSCrash",
+        "state": {
+          "branch": null,
+          "revision": "73c793d1b8efac9e0d911ca96f347c5192ec2a52",
+          "version": "1.17.7"
+        }
+      },
+      {
         "package": "MarqueeLabel",
         "repositoryURL": "https://github.com/cbpowell/MarqueeLabel",
         "state": {

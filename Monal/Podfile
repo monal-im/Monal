@@ -27,7 +27,6 @@ def monalxmpp
   inhibit_all_warnings!
   pod 'SAMKeychain'
   pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
-  pod 'KSCrash', '~> 1.0', subspecs:['Recording', 'Reporting/Filters/Sets', 'Reporting/Filters/Tools', 'Reporting/Tools', 'Core']
   signalDeps
   pod "PromiseKit"
 end

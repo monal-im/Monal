@@ -1,39 +1,5 @@
 PODS:
   - DZNEmptyDataSet (1.8.1)
-  - KSCrash/Core (1.17.7):
-    - KSCrash/Reporting/Filters/Basic
-  - KSCrash/Recording (1.17.7):
-    - KSCrash/Recording/Tools (= 1.17.7)
-  - KSCrash/Recording/Tools (1.17.7)
-  - KSCrash/Reporting/Filters/AppleFmt (1.17.7):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/Base (1.17.7):
-    - KSCrash/Recording
-  - KSCrash/Reporting/Filters/Basic (1.17.7):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/GZip (1.17.7):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/JSON (1.17.7):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/Sets (1.17.7):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/AppleFmt
-    - KSCrash/Reporting/Filters/Base
-    - KSCrash/Reporting/Filters/Basic
-    - KSCrash/Reporting/Filters/GZip
-    - KSCrash/Reporting/Filters/JSON
-    - KSCrash/Reporting/Filters/Stringify
-  - KSCrash/Reporting/Filters/Stringify (1.17.7):
-    - KSCrash/Recording
-    - KSCrash/Reporting/Filters/Base
-  - KSCrash/Reporting/Filters/Tools (1.17.7):
-    - KSCrash/Recording
-  - KSCrash/Reporting/Tools (1.17.7):
-    - KSCrash/Recording
   - MBProgressHUD (1.2.0)
   - PromiseKit (8.2.0):
     - PromiseKit/CorePromise (= 8.2.0)
@@ -57,11 +23,6 @@ PODS:
 
 DEPENDENCIES:
   - DZNEmptyDataSet
-  - KSCrash/Core (~> 1.0)
-  - KSCrash/Recording (~> 1.0)
-  - KSCrash/Reporting/Filters/Sets (~> 1.0)
-  - KSCrash/Reporting/Filters/Tools (~> 1.0)
-  - KSCrash/Reporting/Tools (~> 1.0)
   - MBProgressHUD (~> 1.2.0)
   - PromiseKit
   - SAMKeychain
@@ -73,7 +34,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - DZNEmptyDataSet
-    - KSCrash
     - MBProgressHUD
     - PromiseKit
     - SAMKeychain
@@ -98,7 +58,6 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
-  KSCrash: ea6fc545b7dbb916a141aaadd4343fb891141290
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   PromiseKit: 74e6ab5894856b4762fef547055c809bca91d440
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
@@ -107,6 +66,6 @@ SPEC CHECKSUMS:
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   sqlite3: 5c6474cc334fec29bf7cc3050abf34284afeed19
 
-PODFILE CHECKSUM: efbb7c99942314aec4b370655703c1923c426ad4
+PODFILE CHECKSUM: fb17fa9d5b869abdf53f967c9d7c144a03ab2c00
 
 COCOAPODS: 1.17.0

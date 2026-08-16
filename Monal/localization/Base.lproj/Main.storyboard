@@ -138,7 +138,9 @@
                                     </segue>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem enabled="NO" title="Spinner" id="lQZ-nm-6qt"/>
+                            <barButtonItem enabled="NO" id="lQZ-nm-6qt">
+                                <accessibility key="accessibilityConfiguration" label="Syncing"/>
+                            </barButtonItem>
                         </rightBarButtonItems>
                     </navigationItem>
                     <connections>

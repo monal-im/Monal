@@ -12,7 +12,53 @@
 #import "HelperTools.h"
 @import Darwin.POSIX.sys.time; 
 
+#import <nameser.h>
+#import <dns_sd.h>
+#import <unistd.h>
+#import <sys/types.h>
+#import <sys/socket.h>
+#import <netinet/in.h>
+#import <arpa/inet.h>
+
+#ifndef T_SRV
+#define T_SRV kDNSServiceType_SRV
+#endif
+
+#ifndef T_PTR
+#define T_PTR kDNSServiceType_PTR
+#endif
+
+#ifndef T_A
+#define T_A kDNSServiceType_A
+#endif
+
+#ifndef T_TXT
+#define T_TXT kDNSServiceType_TXT
+#endif
+
+#define MAX_DOMAIN_LABEL 63
+#define MAX_DOMAIN_NAME 255
+#define MAX_CSTRING 2044
+
+
+typedef union { unsigned char b[2]; unsigned short NotAnInteger; } Opaque16;
+
+typedef struct { u_char c[MAX_DOMAIN_LABEL]; } domainLabel;
+typedef struct { u_char c[MAX_DOMAIN_NAME]; } domainName;
+
+
+typedef struct __attribute__((packed))
+{
+    uint16_t priority;
+    uint16_t weight;
+    uint16_t port;
+    domainName target;
+} srv_rdata;
+
+
 @interface MLDNSLookup()
+@property (atomic, strong) NSMutableArray* discoveredStartTLSServers;
+@property (atomic, strong) NSMutableArray* discoveredDirectTLSServers;
 @end
 
 static NSMutableDictionary* _RRCache;
@@ -27,7 +73,8 @@ static NSMutableDictionary* _RRCache;
 -(id) init
 {
     self = [super init];
-    self.discoveredServers = [NSMutableArray new];
+    self.discoveredStartTLSServers = [NSMutableArray new];
+    self.discoveredDirectTLSServers = [NSMutableArray new];
     return self;
 }
 
@@ -105,49 +152,78 @@ static NSMutableDictionary* _RRCache;
         DDLogError(@"DNS SRV query returned error %d for: %@", res, serviceDiscoveryString);
 }
 
+-(NSArray*) filterForDot:(NSArray*) foundEntries
+{
+    //filter out everything but the dot entry if a dot entry has been found
+    @synchronized(foundEntries) {
+        NSDictionary* dotEntry = nil;
+        for(NSDictionary* row in foundEntries)
+            if(![row[@"isEnabled"] boolValue])
+            {
+                dotEntry = row;
+                break;
+            }
+        if(dotEntry != nil)
+            return @[dotEntry];
+        return foundEntries;
+    }
+}
+
 -(NSArray*) doRealDnsDiscoverOnDomain:(NSString*) domain withTimeout:(NSTimeInterval) timeout
 {
     //the whole function is blocking, this synchronized block makes sure we resolve one query at a time (scoped to this class instance)
     @synchronized(self) {
-        @synchronized(self.discoveredServers) {
-            [self.discoveredServers removeAllObjects];
-        }
+        NSMutableArray* allEntries = [NSMutableArray new];
         
         //request xmpps and xmpp records, xmpps will be preferred (use a dispatch queue to fetch xmpp and xmpps concurrently)
         DDLogVerbose(@"Querying DNS for xmpps AND xmpp records...");
         dispatch_queue_t queue = dispatch_queue_create("im.monal.dnsqueue", DISPATCH_QUEUE_CONCURRENT);
         dispatch_async(queue, ^{
+            @synchronized(self.discoveredDirectTLSServers) {
+                [self.discoveredDirectTLSServers removeAllObjects];
+            }
             [self doDiscoveryWithSecure:YES andDomain:domain withTimeout:timeout];
+            @synchronized(self.discoveredDirectTLSServers) {
+                @synchronized(allEntries) {
+                    [allEntries addObjectsFromArray:[self filterForDot:self.discoveredDirectTLSServers]];
+                }
+            }
         });
         dispatch_async(queue, ^{
+            @synchronized(self.discoveredStartTLSServers) {
+                [self.discoveredStartTLSServers removeAllObjects];
+            }
             [self doDiscoveryWithSecure:NO andDomain:domain withTimeout:timeout];
+            @synchronized(self.discoveredStartTLSServers) {
+                @synchronized(allEntries) {
+                    [allEntries addObjectsFromArray:[self filterForDot:self.discoveredStartTLSServers]];
+                }
+            }
         });
         //wait for both dns queries to complete
         dispatch_barrier_sync(queue, ^{
             DDLogVerbose(@"SRV DNS queries completed (xmpps AND xmpp)...");
-//             [HelperTools flushLogsWithTimeout:0.100];
-//             exit(0);
         });
         
-        @synchronized(self.discoveredServers) {
+        @synchronized(allEntries) {
             //early return
-            if([self.discoveredServers count] == 0)
+            if([allEntries count] == 0)
             {
                 DDLogInfo(@"No SRV records could be found, returning empty NSArray...");
                 return @[];
             }
             
             //we ignore weights here for simplicity
-            [self.discoveredServers sortUsingDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"priority" ascending:YES]]];
+            [allEntries sortUsingDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"priority" ascending:YES]]];
         
             //calculate lowest timeout
             u_int32_t lowest_ttl = UINT32_MAX;
-            for(NSDictionary* entry in self.discoveredServers)
+            for(NSDictionary* entry in allEntries)
             {
 #ifdef DEBUG
-                MLAssert([entry isKindOfClass:[NSDictionary class]], @"discoveredServers has an entry that is NOT of type NSDictionary", (@{
+                MLAssert([entry isKindOfClass:[NSDictionary class]], @"allEntries has an entry that is NOT of type NSDictionary", (@{
                     @"entry": entry,
-                    @"discoveredServers": self.discoveredServers,
+                    @"allEntries": allEntries,
                 }));
 #endif
                 if([entry isKindOfClass:[NSDictionary class]])
@@ -156,16 +232,16 @@ static NSMutableDictionary* _RRCache;
             DDLogVerbose(@"Lowest ttl for SRV records: %u", lowest_ttl);
         
             //update resource record cache with discovered servers list
-            DDLogVerbose(@"Updating RRCache with: %@", self.discoveredServers);
+            DDLogVerbose(@"Updating RRCache with: %@", allEntries);
             @synchronized(_RRCache) {
                 _RRCache[domain] = @{
                     @"timeout": [NSDate dateWithTimeIntervalSinceNow:lowest_ttl],
-                    @"records": [self.discoveredServers copy],
+                    @"records": [allEntries copy],
                 };
             }
             
             //return discovered servers list
-            return [self.discoveredServers copy];
+            return [allEntries copy];
         }
     }
 }
@@ -245,7 +321,7 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
     (void)interfaceIndex;
     (void)rrclass;
     
-    //just ignore errors (don't fill anything into the discoveredServers array)
+    //just ignore errors (don't fill anything into the discoveredDirectTLSServers/discoveredStartTLSServers array)
     if(errorCode)
     {
         DDLogVerbose(@"query callback: error==%d\n", errorCode);
@@ -271,25 +347,36 @@ void query_cb(const DNSServiceRef DNSServiceRef, const DNSServiceFlags flags, co
         NSNumber* weight = [NSNumber numberWithInt:ntohs(srv->weight)];
         NSNumber* thePort = [NSNumber numberWithInt:ntohs(srv->port)];
         if(theServer && prio && weight && thePort) {
-            // Check if service is not provided (ignored for xmpps records, NOT ignored for xmpp records)
+            // Check if service is not provided
             bool serviceEnabled = ![theServer isEqualToString:@"."];
-            if(serviceEnabled == false && isSecure == YES)
-                return;
             // Validate that the domain ends with at dot (and ignore this entry, if not)
             if([theServer hasSuffix:@"."] == NO)
                 return;
-            //add result to discovered severs list
-            @synchronized(caller.discoveredServers) {
-                [caller.discoveredServers addObject:@{
-                    @"priority": prio,
-                    @"server": theServer,
-                    @"port": thePort,
-                    @"isSecure": [NSNumber numberWithBool:isSecure],
-                    @"weight": weight,
-                    @"isEnabled": [NSNumber numberWithBool:serviceEnabled],
-                    @"ttl": [NSNumber numberWithUnsignedInt:ttl],
-                }];
-            }
+            //add result to the appropriate discovered severs list
+            if(isSecure)
+                @synchronized(caller.discoveredDirectTLSServers) {
+                    [caller.discoveredDirectTLSServers addObject:@{
+                        @"priority": prio,
+                        @"server": theServer,
+                        @"port": thePort,
+                        @"isSecure": @YES,
+                        @"weight": weight,
+                        @"isEnabled": [NSNumber numberWithBool:serviceEnabled],
+                        @"ttl": [NSNumber numberWithUnsignedInt:ttl],
+                    }];
+                }
+            else
+                @synchronized(caller.discoveredStartTLSServers) {
+                    [caller.discoveredStartTLSServers addObject:@{
+                        @"priority": prio,
+                        @"server": theServer,
+                        @"port": thePort,
+                        @"isSecure": @NO,
+                        @"weight": weight,
+                        @"isEnabled": [NSNumber numberWithBool:serviceEnabled],
+                        @"ttl": [NSNumber numberWithUnsignedInt:ttl],
+                    }];
+                }
         }
     }
 }

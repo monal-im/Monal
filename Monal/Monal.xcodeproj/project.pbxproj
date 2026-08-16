@@ -4863,8 +4863,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Stasel/WebRTC";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 140.0.0;
+				branch = latest;
+				kind = branch;
 			};
 		};
 		84AF79C02DF3C0A900FE3818 /* XCRemoteSwiftPackageReference "TOCropViewController" */ = {

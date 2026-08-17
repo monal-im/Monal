@@ -91,9 +91,10 @@
         UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"soundCell"];
         cell.textLabel.text = self.soundList[(NSUInteger)indexPath.row];
         NSString* filename = [NSString stringWithFormat:@"alert%ld", (long)indexPath.row];
+        NSString* selectedSoundFile = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
         if(
-            (indexPath.row == 0 && [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"] == nil) ||
-            [filename isEqualToString:[[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"]]
+            (indexPath.row == 0 && [selectedSoundFile isEqualToString:kSystemSound]) ||
+            [selectedSoundFile isEqualToString:filename]
         )
         {
             cell.accessoryType = UITableViewCellAccessoryCheckmark;
@@ -130,7 +131,7 @@
         [[HelperTools defaultsDB] setObject:filename forKey:@"AlertSoundFile"];
     }
     else
-        [[HelperTools defaultsDB] removeObjectForKey:@"AlertSoundFile"];
+        [[HelperTools defaultsDB] setObject:kSystemSound forKey:@"AlertSoundFile"];
     NSIndexPath* old = [NSIndexPath indexPathForRow:self.selectedIndex inSection:1];
     self.selectedIndex = indexPath.row;
     NSArray* rows = @[old, indexPath];

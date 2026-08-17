@@ -58,6 +58,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     currentTransactions = [NSMutableDictionary new];
     dbFilesList = [NSMutableArray new];
     
+    //make sure we run in multithreaded mode (this makes SQLITE_OPEN_NOMUTEX unnecessary, but better do this twice)
     if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
         DDLogInfo(@"sqlite initialize: sqlite3 configured ok");
     else
@@ -68,6 +69,9 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     
     sqlite3_initialize();
     DDLogInfo(@"sqlite initialize: using mysql lib version: %s", sqlite3_libversion());
+    
+    //don't try to run in unsafe environments: it would corrupt our databases!
+    MLAssert(sqlite3_threadsafe() != 0, @"SQLite *must* be compiled with SQLITE_THREADSAFE > 0!");
 }
 
 //every thread gets its own instance having its own db connection
@@ -106,7 +110,8 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     [HelperTools configureFileProtectionFor:[NSString stringWithFormat:@"%@-wal", _dbFile]];
     [HelperTools configureFileProtectionFor:[NSString stringWithFormat:@"%@-shm", _dbFile]];
     
-    if(sqlite3_open_v2([_dbFile UTF8String], &(self->_database), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) == SQLITE_OK)
+    //SQLITE_OPEN_NOMUTEX means "multi-thread" threading mode rather than "serialized" threading mode (reachable with SQLITE_OPEN_FULLMUTEX)
+    if(sqlite3_open_v2([_dbFile UTF8String], &(self->_database), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX, nil) == SQLITE_OK)
         DDLogInfo(@"Database opened: %@", _dbFile);
     else
     {

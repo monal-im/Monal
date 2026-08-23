@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "CSQLite",
+        "repositoryURL": "https://github.com/sbooth/CSQLite.git",
+        "state": {
+          "branch": "main",
+          "revision": "d4560f1f808381e07b1f8673c51190c52bdca468",
+          "version": null
+        }
+      },
+      {
         "package": "Chat",
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
@@ -98,6 +107,15 @@
           "branch": null,
           "revision": "2842e6e84e82eb9a8dac0100ca90d9444b0307f4",
           "version": "5.7.1"
+        }
+      },
+      {
+        "package": "CSQLite+MonalTraits",
+        "repositoryURL": "https://github.com/monal-im/sqlite3-package",
+        "state": {
+          "branch": "main",
+          "revision": "4174fb7e23124259f2d6874eb61b301d944421ad",
+          "version": null
         }
       },
       {

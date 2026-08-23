@@ -26,7 +26,6 @@ def monalxmpp
   use_frameworks!
   inhibit_all_warnings!
   pod 'SAMKeychain'
-  pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
   signalDeps
   pod "PromiseKit"
 end

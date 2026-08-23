@@ -102,6 +102,7 @@
 		34BC08122C5E9BE30099FB85 /* ContentUnavailableShimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */; };
 		34C9CAA430293B5E00A87694 /* HelperToolsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C9CAA330293B5E00A87694 /* HelperToolsTest.swift */; };
 		34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E58B4A2C68E7BC009A1634 /* ContactsView.swift */; };
+		34F978CF303B90CB002029CF /* CSQLite+MonalTraits in Frameworks */ = {isa = PBXBuildFile; productRef = 34F978CE303B90CB002029CF /* CSQLite+MonalTraits */; };
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
@@ -902,6 +903,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34F978CF303B90CB002029CF /* CSQLite+MonalTraits in Frameworks */,
 				84F632F02F80AAF900A59209 /* SVGKit in Frameworks */,
 				84F632EB2F7F3EA300A59209 /* OrderedCollections in Frameworks */,
 				849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */,
@@ -1760,6 +1762,7 @@
 				84F632EF2F80AAF900A59209 /* SVGKit */,
 				3434775D302FC074001FCAE3 /* ASN1Decoder */,
 				344B50BF3030B7B80022BD6A /* KSCrash */,
+				34F978CE303B90CB002029CF /* CSQLite+MonalTraits */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1921,6 +1924,7 @@
 				3423E274302F7AA400E12E6D /* XCRemoteSwiftPackageReference "FLAnimatedImage" */,
 				3434775C302FC074001FCAE3 /* XCRemoteSwiftPackageReference "ASN1Decoder" */,
 				344A829F3030C76B009AAC5D /* XCRemoteSwiftPackageReference "KSCrash" */,
+				34F978CD303B90CB002029CF /* XCRemoteSwiftPackageReference "sqlite3-package" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4883,6 +4887,14 @@
 				minimumVersion = 3.2.0;
 			};
 		};
+		34F978CD303B90CB002029CF /* XCRemoteSwiftPackageReference "sqlite3-package" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/monal-im/sqlite3-package";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GeorgeElsham/ViewExtractor";
@@ -4968,6 +4980,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 34745124302F641600F23210 /* XCRemoteSwiftPackageReference "NotificationBanner" */;
 			productName = NotificationBannerSwift;
+		};
+		34F978CE303B90CB002029CF /* CSQLite+MonalTraits */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 34F978CD303B90CB002029CF /* XCRemoteSwiftPackageReference "sqlite3-package" */;
+			productName = "CSQLite+MonalTraits";
 		};
 		8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -17,9 +17,6 @@ PODS:
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
-  - sqlite3/common (3.51.0)
-  - sqlite3/perf-threadsafe (3.51.0):
-    - sqlite3/common
 
 DEPENDENCIES:
   - DZNEmptyDataSet
@@ -29,7 +26,6 @@ DEPENDENCIES:
   - SDWebImage
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
-  - sqlite3/perf-threadsafe
 
 SPEC REPOS:
   trunk:
@@ -38,7 +34,6 @@ SPEC REPOS:
     - PromiseKit
     - SAMKeychain
     - SDWebImage
-    - sqlite3
 
 EXTERNAL SOURCES:
   SignalProtocolC:
@@ -64,8 +59,7 @@ SPEC CHECKSUMS:
   SDWebImage: 16309af6d214ba3f77a7c6f6fdda888cb313a50a
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
-  sqlite3: 5c6474cc334fec29bf7cc3050abf34284afeed19
 
-PODFILE CHECKSUM: fb17fa9d5b869abdf53f967c9d7c144a03ab2c00
+PODFILE CHECKSUM: 1fcff053f140694a6b147950c102bb824103420a
 
 COCOAPODS: 1.17.0

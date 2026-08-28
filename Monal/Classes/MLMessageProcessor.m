@@ -132,7 +132,7 @@ static NSMutableDictionary* _typingNotifications;
     //(history backscrolling ones AND normal ones, both would otherwise disappear again immediately afterwards)
     //do this before handling the message stanza: only non-MLhistory pubsub messages and error-type stanzas should be processed
     //regardless of their age (but pubsub messages only if they aren't MLhistory ones)
-    NSInteger autodeleteInterval = [[HelperTools defaultsDB] integerForKey:@"AutodeleteInterval"];
+    double autodeleteInterval = [[HelperTools defaultsDB] doubleForKey:@"AutodeleteInterval"];
     if(autodeleteInterval > 0)
     {
         NSDate* pastDate = [NSDate dateWithTimeIntervalSinceNow:-autodeleteInterval];

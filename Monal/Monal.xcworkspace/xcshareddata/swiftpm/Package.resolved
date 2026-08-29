@@ -101,6 +101,15 @@
         }
       },
       {
+        "package": "SAMKeychain",
+        "repositoryURL": "https://github.com/meganz/SAMKeychain",
+        "state": {
+          "branch": "master",
+          "revision": "19f05f16b30eed2ed398df30353ec52844e329e5",
+          "version": null
+        }
+      },
+      {
         "package": "SnapKit",
         "repositoryURL": "https://github.com/SnapKit/SnapKit",
         "state": {

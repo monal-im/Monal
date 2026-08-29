@@ -98,6 +98,7 @@
 		3424B4EF2D232C14009F6503 /* HelperTools.h in Headers */ = {isa = PBXBuildFile; fileRef = C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3434775E302FC074001FCAE3 /* ASN1Decoder in Frameworks */ = {isa = PBXBuildFile; productRef = 3434775D302FC074001FCAE3 /* ASN1Decoder */; };
 		344B50C03030B7B80022BD6A /* KSCrash in Frameworks */ = {isa = PBXBuildFile; productRef = 344B50BF3030B7B80022BD6A /* KSCrash */; };
+		34660BA63043057100FDA777 /* SAMKeychain in Frameworks */ = {isa = PBXBuildFile; productRef = 34660BA53043057100FDA777 /* SAMKeychain */; };
 		34745126302F641600F23210 /* NotificationBannerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 34745125302F641600F23210 /* NotificationBannerSwift */; };
 		34BC08122C5E9BE30099FB85 /* ContentUnavailableShimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */; };
 		34C9CAA430293B5E00A87694 /* HelperToolsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C9CAA330293B5E00A87694 /* HelperToolsTest.swift */; };
@@ -903,6 +904,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34660BA63043057100FDA777 /* SAMKeychain in Frameworks */,
 				34F978CF303B90CB002029CF /* CSQLite+MonalTraits in Frameworks */,
 				84F632F02F80AAF900A59209 /* SVGKit in Frameworks */,
 				84F632EB2F7F3EA300A59209 /* OrderedCollections in Frameworks */,
@@ -1763,6 +1765,7 @@
 				3434775D302FC074001FCAE3 /* ASN1Decoder */,
 				344B50BF3030B7B80022BD6A /* KSCrash */,
 				34F978CE303B90CB002029CF /* CSQLite+MonalTraits */,
+				34660BA53043057100FDA777 /* SAMKeychain */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1925,6 +1928,7 @@
 				3434775C302FC074001FCAE3 /* XCRemoteSwiftPackageReference "ASN1Decoder" */,
 				344A829F3030C76B009AAC5D /* XCRemoteSwiftPackageReference "KSCrash" */,
 				34F978CD303B90CB002029CF /* XCRemoteSwiftPackageReference "sqlite3-package" */,
+				34660BA43043057100FDA777 /* XCRemoteSwiftPackageReference "SAMKeychain" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4879,6 +4883,14 @@
 				minimumVersion = 1.17.7;
 			};
 		};
+		34660BA43043057100FDA777 /* XCRemoteSwiftPackageReference "SAMKeychain" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/meganz/SAMKeychain";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		34745124302F641600F23210 /* XCRemoteSwiftPackageReference "NotificationBanner" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Daltron/NotificationBanner";
@@ -4975,6 +4987,11 @@
 		344B50BF3030B7B80022BD6A /* KSCrash */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = KSCrash;
+		};
+		34660BA53043057100FDA777 /* SAMKeychain */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 34660BA43043057100FDA777 /* XCRemoteSwiftPackageReference "SAMKeychain" */;
+			productName = SAMKeychain;
 		};
 		34745125302F641600F23210 /* NotificationBannerSwift */ = {
 			isa = XCSwiftPackageProductDependency;

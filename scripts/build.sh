@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2025 Thilo Molitor <info@monal-im.org>, 2024
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 function exportMacOS {
     local EXPORT_OPTIONS_CATALYST="$1"
     local BUILD_TYPE="$2"

@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# SPDX-FileCopyrightText: 2025 Thilo Molitor <info@monal-im.org>, 2024
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 function sftp_upload {
 sftp ${1} <<EOF
     put build/ipa/${APP_NAME}.ipa /var/www/downloads.monal-im.org/monal-im/alpha/iOS/

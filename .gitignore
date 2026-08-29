@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025 Thilo Molitor <info@monal-im.org>, 2024
+#
+# SPDX-License-Identifier: CC0-1.0
 
 # rust bridge
 rust/monal-rust-swift-bridge/generated

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2025 Thilo Molitor <info@monal-im.org>, 2024
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
 iiface="bond0"
 oiface="virbr0"
 ip="212.21.75.16"

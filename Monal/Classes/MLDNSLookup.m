@@ -111,7 +111,7 @@ static NSMutableDictionary* _RRCache;
 
             struct timeval tv;
             tv.tv_sec  = (time_t)remainingTime;
-            tv.tv_usec = (int32_t)((remainingTime - tv.tv_sec) * 1000000);
+            tv.tv_usec = (int32_t)((remainingTime - (double)tv.tv_sec) * 1000000);
 
             int result = select(FD_SETSIZE, &set, NULL, NULL, &tv);
             DDLogVerbose(@"DNS select() returned %d", result);

@@ -1243,7 +1243,7 @@ again:
 	 * We "cheat" by converting the fractional part to integer by
 	 * multiplying by a factor of ten.
 	 */
-	if ((fracpart = myround(mask * (ufvalue - intpart))) >= mask) {
+	if ((fracpart = myround((long double)mask * (ufvalue - (long double)intpart))) >= mask) {
 		/*
 		 * For example, ufvalue = 2.99962, intpart = 2, and mask = 1000
 		 * (because precision = 3).  Now, myround(1000 * 0.99962) will
@@ -1487,7 +1487,7 @@ cast(LDOUBLE value)
 	 * comparison (cf. C99: 6.3.1.4, 2).  It might then equal the LDOUBLE
 	 * value although converting the latter to UINTMAX_T would overflow.
 	 */
-	if (value >= UINTMAX_MAX)
+	if (value >= (long double)UINTMAX_MAX)
 		return UINTMAX_MAX;
 
 	result = value;
@@ -1496,7 +1496,7 @@ cast(LDOUBLE value)
 	 * an integer type converts e.g. 1.9 to 2 instead of 1 (which violates
 	 * the standard).  Sigh.
 	 */
-	return (result <= value) ? result : result - 1;
+	return ((long double)result <= value) ? result : result - 1;
 }
 
 static UINTMAX_T
@@ -1507,7 +1507,7 @@ myround(LDOUBLE value)
 	if (intpart == UINTMAX_MAX)
 		return UINTMAX_MAX;
 	
-	return ((value - intpart) < 0.5) ? intpart : intpart + 1;
+	return ((value - (long double)intpart) < 0.5) ? intpart : intpart + 1;
 }
 
 static LDOUBLE

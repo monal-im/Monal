@@ -574,11 +574,6 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                     return;
                 }
                 
-#ifdef IS_QUICKSY
-                //make sure we hit the else below, even if (isRegister || (isRoster && registerNeeded)) == YES
-                if(NO)
-                    ;
-#else
                 if(isRegister || (isRoster && registerNeeded))
                 {
                     NSString* username = nilDefault(jidParts[@"node"], @"");
@@ -616,7 +611,6 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
                             return [self handleXMPPURL:url];
                     }];
                 }
-#endif
                 //I know this if is moot, but I wanted to preserve the different cases:
                 //either we already have one or more accounts and the xmpp: uri is of type subscription (ibr does not matter here,
                 //because we already have an account) or muc join

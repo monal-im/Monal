@@ -69,12 +69,8 @@ NSString* const kiqErrorType = @"error";
 #ifdef IS_ALPHA
     [pushModule appendString:@"monalAlpha"];
 #else //IS_ALPHA
-#if TARGET_OS_MACCATALYST && defined(IS_QUICKSY)
-    [pushModule appendString:@"quicksyProdCatalyst"];
-#elif TARGET_OS_MACCATALYST
+#if TARGET_OS_MACCATALYST
     [pushModule appendString:@"monalProdCatalyst"];
-#elif defined(IS_QUICKSY)
-    [pushModule appendString:@"quicksyProdiOS"];
 #else
     [pushModule appendString:@"monalProdiOS"];
 #endif
@@ -445,19 +441,5 @@ NSString* const kiqErrorType = @"error";
         } andChildren:@[] andData:nil],
     ] andData:nil]];
 }
-
-#ifdef IS_QUICKSY
--(void) setQuicksyPhoneBook:(NSArray*) numbers
-{
-    MLXMLNode* envelope = [[MLXMLNode alloc] initWithElement:@"phone-book" andNamespace:@"im.quicksy.synchronization:0"];
-    for(NSString* number in numbers)
-    {
-        [envelope addChildNode:[[MLXMLNode alloc] initWithElement:@"entry" withAttributes:@{
-            @"number": number,
-        } andChildren:@[] andData:nil]];
-    }
-    [self addChildNode:envelope];
-}
-#endif
 
 @end

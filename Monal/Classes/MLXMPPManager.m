@@ -700,7 +700,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     return [password isEqualToString:[SAMKeychain passwordForService:kMonalKeychainName account:accountID.stringValue]];
 }
 
-//this is only used by quicksy
+// This used to be used for Quicksy, but is no longer. It may be used in One-Click registration in the future.
 -(NSString*) getPasswordForAccount:(NSNumber*) accountID
 {
     return [SAMKeychain passwordForService:kMonalKeychainName account:accountID.stringValue];

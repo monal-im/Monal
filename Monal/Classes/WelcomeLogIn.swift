@@ -37,8 +37,6 @@ struct WelcomeLogIn: View {
 
 #if IS_ALPHA
     let appLogoId = "AlphaAppLogo"
-#elseif IS_QUICKSY
-    let appLogoId = "QuicksyAppLogo"
 #else
     let appLogoId = "AppLogo"
 #endif

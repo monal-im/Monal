@@ -720,34 +720,9 @@ static NSMutableSet* _pushWarningDisplayed;
     //(if we would not do this, the first view prepended would be shown regardless of other views prepended after it)
     //every entry in here is flipped, because we want to prepend all intro screens to our queue
     prependToViewQueue((^(PMKResolver resolve) {
-#ifdef IS_QUICKSY
-        prependToViewQueue((^(PMKResolver resolve) {
-            [self syncContacts];
-            resolve(nil);
-        }));
-#else
         [self showWarningsIfNeeded];
-#endif
         
         prependToViewQueue(MLViewIDWelcomeLoginView, (^(PMKResolver resolve) {
-#ifdef IS_QUICKSY
-            if([[[DataLayer sharedInstance] accountList] count] == 0)
-            {
-                DDLogDebug(@"Showing account registration view...");
-                UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:nil];
-                if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
-                    view.modalPresentationStyle = UIModalPresentationFullScreen;
-                else
-                    view.ml_disposeCallback = ^{
-                        [self sheetDismissed];
-                    };
-                [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
-                    [self presentViewController:view animated:NO completion:^{resolve(nil);}];
-                }];
-            }
-            else
-                resolve(nil);
-#else
             // display quick start if the user never seen it or if there are 0 enabled accounts
             if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !self->_loginAlreadyAutodisplayed)
             {
@@ -763,7 +738,6 @@ static NSMutableSet* _pushWarningDisplayed;
             }
             else
                 resolve(nil);
-#endif
         }));
     
         prependToViewQueue((^(PMKResolver resolve) {
@@ -790,19 +764,6 @@ static NSMutableSet* _pushWarningDisplayed;
             NSArray* needingMigration = [[DataLayer sharedInstance] accountListNeedingPasswordMigration];
             if(needingMigration.count > 0)
             {
-#ifdef IS_QUICKSY
-                DDLogDebug(@"Showing account registration view to do password migration...");
-                UIViewController* view = [[SwiftuiInterface new] makeAccountRegistration:nil];
-                if(UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPad)
-                    view.modalPresentationStyle = UIModalPresentationFullScreen;
-                else
-                    view.ml_disposeCallback = ^{
-                        [self sheetDismissed];
-                    };
-                [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
-                    [self presentViewController:view animated:NO completion:^{resolve(nil);}];
-                }];
-#else
                 DDLogDebug(@"Showing password migration view...");
                 UIViewController* passwordMigration = [[SwiftuiInterface new] makePasswordMigration:needingMigration];
                 passwordMigration.ml_disposeCallback = ^{
@@ -811,7 +772,6 @@ static NSMutableSet* _pushWarningDisplayed;
                 [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
                     [self presentViewController:passwordMigration animated:YES completion:^{resolve(nil);}];
                 }];
-#endif
             }
             else
                 resolve(nil);
@@ -820,61 +780,6 @@ static NSMutableSet* _pushWarningDisplayed;
         resolve(nil);
     }));
 }
-
-#ifdef IS_QUICKSY
--(void) syncContacts
-{
-    CNContactStore* store = [[CNContactStore alloc] init];
-    [store requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError* _Nullable error) {
-        if(granted)
-        {
-            Quicksy_Country* country = [[HelperTools defaultsDB] objectForKey:@"Quicksy_country"];
-            NSString* countryCode = country.code;
-            NSCharacterSet* allowedCharacters = [[NSCharacterSet characterSetWithCharactersInString:@"+0123456789"] invertedSet];
-            NSMutableDictionary* numbers = [NSMutableDictionary new];
-            
-            CNContactFetchRequest* request = [[CNContactFetchRequest alloc] initWithKeysToFetch:@[CNContactPhoneNumbersKey, CNContactNicknameKey, CNContactGivenNameKey, CNContactFamilyNameKey]];
-            NSError* error;
-            [store enumerateContactsWithFetchRequest:request error:&error usingBlock:^(CNContact* _Nonnull contact, BOOL* _Nonnull stop) {
-                if(!error)
-                {
-                    NSString* name = [[NSString stringWithFormat:@"%@ %@", contact.givenName, contact.familyName] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                    for(CNLabeledValue<CNPhoneNumber*>* phone in contact.phoneNumbers)
-                    {
-                        //add country code if missing
-                        NSString* number = [[phone.value.stringValue componentsSeparatedByCharactersInSet:allowedCharacters] componentsJoinedByString:@""];
-                        if(countryCode != nil && ![number hasPrefix:@"+"] && ![number hasPrefix:@"00"])
-                        {
-                            DDLogVerbose(@"Adding country code '%@' to number: %@", countryCode, number);
-                            number = [NSString stringWithFormat:@"%@%@", countryCode, [number hasPrefix:@"0"] ? [number substringFromIndex:1] : number];
-                        }
-                        numbers[number] = name;
-                    }
-                }
-                else
-                    DDLogWarn(@"Error fetching contacts: %@", error);
-            }];
-            
-            DDLogDebug(@"Got list of contact phone numbers: %@", numbers);
-            
-            NSArray<xmpp*>* enabledAccounts = [MLXMPPManager sharedInstance].connectedXMPP;
-            if(enabledAccounts.count == 0)
-            {
-                DDLogError(@"No connected account while trying to send quicksy phonebook!");
-                return;
-            }
-            else if(enabledAccounts.count > 1)
-                DDLogWarn(@"More than 1 connected account while trying to send quicksy phonebook, using first one!");
-            
-            XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqGetType to:@"api.quicksy.im"];
-            [iqNode setQuicksyPhoneBook:numbers.allKeys];
-            [enabledAccounts[0] sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleQuicksyPhoneBook, $ID(numbers))];
-        }
-        else
-            DDLogError(@"Access to contacts not granted!");
-    }];
-}
-#endif
 
 -(void) showWarningsIfNeeded
 {

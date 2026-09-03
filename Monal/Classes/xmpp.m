@@ -235,12 +235,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 #else
         @"type": @"phone",
 #endif
-
-#ifdef IS_QUICKSY
-        @"name": @"Quicksy iOS",
-#else
         @"name": @"Monal",
-#endif
     } andChildren:@[] andData:nil];
     _capsFeatures = [HelperTools getOwnFeatureSet];
     NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];
@@ -3417,11 +3412,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 #if TARGET_OS_MACCATALYST
                     [[MLXMLNode alloc] initWithElement:@"tag" andData: @"Monal-macOS"],
 #else
-#if IS_QUICKSY
-                    [[MLXMLNode alloc] initWithElement:@"tag" andData: @"Quicksy-iOS"],
-#else
                     [[MLXMLNode alloc] initWithElement:@"tag" andData: @"Monal-iOS"],
-#endif
 #endif
                     //inline carbons enable into bind2 if possible
                     nilWrapper(

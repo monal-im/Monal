@@ -59,7 +59,6 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import <monalxmpp/MLContactSoftwareVersionInfo.h>
 #import <monalxmpp/IPC.h>
 #import <monalxmpp/MLDelayableTimer.h>
-#import <monalxmpp/Quicksy_Country.h>
 #import "secrets.h"
 
 @import UserNotifications;
@@ -1083,7 +1082,6 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         [NSURL class],
         [OmemoState class],
         [MLContactSoftwareVersionInfo class],
-        [Quicksy_Country class],
         [NSUUID class],
         [MLPromise class],
         [NSError class],

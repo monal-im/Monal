@@ -157,10 +157,6 @@
 		8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */; };
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
-		8418B55D2C7EC6B7006FAF60 /* Quicksy_Country.h in Headers */ = {isa = PBXBuildFile; fileRef = 8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8418B55E2C7EC6B7006FAF60 /* Quicksy_Country.m in Sources */ = {isa = PBXBuildFile; fileRef = 8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */; };
-		8418B5632C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8418B5642C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m in Sources */ = {isa = PBXBuildFile; fileRef = 8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */; };
 		841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F19297B18720074F9B7 /* AccountPicker.swift */; };
 		841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */; };
 		841EE4302A426F2300D3AF14 /* MLCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */; };
@@ -173,7 +169,6 @@
 		844921EA2C29F9A000B99A9C /* MLDelayableTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 844921E92C29F9A000B99A9C /* MLDelayableTimer.m */; };
 		844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84558DBF2DF04C3100F8357F /* OneClickRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84558DBE2DF04C3100F8357F /* OneClickRegistration.swift */; };
-		845836BA2C49F36300B11EC5 /* Quicksy Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */; };
 		845D636B2AD4AEDA0066EFFB /* MediaViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845D636A2AD4AEDA0066EFFB /* MediaViewer.swift */; };
 		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
@@ -195,7 +190,6 @@
 		84A8340C2F1156F5004738AE /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84A8340B2F1156F5004738AE /* WebRTC */; };
 		84AF79C22DF3C0A900FE3818 /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79C12DF3C0A900FE3818 /* CropViewController */; };
 		84AF79C42DF3C0A900FE3818 /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79C32DF3C0A900FE3818 /* TOCropViewController */; };
-		84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */; };
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
 		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; };
@@ -627,10 +621,6 @@
 		8414ADFA2A7ABAC900EFFCCC /* LibMonalRustSwiftBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LibMonalRustSwiftBridge; path = ../rust/LibMonalRustSwiftBridge; sourceTree = "<group>"; };
 		841898AB2957DBAC00FEC77D /* RichAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichAlert.swift; sourceTree = "<group>"; };
 		8418B5582C7EBD39006FAF60 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
-		8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Quicksy_Country.h; sourceTree = "<group>"; };
-		8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Quicksy_Country.m; sourceTree = "<group>"; };
-		8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "HelperTools+Quicksy_CountryCodes.h"; sourceTree = "<group>"; };
-		8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "HelperTools+Quicksy_CountryCodes.m"; sourceTree = "<group>"; };
 		841B6F19297B18720074F9B7 /* AccountPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountPicker.swift; sourceTree = "<group>"; };
 		841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVCallUI.swift; sourceTree = "<group>"; };
 		841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLCrashReporter.m; path = Classes/MLCrashReporter.m; sourceTree = "<group>"; };
@@ -643,7 +633,6 @@
 		844921E92C29F9A000B99A9C /* MLDelayableTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDelayableTimer.m; sourceTree = "<group>"; };
 		844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDelayableTimer.h; sourceTree = "<group>"; };
 		84558DBE2DF04C3100F8357F /* OneClickRegistration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneClickRegistration.swift; sourceTree = "<group>"; };
-		845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Quicksy Launch Screen.storyboard"; path = "Monal-iOS/Quicksy Launch Screen.storyboard"; sourceTree = "<group>"; };
 		845D636A2AD4AEDA0066EFFB /* MediaViewer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaViewer.swift; sourceTree = "<group>"; };
 		846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPlaceholder.swift; sourceTree = "<group>"; };
 		847311222C893D2600739CC6 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -655,7 +644,6 @@
 		848C73DF2BDF2014007035C9 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		849A53E3287135B2007E941A /* MLVoIPProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLVoIPProcessor.m; path = Classes/MLVoIPProcessor.m; sourceTree = SOURCE_ROOT; };
 		849A53E5287135D7007E941A /* MLVoIPProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLVoIPProcessor.h; path = Classes/MLVoIPProcessor.h; sourceTree = SOURCE_ROOT; };
-		84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quicksy_RegisterAccount.swift; sourceTree = "<group>"; };
 		84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftHelpers.swift; sourceTree = "<group>"; };
 		84C1CD512A8F617F007076ED /* MLStreamRedirect.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLStreamRedirect.m; sourceTree = "<group>"; };
 		84C1CD532A8F6196007076ED /* MLStreamRedirect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLStreamRedirect.h; sourceTree = "<group>"; };
@@ -1242,7 +1230,6 @@
 		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */,
 				841EE42E2A426F0900D3AF14 /* tools */,
 				84D31CDA28653AA9006D7926 /* WebRTC */,
 				C1E4654424EE515200CA5AAF /* localization */,
@@ -1339,7 +1326,6 @@
 				C12436122434AB5D00B8F074 /* MLAttributedLabel.h */,
 				C12436132434AB5D00B8F074 /* MLAttributedLabel.m */,
 				20D3611B2C10E12500E46587 /* BoardingCards.swift */,
-				84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */,
 			);
 			name = OnBoard;
 			sourceTree = "<group>";
@@ -1349,10 +1335,6 @@
 			children = (
 				84EC7FBB2F5A9458008ACC3F /* MLDelayedDealloc.h */,
 				84EC7FBC2F5A9458008ACC3F /* MLDelayedDealloc.m */,
-				8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */,
-				8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */,
-				8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */,
-				8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */,
 				84FC37562897523500634E3E /* metamacros.h */,
 				54391BB9273499E80050DAFB /* UIColor+Extension.h */,
 				54391BBA273499E80050DAFB /* UIColor+Extension.m */,
@@ -1629,8 +1611,6 @@
 				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
 				3424B4EF2D232C14009F6503 /* HelperTools.h in Headers */,
 				3424B4EE2D232C0F009F6503 /* MLCall.h in Headers */,
-				8418B5632C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h in Headers */,
-				8418B55D2C7EC6B7006FAF60 /* Quicksy_Country.h in Headers */,
 				844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */,
 				C16D18352792A4AF00F869A0 /* DataLayerMigrations.h in Headers */,
 				340F0CA62D24267B006224D0 /* MLXMLNode.h in Headers */,
@@ -1955,7 +1935,6 @@
 				848C73E02BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */,
 				26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */,
 				842790852A32D16D005C18CC /* CallSounds in Resources */,
-				845836BA2C49F36300B11EC5 /* Quicksy Launch Screen.storyboard in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				26E8462824EABAED00ECE419 /* Main.storyboard in Resources */,
@@ -2257,7 +2236,6 @@
 				3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */,
 				E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */,
 				E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */,
-				84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
@@ -2363,7 +2341,6 @@
 				D0BEF5062EF1F5A800947F75 /* MLFiletransferInfo.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
 				540BD0D424D8D2000087A743 /* IPC.m in Sources */,
-				8418B55E2C7EC6B7006FAF60 /* Quicksy_Country.m in Sources */,
 				84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */,
 				541B6AB4262BC9040038B936 /* MLStream.m in Sources */,
 				84FC37552897521500634E3E /* snprintf.m in Sources */,
@@ -2381,7 +2358,6 @@
 				389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */,
 				84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
-				8418B5642C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m in Sources */,
 				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,
 				C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */,
 				26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */,

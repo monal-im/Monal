@@ -24,7 +24,6 @@
 #import <monalxmpp/MLCall.h>      //for MLCallType
 #import "XMPPIQ.h"
 #import "MLIQProcessor.h"
-#import <monalxmpp/Quicksy_Country.h>
 #import <Monal-Swift.h>
 #import "chatViewController.h"
 

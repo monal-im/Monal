@@ -11,8 +11,6 @@ struct PasswordMigration: View {
     @State var needingMigration: [Int:[String:NSObject]]
 #if IS_ALPHA
     let appLogoId = ImageResource.alphaAppLogo
-#elseif IS_QUICKSY
-    let appLogoId = ImageResource.quicksyAppLogo
 #else
     let appLogoId = ImageResource.appLogo
 #endif

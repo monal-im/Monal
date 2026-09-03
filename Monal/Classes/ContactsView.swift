@@ -103,10 +103,6 @@ struct ContactsView: View {
     }
     
     private static func shouldDisplayContact(_ contact: MLContact) -> Bool {
-#if IS_QUICKSY
-        return true
-#endif
-        
         return contact.isSubscribedTo || contact.hasOutgoingContactRequest || contact.isSubscribedFrom
     }
 

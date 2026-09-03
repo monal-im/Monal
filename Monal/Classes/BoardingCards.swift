@@ -106,7 +106,6 @@ struct OnboardingView: View {
                                 Spacer()
                                 
                                 HStack {
-#if !IS_QUICKSY
                                     if index == 0 && self.appDelegate.showOneClickButton {
                                         Button {
                                             let appDelegate = UIApplication.shared.delegate as! MonalAppDelegate
@@ -118,7 +117,6 @@ struct OnboardingView: View {
                                             Text(card.nextText ?? "Take me to 1-Click registration")
                                         }
                                     }
-#endif
                                     Spacer()
                                     if index < cards.count - 1 {
                                         Button {
@@ -171,27 +169,6 @@ struct OnboardingView: View {
 
 @ViewBuilder
 func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
-#if IS_QUICKSY
-    let cards = [
-        OnboardingCard(
-            title: Text("Welcome to Quicksy !"),
-            description: nil,
-            imageName: "hand.wave",
-            articleText: Text("""
-            Quicksy syncs your contact list in regular intervals to make suggestions about possible contacts who are already on Quicksy.
-            
-            Quicksy shares and stores images, audio recordings, videos and other media to deliver them to the intended recipients. Files will be stored for up to 30 days.
-            
-            Find more Information in our [Privacy Policy](https://quicksy.im/privacy.htm).
-            """),
-            customView: nil,
-            //this is needed because the `#if IS_QUICKSY` blocks the compiler extraction of this LocalizedStringKey based string
-            //during runtime, the localized string will be used as a localization key.
-            //no translation will be found. So, the key (which is already a translation) will be used as is.
-            nextText: LocalizedStringKey(stringLiteral: NSLocalizedString("Accept and continue", comment:"Quicksy privacy policy"))
-        ),
-    ]
-#else
     let cards = [
         OnboardingCard(
             title: Text("Welcome to Monal !"),
@@ -248,7 +225,6 @@ func createOnboardingView(delegate: SheetDismisserProtocol) -> some View {
             nextText: nil
         ),
     ]
-#endif
     OnboardingView(delegate: delegate, cards: cards)
 }
 

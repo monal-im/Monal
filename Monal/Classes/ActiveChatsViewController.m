@@ -8,7 +8,6 @@
 
 #include "metamacros.h"
 
-#import <Contacts/Contacts.h>
 #import "ActiveChatsViewController.h"
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/xmpp.h>
@@ -22,8 +21,6 @@
 #import "MLSettingsAboutViewController.h"
 #import <monalxmpp/MLVoIPProcessor.h>
 #import <monalxmpp/MLCall.h>      //for MLCallType
-#import "XMPPIQ.h"
-#import "MLIQProcessor.h"
 #import <Monal-Swift.h>
 #import "chatViewController.h"
 

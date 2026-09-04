@@ -77,9 +77,6 @@
     // that will clutter the list of selectable contacts, but you can always use sirikit interactions
     // to get the recently used contacts listed
     NSArray<MLContact*>* allContacts = [[DataLayer sharedInstance] contactList];
-#ifdef IS_QUICKSY
-    self.recipients = allContacts;
-#else
     NSMutableArray<MLContact*>* contactsToDisplay = [NSMutableArray new];
     //ignore all contacts not at least in any roster state: e.g. subscribedTo or asking state
     //OR is subscribedFrom (e.g. we approved them already, but they don't approve us)
@@ -91,7 +88,6 @@
         if(((contact.isSubscribedTo || contact.hasOutgoingContactRequest) || contact.isSubscribedFrom) && !contact.isPinned)
             [contactsToDisplay addObject:contact];
     self.recipients = [contactsToDisplay copy];
-#endif
     self.accounts = [[DataLayer sharedInstance] enabledAccountList];
 
     if(self.intentContact != nil)

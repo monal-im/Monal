@@ -136,10 +136,6 @@ removes a contact from the roster
 -(void) setGetRoomConfig;
 -(void) setRoomConfig:(XMPPDataForm*) configForm;
 
-#ifdef IS_QUICKSY
--(void) setQuicksyPhoneBook:(NSArray*) numbers;
-#endif
-
 @end
 
 NS_ASSUME_NONNULL_END

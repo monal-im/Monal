@@ -28,9 +28,7 @@ FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 #import <monalxmpp/MLVoIPProcessor.h>
 #import <monalxmpp/MLCall.h>
 #import <monalxmpp/HelperTools.h>
-#import <monalxmpp/HelperTools+Quicksy_CountryCodes.h>
 #import <monalxmpp/MLDelayableTimer.h>
-#import <monalxmpp/Quicksy_Country.h>
 #import <monalxmpp/IPC.h>
 #import <monalxmpp/MLFiletransfer.h>
 #import <monalxmpp/MLFiletransferInfo.h>

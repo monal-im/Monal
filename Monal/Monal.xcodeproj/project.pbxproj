@@ -157,10 +157,6 @@
 		8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */; };
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
-		8418B55D2C7EC6B7006FAF60 /* Quicksy_Country.h in Headers */ = {isa = PBXBuildFile; fileRef = 8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8418B55E2C7EC6B7006FAF60 /* Quicksy_Country.m in Sources */ = {isa = PBXBuildFile; fileRef = 8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */; };
-		8418B5632C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8418B5642C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m in Sources */ = {isa = PBXBuildFile; fileRef = 8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */; };
 		841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F19297B18720074F9B7 /* AccountPicker.swift */; };
 		841B6F1C297B3CFC0074F9B7 /* AVCallUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */; };
 		841EE4302A426F2300D3AF14 /* MLCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */; };
@@ -173,7 +169,6 @@
 		844921EA2C29F9A000B99A9C /* MLDelayableTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 844921E92C29F9A000B99A9C /* MLDelayableTimer.m */; };
 		844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84558DBF2DF04C3100F8357F /* OneClickRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84558DBE2DF04C3100F8357F /* OneClickRegistration.swift */; };
-		845836BA2C49F36300B11EC5 /* Quicksy Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */; };
 		845D636B2AD4AEDA0066EFFB /* MediaViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845D636A2AD4AEDA0066EFFB /* MediaViewer.swift */; };
 		845EFFBD2918721800C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		845EFFBE2918723D00C1E03E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
@@ -195,7 +190,6 @@
 		84A8340C2F1156F5004738AE /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84A8340B2F1156F5004738AE /* WebRTC */; };
 		84AF79C22DF3C0A900FE3818 /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79C12DF3C0A900FE3818 /* CropViewController */; };
 		84AF79C42DF3C0A900FE3818 /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79C32DF3C0A900FE3818 /* TOCropViewController */; };
-		84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */; };
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
 		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; };
@@ -627,10 +621,6 @@
 		8414ADFA2A7ABAC900EFFCCC /* LibMonalRustSwiftBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LibMonalRustSwiftBridge; path = ../rust/LibMonalRustSwiftBridge; sourceTree = "<group>"; };
 		841898AB2957DBAC00FEC77D /* RichAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichAlert.swift; sourceTree = "<group>"; };
 		8418B5582C7EBD39006FAF60 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
-		8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Quicksy_Country.h; sourceTree = "<group>"; };
-		8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Quicksy_Country.m; sourceTree = "<group>"; };
-		8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "HelperTools+Quicksy_CountryCodes.h"; sourceTree = "<group>"; };
-		8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "HelperTools+Quicksy_CountryCodes.m"; sourceTree = "<group>"; };
 		841B6F19297B18720074F9B7 /* AccountPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountPicker.swift; sourceTree = "<group>"; };
 		841B6F1B297B3CFC0074F9B7 /* AVCallUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVCallUI.swift; sourceTree = "<group>"; };
 		841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLCrashReporter.m; path = Classes/MLCrashReporter.m; sourceTree = "<group>"; };
@@ -643,7 +633,6 @@
 		844921E92C29F9A000B99A9C /* MLDelayableTimer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDelayableTimer.m; sourceTree = "<group>"; };
 		844921EB2C29F9BE00B99A9C /* MLDelayableTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDelayableTimer.h; sourceTree = "<group>"; };
 		84558DBE2DF04C3100F8357F /* OneClickRegistration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneClickRegistration.swift; sourceTree = "<group>"; };
-		845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Quicksy Launch Screen.storyboard"; path = "Monal-iOS/Quicksy Launch Screen.storyboard"; sourceTree = "<group>"; };
 		845D636A2AD4AEDA0066EFFB /* MediaViewer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaViewer.swift; sourceTree = "<group>"; };
 		846DF27B2937FAA600AAB9C0 /* ChatPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatPlaceholder.swift; sourceTree = "<group>"; };
 		847311222C893D2600739CC6 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
@@ -655,7 +644,6 @@
 		848C73DF2BDF2014007035C9 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		849A53E3287135B2007E941A /* MLVoIPProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLVoIPProcessor.m; path = Classes/MLVoIPProcessor.m; sourceTree = SOURCE_ROOT; };
 		849A53E5287135D7007E941A /* MLVoIPProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLVoIPProcessor.h; path = Classes/MLVoIPProcessor.h; sourceTree = SOURCE_ROOT; };
-		84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quicksy_RegisterAccount.swift; sourceTree = "<group>"; };
 		84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftHelpers.swift; sourceTree = "<group>"; };
 		84C1CD512A8F617F007076ED /* MLStreamRedirect.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLStreamRedirect.m; sourceTree = "<group>"; };
 		84C1CD532A8F6196007076ED /* MLStreamRedirect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLStreamRedirect.h; sourceTree = "<group>"; };
@@ -1242,7 +1230,6 @@
 		26B2A4B41B73040000272E63 /* Monal-iOS */ = {
 			isa = PBXGroup;
 			children = (
-				845836B92C49F36300B11EC5 /* Quicksy Launch Screen.storyboard */,
 				841EE42E2A426F0900D3AF14 /* tools */,
 				84D31CDA28653AA9006D7926 /* WebRTC */,
 				C1E4654424EE515200CA5AAF /* localization */,
@@ -1339,7 +1326,6 @@
 				C12436122434AB5D00B8F074 /* MLAttributedLabel.h */,
 				C12436132434AB5D00B8F074 /* MLAttributedLabel.m */,
 				20D3611B2C10E12500E46587 /* BoardingCards.swift */,
-				84BBAEC92C42D272009492E2 /* Quicksy_RegisterAccount.swift */,
 			);
 			name = OnBoard;
 			sourceTree = "<group>";
@@ -1349,10 +1335,6 @@
 			children = (
 				84EC7FBB2F5A9458008ACC3F /* MLDelayedDealloc.h */,
 				84EC7FBC2F5A9458008ACC3F /* MLDelayedDealloc.m */,
-				8418B5612C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h */,
-				8418B5622C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m */,
-				8418B55B2C7EC6B7006FAF60 /* Quicksy_Country.h */,
-				8418B55C2C7EC6B7006FAF60 /* Quicksy_Country.m */,
 				84FC37562897523500634E3E /* metamacros.h */,
 				54391BB9273499E80050DAFB /* UIColor+Extension.h */,
 				54391BBA273499E80050DAFB /* UIColor+Extension.m */,
@@ -1629,8 +1611,6 @@
 				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
 				3424B4EF2D232C14009F6503 /* HelperTools.h in Headers */,
 				3424B4EE2D232C0F009F6503 /* MLCall.h in Headers */,
-				8418B5632C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.h in Headers */,
-				8418B55D2C7EC6B7006FAF60 /* Quicksy_Country.h in Headers */,
 				844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */,
 				C16D18352792A4AF00F869A0 /* DataLayerMigrations.h in Headers */,
 				340F0CA62D24267B006224D0 /* MLXMLNode.h in Headers */,
@@ -1955,7 +1935,6 @@
 				848C73E02BDF2014007035C9 /* PrivacyInfo.xcprivacy in Resources */,
 				26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */,
 				842790852A32D16D005C18CC /* CallSounds in Resources */,
-				845836BA2C49F36300B11EC5 /* Quicksy Launch Screen.storyboard in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				26E8462824EABAED00ECE419 /* Main.storyboard in Resources */,
@@ -2257,7 +2236,6 @@
 				3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */,
 				E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */,
 				E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */,
-				84BBAECA2C42D272009492E2 /* Quicksy_RegisterAccount.swift in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
@@ -2363,7 +2341,6 @@
 				D0BEF5062EF1F5A800947F75 /* MLFiletransferInfo.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
 				540BD0D424D8D2000087A743 /* IPC.m in Sources */,
-				8418B55E2C7EC6B7006FAF60 /* Quicksy_Country.m in Sources */,
 				84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */,
 				541B6AB4262BC9040038B936 /* MLStream.m in Sources */,
 				84FC37552897521500634E3E /* snprintf.m in Sources */,
@@ -2381,7 +2358,6 @@
 				389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */,
 				84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
-				8418B5642C7ECFD6006FAF60 /* HelperTools+Quicksy_CountryCodes.m in Sources */,
 				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,
 				C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */,
 				26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */,
@@ -3979,365 +3955,6 @@
 			};
 			name = Beta;
 		};
-		C15D0B0D2B3EF70E00845061 /* AppStore-Quicksy */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = quicksyGreen;
-				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_STATIC_ANALYZER_MODE_ON_ANALYZE_ACTION = shallow;
-				CLANG_WARN_ATOMIC_IMPLICIT_SEQ_CST = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_COMPLETION_HANDLER_MISUSE = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_CXX0X_EXTENSIONS = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_FLOAT_CONVERSION = NO;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = NO;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = NO;
-				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES_ERROR;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0;
-				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = S8D843U34Y;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					"IS_QUICKSY=1",
-				);
-				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = NO;
-				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
-				GCC_WARN_SIGN_COMPARE = YES;
-				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNKNOWN_PRAGMAS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_LABEL = YES;
-				GCC_WARN_UNUSED_PARAMETER = NO;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
-				LLVM_LTO = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.1;
-				MARKETING_VERSION = 0.0.1;
-				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
-				SDKROOT = iphoneos;
-				STRIP_INSTALLED_PRODUCT = NO;
-				STRIP_STYLE = "non-global";
-				STRIP_SWIFT_SYMBOLS = NO;
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = IS_QUICKSY;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = "AppStore-Quicksy";
-		};
-		C15D0B0E2B3EF70E00845061 /* AppStore-Quicksy */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 213F5BFD4599EC9317B99E97 /* Pods-Monal.appstore-quicksy.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = QuicksyAppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CLANG_LINK_OBJC_RUNTIME = YES;
-				CLANG_WARN_ASSIGN_ENUM = YES;
-				CLANG_WARN_COMMA = YES_ERROR;
-				CLANG_WARN_DELETE_NON_VIRTUAL_DTOR = YES_ERROR;
-				CLANG_WARN_FLOAT_CONVERSION = YES;
-				CLANG_WARN_FRAMEWORK_INCLUDE_PRIVATE_FROM_PUBLIC = YES;
-				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = NO;
-				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
-				CLANG_WARN_PRAGMA_PACK = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES_ERROR;
-				CLANG_WARN_SEMICOLON_BEFORE_METHOD_BODY = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES_ERROR;
-				CLANG_WARN_VEXING_PARSE = YES_ERROR;
-				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
-				CODE_SIGN_ENTITLEMENTS = Quicksy.ios.entitlements;
-				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = Quicksy.ios.entitlements;
-				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = Quicksy.macos.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				COMPILER_INDEX_STORE_ENABLE = YES;
-				CURRENT_PROJECT_VERSION = 0;
-				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = S8D843U34Y;
-				ENABLE_BITCODE = NO;
-				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
-				ENABLE_PREVIEWS = YES;
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)",
-				);
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = MonalSourceCodePrefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
-				GCC_THREADSAFE_STATICS = NO;
-				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = YES;
-				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
-				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
-				INFOPLIST_FILE = "Quicksy-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = Quicksy;
-				LD_RUNPATH_SEARCH_PATHS = (
-					/usr/lib/swift,
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.monal-im.prod.ios.quicksy";
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.quicksy";
-				PRODUCT_MODULE_NAME = Monal;
-				PRODUCT_NAME = Quicksy;
-				PROVISIONING_PROFILE = "";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				STRIP_INSTALLED_PRODUCT = NO;
-				STRIP_STYLE = "non-global";
-				STRIP_SWIFT_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = YES;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "Classes/Monal-Bridging-Header.h";
-				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
-				SWIFT_STRICT_CONCURRENCY = targeted;
-				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = "AppStore-Quicksy";
-		};
-		C15D0B0F2B3EF70E00845061 /* AppStore-Quicksy */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9760CF4718351300C4256921 /* Pods-shareSheet.appstore-quicksy.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Quicksy.sharesheet.entitlements;
-				CURRENT_PROJECT_VERSION = 0;
-				DEAD_CODE_STRIPPING = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
-				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.monal-im.prod.ios.quicksy.shareSheet";
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.quicksy.shareSheet";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRIP_INSTALLED_PRODUCT = NO;
-				STRIP_SWIFT_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = YES;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = "AppStore-Quicksy";
-		};
-		C15D0B102B3EF70E00845061 /* AppStore-Quicksy */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = AA697C1F9B9637B86665DFF1 /* Pods-NotificationService.appstore-quicksy.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_ENTITLEMENTS = "";
-				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = NotificationService/Quicksy.NotificationService.ios.entitlements;
-				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = NotificationService/Quicksy.NotificationService.macos.entitlements;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0;
-				DEAD_CODE_STRIPPING = NO;
-				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
-				INFOPLIST_FILE = NotificationService/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.monal-im.prod.ios.quicksy.notificationService";
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = "org.monal-im.prod.catalyst.quicksy.notificationService";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				STRIP_INSTALLED_PRODUCT = NO;
-				STRIP_SWIFT_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = YES;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = "AppStore-Quicksy";
-		};
-		C15D0B112B3EF70E00845061 /* AppStore-Quicksy */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9899D670570190DCBE9EEDDB /* Pods-monalxmpp.appstore-quicksy.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				CURRENT_PROJECT_VERSION = 0;
-				DEAD_CODE_STRIPPING = NO;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_INPUT_FILETYPE = automatic;
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = monalxmpp/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				STRIP_INSTALLED_PRODUCT = NO;
-				STRIP_STYLE = "non-global";
-				STRIP_SWIFT_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = YES;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "";
-				SWIFT_OBJC_INTERFACE_HEADER_NAME = "monalxmpp-Swift.h";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = "AppStore-Quicksy";
-		};
-		C15D0B122B3EF70E00845061 /* AppStore-Quicksy */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 26ABE9FB494A9E7F3044C695 /* Pods-MonalUITests.appstore-quicksy.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				DEAD_CODE_STRIPPING = NO;
-				INFOPLIST_FILE = MonalUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalUITests;
-				PRODUCT_NAME = MonalUITests;
-				STRIP_INSTALLED_PRODUCT = NO;
-				STRIP_SWIFT_SYMBOLS = NO;
-				TEST_TARGET_NAME = Monal;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = "AppStore-Quicksy";
-		};
-		C15D0B132B3EF70E00845061 /* AppStore-Quicksy */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = B58835E4BBDCCB6BE1E8F0AE /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = MonalXMPPUnitTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalXMPPUnitTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				STRIP_INSTALLED_PRODUCT = NO;
-				STRIP_SWIFT_SYMBOLS = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OBJC_BRIDGING_HEADER = "MonalXMPPUnitTests/MonalXMPPUnitTests-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = "AppStore-Quicksy";
-		};
 		C1850EBD25F38A2D003D506A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F7506FDE7A78EB0CAB14FF60 /* Pods-MonalUITests.debug.xcconfig */;
@@ -4772,7 +4389,6 @@
 				26E74FBE17B06D2200FD91AE /* Adhoc */,
 				C1E1BCAF288BBAB00046AB47 /* Alpha */,
 				2675EF5A18B98C2D0059C5C3 /* AppStore */,
-				C15D0B0E2B3EF70E00845061 /* AppStore-Quicksy */,
 				C11C870D26A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4785,7 +4401,6 @@
 				260773CA232FC4E800BFD50F /* Adhoc */,
 				C1E1BCB1288BBAB00046AB47 /* Alpha */,
 				260773CB232FC4E800BFD50F /* AppStore */,
-				C15D0B102B3EF70E00845061 /* AppStore-Quicksy */,
 				C11C870F26A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4798,7 +4413,6 @@
 				26AA701E2146BBB900598605 /* Adhoc */,
 				C1E1BCB0288BBAB00046AB47 /* Alpha */,
 				26AA701F2146BBB900598605 /* AppStore */,
-				C15D0B0F2B3EF70E00845061 /* AppStore-Quicksy */,
 				C11C870E26A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4811,7 +4425,6 @@
 				26CC579D23A0867400ABB92A /* Adhoc */,
 				C1E1BCB2288BBAB00046AB47 /* Alpha */,
 				26CC579E23A0867400ABB92A /* AppStore */,
-				C15D0B112B3EF70E00845061 /* AppStore-Quicksy */,
 				C11C871026A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4824,7 +4437,6 @@
 				26E74FBD17B06D2200FD91AE /* Adhoc */,
 				C1E1BCAE288BBAB00046AB47 /* Alpha */,
 				2675EF5918B98C2D0059C5C3 /* AppStore */,
-				C15D0B0D2B3EF70E00845061 /* AppStore-Quicksy */,
 				C11C870B26A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4837,7 +4449,6 @@
 				C1049190261301530054AC9E /* Adhoc */,
 				C1E1BCB4288BBAB00046AB47 /* Alpha */,
 				C1049191261301530054AC9E /* AppStore */,
-				C15D0B132B3EF70E00845061 /* AppStore-Quicksy */,
 				C11C871226A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4850,7 +4461,6 @@
 				C1850EBE25F38A2D003D506A /* Adhoc */,
 				C1E1BCB3288BBAB00046AB47 /* Alpha */,
 				C1850EBF25F38A2D003D506A /* AppStore */,
-				C15D0B122B3EF70E00845061 /* AppStore-Quicksy */,
 				C11C871126A83C1D00B8DEA5 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;

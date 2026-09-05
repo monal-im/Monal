@@ -257,7 +257,7 @@ static void addFilePathWithSize(const struct KSCrashReportWriter* _Nonnull write
     writer->addIntegerElement(writer, name_size, st.st_size);
 }
 
-static void crash_callback(const struct KSCrashReportWriter* _Nonnull writer)
+static void crash_callback(const KSCrash_ExceptionHandlingPlan *const _Nonnull plan, const struct KSCrashReportWriter* _Nonnull writer)
 {
     //copy current logfile
     int logfileCopyRetval = asyncSafeCopyFile(_origLogfilePath, _logfilePath);
@@ -2444,9 +2444,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         DDLogWarn(@"Not installing crash handler: debugger is active!");
         config.monitors = KSCrashMonitorTypeManual;
     }
-    config.crashNotifyCallback = ^(const struct KSCrashReportWriter* _Nonnull writer) {
-        crash_callback(writer);
-    };
+    config.isWritingReportCallback = crash_callback;
     //this can trigger crashes on macos < 13 (e.g. mac catalyst < 16) (and possibly ios < 16)
     config.enableSwapCxaThrow = YES;
     config.enableQueueNameSearch = NO;      //this is not async safe and can crash :(

@@ -2468,7 +2468,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         @"bundleName": nilWrapper([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]),
         @"appVersion": [self appBuildVersionInfoFor:MLVersionTypeLog],
     };
-    
+
     if([KSCrash.sharedInstance installWithConfiguration:config error:&error] == NO)
     {
         DDLogError(@"Failed to install KSCrash monitors, crash reporting is disabled now!");

@@ -1690,7 +1690,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     if(count > 0 && options == nil && applicationState != UIApplicationStateBackground)
     {
         [MLXMPPManager sharedInstance].isConnectBlocked = YES;
-        DDLogWarn(@"Blocking connect of connectIfNecessary: crash reports still pending: %ld, retrying in 1 second...", (long)count);
+        DDLogWarn(@"Blocking connect of connectIfNecessary: crash reports still pending: %ld, retrying in 1 second...", count);
         cancelCurrentTimer = createTimer(1.0, (^{ [self connectIfNecessaryWithOptions:options]; }));
     }
     else
@@ -1698,7 +1698,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         [MLXMPPManager sharedInstance].isConnectBlocked = NO;
         DDLogInfo(@"Now unblocking connect of connectIfNecessary (applicationState%@UIApplicationStateBackground, count=%ld, options=%@)...",
                     applicationState == UIApplicationStateBackground ? @"==" : @"!=",
-                    (long)count,
+                    count,
                     options
         );
         cancelEmergencyTimer();

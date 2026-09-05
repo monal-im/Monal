@@ -259,6 +259,8 @@ static void addFilePathWithSize(const struct KSCrashReportWriter* _Nonnull write
 
 static void crash_callback(const KSCrash_ExceptionHandlingPlan *const _Nonnull plan, const struct KSCrashReportWriter* _Nonnull writer)
 {
+    if(plan->crashedDuringExceptionHandling)
+        return;
     //copy current logfile
     int logfileCopyRetval = asyncSafeCopyFile(_origLogfilePath, _logfilePath);
     int errnoLogfileCopy = errno;

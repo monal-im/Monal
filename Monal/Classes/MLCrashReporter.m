@@ -99,7 +99,7 @@
     DDLogVerbose(@"Trying to send crash reports...");
     [KSCrash.sharedInstance.reportStore sendAllReportsWithCompletion:^(NSArray* reports, NSError* error) {
         if(error == nil)
-            DDLogWarn(@"Sent %d reports", (int)[reports count]);
+            DDLogWarn(@"Sent %lu reports", [reports count]);
         else
             DDLogError(@"Failed to send reports: %@", error);
     }];

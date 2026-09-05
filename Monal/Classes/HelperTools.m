@@ -27,12 +27,6 @@
 #import <CommonCrypto/CommonHMAC.h>
 #import <MapKit/MapKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
-#import <KSCrash.h>
-#import <KSCrashConfiguration.h>
-#import <KSCrashC.h>
-//can not be imported, use extern declaration instead
-//#import <KSCrashReportStoreC+Private.h>
-extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import <monalxmpp/monalxmpp-Swift.h>
 #import <monalxmpp/hsluv.h>
 #import <monalxmpp/HelperTools.h>
@@ -72,6 +66,10 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @import UniformTypeIdentifiers;
 @import QuickLookThumbnailing;
 @import SVGKit;
+//can not be imported, use extern declaration instead
+//from KSCrashReportStoreC+Private.h
+extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
+@import KSCrashRecording;
 
 @interface KSCrash()
 @property(nonatomic,readwrite,retain) NSString* basePath;

@@ -7,23 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <KSCrash.h>
-#import <KSNSErrorHelper.h>
-#import <KSCrashReport.h>
-#import <KSCrashReportFilterBasic.h>
-#import <KSCrashReportFilterJSON.h>
-#import <KSCrashReportFilterStringify.h>
-#import <KSCrashReportFilterAppleFmt.h>
-#import <KSCrashReportFilterGZip.h>
-#import <KSCrashReportFields.h>
-#import <KSCrashReportFilterDemangle.h>
-#import <KSCrashReportFilterDoctor.h>
-#import <KSCrashReportFilterAlert.h>
 #import <MessageUI/MessageUI.h>
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/HelperTools.h>
 #import "MonalAppDelegate.h"
 #import "MLCrashReporter.h"
+
+@import KSCrashCore;
+@import KSCrashDemangleFilter;
+@import KSCrashFilters;
 
 #define PART_SEPARATOR_FORMAT "\n\n-------- d049d576-9bf0-47dd-839f-dee6b07c1df9 -------- %@ -------- d049d576-9bf0-47dd-839f-dee6b07c1df9 --------\n\n"
 

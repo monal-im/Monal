@@ -100,6 +100,8 @@
 		344B50C03030B7B80022BD6A /* KSCrash in Frameworks */ = {isa = PBXBuildFile; productRef = 344B50BF3030B7B80022BD6A /* KSCrash */; };
 		34660BA63043057100FDA777 /* SAMKeychain in Frameworks */ = {isa = PBXBuildFile; productRef = 34660BA53043057100FDA777 /* SAMKeychain */; };
 		34745126302F641600F23210 /* NotificationBannerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 34745125302F641600F23210 /* NotificationBannerSwift */; };
+		34A6FD66304EAEE50092A382 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
+		34A6FD67304EB6CC0092A382 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		34BC08122C5E9BE30099FB85 /* ContentUnavailableShimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */; };
 		34C9CAA430293B5E00A87694 /* HelperToolsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C9CAA330293B5E00A87694 /* HelperToolsTest.swift */; };
 		34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E58B4A2C68E7BC009A1634 /* ContactsView.swift */; };
@@ -1994,6 +1996,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34A6FD66304EAEE50092A382 /* Media.xcassets in Resources */,
+				34A6FD67304EB6CC0092A382 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

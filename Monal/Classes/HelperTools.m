@@ -2436,7 +2436,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     DDLogVerbose(@"KSCrash installing handler with callback: %p", crash_callback);
     KSCrashConfiguration* config = [KSCrashConfiguration new];
     config.installPath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
-    config.monitors = KSCrashMonitorTypeProductionSafe;      //KSCrashMonitorTypeAll
+    config.monitors = KSCrashMonitorTypeProductionSafe & (~KSCrashMonitorTypeWatchdog);       // no main thread watchdog
     //don't try to debug zombies if not in debug mode
 #ifndef DEBUG
     config.monitors = config.monitors & (~KSCrashMonitorTypeZombie);
@@ -2453,8 +2453,6 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     config.enableMemoryIntrospection = YES;
     config.addConsoleLogToReport = YES;
     config.printPreviousLogOnStartup = NO;     //debug kscrash itself?
-    config.enableSigTermMonitoring = YES;
-    config.deadlockWatchdogInterval = 0;       // no main thread watchdog
     config.reportStoreConfiguration.maxReportCount = 4;
     config.reportStoreConfiguration.reportCleanupPolicy = KSCrashReportCleanupPolicyAlways;     //KSCrashReportCleanupPolicyOnSuccess;
     //don't use the bundle names to store our crash reports which are different

@@ -27,6 +27,7 @@
 #import <monalxmpp/Quicksy_Country.h>
 #import <Monal-Swift.h>
 #import "chatViewController.h"
+#import "GeneratedAssetSymbols.h"
 
 #define prependToViewQueue(firstArg, ...)                           metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self prependToViewQueue:firstArg withId:MLViewIDUnspecified andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_prependToViewQueue(firstArg, __VA_ARGS__))
 #define _prependToViewQueue(ownId, block)                           [self prependToViewQueue:block withId:ownId andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
@@ -1428,8 +1429,8 @@ static NSMutableSet* _pushWarningDisplayed;
     }]];
     emptyDataSetView.imageView.translatesAutoresizingMaskIntoConstraints = YES;
     if(self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark)
-        return [UIImage imageNamed:@"chat_dark"];
-    return [UIImage imageNamed:@"chat"];
+        return [UIImage imageNamed:ACImageNameChatDark];
+    return [UIImage imageNamed:ACImageNameChat];
     
     /*
     DZNEmptyDataSetView* emptyDataSetView = self.chatListTable.emptyDataSetView;
@@ -1459,7 +1460,7 @@ static NSMutableSet* _pushWarningDisplayed;
         @"detailLabel": emptyDataSetView.detailLabel,
     }]];
     emptyDataSetView.imageView.translatesAutoresizingMaskIntoConstraints = YES;
-    return [UIImage imageNamed:@"chat"];
+    return [UIImage imageNamed:ACImageNameChat];
     */
 }
 
@@ -1495,7 +1496,7 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(UIColor*) backgroundColorForEmptyDataSet:(UIScrollView*) scrollView
 {
-    return [UIColor colorNamed:@"chats"];
+    return [UIColor colorNamed:ACColorNameChats];
 }
 
 -(BOOL) emptyDataSetShouldDisplay:(UIScrollView*) scrollView

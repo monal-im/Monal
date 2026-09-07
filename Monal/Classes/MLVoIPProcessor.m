@@ -20,6 +20,7 @@
 #import "ActiveChatsViewController.h"
 #import <monalxmpp/MLNotificationQueue.h>
 #import "secrets.h"
+#import "GeneratedAssetSymbols.h"
 
 @import PushKit;
 @import CallKit;
@@ -81,9 +82,9 @@ static NSMutableDictionary* _pendingCalls;
     config.includesCallsInRecents = YES;
     //see https://stackoverflow.com/a/45823730/3528174
 #ifndef IS_QUICKSY
-    config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:@"CallKitLogo"]);
+    config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:ACImageNameCallKitLogo]);
 #else
-    config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:@"QuicksyCallKitLogo"]);
+    config.iconTemplateImageData = UIImagePNGRepresentation([UIImage imageNamed:ACImageNameQuicksyCallKitLogo]);
 #endif
     self.cxProvider = [[CXProvider alloc] initWithConfiguration:config];
     [self.cxProvider setDelegate:self queue:dispatch_get_main_queue()];

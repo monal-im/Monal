@@ -10,6 +10,7 @@
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/HelperTools.h>
+#import "GeneratedAssetSymbols.h"
 
 @interface AccountListController ()
 @property (nonatomic, strong) NSDateFormatter* uptimeFormatter;
@@ -95,7 +96,7 @@
         cell.imageView.image = [UIImage systemImageNamed:@"checkmark.circle"];
         if([[MLXMPPManager sharedInstance] isAccountForIdConnected:[[self.accountList objectAtIndex:accNo] objectForKey:@"account_id"]])
         {
-            accessory.image = [UIImage imageNamed:@"Connected"];
+            accessory.image = [UIImage imageNamed:ACImageNameConnected];
             cell.accessoryView = accessory;
         }
         else

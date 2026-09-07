@@ -18,6 +18,7 @@
 #import "ActiveChatsViewController.h"
 #import "MLNotificationManager.h"
 #import "Monal-Swift.h"
+#import "GeneratedAssetSymbols.h"
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -782,7 +783,7 @@ enum DummySettingsRows {
         else
         {
             //use noicon image for account creation
-            [self.userAvatarImageView setImage:[MLImageManager circularImage:[UIImage imageNamed:@"noicon"]]];
+            [self.userAvatarImageView setImage:[MLImageManager circularImage:[UIImage imageNamed:ACImageNameNoicon]]];
         }
         [avatarView addSubview:self.userAvatarImageView];
         

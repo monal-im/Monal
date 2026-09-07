@@ -22,11 +22,11 @@ struct OneClickRegistration: View {
     ]
     
 #if IS_ALPHA
-    let appLogoId = "AlphaAppLogo"
+    let appLogoId = ImageResource.alphaAppLogo
 #elseif IS_QUICKSY
-    let appLogoId = "QuicksyAppLogo"
+    let appLogoId = ImageResource.quicksyAppLogo
 #else
-    let appLogoId = "AppLogo"
+    let appLogoId = ImageResource.appLogo
 #endif
 
     @StateObject var oneClickState = OneClickState()
@@ -202,7 +202,7 @@ struct OneClickRegistration: View {
                 ScrollView {
                     VStack(alignment: .leading) {
                         HStack () {
-                            Image(decorative: appLogoId)
+                            Image(appLogoId)
                                 .resizable()
                                 .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))

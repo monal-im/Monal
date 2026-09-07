@@ -36,11 +36,11 @@ struct WelcomeLogIn: View {
     @StateObject private var overlay = LoadingOverlayState()
 
 #if IS_ALPHA
-    let appLogoId = "AlphaAppLogo"
+    let appLogoId = ImageResource.alphaAppLogo
 #elseif IS_QUICKSY
-    let appLogoId = "QuicksyAppLogo"
+    let appLogoId = ImageResource.quicksyAppLogo
 #else
-    let appLogoId = "AppLogo"
+    let appLogoId = ImageResource.appLogo
 #endif
     
     private var credentialsEnteredAlert: Bool {
@@ -167,7 +167,7 @@ struct WelcomeLogIn: View {
                         if !advancedMode {
                             VStack {
                                 HStack () {
-                                    Image(decorative: appLogoId)
+                                    Image(appLogoId)
                                         .resizable()
                                         .frame(width: CGFloat(120), height: CGFloat(120), alignment: .center)
                                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))

@@ -13,6 +13,7 @@
 #import "MLLinkCell.h"
 #import "MLReloadCell.h"
 #import "MLUploadQueueCell.h"
+#import "GeneratedAssetSymbols.h"
 
 #import "ActiveChatsViewController.h"
 #import "AESGcm.h"
@@ -664,9 +665,9 @@ enum msgSentState {
 -(void) displayEncryptionStateInUI
 {
     if(self.contact.isEncrypted)
-        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"]];
+        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:ACImageName744LockedReceived]];
     else
-        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
+        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:ACImageName745Unlocked]];
     //disable encryption button on unsupported muc types
     if(self.contact.isMuc && [self.contact.mucType isEqualToString:kMucTypeGroup] == NO)
         [self.navBarEncryptToggleButton setEnabled:NO];

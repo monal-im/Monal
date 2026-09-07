@@ -12,6 +12,7 @@
 #import <monalxmpp/DataLayer.h>
 #import "AESGcm.h"
 #import <monalxmpp/UIColor+Extension.h>
+#import "GeneratedAssetSymbols.h"
 
 
 @interface MLImageManager()
@@ -160,7 +161,7 @@
 {
     if(_inboundImage)
         return _inboundImage;
-    _inboundImage = [[UIImage imageNamed:@"incoming"] resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
+    _inboundImage = [[UIImage imageNamed:ACImageNameIncoming] resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     return _inboundImage;
     
 }
@@ -169,7 +170,7 @@
 {
     if (_outboundImage)
         return _outboundImage;
-    _outboundImage = [[UIImage imageNamed:@"outgoing"] resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
+    _outboundImage = [[UIImage imageNamed:ACImageNameOutgoing] resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     return _outboundImage;
 }
 
@@ -354,9 +355,9 @@
             if(contact.isMuc)
             {
                 if([kMucTypeChannel isEqualToString:contact.mucType])
-                    toreturn = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_channel" inBundle:nil compatibleWithTraitCollection:nil]];
+                    toreturn = [MLImageManager circularImage:[UIImage imageNamed:ACImageNameNoiconChannel inBundle:nil compatibleWithTraitCollection:nil]];
                 else
-                    toreturn = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_muc" inBundle:nil compatibleWithTraitCollection:nil]];
+                    toreturn = [MLImageManager circularImage:[UIImage imageNamed:ACImageNameNoiconMuc inBundle:nil compatibleWithTraitCollection:nil]];
             }
             else
                 toreturn = [self generateDummyIconForContact:contact];
@@ -365,9 +366,9 @@
         {
             UIImage* overlay = nil;
             if([kMucTypeChannel isEqualToString:contact.mucType])
-                overlay = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_channel" inBundle:nil compatibleWithTraitCollection:nil]];
+                overlay = [MLImageManager circularImage:[UIImage imageNamed:ACImageNameNoiconChannel inBundle:nil compatibleWithTraitCollection:nil]];
             else
-                overlay = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_muc" inBundle:nil compatibleWithTraitCollection:nil]];
+                overlay = [MLImageManager circularImage:[UIImage imageNamed:ACImageNameNoiconMuc inBundle:nil compatibleWithTraitCollection:nil]];
             if(overlay)
                 toreturn = [MLImageManager image:toreturn withMucOverlay:overlay];
         }

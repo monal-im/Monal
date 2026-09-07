@@ -8,6 +8,7 @@
 
 #import "ShareViewController.h"
 #import "MLSelectionController.h"
+#import "GeneratedAssetSymbols.h"
 
 #import <monalxmpp/MLContact.h>
 #import <monalxmpp/MLConstants.h>
@@ -56,7 +57,7 @@
 {
     [super viewDidLoad];
     [self.navigationController.navigationBar setTintColor:UIColor.systemBackgroundColor];
-    [self.navigationController.navigationBar setBackgroundColor:[UIColor colorNamed:@"monalGreen"]];
+    [self.navigationController.navigationBar setBackgroundColor:[UIColor colorNamed:ACColorNameMonalGreen]];
     self.navigationController.navigationItem.title = NSLocalizedString(@"Monal", @"");
     
     DDLogInfo(@"Extension context: %@", self.extensionContext);

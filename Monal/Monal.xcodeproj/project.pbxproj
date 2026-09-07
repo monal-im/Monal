@@ -4895,8 +4895,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kstenerud/KSCrash";
 			requirement = {
-				kind = upToNextMinorVersion;
-				minimumVersion = 2.5.0;
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
 			};
 		};
 		34660BA43043057100FDA777 /* XCRemoteSwiftPackageReference "SAMKeychain" */ = {

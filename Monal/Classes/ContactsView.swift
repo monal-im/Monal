@@ -161,12 +161,12 @@ struct ContactsView: View {
         .overlay {
             if contactList.isEmpty {
                 ZStack {
-                    Color.contactsBackground
-                    ContentUnavailableShimView("You need friends for this ride", image: colorScheme == .dark ? "friends_dark" : "friends", description: Text("Add new contacts with the + button above. Your friends will pop up here when they can talk"))
+                    Color.contacts
+                    ContentUnavailableShimView("You need friends for this ride", image: colorScheme == .dark ? .friendsDark : .friends, description: Text("Add new contacts with the + button above. Your friends will pop up here when they can talk"))
                 }
             } else if searchResults.isEmpty {
                 ZStack {
-                    Color.contactsBackground
+                    Color.contacts
                     ContentUnavailableShimView.search(text:searchText)
                 }
             }

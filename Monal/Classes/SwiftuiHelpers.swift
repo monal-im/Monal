@@ -26,10 +26,6 @@ import NotificationBannerSwift
 public extension ShapeStyle where Self == Color {
     static var interpolatedWindowBackground: Color { Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor.systemBackground : UIColor.secondarySystemBackground }) }
     static var background: Color { Color(UIColor.systemBackground) }
-    static var secondaryBackground: Color { Color(UIColor.secondarySystemBackground) }
-    static var tertiaryBackground: Color { Color(UIColor.tertiarySystemBackground) }
-    static var monalGreen: Color { Color(UIColor(named:"monalGreen")!) }
-    static var contactsBackground: Color { Color(UIColor(named:"contacts")!) }
 }
 
 @objcMembers

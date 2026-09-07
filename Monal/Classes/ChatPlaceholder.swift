@@ -15,7 +15,7 @@ struct ChatPlaceholder: View {
             } else {
                 Color.white
             }
-            Image(colorScheme == .dark ? "park_white_black" : "park_colors")
+            Image(colorScheme == .dark ? .parkWhiteBlack : .parkColors)
                 .resizable()
                 .scaledToFill()
         }

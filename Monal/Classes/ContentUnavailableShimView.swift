@@ -8,11 +8,11 @@
 
 struct ContentUnavailableShimView: View {
     private var reason: LocalizedStringKey
-    private var image: String?
+    private var image: ImageResource?
     private var systemImage: String?
     private var description: Text
 
-    init(_ reason: LocalizedStringKey, image: String, description: Text) {
+    init(_ reason: LocalizedStringKey, image: ImageResource, description: Text) {
         self.image = image
         self.reason = reason
         self.description = description
@@ -44,7 +44,7 @@ struct ContentUnavailableShimView: View {
                         .font(.largeTitle)
                         .padding(.bottom, 32)
                 } else if let image = image {
-                    Image(decorative: image)
+                    Image(image)
                         .resizable()
                         .scaledToFit()
                         .foregroundStyle(.secondary)

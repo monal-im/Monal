@@ -59,8 +59,6 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import <monalxmpp/MLContactSoftwareVersionInfo.h>
 #import <monalxmpp/IPC.h>
 #import <monalxmpp/MLDelayableTimer.h>
-#import <monalxmpp/Quicksy_Country.h>
-#import "secrets.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -943,12 +941,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     shouldProvideVoip = YES;
 #endif
 #else
-#ifdef IS_QUICKSY
-    NSLocale* userLocale = [NSLocale currentLocale];
-    shouldProvideVoip = !([userLocale.countryCode containsString: @"CN"] || [userLocale.countryCode containsString: @"CHN"]);
-#else
     shouldProvideVoip = YES;
-#endif
 #endif
     return shouldProvideVoip;
 }
@@ -1088,7 +1081,6 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         [NSURL class],
         [OmemoState class],
         [MLContactSoftwareVersionInfo class],
-        [Quicksy_Country class],
         [NSUUID class],
         [MLPromise class],
         [NSError class],
@@ -2825,11 +2817,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 #if TARGET_OS_MACCATALYST
     NSString* resource = [NSString stringWithFormat:@"Monal-macOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
 #else
-#if IS_QUICKSY
-    NSString* resource = [NSString stringWithFormat:@"Quicksy-iOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
-#else
     NSString* resource = [NSString stringWithFormat:@"Monal-iOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
-#endif
 #endif
     return resource;
 }
@@ -3482,30 +3470,6 @@ a=%@\r\n", mid, candidate];
             [reactionsList addObject:substring];
     }];
     return reactionsList;
-}
-
-+(NSString*) hardwareString
-{
-    size_t size = 100;
-    char* hw_machine = malloc(size);
-    int name[] = {CTL_HW, HW_MACHINE};
-    sysctl(name, 2, hw_machine, &size, NULL, 0);
-    NSString* hardware = [NSString stringWithUTF8String:hw_machine];
-    free(hw_machine);
-    return hardware;
-}
-
-+(NSString*) generateQuicksyAuthorizationWithNumber:(NSString*) number installationId:(NSString*) installationId userAgent:(NSString*) userAgent andDevice:(NSString*) device
-{
-    NSString* authString = [NSString stringWithFormat:@"%@\0%@\0%@\0%@",
-        number,
-        installationId,
-        userAgent,
-        device
-    ];
-    NSString* authToken = [self encodeBase64WithData:[self sha256HmacForKey:[self dataWithBase64EncodedString:QUICKSY_API_SECRET] andData:[authString dataUsingEncoding:NSUTF8StringEncoding]]];
-    DDLogVerbose(@"authString=%@, authToken=%@", authString, authToken);
-    return authToken;
 }
 
 @end

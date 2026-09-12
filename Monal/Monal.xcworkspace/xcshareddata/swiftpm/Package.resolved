@@ -74,6 +74,15 @@
         }
       },
       {
+        "package": "SignalProtocolC",
+        "repositoryURL": "https://github.com/monal-im/libsignal-protocol-c",
+        "state": {
+          "branch": "master",
+          "revision": "0020d1c1c6e7cc0ab09fed5ad1bebf17145eeb87",
+          "version": null
+        }
+      },
+      {
         "package": "MarqueeLabel",
         "repositoryURL": "https://github.com/cbpowell/MarqueeLabel",
         "state": {
@@ -106,6 +115,15 @@
         "state": {
           "branch": "master",
           "revision": "19f05f16b30eed2ed398df30353ec52844e329e5",
+          "version": null
+        }
+      },
+      {
+        "package": "SignalProtocolObjC",
+        "repositoryURL": "https://github.com/monal-im/SignalProtocol-ObjC",
+        "state": {
+          "branch": "master",
+          "revision": "21f107c59d7cc43cd0da9ae6c1a3b175cb475672",
           "version": null
         }
       },

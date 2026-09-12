@@ -84,6 +84,7 @@
 		340F0CA42D2425D9006224D0 /* MLXMPPIdentity.h in Headers */ = {isa = PBXBuildFile; fileRef = 26611010238F08980030A4EE /* MLXMPPIdentity.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		340F0CA52D2425E1006224D0 /* MLLogFileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C15D504824C727CC002F75BB /* MLLogFileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		340F0CA62D24267B006224D0 /* MLXMLNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 260C51D2177F44AD0039634B /* MLXMLNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3417273230554BC7003238CC /* SignalProtocolObjC in Frameworks */ = {isa = PBXBuildFile; productRef = 3417273130554BC7003238CC /* SignalProtocolObjC */; };
 		341F44662CAF427500AA6C7D /* MLPromise.h in Headers */ = {isa = PBXBuildFile; fileRef = 341F44642CAF427500AA6C7D /* MLPromise.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		341F44672CAF427500AA6C7D /* MLPromise.m in Sources */ = {isa = PBXBuildFile; fileRef = 341F44652CAF427500AA6C7D /* MLPromise.m */; };
 		3423E276302F7AA400E12E6D /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = 3423E275302F7AA400E12E6D /* FLAnimatedImage */; };
@@ -909,6 +910,7 @@
 				34660BA63043057100FDA777 /* SAMKeychain in Frameworks */,
 				34F978CF303B90CB002029CF /* CSQLite+MonalTraits in Frameworks */,
 				84F632F02F80AAF900A59209 /* SVGKit in Frameworks */,
+				3417273230554BC7003238CC /* SignalProtocolObjC in Frameworks */,
 				84F632EB2F7F3EA300A59209 /* OrderedCollections in Frameworks */,
 				849ADF3F2BACF0360009BCD7 /* CocoaLumberjack in Frameworks */,
 				BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */,
@@ -1768,6 +1770,7 @@
 				344B50BF3030B7B80022BD6A /* KSCrash */,
 				34F978CE303B90CB002029CF /* CSQLite+MonalTraits */,
 				34660BA53043057100FDA777 /* SAMKeychain */,
+				3417273130554BC7003238CC /* SignalProtocolObjC */,
 			);
 			productName = monalxmpp;
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
@@ -1931,6 +1934,7 @@
 				344A829F3030C76B009AAC5D /* XCRemoteSwiftPackageReference "KSCrash" */,
 				34F978CD303B90CB002029CF /* XCRemoteSwiftPackageReference "sqlite3-package" */,
 				34660BA43043057100FDA777 /* XCRemoteSwiftPackageReference "SAMKeychain" */,
+				3417273030554BC7003238CC /* XCRemoteSwiftPackageReference "SignalProtocol-ObjC" */,
 			);
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
@@ -4869,6 +4873,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3417273030554BC7003238CC /* XCRemoteSwiftPackageReference "SignalProtocol-ObjC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/monal-im/SignalProtocol-ObjC";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		3423E274302F7AA400E12E6D /* XCRemoteSwiftPackageReference "FLAnimatedImage" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Flipboard/FLAnimatedImage";
@@ -4984,6 +4996,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3417273130554BC7003238CC /* SignalProtocolObjC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3417273030554BC7003238CC /* XCRemoteSwiftPackageReference "SignalProtocol-ObjC" */;
+			productName = SignalProtocolObjC;
+		};
 		3423E275302F7AA400E12E6D /* FLAnimatedImage */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3423E274302F7AA400E12E6D /* XCRemoteSwiftPackageReference "FLAnimatedImage" */;

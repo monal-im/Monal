@@ -7,11 +7,6 @@ platform :ios, '14.0'
 # ignore all warnings from all pods
 inhibit_all_warnings!
 
-def signalDeps
-  pod 'SignalProtocolC', git: 'https://github.com/monal-im/libsignal-protocol-c', branch: 'master'
-  pod 'SignalProtocolObjC', git: 'https://github.com/monal-im/SignalProtocol-ObjC.git', branch: 'master'
-end
-
 def monal
   use_frameworks!
   inhibit_all_warnings!
@@ -25,7 +20,6 @@ def monalxmpp
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
   use_frameworks!
   inhibit_all_warnings!
-  signalDeps
   pod "PromiseKit"
 end
 

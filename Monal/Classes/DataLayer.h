@@ -179,7 +179,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSArray<MLMessage*>*) messagesForHistoryIDs:(NSArray<NSNumber*>*) historyIDs;
 -(MLMessage* _Nullable) messageForHistoryID:(NSNumber* _Nullable) historyID;
 -(NSNumber*) getSmallestHistoryId;
--(NSNumber*) getBiggestHistoryId;
+-(NSNumber*) getNewestHistoryEntryIdForAccount:(NSNumber*) accountID withMuc:(BOOL) muc;
 
 -(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound occupantId:(NSString* _Nullable) occupantId andJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
 

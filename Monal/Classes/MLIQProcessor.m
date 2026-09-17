@@ -198,7 +198,7 @@ $$class_handler(handleCatchup, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$BO
         {
             //latestMessage can be nil, thus [latestMessage timestamp] will return nil and setMAMQueryAfterTimestamp:nil
             //will query the whole archive since dawn of time
-            MLMessage* latestMessage = [MLMessage createMessageFromHistoryID:[[DataLayer sharedInstance] getNewestHistoryEntryId]];
+            MLMessage* latestMessage = [MLMessage createMessageFromHistoryID:[[DataLayer sharedInstance] getNewestHistoryEntryIdForAccount:account.accountID withMuc:NO]];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive at %@ after timestamp %@ for catchup", account.connectionProperties.identity.jid, [latestMessage timestamp]);
             XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
             [mamQuery setMAMQueryAfterTimestamp:[latestMessage timestamp]];

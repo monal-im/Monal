@@ -261,7 +261,7 @@ NSString* const kiqErrorType = @"error";
     
 #ifdef IS_ALPHA
     if(timestamp == nil)
-        showXMLErrorOnAlpha(nil, self, @"setMAMQueryAfterTimestamp: called with nil timestamp!");
+        showXMLErrorOnAlpha(nil, self, @"We might have a hole in our message history: we needed to call setMAMQueryAfterTimestamp: with nil timestamp!");
 #endif
 }
 

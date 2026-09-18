@@ -252,6 +252,13 @@ static NSDictionary* _optionalGroupConfigOptions;
     }
 }
 
+-(BOOL) isDestroying:(NSString*) room
+{
+    @synchronized(_stateLockObject) {
+        return [_destroying containsObject:room];
+    }
+}
+
 -(BOOL) incrementNameChange:(NSString*) room
 {
     @synchronized(_stateLockObject) {
@@ -379,16 +386,12 @@ static NSDictionary* _optionalGroupConfigOptions;
         }
     }
     //handle reflected presences
-    else
+    else if([self isCreating:presenceNode.fromUser] || [self isJoining:presenceNode.fromUser] || [self isJoined:presenceNode.fromUser])
     {
         DDLogVerbose(@"Got muc presence from full jid: %@", presenceNode.from);
         
         //don't handle this error if we ourselves are destroying this room
-        BOOL isDestroying = NO;
-        @synchronized(_stateLockObject) {
-            isDestroying = [_destroying containsObject:presenceNode.fromUser];
-        }
-        if(!isDestroying)
+        if(![self isDestroying:presenceNode.fromUser])
         {
             let mucContact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:_account.accountNo];
             
@@ -457,6 +460,8 @@ static NSDictionary* _optionalGroupConfigOptions;
         if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
             [self handleStatusCodes:presenceNode];        
     }
+    else
+        DDLogWarn(@"Ignoring presence from room we are not joining and not joined to (probably the broken prosody smacks)!");
 }
 
 -(BOOL) processMessage:(XMPPMessage*) messageNode
@@ -890,11 +895,7 @@ $$
                 if([node check:@"/<type=unavailable>/{http://jabber.org/protocol/muc#user}x/destroy"])
                 {
                     //don't handle this error if we ourselves are destroying this room
-                    BOOL isDestroying = NO;
-                    @synchronized(_stateLockObject) {
-                        isDestroying = [_destroying containsObject:node.fromUser];
-                    }
-                    if(!isDestroying)
+                    if(![self isDestroying:node.fromUser])
                     {
                         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Group/Channel got destroyed: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andIsSevere:YES];
                         [self deleteMuc:node.fromUser withBookmarksUpdate:YES keepBuddylistEntry:YES];

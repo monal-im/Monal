@@ -15,9 +15,9 @@ struct AddContactMenu: View {
 
     @State private var enabledAccounts: [xmpp]
     @State private var selectedAccount: Int
-    @State private var scannedFingerprints: [NSNumber:Data]? = nil
+    @State private var scannedFingerprints: [NSNumber:Data]?
     @State private var importScannedFingerprints: Bool = false
-    @State private var toAdd: String = ""
+    @State private var toAdd: String
 
     @State private var showInvitationError = false
     @State private var showAlert = false

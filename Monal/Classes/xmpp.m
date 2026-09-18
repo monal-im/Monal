@@ -159,6 +159,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 @property (atomic, strong) NSMutableArray* unAckedStanzas;
 
 //these all need to be atomic to not fall into an "asm load -> arc free -> use-after-free pointer usage" race condition
+@property (atomic, strong) MLDelayableTimer* delayedRealSessionInitTimer;
 @property (atomic, strong) MLDelayableTimer* loginTimer;
 @property (atomic, strong) MLDelayableTimer* pingTimer;
 @property (atomic, strong) MLDelayableTimer* reconnectTimer;
@@ -746,6 +747,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 {
     @synchronized(_parseQueue) {
         //pause all timers before freezing the parse queue to not trigger timers that can not be handeld properly while frozen
+        [self.delayedRealSessionInitTimer pause];
         [self.loginTimer pause];
         [self.pingTimer pause];
         [self.reconnectTimer pause];
@@ -781,6 +783,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         }];
         
         //resume all timers paused when freezing the parse queue
+        [self.delayedRealSessionInitTimer resume];
         [self.loginTimer resume];
         [self.pingTimer resume];
         [self.reconnectTimer resume];
@@ -1088,6 +1091,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
     //this has to be synchronous because we want to wait for the disconnect to complete before continuing and unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
         DDLogInfo(@"stopping running timers");
+        if(self.delayedRealSessionInitTimer)
+            [self.delayedRealSessionInitTimer cancel]; //cancel running session init timer
+        self.delayedRealSessionInitTimer = nil;
         if(self.loginTimer)
             [self.loginTimer cancel];     //cancel running login timer
         self.loginTimer = nil;
@@ -4760,53 +4766,79 @@ static NSRegularExpression* fastTokenRemovalRegex;
 
 -(void) initSession
 {
-    DDLogInfo(@"Now bound and past smacks enable, initializing new xmpp session...");
+    monal_void_block_t realSessionInit = ^{
+        DDLogInfo(@"Now bound and past smacks enable, initializing new xmpp session...");
+        
+        //indicate we are bound and smacks enabled now
+        self->_accountState = kStateInitStarted;
+        
+        //inform other parts of monal about our new state
+        [[MLNotificationQueue currentQueue] postNotificationName:kMLSessionInitNotice object:self];
+        [self accountStatusChanged];
+        
+        //now fetch roster, request disco and send initial presence
+        [self fetchRoster];
+        
+        //query disco *before* sending out our first presence because this presence will trigger pubsub "headline" updates and we want to know
+        //if and what pubsub/pep features the server supports, before handling that
+        //we can pipeline the disco requests and outgoing presence broadcast, though
+        [self queryDisco];
+        [self queryServerVersion];
+        [self purgeOfflineStorage];
+        [self setMAMPrefs:@"always"];   //make sure we are able to do proper catchups
+        [self sendPresence];            //this will trigger a replay of offline stanzas on prosody (no XEP-0013 support anymore 😡)
+        //the offline messages will come in *after* we initialized the mam query, because the disco result comes in first
+        //(and this is what triggers mam catchup)
+        //--> no holes in our history can be caused by these offline messages in conjunction with mam catchup,
+        //    however all offline messages will be received twice (as offline message AND via mam catchup)
+        
+        //send own csi state (this must be done *after* presences to not delay/filter incoming presence flood needed to prime our database
+        [self sendCurrentCSIState];
+        
+        //only do this if smacks is not supported because handling of the old queue will be already done on smacks enable/failed enable
+        if(!self.connectionProperties.supportsSM3)
+        {
+            //resend stanzas still in the outgoing queue and clear it afterwards
+            //this happens if the server has internal problems and advertises smacks support
+            //but fails to resume the stream as well as to enable smacks on the new stream
+            //clean up those stanzas to only include message stanzas because iqs don't survive a session change
+            //message duplicates are possible in this scenario, but that's better than dropping messages
+            //initSession() above does not add message stanzas to the self.unAckedStanzas queue --> this is safe to do
+            [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
+        }
+        
+        //fetch current mds state
+        [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
+        
+        //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
+        
+        //initialize stanza counter for statistics
+        [self initCatchupStats];
+    };
     
-    //indicate we are bound and smacks enabled now
-    _accountState = kStateInitStarted;
-    
-    //inform other parts of monal about our new state
-    [[MLNotificationQueue currentQueue] postNotificationName:kMLSessionInitNotice object:self];
-    [self accountStatusChanged];
-    
-    //now fetch roster, request disco and send initial presence
-    [self fetchRoster];
-    
-    //query disco *before* sending out our first presence because this presence will trigger pubsub "headline" updates and we want to know
-    //if and what pubsub/pep features the server supports, before handling that
-    //we can pipeline the disco requests and outgoing presence broadcast, though
-    [self queryDisco];
-    [self queryServerVersion];
-    [self purgeOfflineStorage];
-    [self setMAMPrefs:@"always"];   //make sure we are able to do proper catchups
-    [self sendPresence];            //this will trigger a replay of offline stanzas on prosody (no XEP-0013 support anymore 😡)
-    //the offline messages will come in *after* we initialized the mam query, because the disco result comes in first
-    //(and this is what triggers mam catchup)
-    //--> no holes in our history can be caused by these offline messages in conjunction with mam catchup,
-    //    however all offline messages will be received twice (as offline message AND via mam catchup)
-    
-    //send own csi state (this must be done *after* presences to not delay/filter incoming presence flood needed to prime our database
-    [self sendCurrentCSIState];
-    
-    //only do this if smacks is not supported because handling of the old queue will be already done on smacks enable/failed enable
-    if(!self.connectionProperties.supportsSM3)
+    //prosody>=v13 has this stupid issue with its smacks module to not invalidate the session when its buffer is full,
+    //but to mark it as "broken" and only invalidate the old smacks session once we bind a new connection to the same resource
+    //--> this triggers outgoing unavailable presences to all contacts, including joined mucs
+    //    some contacts (especially mucs) will react to these and the responses then get routed to our newly bound resource
+    //    even though we not even sent a presence yet.
+    //==> delay init for 2 seconds until all these have trickled in before sending out our presence and initializing anything
+    //    this makes sure the incoming presences etc. don't interfere with our session establishment and muc rejoins
+    //    (but unfortunately: when slow networks or slow/overloaded servers are involved, that 2 seconds might not be enough)
+    if([self.connectionProperties.serverIdentity isEqualToString:@"http://prosody.im"])
     {
-        //resend stanzas still in the outgoing queue and clear it afterwards
-        //this happens if the server has internal problems and advertises smacks support
-        //but fails to resume the stream as well as to enable smacks on the new stream
-        //clean up those stanzas to only include message stanzas because iqs don't survive a session change
-        //message duplicates are possible in this scenario, but that's better than dropping messages
-        //initSession() above does not add message stanzas to the self.unAckedStanzas queue --> this is safe to do
-        [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
+        DDLogWarn(@"Connected to prosody, waiting for unsolicited stanza storm triggered by failed smacks resume to cease, before initializing further...");
+        self.delayedRealSessionInitTimer = createDelayableTimer(2.0, (^{
+            self.delayedRealSessionInitTimer = nil;
+            [self dispatchAsyncOnReceiveQueue: ^{
+                if(self->_accountState == kStateBound)
+                    realSessionInit();
+                else
+                    DDLogWarn(@"Not calling realSessionInit, not in kStateBound anymore!");
+            }];
+        }));
     }
-    
-    //fetch current mds state
-    [self.pubsub fetchNode:@"urn:xmpp:mds:displayed:0" from:self.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleMdsFetchResult)];
-    
-    //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
-    
-    //initialize stanza counter for statistics
-    [self initCatchupStats];
+    else
+        realSessionInit();
 }
 
 -(void) addReconnectionHandler:(MLHandler*) handler

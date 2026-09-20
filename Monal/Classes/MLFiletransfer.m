@@ -744,6 +744,10 @@ $$
             [_fileManager removeItemAtPath:filePath error:nil];
         }
     }
+    // delete any file preview hardlinks that didn't get deleted normally
+    // e.g. due to a force-close while the preview is open
+    NSString* previewsDirectory = [HelperTools filePreviewHardlinksDirectory];
+    [_fileManager removeItemAtPath:previewsDirectory error:nil];
 }
 
 #pragma mark - internal methods

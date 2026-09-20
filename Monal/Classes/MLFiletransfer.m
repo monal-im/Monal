@@ -725,6 +725,10 @@ $$
     $call([self prepareUIImageUpload:image], $ID(account), $BOOL(encrypted), $ID(completion));
 }
 
++(NSString*) filePreviewHardlinksDirectory {
+    return [_documentCacheDir stringByAppendingPathComponent:@"filePreviews"];
+}
+
 +(void) doStartupCleanup
 {
     //delete leftover tmp files older than 1 day
@@ -744,6 +748,10 @@ $$
             [_fileManager removeItemAtPath:filePath error:nil];
         }
     }
+    // delete any file preview hardlinks that didn't get deleted normally
+    // e.g. due to a force-close while the preview is open
+    NSString* previewsDirectory = [MLFiletransfer filePreviewHardlinksDirectory];
+    [_fileManager removeItemAtPath:previewsDirectory error:nil];
 }
 
 #pragma mark - internal methods

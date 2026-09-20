@@ -226,6 +226,8 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
 
 +(NSURL* _Nullable) compressFileAtPath:(NSString*) path withLevel:(NSInteger) level;
 
++(NSString*) filePreviewHardlinksDirectory;
+
 +(NSOrderedSet*) createReactionsSetFromString:(NSString*) reactions;
 
 +(NSArray*) getBacktraceForThreadID:(NSNumber*) tid;

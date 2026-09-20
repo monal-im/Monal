@@ -1041,9 +1041,9 @@ class ChatViewMessage: ExyteChat.Message {
             let isError = errorType != nil && !errorType!.isEmpty
             switch(innerMessage) {
                 case let message where isError && !message.hasBeenReceived:
-                    return .error(DraftMessage(id: id, text: text, medias: [], recording: recording, replyMessage: replyMessage, createdAt: createdAt))
+                    return .error(DraftMessage(id: id, text: text, medias: [], files: [], recording: recording, replyMessage: replyMessage, createdAt: createdAt))
                 case let message where message.hasBeenDisplayed:
-                    return .read
+                    return .readBy([])
                 case let message where message.hasBeenReceived:
                     return .received
                 case let message where message.hasBeenSent:

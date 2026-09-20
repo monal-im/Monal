@@ -3,11 +3,20 @@
     "pins": [
       {
         "package": "ActivityIndicatorView",
-        "repositoryURL": "https://github.com/exyte/ActivityIndicatorView",
+        "repositoryURL": "https://github.com/exyte/ActivityIndicatorView.git",
         "state": {
           "branch": null,
-          "revision": "15384b0f9ca3a9b072e12ab779d545e9717adba4",
-          "version": "2.0.0"
+          "revision": "41f89372c018decaf965e8dddeb6e5347741beb4",
+          "version": "2.0.2"
+        }
+      },
+      {
+        "package": "AnchoredPopup",
+        "repositoryURL": "https://github.com/exyte/AnchoredPopup.git",
+        "state": {
+          "branch": null,
+          "revision": "38fb24117f24df91bb79f1d63c8992678456c646",
+          "version": "1.2.3"
         }
       },
       {
@@ -42,7 +51,7 @@
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
           "branch": "main",
-          "revision": "5d0235c6ee0ad98ef84bd1fbb6fe3d31a46c6665",
+          "revision": "1ac3622f593e71b7d53631d9bc6339f295090305",
           "version": null
         }
       },
@@ -93,11 +102,11 @@
       },
       {
         "package": "ExyteMediaPicker",
-        "repositoryURL": "https://github.com/monal-im/MediaPicker.git",
+        "repositoryURL": "https://github.com/exyte/MediaPicker.git",
         "state": {
-          "branch": "main",
-          "revision": "2d482aac360297922424d3a1ae0255f3abdbe6ee",
-          "version": null
+          "branch": null,
+          "revision": "96dc0e21adaa9266bbb5698052c7ddfd22f69f0c",
+          "version": "3.4.6"
         }
       },
       {

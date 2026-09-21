@@ -133,7 +133,7 @@ final class WebRTCClient: NSObject {
                                              optionalConstraints: nil)
         self.peerConnection.offer(for: constrains) { (sdp, error) in
             guard let sdp = sdp else {
-                DDLogError("Could not generate SDP: \(error)")
+                DDLogError("Could not generate SDP: \(String(describing: error))")
                 completion(nil)
                 return
             }
@@ -150,7 +150,7 @@ final class WebRTCClient: NSObject {
                                              optionalConstraints: nil)
         self.peerConnection.answer(for: constrains) { (sdp, error) in
             guard let sdp = sdp else {
-                DDLogError("Could not generate SDP: \(error)")
+                DDLogError("Could not generate SDP: \(String(describing: error))")
                 completion(nil)
                 return
             }

@@ -17,22 +17,31 @@ PODS:
 DEPENDENCIES:
   - DZNEmptyDataSet
   - MBProgressHUD (~> 1.2.0)
-  - PromiseKit
+  - PromiseKit (from `https://github.com/mxcl/PromiseKit`, tag `8.2.0`)
   - SDWebImage
 
 SPEC REPOS:
   trunk:
     - DZNEmptyDataSet
     - MBProgressHUD
-    - PromiseKit
     - SDWebImage
+
+EXTERNAL SOURCES:
+  PromiseKit:
+    :git: https://github.com/mxcl/PromiseKit
+    :tag: 8.2.0
+
+CHECKOUT OPTIONS:
+  PromiseKit:
+    :git: https://github.com/mxcl/PromiseKit
+    :tag: 8.2.0
 
 SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  PromiseKit: 74e6ab5894856b4762fef547055c809bca91d440
+  PromiseKit: 95e5ab5eb01216072eb1d42f49c4144c3eacdb25
   SDWebImage: 16309af6d214ba3f77a7c6f6fdda888cb313a50a
 
-PODFILE CHECKSUM: 6462609d7f7a5f3fb49f1534269fbbc02c45e82a
+PODFILE CHECKSUM: 46d39bc88a72af9cabdc3aad5ae2bb6cccfa5e3b
 
 COCOAPODS: 1.17.0

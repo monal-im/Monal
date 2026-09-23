@@ -55,6 +55,7 @@
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";
 
+//use a dedicated scheme for thread local storage dict entries
 #define kDebugPersistStateTriggers  @"im.monal:xmpp.m|debugPersistStateTriggers"
 #define kPersistStateTriggersAdded  @"im.monal:xmpp.m|persistStateTriggerAdded"
 

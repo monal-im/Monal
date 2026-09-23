@@ -11,10 +11,12 @@
 #import <monalxmpp/MLSQLite.h>
 #import <monalxmpp/HelperTools.h>
 
-#define kSQLiteEndTransactionTriggers       @"kSQLiteEndTransactionTriggers"
-#define kSQLiteTransactionsRunning          @"kSQLiteTransactionsRunning"
-#define kSQLiteInstancesForThread           @"kSQLiteInstancesForThread"
-#define kSQLiteStartedReadStransaction      @"kSQLiteStartedReadStransaction"
+//use a dedicated scheme for thread local storage dict entries
+#define kSQLiteEndTransactionTriggers       @"im.monal:MLSQLite.m|kSQLiteEndTransactionTriggers"
+#define kSQLiteTransactionsRunning          @"im.monal:MLSQLite.m|kSQLiteTransactionsRunning"
+#define kSQLiteInstancesForThread           @"im.monal:MLSQLite.m|kSQLiteInstancesForThread"
+#define kSQLiteStartedReadStransaction      @"im.monal:MLSQLite.m|kSQLiteStartedReadStransaction"
+
 #define kSQLiteTransactionTriggerLocation   @"kSQLiteTransactionTriggerLocation"
 #define kSQLiteTransactionTriggerCallback   @"kSQLiteTransactionTriggerCallback"
 

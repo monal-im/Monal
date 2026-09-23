@@ -9,6 +9,9 @@
 #import <monalxmpp/MLNotificationQueue.h>
 #import <monalxmpp/HelperTools.h>
 
+//use a dedicated scheme for thread local storage dict entries
+#define kNotificationQueueStack @"im.monal:MLNotificationQueue.m|kNotificationQueueStack"
+
 @interface ObserverEntry : NSObject
 @property (nonatomic, weak) id observer;
 @property (nonatomic) SEL selector;
@@ -224,9 +227,9 @@
 {
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     //init dictionaries if neccessary
-    if(!threadData[@"_notificationQueueStack"])
-        threadData[@"_notificationQueueStack"] = [NSMutableArray new];
-    return threadData[@"_notificationQueueStack"];
+    if(!threadData[kNotificationQueueStack])
+        threadData[kNotificationQueueStack] = [NSMutableArray new];
+    return threadData[kNotificationQueueStack];
 }
 
 -(instancetype) initWithName:(NSString*) queueName

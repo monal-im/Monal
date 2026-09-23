@@ -18,7 +18,7 @@ struct OneClickRegistration: View {
     static private let credFaultyPattern = ".*@.*"
     static private let XMPPServer: [Dictionary<String, String>] = [
         ["XMPPServer": "conversations.im", "TermsSite_default": "https://account.conversations.im/privacy/"],
-        ["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"]
+        //["XMPPServer": "yax.im", "TermsSite_default": "https://yaxim.org/yax.im/"]
     ]
     
 #if IS_ALPHA
@@ -60,8 +60,6 @@ struct OneClickRegistration: View {
         //for State stuff see https://forums.swift.org/t/assignment-to-state-var-in-init-doesnt-do-anything-but-the-compiler-gened-one-works/35235
         self._username = State(wrappedValue:("ML-"+HelperTools.generateRandomPassword()).lowercased())
         self._password = State(wrappedValue:HelperTools.generateRandomPassword())
-        
-        self.xmppAccount = createXMPPInstance()
     }
     
     private func showRegistrationAlert(alertMessage: String?) {
@@ -296,6 +294,10 @@ struct OneClickRegistration: View {
         }
         .addLoadingOverlay(overlay)
         .navigationBarTitle(Text("Register"), displayMode:.large)
+        //this isn't really needed
+//         .onAppear {
+//             self.xmppAccount = createXMPPInstance()
+//         }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("kXMPPError")).receive(on: RunLoop.main)) { notification in
             DDLogDebug("Got xmpp error")
             if(self.errorObserverEnabled == false) {

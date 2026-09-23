@@ -61,6 +61,9 @@
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";
 
+#define kDebugPersistStateTriggers  @"im.monal:xmpp.m|debugPersistStateTriggers"
+#define kPersistStateTriggersAdded  @"im.monal:xmpp.m|persistStateTriggerAdded"
+
 static NSRegularExpression* fastTokenRemovalRegex;
 
 @interface MLPubSub ()
@@ -4154,9 +4157,26 @@ static NSRegularExpression* fastTokenRemovalRegex;
 
 -(void) persistState
 {
-    DDLogVerbose(@"%@ --> persistState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountID, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-    [self realPersistState];
-    DDLogVerbose(@"%@ --> persistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountID, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    //this will coalesce all state zerializations+writes inside one transaction into only one single
+    //serialization+write directly before committing the transaction
+    //we simply wrap this into a write transaction (it will be a no-op if we are already inside a write transaction)
+    //and add the trigger inside it. this will call the trigger at the end of that transaction, essentially wrapping
+    //that transaction around the write transaction created by realPersistState (making that one definitely a no-op)
+    [[DataLayer sharedInstance] createTransaction:^{
+        NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+        threadData[kDebugPersistStateTriggers] = @([threadData[kDebugPersistStateTriggers] intValue] + 1);
+        DDLogDebug(@"Would now call realPersistState for the %@. time this transaction...", threadData[kDebugPersistStateTriggers]);
+        if(![threadData[kPersistStateTriggersAdded] boolValue])
+        {
+            callLocationMethod([DataLayer sharedInstance] addEndTransactionTrigger:^{
+                DDLogInfo(@"Inside transaction end trigger: now calling realPersistState, saved %d calls in this transaction...", [threadData[kDebugPersistStateTriggers] intValue] - 1);
+                [self realPersistState];
+                threadData[kPersistStateTriggersAdded] = @0;
+                threadData[kDebugPersistStateTriggers] = @0;
+            });
+            threadData[kPersistStateTriggersAdded] = @1;
+        }
+    }];
 }
 
 -(void) realPersistState

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language>
+<!--
+  Monal XML Query Language
+  https://github.com/monal-im/Monal/wiki/XML-Query-Language
+
+  Embedded language: it is NOT meant to be used standalone. "Objective-C (Monal)"
+  switches into the "QueryStart" context right after the selectors of MLXMLNode that
+  consume a query string (find: findFirst: check:), i.e. we are INSIDE an ObjC string
+  literal here: `"` terminates the query, `\\` is one literal backslash and every
+  context is left at end of line (ObjC string literals do not span lines).
+
+  Grammar (see pathSplitterRegex / componentParserRegex in MLXMLNode.m and
+  dataFormQueryRegex in XMPPDataForm.m):
+    query      := "/"? segment ("/" segment)* extraction?
+    segment    := ("{" ns "}")? ("!"? name | "*" | "..")? ("<" attr "!"? ("="|"~") value ">")*
+    extraction := ("@" attr | "@@" | "#" | "$" | "\" dataform "\") ("|" conversion)?
+    dataform   := ("{" FORM_TYPE "}")? (form-type | "*")? ("[" index "]")? ("@" field | "&" field)?
+  printf-style format specifiers are only substituted in verbatim (=) attribute values,
+  regex (~) values are passed to NSRegularExpression unchanged.
+  Regex highlighting is reused from the JavaScript definition.
+-->
+<language name="Monal XML Query" version="1" kateversion="5.79" section="Other" extensions="" hidden="true" casesensitive="1" author="Monal" license="MIT">
+  <highlighting>
+    <contexts>
+      <!-- entered after "find:" etc., expects the opening @" -->
+      <context name="QueryStart" attribute="Normal Text" lineEndContext="#pop" fallthroughContext="#pop">
+        <DetectSpaces/>
+        <Detect2Chars attribute="Query Quote" context="#pop!Query" char="@" char1="&quot;"/>
+      </context>
+
+      <!-- the query path itself; unmatched chars are errors -->
+      <context name="Query" attribute="Query Error" lineEndContext="#pop">
+        <DetectChar attribute="Query Quote" context="#pop" char="&quot;"/>
+        <Detect2Chars attribute="Data-Form Delimiter" context="DataForm" char="\" char1="\"/>
+        <DetectChar attribute="Path Separator" char="/"/>
+        <DetectChar attribute="Namespace" context="Namespace" char="{"/>
+        <DetectChar attribute="Filter Bracket" context="FilterName" char="&lt;"/>
+        <Detect2Chars attribute="Extraction" char="@" char1="@"/>
+        <RegExpr attribute="Extraction" String="@[a-zA-Z0-9_:\-]+"/>
+        <AnyChar attribute="Extraction" String="#$"/>
+        <DetectChar attribute="Conversion" context="Conversion" char="|"/>
+        <Detect2Chars attribute="Wildcard" char="." char1="."/>
+        <DetectChar attribute="Wildcard" char="*"/>
+        <DetectChar attribute="Negation" char="!"/>
+        <RegExpr attribute="Element" String="[a-zA-Z0-9_:\-]+"/>
+      </context>
+
+      <context name="Namespace" attribute="Namespace" lineEndContext="#pop#pop">
+        <DetectChar attribute="Namespace" context="#pop" char="}"/>
+        <DetectChar attribute="Query Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <RegExpr attribute="Wildcard" String="\*(?=\})"/>
+      </context>
+
+      <context name="Conversion" attribute="Query Error" lineEndContext="#pop#pop" fallthroughContext="#pop">
+        <RegExpr attribute="Conversion" context="#pop" String="(?:bool|int|uint|double|datetime|base64|uuid|uuidcast)(?![a-zA-Z0-9])"/>
+        <RegExpr attribute="Query Error" context="#pop" String="[a-zA-Z0-9]+"/>
+      </context>
+
+      <!-- <attr=value> <attr!=value> <attr~regex> <attr!~regex> -->
+      <context name="FilterName" attribute="Filter Attribute" lineEndContext="#pop#pop">
+        <Detect2Chars attribute="Filter Operator" context="#pop!VerbatimValue" char="!" char1="="/>
+        <Detect2Chars attribute="Filter Operator" context="#pop!RegexValue" char="!" char1="~"/>
+        <DetectChar attribute="Filter Operator" context="#pop!VerbatimValue" char="="/>
+        <DetectChar attribute="Filter Operator" context="#pop!RegexValue" char="~"/>
+        <DetectChar attribute="Query Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <AnyChar attribute="Query Error" String="&gt;!"/>
+      </context>
+      <context name="VerbatimValue" attribute="Filter Value" lineEndContext="#pop#pop">
+        <DetectChar attribute="Filter Bracket" context="#pop" char="&gt;"/>
+        <DetectChar attribute="Query Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <Detect2Chars attribute="Format Specifier" char="%" char1="%"/>
+        <RegExpr attribute="Format Specifier" String="%(?:\d+\$)?[\-+ #0']*(?:\d+|\*)?(?:\.(?:\d+|\*))?(?:hh|h|ll|l|q|z|t|j|L)?[@dDiuUxXoOfFeEgGaAcCsSp]"/>
+        <HlCStringChar attribute="String Char"/>
+      </context>
+      <context name="RegexValue" attribute="Regular Expression" lineEndContext="#pop#pop">
+        <DetectChar attribute="Filter Bracket" context="#pop" char="&gt;"/>
+        <DetectChar attribute="Query Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <!-- ObjC string escaping: \\d in source is \d for the regex engine -->
+        <RegExpr attribute="Pattern Character Class" String="\\\\[nrtvfDdSsWw]"/>
+        <RegExpr attribute="Pattern Internal Operator" String="\\\\[bBAzZ]|\\\\."/>
+        <HlCStringChar attribute="String Char"/>
+        <RegExpr attribute="Pattern Internal Operator" String="\$(?=&gt;)|\^"/>
+        <!-- JS regexes end at "/", ours don't: shadow that rule of the included context -->
+        <DetectChar attribute="Regular Expression" char="/"/>
+        <IncludeRules context="Regular Expression##JavaScript"/>
+      </context>
+
+      <!-- \\{FORM_TYPE}form-type[index]@field\\  or  &field -->
+      <context name="DataForm" attribute="Query Error" lineEndContext="#pop#pop">
+        <Detect2Chars attribute="Data-Form Delimiter" context="#pop" char="\" char1="\"/>
+        <DetectChar attribute="Query Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <DetectChar attribute="Namespace" context="DataFormNamespace" char="{"/>
+        <RegExpr attribute="Data-Form Index" String="\[[0-9]+\]"/>
+        <RegExpr attribute="Extraction" String="[@&amp;][a-zA-Z0-9_:#\-]+"/>
+        <DetectChar attribute="Wildcard" char="*"/>
+        <DetectChar attribute="Negation" char="!"/>
+        <RegExpr attribute="Element" String="[a-zA-Z0-9_:\-]+"/>
+      </context>
+      <context name="DataFormNamespace" attribute="Namespace" lineEndContext="#pop#pop#pop">
+        <DetectChar attribute="Namespace" context="#pop" char="}"/>
+        <DetectChar attribute="Query Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <RegExpr attribute="Wildcard" String="\*(?=\})"/>
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal" spellChecking="false"/>
+      <itemData name="Query Quote" defStyleNum="dsString" spellChecking="false"/>
+      <itemData name="Query Error" defStyleNum="dsError" spellChecking="false"/>
+      <itemData name="Path Separator" defStyleNum="dsOperator" bold="1" spellChecking="false"/>
+      <itemData name="Namespace" defStyleNum="dsImport" spellChecking="false"/>
+      <itemData name="Element" defStyleNum="dsFunction" spellChecking="false"/>
+      <itemData name="Wildcard" defStyleNum="dsSpecialChar" bold="1" spellChecking="false"/>
+      <itemData name="Negation" defStyleNum="dsOperator" bold="1" spellChecking="false"/>
+      <itemData name="Filter Bracket" defStyleNum="dsOperator" spellChecking="false"/>
+      <itemData name="Filter Attribute" defStyleNum="dsAttribute" spellChecking="false"/>
+      <itemData name="Filter Operator" defStyleNum="dsOperator" bold="1" spellChecking="false"/>
+      <itemData name="Filter Value" defStyleNum="dsString" spellChecking="false"/>
+      <itemData name="Format Specifier" defStyleNum="dsVariable" bold="1" spellChecking="false"/>
+      <itemData name="String Char" defStyleNum="dsSpecialChar" spellChecking="false"/>
+      <itemData name="Extraction" defStyleNum="dsBuiltIn" bold="1" spellChecking="false"/>
+      <itemData name="Conversion" defStyleNum="dsDataType" spellChecking="false"/>
+      <itemData name="Data-Form Delimiter" defStyleNum="dsSpecialChar" bold="1" spellChecking="false"/>
+      <itemData name="Data-Form Index" defStyleNum="dsDecVal" spellChecking="false"/>
+      <!-- same names/styles as in javascript.xml, used by the regex rules above -->
+      <itemData name="Regular Expression" defStyleNum="dsSpecialString" spellChecking="false"/>
+      <itemData name="Pattern Internal Operator" defStyleNum="dsSpecialChar" spellChecking="false"/>
+      <itemData name="Pattern Character Class" defStyleNum="dsSpecialChar" spellChecking="false"/>
+    </itemDatas>
+  </highlighting>
+  <general>
+    <keywords casesensitive="1"/>
+  </general>
+</language>
+<!-- kate: replace-tabs on; tab-width 2; indent-width 2; -->

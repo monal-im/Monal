@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language>
+<!--
+  Objective-C (Monal)
+
+  Plain "Objective-C" plus
+   * the MLHandler macro language (MLHandler.h)
+     https://github.com/monal-im/Monal/wiki/Handler-Framework
+   * the XML query language, but only in string literals passed to the MLXMLNode
+     selectors find: findFirst: and check: (everything else stays a normal ObjC string)
+     https://github.com/monal-im/Monal/wiki/XML-Query-Language
+-->
+<language name="Objective-C (Monal)" alternativeNames="Monal;ObjC-Monal" version="1" kateversion="5.79" section="Sources" extensions="*.m" priority="10" mimetype="text/x-objc-src" author="Monal" license="MIT">
+  <highlighting>
+    <contexts>
+      <context name="Default" attribute="Normal Text" lineEndContext="#stay">
+        <IncludeRules context="MonalRules"/>
+        <!-- Objective-C's own preprocessor context switches to *its* Default at line end, which would leave this definition -->
+        <DetectChar attribute="Preprocessor" context="Preprocessor" char="#" column="0"/>
+        <IncludeRules context="##Objective-C"/>
+      </context>
+      <context name="Preprocessor" attribute="Preprocessor" lineEndContext="#pop">
+        <LineContinue attribute="Preprocessor" context="#stay"/>
+        <RangeDetect attribute="Prep. Lib" context="#stay" char="&quot;" char1="&quot;"/>
+        <RangeDetect attribute="Prep. Lib" context="#stay" char="&lt;" char1="&gt;"/>
+        <IncludeRules context="FindComments##Objective-C"/>
+      </context>
+
+      <context name="MonalRules" attribute="Normal Text" lineEndContext="#stay">
+        <!-- XML queries: only the string directly following these selectors -->
+        <RegExpr attribute="Normal Text" context="QueryStart##Monal XML Query" String="\b(?:findFirst|find|check):(?=\s*@&quot;)"/>
+
+        <!-- handler definitions: $$class_handler(name, args...) ... $$ -->
+        <RegExpr attribute="Handler Definition" context="ClassHandlerOpen" String="\$\$(?:returning_)?class_handler\b" beginRegion="MLHandler"/>
+        <RegExpr attribute="Handler Definition" context="InstanceHandlerOpen" String="\$\$(?:returning_)?instance_handler\b" beginRegion="MLHandler"/>
+
+        <!-- argument import in handler definitions -->
+        <RegExpr attribute="Mandatory Argument" context="TypedArgOpen" String="\$\$ID\b"/>
+        <RegExpr attribute="Optional Argument" context="TypedArgOpen" String="\$_ID\b"/>
+        <RegExpr attribute="Mandatory Argument" context="ArgOpen" String="\$\$(?:BOOL|INT|DOUBLE|INTEGER|UINTEGER|HANDLER|PROMISE)\b"/>
+        <RegExpr attribute="Optional Argument" context="ArgOpen" String="\$_(?:BOOL|INT|DOUBLE|INTEGER|UINTEGER|HANDLER|PROMISE)\b"/>
+
+        <!-- end of handler definition -->
+        <RegExpr attribute="Handler Definition" String="\$\$(?![A-Za-z0-9_])" endRegion="MLHandler"/>
+
+        <!-- argument binding when creating / calling handlers: $ID(name) $ID(name, value) -->
+        <RegExpr attribute="Bound Argument" context="ArgOpen" String="\$(?:ID|BOOL|INT|DOUBLE|INTEGER|UINTEGER|HANDLER|PROMISE)\b"/>
+
+        <!-- handler creation / usage -->
+        <RegExpr attribute="Handler Macro" context="NewHandlerWithInvalidationOpen" String="\$newHandlerWithInvalidation\b"/>
+        <RegExpr attribute="Handler Macro" context="NewHandlerOpen" String="\$newHandler\b"/>
+        <RegExpr attribute="Handler Macro" String="\$(?:call|invalidate|bindArgs)\b"/>
+
+        <!-- anything else looking like a handler macro is a typo -->
+        <RegExpr attribute="Error" String="\$[\$_]?[A-Za-z_][A-Za-z0-9_]*"/>
+      </context>
+
+      <!-- generic balanced expression (argument values, instance expression, ...) -->
+      <context name="Nested" attribute="Normal Text" lineEndContext="#stay">
+        <AnyChar attribute="Symbol" context="#pop" String=")]}"/>
+        <IncludeRules context="NestingAndCode"/>
+      </context>
+      <context name="NestingAndCode" attribute="Normal Text" lineEndContext="#stay">
+        <AnyChar attribute="Symbol" context="Nested" String="([{"/>
+        <IncludeRules context="Default"/>
+      </context>
+
+      <!-- $$class_handler( name , args... ) -->
+      <context name="ClassHandlerOpen" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" context="#pop!NameThenArgs" char="("/>
+      </context>
+      <!-- $$instance_handler( name , instanceExpr , args... ) -->
+      <context name="InstanceHandlerOpen" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" context="#pop!NameThenInstance" char="("/>
+      </context>
+      <context name="InstanceSep" attribute="Normal Text" lineEndContext="#stay">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" context="#pop!InstanceExpr" char=","/>
+        <DetectChar attribute="Symbol" context="#pop" char=")"/>
+      </context>
+      <context name="InstanceExpr" attribute="Normal Text" lineEndContext="#stay">
+        <DetectChar attribute="Symbol" context="#pop!DefinitionArgs" char=","/>
+        <DetectChar attribute="Symbol" context="#pop" char=")"/>
+        <IncludeRules context="NestingAndCode"/>
+      </context>
+      <context name="DefinitionArgsSep" attribute="Normal Text" lineEndContext="#stay">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" context="#pop!DefinitionArgs" char=","/>
+        <DetectChar attribute="Symbol" context="#pop" char=")"/>
+      </context>
+      <context name="DefinitionArgs" attribute="Normal Text" lineEndContext="#stay">
+        <DetectChar attribute="Symbol" context="#pop" char=")"/>
+        <IncludeRules context="NestingAndCode"/>
+      </context>
+
+      <!-- identifier naming a handler method, followed by the next part of the macro -->
+      <context name="NameThenArgs" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop!DefinitionArgsSep">
+        <DetectSpaces/>
+        <RegExpr attribute="Handler Name" context="#pop!DefinitionArgsSep" String="[A-Za-z_][A-Za-z0-9_]*"/>
+      </context>
+      <context name="NameThenInstance" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop!InstanceSep">
+        <DetectSpaces/>
+        <RegExpr attribute="Handler Name" context="#pop!InstanceSep" String="[A-Za-z_][A-Za-z0-9_]*"/>
+      </context>
+      <context name="NameThenInvalidation" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop!InvalidationSep">
+        <DetectSpaces/>
+        <RegExpr attribute="Handler Name" context="#pop!InvalidationSep" String="[A-Za-z_][A-Za-z0-9_]*"/>
+      </context>
+
+      <!-- $$ID( type , name ) -->
+      <context name="TypedArgOpen" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" context="#pop!TypedArgType" char="("/>
+      </context>
+      <context name="TypedArgType" attribute="Normal Text" lineEndContext="#stay">
+        <DetectChar attribute="Symbol" context="#pop!ArgName" char=","/>
+        <DetectChar attribute="Symbol" context="#pop" char=")"/>
+        <IncludeRules context="NestingAndCode"/>
+      </context>
+      <!-- $$BOOL( name )  $_BOOL( name , fallback )  $ID( name )  $ID( name , value ) -->
+      <context name="ArgOpen" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" context="#pop!ArgName" char="("/>
+      </context>
+      <context name="ArgName" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop!ArgRest">
+        <DetectSpaces/>
+        <RegExpr attribute="Argument Name" context="#pop!ArgRest" String="[A-Za-z_][A-Za-z0-9_]*"/>
+      </context>
+      <context name="ArgRest" attribute="Normal Text" lineEndContext="#stay">
+        <DetectChar attribute="Symbol" context="#pop" char=")"/>
+        <IncludeRules context="NestingAndCode"/>
+      </context>
+
+      <!-- $newHandler( delegate , name , boundArgs... ) -->
+      <context name="NewHandlerOpen" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" context="#pop!NewHandlerDelegate" char="("/>
+      </context>
+      <context name="NewHandlerDelegate" attribute="Normal Text" lineEndContext="#stay">
+        <DetectChar attribute="Symbol" context="#pop!NameThenArgs" char=","/>
+        <DetectChar attribute="Symbol" context="#pop" char=")"/>
+        <IncludeRules context="NestingAndCode"/>
+      </context>
+      <!-- $newHandlerWithInvalidation( delegate , name , invalidationName , boundArgs... ) -->
+      <context name="NewHandlerWithInvalidationOpen" attribute="Normal Text" lineEndContext="#stay" fallthroughContext="#pop">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" context="#pop!NewHandlerWithInvalidationDelegate" char="("/>
+      </context>
+      <context name="NewHandlerWithInvalidationDelegate" attribute="Normal Text" lineEndContext="#stay">
+        <DetectChar attribute="Symbol" context="#pop!NameThenInvalidation" char=","/>
+        <DetectChar attribute="Symbol" context="#pop" char=")"/>
+        <IncludeRules context="NestingAndCode"/>
+      </context>
+      <context name="InvalidationSep" attribute="Normal Text" lineEndContext="#stay">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" context="#pop!NameThenArgs" char=","/>
+        <DetectChar attribute="Symbol" context="#pop" char=")"/>
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal" spellChecking="false"/>
+      <itemData name="Symbol" defStyleNum="dsOperator" spellChecking="false"/>
+      <itemData name="Preprocessor" defStyleNum="dsPreprocessor" spellChecking="false"/>
+      <itemData name="Prep. Lib" defStyleNum="dsImport" spellChecking="false"/>
+      <itemData name="Error" defStyleNum="dsError" spellChecking="false"/>
+      <itemData name="Handler Definition" defStyleNum="dsControlFlow" bold="1" spellChecking="false"/>
+      <itemData name="Handler Name" defStyleNum="dsFunction" bold="1" spellChecking="false"/>
+      <itemData name="Handler Macro" defStyleNum="dsExtension" bold="1" spellChecking="false"/>
+      <itemData name="Mandatory Argument" defStyleNum="dsBuiltIn" bold="1" spellChecking="false"/>
+      <itemData name="Optional Argument" defStyleNum="dsBuiltIn" italic="1" spellChecking="false"/>
+      <itemData name="Bound Argument" defStyleNum="dsBuiltIn" spellChecking="false"/>
+      <itemData name="Argument Name" defStyleNum="dsVariable" spellChecking="false"/>
+    </itemDatas>
+  </highlighting>
+  <general>
+    <comments>
+      <comment name="singleLine" start="//"/>
+      <comment name="multiLine" start="/*" end="*/" region="Comment"/>
+    </comments>
+    <keywords casesensitive="1"/>
+  </general>
+</language>
+<!-- kate: replace-tabs on; tab-width 2; indent-width 2; -->

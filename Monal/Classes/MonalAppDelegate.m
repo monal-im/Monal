@@ -1104,7 +1104,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         DDLogInfo(@"|~~| 66%% |~~|");
         [HelperTools updateSyncErrorsWithDeleteOnly:NO andWaitForCompletion:YES];
         DDLogInfo(@"|~~| 99%% |~~|");
-        [[MLXMPPManager sharedInstance] disconnectAll];
+        if(!_wasFrozen)     //ignore disconnect if we are already frozen
+            [[MLXMPPManager sharedInstance] disconnectAll];
         DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
         [HelperTools activateTerminationLogging];       //ensure our flush is really successful
         [HelperTools flushLogsWithTimeout:0.025];

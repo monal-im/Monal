@@ -11,6 +11,13 @@
 #import "MLSQLite.h"
 #import "HelperTools.h"
 
+#define kSQLiteEndTransactionTriggers       @"kSQLiteEndTransactionTriggers"
+#define kSQLiteTransactionsRunning          @"kSQLiteTransactionsRunning"
+#define kSQLiteInstancesForThread           @"kSQLiteInstancesForThread"
+#define kSQLiteStartedReadStransaction      @"kSQLiteStartedReadStransaction"
+#define kSQLiteTransactionTriggerLocation   @"kSQLiteTransactionTriggerLocation"
+#define kSQLiteTransactionTriggerCallback   @"kSQLiteTransactionTriggerCallback"
+
 @interface MLSQLite()
 {
     NSString* _dbFile;
@@ -45,23 +52,23 @@ static NSMutableDictionary* currentTransactions;
     MLAssert(dbFile != nil, @"MLSQLite sharedInstanceForFile:nil: file MUST NOT be nil!");
     @synchronized(self) {
         NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-        if(threadData[@"_sqliteInstancesForThread"] && threadData[@"_sqliteInstancesForThread"][dbFile])
-            return threadData[@"_sqliteInstancesForThread"][dbFile];
+        if(threadData[kSQLiteInstancesForThread] && threadData[kSQLiteInstancesForThread][dbFile])
+            return threadData[kSQLiteInstancesForThread][dbFile];
         MLSQLite* newInstance = [[self alloc] initWithFile:dbFile];
         //init dictionaries if neccessary
-        if(!threadData[@"_sqliteInstancesForThread"])
-            threadData[@"_sqliteInstancesForThread"] = [NSMutableDictionary new];
-        if(!threadData[@"_sqliteTransactionsRunning"])
-            threadData[@"_sqliteTransactionsRunning"] = [NSMutableDictionary new];
-        if(!threadData[@"_sqliteStartedReadTransaction"])
-            threadData[@"_sqliteStartedReadTransaction"] = [NSMutableDictionary new];
-        if(!threadData[@"_sqliteEndTransactionTriggers"])
-            threadData[@"_sqliteEndTransactionTriggers"] = [NSMutableDictionary new];
+        if(!threadData[kSQLiteInstancesForThread])
+            threadData[kSQLiteInstancesForThread] = [NSMutableDictionary new];
+        if(!threadData[kSQLiteTransactionsRunning])
+            threadData[kSQLiteTransactionsRunning] = [NSMutableDictionary new];
+        if(!threadData[kSQLiteStartedReadStransaction])
+            threadData[kSQLiteStartedReadStransaction] = [NSMutableDictionary new];
+        if(!threadData[kSQLiteEndTransactionTriggers])
+            threadData[kSQLiteEndTransactionTriggers] = [NSMutableDictionary new];
         //save thread-local instance
-        threadData[@"_sqliteInstancesForThread"][dbFile] = newInstance;
+        threadData[kSQLiteInstancesForThread][dbFile] = newInstance;
         //init data for nested transactions
-        threadData[@"_sqliteTransactionsRunning"][dbFile] = [NSNumber numberWithInt:0];
-        threadData[@"_sqliteStartedReadTransaction"][dbFile] = @NO;
+        threadData[kSQLiteTransactionsRunning][dbFile] = [NSNumber numberWithInt:0];
+        threadData[kSQLiteStartedReadStransaction][dbFile] = @NO;
         return newInstance;
     }
 }
@@ -89,7 +96,7 @@ static NSMutableDictionary* currentTransactions;
     [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification __unused) {
         @synchronized(self) {
             NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-            if([threadData[@"_sqliteTransactionsRunning"][self->_dbFile] intValue] > 0)
+            if([threadData[kSQLiteTransactionsRunning][self->_dbFile] intValue] > 0)
             {
                 DDLogError(@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open");
                 @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
@@ -126,7 +133,7 @@ static NSMutableDictionary* currentTransactions;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     @synchronized(self) {
         NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-        if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 0)
+        if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] > 0)
         {
             DDLogError(@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open");
             @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
@@ -281,7 +288,7 @@ static NSMutableDictionary* currentTransactions;
 -(void) testThreadInstanceForQuery:(NSString*) query andArguments:(NSArray*) args
 {
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    if(!threadData[@"_sqliteInstancesForThread"] || !threadData[@"_sqliteInstancesForThread"][_dbFile] || self != threadData[@"_sqliteInstancesForThread"][_dbFile])
+    if(!threadData[kSQLiteInstancesForThread] || !threadData[kSQLiteInstancesForThread][_dbFile] || self != threadData[kSQLiteInstancesForThread][_dbFile])
     {
         DDLogError(@"Shared instance of MLSQLite used in wrong thread for query '%@' having params %@", query ? query : @"", args ? args : @[]);
         @synchronized(currentTransactions) {
@@ -301,7 +308,7 @@ static NSMutableDictionary* currentTransactions;
     if([[query uppercaseString] hasPrefix:@"PRAGMA "])
         return;
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] == 0)
     {
         DDLogError(@"Tried to run query outside of transaction: '%@' having params %@", query ? query : @"", args ? args : @[]);
         @synchronized(currentTransactions) {
@@ -392,12 +399,12 @@ static NSMutableDictionary* currentTransactions;
     uint8_t depth = 0;
     NSArray* triggerList = nil;
     do {
-        triggerList = [threadData[@"_sqliteEndTransactionTriggers"][_dbFile] copy];
-        threadData[@"_sqliteEndTransactionTriggers"][_dbFile] = [NSMutableArray new];
+        triggerList = [threadData[kSQLiteEndTransactionTriggers][_dbFile] copy];
+        threadData[kSQLiteEndTransactionTriggers][_dbFile] = [NSMutableArray new];
         for(NSMutableDictionary* triggerDict in triggerList)
         {
-            NSString* location = triggerDict[@"location"];
-            monal_void_block_t trigger = triggerDict[@"trigger"];
+            NSString* location = triggerDict[kSQLiteTransactionTriggerLocation];
+            monal_void_block_t trigger = triggerDict[kSQLiteTransactionTriggerCallback];
             DDLogVerbose(@"Running transaction trigger declared at %@: (%@)", location, trigger);
             trigger();
         }
@@ -419,7 +426,7 @@ static NSMutableDictionary* currentTransactions;
 {
     [self testThreadInstanceForQuery:@"addTransactionTrigger" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] == 0)
         @synchronized(currentTransactions) {
             @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to add a transactions trigger outside of a write transaction!" userInfo:@{
                 @"currentTransactions": currentTransactions,
@@ -428,9 +435,9 @@ static NSMutableDictionary* currentTransactions;
                 @"_dbFile": _dbFile,
             }];
         }
-    [threadData[@"_sqliteEndTransactionTriggers"][_dbFile] addObject:@{
-        @"location": location,
-        @"trigger": trigger,
+    [threadData[kSQLiteEndTransactionTriggers][_dbFile] addObject:@{
+        kSQLiteTransactionTriggerLocation: location,
+        kSQLiteTransactionTriggerCallback: trigger,
     }];
     DDLogVerbose(@"Added transaction trigger declared at %@: %@", location, trigger);
 }
@@ -470,14 +477,14 @@ static NSMutableDictionary* currentTransactions;
 {
     [self testThreadInstanceForQuery:@"beginWriteTransaction" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    if([threadData[@"_sqliteStartedReadTransaction"][_dbFile] boolValue])
+    if([threadData[kSQLiteStartedReadStransaction][_dbFile] boolValue])
         @synchronized(currentTransactions) {
             @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to start write transaction inside running read transaction!" userInfo:@{
                 @"currentTransactions": currentTransactions,
             }];
         }
-    threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] + 1)];
-    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
+    threadData[kSQLiteTransactionsRunning][_dbFile] = [NSNumber numberWithInt:([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] + 1)];
+    if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] > 1)
         return;			//begin only outermost transaction
     BOOL retval;
     do {
@@ -497,14 +504,14 @@ static NSMutableDictionary* currentTransactions;
     @synchronized(currentTransactions) {
         currentTransactions[ownThread] = [NSThread callStackSymbols];
     }
-    threadData[@"_sqliteEndTransactionTriggers"][_dbFile] = [NSMutableArray new];
+    threadData[kSQLiteEndTransactionTriggers][_dbFile] = [NSMutableArray new];
 }
 
 -(void) endWriteTransaction
 {
     [self testThreadInstanceForQuery:@"endWriteTransaction" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 1)      //last transaction
+    if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] == 1)      //last transaction
     {
         [self callQueuedEndTransactionTriggers];
         [self executeNonQuery:@"COMMIT;" andArguments:@[] withException:YES];        //commit only outermost transaction
@@ -513,7 +520,7 @@ static NSMutableDictionary* currentTransactions;
             [currentTransactions removeObjectForKey:ownThread];
         }
     }
-    threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
+    threadData[kSQLiteTransactionsRunning][_dbFile] = [NSNumber numberWithInt:[threadData[kSQLiteTransactionsRunning][_dbFile] intValue] - 1];
 }
 
 -(void) voidReadTransaction:(monal_void_block_t) operations
@@ -543,8 +550,8 @@ static NSMutableDictionary* currentTransactions;
 {
     [self testThreadInstanceForQuery:@"beginReadTransaction" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] + 1)];
-    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
+    threadData[kSQLiteTransactionsRunning][_dbFile] = [NSNumber numberWithInt:([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] + 1)];
+    if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] > 1)
         return;			//begin only outermost transaction
     BOOL retval;
     do {
@@ -560,29 +567,29 @@ static NSMutableDictionary* currentTransactions;
             }
         }
     } while(!retval);
-    threadData[@"_sqliteStartedReadTransaction"][_dbFile] = @YES;
+    threadData[kSQLiteStartedReadStransaction][_dbFile] = @YES;
     NSString* ownThread = [self calcThreadName];
     @synchronized(currentTransactions) {
         currentTransactions[ownThread] = [NSThread callStackSymbols];
     }
-    threadData[@"_sqliteEndTransactionTriggers"][_dbFile] = [NSMutableArray new];
+    threadData[kSQLiteEndTransactionTriggers][_dbFile] = [NSMutableArray new];
 }
 
 -(void) endReadTransaction
 {
     [self testThreadInstanceForQuery:@"endReadTransaction" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 1)
+    if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] == 1)
     {
         [self callQueuedEndTransactionTriggers];
         [self executeNonQuery:@"COMMIT;" andArguments:@[] withException:YES];        //commit only outermost transaction
-        threadData[@"_sqliteStartedReadTransaction"][_dbFile] = @NO;
+        threadData[kSQLiteStartedReadStransaction][_dbFile] = @NO;
         NSString* ownThread = [self calcThreadName];
         @synchronized(currentTransactions) {
             [currentTransactions removeObjectForKey:ownThread];
         }
     }
-    threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
+    threadData[kSQLiteTransactionsRunning][_dbFile] = [NSNumber numberWithInt:[threadData[kSQLiteTransactionsRunning][_dbFile] intValue] - 1];
 }
 
 -(id) executeScalar:(NSString*) query
@@ -702,7 +709,7 @@ static NSMutableDictionary* currentTransactions;
 -(void) enableWAL
 {
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    MLAssert([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0, @"Could not enable wal, inside transaction!", (@{
+    MLAssert([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] == 0, @"Could not enable wal, inside transaction!", (@{
         @"threadDictionary": threadData
     }));
     NSString* mode = [self internalExecuteScalar:@"PRAGMA journal_mode;" andArguments:@[]];
@@ -722,7 +729,7 @@ static NSMutableDictionary* currentTransactions;
 {
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     //being inside a transaction is non-fatal, the db file will just not be up to date then
-    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] == 0)
     {
         NSArray* result = [self executeReader:@"PRAGMA wal_checkpoint(TRUNCATE);"];
         DDLogInfo(@"Chekpointing returned: %@", result);
@@ -737,7 +744,7 @@ static NSMutableDictionary* currentTransactions;
     //trying to vaccum the db inside a transaction is non-fatal, the db file will just not be shrinked then
     DDLogDebug(@"Vacuum DB");
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] == 0)
     {
         [self executeNonQuery:@"VACUUM;" andArguments:@[] withException:YES];
         DDLogDebug(@"Vacuum DB success");

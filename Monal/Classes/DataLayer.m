@@ -138,6 +138,11 @@ static NSDateFormatter* dbFormatter;
     [self.db voidWriteTransaction:block];
 }
 
+-(void) addEndTransactionTrigger:(monal_void_block_t) trigger withLocation:(NSString*) location
+{
+    return [self.db addEndTransactionTrigger:trigger withLocation:location];
+}
+
 -(BOOL) vacuum
 {
     return [self.db vacuum];

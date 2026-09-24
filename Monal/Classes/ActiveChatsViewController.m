@@ -720,8 +720,9 @@ static NSMutableSet* _pushWarningDisplayed;
         [self showWarningsIfNeeded];
         
         prependToViewQueue(MLViewIDWelcomeLoginView, (^(PMKResolver resolve) {
-            // display quick start if the user never seen it or if there are 0 enabled accounts
-            if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0 && !self->_loginAlreadyAutodisplayed)
+            //display quick start if the user never seen it or if there are 0 configured accounts
+            //disabled accounts won't display the welcomelogin view because that seems to irritate users
+            if([[DataLayer sharedInstance] accountCnts].intValue == 0 && !self->_loginAlreadyAutodisplayed)
             {
                 DDLogDebug(@"Showing WelcomeLogIn view...");
                 UIViewController* loginViewController = [[SwiftuiInterface new] makeViewWithName:@"WelcomeLogIn"];

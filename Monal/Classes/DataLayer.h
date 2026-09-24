@@ -152,6 +152,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) isContactInList:(NSString*) buddy forAccount:(NSNumber*) accountID;
 
 #pragma mark - account commands
+-(NSNumber*) accountCnts;
 -(NSArray*) accountList;
 -(NSNumber*) enabledAccountCnts;
 -(NSArray*) enabledAccountList;

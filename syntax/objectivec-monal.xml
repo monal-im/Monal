@@ -9,9 +9,825 @@
    * the XML query language, but only in string literals passed to the MLXMLNode
      selectors find: findFirst: and check: (everything else stays a normal ObjC string)
      https://github.com/monal-im/Monal/wiki/XML-Query-Language
+   * SQLite in string literals consumed by MLSQLite: passed to one of its execute*:
+     selectors (or internalExecuteScalar: / prepareQuery:), or assigned (`= @"...`) when
+     the literal starts with an SQL statement keyword (NSString* query = @"SELECT ...").
+     Multiline strings (backslash-newline continuation) are supported.
+     SQL rules are reused from Kate's generic "SQL" definition, extended by SQLite
+     specific keywords, functions and bind parameters.
 -->
 <language name="Objective-C (Monal)" alternativeNames="Monal;ObjC-Monal" version="1" kateversion="5.79" section="Sources" extensions="*.m" priority="10" mimetype="text/x-objc-src" author="Monal" license="MIT">
   <highlighting>
+    <!-- the lists of the generic "SQL" definition, matched by our own rules: SQL does not treat `"` as word deliminator,
+         so e.g. FALSE in `DEFAULT FALSE"` would not be found by its rules -->
+    <list name="sql keywords">
+      <include>keywords##SQL</include>
+    </list>
+    <list name="sql operators">
+      <include>operators##SQL</include>
+    </list>
+    <list name="sql controlFlow">
+      <include>controlFlow##SQL</include>
+    </list>
+    <list name="sql functions">
+      <include>functions##SQL</include>
+    </list>
+    <list name="sql types">
+      <include>types##SQL</include>
+    </list>
+    <!-- SQLite additions to the lists of the generic "SQL" definition -->
+    <list name="sqlite keywords">
+      <item>TRUE</item>
+      <item>FALSE</item>
+      <item>NEW</item>
+      <item>OLD</item>
+      <item>NOCASE</item>
+      <item>BINARY</item>
+      <item>ABORT</item>
+      <item>ACTION</item>
+      <item>ALWAYS</item>
+      <item>ATTACH</item>
+      <item>AUTOINCREMENT</item>
+      <item>COLLATE</item>
+      <item>CONFLICT</item>
+      <item>CURRENT_TIME</item>
+      <item>DETACH</item>
+      <item>DO</item>
+      <item>EXCLUDE</item>
+      <item>FAIL</item>
+      <item>GLOB</item>
+      <item>IGNORE</item>
+      <item>ISNULL</item>
+      <item>MATCH</item>
+      <item>NOTNULL</item>
+      <item>OFFSET</item>
+      <item>OTHERS</item>
+      <item>PRAGMA</item>
+      <item>RAISE</item>
+      <item>RECURSIVE</item>
+      <item>REGEXP</item>
+      <item>REINDEX</item>
+      <item>RELEASE</item>
+      <item>ROWID</item>
+      <item>STRICT</item>
+      <item>TEMP</item>
+      <item>TIES</item>
+      <item>VACUUM</item>
+      <item>VIRTUAL</item>
+      <item>WINDOW</item>
+    </list>
+    <list name="sqlite types">
+      <item>BOOL</item>
+      <item>INTEGER</item>
+      <item>INT</item>
+      <item>TINYINT</item>
+      <item>SMALLINT</item>
+      <item>MEDIUMINT</item>
+      <item>BIGINT</item>
+      <item>INT2</item>
+      <item>INT8</item>
+      <item>UNSIGNED</item>
+      <item>CHARACTER</item>
+      <item>VARCHAR</item>
+      <item>NCHAR</item>
+      <item>NVARCHAR</item>
+      <item>TEXT</item>
+      <item>CLOB</item>
+      <item>BLOB</item>
+      <item>REAL</item>
+      <item>DOUBLE</item>
+      <item>PRECISION</item>
+      <item>FLOAT</item>
+      <item>NUMERIC</item>
+      <item>DECIMAL</item>
+      <item>BOOLEAN</item>
+      <item>DATE</item>
+      <item>DATETIME</item>
+      <item>VARYING</item>
+      <item>NATIVE</item>
+      <item>ANY</item>
+    </list>
+    <!-- words of the generic "SQL" lists that are no keywords, functions or type names in SQLite (Oracle/ANSI/...),
+         shown as normal text, so column names like "account" or "id" don't look like keywords -->
+    <list name="not sqlite">
+      <item>ACCESS</item>
+      <item>ACCOUNT</item>
+      <item>ADD_MONTHS</item>
+      <item>ADMIN</item>
+      <item>ADMINISTER</item>
+      <item>ADVISE</item>
+      <item>AGENT</item>
+      <item>ALLOCATE</item>
+      <item>ALL_ROWS</item>
+      <item>ANCILLARY</item>
+      <item>ANY</item>
+      <item>ANYDATA</item>
+      <item>ANYDATASET</item>
+      <item>ANYTYPE</item>
+      <item>ARCHIVE</item>
+      <item>ARCHIVELOG</item>
+      <item>ARRAY</item>
+      <item>ASCII</item>
+      <item>ASCIISTR</item>
+      <item>ASSERTION</item>
+      <item>ASSOCIATE</item>
+      <item>AT</item>
+      <item>ATTRIBUTE</item>
+      <item>ATTRIBUTES</item>
+      <item>AUDIT</item>
+      <item>AUTHENTICATED</item>
+      <item>AUTHID</item>
+      <item>AUTHORIZATION</item>
+      <item>AUTOALLOCATE</item>
+      <item>AUTOEXTEND</item>
+      <item>AUTOMATIC</item>
+      <item>BACKUP</item>
+      <item>BECOME</item>
+      <item>BEHALF</item>
+      <item>BFILE</item>
+      <item>BFILENAME</item>
+      <item>BINARY_DOUBLE</item>
+      <item>BINARY_FLOAT</item>
+      <item>BINARY_INTEGER</item>
+      <item>BINDING</item>
+      <item>BIN_TO_NUM</item>
+      <item>BITAND</item>
+      <item>BITMAP</item>
+      <item>BLOCK</item>
+      <item>BLOCK_RANGE</item>
+      <item>BODY</item>
+      <item>BOTH</item>
+      <item>BOUND</item>
+      <item>BREAK</item>
+      <item>BROADCAST</item>
+      <item>BTITLE</item>
+      <item>BUFFER_POOL</item>
+      <item>BUILD</item>
+      <item>BULK</item>
+      <item>CACHE</item>
+      <item>CACHE_INSTANCES</item>
+      <item>CALL</item>
+      <item>CANCEL</item>
+      <item>CARDINALITY</item>
+      <item>CATEGORY</item>
+      <item>CFILE</item>
+      <item>CHAINED</item>
+      <item>CHANGE</item>
+      <item>CHARTOROWID</item>
+      <item>CHECKPOINT</item>
+      <item>CHILD</item>
+      <item>CHOOSE</item>
+      <item>CHR</item>
+      <item>CHUNK</item>
+      <item>CLASS</item>
+      <item>CLEAR</item>
+      <item>CLONE</item>
+      <item>CLOSE</item>
+      <item>CLOSE_CACHED_OPEN_CURSORS</item>
+      <item>CLUSTER</item>
+      <item>COLLECT</item>
+      <item>COLUMNS</item>
+      <item>COLUMN_VALUE</item>
+      <item>COMMENT</item>
+      <item>COMMITTED</item>
+      <item>COMPATIBILITY</item>
+      <item>COMPILE</item>
+      <item>COMPLETE</item>
+      <item>COMPOSE</item>
+      <item>COMPOSITE_LIMIT</item>
+      <item>COMPRESS</item>
+      <item>COMPUTE</item>
+      <item>CONNECT</item>
+      <item>CONNECT_TIME</item>
+      <item>CONSIDER</item>
+      <item>CONSISTENT</item>
+      <item>CONSTANT</item>
+      <item>CONSTRAINTS</item>
+      <item>CONTAINER</item>
+      <item>CONTAINS</item>
+      <item>CONTENTS</item>
+      <item>CONTEXT</item>
+      <item>CONTINUE</item>
+      <item>CONTROLFILE</item>
+      <item>CONVERT</item>
+      <item>COPY</item>
+      <item>CORR</item>
+      <item>CORR_K</item>
+      <item>CORR_S</item>
+      <item>COST</item>
+      <item>COVAR_POP</item>
+      <item>COVAR_SAMP</item>
+      <item>CPU_PER_CALL</item>
+      <item>CPU_PER_SESSION</item>
+      <item>CREATE_STORED_OUTLINES</item>
+      <item>CUBE</item>
+      <item>CURSOR</item>
+      <item>CV</item>
+      <item>CYCLE</item>
+      <item>DANGLING</item>
+      <item>DATA</item>
+      <item>DATAFILE</item>
+      <item>DATAFILES</item>
+      <item>DAY</item>
+      <item>DBA</item>
+      <item>DBTIMEZONE</item>
+      <item>DBURITYPE</item>
+      <item>DDL</item>
+      <item>DEALLOCATE</item>
+      <item>DEBUG</item>
+      <item>DEC</item>
+      <item>DECLARE</item>
+      <item>DECODE</item>
+      <item>DECOMPOSE</item>
+      <item>DEFINER</item>
+      <item>DEGREE</item>
+      <item>DEMAND</item>
+      <item>DEPTH</item>
+      <item>DEREF</item>
+      <item>DETERMINES</item>
+      <item>DICTIONARY</item>
+      <item>DIMENSION</item>
+      <item>DIRECTORY</item>
+      <item>DISABLE</item>
+      <item>DISASSOCIATE</item>
+      <item>DISCONNECT</item>
+      <item>DISKGROUP</item>
+      <item>DISMOUNT</item>
+      <item>DISTRIBUTED</item>
+      <item>DOMAIN</item>
+      <item>DUMP</item>
+      <item>DYNAMIC</item>
+      <item>ELSIF</item>
+      <item>EMPTY</item>
+      <item>EMPTY_BLOB</item>
+      <item>EMPTY_CLOB</item>
+      <item>ENABLE</item>
+      <item>ENFORCE</item>
+      <item>ENTRY</item>
+      <item>ESTIMATE</item>
+      <item>EVENTS</item>
+      <item>EXCEPTION</item>
+      <item>EXCEPTIONS</item>
+      <item>EXCHANGE</item>
+      <item>EXCLUDING</item>
+      <item>EXEC</item>
+      <item>EXECUTE</item>
+      <item>EXISTSNODE</item>
+      <item>EXPIRE</item>
+      <item>EXPLOSION</item>
+      <item>EXTENDS</item>
+      <item>EXTENT</item>
+      <item>EXTENTS</item>
+      <item>EXTERNALLY</item>
+      <item>EXTRACT</item>
+      <item>EXTRACTVALUE</item>
+      <item>FAILED_LOGIN_ATTEMPTS</item>
+      <item>FAST</item>
+      <item>FILE</item>
+      <item>FIRST_ROWS</item>
+      <item>FLAGGER</item>
+      <item>FLASHBACK</item>
+      <item>FLOB</item>
+      <item>FLUSH</item>
+      <item>FORCE</item>
+      <item>FREELIST</item>
+      <item>FREELISTS</item>
+      <item>FRESH</item>
+      <item>FROM_TZ</item>
+      <item>FUNCTION</item>
+      <item>FUNCTIONS</item>
+      <item>GLOBAL</item>
+      <item>GLOBALLY</item>
+      <item>GLOBAL_NAME</item>
+      <item>GRANT</item>
+      <item>GREATEST</item>
+      <item>GROUPING</item>
+      <item>GROUPING_ID</item>
+      <item>GROUP_ID</item>
+      <item>HASH</item>
+      <item>HASHKEYS</item>
+      <item>HEADER</item>
+      <item>HEAP</item>
+      <item>HEXTORAW</item>
+      <item>HIERARCHY</item>
+      <item>HOUR</item>
+      <item>HTTPURITYPE</item>
+      <item>ID</item>
+      <item>IDENTIFIED</item>
+      <item>IDENTIFIER</item>
+      <item>IDGENERATORS</item>
+      <item>IDLE_TIME</item>
+      <item>INCLUDING</item>
+      <item>INCREMENT</item>
+      <item>INCREMENTAL</item>
+      <item>INDEXES</item>
+      <item>INDEXTYPE</item>
+      <item>INDEXTYPES</item>
+      <item>INDICATOR</item>
+      <item>INITCAP</item>
+      <item>INITIAL</item>
+      <item>INITIALIZED</item>
+      <item>INITRANS</item>
+      <item>INSTANCE</item>
+      <item>INSTANCES</item>
+      <item>INSTRB</item>
+      <item>INTERMEDIATE</item>
+      <item>INTERVAL</item>
+      <item>INVALIDATE</item>
+      <item>ISOLATION</item>
+      <item>ISOLATION_LEVEL</item>
+      <item>JAVA</item>
+      <item>KEEP</item>
+      <item>KILL</item>
+      <item>LABEL</item>
+      <item>LAST_DAY</item>
+      <item>LAYER</item>
+      <item>LEADING</item>
+      <item>LEAST</item>
+      <item>LENGTHB</item>
+      <item>LESS</item>
+      <item>LEVEL</item>
+      <item>LIBRARY</item>
+      <item>LINK</item>
+      <item>LIST</item>
+      <item>LNNVL</item>
+      <item>LOB</item>
+      <item>LOCAL</item>
+      <item>LOCALTIMESTAMP</item>
+      <item>LOCATOR</item>
+      <item>LOCK</item>
+      <item>LOCKED</item>
+      <item>LOGFILE</item>
+      <item>LOGGING</item>
+      <item>LOGICAL_READS_PER_CALL</item>
+      <item>LOGICAL_READS_PER_SESSION</item>
+      <item>LOGOFF</item>
+      <item>LOGON</item>
+      <item>LONG</item>
+      <item>LOOP</item>
+      <item>LPAD</item>
+      <item>MAKE_REF</item>
+      <item>MANAGE</item>
+      <item>MANAGED</item>
+      <item>MANAGEMENT</item>
+      <item>MASTER</item>
+      <item>MAXARCHLOGS</item>
+      <item>MAXDATAFILES</item>
+      <item>MAXEXTENTS</item>
+      <item>MAXINSTANCES</item>
+      <item>MAXLOGFILES</item>
+      <item>MAXLOGHISTORY</item>
+      <item>MAXLOGMEMBERS</item>
+      <item>MAXSIZE</item>
+      <item>MAXTRANS</item>
+      <item>MAXVALUE</item>
+      <item>MEDIAN</item>
+      <item>MEMBER</item>
+      <item>MERGE</item>
+      <item>METHOD</item>
+      <item>MINEXTENTS</item>
+      <item>MINIMIZE</item>
+      <item>MINIMUM</item>
+      <item>MINUS</item>
+      <item>MINUTE</item>
+      <item>MINVALUE</item>
+      <item>MLSLABEL</item>
+      <item>MODE</item>
+      <item>MODIFY</item>
+      <item>MONITORING</item>
+      <item>MONTH</item>
+      <item>MONTHS_BETWEEN</item>
+      <item>MOUNT</item>
+      <item>MOVE</item>
+      <item>MOVEMENT</item>
+      <item>MTS_DISPATCHERS</item>
+      <item>MULTISET</item>
+      <item>NAMED</item>
+      <item>NANVL</item>
+      <item>NATIONAL</item>
+      <item>NCHR</item>
+      <item>NCLOB</item>
+      <item>NEEDED</item>
+      <item>NESTED</item>
+      <item>NESTED_TABLE_ID</item>
+      <item>NETWORK</item>
+      <item>NEVER</item>
+      <item>NEW</item>
+      <item>NEW_TIME</item>
+      <item>NEXT</item>
+      <item>NEXT_DAY</item>
+      <item>NLSSORT</item>
+      <item>NLS_CALENDAR</item>
+      <item>NLS_CHARACTERSET</item>
+      <item>NLS_CHARSET_DECL_LEN</item>
+      <item>NLS_CHARSET_ID</item>
+      <item>NLS_CHARSET_NAME</item>
+      <item>NLS_COMP</item>
+      <item>NLS_CURRENCY</item>
+      <item>NLS_DATE_FORMAT</item>
+      <item>NLS_DATE_LANGUAGE</item>
+      <item>NLS_INITCAP</item>
+      <item>NLS_ISO_CURRENCY</item>
+      <item>NLS_LANG</item>
+      <item>NLS_LANGUAGE</item>
+      <item>NLS_LOWER</item>
+      <item>NLS_NUMERIC_CHARACTERS</item>
+      <item>NLS_SORT</item>
+      <item>NLS_SPECIAL_CHARS</item>
+      <item>NLS_TERRITORY</item>
+      <item>NLS_UPPER</item>
+      <item>NOARCHIVELOG</item>
+      <item>NOAUDIT</item>
+      <item>NOCACHE</item>
+      <item>NOCOMPRESS</item>
+      <item>NOCYCLE</item>
+      <item>NOFORCE</item>
+      <item>NOLOGGING</item>
+      <item>NOMAXVALUE</item>
+      <item>NOMINIMIZE</item>
+      <item>NOMINVALUE</item>
+      <item>NOMONITORING</item>
+      <item>NONE</item>
+      <item>NOORDER</item>
+      <item>NOOVERRIDE</item>
+      <item>NOPARALLEL</item>
+      <item>NORELY</item>
+      <item>NORESETLOGS</item>
+      <item>NOREVERSE</item>
+      <item>NORMAL</item>
+      <item>NOSEGMENT</item>
+      <item>NOSORT</item>
+      <item>NOVALIDATE</item>
+      <item>NOWAIT</item>
+      <item>NUMBER</item>
+      <item>NUMTODSINTERVAL</item>
+      <item>NUMTOYMINTERVAL</item>
+      <item>NVL</item>
+      <item>NVL2</item>
+      <item>OBJECT</item>
+      <item>OBJNO</item>
+      <item>OBJNO_REUSE</item>
+      <item>OFF</item>
+      <item>OFFLINE</item>
+      <item>OID</item>
+      <item>OIDINDEX</item>
+      <item>OLD</item>
+      <item>ONLINE</item>
+      <item>ONLY</item>
+      <item>OPCODE</item>
+      <item>OPEN</item>
+      <item>OPERATOR</item>
+      <item>OPTIMAL</item>
+      <item>OPTIMIZER_GOAL</item>
+      <item>OPTION</item>
+      <item>ORA_HASH</item>
+      <item>ORA_ROWSCN</item>
+      <item>ORGANIZATION</item>
+      <item>OUT</item>
+      <item>OUTLINE</item>
+      <item>OVERFLOW</item>
+      <item>OVERLAPS</item>
+      <item>OWN</item>
+      <item>PACKAGE</item>
+      <item>PACKAGES</item>
+      <item>PARALLEL</item>
+      <item>PARAMETERS</item>
+      <item>PARENT</item>
+      <item>PARTITIONS</item>
+      <item>PARTITION_HASH</item>
+      <item>PARTITION_RANGE</item>
+      <item>PASSWORD</item>
+      <item>PASSWORD_GRACE_TIME</item>
+      <item>PASSWORD_LIFE_TIME</item>
+      <item>PASSWORD_LOCK_TIME</item>
+      <item>PASSWORD_REUSE_MAX</item>
+      <item>PASSWORD_REUSE_TIME</item>
+      <item>PASSWORD_VERIFY_FUNCTION</item>
+      <item>PCTFREE</item>
+      <item>PCTINCREASE</item>
+      <item>PCTTHRESHOLD</item>
+      <item>PCTUSED</item>
+      <item>PCTVERSION</item>
+      <item>PERCENT</item>
+      <item>PERCENTILE_CONT</item>
+      <item>PERCENTILE_DISC</item>
+      <item>PERMANENT</item>
+      <item>PLSQL_DEBUG</item>
+      <item>PLS_INTEGER</item>
+      <item>POST_TRANSACTION</item>
+      <item>POWERMULTISET</item>
+      <item>POWERMULTISET_BY_CARDINALITY</item>
+      <item>PREBUILT</item>
+      <item>PREPARE</item>
+      <item>PRESENT</item>
+      <item>PRESENTNNV</item>
+      <item>PRESENTV</item>
+      <item>PRESERVE</item>
+      <item>PREVIOUS</item>
+      <item>PRIOR</item>
+      <item>PRIVATE</item>
+      <item>PRIVATE_SGA</item>
+      <item>PRIVILEGE</item>
+      <item>PRIVILEGES</item>
+      <item>PROCEDURE</item>
+      <item>PROFILE</item>
+      <item>PUBLIC</item>
+      <item>PURGE</item>
+      <item>QUEUE</item>
+      <item>QUOTA</item>
+      <item>RATIO_TO_REPORT</item>
+      <item>RAW</item>
+      <item>RAWTOHEX</item>
+      <item>RAWTONHEX</item>
+      <item>RBA</item>
+      <item>READ</item>
+      <item>READS</item>
+      <item>REBUILD</item>
+      <item>RECORD</item>
+      <item>RECORDS_PER_BLOCK</item>
+      <item>RECOVER</item>
+      <item>RECOVERABLE</item>
+      <item>RECOVERY</item>
+      <item>RECYCLE</item>
+      <item>REDUCED</item>
+      <item>REF</item>
+      <item>REFERENCING</item>
+      <item>REFRESH</item>
+      <item>REFTOHEX</item>
+      <item>REGEXP_INSTR</item>
+      <item>REGEXP_LIKE</item>
+      <item>REGEXP_REPLACE</item>
+      <item>REGEXP_SUBSTR</item>
+      <item>REGR_AVGX</item>
+      <item>REGR_AVGY</item>
+      <item>REGR_COUNT</item>
+      <item>REGR_INTERCEPT</item>
+      <item>REGR_R2</item>
+      <item>REGR_SLOPE</item>
+      <item>REGR_SXX</item>
+      <item>REGR_SXY</item>
+      <item>REGR_SYY</item>
+      <item>RELY</item>
+      <item>REMAINDER</item>
+      <item>RESET</item>
+      <item>RESETLOGS</item>
+      <item>RESIZE</item>
+      <item>RESOLVE</item>
+      <item>RESOLVER</item>
+      <item>RESOURCE</item>
+      <item>RESTRICTED</item>
+      <item>RESUME</item>
+      <item>RETURN</item>
+      <item>REUSE</item>
+      <item>REVERSE</item>
+      <item>REVOKE</item>
+      <item>REWRITE</item>
+      <item>ROLE</item>
+      <item>ROLES</item>
+      <item>ROLLUP</item>
+      <item>ROWIDTOCHAR</item>
+      <item>ROWIDTONCHAR</item>
+      <item>ROWNUM</item>
+      <item>RPAD</item>
+      <item>RULE</item>
+      <item>SAMPLE</item>
+      <item>SCAN</item>
+      <item>SCAN_INSTANCES</item>
+      <item>SCHEMA</item>
+      <item>SCN</item>
+      <item>SCN_TO_TIMESTAMP</item>
+      <item>SCOPE</item>
+      <item>SD_ALL</item>
+      <item>SD_INHIBIT</item>
+      <item>SD_SHOW</item>
+      <item>SECOND</item>
+      <item>SEGMENT</item>
+      <item>SEG_BLOCK</item>
+      <item>SEG_FILE</item>
+      <item>SELECTIVITY</item>
+      <item>SEQUENCE</item>
+      <item>SERIALIZABLE</item>
+      <item>SERVERERROR</item>
+      <item>SESSION</item>
+      <item>SESSIONS_PER_USER</item>
+      <item>SESSIONTIMEZONE</item>
+      <item>SESSION_CACHED_CURSORS</item>
+      <item>SHARE</item>
+      <item>SHARED</item>
+      <item>SHARED_POOL</item>
+      <item>SHRINK</item>
+      <item>SHUTDOWN</item>
+      <item>SINGLE</item>
+      <item>SINGLETASK</item>
+      <item>SIZE</item>
+      <item>SKIP</item>
+      <item>SKIP_UNUSABLE_INDEXES</item>
+      <item>SNAPSHOT</item>
+      <item>SOME</item>
+      <item>SORT</item>
+      <item>SOURCE</item>
+      <item>SPECIFICATION</item>
+      <item>SPLIT</item>
+      <item>SQL_TRACE</item>
+      <item>STANDBY</item>
+      <item>START</item>
+      <item>STARTUP</item>
+      <item>STATEMENT_ID</item>
+      <item>STATIC</item>
+      <item>STATISTICS</item>
+      <item>STATS_BINOMIAL_TEST</item>
+      <item>STATS_CROSSTAB</item>
+      <item>STATS_F_TEST</item>
+      <item>STATS_KS_TEST</item>
+      <item>STATS_MODE</item>
+      <item>STATS_MW_TEST</item>
+      <item>STATS_ONE_WAY_ANOVA</item>
+      <item>STATS_T_TEST_INDEP</item>
+      <item>STATS_T_TEST_INDEPU</item>
+      <item>STATS_T_TEST_ONE</item>
+      <item>STATS_T_TEST_PAIRED</item>
+      <item>STATS_WSR_TEST</item>
+      <item>STDDEV</item>
+      <item>STDDEV_POP</item>
+      <item>STDDEV_SAMP</item>
+      <item>STOP</item>
+      <item>STORAGE</item>
+      <item>STORE</item>
+      <item>STRUCTURE</item>
+      <item>SUBMULTISET</item>
+      <item>SUBPARTITION</item>
+      <item>SUBPARTITIONS</item>
+      <item>SUBSTRB</item>
+      <item>SUCCESSFUL</item>
+      <item>SUMMARY</item>
+      <item>SUPPLEMENTAL</item>
+      <item>SUSPEND</item>
+      <item>SWITCH</item>
+      <item>SYNONYM</item>
+      <item>SYSDATE</item>
+      <item>SYSDBA</item>
+      <item>SYSOPER</item>
+      <item>SYSTEM</item>
+      <item>SYSTIMESTAMP</item>
+      <item>SYS_CONNECT_BY_PATH</item>
+      <item>SYS_CONTEXT</item>
+      <item>SYS_DBURIGEN</item>
+      <item>SYS_EXTRACT_UTC</item>
+      <item>SYS_GUID</item>
+      <item>SYS_OP_BITVEC</item>
+      <item>SYS_OP_ENFORCE_NOT_NULL$</item>
+      <item>SYS_OP_NOEXPAND</item>
+      <item>SYS_OP_NTCIMG$</item>
+      <item>SYS_TYPEID</item>
+      <item>SYS_XMLAGG</item>
+      <item>SYS_XMLGEN</item>
+      <item>TABLES</item>
+      <item>TABLESPACE</item>
+      <item>TABLESPACE_NO</item>
+      <item>TABNO</item>
+      <item>TEMPFILE</item>
+      <item>THAN</item>
+      <item>THE</item>
+      <item>THREAD</item>
+      <item>THROUGH</item>
+      <item>TIMEOUT</item>
+      <item>TIMESTAMP</item>
+      <item>TIMESTAMP_TO_SCN</item>
+      <item>TIMEZONE_HOUR</item>
+      <item>TIMEZONE_MINUTE</item>
+      <item>TIME_ZONE</item>
+      <item>TOPLEVEL</item>
+      <item>TO_BINARY_DOUBLE</item>
+      <item>TO_BINARY_FLOAT</item>
+      <item>TO_CHAR</item>
+      <item>TO_CLOB</item>
+      <item>TO_DATE</item>
+      <item>TO_DSINTERVAL</item>
+      <item>TO_LOB</item>
+      <item>TO_MULTI_BYTE</item>
+      <item>TO_NCHAR</item>
+      <item>TO_NCLOB</item>
+      <item>TO_NUMBER</item>
+      <item>TO_SINGLE_BYTE</item>
+      <item>TO_TIMESTAMP</item>
+      <item>TO_TIMESTAMP_TZ</item>
+      <item>TO_YMINTERVAL</item>
+      <item>TRACE</item>
+      <item>TRACING</item>
+      <item>TRAILING</item>
+      <item>TRANSITIONAL</item>
+      <item>TRANSLATE</item>
+      <item>TREAT</item>
+      <item>TRIGGERS</item>
+      <item>TRUNCATE</item>
+      <item>TYPE</item>
+      <item>TYPES</item>
+      <item>TZ_OFFSET</item>
+      <item>UID</item>
+      <item>UNARCHIVED</item>
+      <item>UNBOUND</item>
+      <item>UNDO</item>
+      <item>UNIFORM</item>
+      <item>UNISTR</item>
+      <item>UNLIMITED</item>
+      <item>UNLOCK</item>
+      <item>UNRECOVERABLE</item>
+      <item>UNTIL</item>
+      <item>UNUSABLE</item>
+      <item>UNUSED</item>
+      <item>UPDATABLE</item>
+      <item>UPDATEXML</item>
+      <item>UPD_INDEXES</item>
+      <item>UPPPER</item>
+      <item>URIFACTORYTYPE</item>
+      <item>URITYPE</item>
+      <item>UROWID</item>
+      <item>USAGE</item>
+      <item>USE</item>
+      <item>USER</item>
+      <item>USERENV</item>
+      <item>USER_DEFINED</item>
+      <item>USE_STORED_OUTLINES</item>
+      <item>VALIDATE</item>
+      <item>VALIDATION</item>
+      <item>VALUE</item>
+      <item>VARCHAR2</item>
+      <item>VARIANCE</item>
+      <item>VARRAY</item>
+      <item>VAR_POP</item>
+      <item>VAR_SAMP</item>
+      <item>VSIZE</item>
+      <item>WHENEVER</item>
+      <item>WHILE</item>
+      <item>WIDTH_BUCKET</item>
+      <item>WORK</item>
+      <item>WRITE</item>
+      <item>XMLAGG</item>
+      <item>XMLCOLATTVAL</item>
+      <item>XMLCONCAT</item>
+      <item>XMLELEMENT</item>
+      <item>XMLFOREST</item>
+      <item>XMLSEQUENCE</item>
+      <item>XMLTRANSFORM</item>
+      <item>XMLTYPE</item>
+      <item>YEAR</item>
+      <item>ZONE</item>
+    </list>
+    <list name="sqlite functions">
+      <item>changes</item>
+      <item>concat_ws</item>
+      <item>format</item>
+      <item>glob</item>
+      <item>hex</item>
+      <item>ifnull</item>
+      <item>iif</item>
+      <item>last_insert_rowid</item>
+      <item>likelihood</item>
+      <item>likely</item>
+      <item>load_extension</item>
+      <item>octet_length</item>
+      <item>printf</item>
+      <item>quote</item>
+      <item>randomblob</item>
+      <item>sqlite_compileoption_get</item>
+      <item>sqlite_compileoption_used</item>
+      <item>sqlite_offset</item>
+      <item>sqlite_source_id</item>
+      <item>sqlite_version</item>
+      <item>substring</item>
+      <item>total_changes</item>
+      <item>typeof</item>
+      <item>unhex</item>
+      <item>unicode</item>
+      <item>unlikely</item>
+      <item>zeroblob</item>
+      <item>datetime</item>
+      <item>julianday</item>
+      <item>unixepoch</item>
+      <item>strftime</item>
+      <item>timediff</item>
+      <item>group_concat</item>
+      <item>string_agg</item>
+      <item>total</item>
+      <item>json</item>
+      <item>json_array</item>
+      <item>json_array_length</item>
+      <item>json_extract</item>
+      <item>json_insert</item>
+      <item>json_object</item>
+      <item>json_patch</item>
+      <item>json_remove</item>
+      <item>json_replace</item>
+      <item>json_set</item>
+      <item>json_type</item>
+      <item>json_valid</item>
+      <item>json_quote</item>
+      <item>json_group_array</item>
+      <item>json_group_object</item>
+      <item>json_each</item>
+      <item>json_tree</item>
+      <item>nth_value</item>
+    </list>
     <contexts>
       <context name="Default" attribute="Normal Text" lineEndContext="#stay">
         <IncludeRules context="MonalRules"/>
@@ -29,6 +845,13 @@
       <context name="MonalRules" attribute="Normal Text" lineEndContext="#stay">
         <!-- XML queries: only the string directly following these selectors -->
         <RegExpr attribute="Normal Text" context="QueryStart##Monal XML Query" String="\b(?:findFirst|find|check):(?=\s*@&quot;)"/>
+
+        <!-- SQL queries: the string directly following the query-taking selectors of MLSQLite, (optionally in parentheses) -->
+        <RegExpr attribute="Normal Text" context="SqlStart" String="\b(?:executeScalar|executeScalarReader|executeReader|executeNonQuery|internalExecuteScalar|prepareQuery):(?=\s*\(?\s*@&quot;)"/>
+        <!-- ... or a string assigned to a variable (to be passed to MLSQLite later on), if it starts with an UPPERCASE SQL statement
+             keyword, or with one in any case if the variable is called like "query" -->
+        <RegExpr attribute="Symbol" context="SqlStart" String="(?&lt;![=!&lt;&gt;])=(?!=)(?=\s*@&quot;(?:SELECT|INSERT|UPDATE|DELETE|REPLACE|CREATE|ALTER|DROP|PRAGMA|WITH|VACUUM|BEGIN|COMMIT|END|ROLLBACK|SAVEPOINT|RELEASE|ATTACH|DETACH|REINDEX|ANALYZE|EXPLAIN)[\s\\;&quot;])"/>
+        <RegExpr attribute="Normal Text" context="SqlAssign" String="\b(?i:[A-Za-z0-9_]*query[A-Za-z0-9_]*)\s*(?==\s*@&quot;(?i:SELECT|INSERT|UPDATE|DELETE|REPLACE|CREATE|ALTER|DROP|PRAGMA|WITH|VACUUM|BEGIN|COMMIT|END|ROLLBACK|SAVEPOINT|RELEASE|ATTACH|DETACH|REINDEX|ANALYZE|EXPLAIN)[\s\\;&quot;])"/>
 
         <!-- handler definitions: $$class_handler(name, args...) ... $$ -->
         <RegExpr attribute="Handler Definition" context="ClassHandlerOpen" String="\$\$(?:returning_)?class_handler\b" beginRegion="MLHandler"/>
@@ -158,6 +981,65 @@
         <DetectChar attribute="Symbol" context="#pop!NameThenArgs" char=","/>
         <DetectChar attribute="Symbol" context="#pop" char=")"/>
       </context>
+
+      <!-- ===== SQLite ===== -->
+      <!-- we are INSIDE an ObjC string literal: `"` ends the query, `\"` is a literal ", `\` at line end continues the string,
+           every other line end terminates it; these checks must be present in each SQL context, so the
+           contexts of "SQL" that would span them (strings, identifiers, comments) are replaced by own ones -->
+      <context name="SqlStart" attribute="Normal Text" lineEndContext="#pop" fallthroughContext="#pop">
+        <DetectSpaces/>
+        <DetectChar attribute="Symbol" char="("/>
+        <Detect2Chars attribute="SQL Quote" context="#pop!Sql" char="@" char1="&quot;"/>
+      </context>
+      <context name="SqlAssign" attribute="Normal Text" lineEndContext="#pop" fallthroughContext="#pop">
+        <DetectChar attribute="Symbol" context="#pop!SqlStart" char="="/>
+      </context>
+      <context name="SqlStringEnd" attribute="SQL Text" lineEndContext="#stay">
+        <LineContinue attribute="SQL Quote"/>
+        <HlCStringChar attribute="SQL String Char"/>
+      </context>
+      <context name="Sql" attribute="SQL Text" lineEndContext="#pop">
+        <DetectChar attribute="SQL Quote" context="#pop" char="&quot;"/>
+        <Detect2Chars attribute="SQL Identifier" context="SqlIdentifier" char="\" char1="&quot;"/>
+        <IncludeRules context="SqlStringEnd"/>
+        <DetectSpaces attribute="SQL Text"/>
+        <Detect2Chars attribute="SQL Comment" context="SqlLineComment" char="-" char1="-"/>
+        <Detect2Chars attribute="SQL Comment" context="SqlBlockComment" char="/" char1="*"/>
+        <DetectChar attribute="SQL String" context="SqlString" char="'"/>
+        <!-- bind parameters: ? ?NNN :name @name $name -->
+        <RegExpr attribute="SQL Parameter" String="\?[0-9]*|[:@$][A-Za-z_][A-Za-z0-9_]*"/>
+        <keyword attribute="SQL Keyword" String="sqlite keywords" insensitive="true"/>
+        <keyword attribute="SQL Function" String="sqlite functions" insensitive="true"/>
+        <keyword attribute="SQL Data Type" String="sqlite types" insensitive="true"/>
+        <keyword attribute="SQL Text" String="not sqlite" insensitive="true"/>
+        <keyword attribute="SQL Control Flow" String="sql controlFlow" insensitive="true"/>
+        <keyword attribute="SQL Operator Keyword" String="sql operators" insensitive="true"/>
+        <keyword attribute="SQL Keyword" String="sql keywords" insensitive="true"/>
+        <keyword attribute="SQL Function" String="sql functions" insensitive="true"/>
+        <keyword attribute="SQL Data Type" String="sql types" insensitive="true"/>
+        <IncludeRules context="Normal##SQL"/>
+      </context>
+      <context name="SqlString" attribute="SQL String" lineEndContext="#pop#pop">
+        <DetectChar attribute="SQL Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <Detect2Chars attribute="SQL String Char" char="'" char1="'"/>
+        <DetectChar attribute="SQL String" context="#pop" char="'"/>
+        <IncludeRules context="SqlStringEnd"/>
+      </context>
+      <context name="SqlIdentifier" attribute="SQL Identifier" lineEndContext="#pop#pop">
+        <Detect2Chars attribute="SQL Identifier" context="#pop" char="\" char1="&quot;"/>
+        <DetectChar attribute="SQL Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <IncludeRules context="SqlStringEnd"/>
+      </context>
+      <!-- the ObjC line continuation joins the lines, so a "- -" comment really extends over the following lines up to the end of the string -->
+      <context name="SqlLineComment" attribute="SQL Comment" lineEndContext="#pop#pop">
+        <DetectChar attribute="SQL Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <IncludeRules context="SqlStringEnd"/>
+      </context>
+      <context name="SqlBlockComment" attribute="SQL Comment" lineEndContext="#pop#pop">
+        <Detect2Chars attribute="SQL Comment" context="#pop" char="*" char1="/"/>
+        <DetectChar attribute="SQL Quote" context="#pop" char="&quot;" lookAhead="true"/>
+        <IncludeRules context="SqlStringEnd"/>
+      </context>
     </contexts>
     <itemDatas>
       <itemData name="Normal Text" defStyleNum="dsNormal" spellChecking="false"/>
@@ -172,6 +1054,18 @@
       <itemData name="Optional Argument" defStyleNum="dsBuiltIn" italic="1" spellChecking="false"/>
       <itemData name="Bound Argument" defStyleNum="dsBuiltIn" spellChecking="false"/>
       <itemData name="Argument Name" defStyleNum="dsVariable" spellChecking="false"/>
+      <itemData name="SQL Quote" defStyleNum="dsString" spellChecking="false"/>
+      <itemData name="SQL Text" defStyleNum="dsNormal" spellChecking="false"/>
+      <itemData name="SQL Keyword" defStyleNum="dsKeyword" spellChecking="false"/>
+      <itemData name="SQL Control Flow" defStyleNum="dsControlFlow" spellChecking="false"/>
+      <itemData name="SQL Operator Keyword" defStyleNum="dsKeyword" spellChecking="false"/>
+      <itemData name="SQL Function" defStyleNum="dsFunction" spellChecking="false"/>
+      <itemData name="SQL Data Type" defStyleNum="dsDataType" spellChecking="false"/>
+      <itemData name="SQL String" defStyleNum="dsString" spellChecking="false"/>
+      <itemData name="SQL String Char" defStyleNum="dsSpecialChar" spellChecking="false"/>
+      <itemData name="SQL Identifier" defStyleNum="dsOthers" spellChecking="false"/>
+      <itemData name="SQL Comment" defStyleNum="dsComment" spellChecking="false"/>
+      <itemData name="SQL Parameter" defStyleNum="dsVariable" bold="1" spellChecking="false"/>
     </itemDatas>
   </highlighting>
   <general>
@@ -179,7 +1073,7 @@
       <comment name="singleLine" start="//"/>
       <comment name="multiLine" start="/*" end="*/" region="Comment"/>
     </comments>
-    <keywords casesensitive="1"/>
+    <keywords casesensitive="1" additionalDeliminator="&quot;'"/>
   </general>
 </language>
 <!-- kate: replace-tabs on; tab-width 2; indent-width 2; -->

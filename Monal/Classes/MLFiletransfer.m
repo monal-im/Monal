@@ -21,11 +21,15 @@
 @import UniformTypeIdentifiers;
 @import UIKit.UIImage;
 
+//monal version 7.x, state counter: 001
+#define CURRENT_FILETRANSFER_DATA_VERSION @7001
+
 static NSFileManager* _fileManager;
 static NSString* _documentCacheDir;
-static NSMutableSet* _currentlyTransfering;
-static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
 static NSObject* _hardlinkingSyncObject;
+static NSObject* _stateSyncObject;
+static NSMutableDictionary<NSString*, NSNumber*>* _expectedDownloadSizes;
+static NSMutableSet* _currentlyTransfering;
 
 @implementation MLFiletransfer
 
@@ -33,6 +37,7 @@ static NSObject* _hardlinkingSyncObject;
 {
     NSError* error;
     _hardlinkingSyncObject = [NSObject new];
+    _stateSyncObject = [NSObject new];
     _fileManager = [NSFileManager defaultManager];
     _documentCacheDir = [[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path];
     
@@ -45,10 +50,78 @@ static NSObject* _hardlinkingSyncObject;
     _expectedDownloadSizes = [NSMutableDictionary new];
 }
 
++(void) loadState
+{
+    NSDictionary* state = [[DataLayer sharedInstance] getFiletransferState];
+    //DDLogVerbose(@"Setting MLFileTransfer state to: %@", state);
+    
+    //ignore state having wrong version code
+    if(!state[@"version"] || ![state[@"version"] isEqual:CURRENT_FILETRANSFER_DATA_VERSION])
+    {
+        DDLogDebug(@"Ignoring MLFiletransfer state having wrong version: %@ != %@", state[@"version"], CURRENT_FILETRANSFER_DATA_VERSION);
+        return;
+    }
+    
+    @synchronized(_stateSyncObject) {
+        _currentlyTransfering = state[@"currentlyTransfering"];
+        _expectedDownloadSizes = state[@"expectedDownloadSizes"];
+    }
+}
+
++(void) storeState
+{
+    @synchronized(_stateSyncObject) {
+        NSDictionary* state = @{
+            @"version": CURRENT_FILETRANSFER_DATA_VERSION,
+            @"currentlyTransfering": _currentlyTransfering,
+            @"expectedDownloadSizes": _expectedDownloadSizes,
+        };
+        //DDLogVerbose(@"Storing MLFileTransfer state: %@", state);
+        [[DataLayer sharedInstance] setFiletransferState:state];
+    }
+}
+
 +(BOOL) isIdle
 {
-    @synchronized(_currentlyTransfering) {
+    @synchronized(_stateSyncObject) {
         return [_currentlyTransfering count] == 0;
+    }
+}
+
++(void) addTransfer:(id) obj
+{
+    @synchronized(_stateSyncObject) {
+        [_currentlyTransfering addObject:obj];
+        [self storeState];
+    }
+}
+
++(void) markAsComplete:(id) obj
+{
+    @synchronized(_stateSyncObject) {
+        [_currentlyTransfering removeObject:obj];
+        [self storeState];
+    }
+    if(self.isIdle)
+        //don't queue this notification because it should be handled immediately
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFiletransfersIdle object:self];
+}
+
++(BOOL) isFileForHistoryIdInTransfer:(NSNumber*) historyId
+{
+    @synchronized(_stateSyncObject) {
+        if([_currentlyTransfering containsObject:historyId])
+            return YES;
+        return NO;
+    }
+}
+
++(BOOL) isFileAtPathInTransfer:(NSString*) path
+{
+    @synchronized(_stateSyncObject) {
+        if([_currentlyTransfering containsObject:path])
+            return YES;
+        return NO;
     }
 }
 
@@ -67,18 +140,21 @@ static NSObject* _hardlinkingSyncObject;
         return;
     }
     url = [self genCanonicalUrl:msg.messageText];
-    @synchronized(_expectedDownloadSizes) {
+    @synchronized(_stateSyncObject) {
         if(_expectedDownloadSizes[url] == nil)
+        {
             _expectedDownloadSizes[url] = msg.fileInfo.size;
+            [self storeState];
+        }
     }
     //make sure we don't check or download this twice
-    @synchronized(_currentlyTransfering) {
+    @synchronized(_stateSyncObject) {
         if([self isFileForHistoryIdInTransfer:historyId])
         {
             DDLogDebug(@"Already checking/downloading this content, ignoring");
             return;
         }
-        [_currentlyTransfering addObject:historyId];
+        [self addTransfer:historyId];
     }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         DDLogInfo(@"Requesting mime-type and size for historyID %@ from http server", historyId);
@@ -90,8 +166,6 @@ static NSObject* _hardlinkingSyncObject;
 
         NSURLSession* session = [HelperTools createEphemeralURLSession];
         [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data __unused, NSURLResponse* _Nullable response, NSError* _Nullable error) {
-            [session finishTasksAndInvalidate];     //needed for garbage collection of url session
-            
             if(msg.retracted || msg.deletedLocally)
             {
                 DDLogDebug(@"Ignoring mimeType/size check results because the corresponding message was retracted or deleted while fetching the headers. historyId = %@", historyId);
@@ -162,6 +236,14 @@ static NSObject* _hardlinkingSyncObject;
     });
 }
 
+
+
+//### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+//************************************************* OLD NON_PROMISE API *************************************************
+//### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+
+
 +(void) downloadFileForHistoryID:(NSNumber*) historyId
 {
     [self downloadFileForHistoryID:historyId andForceDownload:NO];
@@ -176,14 +258,14 @@ static NSObject* _hardlinkingSyncObject;
         return;
     }
     //make sure we don't check or download this twice (but only do this if the download is not forced anyway)
-    @synchronized(_currentlyTransfering)
+    @synchronized(_stateSyncObject)
     {
         if(!forceDownload && [self isFileForHistoryIdInTransfer:historyId])
         {
             DDLogDebug(@"Already checking/downloading this content, ignoring");
             return;
         }
-        [_currentlyTransfering addObject:historyId];
+        [self addTransfer:historyId];
     }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         DDLogInfo(@"Downloading file for historyID %@", historyId);
@@ -197,152 +279,148 @@ static NSObject* _hardlinkingSyncObject;
             return;
         }
         
-        NSURLSession* session = [HelperTools createEphemeralURLSession];
-        // set app defined description for download size checks
-        [session setSessionDescription:url];
-        NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
-            [_expectedDownloadSizes removeObjectForKey:session.sessionDescription];
-            [session finishTasksAndInvalidate];     //needed for garbage collection of url session
-            
-            if(msg.retracted || msg.deletedLocally)
-            {
-                DDLogDebug(@"Discarding downloaded file because its message was retracted or deleted during the download. historyId = %@", historyId);
-                // No need to remove the attachment thumbnail because it hasn't been generated.
-                [_fileManager removeItemAtPath:location.path error:nil];
-                [self markAsComplete:historyId];
-                return;
-            }
-            if(error)
-            {
-                DDLogError(@"File download for %@ failed: %@", msg, error);
-                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to download file: %@", @""), error] forMessage:msg];
-                [self markAsComplete:historyId];
-                return;
-            }
-            
-            NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
-            NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
-            if(mimeType)                                                                                                                                                                 
-                mimeType = [[mimeType componentsSeparatedByString:@";"] firstObject];
-            if(!mimeType)
-                mimeType = @"application/octet-stream";
-            
-            //try to deduce the content type from a given file extension if needed and possible
-            if([mimeType isEqualToString:@"application/octet-stream"])
-                mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
-            
-            //make sure we *always* have a mime type
-            if(!mimeType)
-                mimeType = @"application/octet-stream";
-            
-            NSString* cacheFilePath = [self calculateCacheFilePathForNewUrl:msg.messageText andMimeType:mimeType];
-            
-            //encrypted filetransfer
-            if([[urlComponents.scheme lowercaseString] isEqualToString:@"aesgcm"])
-            {
-                DDLogInfo(@"Decrypting encrypted filetransfer stored at '%@'...", location);
-                if(urlComponents.fragment.length < 88)
-                {
-                    DDLogError(@"File download for %@ failed: %@", msg, error);
-                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode encrypted link", @"") forMessage:msg];
-                    [self markAsComplete:historyId];
-                    return;
-                }
-                int ivLength = 24;
-                //format is iv+32byte key
-                NSData* key = [HelperTools dataWithHexString:[urlComponents.fragment substringWithRange:NSMakeRange(ivLength, 64)]];
-                NSData* iv = [HelperTools dataWithHexString:[urlComponents.fragment substringToIndex:ivLength]];
-                
-                //decrypt data with given key and iv
-                NSData* encryptedData = [NSData dataWithContentsOfURL:location];
-                if(encryptedData && encryptedData.length > 0 && key && key.length == 32 && iv && iv.length == 12)
-                {
-                    NSData* decryptedData = [AESGcm decrypt:encryptedData withKey:key andIv:iv withAuth:nil];
-                    if(decryptedData == nil)
-                    {
-                        DDLogError(@"File download decryption failed for %@", msg);
-                        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt download", @"") forMessage:msg];
-                        [self markAsComplete:historyId];
-                        return;
-                    }
-                    [decryptedData writeToFile:cacheFilePath options:NSDataWritingAtomic error:&error];
-                    if(error)
-                    {
-                        DDLogError(@"File download for %@ failed: %@", msg, error);
-                        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to write decrypted download into cache directory", @"") forMessage:msg];
-                        [self markAsComplete:historyId];
-                        return;
-                    }
-                    MLAssert([_fileManager fileExistsAtPath:cacheFilePath], @"cache file should be there!", (@{@"cacheFilePath": cacheFilePath}));
-                    [HelperTools configureFileProtectionFor:cacheFilePath];
-                }
-                else
-                {
-                    DDLogError(@"Failed to decrypt file (iv, key, data length checks failed) for %@", msg);
-                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt filetransfer", @"") forMessage:msg];
-                    [self markAsComplete:historyId];
-                    return;
-                }
-            }
-            else        //cleartext filetransfer
-            {
-                //hardlink file to our cache directory
-                //it will be removed once this completion returnes, even if moved to a new location (this seems to be a ios16 bug)
-                DDLogInfo(@"Hardlinking downloaded file from '%@' to document cache at '%@'...", [location path], cacheFilePath);
-                error = [HelperTools hardLinkOrCopyFile:[location path] to:cacheFilePath];
-                if(error)
-                {
-                    DDLogError(@"File download for %@ failed: %@", msg, error);
-                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to copy downloaded file into cache directory: %@", @""), error] forMessage:msg];
-                    [self markAsComplete:historyId];
-                    return;
-                }
-                MLAssert([_fileManager fileExistsAtPath:cacheFilePath], @"cache file should be there!", (@{@"cacheFilePath": cacheFilePath}));
-                [HelperTools configureFileProtectionFor:cacheFilePath];
-            }
-            
-            //hardlink cache file if possible
-            [self hardlinkFileForMessage:msg];
-            
-            NSNumber* filetransferSize = @([[_fileManager attributesOfItemAtPath:cacheFilePath error:nil] fileSize]);
-            DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
-            //update db with content type and size
-            [[DataLayer sharedInstance] setFiletransferInfoForHistoryId:historyId withMimeType:mimeType andSize:filetransferSize];
-
-            //send out update notification
-            xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
-            if(account != nil)      //don't send out update notices for already deleted accounts
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{ @"message": msg }];
-            else
-                [_fileManager removeItemAtPath:cacheFilePath error:nil];
-            
-            //download done, remove from "currently checking/downloading list"
-            [self markAsComplete:historyId];
-        }];
+        NSURLSession* session = [HelperTools createBackgroundURLSession];
+        NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url]];
+        task.taskDescription = [HelperTools hexadecimalString:[HelperTools serializeObject:@{
+            @"handler": $newHandler(self, handleFileDownload,
+                $ID(url),
+                $ID(historyId),
+            ),
+            @"url": url,
+            @"historyId": historyId,
+        }]];
         [task resume];
     });
 }
 
--(void) URLSession:(NSURLSession*) session downloadTask:(NSURLSessionDownloadTask*) downloadTask didWriteData:(int64_t) bytesWritten totalBytesWritten:(int64_t) totalBytesWritten totalBytesExpectedToWrite:(int64_t) totalBytesExpectedToWrite
-{
-    @synchronized(_expectedDownloadSizes) {
-        NSNumber* expectedSize = _expectedDownloadSizes[session.sessionDescription];
-        if(expectedSize == nil)                                                 //don't allow downloads of files without size in http header
-            [downloadTask cancel];
-        else if(totalBytesWritten >= expectedSize.intValue + 512 * 1024)        //allow for a maximum of 512KiB of extra data
-            [downloadTask cancel];
-        else                                                                    // everything is ok
-            ;
+$$class_handler(handleFileDownload, $$ID(NSString*, url), $$ID(NSNumber*, historyId), $_ID(NSURL*, location), $_ID(NSHTTPURLResponse*, response), $_ID(NSError*, error))
+    [_expectedDownloadSizes removeObjectForKey:url];
+    
+    MLMessage* msg = [MLMessage createMessageFromHistoryID:historyId];
+    if(msg == nil || msg.retracted || msg.deletedLocally)
+    {
+        DDLogDebug(@"Discarding downloaded file because its message was retracted or deleted during the download. historyId = %@", historyId);
+        // No need to remove the attachment thumbnail because it hasn't been generated.
+        [_fileManager removeItemAtPath:location.path error:nil];
+        [self markAsComplete:historyId];
+        return;
     }
-}
-
--(void) URLSession:(nonnull NSURLSession*) session downloadTask:(nonnull NSURLSessionDownloadTask*) downloadTask didFinishDownloadingToURL:(nonnull NSURL*) location
-{
-    @synchronized(_expectedDownloadSizes) {
-        [_expectedDownloadSizes removeObjectForKey:session.sessionDescription];
+    if(error || response == nil)
+    {
+        DDLogError(@"File download for %@ failed: %@", msg, error);
+        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to download file: %@", @""), error] forMessage:msg];
+        [self markAsComplete:historyId];
+        return;
     }
-}
+    if(response.statusCode < 200 || response.statusCode > 299)      //check for proper status code
+    {
+        NSString* errorText = [NSString stringWithFormat:@"%@ %@", @(response.statusCode), [NSHTTPURLResponse localizedStringForStatusCode:response.statusCode]];
+        DDLogError(@"File download for %@ failed: %@", msg, errorText);
+        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to download file: %@", @""), errorText] forMessage:msg];
+        [self markAsComplete:historyId];
+        return;
+    }
+    
+    NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];
+    NSDictionary* headers = response.allHeaderFields;
+    NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
+    if(mimeType)                                                                                                                                                                 
+        mimeType = [[mimeType componentsSeparatedByString:@";"] firstObject];
+    if(!mimeType)
+        mimeType = @"application/octet-stream";
+    
+    //try to deduce the content type from a given file extension if needed and possible
+    if([mimeType isEqualToString:@"application/octet-stream"])
+        mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
+    
+    //make sure we *always* have a mime type
+    if(!mimeType)
+        mimeType = @"application/octet-stream";
+    
+    NSString* cacheFilePath = [self calculateCacheFilePathForNewUrl:msg.messageText andMimeType:mimeType];
+    
+    //encrypted filetransfer
+    if([[urlComponents.scheme lowercaseString] isEqualToString:@"aesgcm"])
+    {
+        DDLogInfo(@"Decrypting encrypted filetransfer stored at '%@'...", location);
+        if(urlComponents.fragment.length < 88)
+        {
+            DDLogError(@"File download for %@ failed: %@", msg, error);
+            [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode encrypted link", @"") forMessage:msg];
+            [self markAsComplete:historyId];
+            return;
+        }
+        int ivLength = 24;
+        //format is iv+32byte key
+        NSData* key = [HelperTools dataWithHexString:[urlComponents.fragment substringWithRange:NSMakeRange(ivLength, 64)]];
+        NSData* iv = [HelperTools dataWithHexString:[urlComponents.fragment substringToIndex:ivLength]];
+        
+        //decrypt data with given key and iv
+        NSData* encryptedData = [NSData dataWithContentsOfURL:location];
+        if(encryptedData && encryptedData.length > 0 && key && key.length == 32 && iv && iv.length == 12)
+        {
+            NSData* decryptedData = [AESGcm decrypt:encryptedData withKey:key andIv:iv withAuth:nil];
+            if(decryptedData == nil)
+            {
+                DDLogError(@"File download decryption failed for %@", msg);
+                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt download", @"") forMessage:msg];
+                [self markAsComplete:historyId];
+                return;
+            }
+            [decryptedData writeToFile:cacheFilePath options:NSDataWritingAtomic error:&error];
+            if(error)
+            {
+                DDLogError(@"File download for %@ failed: %@", msg, error);
+                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to write decrypted download into cache directory", @"") forMessage:msg];
+                [self markAsComplete:historyId];
+                return;
+            }
+            MLAssert([_fileManager fileExistsAtPath:cacheFilePath], @"cache file should be there!", (@{@"cacheFilePath": cacheFilePath}));
+            [HelperTools configureFileProtectionFor:cacheFilePath];
+        }
+        else
+        {
+            DDLogError(@"Failed to decrypt file (iv, key, data length checks failed) for %@", msg);
+            [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt filetransfer", @"") forMessage:msg];
+            [self markAsComplete:historyId];
+            return;
+        }
+    }
+    else        //cleartext filetransfer
+    {
+        //hardlink file to our cache directory
+        //it will be removed once this completion returns, even if moved to a new location (this seems to be a ios16 bug)
+        DDLogInfo(@"Hardlinking downloaded file from '%@' to document cache at '%@'...", [location path], cacheFilePath);
+        error = [HelperTools hardLinkOrCopyFile:[location path] to:cacheFilePath];
+        if(error)
+        {
+            DDLogError(@"File download for %@ failed: %@", msg, error);
+            [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:[NSString stringWithFormat:NSLocalizedString(@"Failed to copy downloaded file into cache directory: %@", @""), error] forMessage:msg];
+            [self markAsComplete:historyId];
+            return;
+        }
+        MLAssert([_fileManager fileExistsAtPath:cacheFilePath], @"cache file should be there!", (@{@"cacheFilePath": cacheFilePath}));
+        [HelperTools configureFileProtectionFor:cacheFilePath];
+    }
+    
+    //hardlink cache file if possible
+    [self hardlinkFileForMessage:msg];
+    
+    NSNumber* filetransferSize = @([[_fileManager attributesOfItemAtPath:cacheFilePath error:nil] fileSize]);
+    DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
+    //update db with content type and size
+    [[DataLayer sharedInstance] setFiletransferInfoForHistoryId:historyId withMimeType:mimeType andSize:filetransferSize];
 
+    //send out update notification
+    xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
+    if(account != nil)      //don't send out update notices for already deleted accounts
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{ @"message": msg }];
+    else
+        [_fileManager removeItemAtPath:cacheFilePath error:nil];
+    
+    //download done, remove from "currently checking/downloading list"
+    [self markAsComplete:historyId];
+$$
 
 $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFilePath), $$ID((NSArray<NSString*>*), hardlinkPathComponents), $$BOOL(direct))
     NSError* error;    
@@ -748,7 +826,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
     NSError* error;
     
     //make sure we don't upload the same tmpfile twice (should never happen anyways)
-    @synchronized(_currentlyTransfering)
+    @synchronized(_stateSyncObject)
     {
         if([self isFileAtPathInTransfer:file])
         {
@@ -757,7 +835,7 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
             [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
             return completion(nil, nil, nil, error);
         }
-        [_currentlyTransfering addObject:file];
+        [self addTransfer:file];
     }
     
     //TODO: allow real file based transfers instead of NSData based transfers
@@ -873,27 +951,84 @@ $$class_handler(internalTmpFileUploadHandler, $$ID(NSString*, file), $$ID(NSStri
     }];
 $$
 
-+(void) markAsComplete:(id) obj
+#pragma mark - NSURLSessionDelegate
+
+-(void) URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession*) session
 {
-    @synchronized(_currentlyTransfering) {
-        [_currentlyTransfering removeObject:obj];
+    //notify about finished background fetch (don't queue this notification because it should be handled IMMEDIATELY and INLINE)
+    //this will be used by the mainapp app delegate to call the backgroundURLSessionCompletionHandler callback
+    DDLogVerbose(@"Posting kMonalFiletransferEventsFinished notification now...");
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFiletransferEventsFinished object:nil];
+}
+
+-(void) URLSession:(NSURLSession*) session downloadTask:(NSURLSessionDownloadTask*) downloadTask didFinishDownloadingToURL:(NSURL*) location
+{
+    NSDictionary* associatedData = [HelperTools unserializeData:[HelperTools dataWithHexString:downloadTask.taskDescription]];
+    @synchronized(_stateSyncObject) {
+        [_expectedDownloadSizes removeObjectForKey:associatedData[@"url"]];
+        [[self class] storeState];
     }
-    if(self.isIdle)
-        //don't queue this notification because it should be handled immediately
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFiletransfersIdle object:self];
+    DDLogVerbose(@"Background filetransfer completed: %@", associatedData);
+    $call(associatedData[@"handler"], $ID(location), $ID(response, downloadTask.response));
 }
 
-+(BOOL) isFileForHistoryIdInTransfer:(NSNumber*) historyId
+-(void) URLSession:(NSURLSession*) session task:(NSURLSessionTask*) task didCompleteWithError:(NSError* _Nullable) error
 {
-    if([_currentlyTransfering containsObject:historyId])
-        return YES;
-    return NO;
+    //we only need to forward errors, everything else was already forwarded by URLSession:downloadTask:didFinishDownloadingToURL:
+    if(error != nil)
+    {
+        NSDictionary* associatedData = [HelperTools unserializeData:[HelperTools dataWithHexString:task.taskDescription]];
+        DDLogVerbose(@"Background filetransfer %@ failed with error: %@", associatedData, error);
+        $call(associatedData[@"handler"], $ID(error));
+    }
 }
 
-+(BOOL) isFileAtPathInTransfer:(NSString*) path
+-(void) URLSession:(NSURLSession*) session downloadTask:(NSURLSessionDownloadTask*) downloadTask didWriteData:(int64_t) bytesWritten totalBytesWritten:(int64_t) totalBytesWritten totalBytesExpectedToWrite:(int64_t) totalBytesExpectedToWrite
 {
-    if([_currentlyTransfering containsObject:path])
-        return YES;
-    return NO;
+    NSDictionary* associatedData = [HelperTools unserializeData:[HelperTools dataWithHexString:downloadTask.taskDescription]];
+    MLMessage* msg = [MLMessage createMessageFromHistoryID:associatedData[@"historyId"]];
+    xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
+    NSNumber* expectedSize;
+    @synchronized(_stateSyncObject) {
+        expectedSize = _expectedDownloadSizes[associatedData[@"url"]];
+    }
+    if(expectedSize != nil && expectedSize.longLongValue != -1)
+    {
+        //only allow for a maximum of 512KiB of extra data
+        if(totalBytesWritten >= expectedSize.longLongValue + 512 * 1024)
+            return [downloadTask cancel];
+        
+        //notify about download progress, but don't send out update notices for already deleted accounts
+        if(account != nil)
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{
+                    @"message": msg,
+                    @"progress": @((double)totalBytesWritten / expectedSize.longLongValue),
+                }];
+            });
+    }
 }
+
+-(void) URLSession:(NSURLSession*) session task:(NSURLSessionTask*) task didSendBodyData:(int64_t) bytesSent totalBytesSent:(int64_t) totalBytesSent totalBytesExpectedToSend:(int64_t) totalBytesExpectedToSend
+{
+    //this only handles upload progress, download progress is handled in another delegate method (see above)
+    if([task isKindOfClass:NSURLSessionDownloadTask.class])
+        return;
+    
+    //notify about download progress if we know the size (should be always true)
+    if(totalBytesExpectedToSend > 0)
+    {
+        NSDictionary* associatedData = [HelperTools unserializeData:[HelperTools dataWithHexString:task.taskDescription]];
+        MLMessage* msg = [MLMessage createMessageFromHistoryID:associatedData[@"historyId"]];
+        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:msg.accountID];
+        if(account != nil)      //don't send out update notices for already deleted accounts
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:account userInfo:@{
+                    @"message": msg,
+                    @"progress": @((double)totalBytesSent / totalBytesExpectedToSend),
+                }];
+            });
+    }
+}
+
 @end

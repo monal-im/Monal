@@ -3223,8 +3223,6 @@ a=%@\r\n", mid, candidate];
     return hex.uppercaseString;
 }
 
-#pragma mark ui stuff
-
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title
 {
     UIView* tempView = [[UIView alloc]initWithFrame:CGRectMake(0, 200, 300, 244)];
@@ -3381,14 +3379,22 @@ a=%@\r\n", mid, candidate];
 
 +(NSURLSession*) createBackgroundURLSession
 {
-    NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@.backgroundHttpFetch", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]]];
-    if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
-        sessionConfig.requiresDNSSECValidation = YES;
-    sessionConfig.HTTPAdditionalHeaders = @{
-        @"User-Agent": [HelperTools appBuildVersionInfoFor:MLVersionTypeUserAgent],
-    };
-    sessionConfig.sessionSendsLaunchEvents = YES;
-    return [NSURLSession sessionWithConfiguration:sessionConfig];
+    static NSURLSession* session = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@.backgroundHttpFetch", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]]];
+        if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+            sessionConfig.requiresDNSSECValidation = YES;
+        sessionConfig.HTTPAdditionalHeaders = @{
+            @"User-Agent": [HelperTools appBuildVersionInfoFor:MLVersionTypeUserAgent],
+        };
+        sessionConfig.sessionSendsLaunchEvents = YES;
+        sessionConfig.sharedContainerIdentifier = kAppGroup;
+        sessionConfig.discretionary = NO;       //will be ignored by iOS for all transfers started in the background (appex or mainapp)
+        //we don't need to make MLFileTransfer a singleton here, because this delegate will only be instanciated once per process
+        session = [NSURLSession sessionWithConfiguration:sessionConfig delegate:[MLFiletransfer new] delegateQueue:nil];
+    });
+    return session;
 }
 
 +(NSURL* _Nullable) compressFileAtPath:(NSString*) path withLevel:(NSInteger) level

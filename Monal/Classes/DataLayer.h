@@ -337,6 +337,9 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) removeAllPromises;
 -(MLPromise*) getPromise:(MLPromise*) promise;
 
+-(NSDictionary*) getFiletransferState;
+-(void) setFiletransferState:(NSDictionary*) state;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -146,6 +146,7 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMonalWillBeFreezed @"kMonalWillBeFreezed"
 #define kMonalFrozen @"kMonalFrozen"
 #define kMonalUnfrozen @"kMonalUnfrozen"
+#define kMonalFiletransferEventsFinished @"kMonalFiletransferEventsFinished"
 #define kMonalNewMessageNotice @"kMonalNewMessageNotice"
 #define kMonalUpdatedMessageNotice @"kMonalUpdatedMessageNotice"
 #define kMonalMucSubjectChanged @"kMonalMucSubjectChanged"

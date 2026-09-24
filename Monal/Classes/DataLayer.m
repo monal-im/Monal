@@ -2626,4 +2626,22 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+-(NSDictionary*) getFiletransferState
+{
+    return [self.db idReadTransaction:^{
+        NSMutableDictionary* state = [HelperTools unserializeData:(NSData*)[self.db executeScalar:@"SELECT value FROM flags WHERE name='filetransfer~state';"]];
+        if(state == nil)
+            return [NSMutableDictionary new];
+        return state;
+    }];
+}
+
+-(void) setFiletransferState:(NSDictionary*) state
+{
+    return [self.db voidWriteTransaction:^{
+        NSData* data = [HelperTools serializeObject:state];
+        [self.db executeNonQuery:@"INSERT INTO flags (name, value) VALUES('filetransfer~state', ?) ON CONFLICT(name) DO UPDATE SET value=?;" andArguments:@[data, data]];
+    }];
+}
+
 @end

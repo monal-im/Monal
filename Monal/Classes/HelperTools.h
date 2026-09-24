@@ -215,6 +215,7 @@ void swizzle(Class c, SEL orig, SEL new);
 +(BOOL) isIP:(NSString*) host;
 
 +(NSURLSession*) createEphemeralURLSession;
++(NSURLSession*) createBackgroundURLSession;
 
 +(void) updateCurrentLogfilePath:(NSString*) logfilePath;
 

@@ -65,6 +65,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 @property (atomic, strong) BGTask* bgRefreshing;
 @property (atomic, strong) MLContact* contactToOpen;
 @property (atomic, strong) monal_id_block_t completionToCall;
+@property (atomic, strong) monal_void_block_t _Nullable backgroundURLSessionCompletionHandler;
 
 @end
 
@@ -185,6 +186,8 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(prepareForFreeze:) name:kMonalWillBeFreezed object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFiletransferEventsFinished) name:kMonalFiletransferEventsFinished object:nil];
     
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     center.delegate = self;
@@ -421,6 +424,31 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 {
     DDLogError(@"Got intent: %@", intent);
     return nil;
+}
+
+-(void) application:(UIApplication*) application handleEventsForBackgroundURLSession:(NSString*) identifier completionHandler:(monal_void_block_t) completionHandler
+{
+    NSString* expectedIdentifier = [NSString stringWithFormat:@"%@.backgroundHttpFetch", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]];
+    MLAssert([expectedIdentifier isEqualToString:identifier], @"BackgroundURLSession identifier unknown!", @{@"identifier": identifier});
+
+    //resume upload etc.
+    [HelperTools createBackgroundURLSession];
+    self.backgroundURLSessionCompletionHandler = completionHandler;
+}
+
+-(void) handleFiletransferEventsFinished
+{
+    //we don't want to call this while in the process of freezing our accounts
+    if(_wasFrozen)
+        return;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(self.backgroundURLSessionCompletionHandler != nil)
+        {
+            self.backgroundURLSessionCompletionHandler();
+            self.backgroundURLSessionCompletionHandler = nil;
+        }
+    });
 }
 
 #if TARGET_OS_MACCATALYST
@@ -1041,6 +1069,9 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     
     [self addBackgroundTask];
     [[MLXMPPManager sharedInstance] nowForegrounded];           //NOTE: this will unfreeze all queues in our accounts
+    
+    //make sure we call the NSURLSession callback that was delayed by app freeze
+    [self handleFiletransferEventsFinished];
     
     //open call ui using first call if at least one call is present
     NSArray<MLCall*>* activeCalls = self.voipProcessor.activeCalls;

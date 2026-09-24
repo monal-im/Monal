@@ -36,8 +36,8 @@
 {
     //migrate dbversion into flags table if necessary
     [db voidWriteTransaction:^{
-        NSNumber* alreadyMigrated = [db executeScalar:@"SELECT count(*) FROM sqlite_master WHERE type='table' AND name='dbversion';"];
-        if([alreadyMigrated boolValue])
+        NSNumber* notYetMigrated = [db executeScalar:@"SELECT count(*) FROM sqlite_master WHERE type='table' AND name='dbversion';"];
+        if([notYetMigrated boolValue])
         {
             NSNumber* unmigratedDBVersion = [db executeScalar:@"SELECT dbversion FROM dbversion;"];
             DDLogInfo(@"Migrating dbversion to flags table...");

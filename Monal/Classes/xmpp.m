@@ -2846,7 +2846,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 //build FAST mechanism list displayed in ui (mark _htHandler.method as used)
                 NSMutableDictionary* fastMechanismList = [NSMutableDictionary new];
                 for(NSString* mechanism in _supportedFastMechanisms)
-                    fastMechanismList[mechanism] = @([mechanism isEqualToString:self->_htHandler.method]);
+                    fastMechanismList[mechanism] = @(self->_htHandler.method != nil && [mechanism isEqualToString:self->_htHandler.method]);
                 DDLogInfo(@"Saving fastMethods list: %@", fastMechanismList);
                 self.connectionProperties.fastMethods = fastMechanismList;
                 

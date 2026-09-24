@@ -204,7 +204,13 @@ static NSMutableDictionary* currentTransactions;
         else if([obj isKindOfClass:[NSString class]])
         {
             NSString* text = (NSString*)obj;
-            if(sqlite3_bind_text(statement, (signed)idx+1, [text cStringUsingEncoding:NSUTF8StringEncoding], -1, SQLITE_TRANSIENT) != SQLITE_OK)
+            NSData* encoded = [text dataUsingEncoding:NSUTF8StringEncoding];
+            if(encoded == nil)
+            {
+                DDLogError(@"could not convert text to UTF8 prior to binding to column: %@", text);
+                [self throwErrorForQuery:query andArguments:args];
+            }
+            if(sqlite3_bind_text64(statement, (signed)idx+1, encoded.length > 0 ? (const char*)encoded.bytes : "", (sqlite3_uint64)encoded.length, SQLITE_TRANSIENT, SQLITE_UTF8) != SQLITE_OK)
             {
                 DDLogError(@"text bind error: %@", text);
                 [self throwErrorForQuery:query andArguments:args];
@@ -254,7 +260,10 @@ static NSMutableDictionary* currentTransactions;
         }
         case(SQLITE_TEXT):
         {
-            NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull) sqlite3_column_text(statement, column)];
+            const char* text = (const char* _Nonnull) sqlite3_column_text(statement, column);
+            int size = sqlite3_column_bytes(statement, column);
+            NSString* returnString = [[NSString alloc] initWithBytes:text length:(NSUInteger)size encoding:NSUTF8StringEncoding];
+            MLAssert(returnString != nil, @"could not convert stored column data to UTF8, returning nil!", (@{@"text": [NSData dataWithBytes:text length:size]}));
             return returnString;
         }
         case(SQLITE_BLOB):

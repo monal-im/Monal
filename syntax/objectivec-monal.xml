@@ -13,8 +13,9 @@
      selectors (or internalExecuteScalar: / prepareQuery:), or assigned (`= @"...`) when
      the literal starts with an SQL statement keyword (NSString* query = @"SELECT ...").
      Multiline strings (backslash-newline continuation) are supported.
-     SQL rules are reused from Kate's generic "SQL" definition, extended by SQLite
-     specific keywords, functions and bind parameters.
+     The keyword lists are reused from Kate's generic "SQL" definition, extended by SQLite
+     specific keywords, functions and bind parameters. Queries get a light background
+     (backgroundColor of all "SQL ..." itemDatas) to set them apart from the surrounding code.
 -->
 <language name="Objective-C (Monal)" alternativeNames="Monal;ObjC-Monal" version="1" kateversion="5.79" section="Sources" extensions="*.m" priority="10" mimetype="text/x-objc-src" author="Monal" license="MIT">
   <highlighting>
@@ -1017,7 +1018,12 @@
         <keyword attribute="SQL Keyword" String="sql keywords" insensitive="true"/>
         <keyword attribute="SQL Function" String="sql functions" insensitive="true"/>
         <keyword attribute="SQL Data Type" String="sql types" insensitive="true"/>
-        <IncludeRules context="Normal##SQL"/>
+        <!-- numbers and operators (the remaining rules of "Normal##SQL", redone here to get the query background color) -->
+        <HlCHex attribute="SQL Number"/>
+        <Float attribute="SQL Number"/>
+        <Int attribute="SQL Number"/>
+        <AnyChar attribute="SQL Operator" String="+-*/%=&lt;&gt;!|&amp;~"/>
+        <DetectIdentifier attribute="SQL Text"/>
       </context>
       <context name="SqlString" attribute="SQL String" lineEndContext="#pop#pop">
         <DetectChar attribute="SQL Quote" context="#pop" char="&quot;" lookAhead="true"/>
@@ -1054,18 +1060,20 @@
       <itemData name="Optional Argument" defStyleNum="dsBuiltIn" italic="1" spellChecking="false"/>
       <itemData name="Bound Argument" defStyleNum="dsBuiltIn" spellChecking="false"/>
       <itemData name="Argument Name" defStyleNum="dsVariable" spellChecking="false"/>
-      <itemData name="SQL Quote" defStyleNum="dsString" spellChecking="false"/>
-      <itemData name="SQL Text" defStyleNum="dsNormal" spellChecking="false"/>
-      <itemData name="SQL Keyword" defStyleNum="dsKeyword" spellChecking="false"/>
-      <itemData name="SQL Control Flow" defStyleNum="dsControlFlow" spellChecking="false"/>
-      <itemData name="SQL Operator Keyword" defStyleNum="dsKeyword" spellChecking="false"/>
-      <itemData name="SQL Function" defStyleNum="dsFunction" spellChecking="false"/>
-      <itemData name="SQL Data Type" defStyleNum="dsDataType" spellChecking="false"/>
-      <itemData name="SQL String" defStyleNum="dsString" spellChecking="false"/>
-      <itemData name="SQL String Char" defStyleNum="dsSpecialChar" spellChecking="false"/>
-      <itemData name="SQL Identifier" defStyleNum="dsOthers" spellChecking="false"/>
-      <itemData name="SQL Comment" defStyleNum="dsComment" spellChecking="false"/>
-      <itemData name="SQL Parameter" defStyleNum="dsVariable" bold="1" spellChecking="false"/>
+      <itemData name="SQL Quote" defStyleNum="dsString" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Text" defStyleNum="dsNormal" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Keyword" defStyleNum="dsKeyword" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Control Flow" defStyleNum="dsControlFlow" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Operator Keyword" defStyleNum="dsKeyword" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Function" defStyleNum="dsFunction" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Data Type" defStyleNum="dsDataType" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Number" defStyleNum="dsDecVal" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Operator" defStyleNum="dsOperator" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL String" defStyleNum="dsString" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL String Char" defStyleNum="dsSpecialChar" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Identifier" defStyleNum="dsOthers" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Comment" defStyleNum="dsComment" backgroundColor="#1800CC00" spellChecking="false"/>
+      <itemData name="SQL Parameter" defStyleNum="dsVariable" bold="1" backgroundColor="#1800CC00" spellChecking="false"/>
     </itemDatas>
   </highlighting>
   <general>

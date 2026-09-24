@@ -169,6 +169,13 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark account commands
 
+-(NSNumber*) accountCnts
+{
+    return [self.db idReadTransaction:^{
+        return (NSNumber*)[self.db executeScalar:@"SELECT COUNT(*) FROM account;"];
+    }];
+}
+
 -(NSArray*) accountList
 {
     return [self.db idReadTransaction:^{

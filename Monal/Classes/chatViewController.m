@@ -245,6 +245,37 @@ enum msgSentState {
         [self.xmppAccount.mucProcessor ping:self.contact.contactJid];
 }
 
+-(void) updateTableBottomInset
+{
+    UIWindow* window = self.view.window;
+    if(!window || self.inputContainerView.window == nil)
+        return;     // accessory not attached yet
+
+    CGRect tableRect = [self.messageTable convertRect:self.messageTable.bounds toView:nil];
+    CGFloat tableMaxY = CGRectGetMaxY(tableRect);
+
+    CGRect inputRect = [self.inputContainerView convertRect:self.inputContainerView.bounds toView:nil];
+    CGFloat accessoryTop = CGRectGetMinY(inputRect);
+    if(self.inputContainerView.superview == nil || accessoryTop >= window.bounds.size.height)
+        accessoryTop = window.bounds.size.height - window.safeAreaInsets.bottom
+                     - self.inputContainerView.frame.size.height;
+
+    // padding between the inputView and the most recent message
+    int padding = 15;
+#if TARGET_OS_MACCATALYST
+    padding = 8;
+#endif
+    // window-space height the content must clear
+    CGFloat needed = MAX(tableMaxY - accessoryTop + padding, 0);
+
+    // don't double-count what the system already adds via safe areas
+    CGFloat systemBottom = self.messageTable.adjustedContentInset.bottom - self.messageTable.contentInset.bottom;
+    UIEdgeInsets insets = self.messageTable.contentInset;
+    insets.bottom = MAX(needed - systemBottom, 0);
+    self.messageTable.contentInset = insets;
+    self.messageTable.scrollIndicatorInsets = insets;
+}
+
 -(void) updateVoiceRequestButton
 {
     BOOL shouldBePresent = NO;
@@ -962,10 +993,25 @@ enum msgSentState {
     [_lastMsgButton removeFromSuperview];
 }
 
-- (void)viewDidLayoutSubviews {
+-(CGFloat) bottomContentOffsetY
+{
+    UIScrollView* sv = self.messageTable;
+    return MAX(sv.contentSize.height - sv.bounds.size.height + sv.adjustedContentInset.bottom,
+               -sv.adjustedContentInset.top);
+}
+
+- (void)viewDidLayoutSubviews
+{
     [super viewDidLayoutSubviews];
-    if(self.messageTable.contentSize.height > self.messageTable.bounds.size.height)
-        [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height - self.messageTable.bounds.size.height) animated:NO];
+    [self updateTableBottomInset];
+    if(self.messageTable.isDragging || self.messageTable.isDecelerating)
+        return;
+    if(self.viewDidAppear && !self->_isAtBottom)
+        return; // user scrolled up to read; don't yank
+    if(self.messageTable.contentSize.height > 0)
+        [self.messageTable setContentOffset:CGPointMake(0, [self bottomContentOffsetY]) animated:NO];
+    self->_isAtBottom = YES;
+    [self.lastMsgButton setHidden:YES];
 }
 
 -(BOOL) saveMessageDraft
@@ -2697,15 +2743,13 @@ enum msgSentState {
     
     // get current scroll position (y-axis)
     CGFloat curOffset = scrollView.contentOffset.y;
-    CGFloat bottomLength = scrollView.frame.size.height + curOffset;
-    _isAtBottom = scrollView.contentSize.height <= bottomLength;
-    
+    CGFloat maxOffsetY = scrollView.contentSize.height - scrollView.bounds.size.height
+                       + scrollView.adjustedContentInset.bottom;
+    _isAtBottom = curOffset >= maxOffsetY - 1;
     if(_isAtBottom)
         [self.lastMsgButton setHidden:YES];
     else
         [self.lastMsgButton setHidden:NO];
-    
-    
 }
 
 -(void) loadOldMsgHistory
@@ -3102,6 +3146,7 @@ enum msgSentState {
 - (void)keyboardWillDisappear:(NSNotification*) aNotification
 {
     [self setChatInputHeightConstraints:YES];
+    [self updateTableBottomInset];
 }
 
 - (void)keyboardDidShow:(NSNotification*)aNotification
@@ -3112,9 +3157,7 @@ enum msgSentState {
     if(kbSize.height > 100) { //my inputbar +any other
         self.hardwareKeyboardPresent = NO;
     }
-    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height - 10, 0.0);
-    self.messageTable.contentInset = contentInsets;
-    self.messageTable.scrollIndicatorInsets = contentInsets;
+    [self updateTableBottomInset];
 
     //this will be automatically called once the whole chat view is loaded (even if not showing a keyboard)
     [self scrollToBottomIfNeeded];
@@ -3125,19 +3168,16 @@ enum msgSentState {
     [self saveMessageDraft];
     [self sendChatState:NO];
 
-    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
-    self.messageTable.contentInset = contentInsets;
-    self.messageTable.scrollIndicatorInsets = contentInsets;
+    [self updateTableBottomInset];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{ [self updateTableBottomInset]; }); // after hide animation settles
 }
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
-    
     [self setChatInputHeightConstraints:NO];
+    [self updateTableBottomInset];
     //TODO grab animation info
-//    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
-//    self.messageTable.contentInset = contentInsets;
-//    self.messageTable.scrollIndicatorInsets = contentInsets;
 }
 
 -(void) tempfreezeAutoloading

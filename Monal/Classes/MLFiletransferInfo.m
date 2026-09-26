@@ -13,6 +13,7 @@
 #import <monalxmpp/MLFiletransfer.h>
 #import <monalxmpp/MLFiletransferInfo.h>
 #import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLDelayedDealloc.h>
 
 @import UniformTypeIdentifiers;
 
@@ -69,6 +70,10 @@ static NSMutableDictionary* _singletonCache;
         fileInfo.mimeType = [dic objectForKey:@"mime_type"];
         fileInfo.size = [dic objectForKey:@"size"];
         _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:fileInfo];
+        
+        //only deallocate once per second to not rapidly create and dealloc the same file info again
+        //(for example when the containing message isn't visible during filetransfers)
+        [MLDelayedDealloc delayFor:fileInfo];
     }
     return fileInfo;
 }

@@ -18,6 +18,7 @@
 #import <monalxmpp/MLImageManager.h>
 #import <monalxmpp/MLVoIPProcessor.h>
 #import <monalxmpp/MLMucProcessor.h>
+#import <monalxmpp/MLDelayedDealloc.h>
 #import "MonalAppDelegate.h"
 
 @import Intents;
@@ -271,8 +272,11 @@ static NSMutableDictionary* _singletonCache;
         }
         
         MLContact* retval = [self createContactFromDatabaseWithJid:jid andAccountID:accountID];
-        
         _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:retval];
+        
+        //only deallocate once per second to not rapidly create and dealloc MLContact objects
+        [MLDelayedDealloc delayFor:retval];
+        
         return retval;
     }
 }

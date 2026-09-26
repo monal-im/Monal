@@ -15,6 +15,7 @@
 #import <monalxmpp/xmpp.h>
 #import <monalxmpp/MLFiletransferInfo.h>
 #import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLDelayedDealloc.h>
 #import "XMPPMessage.h"
 
 static NSMutableDictionary* _singletonCache;
@@ -47,6 +48,10 @@ static NSMutableDictionary* _singletonCache;
         @synchronized(_singletonCache) {
             _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:message];
         }
+        
+        //only deallocate once per second to not rapidly create and dealloc the same message again
+        //(for example when the message isn't visible during filetransfers)
+        [MLDelayedDealloc delayFor:message];
         
         //fill reactions *after* adding this message to our singleton cache to not create an endless loop
         //(the reactions reference back to this message, but don't store a reference, so no retain cycle)

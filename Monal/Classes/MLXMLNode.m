@@ -409,7 +409,7 @@ static NSRegularExpression* attributeFilterRegex;
         results = [self find:queryString inNodeList:_children arguments:args];                             //relative path (check childs first)
     
     //update cache and return results
-    [self.cache setObject:[[WeakContainer alloc] initWithObj:results] forKey:cacheKey];                    //use weak container to break retain circle
+    [self.cache setObject:[WeakContainer for:results] forKey:cacheKey];                    //use weak container to break retain circle
     return results;
 }
 

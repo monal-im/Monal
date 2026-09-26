@@ -56,7 +56,7 @@ static NSMutableDictionary* _singletonCache;
         retval.nick = nick;
         retval->_ownOccupantId = [[DataLayer sharedInstance] getOwnOccupantIdForMuc:mucContact.contactJid onAccountID:mucContact.accountID];
         
-        _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:retval];
+        _singletonCache[cacheKey] = [WeakContainer for:retval];
         return retval;
     }
 }

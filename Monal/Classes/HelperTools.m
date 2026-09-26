@@ -355,11 +355,11 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 }
 
 @implementation WeakContainer
--(id) initWithObj:(id) obj
++(WeakContainer*) for:(id) obj
 {
-    self = [super init];
-    self.obj = obj;
-    return self;
+    WeakContainer* retval = [self new];
+    retval.obj = obj;
+    return retval;
 }
 @end
 

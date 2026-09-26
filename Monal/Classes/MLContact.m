@@ -272,7 +272,7 @@ static NSMutableDictionary* _singletonCache;
         }
         
         MLContact* retval = [self createContactFromDatabaseWithJid:jid andAccountID:accountID];
-        _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:retval];
+        _singletonCache[cacheKey] = [WeakContainer for:retval];
         
         //only deallocate once per second to not rapidly create and dealloc MLContact objects
         [MLDelayedDealloc delayFor:retval];

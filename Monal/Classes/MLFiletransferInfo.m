@@ -69,7 +69,7 @@ static NSMutableDictionary* _singletonCache;
         fileInfo.historyId = [dic objectForKey:@"message_history_id"];
         fileInfo.mimeType = [dic objectForKey:@"mime_type"];
         fileInfo.size = [dic objectForKey:@"size"];
-        _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:fileInfo];
+        _singletonCache[cacheKey] = [WeakContainer for:fileInfo];
         
         //only deallocate once per second to not rapidly create and dealloc the same file info again
         //(for example when the containing message isn't visible during filetransfers)

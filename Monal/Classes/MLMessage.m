@@ -46,7 +46,7 @@ static NSMutableDictionary* _singletonCache;
         
         MLMessage* message = [self createMessageFromDatabaseWithHistoryID:historyID];
         @synchronized(_singletonCache) {
-            _singletonCache[cacheKey] = [[WeakContainer alloc] initWithObj:message];
+            _singletonCache[cacheKey] = [WeakContainer for:message];
         }
         
         //only deallocate once per second to not rapidly create and dealloc the same message again

@@ -58,7 +58,7 @@ void swizzle(Class c, SEL orig, SEL new);
 //weak container holding an object as weak pointer (needed to not create retain circles in NSCache
 @interface WeakContainer : NSObject
 @property (atomic, weak) id obj;
--(id) initWithObj:(id) obj;
++(WeakContainer*) for:(id) obj;
 @end
 
 @interface DDLogMessage(TaggedMessage)

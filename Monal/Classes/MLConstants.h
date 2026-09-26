@@ -34,11 +34,13 @@ static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
     #define kMonalOpenURL [NSURL URLWithString:@"monalAlphaOpen://"]
     #define kBackgroundProcessingTask @"im.monal.alpha.process"
     #define kBackgroundRefreshingTask @"im.monal.alpha.refresh"
+    #define kBackgroundURLSessionIdentifier @"im.monal.alpha.backgroundHttpFetch"
 #else
     #define kAppGroup @"group.monal"
     #define kMonalOpenURL [NSURL URLWithString:@"monalOpen://"]
     #define kBackgroundProcessingTask @"im.monal.process"
     #define kBackgroundRefreshingTask @"im.monal.refresh"
+    #define kBackgroundURLSessionIdentifier @"im.monal.backgroundHttpFetch"
 #endif
 
 #define kMonalKeychainName @"Monal"

@@ -428,8 +428,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
 -(void) application:(UIApplication*) application handleEventsForBackgroundURLSession:(NSString*) identifier completionHandler:(monal_void_block_t) completionHandler
 {
-    NSString* expectedIdentifier = [NSString stringWithFormat:@"%@.backgroundHttpFetch", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]];
-    MLAssert([expectedIdentifier isEqualToString:identifier], @"BackgroundURLSession identifier unknown!", @{@"identifier": identifier});
+    MLAssert([kBackgroundURLSessionIdentifier isEqualToString:identifier], @"BackgroundURLSession identifier unknown!", @{@"identifier": identifier});
 
     //resume upload etc.
     [HelperTools createBackgroundURLSession];

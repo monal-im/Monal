@@ -3382,7 +3382,7 @@ a=%@\r\n", mid, candidate];
     static NSURLSession* session = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@.backgroundHttpFetch", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"]]];
+        NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:kBackgroundURLSessionIdentifier];
         if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
             sessionConfig.requiresDNSSECValidation = YES;
         sessionConfig.HTTPAdditionalHeaders = @{

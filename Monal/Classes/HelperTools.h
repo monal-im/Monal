@@ -73,6 +73,9 @@ void swizzle(Class c, SEL orig, SEL new);
     NSUInteger count;
 } @end
 
+@interface MonalUserDefaults : NSUserDefaults
+@end
+
 @interface HelperTools : NSObject
 
 @property (class, nonatomic, strong, nullable) DDFileLogger* fileLogger;
@@ -153,6 +156,7 @@ void swizzle(Class c, SEL orig, SEL new);
 
 +(void) dispatchAsync:(BOOL) async reentrantOnQueue:(dispatch_queue_t _Nullable) queue withBlock:(monal_void_block_t) block;
 +(NSUserDefaults*) defaultsDB;
++(NSUserDefaults*) standardDefaultsDB;
 +(BOOL) isAppExtension;
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;
 +(NSSet*) getOwnFeatureSet;

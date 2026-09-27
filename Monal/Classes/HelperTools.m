@@ -77,11 +77,6 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 -(void) invalidate;
 @end
 
-@interface NSUserDefaults (SerializeNSObject)
--(id) swizzled_objectForKey:(NSString*) defaultName;
--(void) swizzled_setObject:(id) value forKey:(NSString*) defaultName;
-@end
-
 //make method visible
 @interface DDLog()
 -(void) queueLogMessage:(DDLogMessage*) logMessage asynchronously:(BOOL) asyncFlag;
@@ -375,11 +370,10 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 }
 @end
 
-@implementation NSUserDefaults (SerializeNSObject)
--(id) swizzled_objectForKey:(NSString*) defaultName
+@implementation MonalUserDefaults
+-(id) objectForKey:(NSString*) defaultName
 {
-    //this will call the original not this one, because of swizzling!
-    id data = [self swizzled_objectForKey:defaultName];
+    id data = [super objectForKey:defaultName];
     //always unserialize this: every real NSData should be serialized to NSData (e.g. an NSData containing a serialized NSData)
     //and therefore any exception thrown by unserialize of not serialized data should never happen as it is an implementation error in Monal
     if([data isKindOfClass:[NSData class]])
@@ -395,7 +389,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     return data;
 }
 
--(void) swizzled_setObject:(id) value forKey:(NSString*) defaultName
+-(void) setObject:(id) value forKey:(NSString*) defaultName
 {
     id toSave = value;
     //these are the default datatypes/class clusters already handled by NSUserDefaults
@@ -416,25 +410,11 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     //everything else will just be (single) serialized to NSData
     else
         toSave = [HelperTools serializeObject:value];
-    return [self swizzled_setObject:toSave forKey:defaultName];
-}
-
-//see https://stackoverflow.com/a/13326633 and https://fek.io/blog/method-swizzling-in-obj-c-and-swift/
-+(void) load
-{
-    if(self == NSUserDefaults.self)
-    {
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            swizzle([self class], @selector(objectForKey:), @selector(swizzled_objectForKey:));
-            swizzle([self class], @selector(setObject:forKey:), @selector(swizzled_setObject:forKey:));
-        });
-    }
+    return [super setObject:toSave forKey:defaultName];
 }
 @end
 
 @implementation DDLog (AllowQueueFreeze)
-
 -(void) swizzled_queueLogMessage:(DDLogMessage*) logMessage asynchronously:(BOOL) asyncFlag
 {
     //make sure this method remains performant even when checking for udp logging presence
@@ -473,11 +453,9 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         });
     }
 }
-
 @end
 
 @implementation PMKArray (AllowSerialization)
-
 +(BOOL) supportsSecureCoding
 {
     return YES;
@@ -498,7 +476,6 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         self->objs[c] = [coder decodeObjectForKey:[NSString stringWithFormat:@"%@", @(c)]];
     return self;
 }
-
 @end
 
 @implementation HelperTools
@@ -2145,7 +2122,17 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     static NSUserDefaults* db;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        db = [[NSUserDefaults alloc] initWithSuiteName:kAppGroup];
+        db = [[MonalUserDefaults alloc] initWithSuiteName:kAppGroup];
+    });
+    return db;
+}
+
++(NSUserDefaults*) standardDefaultsDB
+{
+    static NSUserDefaults* db;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        db = [MonalUserDefaults standardUserDefaults];
     });
     return db;
 }

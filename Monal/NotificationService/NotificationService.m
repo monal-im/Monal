@@ -448,7 +448,7 @@ static BOOL warnUnclean = NO;
 {
     //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
     //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
-    NSNumber* wasClean = [[NSUserDefaults standardUserDefaults] objectForKey:@"clean_appex_shutdown"];
+    NSNumber* wasClean = [[HelperTools standardDefaultsDB] objectForKey:@"clean_appex_shutdown"];
     return wasClean == nil || wasClean.boolValue;
 }
 
@@ -456,15 +456,15 @@ static BOOL warnUnclean = NO;
 {
     //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
     //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
-    [[NSUserDefaults standardUserDefaults] setBool:shutdownStatus forKey:@"clean_appex_shutdown"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    [[HelperTools standardDefaultsDB] setBool:shutdownStatus forKey:@"clean_appex_shutdown"];
+    [[HelperTools standardDefaultsDB] synchronize];
 }
 
 +(BOOL) getWarnedNotUnlockedFirstTime
 {
     //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
     //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
-    NSNumber* warned = [[NSUserDefaults standardUserDefaults] objectForKey:@"warned_not_unlocked"];
+    NSNumber* warned = [[HelperTools standardDefaultsDB] objectForKey:@"warned_not_unlocked"];
     return warned != nil && warned.boolValue;
 }
 
@@ -472,8 +472,8 @@ static BOOL warnUnclean = NO;
 {
     //we use the defaultsDB to avoid write transaction to the main DB which would kill the main app while running in the background
     //(use the standardUserDefaults of the appex instead of the shared one exposed by our HelperTools to reduce kills due to locking even further)
-    [[NSUserDefaults standardUserDefaults] setBool:warned forKey:@"warned_not_unlocked"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    [[HelperTools standardDefaultsDB] setBool:warned forKey:@"warned_not_unlocked"];
+    [[HelperTools standardDefaultsDB] synchronize];
 }
 
 -(id) init

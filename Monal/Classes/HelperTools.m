@@ -304,6 +304,36 @@ void swizzle(Class c, SEL orig, SEL new)
         method_exchangeImplementations(origMethod, newMethod);
 }
 
+NSArray* _Nullable arrayComprehension(id<NSFastEnumeration> _Nullable arr, id _Nullable (^cb)(id))
+{
+    if(arr == nil)
+        return nil;
+    NSMutableArray* retval = [NSMutableArray new];
+    for(id entry in arr)
+    {
+        id cbretval = cb != nil ? cb(entry) : entry;
+        if(cbretval != nil)
+            [retval addObject:cbretval];
+    }
+    return retval;
+}
+
+NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id _Nullable (^cb)(id, id))
+{
+    if(dict == nil)
+        return nil;
+    if(cb == nil)
+        return dict;
+    NSMutableDictionary* retval = [NSMutableDictionary new];
+    for(id key in dict)
+    {
+        id cbretval = cb(key, dict[key]);
+        if(cbretval != nil)
+            retval[cbretval[0]] = cbretval[1];
+    }
+    return retval;
+}
+
 @implementation WeakContainer
 -(id) initWithObj:(id) obj
 {

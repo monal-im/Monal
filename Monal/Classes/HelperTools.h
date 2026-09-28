@@ -62,6 +62,8 @@ typedef NS_ENUM(NSUInteger, MLRunLoopIdentifier) {
 
 void logException(NSException* exception);
 void swizzle(Class c, SEL orig, SEL new);
+NSArray* _Nullable arrayComprehension(id<NSFastEnumeration> _Nullable arr, id _Nullable (^cb)(id));
+NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id _Nullable (^cb)(id, id));
 
 //weak container holding an object as weak pointer (needed to not create retain circles in NSCache
 @interface WeakContainer : NSObject

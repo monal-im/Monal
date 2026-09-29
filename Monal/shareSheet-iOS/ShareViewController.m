@@ -151,79 +151,209 @@
     return NO;
 }
 
+-(NSExtensionItem*) filterItems:(NSArray*) items
+{
+    for(NSExtensionItem* item in items)
+        for(NSItemProvider* provider in item.attachments)
+        {
+            //public.data, public.file-url, or com.apple.pkpass
+            if([provider hasItemConformingToTypeIdentifier:UTTypeData.identifier])
+                return item;
+            else if([provider hasItemConformingToTypeIdentifier:UTTypeFileURL.identifier])
+                return item;
+            else if([provider hasItemConformingToTypeIdentifier:@"com.apple.pkpass"])
+                return item;
+        }
+    return items.firstObject;       //fallback, should normally not be needed
+}
+
 -(void) didSelectPost
 {
     DDLogVerbose(@"input items: %@", self.extensionContext.inputItems);
-    NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
+    
+    //filter items for first one matching public.data, public.file-url, or com.apple.pkpass (Signal does the same)
+    //TODO: should we instead simply flatten all attachments of all items into one attachments array instead, like other apps seem to do it?
+    NSExtensionItem* item = [self filterItems:self.extensionContext.inputItems];
+    
+    //convert all attachments to fulfilled promises
     DDLogVerbose(@"Attachments = %@", item.attachments);
 
-    __block uint32_t loading = 0;       //no need for @synchronized etc., because we access this var exclusively from the main thread
-    __block uint32_t saved = 0;         //no need for @synchronized etc., because we access this var exclusively from the main thread
-    monal_void_block_t checkIfDone = ^{
-        if(loading == 0)
-        {
-            if(self.contentText && [self.contentText length] > 0)
+    //process all items first (tmpfiles of unused ones will be autodeleted by our tmpfile cleanup)
+    NSMutableArray<AnyPromise*>* attachments = [NSMutableArray new];
+    for(NSItemProvider* provider in item.attachments)
+        //extract item data
+        [attachments addObject:[AnyPromise promiseWithValue:provider].then(^id(NSItemProvider* provider) {
+            DDLogDebug(@"Handling: %@", provider);
+            return [HelperTools handleUploadItemProvider:provider].then(^id(NSMutableDictionary* payload) {
+                return PMKManifold(provider, payload);
+            });
+        //add recipient information
+        }).then(^id(NSItemProvider* provider, NSMutableDictionary* payload) {
+            DDLogDebug(@"Got handleUploadItemProvider callback with payload: %@ for provider: %@", payload, provider);
+            if(payload == nil)      //short circuit
+                return nil;
+            payload[@"account_id"] = self.recipient.accountId;
+            payload[@"recipient"] = self.recipient.contactJid;
+            return PMKManifold(provider, payload);
+        //filter out all bplist items already contained in the contentText field (google youtube and google maps apps)
+        }).then(^id(NSItemProvider* provider, NSDictionary* payload) {
+            if(payload == nil)      //short circuit
+                return nil;
+            
+            //text shares (not text files) are often also shared via comment field
+            //--> special handling below, everything else is just returned
+            //(we have to check if we landed in the last text file block inside handleUploadItemProvider,
+            //because hasItemConformingToTypeIdentifier would also match for UTTypeURL etc.)
+            if(![payload[@"uttype"] isEqualToString:UTTypePlainText.identifier])
+                return payload;
+            
+            //ignore text shares, if they contain the same contents as the comment field
+            if(self.contentText && [self.contentText length] > 0 && [payload[@"data"] isKindOfClass:[NSString class]] && [self.contentText isEqualToString:payload[@"data"]])
             {
-                NSMutableDictionary* payload = [NSMutableDictionary new];
-                payload[@"account_id"] = self.recipient.accountId;
-                payload[@"recipient"] = self.recipient.contactJid;
-                payload[@"type"] = @"text";
-                payload[@"data"] = self.contentText;
-                DDLogDebug(@"Adding shareSheet comment payload: %@", payload);
+                DDLogWarn(@"Ignoring plain text payload because already sent via comment field");
+                return nil;
+            }
+            
+            //urls or other plaintext transfered as bplist
+            return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+                [provider loadItemForTypeIdentifier:UTTypePlainText.identifier options:nil completionHandler:^(NSString*  _Nullable item, NSError* _Null_unspecified error) {
+                    if(self.contentText && [self.contentText length] > 0 && item != nil && [self.contentText isEqualToString:item])
+                    {
+                        DDLogWarn(@"Ignoring serialized text payload because already sent via comment field");
+                        resolve(nil);
+                    }
+                    else
+                        resolve(payload);
+                }];
+            }];
+        })];
+    
+    //make sure we only process non-nil payloads
+    PMKWhen(attachments).then(^id(NSArray* payloads) {
+        return arrayComprehension(payloads, ^id(id e) { return nilExtractor(e); });
+    //finally filter for attachments we really want (signalapp style)
+    }).then(^id(NSArray* payloads) {
+        uint32_t saved = 0;
+        NSMutableSet<NSString*>* uttypes = [NSMutableSet new];
+        for(NSDictionary* payload in payloads)
+            [uttypes addObject:payload[@"uttype"]];
+        
+        //add the contentText as normal message payload, if given
+        if(self.contentText && [self.contentText length] > 0)
+        {
+            DDLogInfo(@"Adding contentText as text message...");
+            NSMutableDictionary* payload = [NSMutableDictionary new];
+            payload[@"account_id"] = self.recipient.accountId;
+            payload[@"recipient"] = self.recipient.contactJid;
+            payload[@"type"] = @"text";
+            payload[@"data"] = self.contentText;
+            DDLogDebug(@"Adding shareSheet comment payload: %@", payload);
+            [[DataLayer sharedInstance] addShareSheetPayload:payload];
+            saved++;
+        }
+        
+        //mapkit items are superior above all others (urls, files, text): ignore everything else
+        if([uttypes containsObject:@"com.apple.mapkit.map-item"])
+        {
+            for(NSDictionary* payload in payloads)
+                if(payload[@"error"] == nil && [payload[@"uttype"] isEqualToString:@"com.apple.mapkit.map-item"])
+                {
+                    DDLogInfo(@"Adding geo special shareSheet payload(%u): %@", saved, payload);
+                    [[DataLayer sharedInstance] addShareSheetPayload:payload];
+                    saved++;
+                    return PMKManifold(@(saved), @[]);     //empty list --> no error handling (we extracted the map item, thats all we need)
+                }
+        }
+        //contacts are also special: ignore everything else
+        if([uttypes containsObject:UTTypeContact.identifier])
+        {
+            for(NSDictionary* payload in payloads)
+                if(payload[@"error"] == nil && [payload[@"uttype"] isEqualToString:UTTypeContact.identifier])
+                {
+                    DDLogInfo(@"Adding contact special shareSheet payload(%u): %@", saved, payload);
+                    [[DataLayer sharedInstance] addShareSheetPayload:payload];
+                    saved++;
+                    return PMKManifold(@(saved), @[]);     //empty list --> no error handling (we extracted the map item, thats all we need)
+                }
+        }
+        
+        //try to use all files (images, videos, simple files)...
+        for(NSDictionary* payload in payloads)
+            if(payload[@"error"] == nil && ([payload[@"type"] isEqualToString:@"image"] || [payload[@"type"] isEqualToString:@"file"] || [payload[@"type"] isEqualToString:@"audiovisual"]))
+            {
+                DDLogInfo(@"Adding %@ shareSheet payload(%u): %@", payload[@"type"], saved, payload);
                 [[DataLayer sharedInstance] addShareSheetPayload:payload];
                 saved++;
             }
-            [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired __unused) {
-                if(saved > 0)
-                    [self openMainApp];
-            }];
+//         //...and additionally use urls if no files were found...
+//         if(saved == 0)
+        //...and additionally use urls...
+        if(YES)
+        {
+            for(NSDictionary* payload in payloads)
+                if(payload[@"error"] == nil && [payload[@"type"] isEqualToString:@"url"])
+                {
+                    DDLogInfo(@"Adding %@ shareSheet payload(%u): %@", payload[@"type"], saved, payload);
+                    [[DataLayer sharedInstance] addShareSheetPayload:payload];
+                    saved++;
+                    break;          //use only the first url
+                }
         }
-    };
-    for(NSItemProvider* provider in item.attachments)
-    {
-//         //text shares are also shared via comment field, so ignore them
-//         if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
-//             continue;
-        DDLogVerbose(@"handling(%u) %@", loading, provider);
-        loading++;
-        [HelperTools handleUploadItemProvider:provider].then(^(NSMutableDictionary* payload) {
-            DDLogVerbose(@"Got handleUploadItemProvider callback with payload: %@", payload);
-            if(payload == nil || payload[@"error"] != nil)
+        //...finally simply use everything provided, if neither a file nor url could be found
+        if(saved == 0)
+        {
+            for(NSDictionary* payload in payloads)
             {
-                DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
-                NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
-                if(payload[@"error"] != nil)
-                    message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
-                UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
-                                                                            message:message preferredStyle:UIAlertControllerStyleAlert];
-                [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                    [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
-                    loading--;
-                    checkIfDone();
-                }]];
-                [self presentViewController:unknownItemWarning animated:YES completion:nil];
-                return;
+                DDLogInfo(@"Adding any (%@) shareSheet payload(%u): %@", payload[@"type"], saved, payload);
+                [[DataLayer sharedInstance] addShareSheetPayload:payload];
+                saved++;
             }
+        }
+        
+        //return saved payload count and full payload list to next stage for error handling
+        return PMKManifold(@(saved), payloads);
+    //extract all errors and warn the user about it, this resolves once the user dismisses the error
+    }).then(^id(NSNumber* saved, NSArray* payloads) {
+        return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
+            //extract error descriptions
+            NSArray* errorTexts = arrayComprehension(payloads, ^id(NSDictionary* payload) {
+                if(payload[@"error"] == nil)
+                    return nil;
+                DDLogError(@"Could not save payload for sending: %@", payload);
+                return [payload[@"error"] localizedDescription];
+            });
             
-            //text shares are also shared via comment field, so ignore them, if they contain the same contents
-            if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier] && self.contentText && [self.contentText length] > 0 && [payload[@"data"] isKindOfClass:[NSString class]] && [self.contentText isEqualToString:payload[@"data"]])
-            {
-                DDLogWarn(@"Ignoring text payload because already sent via comment field");
-                loading--;
-                checkIfDone();
-                return;
-            }
+            if(errorTexts.count == 0)
+                return resolve(saved);
             
-            payload[@"account_id"] = self.recipient.accountId;
-            payload[@"recipient"] = self.recipient.contactJid;
-            DDLogDebug(@"Adding shareSheet payload(%u): %@", loading, payload);
-            [[DataLayer sharedInstance] addShareSheetPayload:payload];
-            saved++;
-            loading--;
-            checkIfDone();
-        });
-    }
-    checkIfDone();
+            //build alert message
+            NSString* message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send any of your attachments: %@", @""), errorTexts];
+            if(saved.unsignedIntValue > 0)
+                message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send some of your attachments: %@", @""), errorTexts];
+            
+            UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                        message:message preferredStyle:UIAlertControllerStyleAlert];
+            [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Dismiss", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                [unknownItemWarning dismissViewControllerAnimated:YES completion:^{
+                    resolve(saved);
+                }];
+            }]];
+            [self presentViewController:unknownItemWarning animated:YES completion:nil];
+        }];
+    //then open the mainapp if we actually managed to extract anything sendable
+    }).then(^(NSNumber* saved) {
+        DDLogInfo(@"Got %@ saved share items, opening the main app now...", saved);
+        [self.extensionContext completeRequestReturningItems:@[] completionHandler:^(BOOL expired __unused) {
+            if(saved.unsignedIntValue > 0)
+                [self openMainApp];
+            [HelperTools signalSuspension];
+            //make sure the next start of this extension is a fresh one (like we already do with the NSE appex)
+            createTimer(0.250, (^{
+                DDLogInfo(@"Committing suicide...");
+                exit(0);
+            }));
+        }];
+    });
 }
 
 -(NSArray*) configurationItems

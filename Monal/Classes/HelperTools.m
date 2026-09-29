@@ -1121,6 +1121,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                 {
                     DDLogInfo(@"Got mapkit item: %@", item);
                     payload[@"type"] = @"geo";
+                    payload[@"uttype"] = @"com.apple.mapkit.map-item";
                     payload[@"data"] = [NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude];
                     [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
                         resolve(payload);
@@ -1158,6 +1159,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                 }
                 DDLogInfo(@"Got %@ gif image item: %@", isInPlace ? @"(in place)" : @"(copied)", item);
                 payload[@"type"] = @"file";
+                payload[@"uttype"] = UTTypeGIF.identifier;
                 prepareFile(item).then(resolve);
                 return;
             }];
@@ -1173,6 +1175,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                 }
                 DDLogInfo(@"Got audiovisual item: %@", item);
                 payload[@"type"] = @"audiovisual";
+                payload[@"uttype"] = UTTypeAudiovisualContent.identifier;
                 prepareFile(item).then(resolve);
                 return;
             }];
@@ -1193,6 +1196,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                         }
                         DDLogInfo(@"Got memory image item: %@", item);
                         payload[@"type"] = @"image";
+                        payload[@"uttype"] = UTTypeImage.identifier;
                         if(![[HelperTools defaultsDB] boolForKey:@"uploadImagesOriginal"])
                         {
                             //use prepareUIImageUpload to resize the image to the configured quality
@@ -1208,6 +1212,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                 {
                     DDLogInfo(@"Got image item: %@", item);
                     payload[@"type"] = @"image";
+                    payload[@"uttype"] = UTTypeImage.identifier;
                     if(![[HelperTools defaultsDB] boolForKey:@"uploadImagesOriginal"])
                     {
                         [item startAccessingSecurityScopedResource];
@@ -1260,12 +1265,14 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                         }
                         DDLogInfo(@"Got contact item NSURL: %@", item);
                         payload[@"type"] = @"contact";
+                        payload[@"uttype"] = UTTypeContact.identifier;
                         prepareFile(item).then(resolve);
                         return;
                     }];
                 }
                 DDLogInfo(@"Got contact item NSData: %@", data);
                 payload[@"type"] = @"contact";
+                payload[@"uttype"] = UTTypeContact.identifier;
                 payload[@"data"] = [MLFiletransfer prepareDataUpload:data withFileExtension:@"vcf"];
                 [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
                     resolve(payload);
@@ -1284,6 +1291,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                 }
                 DDLogInfo(@"Got file url item: %@", item);
                 payload[@"type"] = @"file";
+                payload[@"uttype"] = UTTypeFileURL.identifier;
                 prepareFile(item).then(resolve);
                 return;
             }];
@@ -1301,6 +1309,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                 {
                     DDLogInfo(@"Got finder file url item: %@", item);
                     payload[@"type"] = @"file";
+                    payload[@"uttype"] = @"com.apple.finder.node";
                     prepareFile((NSURL*)item).then(resolve);
                     return;
                 }
@@ -1323,6 +1332,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                 }
                 DDLogInfo(@"Got internet url item: %@", item);
                 payload[@"type"] = @"url";
+                payload[@"uttype"] = UTTypeURL.identifier;
                 payload[@"data"] = item.absoluteString;
                 [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
                     resolve(payload);
@@ -1341,6 +1351,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
                 }
                 DDLogInfo(@"Got direct text file item: %@", item);
                 payload[@"type"] = @"file";
+                payload[@"uttype"] = UTTypePlainText.identifier;
                 prepareFile(item).then(resolve);
             }];
         }

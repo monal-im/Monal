@@ -17,6 +17,8 @@
 #include <mach/mach_error.h>
 #include <mach/mach_traps.h>
 #include <os/proc.h>
+#include <os/lock.h>
+#include <pthread/introspection.h>
 #include <objc/runtime.h> 
 #include <objc/message.h>
 #include <objc/objc-exception.h>
@@ -112,6 +114,9 @@ static volatile void (*_oldExceptionHandler)(NSException*) = NULL;
 #if TARGET_OS_MACCATALYST
 static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
 #endif
+static NSMutableDictionary<NSNumber*, NSValue*>* tid2Pthread;
+static os_unfair_lock tid2PthreadLock = OS_UNFAIR_LOCK_INIT;
+static pthread_introspection_hook_t oldPthreadHook = NULL;
 
 //shamelessly stolen from utils.ip in conversations source
 static NSRegularExpression* IPV4;
@@ -136,8 +141,34 @@ static struct {
 } _crash_info __attribute__((section("__DATA, __crash_info"))) = { 5, 0, 0, 0, 0, 0, 0, 0 };
 #pragma pack()
 
+static void pthreadHook(unsigned int event, pthread_t thread, void* addr, size_t size)
+{
+    if(event == PTHREAD_INTROSPECTION_THREAD_START)
+    {
+        //make sure we already have an autorelease pool available in this hook
+        @autoreleasepool {
+            uint64_t tid;
+            pthread_threadid_np(NULL, &tid);
+            os_unfair_lock_lock(&tid2PthreadLock);
+            tid2Pthread[@(tid)] = [NSValue valueWithPointer:thread];
+            os_unfair_lock_unlock(&tid2PthreadLock);
+        }
+    }
+    else if(event == PTHREAD_INTROSPECTION_THREAD_TERMINATE)
+    {
+        uint64_t tid;
+        pthread_threadid_np(NULL, &tid);
+        os_unfair_lock_lock(&tid2PthreadLock);
+        [tid2Pthread removeObjectForKey:@(tid)];
+        os_unfair_lock_unlock(&tid2PthreadLock);
+    }
+    
+    //chain to the old handler if one exists
+    if(oldPthreadHook != nil)
+        oldPthreadHook(event, thread, addr, size);
+}
 
-void exitLogging(void)
+static void exitLogging(void)
 {
     DDLogInfo(@"exit() was called...");
     //make sure to unfreeze logging before flushing everything and terminating
@@ -149,7 +180,7 @@ void exitLogging(void)
 // see: https://developer.apple.com/library/archive/qa/qa1361/_index.html
 // Returns true if the current process is being debugged (either 
 // running under the debugger or has a debugger attached post facto).
-bool isDebugerActive(void)
+static bool isDebugerActive(void)
 {
     int                 junk;
     int                 mib[4];
@@ -177,7 +208,7 @@ bool isDebugerActive(void)
 }
 
 //see https://stackoverflow.com/a/2180788
-int asyncSafeCopyFile(const char* from, const char* to)
+static int asyncSafeCopyFile(const char* from, const char* to)
 {
     int fd_to, fd_from;
     char buf[1024];
@@ -275,7 +306,7 @@ static void crash_callback(const KSCrash_ExceptionHandlingPlan *const _Nonnull p
     addFilePathWithSize(writer, "currentProfile", _origProfilePath);
 }
 
-void logException(NSException* exception)
+static void logException(NSException* exception)
 {
 #if TARGET_OS_MACCATALYST
     NSString* prefix = @"POSSIBLE_CRASH";
@@ -287,7 +318,7 @@ void logException(NSException* exception)
     [HelperTools flushLogsWithTimeout:0.250];
 }
 
-void uncaughtExceptionHandler(NSException* exception)
+static void uncaughtExceptionHandler(NSException* exception)
 {
     logException(exception);
 
@@ -509,6 +540,14 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
 @end
 
 @implementation HelperTools
+
++(void) load
+{
+    //install our thread spawn/destroy hook used to record tid to pthread object mappings
+    //than can be used by getBacktraceForThreadID later on
+    tid2Pthread = [NSMutableDictionary new];
+    oldPthreadHook = pthread_introspection_hook_install(pthreadHook);
+}
 
 +(void) initialize
 {
@@ -3506,6 +3545,40 @@ a=%@\r\n", mid, candidate];
             [reactionsList addObject:substring];
     }];
     return reactionsList;
+}
+
++(NSArray*) getBacktraceForThreadID:(NSNumber*) tid
+{
+    uintptr_t addresses[128];
+    int addrCount = 0;
+    
+    //suspend the thread and walk its stack to get the backtrace
+    //hold the lock while sampling the thread, we don't want it to be invalidated in between
+    //calling the sampler and suspending the thread inside captureBacktraceFromThread
+    os_unfair_lock_lock(&tid2PthreadLock);
+    pthread_t thread = [tid2Pthread[tid] pointerValue];
+    if(thread != NULL)
+        addrCount = [KSCrash.sharedInstance captureBacktraceFromThread:thread addresses:addresses count:128];
+    os_unfair_lock_unlock(&tid2PthreadLock);
+    
+    //now symbolicate our backtrace
+    NSMutableArray* backtrace = [NSMutableArray new];
+    struct KSSymbolInformation info;
+    for(int i = 0; i<addrCount; i++)
+    {
+        if([KSCrash.sharedInstance quickSymbolicateAddress:addresses[i] result:&info])
+        {
+            const char* slash = strrchr(info.imageName, '/');
+            const char* image = slash ? slash + 1 : info.imageName;
+            if(info.symbolName)
+                [backtrace addObject:[NSString stringWithFormat:@"%-3d %-30s 0x%016lx %s + %lu", i, image, addresses[i], info.symbolName, addresses[i] - info.symbolAddress]];
+            else
+                [backtrace addObject:[NSString stringWithFormat:@"%-3d %-30s 0x%016lx 0x%lx + %lu", i, image, addresses[i], info.imageAddress, addresses[i] - info.imageAddress]];
+        }
+        else
+            [backtrace addObject:[NSString stringWithFormat:@"%-3d %-30s 0x%016lx", i, "???", addresses[i]]];
+    }
+    return backtrace;
 }
 
 @end

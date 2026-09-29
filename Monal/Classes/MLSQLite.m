@@ -202,13 +202,29 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     }
 }
 
--(NSString*) calcThreadName
+-(NSNumber*) getThreadID
 {
     __uint64_t tid;
     if(pthread_threadid_np(NULL, &tid) == 0)
-        return [[NSString alloc] initWithFormat:@"%llu(%@) --> %@", tid, [NSThread currentThread].name, [NSThread currentThread]];
+        return @(tid);
     else
-        return [[NSString alloc] initWithFormat:@"missing threadId (%@) --> %@", [NSThread currentThread].name, [NSThread currentThread]];
+    {
+        DDLogError(@"Could not get own thread id!");
+        return @0;
+    }
+}
+
+-(NSDictionary*) getStacktracesFor:(NSDictionary*) currentTransactions
+{
+    NSMutableDictionary* retval = [NSMutableDictionary new];
+    for(NSNumber* tid in currentTransactions)
+    {
+        retval[tid] = @{
+            @"createdAt": currentTransactions[tid],
+            @"currentlyAt": [HelperTools getBacktraceForThreadID:tid],
+        };
+    }
+    return retval;
 }
 
 #pragma mark - private sql api
@@ -344,7 +360,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
         @throw [NSException exceptionWithName:@"SQLite3Exception" reason:[NSString stringWithFormat:@"%d: %@", errcode, error] userInfo:@{
             @"query": query ? query : [NSNull null],
             @"args": args ? args : [NSNull null],
-            @"currentTransactions": currentTransactions,
+            @"currentTransactions": [self getStacktracesFor:currentTransactions],
         }];
     }
 }
@@ -358,7 +374,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
         @synchronized(currentTransactions) {
             DDLogError(@"currentTransactions: %@", currentTransactions);
             @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Shared instance of MLSQLite used in wrong thread!" userInfo:@{
-                @"currentTransactions": currentTransactions,
+                @"currentTransactions": [self getStacktracesFor:currentTransactions],
                 @"query": query ? query : [NSNull null],
                 @"args": args ? args : [NSNull null]
             }];
@@ -378,7 +394,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
         @synchronized(currentTransactions) {
             DDLogError(@"currentTransactions: %@", currentTransactions);
             @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to run query outside of transaction!" userInfo:@{
-                @"currentTransactions": currentTransactions,
+                @"currentTransactions": [self getStacktracesFor:currentTransactions],
                 @"query": query ? query : [NSNull null],
                 @"args": args ? args : [NSNull null]
             }];
@@ -476,7 +492,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
         if(depth >= 16)     //trigger iterations 0-15 are allowed
             @synchronized(currentTransactions) {
                 @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Endless loop of transaction triggers detected!" userInfo:@{
-                    @"currentTransactions": currentTransactions,
+                    @"currentTransactions": [self getStacktracesFor:currentTransactions],
                     @"threadData": threadData,
                     @"_dbFile": _dbFile,
                 }];
@@ -493,7 +509,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     if([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] == 0)
         @synchronized(currentTransactions) {
             @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to add a transactions trigger outside of a write transaction!" userInfo:@{
-                @"currentTransactions": currentTransactions,
+                @"currentTransactions": [self getStacktracesFor:currentTransactions],
                 @"trigger": trigger,
                 @"threadData": threadData,
                 @"_dbFile": _dbFile,
@@ -544,7 +560,7 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     if([threadData[kSQLiteStartedReadStransaction][_dbFile] boolValue])
         @synchronized(currentTransactions) {
             @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to start write transaction inside running read transaction!" userInfo:@{
-                @"currentTransactions": currentTransactions,
+                @"currentTransactions": [self getStacktracesFor:currentTransactions],
             }];
         }
     threadData[kSQLiteTransactionsRunning][_dbFile] = [NSNumber numberWithInt:([threadData[kSQLiteTransactionsRunning][_dbFile] intValue] + 1)];
@@ -559,14 +575,13 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
             @synchronized(currentTransactions) {
                 DDLogWarn(@"Retrying write transaction start: %@", @{
                     @"newWriteTransactionVia": [NSThread callStackSymbols],
-                    @"currentTransactions": currentTransactions,
+                    @"currentTransactions": [self getStacktracesFor:currentTransactions],
                 });
             }
         }
     } while(!retval);
-    NSString* ownThread = [self calcThreadName];
     @synchronized(currentTransactions) {
-        currentTransactions[ownThread] = [NSThread callStackSymbols];
+        currentTransactions[[self getThreadID]] = [NSThread callStackSymbols];
     }
     threadData[kSQLiteEndTransactionTriggers][_dbFile] = [NSMutableArray new];
 }
@@ -579,9 +594,8 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     {
         [self callQueuedEndTransactionTriggers];
         [self executeNonQuery:@"COMMIT;" andArguments:@[] withException:YES];        //commit only outermost transaction
-        NSString* ownThread = [self calcThreadName];
         @synchronized(currentTransactions) {
-            [currentTransactions removeObjectForKey:ownThread];
+            [currentTransactions removeObjectForKey:[self getThreadID]];
         }
     }
     threadData[kSQLiteTransactionsRunning][_dbFile] = [NSNumber numberWithInt:[threadData[kSQLiteTransactionsRunning][_dbFile] intValue] - 1];
@@ -626,15 +640,14 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
             @synchronized(currentTransactions) {
                 DDLogWarn(@"Retrying read transaction start: %@", @{
                     @"newReadTransactionVia": [NSThread callStackSymbols],
-                    @"currentTransactions": currentTransactions,
+                    @"currentTransactions": [self getStacktracesFor:currentTransactions],
                 });
             }
         }
     } while(!retval);
     threadData[kSQLiteStartedReadStransaction][_dbFile] = @YES;
-    NSString* ownThread = [self calcThreadName];
     @synchronized(currentTransactions) {
-        currentTransactions[ownThread] = [NSThread callStackSymbols];
+        currentTransactions[[self getThreadID]] = [NSThread callStackSymbols];
     }
     threadData[kSQLiteEndTransactionTriggers][_dbFile] = [NSMutableArray new];
 }
@@ -648,9 +661,8 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
         [self callQueuedEndTransactionTriggers];
         [self executeNonQuery:@"COMMIT;" andArguments:@[] withException:YES];        //commit only outermost transaction
         threadData[kSQLiteStartedReadStransaction][_dbFile] = @NO;
-        NSString* ownThread = [self calcThreadName];
         @synchronized(currentTransactions) {
-            [currentTransactions removeObjectForKey:ownThread];
+            [currentTransactions removeObjectForKey:[self getThreadID]];
         }
     }
     threadData[kSQLiteTransactionsRunning][_dbFile] = [NSNumber numberWithInt:[threadData[kSQLiteTransactionsRunning][_dbFile] intValue] - 1];

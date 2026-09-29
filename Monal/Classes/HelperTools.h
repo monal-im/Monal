@@ -52,7 +52,6 @@ typedef NS_ENUM(NSUInteger, MLRunLoopIdentifier) {
     MLRunLoopIdentifierTimer,
 };
 
-void logException(NSException* exception);
 void swizzle(Class c, SEL orig, SEL new);
 NSArray* _Nullable arrayComprehension(id<NSFastEnumeration> _Nullable arr, id _Nullable (^cb)(id));
 NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id _Nullable (^cb)(id, id));
@@ -228,6 +227,8 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
 +(NSURL* _Nullable) compressFileAtPath:(NSString*) path withLevel:(NSInteger) level;
 
 +(NSOrderedSet*) createReactionsSetFromString:(NSString*) reactions;
+
++(NSArray*) getBacktraceForThreadID:(NSNumber*) tid;
 
 @end
 

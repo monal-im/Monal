@@ -134,9 +134,9 @@ struct ServerDetails: View {
             ),
 
             EntryData(
-                title: NSLocalizedString("XEP-0199: XMPP Ping", comment: ""),
-                description: NSLocalizedString("XMPP protocol extension for sending application-level pings over XML streams.", comment: ""),
-                status: connection.serverDiscoFeatures.contains("urn:xmpp:ping") ? .success : .error
+                title: NSLocalizedString("XEP-0402: PEP Native Bookmarks", comment: ""),
+                description: NSLocalizedString("This specification defines a syntax and storage profile for keeping a list of chatroom bookmarks on the server.", comment: ""),
+                status: connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") && connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") ? (connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") ? .success : .warning) : .error
             ),
 
             EntryData(

@@ -1424,33 +1424,33 @@ NSString* const kStanza = @"stanza";
             //prime query cache by doing the most used queries in this thread ahead of the receiveQueue processing
             //only preprocess MLXMLNode queries to prime the cache if enough xml nodes are already queued
             //(we don't want to slow down processing by this)
-            if([self->_parseQueue operationCount] > 2)
-            {
-                //this list contains the upper part of the 0.75 percentile of the statistically most used queries
-                [parsedStanza find:@"/@id"];
-                [parsedStanza find:@"/{urn:xmpp:sm:3}r"];
-                [parsedStanza find:@"/{urn:xmpp:sm:3}a"];
-                [parsedStanza find:@"/<type=get>"];
-                [parsedStanza find:@"/<type=set>"];
-                [parsedStanza find:@"/<type=result>"];
-                [parsedStanza find:@"/<type=error>"];
-                [parsedStanza find:@"{urn:xmpp:sid:0}origin-id"];
-                [parsedStanza find:@"/{jabber:client}presence"];
-                [parsedStanza find:@"/{jabber:client}message"];
-                [parsedStanza find:@"/@h|int"];
-                [parsedStanza find:@"{urn:xmpp:delay}delay"];
-                [parsedStanza find:@"{http://jabber.org/protocol/muc#user}x/invite"];
-                [parsedStanza find:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"];
-                [parsedStanza find:@"{urn:xmpp:receipts}received@id"];
-                [parsedStanza find:@"{http://jabber.org/protocol/chatstates}*"];
-                [parsedStanza find:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
-                [parsedStanza find:@"{urn:xmpp:sid:0}stanza-id@by"];
-                [parsedStanza find:@"{urn:xmpp:mam:2}result"];
-                [parsedStanza find:@"{urn:xmpp:chat-markers:0}displayed@id"];
-                [parsedStanza find:@"body"];
-                [parsedStanza find:@"{urn:xmpp:mam:2}result@id"];
-                [parsedStanza find:@"{urn:xmpp:carbons:2}*"];
-            }
+//             if([self->_parseQueue operationCount] > 2)
+//             {
+//                 //this list contains the upper part of the 0.75 percentile of the statistically most used queries
+//                 [parsedStanza find:@"/@id"];
+//                 [parsedStanza find:@"/{urn:xmpp:sm:3}r"];
+//                 [parsedStanza find:@"/{urn:xmpp:sm:3}a"];
+//                 [parsedStanza find:@"/<type=get>"];
+//                 [parsedStanza find:@"/<type=set>"];
+//                 [parsedStanza find:@"/<type=result>"];
+//                 [parsedStanza find:@"/<type=error>"];
+//                 [parsedStanza find:@"{urn:xmpp:sid:0}origin-id"];
+//                 [parsedStanza find:@"/{jabber:client}presence"];
+//                 [parsedStanza find:@"/{jabber:client}message"];
+//                 [parsedStanza find:@"/@h|int"];
+//                 [parsedStanza find:@"{urn:xmpp:delay}delay"];
+//                 [parsedStanza find:@"{http://jabber.org/protocol/muc#user}x/invite"];
+//                 [parsedStanza find:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"];
+//                 [parsedStanza find:@"{urn:xmpp:receipts}received@id"];
+//                 [parsedStanza find:@"{http://jabber.org/protocol/chatstates}*"];
+//                 [parsedStanza find:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
+//                 [parsedStanza find:@"{urn:xmpp:sid:0}stanza-id@by"];
+//                 [parsedStanza find:@"{urn:xmpp:mam:2}result"];
+//                 [parsedStanza find:@"{urn:xmpp:chat-markers:0}displayed@id"];
+//                 [parsedStanza find:@"body"];
+//                 [parsedStanza find:@"{urn:xmpp:mam:2}result@id"];
+//                 [parsedStanza find:@"{urn:xmpp:carbons:2}*"];
+//             }
 #endif
             
             //queue up new stanzas onto the parseQueue which will dispatch them synchronously to the receiveQueue

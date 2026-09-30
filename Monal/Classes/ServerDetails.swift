@@ -184,7 +184,7 @@ struct ServerDetails: View {
             EntryData(
                 title: NSLocalizedString("XEP-0402: PEP Native Bookmarks", comment: ""),
                 description: NSLocalizedString("This specification defines a syntax and storage profile for keeping a list of chatroom bookmarks on the server.", comment: ""),
-                status: connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") && connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") ? (connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") ? .success : .warning) : .error
+                status: connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") ? (connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat") ? .success : .warning) : .error
             ),
 
             EntryData(

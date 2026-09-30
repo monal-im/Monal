@@ -1006,15 +1006,23 @@ enum msgSentState {
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
-    [self updateTableBottomInset];
-    if(self.messageTable.isDragging || self.messageTable.isDecelerating)
-        return;
-    if(self.viewDidAppear && !self->_isAtBottom)
-        return; // user scrolled up to read; don't yank
-    if(self.messageTable.contentSize.height > 0)
-        [self.messageTable setContentOffset:CGPointMake(0, [self bottomContentOffsetY]) animated:NO];
-    self->_isAtBottom = YES;
-    [self.lastMsgButton setHidden:YES];
+    if(@available(iOS 27.0,*))
+    {
+        [self updateTableBottomInset];
+        if(self.messageTable.isDragging || self.messageTable.isDecelerating)
+            return;
+        if(self.viewDidAppear && !self->_isAtBottom)
+            return; // user scrolled up to read; don't yank
+        if(self.messageTable.contentSize.height > 0)
+            [self.messageTable setContentOffset:CGPointMake(0, [self bottomContentOffsetY]) animated:NO];
+        self->_isAtBottom = YES;
+        [self.lastMsgButton setHidden:YES];
+    }
+    else
+    {
+        if(self.messageTable.contentSize.height > self.messageTable.bounds.size.height)
+            [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height - self.messageTable.bounds.size.height) animated:NO];
+    }
 }
 
 -(BOOL) saveMessageDraft
@@ -2789,9 +2797,18 @@ enum msgSentState {
     
     // get current scroll position (y-axis)
     CGFloat curOffset = scrollView.contentOffset.y;
-    CGFloat maxOffsetY = scrollView.contentSize.height - scrollView.bounds.size.height
-                       + scrollView.adjustedContentInset.bottom;
-    _isAtBottom = curOffset >= maxOffsetY - 1;
+    if(@available(iOS 27.0,*))
+    {
+        CGFloat maxOffsetY = scrollView.contentSize.height - scrollView.bounds.size.height
+                           + scrollView.adjustedContentInset.bottom;
+        _isAtBottom = curOffset >= maxOffsetY - 1;
+    }
+    else
+    {
+        CGFloat bottomLength = scrollView.frame.size.height + curOffset;
+        _isAtBottom = scrollView.contentSize.height <= bottomLength;
+    }
+
     if(_isAtBottom)
         [self.lastMsgButton setHidden:YES];
     else
@@ -3223,7 +3240,8 @@ enum msgSentState {
 - (void)keyboardWillDisappear:(NSNotification*) aNotification
 {
     [self setChatInputHeightConstraints:YES];
-    [self updateTableBottomInset];
+    if(@available(iOS 27.0,*))
+        [self updateTableBottomInset];
 }
 
 - (void)keyboardDidShow:(NSNotification*)aNotification
@@ -3234,7 +3252,14 @@ enum msgSentState {
     if(kbSize.height > 100) { //my inputbar +any other
         self.hardwareKeyboardPresent = NO;
     }
-    [self updateTableBottomInset];
+    if(@available(iOS 27.0,*))
+        [self updateTableBottomInset];
+    else
+    {
+        UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height - 10, 0.0);
+        self.messageTable.contentInset = contentInsets;
+        self.messageTable.scrollIndicatorInsets = contentInsets;
+    }
 
     //this will be automatically called once the whole chat view is loaded (even if not showing a keyboard)
     [self scrollToBottomIfNeeded];
@@ -3245,15 +3270,25 @@ enum msgSentState {
     [self saveMessageDraft];
     [self sendChatState:NO];
 
-    [self updateTableBottomInset];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)),
-                   dispatch_get_main_queue(), ^{ [self updateTableBottomInset]; }); // after hide animation settles
+    if(@available(iOS 27.0,*))
+    {
+        [self updateTableBottomInset];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)),
+                       dispatch_get_main_queue(), ^{ [self updateTableBottomInset]; }); // after hide animation settles
+    }
+    else
+    {
+        UIEdgeInsets contentInsets = UIEdgeInsetsZero;
+        self.messageTable.contentInset = contentInsets;
+        self.messageTable.scrollIndicatorInsets = contentInsets;
+    }
 }
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
     [self setChatInputHeightConstraints:NO];
-    [self updateTableBottomInset];
+    if(@available(iOS 27.0,*))
+        [self updateTableBottomInset];
     //TODO grab animation info
 }
 

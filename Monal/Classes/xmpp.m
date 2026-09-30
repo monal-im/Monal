@@ -5525,6 +5525,8 @@ NSString* const kStanza = @"stanza";
                         [self handleFinishedCatchup];
                     }
                 }
+                
+                [self logCatchupStats];
             }
             else
             {
@@ -5573,7 +5575,7 @@ NSString* const kStanza = @"stanza";
     if(self->_catchupStartTime != nil)
     {
         NSDate* now = [NSDate date];
-        DDLogInfo(@"Handled %u stanzas in %f seconds...", self->_catchupStanzaCounter, [now timeIntervalSinceDate:self->_catchupStartTime]);
+        DDLogInfo(@"%lu mam catchups running: Handled %u stanzas in %f seconds (%f stanzas per second)...", (unsigned long)self->_inCatchup.count, self->_catchupStanzaCounter, [now timeIntervalSinceDate:self->_catchupStartTime], self->_catchupStanzaCounter / [now timeIntervalSinceDate:self->_catchupStartTime]);
     }
 }
 

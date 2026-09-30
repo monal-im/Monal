@@ -66,8 +66,11 @@ static NSDateFormatter* dbFormatter;
     //the file does not exist (e.g. fresh install) --> copy default database to app group path
     if(![fileManager fileExistsAtPath:writableDBPath])
     {
-        DDLogInfo(@"initialize: copying default DB to: %@", writableDBPath);
         NSString* defaultDBPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
+        NSDictionary* attrs = [fileManager attributesOfItemAtPath:defaultDBPath error:nil];
+        unsigned long long defaultDBSize = attrs ? [attrs fileSize] : 0;
+        DDLogInfo(@"initialize: copying default from '%@' DB to '%@', size=%llu...", defaultDBPath, writableDBPath, defaultDBSize);
+        DDLogInfo(@"defaultDB sha1: %@", [HelperTools hexadecimalString:[HelperTools sha1:[NSData dataWithContentsOfFile:defaultDBPath options:0 error:nil]]]);
         NSError* error;
         [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
         if(error)

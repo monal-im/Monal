@@ -796,6 +796,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 
 -(void) freezeSendQueue
 {
+    DDLogVerbose(@"Freezing sendQueue...");
     @synchronized(_sendQueue) {
         if(_sendQueue.suspended)
         {
@@ -809,6 +810,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
         [HelperTools busyWaitForOperationQueue:_sendQueue];
     }
+    DDLogVerbose(@"sendQueue is frozen now...");
 }
 
 -(void) unfreezeSendQueue
@@ -4276,6 +4278,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [values setObject:[NSNumber numberWithBool:self.hasSeenOmemoDeviceListAfterOwnDeviceid] forKey:@"hasSeenOmemoDeviceListAfterOwnDeviceid"];
             
             //save state dictionary
+            DDLogVerbose(@"%@ --> realPersistState is now serializing the state...", self.accountID);
             [[DataLayer sharedInstance] persistState:values forAccount:self.accountID];
 
             //debug output

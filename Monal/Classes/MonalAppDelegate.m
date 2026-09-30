@@ -1,3 +1,4 @@
+
 //
 //  SworIMAppDelegate.m
 //  SworIM
@@ -5,6 +6,8 @@
 //  Created by Anurodh Pokharel on 11/16/08.
 //  Copyright __MyCompanyName__ 2008. All rights reserved.
 //
+
+//#define START_CLEAN
 
 #import <BackgroundTasks/BackgroundTasks.h>
 #import "MonalAppDelegate.h"
@@ -144,6 +147,13 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     [MLProcessLock lock];
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     
+#ifdef START_CLEAN
+    //clear old db files so opening the database will copy over the seed db we prepared for our test
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSString* writableDBPath = [[HelperTools getContainerURLForPathComponents:@[@"sworim.sqlite"]] path];
+    for(NSString* suffix in @[@"", @"-wal", @"-shm", @"-journal"])
+        [fileManager removeItemAtPath:[writableDBPath stringByAppendingString:suffix] error:nil];
+#else
     //do MLFiletransfer cleanup tasks (do this in a new thread to parallelize it with our ping to the appex and don't slow down app startup)
     //this will also migrate our old image cache to new MLFiletransfer cache
     //BUT: don't do this if we are sending the sharesheet outbox
@@ -156,6 +166,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         [[MLImageManager sharedInstance] cleanupHashes];
     });
+#endif
     
     // Remove stale promises left in the DB that weren't consumed last time we ran the app
     [MLPromise removeStalePromises];

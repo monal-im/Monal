@@ -95,6 +95,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 @end
 
 static char* _crashBundleName = "UnifiedReport";
+static NSObject* _hangObserverRetainToken = nil;
 static NSString* _processID;
 static DDFileLogger* _fileLogger = nil;
 static uint64_t _nextCrashId = 0;
@@ -117,6 +118,7 @@ static objc_exception_preprocessor _oldExceptionPreprocessor = NULL;
 static NSMutableDictionary<NSNumber*, NSValue*>* tid2Pthread;
 static os_unfair_lock tid2PthreadLock = OS_UNFAIR_LOCK_INIT;
 static pthread_introspection_hook_t oldPthreadHook = NULL;
+static volatile uint64_t _mainThreadID = 0;
 
 //shamelessly stolen from utils.ip in conversations source
 static NSRegularExpression* IPV4;
@@ -547,6 +549,16 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     //than can be used by getBacktraceForThreadID later on
     tid2Pthread = [NSMutableDictionary new];
     oldPthreadHook = pthread_introspection_hook_install(pthreadHook);
+    
+    //we should be inside the main thread because HelperTools is used from main.m
+    MLAssert([NSThread isMainThread], @"+load of HelperTools called outside of main thread!");
+    uint64_t tid;
+    pthread_threadid_np(NULL, &tid);
+    pthread_t thread = pthread_self();
+    os_unfair_lock_lock(&tid2PthreadLock);
+    tid2Pthread[@(tid)] = [NSValue valueWithPointer:thread];
+    os_unfair_lock_unlock(&tid2PthreadLock);
+    _mainThreadID = tid;
 }
 
 +(void) initialize
@@ -2489,7 +2501,10 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     DDLogVerbose(@"KSCrash installing handler with callback: %p", crash_callback);
     KSCrashConfiguration* config = [KSCrashConfiguration new];
     config.installPath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
-    config.monitors = KSCrashMonitorTypeProductionSafe & (~KSCrashMonitorTypeWatchdog);       // no main thread watchdog
+    config.monitors = KSCrashMonitorTypeProductionSafe & (~KSCrashMonitorTypeWatchdog);     //default is no hang monitor
+    //watch the mainthread for hangs and log them in the hang observer below (but not in the appex)
+    if(![self isAppExtension])
+        config.monitors |= KSCrashMonitorTypeWatchdog;
     //don't try to debug zombies if not in debug mode
 #ifndef DEBUG
     config.monitors = config.monitors & (~KSCrashMonitorTypeZombie);
@@ -2525,6 +2540,15 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     }
     else
         DDLogInfo(@"Crash monitoring active now...");
+    _hangObserverRetainToken = [KSCrash.sharedInstance addHangObserver:^(KSHangChangeType change, uint64_t startTimestamp, uint64_t endTimestamp) {
+        NSString* type = change == KSHangChangeTypeStarted ? @"Started" : (change == KSHangChangeTypeUpdated ? @"Updated" : @"Ended");
+        NSArray* backtrace = nil;
+        //make sure we never try to generate a backtrace from the thread we are in
+        //(first of all that's pointless and secondly the mach supension of the tread would kill us)
+        if(![NSThread isMainThread])
+            backtrace = [self getBacktraceForThreadID:@(_mainThreadID)];
+        DDLogError(@"%@: Detected main thread hang from %lluns to %lluns (%f seconds): %@", type, startTimestamp, endTimestamp, (double)(endTimestamp-startTimestamp)/NSEC_PER_SEC, backtrace);
+    }];
     
     //KSCrash increments the id by one every new crash --> the next id used by kscrash will be this one
     _nextCrashId = kscrs_getNextCrashReport(NULL) + 1;

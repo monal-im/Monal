@@ -134,12 +134,6 @@ struct ServerDetails: View {
             ),
 
             EntryData(
-                title: NSLocalizedString("XEP-0402: PEP Native Bookmarks", comment: ""),
-                description: NSLocalizedString("This specification defines a syntax and storage profile for keeping a list of chatroom bookmarks on the server.", comment: ""),
-                status: connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") && connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") ? (connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") ? .success : .warning) : .error
-            ),
-
-            EntryData(
                 title: NSLocalizedString("XEP-0215: External Service Discovery", comment: ""),
                 description: NSLocalizedString("XMPP protocol extension for discovering services external to the XMPP network, like STUN or TURN servers needed for A/V calls.", comment: ""),
                 status: connection.serverDiscoFeatures.contains("urn:xmpp:extdisco:2") ? .success : .error
@@ -185,6 +179,12 @@ struct ServerDetails: View {
                 title: NSLocalizedString("XEP-0379: Pre-Authenticated Roster Subscription", comment: ""),
                 description: NSLocalizedString("Defines a protocol and URI scheme for pre-authenticated roster links that allow a third party to automatically obtain the user's presence subscription.", comment: ""),
                 status: connection.supportsRosterPreApproval ? .success : .error
+            ),
+
+            EntryData(
+                title: NSLocalizedString("XEP-0402: PEP Native Bookmarks", comment: ""),
+                description: NSLocalizedString("This specification defines a syntax and storage profile for keeping a list of chatroom bookmarks on the server.", comment: ""),
+                status: connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") && connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") ? (connection.accountDiscoFeatures.contains("urn:xmpp:bookmarks:1#compat-pep") ? .success : .warning) : .error
             ),
 
             EntryData(

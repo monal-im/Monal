@@ -36,10 +36,13 @@ impl RtcpFb {
         }
     }
 
-    pub fn to_sdp(&self, payload_type: SdpAttributePayloadType) -> SdpAttributeRtcpFb {
-        SdpAttributeRtcpFb {
+    // return None if feedback_type is an unknown value (mandated by XEP-0293)
+    pub fn to_sdp(&self, payload_type: SdpAttributePayloadType) -> Option<SdpAttributeRtcpFb> {
+        // drop whole RtcpFb if feedback_type is an unknown value
+        let feedback_type = self.fb_type.to_sdp()?;
+        Some(SdpAttributeRtcpFb {
             payload_type,
-            feedback_type: self.fb_type.to_sdp(),
+            feedback_type,
             parameter: match &self.subtype {
                 Some(subtype) => subtype.to_string(),
                 None => "".to_string(),
@@ -47,15 +50,14 @@ impl RtcpFb {
             extra: GenericParameter::create_parameter_string(
                 &self
                     .parameter
-                    .clone()
-                    .into_iter()
+                    .iter()
                     .filter_map(|p| match p {
-                        GenericParameterEnum::Parameter(p) => Some(p),
+                        GenericParameterEnum::Parameter(p) => Some(p.clone()),
                         GenericParameterEnum::Invalid => None,
                     })
                     .collect::<Vec<GenericParameter>>(),
             ),
-        }
+        })
     }
 }
 
@@ -100,6 +102,8 @@ pub enum RtcpFbType {
     //this is defined in https://datatracker.ietf.org/doc/html/draft-alvestrand-rmcat-remb-03
     Remb,
     TransportCc,
+    #[serde(other, skip_serializing)]
+    Invalid,
 }
 
 impl RtcpFbType {
@@ -114,14 +118,15 @@ impl RtcpFbType {
         }
     }
 
-    pub fn to_sdp(&self) -> SdpAttributeRtcpFbType {
+    pub fn to_sdp(&self) -> Option<SdpAttributeRtcpFbType> {
         match self {
-            Self::Ack => SdpAttributeRtcpFbType::Ack,
-            Self::Ccm => SdpAttributeRtcpFbType::Ccm,
-            Self::Nack => SdpAttributeRtcpFbType::Nack,
-            Self::TrrInt => SdpAttributeRtcpFbType::TrrInt,
-            Self::Remb => SdpAttributeRtcpFbType::Remb,
-            Self::TransportCc => SdpAttributeRtcpFbType::TransCc,
+            Self::Ack => Some(SdpAttributeRtcpFbType::Ack),
+            Self::Ccm => Some(SdpAttributeRtcpFbType::Ccm),
+            Self::Nack => Some(SdpAttributeRtcpFbType::Nack),
+            Self::TrrInt => Some(SdpAttributeRtcpFbType::TrrInt),
+            Self::Remb => Some(SdpAttributeRtcpFbType::Remb),
+            Self::TransportCc => Some(SdpAttributeRtcpFbType::TransCc),
+            Self::Invalid => None,
         }
     }
 }

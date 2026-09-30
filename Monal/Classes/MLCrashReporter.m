@@ -42,6 +42,14 @@
 
 +(void) reportPendingCrashes
 {
+    KSTerminationReason terminationReason = [[KSCrash sharedInstance] previousTerminationReason];
+    BOOL crashWasOurFault = terminationReason == KSTerminationReasonCrash || terminationReason == KSTerminationReasonHang;
+    if(!crashWasOurFault)
+    {
+        DDLogVerbose(@"App terminated for a reason out of our control. Do not prompt the user to send a report");
+        return;
+    }
+
     //send out pending KSCrash reports
     id<KSCrashReportFilter> alertFilter = [[KSCrashReportFilterAlert alloc]
         initWithTitle:NSLocalizedString(@"Crash Detected", @"Crash reporting")

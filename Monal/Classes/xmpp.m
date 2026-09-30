@@ -5864,6 +5864,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
                         [self handleFinishedCatchup];
                     }
                 }
+                
+                [self logCatchupStats];
             }
             else
             {
@@ -5912,7 +5914,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     if(self->_catchupStartTime != nil)
     {
         NSDate* now = [NSDate date];
-        DDLogInfo(@"Handled %u stanzas in %f seconds...", self->_catchupStanzaCounter, [now timeIntervalSinceDate:self->_catchupStartTime]);
+        DDLogInfo(@"%lu mam catchups running: Handled %u stanzas in %f seconds (%f stanzas per second)...", (unsigned long)self.inCatchup.count, self->_catchupStanzaCounter, [now timeIntervalSinceDate:self->_catchupStartTime], self->_catchupStanzaCounter / [now timeIntervalSinceDate:self->_catchupStartTime]);
     }
 }
 

@@ -42,13 +42,16 @@ jobs:
       - name: Run tests
         working-directory: Monal
         run: |
+          mkdir -p "$RUNNER_TEMP/test-artifacts"
           set -o pipefail && \
           NSUnbufferedIO=YES xcodebuild \
             -workspace Monal.xcworkspace \
             -scheme Monal \
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -resultBundlePath "$RUNNER_TEMP/test-artifacts/TestResults.xcresult" \
             test \
             2>&1 | \
+          tee "$RUNNER_TEMP/test-artifacts/xcodebuild.log" | \
           stdbuf -oL -eL xcbeautify --renderer github-actions | \
           while IFS= read -r line; do \
             echo "$line"; \
@@ -56,3 +59,17 @@ jobs:
               echo "::notice ::${line}"; \
             fi; \
           done
+      - name: Collect crash reports
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -d ~/Library/Logs/DiagnosticReports ]; then
+            cp -R ~/Library/Logs/DiagnosticReports "$RUNNER_TEMP/test-artifacts/" || true
+          fi
+      - name: Upload test artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-${{ github.run_number }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/test-artifacts
+          if-no-files-found: ignore
+          retention-days: 14

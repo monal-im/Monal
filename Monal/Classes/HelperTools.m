@@ -2501,10 +2501,14 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     DDLogVerbose(@"KSCrash installing handler with callback: %p", crash_callback);
     KSCrashConfiguration* config = [KSCrashConfiguration new];
     config.installPath = [[HelperTools getContainerURLForPathComponents:@[@"CrashReports"]] path];
-    config.monitors = KSCrashMonitorTypeProductionSafe & (~KSCrashMonitorTypeWatchdog);     //default is no hang monitor
+    //default is no hang monitor (and no almost-empty termination reports)
+    config.monitors = KSCrashMonitorTypeProductionSafe & (~KSCrashMonitorTypeTermination) & (~KSCrashMonitorTypeWatchdog);
     //watch the mainthread for hangs and log them in the hang observer below (but not in the appex)
+    //ios killing the app due to the hang should hopefully also be reported as crash report,
+    //even though KSCrashMonitorTypeTermination is turned off
     if(![self isAppExtension])
         config.monitors |= KSCrashMonitorTypeWatchdog;
+    config.enableHangReporting = NO;        //don't report recovered hangs as crash reports, logging them is enough
     //don't try to debug zombies if not in debug mode
 #ifndef DEBUG
     config.monitors = config.monitors & (~KSCrashMonitorTypeZombie);
@@ -2519,6 +2523,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     config.enableSwapCxaThrow = YES;
     config.enableQueueNameSearch = NO;      //this is not async safe and can crash :(
     config.enableMemoryIntrospection = YES;
+    config.enableSwiftAsyncStackTraces = YES;   //stitch swift async continuation frames into the backtrace
     config.addConsoleLogToReport = YES;
     config.printPreviousLogOnStartup = NO;     //debug kscrash itself?
     config.reportStoreConfiguration.maxReportCount = 4;

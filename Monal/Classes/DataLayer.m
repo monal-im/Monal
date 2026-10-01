@@ -157,12 +157,24 @@ static NSDateFormatter* dbFormatter;
     [self.db voidWriteTransaction:block];
 }
 
+-(void) addEndTransactionTrigger:(monal_void_block_t) trigger withLocation:(NSString*) location
+{
+    return [self.db addEndTransactionTrigger:trigger withLocation:location];
+}
+
 -(void) vacuum
 {
     return [self.db vacuum];
 }
 
 #pragma mark account commands
+
+-(NSNumber*) accountCnts
+{
+    return [self.db idReadTransaction:^{
+        return (NSNumber*)[self.db executeScalar:@"SELECT COUNT(*) FROM account;"];
+    }];
+}
 
 -(NSArray*) accountList
 {
@@ -1231,10 +1243,10 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSNumber*) getBiggestHistoryId
+-(NSNumber*) getNewestHistoryEntryIdForAccount:(NSNumber*) accountID withMuc:(BOOL) muc
 {
     return [self.db idReadTransaction:^{
-        return [self.db executeScalar:@"SELECT MAX(message_history_id) FROM message_history;"];
+        return [self.db executeScalar:@"SELECT MAX(M.message_history_id) FROM message_history AS M INNER JOIN buddylist AS B on M.buddy_name = B.buddy_name AND M.account_id = B.account_id WHERE B.account_id=? AND (B.Muc=0 OR B.Muc=?);" andArguments:@[accountID, @(muc)]];
     }];
 }
 
@@ -1702,7 +1714,7 @@ static NSDateFormatter* dbFormatter;
         }
         
         //return "real" last message
-        NSNumber* historyID = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountNo, contact]];
+        NSNumber* historyID = [self.db executeScalar:@"SELECT MAX(message_history_id) FROM message_history WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, contact]];
         if(historyID == nil)
             return (MLMessage*)nil;
         return [self messageForHistoryID:historyID];

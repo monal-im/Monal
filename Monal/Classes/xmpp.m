@@ -55,6 +55,9 @@
 NSString* const kQueueID = @"queueID";
 NSString* const kStanza = @"stanza";
 
+//use a dedicated scheme for thread local storage dict entries
+#define kDebugPersistStateTriggers  @"im.monal:xmpp.m|debugPersistStateTriggers"
+#define kPersistStateTriggersAdded  @"im.monal:xmpp.m|persistStateTriggerAdded"
 
 @interface MLPubSub ()
 -(id) initWithAccount:(xmpp*) account;
@@ -1421,33 +1424,33 @@ NSString* const kStanza = @"stanza";
             //prime query cache by doing the most used queries in this thread ahead of the receiveQueue processing
             //only preprocess MLXMLNode queries to prime the cache if enough xml nodes are already queued
             //(we don't want to slow down processing by this)
-            if([self->_parseQueue operationCount] > 2)
-            {
-                //this list contains the upper part of the 0.75 percentile of the statistically most used queries
-                [parsedStanza find:@"/@id"];
-                [parsedStanza find:@"/{urn:xmpp:sm:3}r"];
-                [parsedStanza find:@"/{urn:xmpp:sm:3}a"];
-                [parsedStanza find:@"/<type=get>"];
-                [parsedStanza find:@"/<type=set>"];
-                [parsedStanza find:@"/<type=result>"];
-                [parsedStanza find:@"/<type=error>"];
-                [parsedStanza find:@"{urn:xmpp:sid:0}origin-id"];
-                [parsedStanza find:@"/{jabber:client}presence"];
-                [parsedStanza find:@"/{jabber:client}message"];
-                [parsedStanza find:@"/@h|int"];
-                [parsedStanza find:@"{urn:xmpp:delay}delay"];
-                [parsedStanza find:@"{http://jabber.org/protocol/muc#user}x/invite"];
-                [parsedStanza find:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"];
-                [parsedStanza find:@"{urn:xmpp:receipts}received@id"];
-                [parsedStanza find:@"{http://jabber.org/protocol/chatstates}*"];
-                [parsedStanza find:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
-                [parsedStanza find:@"{urn:xmpp:sid:0}stanza-id@by"];
-                [parsedStanza find:@"{urn:xmpp:mam:2}result"];
-                [parsedStanza find:@"{urn:xmpp:chat-markers:0}displayed@id"];
-                [parsedStanza find:@"body"];
-                [parsedStanza find:@"{urn:xmpp:mam:2}result@id"];
-                [parsedStanza find:@"{urn:xmpp:carbons:2}*"];
-            }
+//             if([self->_parseQueue operationCount] > 2)
+//             {
+//                 //this list contains the upper part of the 0.75 percentile of the statistically most used queries
+//                 [parsedStanza find:@"/@id"];
+//                 [parsedStanza find:@"/{urn:xmpp:sm:3}r"];
+//                 [parsedStanza find:@"/{urn:xmpp:sm:3}a"];
+//                 [parsedStanza find:@"/<type=get>"];
+//                 [parsedStanza find:@"/<type=set>"];
+//                 [parsedStanza find:@"/<type=result>"];
+//                 [parsedStanza find:@"/<type=error>"];
+//                 [parsedStanza find:@"{urn:xmpp:sid:0}origin-id"];
+//                 [parsedStanza find:@"/{jabber:client}presence"];
+//                 [parsedStanza find:@"/{jabber:client}message"];
+//                 [parsedStanza find:@"/@h|int"];
+//                 [parsedStanza find:@"{urn:xmpp:delay}delay"];
+//                 [parsedStanza find:@"{http://jabber.org/protocol/muc#user}x/invite"];
+//                 [parsedStanza find:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"];
+//                 [parsedStanza find:@"{urn:xmpp:receipts}received@id"];
+//                 [parsedStanza find:@"{http://jabber.org/protocol/chatstates}*"];
+//                 [parsedStanza find:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
+//                 [parsedStanza find:@"{urn:xmpp:sid:0}stanza-id@by"];
+//                 [parsedStanza find:@"{urn:xmpp:mam:2}result"];
+//                 [parsedStanza find:@"{urn:xmpp:chat-markers:0}displayed@id"];
+//                 [parsedStanza find:@"body"];
+//                 [parsedStanza find:@"{urn:xmpp:mam:2}result@id"];
+//                 [parsedStanza find:@"{urn:xmpp:carbons:2}*"];
+//             }
 #endif
             
             //queue up new stanzas onto the parseQueue which will dispatch them synchronously to the receiveQueue
@@ -3688,9 +3691,26 @@ NSString* const kStanza = @"stanza";
 
 -(void) persistState
 {
-    DDLogVerbose(@"%@ --> persistState before: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
-    [self realPersistState];
-    DDLogVerbose(@"%@ --> persistState after: used/available memory: %.3fMiB / %.3fMiB)...", self.accountNo, [HelperTools report_memory], (CGFloat)os_proc_available_memory() / 1048576);
+    //this will coalesce all state zerializations+writes inside one transaction into only one single
+    //serialization+write directly before committing the transaction
+    //we simply wrap this into a write transaction (it will be a no-op if we are already inside a write transaction)
+    //and add the trigger inside it. this will call the trigger at the end of that transaction, essentially wrapping
+    //that transaction around the write transaction created by realPersistState (making that one definitely a no-op)
+    [[DataLayer sharedInstance] createTransaction:^{
+        NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+        threadData[kDebugPersistStateTriggers] = @([threadData[kDebugPersistStateTriggers] intValue] + 1);
+        DDLogDebug(@"Would now call realPersistState for the %@. time this transaction...", threadData[kDebugPersistStateTriggers]);
+        if(![threadData[kPersistStateTriggersAdded] boolValue])
+        {
+            callLocationMethod([DataLayer sharedInstance] addEndTransactionTrigger:^{
+                DDLogInfo(@"Inside transaction end trigger: now calling realPersistState, saved %d calls in this transaction...", [threadData[kDebugPersistStateTriggers] intValue] - 1);
+                [self realPersistState];
+                threadData[kPersistStateTriggersAdded] = @0;
+                threadData[kDebugPersistStateTriggers] = @0;
+            });
+            threadData[kPersistStateTriggersAdded] = @1;
+        }
+    }];
 }
 
 -(void) realPersistState
@@ -5505,6 +5525,8 @@ NSString* const kStanza = @"stanza";
                         [self handleFinishedCatchup];
                     }
                 }
+                
+                [self logCatchupStats];
             }
             else
             {
@@ -5553,7 +5575,7 @@ NSString* const kStanza = @"stanza";
     if(self->_catchupStartTime != nil)
     {
         NSDate* now = [NSDate date];
-        DDLogInfo(@"Handled %u stanzas in %f seconds...", self->_catchupStanzaCounter, [now timeIntervalSinceDate:self->_catchupStartTime]);
+        DDLogInfo(@"%lu mam catchups running: Handled %u stanzas in %f seconds (%f stanzas per second)...", (unsigned long)self->_inCatchup.count, self->_catchupStanzaCounter, [now timeIntervalSinceDate:self->_catchupStartTime], self->_catchupStanzaCounter / [now timeIntervalSinceDate:self->_catchupStartTime]);
     }
 }
 

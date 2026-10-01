@@ -2,6 +2,7 @@ name: Check PR title for proper semver
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
     branches:
       - beta
       - stable
@@ -17,8 +18,12 @@ permissions: {}
 
 jobs:
   check-pr-semver-title:
+    if: github.event.action != 'edited' || github.event.changes.title || github.event.changes.base
     runs-on: ubuntu-latest
     name: Validate PR Title
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
       - name: Get PR details
@@ -33,8 +38,8 @@ jobs:
             prNumber=${INPUT_PR_NUMBER}
           fi
           echo "prNumber=$prNumber" | tee /dev/stderr >> "$GITHUB_OUTPUT"
-      - name: Fetch pull request title
-        id: pr_title
+      - name: Extract PR metadata
+        id: pr_metadata
         uses: actions/github-script@v8
         env:
           PR_NUMBER: ${{ steps.find_pr.outputs.prNumber }}
@@ -48,14 +53,52 @@ jobs:
               pull_number: prNumber
             });
             core.setOutput('prTitle', pull_request.title);
-      - name: Check PR title format
+            core.setOutput('prTarget', pull_request.base.ref);
+      # - name: Check PR title semver format
+      #   env:
+      #     VERSION: ${{ steps.pr_metadata.outputs.prTitle }}
+      #   run: |
+      #     version="${VERSION}"
+      #     if ! [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
+      #       echo "Invalid semver: '$version'!"
+      #       exit 1
+      #     fi
+      #     echo "Version is proper semver: $version"
+      - name: Checkout target branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.pr_metadata.outputs.prTarget }}
+          fetch-depth: 4096
+          persist-credentials: false
+      - name: Extract target branch semver
+        id: target_metadata
         env:
-          VERSION: ${{ steps.pr_title.outputs.prTitle }}
+          TARGET: ${{ steps.pr_metadata.outputs.prTarget }}
         run: |
-          version="${VERSION}"
-          if ! [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(\+([0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*))?$ ]]; then
-            echo "Invalid semver: '$version'!"
-            exit 1
+          version="$(git log -n 1 --merges --pretty=format:%s | sed -E 's/^[\t\n ]*([^\n\t ]+)[\t\n ]+\(([^\n\t ]+)\)[\t\n ]*$/\1/g')"
+          if [ -z "$version" ]; then
+            echo "Could not find a merge commit in the last 4096 commits of '$TARGET'!"
+            exit 2
           fi
-          echo "Version is proper semver: $version"
- 
+          echo "Semver of branch '$TARGET': $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Check PR title semver is valid and greater than target branch semver
+        env:
+          VERSION: ${{ steps.pr_metadata.outputs.prTitle }}
+          TARGET_VERSION: ${{ steps.target_metadata.outputs.version }}
+          TARGET: ${{ steps.pr_metadata.outputs.prTarget }}
+        run: |
+          pysemver() { pipx run --spec semver==3.1.0 pysemver "$@"; }
+          if ! pysemver check -- "$VERSION"; then
+            echo "Invalid semver in PR title: '$VERSION'!"
+            exit 3
+          fi
+          if ! pysemver check -- "$TARGET_VERSION"; then
+            echo "Invalid semver in target branch '$TARGET': '$TARGET_VERSION'!"
+            exit 4
+          fi
+          if [ "$(pysemver compare -- "$VERSION" "$TARGET_VERSION")" != "1" ]; then
+            echo "PR semver $VERSION is not greater than semver $TARGET_VERSION of our '$TARGET' branch!"
+            exit 5
+          fi
+          echo "PR version $VERSION is greater than version $TARGET_VERSION of our '$TARGET' branch..."

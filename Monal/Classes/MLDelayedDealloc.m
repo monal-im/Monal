@@ -10,12 +10,15 @@
 //#define DEBUG_DEALLOC_DEBUGGING
 
 #import <Foundation/Foundation.h>
+#import <os/lock.h>
 #import <objc/runtime.h>
 #import <monalxmpp/MLConstants.h>
 #import <monalxmpp/MLDelayedDealloc.h>
 //#import <monalxmpp/MLXMLNode.h>
 
-static NSMutableArray* _deallocList;
+static os_unfair_lock _deallocListLock = OS_UNFAIR_LOCK_INIT;
+static NSMutableArray* _accumulatingDeallocList;
+static NSMutableArray* _processingDeallocList;
 static dispatch_source_t _timer;
 static dispatch_queue_t _queue;
 
@@ -31,7 +34,9 @@ static NSUInteger DumpMemoryGraph(NSSet* objects);
 
 +(void) initialize
 {
-    _deallocList = [NSMutableArray new];
+    //we use double buffering
+    _accumulatingDeallocList = [NSMutableArray arrayWithCapacity:131072];
+    _processingDeallocList = [NSMutableArray arrayWithCapacity:131072];
     
     //configure timer
     _queue = dispatch_queue_create("im.monal.dealloc.timer", dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_BACKGROUND, 0));
@@ -43,24 +48,26 @@ static NSUInteger DumpMemoryGraph(NSSet* objects);
     
     //periodically dealloc objects
     dispatch_source_set_event_handler(_timer, ^{
-        NSMutableArray* deallocCopy = nil;
-        //cleanup _deallocList, make this section short to not block other threads
-        @synchronized(_deallocList) {
-            deallocCopy = [_deallocList mutableCopy];
-            [_deallocList removeAllObjects];            //this won't deallocate anything, because we still reference everything in deallocCopy
-        }
+        //cleanup the _accumulatingDeallocList, we use double buffering and os_unfair_lock (which protects from priority inversion)
+        //to make this section as short as possible
+        [_processingDeallocList removeAllObjects];      //just to be sure
+        os_unfair_lock_lock(&_deallocListLock);
+        NSMutableArray* tmp = _accumulatingDeallocList;
+        _accumulatingDeallocList = _processingDeallocList;
+        _processingDeallocList = tmp;
+        os_unfair_lock_unlock(&_deallocListLock);
         
-        NSUInteger count = [deallocCopy count];
+        NSUInteger count = [_processingDeallocList count];
         NSUInteger rootCount = 0;
         if(count > 0)
         {
-            //requeue all entries that are still used by somebody else (retainCount == 1 being only us holding the object in deallocCopy)
+            //requeue all entries that are still used by somebody else (retainCount == 1 being only us holding the object in _processingDeallocList)
             NSUInteger requeuedCount = 0;
             @autoreleasepool {
 #ifdef DEBUG
                 NSMutableSet* retainedSet = [NSMutableSet new];
 #endif
-                for(id entry in deallocCopy)
+                for(id entry in _processingDeallocList)
                 {
                     NSUInteger retainCount = CFGetRetainCount((__bridge CFTypeRef)entry);
                     if(retainCount > 1 && retainCount < 65536)      //only requeue if still used but not due to some tagged pointer foo etc.
@@ -70,7 +77,7 @@ static NSUInteger DumpMemoryGraph(NSSet* objects);
                         requeuedCount++;
 #ifdef DEBUG
                         //use NSValue to pass a pointer of the object around without ever retaining/releasing it
-                        //this is safe because we know the object is alive until we set deallocCopy = nil below
+                        //this is safe because we know the object is alive until we call removeAllObjects below
                         [retainedSet addObject:[NSValue valueWithNonretainedObject:entry]];
                         //DDLogDebug(@"Requeued deallocation with retain count %lu (%lu) of: %p %@", retainCount - 1, CFGetRetainCount((__bridge CFTypeRef)entry) - 2, entry, entry);
 #endif
@@ -91,11 +98,13 @@ static NSUInteger DumpMemoryGraph(NSSet* objects);
             //check if, after removing still retained entries, count is still > 0 and start deallocation, if so
             if(count > 0)
             {
-                //for(id entry in deallocCopy)
+                //for(id entry in _processingDeallocList)
                 //    DDLogVerbose(@"Deallocating: %@", NodeName(entry));
                 DDLogVerbose(@"Deallocating %lu objects, %lu still used objects (%lu roots) requeued for later deallocation...", count, requeuedCount, rootCount);
                 NSDate* start = [NSDate date];
-                deallocCopy = nil;
+                @autoreleasepool {
+                    [_processingDeallocList removeAllObjects];
+                }
                 NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:start];
                 if(elapsed > 1.0)
                     DDLogWarn(@"Done deallocating %lu objects in %.3fs (%lu still used objects (%lu roots) requeued for later deallocation)...", count, elapsed, requeuedCount, rootCount);
@@ -111,9 +120,9 @@ static NSUInteger DumpMemoryGraph(NSSet* objects);
 {
     if(obj == nil)
         return;
-    @synchronized(_deallocList) {
-        [_deallocList addObject:obj];
-    }
+    os_unfair_lock_lock(&_deallocListLock);
+    [_accumulatingDeallocList addObject:obj];
+    os_unfair_lock_unlock(&_deallocListLock);
 }
 
 @end

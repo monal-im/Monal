@@ -42,6 +42,7 @@ extern NSString* const kMessageTypeFiletransfer;
 +(DataLayer*) sharedInstance;
 -(NSString* _Nullable) exportDB;
 -(void) createTransaction:(monal_void_block_t) block;
+-(void) addEndTransactionTrigger:(monal_void_block_t) trigger withLocation:(NSString*) location;
 -(void) vacuum;
 
 //Roster
@@ -143,6 +144,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) isContactInList:(NSString*) buddy forAccount:(NSNumber*) accountNo;
 
 #pragma mark - account commands
+-(NSNumber*) accountCnts;
 -(NSArray*) accountList;
 -(NSNumber*) enabledAccountCnts;
 -(NSArray*) enabledAccountList;
@@ -177,7 +179,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSArray<MLMessage*>*) messagesForHistoryIDs:(NSArray<NSNumber*>*) historyIDs;
 -(MLMessage* _Nullable) messageForHistoryID:(NSNumber* _Nullable) historyID;
 -(NSNumber*) getSmallestHistoryId;
--(NSNumber*) getBiggestHistoryId;
+-(NSNumber*) getNewestHistoryEntryIdForAccount:(NSNumber*) accountID withMuc:(BOOL) muc;
 
 -(NSNumber* _Nullable) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId withInboundDir:(BOOL) inbound occupantId:(NSString* _Nullable) occupantId andJid:(NSString*) jid onAccount:(NSNumber*) accountNo;
 

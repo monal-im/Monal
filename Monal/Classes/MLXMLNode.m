@@ -31,8 +31,8 @@ int rpl_vasprintf(char **, const char *, va_list *);
 {
     NSMutableArray* _children;
 }
-@property (nonatomic, strong) NSCache* cache;
-@property (nonatomic, strong) NSCache* queryEntryCache;
+@property (atomic, strong) NSMutableDictionary* cache;
+@property (atomic, strong) NSMutableDictionary* queryEntryCache;
 
 @property (atomic, strong, readwrite) NSString* element;
 @property (atomic, readwrite) NSMutableDictionary* attributes;
@@ -105,12 +105,16 @@ static NSRegularExpression* attributeFilterRegex;
     _parent = nil;
     _data = nil;
     _element = @"";
-    self.cache = [NSCache new];
-    self.queryEntryCache = [NSCache new];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMemoryPressureNotification) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
     
-    //always delay own deallocation to not block receive/send queues or any other queues
-    [MLDelayedDealloc delayFor:self];
+    //don't use the cache anymore, NSCache created a huge lock contention and caching using NSDictionary doesn't seem to speed anything up encodeWithCoder
+    //setting this to nil allows us to keep the code and just deactivate it (sending messages to a nil object is a noop)
+    self.cache = nil; //[NSMutableDictionary new];
+    self.queryEntryCache = nil; //[NSMutableDictionary new];
+//     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleMemoryPressureNotification) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+    
+    //don't do this, its largely not needed and slows down catchup a bit (on my device ~18 stanzas/s with this and ~20 stanzas/s without it)
+//     //always delay own deallocation to not block receive/send queues or any other queues
+//     [MLDelayedDealloc delayFor:self];
 }
 
 -(id) init
@@ -174,7 +178,7 @@ static NSRegularExpression* attributeFilterRegex;
     DDLogVerbose(@"Dealloc of MLXMLNode: %@", self);
 #endif
 */
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+//     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self.cache removeAllObjects];
     [self.queryEntryCache removeAllObjects];
 }
@@ -235,10 +239,10 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(void) handleMemoryPressureNotification
 {
-    [self.cache removeAllObjects];
-    [self.queryEntryCache removeAllObjects];
-    DDLogVerbose(@"Removed all cached objects in this MLXMLNode due to memory pressure");
-    DDLogVerbose(@"Node: %@", self);
+//     [self.cache removeAllObjects];
+//     [self.queryEntryCache removeAllObjects];
+//     DDLogWarn(@"Removed all cached objects in this MLXMLNode due to memory pressure");
+//     DDLogWarn(@"Node: %@", self);
 }
 
 -(void) setXMLNS:(NSString*) xmlns

@@ -103,6 +103,7 @@ typedef NS_ENUM(NSUInteger, MLAudioState) {
 #define var                                 __auto_type 
 #define let                                 const __auto_type
 #define bool2str(b)                         ((b) ? @"YES" : @"NO")
+#define callLocationMethod(call)            [call withLocation:[NSString stringWithFormat:@"%@:%d in %s", [HelperTools sanitizeFilePath:(char*)__FILE__], __LINE__, (char*)__func__]]
 
 #define min(a, b) \
     ({ __typeof__ (a) _a = (a); \
@@ -127,7 +128,7 @@ typedef NS_ENUM(NSUInteger, MLAudioState) {
 __attribute__((annotate("returns_localized_nsstring")))
 static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 {
-  return s;
+    return s;
 }
 
 #define kServerDoesNotFollowXep0440Error @"__incomplete XEP-0388 support, XEP-0440 MUST be implemented and this mandates that servers MUST at least implement tls-server-end-point__"
@@ -209,6 +210,8 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 #define kMucAffiliationNone @"none"
 #define kMucActionShowProfile @"profile"
 #define kMucActionReinvite @"reinvite"
+
+#define kSystemSound @"SystemSound"
 
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048

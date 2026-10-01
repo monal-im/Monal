@@ -62,6 +62,8 @@ typedef NS_ENUM(NSUInteger, MLRunLoopIdentifier) {
 
 void logException(NSException* exception);
 void swizzle(Class c, SEL orig, SEL new);
+NSArray* _Nullable arrayComprehension(id<NSFastEnumeration> _Nullable arr, id _Nullable (^cb)(id));
+NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id _Nullable (^cb)(id, id));
 
 //weak container holding an object as weak pointer (needed to not create retain circles in NSCache
 @interface WeakContainer : NSObject
@@ -123,8 +125,8 @@ void swizzle(Class c, SEL orig, SEL new);
 +(NSData*) serializeObject:(id) obj;
 +(id) unserializeData:(NSData*) data;
 +(NSError* _Nullable) postUserNotificationRequest:(UNNotificationRequest*) request;
-+(void) addUploadItemPreviewForItem:(NSURL* _Nullable) url provider:(NSItemProvider* _Nullable) provider andPayload:(NSMutableDictionary*) payload withCompletionHandler:(void(^)(NSMutableDictionary* _Nullable)) completion;
-+(void) handleUploadItemProvider:(NSItemProvider*) provider withCompletionHandler:(void (^)(NSMutableDictionary* _Nullable)) completion;
++(AnyPromise*) addUploadItemPreviewForItem:(NSURL* _Nullable) url provider:(NSItemProvider* _Nullable) provider andPayload:(NSMutableDictionary*) payload;
++(AnyPromise*) handleUploadItemProvider:(NSItemProvider*) provider;
 +(UIImage* _Nullable) rotateImage:(UIImage* _Nullable) image byRadians:(CGFloat) rotation;
 +(UIImage* _Nullable) mirrorImageOnXAxis:(UIImage* _Nullable) image;
 +(UIImage* _Nullable) mirrorImageOnYAxis:(UIImage* _Nullable) image;

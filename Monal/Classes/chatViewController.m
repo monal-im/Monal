@@ -244,6 +244,37 @@ enum msgSentState {
         [self.xmppAccount.mucProcessor ping:self.contact.contactJid];
 }
 
+-(void) updateTableBottomInset
+{
+    UIWindow* window = self.view.window;
+    if(!window || self.inputContainerView.window == nil)
+        return;     // accessory not attached yet
+
+    CGRect tableRect = [self.messageTable convertRect:self.messageTable.bounds toView:nil];
+    CGFloat tableMaxY = CGRectGetMaxY(tableRect);
+
+    CGRect inputRect = [self.inputContainerView convertRect:self.inputContainerView.bounds toView:nil];
+    CGFloat accessoryTop = CGRectGetMinY(inputRect);
+    if(self.inputContainerView.superview == nil || accessoryTop >= window.bounds.size.height)
+        accessoryTop = window.bounds.size.height - window.safeAreaInsets.bottom
+                     - self.inputContainerView.frame.size.height;
+
+    // padding between the inputView and the most recent message
+    int padding = 15;
+#if TARGET_OS_MACCATALYST
+    padding = 8;
+#endif
+    // window-space height the content must clear
+    CGFloat needed = MAX(tableMaxY - accessoryTop + padding, 0);
+
+    // don't double-count what the system already adds via safe areas
+    CGFloat systemBottom = self.messageTable.adjustedContentInset.bottom - self.messageTable.contentInset.bottom;
+    UIEdgeInsets insets = self.messageTable.contentInset;
+    insets.bottom = MAX(needed - systemBottom, 0);
+    self.messageTable.contentInset = insets;
+    self.messageTable.scrollIndicatorInsets = insets;
+}
+
 -(void) updateVoiceRequestButton
 {
     BOOL shouldBePresent = NO;
@@ -965,10 +996,33 @@ enum msgSentState {
     [_lastMsgButton removeFromSuperview];
 }
 
-- (void)viewDidLayoutSubviews {
+-(CGFloat) bottomContentOffsetY
+{
+    UIScrollView* sv = self.messageTable;
+    return MAX(sv.contentSize.height - sv.bounds.size.height + sv.adjustedContentInset.bottom,
+               -sv.adjustedContentInset.top);
+}
+
+- (void)viewDidLayoutSubviews
+{
     [super viewDidLayoutSubviews];
-    if(self.messageTable.contentSize.height > self.messageTable.bounds.size.height)
-        [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height - self.messageTable.bounds.size.height) animated:NO];
+    if(@available(iOS 27.0,*))
+    {
+        [self updateTableBottomInset];
+        if(self.messageTable.isDragging || self.messageTable.isDecelerating)
+            return;
+        if(self.viewDidAppear && !self->_isAtBottom)
+            return; // user scrolled up to read; don't yank
+        if(self.messageTable.contentSize.height > 0)
+            [self.messageTable setContentOffset:CGPointMake(0, [self bottomContentOffsetY]) animated:NO];
+        self->_isAtBottom = YES;
+        [self.lastMsgButton setHidden:YES];
+    }
+    else
+    {
+        if(self.messageTable.contentSize.height > self.messageTable.bounds.size.height)
+            [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height - self.messageTable.bounds.size.height) animated:NO];
+    }
 }
 
 -(BOOL) saveMessageDraft
@@ -1337,9 +1391,9 @@ enum msgSentState {
             @"type": @"file",
             @"filename": [url lastPathComponent],
             @"data": [MLFiletransfer prepareFileUpload:url],
-        } mutableCopy] withCompletionHandler:^(NSMutableDictionary* payload) {
+        } mutableCopy]].then(^(NSMutableDictionary* payload) {
             [self addToUIQueue:@[payload]];
-        }];
+        });
     }
 }
 
@@ -1612,29 +1666,27 @@ enum msgSentState {
         DDLogDebug(@"Handling asset with identifier: %@", userSelection.assetIdentifier);
         NSItemProvider* provider = userSelection.itemProvider;
         MLAssert(provider != nil, @"Expected a NSItemProvider");
-        [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* payload) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(payload == nil || payload[@"error"] != nil)
-                {
-                    DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
-                    NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
-                    if(payload[@"error"] != nil)
-                        message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
-                    UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
-                                                                                message:message preferredStyle:UIAlertControllerStyleAlert];
-                    [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                        [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
-                        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
-                    }]];
-                    [self presentViewController:unknownItemWarning animated:YES completion:nil];
-                }
-                else
-                {
-                    DDLogDebug(@"Adding payload to UI upload queue: %@", payload);
-                    [self addToUIQueue:@[payload]];
-                }
-            });
-        }];
+        [HelperTools handleUploadItemProvider:provider].then(^(NSMutableDictionary* payload) {
+            if(payload == nil || payload[@"error"] != nil)
+            {
+                DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
+                NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
+                if(payload[@"error"] != nil)
+                    message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
+                UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                            message:message preferredStyle:UIAlertControllerStyleAlert];
+                [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
+                    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                }]];
+                [self presentViewController:unknownItemWarning animated:YES completion:nil];
+            }
+            else
+            {
+                DDLogDebug(@"Adding payload to UI upload queue: %@", payload);
+                [self addToUIQueue:@[payload]];
+            }
+        });
     }
 }
 
@@ -1663,9 +1715,9 @@ enum msgSentState {
             @"type": @"audiovisual",
             @"filename": [url lastPathComponent],
             @"data": [MLFiletransfer prepareFileUpload:url],
-        } mutableCopy] withCompletionHandler:^(NSMutableDictionary* payload) {
+        } mutableCopy]].then(^(NSMutableDictionary* payload) {
             [self addToUIQueue:@[payload]];
-        }];
+        });
     }
     else
     {
@@ -2743,15 +2795,22 @@ enum msgSentState {
     
     // get current scroll position (y-axis)
     CGFloat curOffset = scrollView.contentOffset.y;
-    CGFloat bottomLength = scrollView.frame.size.height + curOffset;
-    _isAtBottom = scrollView.contentSize.height <= bottomLength;
-    
+    if(@available(iOS 27.0,*))
+    {
+        CGFloat maxOffsetY = scrollView.contentSize.height - scrollView.bounds.size.height
+                           + scrollView.adjustedContentInset.bottom;
+        _isAtBottom = curOffset >= maxOffsetY - 1;
+    }
+    else
+    {
+        CGFloat bottomLength = scrollView.frame.size.height + curOffset;
+        _isAtBottom = scrollView.contentSize.height <= bottomLength;
+    }
+
     if(_isAtBottom)
         [self.lastMsgButton setHidden:YES];
     else
         [self.lastMsgButton setHidden:NO];
-    
-    
 }
 
 -(void) loadOldMsgHistory
@@ -3179,6 +3238,8 @@ enum msgSentState {
 - (void)keyboardWillDisappear:(NSNotification*) aNotification
 {
     [self setChatInputHeightConstraints:YES];
+    if(@available(iOS 27.0,*))
+        [self updateTableBottomInset];
 }
 
 - (void)keyboardDidShow:(NSNotification*)aNotification
@@ -3189,9 +3250,14 @@ enum msgSentState {
     if(kbSize.height > 100) { //my inputbar +any other
         self.hardwareKeyboardPresent = NO;
     }
-    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height - 10, 0.0);
-    self.messageTable.contentInset = contentInsets;
-    self.messageTable.scrollIndicatorInsets = contentInsets;
+    if(@available(iOS 27.0,*))
+        [self updateTableBottomInset];
+    else
+    {
+        UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height - 10, 0.0);
+        self.messageTable.contentInset = contentInsets;
+        self.messageTable.scrollIndicatorInsets = contentInsets;
+    }
 
     //this will be automatically called once the whole chat view is loaded (even if not showing a keyboard)
     [self scrollToBottomIfNeeded];
@@ -3202,19 +3268,26 @@ enum msgSentState {
     [self saveMessageDraft];
     [self sendChatState:NO];
 
-    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
-    self.messageTable.contentInset = contentInsets;
-    self.messageTable.scrollIndicatorInsets = contentInsets;
+    if(@available(iOS 27.0,*))
+    {
+        [self updateTableBottomInset];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)),
+                       dispatch_get_main_queue(), ^{ [self updateTableBottomInset]; }); // after hide animation settles
+    }
+    else
+    {
+        UIEdgeInsets contentInsets = UIEdgeInsetsZero;
+        self.messageTable.contentInset = contentInsets;
+        self.messageTable.scrollIndicatorInsets = contentInsets;
+    }
 }
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
-    
     [self setChatInputHeightConstraints:NO];
+    if(@available(iOS 27.0,*))
+        [self updateTableBottomInset];
     //TODO grab animation info
-//    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
-//    self.messageTable.contentInset = contentInsets;
-//    self.messageTable.scrollIndicatorInsets = contentInsets;
 }
 
 -(void) tempfreezeAutoloading
@@ -3694,26 +3767,24 @@ enum msgSentState {
         NSItemProvider* provider = item.itemProvider;
         MLAssert(provider != nil, @"provider must not be nil");
         MLAssert([provider hasItemConformingToTypeIdentifier:UTTypeItem.identifier], @"provider must supply item conforming to kUTTypeItem");
-        [HelperTools handleUploadItemProvider:provider withCompletionHandler:^(NSMutableDictionary* _Nullable payload) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(payload == nil || payload[@"error"] != nil)
-                {
-                    DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
-                    NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
-                    if(payload[@"error"] != nil)
-                        message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
-                    UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
-                                                                                message:message preferredStyle:UIAlertControllerStyleAlert];
-                    [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                        [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
-                        [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
-                    }]];
-                    [self presentViewController:unknownItemWarning animated:YES completion:nil];
-                }
-                else
-                    [self addToUIQueue:@[payload]];
-            });
-        }];
+        [HelperTools handleUploadItemProvider:provider].then(^(NSMutableDictionary* _Nullable payload) {
+            if(payload == nil || payload[@"error"] != nil)
+            {
+                DDLogError(@"Could not save payload for sending: %@", payload[@"error"]);
+                NSString* message = NSLocalizedString(@"Monal was not able to send your attachment!", @"");
+                if(payload[@"error"] != nil)
+                    message = [NSString stringWithFormat:NSLocalizedString(@"Monal was not able to send your attachment: %@", @""), [payload[@"error"] localizedDescription]];
+                UIAlertController* unknownItemWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not send", @"")
+                                                                            message:message preferredStyle:UIAlertControllerStyleAlert];
+                [unknownItemWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Abort", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    [unknownItemWarning dismissViewControllerAnimated:YES completion:nil];
+                    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+                }]];
+                [self presentViewController:unknownItemWarning animated:YES completion:nil];
+            }
+            else
+                [self addToUIQueue:@[payload]];
+        });
     }
 }
 

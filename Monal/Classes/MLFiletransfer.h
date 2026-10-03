@@ -28,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) hardlinkFileForMessage:(MLMessage*) msg;
 +(BOOL) isFileForHistoryIdInTransfer:(NSNumber*) historyId;
 +(NSString*) getMimeTypeOfOriginalFile:(NSString*) file;
++(NSString*) filePreviewHardlinksDirectory;
 
 @end
 

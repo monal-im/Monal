@@ -4532,8 +4532,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/meganz/SAMKeychain";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
 			};
 		};
 		34745124302F641600F23210 /* XCRemoteSwiftPackageReference "NotificationBanner" */ = {

@@ -4541,7 +4541,7 @@
 			repositoryURL = "https://github.com/Daltron/NotificationBanner";
 			requirement = {
 				kind = upToNextMinorVersion;
-				minimumVersion = 3.2.0;
+				minimumVersion = 4.0.0;
 			};
 		};
 		34F978CD303B90CB002029CF /* XCRemoteSwiftPackageReference "sqlite3-package" */ = {

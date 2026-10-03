@@ -898,12 +898,12 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     });
     
     //every identifier has its own thread qos class
-    __block NSQualityOfService qos;
-    __block char* name;
+    qos_class_t qos;
+    char* name;
     switch(identifier)
     {
-        case MLRunLoopIdentifierNetwork: qos = NSQualityOfServiceBackground; name = "im.monal.runloop.networking"; break;
-        case MLRunLoopIdentifierTimer: qos = NSQualityOfServiceBackground; name = "im.monal.runloop.timer"; break;
+        case MLRunLoopIdentifierNetwork: qos = QOS_CLASS_BACKGROUND; name = "im.monal.runloop.networking"; break;
+        case MLRunLoopIdentifierTimer: qos = QOS_CLASS_BACKGROUND; name = "im.monal.runloop.timer"; break;
         default: unreachable(@"unknown runloop identifier!");
     }
     
@@ -920,6 +920,10 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                     [condition lock];
                     [condition signal];
                     [condition unlock];
+                    //now switch to the right priority, no priority inversion can happen now that we signalled our condition variable
+                    int err = pthread_set_qos_class_self_np(qos, 0);
+                    MLAssert(err == 0, @"Failed to lower QoS of new runloop thread!", (@{@"error": @(err)}));
+                    //start to serve the runloop
                     while(YES)
                     {
                         [localLoop run];
@@ -929,8 +933,9 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
             }];
             //configure and start thread
             [newRunloopThread setName:[NSString stringWithFormat:@"%s", name]];
-            //newRunloopThread.threadPriority = 1.0;
-            newRunloopThread.qualityOfService = qos;
+            //always start with the highest priority to not create priority inversion on our condition variable, then switch
+            //to the right QOS after signalling the thread did start
+            newRunloopThread.qualityOfService = NSQualityOfServiceUserInteractive;
             [newRunloopThread start];
             //wait for the new thread to create a new runloop, it will immediately spin the runloop after signalling this condition
             [condition wait];

@@ -87,6 +87,8 @@ pub enum JingleRtpSessionMedia {
     Audio,
     Application,
     Video,
+    #[serde(untagged)]
+    Other(String),
 }
 
 impl JingleRtpSessionMedia {
@@ -95,6 +97,7 @@ impl JingleRtpSessionMedia {
             SdpMediaValue::Audio => JingleRtpSessionMedia::Audio,
             SdpMediaValue::Application => JingleRtpSessionMedia::Application,
             SdpMediaValue::Video => JingleRtpSessionMedia::Video,
+            SdpMediaValue::Unknown(media_type) => JingleRtpSessionMedia::Other(media_type.to_string()),
         }
     }
 
@@ -103,6 +106,7 @@ impl JingleRtpSessionMedia {
             JingleRtpSessionMedia::Audio => SdpMediaValue::Audio,
             JingleRtpSessionMedia::Application => SdpMediaValue::Application,
             JingleRtpSessionMedia::Video => SdpMediaValue::Video,
+            JingleRtpSessionMedia::Other(media_type) => SdpMediaValue::Unknown(media_type.to_string()),
         }
     }
 }

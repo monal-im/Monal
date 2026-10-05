@@ -62,7 +62,7 @@ PODS:
   - sqlite3/common (3.52.0)
   - sqlite3/perf-threadsafe (3.52.0):
     - sqlite3/common
-  - WebRTC-lib (153.0.0)
+  - WebRTC-lib (150.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
@@ -82,7 +82,7 @@ DEPENDENCIES:
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
   - sqlite3/perf-threadsafe
-  - WebRTC-lib
+  - WebRTC-lib (~> 150.0)
 
 SPEC REPOS:
   trunk:
@@ -133,8 +133,8 @@ SPEC CHECKSUMS:
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   sqlite3: a51c07cf16e023d6c48abd5e5791a61a47354921
-  WebRTC-lib: 5fe10272d8968e849aa7c5fc2acda5ed06466514
+  WebRTC-lib: 28076a749ad01008202ea2757a7349375454198b
 
-PODFILE CHECKSUM: 0bbe506149cc239213672303850053e37c83c9be
+PODFILE CHECKSUM: e4dedd7e642b736a54af6ad970c90a4b5ceed0bd
 
 COCOAPODS: 1.17.0

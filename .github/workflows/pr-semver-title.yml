@@ -101,4 +101,16 @@ jobs:
             echo "PR semver $VERSION is not greater than semver $TARGET_VERSION of our '$TARGET' branch!"
             exit 5
           fi
-          echo "PR version $VERSION is greater than version $TARGET_VERSION of our '$TARGET' branch..."
+          if [ "$TARGET" = "stable" ]; then
+            STABLE_VERSION="$(echo "$VERSION" | grep -oE '^[0-9]+(\.[0-9]+){0,2}')"
+            STABLE_TARGET_VERSION="$(echo "$TARGET_VERSION" | grep -oE '^[0-9]+(\.[0-9]+){0,2}')"
+            if [ "$STABLE_VERSION" != "$VERSION" ]; then
+              echo "PR semver $VERSION has a suffix, which is not allowed on our '$TARGET' branch!"
+              exit 6
+            fi
+            if [ "$(pysemver compare -- "$STABLE_VERSION" "$STABLE_TARGET_VERSION")" != "1" ]; then
+              echo "Stripped PR semver $STABLE_VERSION is not greater than stripped semver $STABLE_TARGET_VERSION of our '$TARGET' branch!"
+              exit 7
+            fi
+          fi
+          echo "PR semver $VERSION is greater than semver $TARGET_VERSION of our '$TARGET' branch..."

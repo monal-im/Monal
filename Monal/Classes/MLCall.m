@@ -692,7 +692,7 @@
                 }
                 else if(self.finishReason == MLCallFinishReasonError)
                 {
-                    [self sendJmiFinishWithReason:@"application-error"];
+                    [self sendJmiFinishWithReason:@"failed-application"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else
@@ -721,7 +721,7 @@
                 }
                 else if(self.finishReason == MLCallFinishReasonError)
                 {
-                    [self sendJmiFinishWithReason:@"application-error"];
+                    [self sendJmiFinishWithReason:@"failed-application"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else
@@ -750,7 +750,7 @@
                     }
                     else if(self.finishReason == MLCallFinishReasonError)
                     {
-                        [self sendJmiFinishWithReason:@"application-error"];
+                        [self sendJmiFinishWithReason:@"failed-application"];
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     }
                     else
@@ -779,7 +779,7 @@
                     }
                     else if(self.finishReason == MLCallFinishReasonError)
                     {
-                        [self sendJmiFinishWithReason:@"application-error"];
+                        [self sendJmiFinishWithReason:@"failed-application"];
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     }
                     else

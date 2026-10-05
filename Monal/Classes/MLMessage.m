@@ -44,7 +44,8 @@ static NSMutableDictionary* _singletonCache;
                 [_singletonCache removeObjectForKey:cacheKey];
         }
         
-        MLMessage* message = [self createMessageFromDatabaseWithHistoryID:historyID];
+        MLMessage* message = [self new];
+        [MLMessage fillMessage:message fromDatabaseWithHistoryID:historyID];
         @synchronized(_singletonCache) {
             _singletonCache[cacheKey] = [WeakContainer for:message];
         }
@@ -68,11 +69,10 @@ static NSMutableDictionary* _singletonCache;
     return result;
 }
 
-+(MLMessage*) createMessageFromDatabaseWithHistoryID:(NSNumber*) historyID
++(void) fillMessage:(MLMessage*) message fromDatabaseWithHistoryID:(NSNumber*) historyID
 {
     NSDictionary* dic = [[DataLayer sharedInstance] messageDataForHistoryID:historyID];
 
-    MLMessage* message = [self new];
     message.accountID = [dic objectForKey:@"account_id"];
 
     message.buddyName = [dic objectForKey:@"buddy_name"];
@@ -103,8 +103,6 @@ static NSMutableDictionary* _singletonCache;
     message.errorReason = [dic objectForKey:@"errorReason"];
 
     message.retracted = [(NSNumber*)[dic objectForKey:@"retracted"] boolValue];
-    
-    return message;
 }
 
 +(MLMessage* _Nullable) createDraftMessageFromDatabaseWithJid:(NSString*) jid andAccountID:(NSNumber*) accountID
@@ -181,6 +179,7 @@ static NSMutableDictionary* _singletonCache;
     [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleMessageReceived:) name:kMonalMessageReceivedNotice object:nil];
     [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleMessageDisplayed:) name:kMonalMessageDisplayedNotice object:nil];
     [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
+    [[MLNotificationQueue currentQueue] addObserver:self selector:@selector(handleGlobalRefresh:) name:kMonalRefresh object:nil];
     return self;
 }
 
@@ -296,6 +295,12 @@ static NSMutableDictionary* _singletonCache;
             self.errorReason = errorReason;
         }
     }
+}
+
+-(void) handleGlobalRefresh:(NSNotification*) notification
+{
+    [MLMessage fillMessage:self fromDatabaseWithHistoryID:self.messageDBId];
+    self.reactions = [[DataLayer sharedInstance] getReactionsForHistoryId:self.messageDBId];
 }
 
 -(BOOL) isMuc

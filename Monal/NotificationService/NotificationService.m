@@ -194,14 +194,10 @@
     //this has to be synchronous because we only want to continue if all accounts are completely disconnected
     [[MLXMPPManager sharedInstance] disconnectAll];
     
-    //we posted all notifications and disconnected, technically we're not running anymore
-    //(even though our containing process will still be running for a few more seconds)
-    [MLProcessLock unlock];
-    
-    //feed all waiting handlers with empty notifications to silence them
-    //this will terminate/freeze the app extension afterwards
+    //feed all waiting handlers with empty notifications to silence them and commit suicide afterwards
     while([self feedNextHandler])
         ;
+    [self killAppex];
 }
 
 -(void) incomingPush:(void (^)(UNNotificationContent* _Nullable)) contentHandler
@@ -407,6 +403,21 @@
 {
     DDLogInfo(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
     [HelperTools updateSyncErrorsWithDeleteOnly:YES andWaitForCompletion:NO];
+    
+    //disconnect on idle in low power mode, rather than waiting for more stanzas
+    //but only if *all* accounts are idle now
+    if([[MLXMPPManager sharedInstance] allAccountsIdle] && ([[HelperTools defaultsDB] boolForKey:@"reducedBackgroundActivity"] || ([[NSProcessInfo processInfo] isLowPowerModeEnabled] && [[HelperTools defaultsDB] boolForKey:@"reducedLowPowerBackgroundActivity"])))
+    {
+        //do this in an extra thread to avoid deadlocks via receive_queue
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            DDLogInfo(@"Expiring every queued push: reducedBackgroundActivity = %@, isLowPowerModeEnabled = %@, reducedLowPowerBackgroundActivity = %@", bool2str([[HelperTools defaultsDB] boolForKey:@"reducedBackgroundActivity"]), bool2str([[NSProcessInfo processInfo] isLowPowerModeEnabled]), bool2str([[HelperTools defaultsDB] boolForKey:@"reducedLowPowerBackgroundActivity"]));
+            BOOL isLastHandler = NO;
+            do {
+                isLastHandler = [self checkForLastHandler];
+                [self pushExpired];
+            } while(!isLastHandler);
+        });
+    }
 }
 
 @end

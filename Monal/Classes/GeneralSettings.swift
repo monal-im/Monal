@@ -136,6 +136,12 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     
     @defaultsDB("showNotificationsForReactions")
     var showNotificationsForReactions: Bool
+    
+    @defaultsDB("reducedBackgroundActivity")
+    var reducedBackgroundActivity: Bool
+    
+    @defaultsDB("reducedLowPowerBackgroundActivity")
+    var reducedLowPowerBackgroundActivity: Bool
 }
 
 
@@ -189,6 +195,18 @@ struct GeneralSettings: View {
                             .aspectRatio(contentMode: .fit)
                             .frame(width: size20px, height: size20px)
                         Text("Attachments")
+                    }
+                }
+                
+                if generalSettingsDefaultsDB.showAdvancedUI {
+                    NavigationLink(destination: LazyClosureView(MiscellaneousSettings())) {
+                        HStack {
+                            Image(systemName: "menucard")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: size20px, height: size20px)
+                            Text("Miscellaneous")
+                        }
                     }
                 }
                 
@@ -581,6 +599,30 @@ struct AttachmentSettings: View {
                 }
             }
         }
+    }
+}
+
+struct MiscellaneousSettings: View {
+    @ObservedObject var generalSettingsDefaultsDB = GeneralSettingsDefaultsDB()
+    
+    var body: some View {
+        Form {
+            Section(header: Text("Background activity")) {
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.reducedBackgroundActivity) {
+                    Text("Reduce background activity")
+                    Text("While turning this on might look better in the Battery Stats, it might in fact increase the battery consumption. Closely monitor how long your battery lasts when changing this setting and make sure to read [this explanation](https://github.com/monal-im/Monal/wiki/Battery-consumption).")
+                }
+                
+                SettingsToggle(isOn: Binding<Bool>(
+                    get: { generalSettingsDefaultsDB.reducedBackgroundActivity || generalSettingsDefaultsDB.reducedLowPowerBackgroundActivity },
+                    set: { generalSettingsDefaultsDB.reducedLowPowerBackgroundActivity = $0 }
+                )) {
+                    Text("Reduce background activity when in low power mode")
+                    Text("This has the exact same caveats as the setting above, but only activates when the device is in low power mode. Turning this on might increase your real power consumption exactly at times you need it most!")
+                }.disabled(generalSettingsDefaultsDB.reducedBackgroundActivity)
+            }
+        }
+        .navigationBarTitle(Text("Miscellaneous"), displayMode: .inline)
     }
 }
 

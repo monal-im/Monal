@@ -48,10 +48,28 @@
 
 @import Intents;
 
-#define GRACEFUL_TIMEOUT            20.0
-#define BGPROCESS_GRACEFUL_TIMEOUT  60.0
+//the normal graceful timeout when putting the app into the background
+#define GRACEFUL_TIMEOUT                    20.0
+//reducing the BGPROCESS_ and BGREFRESH_GRACEFUL_TIMEOUT to 5 seconds probably gives us more background shots than consuming 60 seconds per shot
+//afaik apple uses a total time budget and this will split it into more shots
+#define BGREFRESH_GRACEFUL_TIMEOUT           5.0
+#define BGPROCESS_GRACEFUL_TIMEOUT           5.0
+//wakeup timeout gets triggered by notification interactions
+#define WAKEUP_TIMEOUT                      20.0
+
+//reduced timeouts
+#define REDUCED_GRACEFUL_TIMEOUT             5.0
+#define REDUCED_BGREFRESH_GRACEFUL_TIMEOUT   5.0
+#define REDUCED_BGPROCESS_GRACEFUL_TIMEOUT   5.0
+#define REDUCED_WAKEUP_TIMEOUT               5.0
 
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
+typedef NS_ENUM(NSUInteger, MLGracefulTimeoutType) {
+    MLGracefulTimeoutTypeNormal,
+    MLGracefulTimeoutTypeBGRefresh,
+    MLGracefulTimeoutTypeBGProcess,
+    MLGracefulTimeoutTypeWakeup,
+};
 
 @interface MonalAppDelegate()
 {
@@ -1104,7 +1122,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 {
     [self addBackgroundTask];
     [[MLXMPPManager sharedInstance] nowBackgrounded];
-    [self startBackgroundTimer:GRACEFUL_TIMEOUT];
+    [self startBackgroundTimer:[self getGracefulTimeoutFor:MLGracefulTimeoutTypeNormal]];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self checkIfBackgroundTaskIsStillNeeded];
     });
@@ -1253,6 +1271,37 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 }
 
 #pragma mark - background tasks
+
+-(double) getGracefulTimeoutFor:(MLGracefulTimeoutType) type
+{
+    if([[HelperTools defaultsDB] boolForKey:@"reducedBackgroundActivity"] || ([[NSProcessInfo processInfo] isLowPowerModeEnabled] && [[HelperTools defaultsDB] boolForKey:@"reducedLowPowerBackgroundActivity"]))
+    {
+        DDLogInfo(@"Returning reduced graceful timeout: reducedBackgroundActivity = %@, isLowPowerModeEnabled = %@, reducedLowPowerBackgroundActivity = %@", bool2str([[HelperTools defaultsDB] boolForKey:@"reducedBackgroundActivity"]), bool2str([[NSProcessInfo processInfo] isLowPowerModeEnabled]), bool2str([[HelperTools defaultsDB] boolForKey:@"reducedLowPowerBackgroundActivity"]));
+        if(type == MLGracefulTimeoutTypeNormal)
+            return REDUCED_GRACEFUL_TIMEOUT;
+        else if(type == MLGracefulTimeoutTypeBGRefresh)
+            return REDUCED_BGREFRESH_GRACEFUL_TIMEOUT;
+        else if(type == MLGracefulTimeoutTypeBGProcess)
+            return REDUCED_BGPROCESS_GRACEFUL_TIMEOUT;
+        else if(type == MLGracefulTimeoutTypeWakeup)
+            return REDUCED_WAKEUP_TIMEOUT;
+        else
+            unreachable(@"Unexpected MLGracefulTimeoutType!");
+    }
+    
+    DDLogInfo(@"Returning NORMAL graceful timeout: reducedBackgroundActivity = %@, isLowPowerModeEnabled = %@, reducedLowPowerBackgroundActivity = %@", bool2str([[HelperTools defaultsDB] boolForKey:@"reducedBackgroundActivity"]), bool2str([[NSProcessInfo processInfo] isLowPowerModeEnabled]), bool2str([[HelperTools defaultsDB] boolForKey:@"reducedLowPowerBackgroundActivity"]));
+    if(type == MLGracefulTimeoutTypeNormal)
+        return GRACEFUL_TIMEOUT;
+    else if(type == MLGracefulTimeoutTypeBGRefresh)
+            return BGREFRESH_GRACEFUL_TIMEOUT;
+    else if(type == MLGracefulTimeoutTypeBGProcess)
+        return BGPROCESS_GRACEFUL_TIMEOUT;
+    else if(type == MLGracefulTimeoutTypeWakeup)
+            return WAKEUP_TIMEOUT;
+    else
+        unreachable(@"Unexpected MLGracefulTimeoutType!");
+    
+}
 
 -(void) handleSpinner
 {
@@ -1524,7 +1573,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     if(![[MLXMPPManager sharedInstance] hasConnectivity])
         DDLogError(@"BGTASK has *no* connectivity? That's strange!");
     
-    [self startBackgroundTimer:BGPROCESS_GRACEFUL_TIMEOUT];
+    [self startBackgroundTimer:[self getGracefulTimeoutFor:MLGracefulTimeoutTypeBGProcess]];
     @synchronized(self) {
         DDLogVerbose(@"Setting _shutdownPending to NO...");
         _shutdownPending = NO;
@@ -1622,7 +1671,7 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
         DDLogError(@"BGTASK has *no* connectivity? That's strange!");
     }
     
-    [self startBackgroundTimer:GRACEFUL_TIMEOUT];
+    [self startBackgroundTimer:[self getGracefulTimeoutFor:MLGracefulTimeoutTypeBGRefresh]];
     @synchronized(self) {
         DDLogVerbose(@"Setting _shutdownPending to NO...");
         _shutdownPending = NO;
@@ -1775,11 +1824,11 @@ typedef void (^pushCompletion)(UIBackgroundFetchResult result);
     //that gets stopped once we call the completionHandler
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
-    //register push completion handler and associated timer (use the GRACEFUL_TIMEOUT here, too)
+    //register push completion handler and associated timer
     @synchronized(self) {
         _wakeupCompletions[completionId] = @{
             @"handler": completionHandler,
-            @"timer": createTimer(GRACEFUL_TIMEOUT, (^{
+            @"timer": createTimer([self getGracefulTimeoutFor:MLGracefulTimeoutTypeWakeup], (^{
                 DDLogWarn(@"### Wakeup timer triggered for ID %@ ###", completionId);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self updateBackgroundState];       //make sure we are in the correct state

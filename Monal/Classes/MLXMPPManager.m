@@ -170,6 +170,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     [self upgradeBoolUserSettingsIfUnset:@"showNotificationsForReactions" toDefault:YES];
     
+    [self upgradeBoolUserSettingsIfUnset:@"reducedBackgroundActivity" toDefault:NO];
+    [self upgradeBoolUserSettingsIfUnset:@"reducedLowPowerBackgroundActivity" toDefault:NO];
+    
 // //always show onboarding on simulator for now
 // #if TARGET_OS_SIMULATOR
 //     [[HelperTools defaultsDB] setBool:NO forKey:@"hasCompletedOnboarding"];

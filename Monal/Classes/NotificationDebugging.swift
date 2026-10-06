@@ -12,6 +12,9 @@ class NotificationDebuggingDefaultsDB: ObservableObject {
     
     @defaultsDB("selectedPushServer")
     var selectedPushServer: String
+    
+    @defaultsDB("notificationsGranted")
+    var notificationsGranted: Bool
 }
 
 struct NotificationDebugging: View {
@@ -41,6 +44,22 @@ struct NotificationDebugging: View {
         Form {
             Group {
                 Section(header: Text("Status").font(.title3)) {
+                    VStack(alignment: .leading) {
+                        buildNotificationStateLabel(Text("Can Show Notifications"), isWorking: self.pushPermissionEnabled);
+                        Divider()
+                        Text("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to [iOS Settings -> Apps -> Monal -> Notifications](app-settings:) and select 'Allow Notifications'.")
+                            .font(.footnote)
+                            .foregroundColor(Color(UIColor.secondaryLabel))
+                            .environment(\.openURL, OpenURLAction { _ in
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                    return .handled
+                                }
+                                return .discarded
+                            })
+                    }
+                }
+                Section {
                     VStack(alignment: .leading, spacing:10) {
                         buildNotificationStateLabel(Text("Apple Push Service"), isWorking: self.applePushEnabled);
                         Divider()
@@ -67,13 +86,6 @@ struct NotificationDebugging: View {
                             secondaryButton: .destructive(Text("Close")))
                         :
                             Alert(title: Text("Apple Push Token is not available!"))
-                    }
-                }
-                Section {
-                    VStack(alignment: .leading) {
-                        buildNotificationStateLabel(Text("Can Show Notifications"), isWorking: self.pushPermissionEnabled);
-                        Divider()
-                        Text("If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission. Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'.").foregroundColor(Color(UIColor.secondaryLabel)).font(.footnote)
                     }
                 }
                 if(self.xmppAccountInfo.count > 0) {

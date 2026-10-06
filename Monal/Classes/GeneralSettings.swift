@@ -228,7 +228,7 @@ struct GeneralSettings: View {
                         #endif
                     }.foregroundColor(Color(UIColor.label))
                 })
-                .buttonStyle(.borderless) 
+                .buttonStyle(.borderless)
             }
         }
         .navigationBarTitle(Text("General Settings"))

@@ -674,6 +674,18 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     }
     content.body = msgText;     //save message text to notification content
     
+    //show timestamp if the message is older than 5 minutes
+    //TODO: use a UNNotificationContentExtension to add a view with the timestamp above the body content rather than embedding this into the body
+    if([[NSDate date] timeIntervalSinceDate:message.timestamp] > 5 * 60)
+    {
+        NSDateFormatter* f = [NSDateFormatter new];
+        f.timeStyle = NSDateFormatterShortStyle;
+        f.dateStyle = [[NSCalendar currentCalendar] isDateInToday:message.timestamp] ? NSDateFormatterNoStyle : NSDateFormatterShortStyle;
+        NSString* timestamp = [NSString stringWithFormat:NSLocalizedString(@"Sent %@", @"Subtitle of delayed message notifications"), [f stringFromDate:message.timestamp]];
+        content.body = [NSString stringWithFormat:@"[%@] %@", timestamp, content.body];
+        
+    }
+    
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
         NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];

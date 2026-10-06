@@ -142,6 +142,9 @@ class GeneralSettingsDefaultsDB: ObservableObject {
     
     @defaultsDB("reducedLowPowerBackgroundActivity")
     var reducedLowPowerBackgroundActivity: Bool
+    
+    @defaultsDB("showSyncErrorNotificationForIncomingPush")
+    var showSyncErrorNotificationForIncomingPush: Bool
 }
 
 
@@ -511,6 +514,22 @@ struct NotificationSettings: View {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.showNotificationsForReactions) {
                     Text("Show reaction notifications")
                     Text("Show notifications if users react to your messages.")
+                }
+                
+                SettingsToggle(isOn: $generalSettingsDefaultsDB.showSyncErrorNotificationForIncomingPush) {
+                    Text("Show warning notification if a push can't be retrieved")
+                    Text(
+"""
+If we receive a push telling us the server wants to talk to us, but we can't reach the server to retrieve
+anything that's waiting for us there, we show a warning notification.\n\
+But since the data waiting on the server can sometimes be a protocol message like like reactions, read receipts etc.,
+not a "real incoming message".\n\
+We only show these warning notifications for the first push connectivity issue after you opened the app last,
+but if you're experience bad wifi/mobile connections on a regular basis, these warning notifications can become annoying nontheless.\n\
+You can turn them off here, if so, but be warned, that you might not get notified about unretrievable pushes
+and thus might miss messages.
+"""
+                    )
                 }
             }
             

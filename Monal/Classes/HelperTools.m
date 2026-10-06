@@ -2086,7 +2086,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                         continue;
                     }
                     //we always want to post sync errors if we are in the appex (because an incoming push means the server has
-                    //*possibly* queued some messages for us)
+                    //*possibly* queued some messages for us), but only if showSyncErrorNotificationForIncomingPush is configured to YES
                     //if we are in the main app we only want to post sync errors if we are in one of these states:
                     //1. we are NOT doing a full reconnect and the smacks queue does not contain some unacked message stanzas having a body
                     //--> (briefly) opening the app while not having an internet connection does not generate sync errors (if no
@@ -2094,7 +2094,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
                     //2. we are doing a full reconnect --> we always want to post sync erros because we have to rejoin mucs,
                     //set up push etc. and we *really* want to be sure all of these get a chance to complete
                     //NOTE: this conditions are all swapped and ANDed because we want to continue the loop here instead of posting a sync error
-                    if(![self isAppExtension] && !account.isDoingFullReconnect && ![account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas])
+                    if(!([self isAppExtension] && [[HelperTools defaultsDB] boolForKey:@"showSyncErrorNotificationForIncomingPush"]) && !account.isDoingFullReconnect && ![account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas])
                     {
                         DDLogWarn(@"NOT posting syncError notification for %@ (we are not in the appex, no important stanzas are unacked and we are not doing a full reconnect)...", account.connectionProperties.identity.jid);
                         DDLogDebug(@"[self isAppExtension] == %@, account.isDoingFullReconnect == %@, [account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas] == %@", bool2str([self isAppExtension]), bool2str(account.isDoingFullReconnect), bool2str([account shouldTriggerSyncErrorForImportantUnackedOutgoingStanzas]));

@@ -299,6 +299,7 @@ static NSMutableDictionary* _singletonCache;
 
 -(void) handleGlobalRefresh:(NSNotification*) notification
 {
+    DDLogDebug(@"Handling global refresh for MLMessage: %@", self);
     [MLMessage fillMessage:self fromDatabaseWithHistoryID:self.messageDBId];
     self.reactions = [[DataLayer sharedInstance] getReactionsForHistoryId:self.messageDBId];
 }

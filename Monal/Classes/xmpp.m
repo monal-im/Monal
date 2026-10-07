@@ -1051,7 +1051,10 @@ NSString* const kStanza = @"stanza";
             
             //clear all reconnection handlers
             @synchronized(self->_reconnectionHandlers) {
+                NSArray* handlers = [self->_reconnectionHandlers copy];
                 [self->_reconnectionHandlers removeAllObjects];
+                for(MLHandler* handler in handlers)
+                    $invalidate(handler, $ID(account, self));
             }
 
             //persist these changes
@@ -1174,7 +1177,10 @@ NSString* const kStanza = @"stanza";
                 
                 //clear all reconnection handlers
                 @synchronized(self->_reconnectionHandlers) {
+                    NSArray* handlers = [self->_reconnectionHandlers copy];
                     [self->_reconnectionHandlers removeAllObjects];
+                    for(MLHandler* handler in handlers)
+                        $invalidate(handler, $ID(account, self));
                 }
 
                 //persist these changes

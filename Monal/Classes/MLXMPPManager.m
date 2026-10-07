@@ -13,7 +13,9 @@
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/HelperTools.h>
 #import <monalxmpp/xmpp.h>
-#import "XMPPMessage.h"
+#import <monalxmpp/XMPPMessage.h>
+#import <monalxmpp/XMPPIQ.h>
+#import <monalxmpp/MLIQProcessor.h>
 #import <monalxmpp/MLNotificationQueue.h>
 #import "MLNotificationManager.h"
 #import <monalxmpp/MLOMEMO.h>
@@ -23,6 +25,8 @@
 @import MobileCoreServices;
 @import SAMKeychain;
 @import Intents;
+
+@class MLIQProcessor;
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
 #define FIRST_LOGIN_TIMEOUT 30.0
@@ -884,6 +888,22 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         return account.connectionProperties.identity.jid;
     return @"";
 }
+
+$$class_handler(retryPasswordChangeInvalidation, $$ID(xmpp*, account), $$ID(NSString*, uuid), $$PROMISE(promise))
+    NSString* jid = account.connectionProperties.identity.jid;
+    DDLogError(@"Could not change the password of '%@': logout was forced", jid);
+    [SAMKeychain deletePasswordForService:kMonalTmpKeychainName account:uuid];
+    NSString* errorMessage = [NSString stringWithFormat:NSLocalizedString(@"Could not change the password of '%@', the account was forced to log out.", @""), jid];
+    [promise reject:[HelperTools getNSErrorFrom:nil withDescription:errorMessage]];
+$$
+
+$$class_handler(retryPasswordChange, $$ID(xmpp*, account), $$ID(NSString*, uuid), $$PROMISE(promise))
+    NSString* newPass = [SAMKeychain passwordForService:kMonalTmpKeychainName account:uuid];
+    XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [iqNode setiqTo:account.connectionProperties.identity.domain];
+    [iqNode changePasswordForUser:account.connectionProperties.identity.user newPassword:newPass];
+    [account sendIq:iqNode withHandler:$newHandlerWithInvalidation(MLIQProcessor, handlePasswordChange, handlePasswordChangeInvalidation, $ID(uuid), $PROMISE(promise))];
+$$
 
 #pragma mark - contact
 

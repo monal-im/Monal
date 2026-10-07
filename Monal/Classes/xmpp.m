@@ -5249,10 +5249,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
 -(AnyPromise*) changePassword:(NSString*) newPass
 {
     MLPromise* promise = [MLPromise new];
-    XMPPIQ* iqNode = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [iqNode setiqTo:self.connectionProperties.identity.domain];
-    [iqNode changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
-
+    
     //temporarily store the new password in the keychain.
     //this way, we don't store the password in the db when serializing the handler
     NSString* uuid = [[NSUUID UUID] UUIDString];
@@ -5260,8 +5257,19 @@ static NSRegularExpression* fastTokenRemovalRegex;
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly];
         [SAMKeychain setPassword:newPass forService:kMonalTmpKeychainName account:uuid];
     }
-
-    [self sendIq:iqNode withHandler:$newHandlerWithInvalidation(MLIQProcessor, handlePasswordChange,handlePasswordChangeInvalidation, $ID(uuid), $PROMISE(promise))];
+    
+    //we have to login using scram/plain when currently authenticated using fast, because at least ejabberd doesn't allow password
+    //changes when we are not logged in using the old password and therefore proofed posession of it in this tcp connection
+    if(_fast_used)
+    {
+        DDLogWarn(@"FAST was used for login, reconnecting using SCRAM/PLAIN to make sure the server will accept our password change...");
+        [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
+        [self addReconnectionHandler:$newHandlerWithInvalidation(MLXMPPManager, retryPasswordChange, retryPasswordChangeInvalidation, $ID(uuid), $PROMISE(promise))];
+        [self reconnect];
+    }
+    else
+        $call($newHandler(MLIQProcessor, handlePasswordChange), $ID(account, self), $ID(uuid), $PROMISE(promise));
+    
     return [promise toAnyPromise];
 }
 

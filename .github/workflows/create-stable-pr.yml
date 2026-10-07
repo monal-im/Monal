@@ -11,14 +11,22 @@ jobs:
   create-pull-request:
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      contents: read
     steps:
+      # Act as our own GitHub App instead of github-actions[bot], so the PR events
+      # trigger test.yml and pr-semver-title.yml without needing manual approval
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
       - name: Checkout Beta Branch
         uses: actions/checkout@v6
         with:
           clean: true
           submodules: true
-          fetch-depth: 100
+          fetch-depth: 4096
           fetch-tags: true
           show-progress: true
           lfs: true
@@ -58,7 +66,7 @@ jobs:
         id: find_pr
         uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
             const { data: pullRequests } = await github.rest.pulls.list({
@@ -82,7 +90,7 @@ jobs:
           PR_TITLE: ${{ steps.get_commits.outputs.buildVersion }}
           PR_BODY: ${{ steps.get_commits.outputs.description }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
             const prNumber = process.env.PR_NUMBER;
@@ -128,7 +136,7 @@ jobs:
         env:
           PR_NUMBER: ${{ steps.create_or_update_pr.outputs.prNumber }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
             const pullNumber = process.env.PR_NUMBER;

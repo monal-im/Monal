@@ -471,7 +471,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
         NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-        if(filename)
+        if(filename && ![filename isEqualToString:kSystemSound])
         {
             content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
             DDLogDebug(@"Using user configured alert sound: %@", content.sound);
@@ -604,7 +604,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
     {
         NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-        if(filename)
+        if(filename && ![filename isEqualToString:kSystemSound])
         {
             content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
             DDLogDebug(@"Using user configured alert sound: %@", content.sound);
@@ -872,7 +872,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
         {
             NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-            if(filename)
+            if(filename && ![filename isEqualToString:kSystemSound])
             {
                 content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
                 DDLogDebug(@"Using user configured alert sound: %@", content.sound);

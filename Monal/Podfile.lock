@@ -1,6 +1,6 @@
 PODS:
   - ASN1Decoder (1.10.0)
-  - CropViewController (2.7.4)
+  - CropViewController (2.8.0)
   - DZNEmptyDataSet (1.8.1)
   - FLAnimatedImage (1.0.17)
   - KSCrash/Core (1.17.7):
@@ -42,38 +42,38 @@ PODS:
   - NotificationBannerSwift (3.2.1):
     - MarqueeLabel (~> 4.3.0)
     - SnapKit (~> 5.6.0)
-  - PromiseKit (8.1.2):
-    - PromiseKit/CorePromise (= 8.1.2)
-    - PromiseKit/Foundation (= 8.1.2)
-    - PromiseKit/UIKit (= 8.1.2)
-  - PromiseKit/CorePromise (8.1.2)
-  - PromiseKit/Foundation (8.1.2):
+  - PromiseKit (8.2.0):
+    - PromiseKit/CorePromise (= 8.2.0)
+    - PromiseKit/Foundation (= 8.2.0)
+    - PromiseKit/UIKit (= 8.2.0)
+  - PromiseKit/CorePromise (8.2.0)
+  - PromiseKit/Foundation (8.2.0):
     - PromiseKit/CorePromise
-  - PromiseKit/UIKit (8.1.2):
+  - PromiseKit/UIKit (8.2.0):
     - PromiseKit/CorePromise
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.20.0):
-    - SDWebImage/Core (= 5.20.0)
-  - SDWebImage/Core (5.20.0)
+  - SDWebImage (5.21.7):
+    - SDWebImage/Core (= 5.21.7)
+  - SDWebImage/Core (5.21.7)
   - SignalProtocolC (2.3.3)
   - SignalProtocolObjC (1.1.1):
     - SignalProtocolC (~> 2.3.3)
   - SnapKit (5.6.0)
-  - sqlite3/common (3.47.2)
-  - sqlite3/perf-threadsafe (3.47.2):
+  - sqlite3/common (3.52.0)
+  - sqlite3/perf-threadsafe (3.52.0):
     - sqlite3/common
-  - WebRTC-lib (130.0.0)
+  - WebRTC-lib (150.0.0)
 
 DEPENDENCIES:
   - ASN1Decoder
-  - CropViewController
+  - CropViewController (~> 2.0)
   - DZNEmptyDataSet
   - FLAnimatedImage (~> 1.0)
-  - KSCrash/Core
-  - KSCrash/Recording
-  - KSCrash/Reporting/Filters/Sets
-  - KSCrash/Reporting/Filters/Tools
-  - KSCrash/Reporting/Tools
+  - KSCrash/Core (~> 1.0)
+  - KSCrash/Recording (~> 1.0)
+  - KSCrash/Reporting/Filters/Sets (~> 1.0)
+  - KSCrash/Reporting/Filters/Tools (~> 1.0)
+  - KSCrash/Reporting/Tools (~> 1.0)
   - MBProgressHUD (~> 1.2.0)
   - NotificationBannerSwift (~> 3.2.0)
   - PromiseKit
@@ -82,7 +82,7 @@ DEPENDENCIES:
   - SignalProtocolC (from `https://github.com/monal-im/libsignal-protocol-c`, branch `master`)
   - SignalProtocolObjC (from `https://github.com/monal-im/SignalProtocol-ObjC.git`, branch `master`)
   - sqlite3/perf-threadsafe
-  - WebRTC-lib
+  - WebRTC-lib (~> 150.0)
 
 SPEC REPOS:
   trunk:
@@ -111,30 +111,30 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   SignalProtocolC:
-    :commit: 560504888d9c0ba4be860275d206dcef07e0761e
+    :commit: 0020d1c1c6e7cc0ab09fed5ad1bebf17145eeb87
     :git: https://github.com/monal-im/libsignal-protocol-c
   SignalProtocolObjC:
-    :commit: e153e868c6737881a196da17612367ab9ecaae13
+    :commit: 21f107c59d7cc43cd0da9ae6c1a3b175cb475672
     :git: https://github.com/monal-im/SignalProtocol-ObjC.git
 
 SPEC CHECKSUMS:
   ASN1Decoder: 91cb1d781b5a178ea7375b2f1519e2bdaaa4c427
-  CropViewController: 3489bbf95a3e11c654382b0bae08ac645cdf1b93
+  CropViewController: 29befa222e239d392d7f0ed00f324102c8bef5c9
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
   KSCrash: ea6fc545b7dbb916a141aaadd4343fb891141290
   MarqueeLabel: 15e524a6762552bb279cb17438b8a94990269fb9
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: dce54ded532b26e30cd8e7f4d80e124a0f2ba7d1
-  PromiseKit: e057b5b3c0ce9a0145674d633930924234104ee3
+  PromiseKit: 74e6ab5894856b4762fef547055c809bca91d440
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
+  SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SignalProtocolC: 8092866e45b663a6bc3e45a8d13bad2571dbf236
   SignalProtocolObjC: 1beb46b1d35733e7ab96a919f88bac20ec771c73
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  sqlite3: 7559e33dae4c78538df563795af3a86fc887ee71
-  WebRTC-lib: 73de4fee6337c39be0ab9ddd516dc64bb73cefc5
+  sqlite3: a51c07cf16e023d6c48abd5e5791a61a47354921
+  WebRTC-lib: 28076a749ad01008202ea2757a7349375454198b
 
-PODFILE CHECKSUM: e66b7bd410467c69adaa2ca9b0fca4fb025d8aa4
+PODFILE CHECKSUM: e4dedd7e642b736a54af6ad970c90a4b5ceed0bd
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.17.0

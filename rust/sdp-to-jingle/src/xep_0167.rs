@@ -87,6 +87,8 @@ pub enum JingleRtpSessionMedia {
     Audio,
     Application,
     Video,
+    #[serde(untagged)]
+    Other(String),
 }
 
 impl JingleRtpSessionMedia {
@@ -95,6 +97,7 @@ impl JingleRtpSessionMedia {
             SdpMediaValue::Audio => JingleRtpSessionMedia::Audio,
             SdpMediaValue::Application => JingleRtpSessionMedia::Application,
             SdpMediaValue::Video => JingleRtpSessionMedia::Video,
+            SdpMediaValue::Unknown(media_type) => JingleRtpSessionMedia::Other(media_type.to_string()),
         }
     }
 
@@ -103,6 +106,7 @@ impl JingleRtpSessionMedia {
             JingleRtpSessionMedia::Audio => SdpMediaValue::Audio,
             JingleRtpSessionMedia::Application => SdpMediaValue::Application,
             JingleRtpSessionMedia::Video => SdpMediaValue::Video,
+            JingleRtpSessionMedia::Other(media_type) => SdpMediaValue::Unknown(media_type.to_string()),
         }
     }
 }
@@ -916,7 +920,9 @@ impl JingleRtpSessions {
                                                 match &param {
                                                     JingleRtpSessionsPayloadTypeValue::Parameter(_) => (), // will be handled by to_sdp_fmtp() below
                                                     JingleRtpSessionsPayloadTypeValue::RtcpFb(fb) => {
-                                                        media.add_attribute(SdpAttribute::Rtcpfb(fb.to_sdp(SdpAttributePayloadType::PayloadType(payload_type.id()))))?;
+                                                        if let Some(sdp) = fb.to_sdp(SdpAttributePayloadType::PayloadType(payload_type.id())) {
+                                                            media.add_attribute(SdpAttribute::Rtcpfb(sdp))?;
+                                                        }
                                                     },
                                                     JingleRtpSessionsPayloadTypeValue::RtcpFbTrrInt(trr_int) => {
                                                         media.add_attribute(SdpAttribute::Rtcpfb(trr_int.to_sdp(SdpAttributePayloadType::PayloadType(payload_type.id()))))?;
@@ -939,9 +945,10 @@ impl JingleRtpSessions {
                                             media.add_attribute(SdpAttribute::RtcpMux)
                                         }
                                         JingleRtpSessionsValue::RtcpFb(fb) => {
-                                            media.add_attribute(SdpAttribute::Rtcpfb(
-                                                fb.to_sdp(SdpAttributePayloadType::Wildcard),
-                                            ))
+                                            match fb.to_sdp(SdpAttributePayloadType::Wildcard) {
+                                                Some(sdp) => media.add_attribute(SdpAttribute::Rtcpfb(sdp)),
+                                                None => Ok(()),
+                                            }
                                         }
                                         JingleRtpSessionsValue::RtcpFbTrrInt(trr_int) => media
                                             .add_attribute(SdpAttribute::Rtcpfb(

@@ -509,7 +509,7 @@
         [[MLXMLNode alloc] initWithElement:@"reason" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{}  andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"expired"]
         ] andData:nil],
-        [[MLXMLNode alloc] initWithElement:@"migrated" andNamespace:@"urn:xmpp:jingle:1" withAttributes:@{
+        [[MLXMLNode alloc] initWithElement:@"migrated" andNamespace:@"urn:xmpp:jingle-message:0" withAttributes:@{
             @"to": otherCall.jmiid,
         }  andChildren:@[] andData:nil]
     ] andData:nil]];
@@ -644,7 +644,7 @@
                 }
                 else if(self.finishReason == MLCallFinishReasonError)
                 {
-                    [self sendJmiFinishWithReason:@"application-error"];
+                    [self sendJmiFinishWithReason:@"failed-application"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else
@@ -673,7 +673,7 @@
                 }
                 else if(self.finishReason == MLCallFinishReasonError)
                 {
-                    [self sendJmiFinishWithReason:@"application-error"];
+                    [self sendJmiFinishWithReason:@"failed-application"];
                     [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                 }
                 else
@@ -702,7 +702,7 @@
                     }
                     else if(self.finishReason == MLCallFinishReasonError)
                     {
-                        [self sendJmiFinishWithReason:@"application-error"];
+                        [self sendJmiFinishWithReason:@"failed-application"];
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     }
                     else
@@ -731,7 +731,7 @@
                     }
                     else if(self.finishReason == MLCallFinishReasonError)
                     {
-                        [self sendJmiFinishWithReason:@"application-error"];
+                        [self sendJmiFinishWithReason:@"failed-application"];
                         [self.voipProcessor.cxProvider reportCallWithUUID:self.uuid endedAtDate:nil reason:CXCallEndedReasonFailed];
                     }
                     else

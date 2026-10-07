@@ -63,7 +63,7 @@ func showPromisingLoadingOverlay<T1:View, T2:View>(_ overlay: LoadingOverlayStat
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.250) {
             overlay.objectWillChange.send()
         }
-    })).toGuarantee()
+    })).toTypedGuarantee()
 }
 
 func showPromisingLoadingOverlay<T:StringProtocol>(_ overlay: LoadingOverlayState, headline: T, description: T = "") -> Guarantee<Void> {

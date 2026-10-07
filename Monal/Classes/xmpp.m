@@ -3080,6 +3080,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 return;
             }
             
+            //we only support XEP-480 upgrade tasks which MUST be serialized (e.g. only one task at a time)
             if(tasks.count != 1)
             {
                 [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"We don't support any task requested by the server, account disabled: %@", @""), tasks] withNode:nil andAccount:self andIsSevere:YES andDisableAccount:YES];

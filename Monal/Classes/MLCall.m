@@ -1538,6 +1538,18 @@
         return;
     }
     
+    //check if we or the remote party aleady accepted the call, incoming sdp without an accepted call would provoke an IP leak
+    if(self.jmiProceed == nil)
+    {
+        DDLogWarn(@"Got new remote sdp but the call wasn't yet accepted! IP leak provocation??");
+        XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+        [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+        ] andData:nil]];
+        [self.account send:errorIq];
+        return;
+    }
+    
     NSString* rawSDP;
     NSString* type;
     if([iqNode check:@"{urn:xmpp:jingle:1}jingle<action~^session-(initiate|accept)$>"])

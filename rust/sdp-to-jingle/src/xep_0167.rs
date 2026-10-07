@@ -296,7 +296,8 @@ impl JingleRtpSessionsPayloadType {
                             "true" => value.clone_from(&"true".to_string()),
                             "1" => value.clone_from(&"true".to_string()),
                             _ => {
-                                panic!("unallowed truth value: {}", value)
+                                /* leave value unchanged; the parse below rejects it gracefully */
+                                eprintln!("unallowed truth value: {}", value)
                             }
                         };
                     }

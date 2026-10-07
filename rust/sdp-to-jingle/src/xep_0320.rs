@@ -43,17 +43,16 @@ impl JingleTranportFingerprint {
         // let hash_algorithm = SdpAttributeFingerprintHashType::try_from_name(self.hash.as_str())?;
         // let bytes = hash_algorithm.parse_octets(self.fingerprint.as_str())?;
         // SdpAttributeFingerprint::try_from((hash_algorithm, bytes))
-        Ok(SdpAttributeFingerprint {
-            fingerprint: self
-                .fingerprint
-                .split(':')
-                .collect::<Vec<&str>>()
-                .iter()
-                .map(|hex| u8::from_str_radix(hex, 16))
-                .collect::<Result<Vec<u8>, _>>()
-                .unwrap(),
-            hash_algorithm: SdpAttributeFingerprintHashType::try_from_name(self.hash.as_str())?,
-        })
+        let hash_algorithm = SdpAttributeFingerprintHashType::try_from_name(self.hash.as_str())?;
+        let fingerprint = self
+            .fingerprint
+            .split(':')
+            .collect::<Vec<&str>>()
+            .iter()
+            .map(|hex| u8::from_str_radix(hex, 16))
+            .collect::<Result<Vec<u8>, _>>()
+            .map_err(|_| SdpParserInternalError::Generic("invalid hex in DTLS fingerprint".into()))?;
+        Ok(SdpAttributeFingerprint { fingerprint, hash_algorithm })
     }
 
     pub fn set_setup(&mut self, sdp: &SdpAttributeSetup) {

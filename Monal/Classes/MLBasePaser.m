@@ -50,29 +50,35 @@
 
 -(void) parserDidStartElement:(NSString*) elementName namespaceURI:(NSString*) namespaceURI attributes:(NSDictionary*) attributeDict
 {
+    MLXMLNode* newNode = nil;
     NSInteger depth = [_currentStack count] + 1;        //this makes the depth in here equal to the depth in didEndElement:
     DebugParser(@"Started element: %@ :: %@ depth %ld", elementName, namespaceURI, depth);
-    
-    //use appropriate MLXMLNode child classes for iq, message and presence stanzas
-    MLXMLNode* newNode;
-    if(depth == 2 && [elementName isEqualToString:@"iq"] && [namespaceURI isEqualToString:@"jabber:client"])
-        newNode = [XMPPIQ alloc];
-    else if(depth == 2 && [elementName isEqualToString:@"message"] && [namespaceURI isEqualToString:@"jabber:client"])
-        newNode = [XMPPMessage alloc];
-    else if(depth == 2 && [elementName isEqualToString:@"presence"] && [namespaceURI isEqualToString:@"jabber:client"])
-        newNode = [XMPPPresence alloc];
-    else if(depth >= 3 && [elementName isEqualToString:@"x"] && [namespaceURI isEqualToString:@"jabber:x:data"])
-        newNode = [XMPPDataForm alloc];
-    else
-        newNode = [MLXMLNode alloc];
-    newNode = [newNode initWithElement:elementName andNamespace:namespaceURI withAttributes:attributeDict andChildren:@[] andData:nil];
-    
     DebugParser(@"Current stack: %@", _currentStack);
-    DebugParser(@"New node: %@", newNode);
-    //add new node to tree (each node needs a prototype MLXMLNode element and a mutable string to hold its future
-    //char data added to the MLXMLNode when the xml element is closed
-    newNode.parent = [_currentStack lastObject][@"node"];
-    [_currentStack addObject:@{@"node": newNode, @"charData": [NSMutableString new]}];
+    
+    //make sure this doesn't construct a DOS via deep nesting elements
+    if(depth <= 64)
+    {
+        //use appropriate MLXMLNode child classes for iq, message and presence stanzas
+        if(depth == 2 && [elementName isEqualToString:@"iq"] && [namespaceURI isEqualToString:@"jabber:client"])
+            newNode = [XMPPIQ alloc];
+        else if(depth == 2 && [elementName isEqualToString:@"message"] && [namespaceURI isEqualToString:@"jabber:client"])
+            newNode = [XMPPMessage alloc];
+        else if(depth == 2 && [elementName isEqualToString:@"presence"] && [namespaceURI isEqualToString:@"jabber:client"])
+            newNode = [XMPPPresence alloc];
+        else if(depth >= 3 && [elementName isEqualToString:@"x"] && [namespaceURI isEqualToString:@"jabber:x:data"])
+            newNode = [XMPPDataForm alloc];
+        else
+            newNode = [MLXMLNode alloc];
+        newNode = [newNode initWithElement:elementName andNamespace:namespaceURI withAttributes:attributeDict andChildren:@[] andData:nil];
+    
+        DebugParser(@"New node: %@", newNode);
+        //add new node to tree (each node needs a prototype MLXMLNode element and a mutable string to hold its future
+        //char data added to the MLXMLNode when the xml element is closed
+        newNode.parent = [_currentStack lastObject][@"node"];
+    }
+    else
+        DDLogWarn(@"Deep nesting detected, ignoring '{%@}%@' node at nesting level %ld > 64!", namespaceURI, elementName, depth);
+    [_currentStack addObject:@{@"node": nilWrapper(newNode), @"charData": [NSMutableString new]}];
     DebugParser(@"New stack: %@", _currentStack);
 }
 
@@ -95,12 +101,19 @@
 {
     NSInteger depth = [_currentStack count];
     NSDictionary* topmostStackElement = [_currentStack lastObject];
-    MLXMLNode* currentNode = ((MLXMLNode*)topmostStackElement[@"node"]);
+    [_currentStack removeLastObject];
+    MLXMLNode* currentNode = ((MLXMLNode*)nilExtractor(topmostStackElement[@"node"]));
+    
+    DebugParser(@"Ended element: %@ depth %ld", currentNode.element, depth);
+    
+    if(currentNode == nil)
+    {
+        DDLogWarn(@"Ignoring deeply nested element on element close at depth %ld...", depth);
+        return;
+    }
     
     if([topmostStackElement[@"charData"] length])
         currentNode.data = [topmostStackElement[@"charData"] copy];
-    
-    DebugParser(@"Ended element: %@ depth %ld", currentNode.element, depth);
     
     MLXMLNode* parent = currentNode.parent;
     if(parent)
@@ -112,7 +125,6 @@
             [parent addChildNodeWithoutCopy:currentNode];
         }
     }
-    [_currentStack removeLastObject];
     
     //only call completion for stanzas, not for inner elements inside stanzas and not for our outermost stream start element
     if(depth == 2)

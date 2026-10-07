@@ -453,7 +453,14 @@ static NSMutableDictionary* _typingNotifications;
                 DDLogInfo(@"Ignoring encrypted mam history message without fallback body");
         }
         else
+        {
             decrypted = [account.omemo decryptMessage:messageNode withMucParticipantJid:participantJid];
+            if(decrypted == nil)
+            {
+                DDLogInfo(@"Ignoring OMEMO message indicated as 'throwaway' by MLOMEMO...");
+                return nil;
+            }
+        }
         
         DDLogVerbose(@"Decrypted: %@", decrypted);
     }

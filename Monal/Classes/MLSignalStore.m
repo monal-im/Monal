@@ -485,6 +485,9 @@
     //we already fixed this behavior by explicitly checking the deviceids for sending/receiving in MLOMEMO,
     //but still call acceptedTrustLevel: here, too, for good measures
     int trustLevel = [self getTrustLevel:address identityKey:identityKey].intValue;
+    NSData* storedIdentity = [self getIdentityForAddress:address];
+    if(storedIdentity != nil && ![storedIdentity isEqual:identityKey])
+        trustLevel = 0;     //never trust an unknown identityKey if we already know this deviceid (new devices will differ in both)
     return [[self class] acceptedTrustLevel:trustLevel withTofu:YES andOutgoing:YES];
 }
 
@@ -617,6 +620,12 @@
 {
     return [self.sqliteDatabase idReadTransaction:^{
         DDLogVerbose(@"Getting trust level for: accountID=%@, deviceId=%@, name=%@, identityKey=%@", self.accountID, @(address.deviceId), address.name, identityKey);
+        
+        //check for identity key changes for known deviceids and reject these (legitimate new devices will always differ in both)
+        NSData* storedIdentity = [self getIdentityForAddress:address];
+        if(storedIdentity != nil && ![storedIdentity isEqual:identityKey])
+            return (id)@(MLOmemoNotTrusted);
+        
         return [self.sqliteDatabase executeScalar:(@"SELECT \
                 CASE \
                     WHEN (trustLevel=0) THEN 0 \
@@ -630,8 +639,8 @@
                     ELSE 0 \
                 END \
                 FROM signalContactIdentity \
-                WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?; \
-                ") andArguments:@[self.accountID, @(address.deviceId), address.name, identityKey]];
+                WHERE account_id=? AND contactDeviceId=? AND contactName=?; \
+                ") andArguments:@[self.accountID, @(address.deviceId), address.name]];
     }];
 }
 

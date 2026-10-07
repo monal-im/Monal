@@ -142,6 +142,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     monal_void_block_t _blockToCallOnTCPOpen;
     NSString* _upgradeTask;
     NSString* _fastTokenRequested;
+    BOOL _fast_used;
     
     //catchup statistics
     uint32_t _catchupStanzaCounter;
@@ -1006,6 +1007,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         self->_htHandler = nil;
         self->_fastTokenRequested = nil;
         self->_blockToCallOnTCPOpen = nil;
+        self->_fast_used = NO;
         
         //(re)read persisted state and start connection
         [self readState];
@@ -1123,6 +1125,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
         self->_htHandler = nil;
         self->_fastTokenRequested = nil;
         self->_blockToCallOnTCPOpen = nil;
+        self->_fast_used = NO;
         
         if(self->_accountState<kStateReconnecting)
         {
@@ -2835,6 +2838,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 self->_htHandler = nil;
                 self->_fastTokenRequested = nil;
                 self->_blockToCallOnTCPOpen = nil;
+                self->_fast_used = NO;
                 
                 DDLogWarn(@"Reconnecting to flush pipeline...");
                 [self reconnect];
@@ -2881,6 +2885,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 self->_htHandler = nil;
                 self->_fastTokenRequested = nil;
                 self->_blockToCallOnTCPOpen = nil;
+                self->_fast_used = NO;
             }
         }
         else if([parsedStanza check:@"/{urn:xmpp:sasl:2}success"])
@@ -2894,6 +2899,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
             //check FAST responder-message or SCRAM server-final message for correctness if needed
             if(!self->_htHandler.finishedSuccessfully && !self->_scramHandler.finishedSuccessfully)
                 [self handleSasl2SuccessOrContinue:parsedStanza];
+            
+            //needed for password reset (which is only allowed when logging in with scram/plain, not when using fast)
+            _fast_used = self->_htHandler != nil && self->_htHandler.finishedSuccessfully;
             
             //build mechanism list displayed in ui (mark _scramHandler.method as used)
             NSMutableDictionary* mechanismList = [NSMutableDictionary new];
@@ -3061,6 +3069,9 @@ static NSRegularExpression* fastTokenRemovalRegex;
             //check FAST responder-message or SCRAM server-final message for correctness if needed
             if(!self->_htHandler.finishedSuccessfully && !self->_scramHandler.finishedSuccessfully)
                 [self handleSasl2SuccessOrContinue:parsedStanza];
+            
+            //needed for password reset (which is only allowed when logging in with scram/plain, not when using fast)
+            _fast_used = self->_htHandler != nil && self->_htHandler.finishedSuccessfully;
             
             NSArray* tasks = [parsedStanza find:@"tasks/task#"];
             if(tasks.count == 0)

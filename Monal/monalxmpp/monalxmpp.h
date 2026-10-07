@@ -14,32 +14,31 @@ FOUNDATION_EXPORT double monalxmppVersionNumber;
 //! Project version string for monalxmpp.
 FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 
+#import <monalxmpp/MLSQLite.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLSignalStore.h>
 #import <monalxmpp/MLContact.h>
 #import <monalxmpp/MLChannelContact.h>
 #import <monalxmpp/MLMessage.h>
 #import <monalxmpp/MLReactionsEntry.h>
-#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLFiletransferInfo.h>
 #import <monalxmpp/xmpp.h>
 #import <monalxmpp/MLOMEMO.h>
-#import <monalxmpp/MLSignalStore.h>
 #import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/MLImageManager.h>
 #import <monalxmpp/MLMucProcessor.h>
-#import <monalxmpp/MLVoIPProcessor.h>
 #import <monalxmpp/MLCall.h>
+#import <monalxmpp/SCRAM.h>
+#import <monalxmpp/HT.h>
 #import <monalxmpp/HelperTools.h>
 #import <monalxmpp/MLDelayableTimer.h>
+#import <monalxmpp/MLDelayedDealloc.h>
 #import <monalxmpp/IPC.h>
 #import <monalxmpp/MLFiletransfer.h>
-#import <monalxmpp/MLFiletransferInfo.h>
 #import <monalxmpp/MLProcessLock.h>
 #import <monalxmpp/MLNotificationQueue.h>
 #import <monalxmpp/UIColor+Extension.h>
 #import <monalxmpp/MLUDPLogger.h>
-#import <monalxmpp/XMPPDataForm.h>
-#import <monalxmpp/MLBasePaser.h>
-#import <monalxmpp/SCRAM.h>
-#import <monalxmpp/HT.h>
-#import <monalxmpp/MLMucProcessor.h>
 #import <monalxmpp/MLNotificationManager.h>
-
+#import <monalxmpp/MLVoIPProcessor.h>
+#import <monalxmpp/MLBasePaser.h>

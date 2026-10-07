@@ -93,7 +93,6 @@
 		3424B4EA2D232BF5009F6503 /* MLSignalStore.h in Headers */ = {isa = PBXBuildFile; fileRef = 263AFDFA209B3B35007F9CEE /* MLSignalStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4EB2D232BFA009F6503 /* MLXMPPManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 26352EA6177D222600E2C8FF /* MLXMPPManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4EC2D232BFF009F6503 /* MLImageManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 26EC411117BDE39E0031304D /* MLImageManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		3424B4ED2D232C07009F6503 /* MLVoIPProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 849A53E5287135D7007E941A /* MLVoIPProcessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4EE2D232C0F009F6503 /* MLCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 848717F2295ED64500B8D288 /* MLCall.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3424B4EF2D232C14009F6503 /* HelperTools.h in Headers */ = {isa = PBXBuildFile; fileRef = C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3434775E302FC074001FCAE3 /* ASN1Decoder in Frameworks */ = {isa = PBXBuildFile; productRef = 3434775D302FC074001FCAE3 /* ASN1Decoder */; };
@@ -111,7 +110,6 @@
 		34F978CF303B90CB002029CF /* CSQLite+MonalTraits in Frameworks */ = {isa = PBXBuildFile; productRef = 34F978CE303B90CB002029CF /* CSQLite+MonalTraits */; };
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
-		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
 		3D06A515281FFCC000DDAE90 /* NotificationDebugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D06A514281FFCC000DDAE90 /* NotificationDebugging.swift */; };
 		3D27D956290B0BB60014748B /* AddContactMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D955290B0BB60014748B /* AddContactMenu.swift */; };
 		3D27D958290B0BC80014748B /* ContactRequestsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */; };
@@ -132,16 +130,16 @@
 		54179CC0251CBAFA008F398E /* XMPPStanza.m in Sources */ = {isa = PBXBuildFile; fileRef = 54179CBF251CBAF9008F398E /* XMPPStanza.m */; };
 		54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */ = {isa = PBXBuildFile; fileRef = 54179CC2251CBB2B008F398E /* XMPPStanza.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		541B6AB4262BC9040038B936 /* MLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 541B6AB2262BC9040038B936 /* MLStream.m */; };
-		541B6AB5262BC9040038B936 /* MLStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 541B6AB3262BC9040038B936 /* MLStream.h */; };
-		541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CBB254AA08600FD7B28 /* MLSQLite.h */; };
+		541B6AB5262BC9040038B936 /* MLStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 541B6AB3262BC9040038B936 /* MLStream.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CBB254AA08600FD7B28 /* MLSQLite.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CBD254AA0B600FD7B28 /* MLHandler.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CBF254AA0E700FD7B28 /* MLHandler.m */; };
-		541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */; };
+		541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		541E4CC7254D370200FD7B28 /* MLPubSubProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */; };
 		5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */ = {isa = PBXBuildFile; fileRef = 54391BB9273499E80050DAFB /* UIColor+Extension.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5427C94E276A6BE1003217D5 /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		542CF3FF2763314F002C3710 /* hsluv.c in Sources */ = {isa = PBXBuildFile; fileRef = 542CF3FD2763314E002C3710 /* hsluv.c */; };
-		542CF4002763314F002C3710 /* hsluv.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF3FE2763314F002C3710 /* hsluv.h */; };
+		542CF4002763314F002C3710 /* hsluv.h in Headers */ = {isa = PBXBuildFile; fileRef = 542CF3FE2763314F002C3710 /* hsluv.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 54391BBA273499E80050DAFB /* UIColor+Extension.m */; };
 		544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 544656BA2534910D006B2953 /* XMPPDataForm.m */; };
 		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -167,6 +165,13 @@
 		841EE4302A426F2300D3AF14 /* MLCrashReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = 841EE42F2A426F2300D3AF14 /* MLCrashReporter.m */; };
 		8420EA9B2915E4FE0038FF40 /* OmemoState.h in Headers */ = {isa = PBXBuildFile; fileRef = 8420EA9A2915E4FE0038FF40 /* OmemoState.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */ = {isa = PBXBuildFile; fileRef = 8420EA9C2915E5100038FF40 /* OmemoState.m */; };
+		8426B09630762D0E004801F5 /* MLIQProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 2661101A238F10360030A4EE /* MLIQProcessor.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		8426B09730762D5D004801F5 /* MLMessageProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 2633CB41231CB816006D0277 /* MLMessageProcessor.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		8426B09830762D85004801F5 /* MLPresenceProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 2661101F238F104B0030A4EE /* MLPresenceProcessor.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		8426B09A30762DE7004801F5 /* AESGcm.h in Headers */ = {isa = PBXBuildFile; fileRef = 267B671A226A200D003DB850 /* AESGcm.h */; };
+		8426B09B30762DF0004801F5 /* MLEncryptedPayload.h in Headers */ = {isa = PBXBuildFile; fileRef = 267B671F226A222E003DB850 /* MLEncryptedPayload.h */; };
+		8426B09C30762E9F004801F5 /* MLDNSLookup.h in Headers */ = {isa = PBXBuildFile; fileRef = 26C4B22221B6B91300610282 /* MLDNSLookup.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		8426B09D30762F18004801F5 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
 		842790852A32D16D005C18CC /* CallSounds in Resources */ = {isa = PBXBuildFile; fileRef = 842790842A32D16C005C18CC /* CallSounds */; };
 		843AD3AB2AA55CE20036844D /* MLOgHtmlParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */; };
 		843DC1B22C8E51E3002724FE /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 843DC1B12C8E51E3002724FE /* ExyteChat */; };
@@ -197,13 +202,14 @@
 		84AF79C42DF3C0A900FE3818 /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF79C32DF3C0A900FE3818 /* TOCropViewController */; };
 		84C1CD502A8C764D007076ED /* SwiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */; };
 		84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C1CD512A8F617F007076ED /* MLStreamRedirect.m */; };
-		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; };
+		84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84C1CD532A8F6196007076ED /* MLStreamRedirect.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		84C6F6032D597FB20015575E /* ParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C6F6022D597FB20015575E /* ParserTest.m */; };
 		84C6F6052D597FD10015575E /* SDPTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C6F6042D597FD10015575E /* SDPTest.m */; };
 		84C6F6072D597FF40015575E /* HandlerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C6F6062D597FF40015575E /* HandlerTest.m */; };
 		84CAED6D2ECAC5E500F4FCBF /* XMPPIQ.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CF3EA81780D6B7002B7085 /* XMPPIQ.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84CAED6E2ECAC5F700F4FCBF /* XMPPMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 262D9EA817921E82009292B4 /* XMPPMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D31CE528653B83006D7926 /* WebRTCClient.swift */; };
+		84D452FD3076335400CC5F91 /* MLVoIPProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 849A53E5287135D7007E941A /* MLVoIPProcessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84DED8562EE0774700401D3A /* MLChannelContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 84DED8552EE0774600401D3A /* MLChannelContact.m */; };
 		84DED8582EE0776400401D3A /* MLChannelContact.h in Headers */ = {isa = PBXBuildFile; fileRef = 84DED8572EE0776400401D3A /* MLChannelContact.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84DED85A2EE0795200401D3A /* MLContactProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 84DED8592EE0795200401D3A /* MLContactProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -214,7 +220,7 @@
 		84E8870D2EEADD34006A61FC /* HT.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E8870A2EEADD34006A61FC /* HT.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84E8870E2EEADD8F006A61FC /* SCRAM.h in Headers */ = {isa = PBXBuildFile; fileRef = 848904AA289C82DB0097E19C /* SCRAM.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84EC7FBD2F5A9458008ACC3F /* MLDelayedDealloc.m in Sources */ = {isa = PBXBuildFile; fileRef = 84EC7FBC2F5A9458008ACC3F /* MLDelayedDealloc.m */; };
-		84EC7FBE2F5A9458008ACC3F /* MLDelayedDealloc.h in Headers */ = {isa = PBXBuildFile; fileRef = 84EC7FBB2F5A9458008ACC3F /* MLDelayedDealloc.h */; };
+		84EC7FBE2F5A9458008ACC3F /* MLDelayedDealloc.h in Headers */ = {isa = PBXBuildFile; fileRef = 84EC7FBB2F5A9458008ACC3F /* MLDelayedDealloc.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84F194D12C15197200F0A994 /* FrameUp in Frameworks */ = {isa = PBXBuildFile; productRef = 84F194D02C15197200F0A994 /* FrameUp */; };
 		84F632E52F7F3EA300A59209 /* BitCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 84F632E42F7F3EA300A59209 /* BitCollections */; };
 		84F632E72F7F3EA300A59209 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 84F632E62F7F3EA300A59209 /* Collections */; };
@@ -1377,7 +1383,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA = {
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
 				8414ADF92A7ABAC900EFFCCC /* Packages */,
@@ -1597,6 +1603,7 @@
 				84E5AF1B2EE63FCF00FF1E4A /* MLReactionsEntry.h in Headers */,
 				340F0CA52D2425E1006224D0 /* MLLogFileManager.h in Headers */,
 				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
+				84D452FD3076335400CC5F91 /* MLVoIPProcessor.h in Headers */,
 				340F0CA42D2425D9006224D0 /* MLXMPPIdentity.h in Headers */,
 				340F0CA32D2425D2006224D0 /* MLXMPPServer.h in Headers */,
 				54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */,
@@ -1605,28 +1612,33 @@
 				84FC37572897523500634E3E /* metamacros.h in Headers */,
 				84E8870E2EEADD8F006A61FC /* SCRAM.h in Headers */,
 				340F0CA02D2425A4006224D0 /* MLMessage.h in Headers */,
+				8426B09B30762DF0004801F5 /* MLEncryptedPayload.h in Headers */,
 				340F0CA12D2425AA006224D0 /* MLXMPPConnection.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 				3424B4E92D232BEB009F6503 /* xmpp.h in Headers */,
 				3424B4E82D232BE7009F6503 /* DataLayer.h in Headers */,
 				3424B4E72D232BE2009F6503 /* MLContact.h in Headers */,
 				84DED85A2EE0795200401D3A /* MLContactProtocol.h in Headers */,
-				3424B4ED2D232C07009F6503 /* MLVoIPProcessor.h in Headers */,
 				3424B4EC2D232BFF009F6503 /* MLImageManager.h in Headers */,
 				3424B4EB2D232BFA009F6503 /* MLXMPPManager.h in Headers */,
 				84DED8582EE0776400401D3A /* MLChannelContact.h in Headers */,
+				8426B09830762D85004801F5 /* MLPresenceProcessor.h in Headers */,
 				3424B4EA2D232BF5009F6503 /* MLSignalStore.h in Headers */,
 				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
 				3424B4EF2D232C14009F6503 /* HelperTools.h in Headers */,
 				3424B4EE2D232C0F009F6503 /* MLCall.h in Headers */,
 				844921EC2C29F9BE00B99A9C /* MLDelayableTimer.h in Headers */,
+				8426B09630762D0E004801F5 /* MLIQProcessor.h in Headers */,
 				C16D18352792A4AF00F869A0 /* DataLayerMigrations.h in Headers */,
 				340F0CA62D24267B006224D0 /* MLXMLNode.h in Headers */,
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
 				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
+				8426B09C30762E9F004801F5 /* MLDNSLookup.h in Headers */,
+				8426B09D30762F18004801F5 /* MLAudioRecoderManager.h in Headers */,
 				84E8870D2EEADD34006A61FC /* HT.h in Headers */,
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
+				8426B09A30762DE7004801F5 /* AESGcm.h in Headers */,
 				849DFCFA2EEBC1ED008821AF /* MLNotificationManager.h in Headers */,
 				5427C94C276A6BC4003217D5 /* UIColor+Extension.h in Headers */,
 				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
@@ -1641,7 +1653,7 @@
 				541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */,
 				84C1CD542A8F6196007076ED /* MLStreamRedirect.h in Headers */,
 				84CAED6E2ECAC5F700F4FCBF /* XMPPMessage.h in Headers */,
-				389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */,
+				8426B09730762D5D004801F5 /* MLMessageProcessor.h in Headers */,
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1904,7 +1916,7 @@
 				te,
 				et,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			packageReferences = (
 				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
@@ -2037,9 +2049,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2098,9 +2114,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2156,9 +2176,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

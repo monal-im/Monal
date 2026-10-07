@@ -519,8 +519,9 @@ $$
             [self.monalSignalStore markDeviceAsDeleted:address];
             
             //only warn for deleted devices, if if was a non-tofu one (and trust could be read from db aka the identity was known)
-            //we ignore MLOmemoToFUButRemoved because its obviously already deleted
-            if(!(trust == -1 || trust == MLOmemoToFU || trust == MLOmemoToFUButNoMsgSeenInTime))
+            //we ignore MLOmemoTrustedButRemoved because it was obviously already deleted
+            //we ignore MLOmemoNotTrusted because it is obviously not trusted, so we aren't interested in its deletion either
+            if(trust == MLOmemoTrusted || trust == MLOmemoTrustedButNoMsgSeenInTime)
                 [self postOMEMOMessageForUser:source withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Device %@ is now inactive, because it is no longer advertised by your contact", @"OMEMO warning shown inside chat view"), deviceId]];
         }
     }
@@ -614,7 +615,7 @@ $$
         }
         int trust = [self.monalSignalStore getTrustLevel:address identityKey:identity].intValue;
         
-        //remove own old devices (these clients will add thei id back, if they are still active)
+        //remove own old devices (these clients will add their id back, if they are still active)
         //this is what conversations does, too
         if(trust == MLOmemoToFUButNoMsgSeenInTime || trust == MLOmemoTrustedButNoMsgSeenInTime)
         {
@@ -719,7 +720,7 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(uint32_t)rid.unsignedIntValue];
         NSData* oldIdentity = [self.monalSignalStore getIdentityForAddress:address];
 
-        //check that a corresponding buddy exists -> prevent foreign key errors
+        //check if the bundle conforms to the standard
         MLXMLNode* receivedKeys = data[@"current"];
         if(receivedKeys == nil && data.count == 1)
         {
@@ -728,16 +729,37 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
             receivedKeys = [[data allValues] firstObject];
         }
         else if(receivedKeys == nil && data.count > 1)
+        {
             DDLogWarn(@"More than one bundle item found from %@ rid: %@, ignoring all items!", jid, rid);
+            receivedKeys = nil;
+        }
+        NSArray* bundles = [receivedKeys find:@"{eu.siacs.conversations.axolotl}bundle"];
+        if(bundles == nil || [bundles count] != 1)
+        {
+            DDLogWarn(@"bundle count != 1, ignoring: %@", bundles);
+            receivedKeys = nil;
+        }
+        
+        //check if the identityKey has changed, but the deviceid remained the same --> likely an attack
+        if(receivedKeys)
+        {
+            NSData* newIdentity = [[bundles firstObject] findFirst:@"identityKey#|base64"];
+            if(oldIdentity != nil && ![oldIdentity isEqual:newIdentity])
+            {
+                DDLogWarn(@"Detected identity key change for already known deviceid, possible attack!");
+                [self postOMEMOMessageForUser:jid withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new identity key for already known device of %@ having id %@. New identity ignored because this likely is an attack!", @"OMEMO warning shown inside chat view"), jid, rid]];
+                receivedKeys = nil;     //make sure we don't try to import this
+            }
+        }
         
         if(receivedKeys)
         {
             [self processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
             
-            NSData* newIdentity = [self.monalSignalStore getIdentityForAddress:address];
-            if(newIdentity != nil && (oldIdentity == nil || ![oldIdentity isEqual:newIdentity]))
+            NSData* newStoredIdentity = [self.monalSignalStore getIdentityForAddress:address];
+            if(newStoredIdentity != nil && oldIdentity == nil)
             {
-                int trust = [self.monalSignalStore getTrustLevel:address identityKey:newIdentity].intValue;
+                int trust = [self.monalSignalStore getTrustLevel:address identityKey:newStoredIdentity].intValue;
                 
                 //don't show new omemo device status message if it is TofU
                 //(it won't be automatically tofu as soon as at least one device was manually verified,
@@ -755,9 +777,9 @@ $$instance_handler(handleBundleFetchResult, account.omemo, $$ID(xmpp*, account),
             {
                 //only show warning, if we don't already know this deviceid
                 //(e.g. a really new device, not a devicelist removal followed by adding it back)
-                if(newIdentity != nil && ((oldIdentity == nil || ![oldIdentity isEqual:newIdentity]) && [rid unsignedIntValue] != self.monalSignalStore.deviceid))
+                if(newStoredIdentity != nil && ((oldIdentity == nil || ![oldIdentity isEqual:newStoredIdentity]) && [rid unsignedIntValue] != self.monalSignalStore.deviceid))
                 {
-                    NSString* trustLevel = trustLevels2Text[[self.monalSignalStore getTrustLevel:address identityKey:newIdentity]];
+                    NSString* trustLevel = trustLevels2Text[[self.monalSignalStore getTrustLevel:address identityKey:newStoredIdentity]];
                     DDLogWarn(@"Got new %@ deviceid %@ for own account %@", trustLevel, rid, jid);
                     UNMutableNotificationContent* content = [UNMutableNotificationContent new];
                     content.title = NSLocalizedString(@"New omemo device", @"");;
@@ -869,9 +891,9 @@ $$
     SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
     NSMutableArray<NSNumber*>* preKeyIds = [[bundle find:@"prekeys/preKeyPublic@preKeyId|uint"] mutableCopy];
 
-    if(preKeyIds == nil || preKeyIds.count == 0)
+    if(preKeyIds == nil || [preKeyIds count] == 0)
     {
-        DDLogWarn(@"Could not create array of preKeyIds, ignoring %lu preKeyIds: %@", (unsigned long)preKeyIds.count, preKeyIds);
+        DDLogWarn(@"Could not create array of preKeyIds, ignoring %lu preKeyIds: %@", (unsigned long)[preKeyIds count], preKeyIds);
         return;
     }
     
@@ -1421,6 +1443,16 @@ $$
             if([@"org.whispersystems.SignalProtocol" isEqualToString:error.domain] && error.code == 3)
             {
                 DDLogDebug(@"Deduplicated %@ message via omemo...", isKeyTransportElement ? @"key transport" : @"normal");
+                return nil;
+            }
+            //don't report a generic signal error if this was a identity key attack
+            //the error "untrusted identity" can't normally happen, because our recipientDeviceMap will only contain trusted
+            //deviceids, and we fail early in this method if the sid is not included there
+            //--> if we still get a "untrusted identity" error even though the sid listed there, this is an attack via identity key change
+            if([@"org.whispersystems.SignalProtocol" isEqualToString:error.domain] && error.code == 12)
+            {
+                DDLogWarn(@"Detected identity key change for already known deviceid, possible attack!");
+                [self postOMEMOMessageForUser:(mucJid ?: senderJid) withMessage:[NSString stringWithFormat:NSLocalizedString(@"OMEMO: Detected new identity key for already known device of %@ having id %@. New identity ignored because this likely is an attack!", @"OMEMO warning shown inside chat view"), senderJid, sid]];
                 return nil;
             }
             [self rebuildSessionWithJid:senderJid forRid:sid];

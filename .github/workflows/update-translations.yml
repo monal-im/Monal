@@ -37,7 +37,10 @@ jobs:
       - name: Checkout submodules
         run: git submodule update -f --init --remote
       - name: Update translations
+        env:
+          arg2: ${{ github.event.inputs.arg2 }}
+          arg3: ${{ github.event.inputs.arg3 }}
         run: |
           chmod +x ./scripts/updateLocalization.sh
           chmod +x ./scripts/xliff_extractor.py
-          ./scripts/updateLocalization.sh BUILDSERVER "${{ github.event.inputs.arg2 }}" "${{ github.event.inputs.arg3 }}"
+          ./scripts/updateLocalization.sh BUILDSERVER "$arg2" "$arg3"

@@ -87,8 +87,8 @@
             return self;
         }
         // remove old keys that should no longer be available
-        [self cleanupKeys];
-        [self reloadCachedPrekeys];
+        [self cleanupPreKeys];
+        [self cleanupDeletedDevices];
     }
     else
         self.deviceid = 0;
@@ -96,18 +96,45 @@
     return self; 
 }
 
--(void) reloadCachedPrekeys
-{
-    self.preKeys = [self readPreKeys];
-}
-
--(void) cleanupKeys
+-(void) cleanupPreKeys
 {
     [self.sqliteDatabase voidWriteTransaction:^{
-        // remove old keys that have been remove a long time ago from pubsub
+        // remove old prekeys that have been removed some time ago from pubsub
         [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND unixepoch(pubSubRemovalTimestamp) <= unixepoch('now', '-14 day');" andArguments:@[self.accountID]];
-        // mark old unused keys to be removed from pubsub
-        [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND unixepoch(creationTimestamp) <= unixepoch('now','-14 day');" andArguments:@[self.accountID]];
+    }];
+}
+
+-(void) cleanupDeletedDevices
+{
+    [self.sqliteDatabase voidWriteTransaction:^{
+        DDLogVerbose(@"All removed devices: %@", [self.sqliteDatabase executeReader:@"SELECT * FROM signalContactIdentity WHERE account_id=? AND removedFromDeviceList IS NOT NULL;" andArguments:@[self.accountID]]);
+        // remove old devices and their sessions that have been removed some time ago from pubsub and never been added back
+        // this grace period of 28 days makes sure a device added  back to the devicelist when the deleted device comes online again
+        // does still work without a trust level and/or session reset
+        NSArray* devices = [self.sqliteDatabase executeReader:@"SELECT contactName, contactDeviceId, removedFromDeviceList FROM signalContactIdentity WHERE account_id=? AND removedFromDeviceList IS NOT NULL AND unixepoch(removedFromDeviceList) <= unixepoch('now', '-365 day');" andArguments:@[self.accountID]];
+        DDLogVerbose(@"Cleaning up devices: %@", devices);
+        for(NSDictionary* device in devices)
+            [self forceDeleteDeviceForSource:[[SignalAddress alloc] initWithName:device[@"contactName"] deviceId:[device[@"contactDeviceId"] unsignedIntValue]]];
+    }];
+}
+
+-(void) forceDeleteDeviceForSource:(SignalAddress*) address
+{
+    [self.sqliteDatabase voidWriteTransaction:^{
+        [self deleteSessionRecordForAddress:address];
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactName=? AND contactDeviceId=?;" andArguments:@[self.accountID, address.name, @(address.deviceId)]];
+    }];
+}
+
+-(void) immediateCleanupForJid:(NSString*) jid
+{
+    if(jid == nil)
+        return;
+    [self.sqliteDatabase voidWriteTransaction:^{
+        // remove sessions of jid
+        [self deleteAllSessionsForAddressName:jid];
+        // remove devices of jid
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactName=?;" andArguments:@[self.accountID, jid]];
     }];
 }
 
@@ -118,7 +145,7 @@
     }];
     
     NSMutableArray<SignalPreKey*>* array = [[NSMutableArray alloc] initWithCapacity:keys.count];
-    for (NSDictionary* row in keys)
+    for(NSDictionary* row in keys)
     {
         SignalPreKey* key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
         if(key != nil)
@@ -148,16 +175,13 @@
     return count.unsignedIntValue;
 }
 
--(void) saveValues
+-(void) saveValues:(NSArray<SignalPreKey*>*) preKeys
 {
     [self storeSignedPreKey:self.signedPreKey.serializedData signedPreKeyId:1];
     [self storeIdentityPublicKey:self.identityKeyPair.publicKey andPrivateKey:self.identityKeyPair.privateKey];
     
-    for (SignalPreKey *key in self.preKeys)
-    {
+    for(SignalPreKey* key in preKeys)
         [self storePreKey:key.serializedData preKeyId:key.preKeyId];
-    }
-    [self reloadCachedPrekeys];
 }
 
 /**
@@ -218,13 +242,13 @@
     }];
 }
 
--(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*) jid
+-(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*) jid withRemovedDevices:(BOOL) removed
 {
     if(!jid)
         return nil;
 
     return [self.sqliteDatabase idReadTransaction:^{
-        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND removedFromDeviceList IS NULL;" andArguments:@[self.accountID, jid]];
+        return [self.sqliteDatabase executeScalarReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND (removedFromDeviceList IS NULL OR ?=1);" andArguments:@[self.accountID, jid, @(removed)]];
     }];
 }
 
@@ -319,8 +343,7 @@
     DDLogDebug(@"Marking prekey %lu as deleted", (unsigned long)preKeyId);
     // only mark the key for deletion -> key should be removed from pubSub
     return [self.sqliteDatabase boolWriteTransaction:^{
-        BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP, keyUsed=1 WHERE account_id=? AND prekeyid=?;" andArguments:@[self.accountID, @(preKeyId)]];
-        [self reloadCachedPrekeys];
+        BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET keyUsed=1 WHERE account_id=? AND prekeyid=?;" andArguments:@[self.accountID, @(preKeyId)]];
         return ret;
     }];
 }
@@ -332,7 +355,6 @@
 {
     return [self.sqliteDatabase boolWriteTransaction:^{
         BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=1 AND pubSubRemovalTimestamp IS NULL;" andArguments:@[self.accountID]];
-        [self reloadCachedPrekeys];
         return ret;
     }];
 }
@@ -494,6 +516,13 @@
     }];
 }
 
+-(void) markAllDevicesAsDeletedForAddressName:(NSString*) jid
+{
+    [self.sqliteDatabase voidWriteTransaction:^{
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=CURRENT_TIMESTAMP WHERE account_id=? AND contactName=?;" andArguments:@[self.accountID, jid]];
+    }];
+}
+
 -(void) markDeviceAsDeleted:(SignalAddress*) address
 {
     [self.sqliteDatabase voidWriteTransaction:^{
@@ -524,6 +553,16 @@
     return [NSDate dateWithTimeIntervalSince1970:[[self.sqliteDatabase idReadTransaction:^{
         return [self.sqliteDatabase executeScalar:@"SELECT unixepoch(lastReceivedMsg) FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, @(address.deviceId), address.name]];
     }] doubleValue]];
+}
+
+-(NSDate*) getRemovedFromDevicelistTime:(SignalAddress*) address
+{
+    NSNumber* timestamp = [self.sqliteDatabase idReadTransaction:^{
+        return [self.sqliteDatabase executeScalar:@"SELECT unixepoch(removedFromDeviceList) FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND removedFromDeviceList IS NOT NULL;" andArguments:@[self.accountID, @(address.deviceId), address.name]];
+    }];
+    if(timestamp == nil)
+        return nil;
+    return [NSDate dateWithTimeIntervalSince1970:timestamp.doubleValue];
 }
 
 -(void) markSessionAsBroken:(SignalAddress*) address
@@ -601,13 +640,6 @@
     }];
 }
 
--(void) deleteDeviceforAddress:(SignalAddress*) address
-{
-    [self.sqliteDatabase voidWriteTransaction:^{
-        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?" andArguments:@[self.accountID, @(address.deviceId), address.name]];
-    }];
- }
-
 // MUC session management
 
 // return true if we found at least one fingerprint for the given buddyJid
@@ -660,18 +692,7 @@
 
         BOOL buddyStillNeeded = buddyJidCnt.intValue > 0;
         if(buddyStillNeeded == NO)
-        {
-            [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity \
-                WHERE \
-                    account_id=? \
-                    AND contactName=? \
-             " andArguments:@[self.accountID, buddyJid]];
-            [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
-                WHERE \
-                    account_id=? \
-                    AND contactName=? \
-             " andArguments:@[self.accountID, buddyJid]];
-        }
+            [self markAllDevicesAsDeletedForAddressName:buddyJid];  // queue old devices and sessions for graceful deletion
         return buddyStillNeeded;
     }];
 }
@@ -692,17 +713,7 @@
             // check if the session is still needed
             if([self checkIfSessionIsStillNeeded:jid] == NO) {
                 [danglingJids addObject:jid];
-                // delete old session
-                [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity \
-                    WHERE \
-                        account_id = ? \
-                        AND contactName = ? \
-                " andArguments:@[self.accountID, jid]];
-                [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession \
-                    WHERE \
-                        account_id = ? \
-                        AND contactName = ? \
-                " andArguments:@[self.accountID, jid]];
+                [self markAllDevicesAsDeletedForAddressName:jid];   // queue old devices and sessions for graceful deletion
             }
         }
         return danglingJids;

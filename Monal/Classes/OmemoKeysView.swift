@@ -21,6 +21,7 @@ struct OmemoKeysEntryView: View {
     private let isOwnDevice: Bool
     private let isBrokenSession: Bool
     private let lastSuccessfulDecryptTime: Date
+    private let removedFromDevicelistTime: Date?
     
     init(account: xmpp, contactJid: String, deviceId: NSNumber, isOwnDevice: Bool) {
         self.contactJid = contactJid
@@ -32,6 +33,7 @@ struct OmemoKeysEntryView: View {
         self.account = account
         self.isBrokenSession = account.omemo.isSessionBroken(forJid:contactJid, andDeviceId:deviceId)
         self.lastSuccessfulDecryptTime = account.omemo.getLastSuccessfulDecryptTime(self.address)
+        self.removedFromDevicelistTime = account.omemo.getRemovedFromDevicelistTime(self.address)
     }
     
     func setTrustLevel(_ enableTrust: Bool) {
@@ -54,20 +56,28 @@ struct OmemoKeysEntryView: View {
                 dismissButton: nil)
         case MLOmemoToFU:
             return Alert(
-                title: Text("Trusted but unverified key"),
-                message: Text("Monal currently trusts this key, but fingerprints were not compared yet. To increase security, please confirm with the contact that the displayed fingerprints do match before trusting this key!"),
+                title: Text("Unverified but trusted key"),
+                message: Text("Monal currently trusts this key automatically, but fingerprints were not compared yet. To increase security, please confirm with the contact that the displayed fingerprints do match before trusting this key!"),
                 primaryButton: .default(Text("Trust Key"), action: {
                     setTrustLevel(true)
                 }),
-                secondaryButton: .default(Text("OK")))
+                secondaryButton: .default(Text("Close")))
+        case MLOmemoToFUButRemoved:
+            return Alert(
+                title: Text("Removed unverified but trusted key"),
+                message: Text("Monal previously trusted this key automatically, but the contact does not use it anymore. Consider to explicitly disable trust for this key."),
+                primaryButton: .destructive(Text("Dont' trust Key"), action: {
+                    setTrustLevel(false)
+                }),
+                secondaryButton: .cancel(Text("Close")))
         case MLOmemoToFUButNoMsgSeenInTime:
             return Alert(
-                title: Text("Trusted but unverified and unused key"),
-                message: Text("Monal currently trusts this key, but fingerprints were not compared yet and the contact has not used it for a long time. Consider to disable trust for this key."),
+                title: Text("Unused unverified but trusted key"),
+                message: Text("Monal currently trusts this key automatically, but fingerprints were not compared yet and the contact has not used it for a long time. Consider to disable trust for this key."),
                 primaryButton: .destructive(Text("Don't trust Key"), action: {
                     setTrustLevel(false)
                 }),
-                secondaryButton: .default(Text("OK")))
+                secondaryButton: .default(Text("Close")))
         case MLOmemoTrusted:
             return Alert(
                 title: Text("Trusted and verified key"),
@@ -80,15 +90,15 @@ struct OmemoKeysEntryView: View {
                 primaryButton: .destructive(Text("Dont' trust Key"), action: {
                     setTrustLevel(false)
                 }),
-                secondaryButton: .cancel(Text("OK")))
+                secondaryButton: .cancel(Text("Close")))
         case MLOmemoTrustedButNoMsgSeenInTime:
             return Alert(
-                title: Text("Trusted but unused key"),
+                title: Text("Unused trusted key"),
                 message: Text("This key is trusted, but the contact has not used it for a long time. Consider to disable trust for this key."),
                 primaryButton: .destructive(Text("Don't trust Key"), action: {
                     setTrustLevel(false)
                 }),
-                secondaryButton: .cancel(Text("OK")))
+                secondaryButton: .cancel(Text("Close")))
         default:
             return Alert(
                 title: Text("Invalid State"),
@@ -108,11 +118,11 @@ struct OmemoKeysEntryView: View {
                 getTrustLevelIcon("clock.fill", .clear)
                 getTrustLevelIcon("key.fill", .yellow)
             case MLOmemoToFUButRemoved:
-                getTrustLevelIcon("trash.fill", .yellow)
+                getTrustLevelIcon("trash.fill", .red)
             case MLOmemoTrusted:
                 getTrustLevelIcon("key.fill", .green)
             case MLOmemoTrustedButRemoved:
-                getTrustLevelIcon("trash.fill", .yellow)
+                getTrustLevelIcon("trash.fill", .red)
             case MLOmemoTrustedButNoMsgSeenInTime:
                 getTrustLevelIcon("clock.fill", .clear)
                 getTrustLevelIcon("key.fill", .green)
@@ -167,9 +177,14 @@ struct OmemoKeysEntryView: View {
                                 UIFont.monospacedSystemFont(ofSize: size11px, weight: .regular)
                             ))
                     }
-                    Text("Last seen: \(lastSuccessfulDecryptTime, format:.dateTime)")
+                    Text("Last seen: \(self.lastSuccessfulDecryptTime, format:.dateTime)")
                         .foregroundColor(.gray)
                         .font(.footnote)
+                    if let removedFromDevicelistTime = self.removedFromDevicelistTime {
+                        Text("Removed at: \(removedFromDevicelistTime, format:.dateTime)")
+                            .foregroundColor(.gray)
+                            .font(.footnote)
+                    }
                     if(self.isBrokenSession) {
                         Text("Encrypted session to this device broken beyond repair.").foregroundColor(.red)
                     }
@@ -255,7 +270,12 @@ struct OmemoKeysForContactView: View {
                     if(deviceId == -1) {
                         return // should be unreachable
                     }
-                    account.omemo.deleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion)
+                    let address = SignalAddress.init(name: self.contactJid, deviceId: Int32(self.selectedDeviceForDeletion.int32Value))
+                    if let removedSince = account.omemo.getRemovedFromDevicelistTime(address) {
+                        account.omemo.forceDeleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion)
+                    } else {
+                        account.omemo.deleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion)
+                    }
                 },
                 secondaryButton: .cancel(Text("Abort"))
             )
@@ -501,7 +521,7 @@ class OmemoKeysForChat: ObservableObject {
 
     private static func devicesForContact(contact: ObservableKVOWrapper<MLContact>) -> OmemoKeysForContact {
         let account: xmpp = (contact.account as xmpp?)!
-        let devicesForContact: Set<NSNumber> = account.omemo.knownDevices(forAddressName: contact.contactJid)
+        let devicesForContact: Set<NSNumber> = account.omemo.knownDevices(forAddressName: contact.contactJid, withRemovedDevices:true)
         return OmemoKeysForContact(devices: devicesForContact)
     }
 }

@@ -36,15 +36,18 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode withMucParticipantJid:(NSString* _Nullable) mucParticipantJid;
 
 -(NSSet<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;
+-(NSSet<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName withRemovedDevices:(BOOL) removed;
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(void) addIdentityManually:(SignalAddress*) address identityKey:(NSData* _Nonnull) identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(NSDate*) getLastSuccessfulDecryptTime:(SignalAddress*) address;
+-(NSDate* _Nullable) getRemovedFromDevicelistTime:(SignalAddress* _Nonnull) address;
 -(NSNumber* _Nullable) getTrustLevelForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceid;
 -(NSData*) getIdentityForAddress:(SignalAddress*) address;
 -(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) rid;
 -(void) deleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid;
+-(void) forceDeleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid;
 
 -(void) subscribeAndFetchDevicelistIfNoSessionExistsForJid:(NSString*) buddyJid;
 -(void) checkIfSessionIsStillNeeded:(NSString*) buddyJid isMuc:(BOOL) isMuc;

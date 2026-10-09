@@ -26,19 +26,18 @@
 @property (nonatomic, assign) NSString* _Nonnull accountJid;
 @property (nonatomic, strong) SignalIdentityKeyPair* _Nullable identityKeyPair;
 @property (nonatomic, strong) SignalSignedPreKey* _Nullable signedPreKey;
-@property (nonatomic, strong) NSArray<SignalPreKey*>* _Nullable preKeys;
 
 +(BOOL) acceptedTrustLevel:(int) trustLevel withTofu:(BOOL) withTofu andOutgoing:(BOOL) outgoing;
 
 -(MLSignalStore* _Nonnull) initWithAccountID:(NSNumber* _Nonnull) accountID andAccountJid:(NSString* _Nonnull) accountJid;
--(void) saveValues;
 
 -(NSData* _Nullable) getIdentityForAddress:(SignalAddress* _Nonnull) address;
 -(BOOL) saveIdentity:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nullable) identityKey;
+
 /**
  all non deleted devices (even those without sessions or a broken session)
  */
--(NSArray<NSNumber*>* _Nullable) knownDevicesForAddressName:(NSString* _Nullable) addressName;
+-(NSArray<NSNumber*>* _Nullable) knownDevicesForAddressName:(NSString* _Nullable) addressName withRemovedDevices:(BOOL) removed;
 /**
  all non deleted devices with a valid (non broken) session
  */
@@ -50,12 +49,11 @@
 
 -(NSMutableArray<SignalPreKey*>* _Nonnull) readPreKeys;
 
--(void) deleteDeviceforAddress:(SignalAddress* _Nonnull) address;
-
 -(void) markDeviceAsDeleted:(SignalAddress* _Nonnull) address;
 -(void) removeDeviceDeletedMark:(SignalAddress* _Nonnull) address;
 -(void) updateLastSuccessfulDecryptTime:(SignalAddress* _Nonnull) address;
 -(NSDate* _Nonnull) getLastSuccessfulDecryptTime:(SignalAddress* _Nonnull) address;
+-(NSDate* _Nullable) getRemovedFromDevicelistTime:(SignalAddress* _Nonnull) address;
 -(void) markSessionAsBroken:(SignalAddress* _Nonnull) address;
 -(void) markBundleAsFixed:(SignalAddress* _Nonnull) address;
 -(BOOL) isSessionBrokenForJid:(NSString* _Nonnull) jid andDeviceId:(NSNumber* _Nonnull) deviceId;
@@ -74,10 +72,14 @@
 -(int) getHighestPreKeyId;
 -(unsigned int) getPreKeyCount;
 
--(void) cleanupKeys;
--(void) reloadCachedPrekeys;
+-(void) cleanupPreKeys;
+-(void) cleanupDeletedDevices;
+-(void) forceDeleteDeviceForSource:(SignalAddress* _Nonnull) address;
+-(void) immediateCleanupForJid:(NSString* _Nonnull) jid;
 
 -(BOOL) deletePreKeyWithId:(uint32_t) preKeyId;
 -(BOOL) deleteUsedPrekeys;
+
+-(void) saveValues:(NSArray<SignalPreKey*>* _Nonnull) preKeys;
 
 @end

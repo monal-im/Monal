@@ -62,6 +62,8 @@ static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
     #define BGFETCH_DEFAULT_INTERVAL 3600*3
 #endif
 
+#define OMEMO_DEVICE_CLEANUP_GRACE_PERIOD 90
+
 // #define defineBlockType(name, returntype, ...) \
 //     typedef returntype (^name)(__VA_ARGS__); \
 //     name _Nonnull castTo_##name(id _Nonnull block) { return block; }

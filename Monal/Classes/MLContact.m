@@ -79,6 +79,7 @@ static NSMutableDictionary* _singletonCache;
 
 @property (nonatomic, strong) NSString* contactDisplayName;
 @property (nonatomic, assign) BOOL hasReachedMamArchiveTop;
+@property (nonatomic, assign) BOOL hasExplicitOmemoTrustActivated;
 @end
 
 @implementation MLContact
@@ -112,6 +113,7 @@ static NSMutableDictionary* _singletonCache;
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],
             @"rosterGroups": [NSSet new],
             @"reached_mam_archive_top": @NO,
+            @"explicit_omemo_trust_activated": @NO,
         }];
     }
     else if(type == 2)
@@ -137,6 +139,7 @@ static NSMutableDictionary* _singletonCache;
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640153174],
             @"rosterGroups": [NSSet new],
             @"reached_mam_archive_top": @NO,
+            @"explicit_omemo_trust_activated": @NO,
         }];
     }
     else if(type == 3)
@@ -162,6 +165,7 @@ static NSMutableDictionary* _singletonCache;
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640157074],
             @"rosterGroups": [NSSet new],
             @"reached_mam_archive_top": @NO,
+            @"explicit_omemo_trust_activated": @NO,
         }];
     }
     else
@@ -186,6 +190,7 @@ static NSMutableDictionary* _singletonCache;
             @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:1640157174],
             @"rosterGroups": [NSSet new],
             @"reached_mam_archive_top": @NO,
+            @"explicit_omemo_trust_activated": @NO,
         }];
     }
 }
@@ -223,6 +228,7 @@ static NSMutableDictionary* _singletonCache;
     if(contactDict == nil)
     {
         DDLogInfo(@"Returning dummy MLContact for %@ on accountID %@", jid, accountID);
+        xmpp* account = [[MLXMPPManager sharedInstance] getEnabledAccountForID:accountID];
         retval = [self contactFromDictionary:@{
             @"buddy_name": jid.lowercaseString,
             @"nick_name": @"",
@@ -244,6 +250,7 @@ static NSMutableDictionary* _singletonCache;
             @"lastInteraction": nilWrapper(nil),
             @"rosterGroups": [NSSet set],
             @"reached_mam_archive_top": @NO,
+            @"explicit_omemo_trust_activated": account == nil ? @NO : @([account.omemo isExplicitlyTrusted:jid]),
         }];
     }
     else
@@ -782,6 +789,12 @@ static NSMutableDictionary* _singletonCache;
     self.hasReachedMamArchiveTop = YES;
 }
 
+-(void) activateExplicitOmemoTrust
+{
+    [[DataLayer sharedInstance] activateExplicitOmemoTrustForContact:self];
+    self.hasExplicitOmemoTrustActivated = YES;
+}
+
 #pragma mark - NSCoding
 
 -(void) encodeWithCoder:(NSCoder*) coder
@@ -833,6 +846,7 @@ static NSMutableDictionary* _singletonCache;
     //updateIfIdNotEqual(self.lastInteractionTime, contact.lastInteractionTime);
     updateIfIdNotEqual(self.rosterGroups, contact.rosterGroups);
     updateIfPrimitiveNotEqual(self.hasReachedMamArchiveTop, contact.hasReachedMamArchiveTop);
+    updateIfPrimitiveNotEqual(self.hasExplicitOmemoTrustActivated, contact.hasExplicitOmemoTrustActivated);
 }
 
 -(BOOL) isEqualToMessage:(MLMessage*) message
@@ -911,6 +925,7 @@ static NSMutableDictionary* _singletonCache;
     contact.lastInteractionTime = nilExtractor([dic objectForKey:@"lastInteraction"]);        //no default needed, already done in DataLayer
     contact.rosterGroups = [dic objectForKey:@"rosterGroups"];
     contact.hasReachedMamArchiveTop = [[dic objectForKey:@"reached_mam_archive_top"] boolValue];
+    contact.hasExplicitOmemoTrustActivated = [[dic objectForKey:@"explicit_omemo_trust_activated"] boolValue];
     contact->_avatar = nil;
 
     MLAssert(contact.rosterGroups != nil, @"rosterGroups must be non-nil (if a user is in no groups, it should be empty set)");

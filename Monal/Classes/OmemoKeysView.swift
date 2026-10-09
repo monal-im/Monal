@@ -118,11 +118,11 @@ struct OmemoKeysEntryView: View {
                 getTrustLevelIcon("clock.fill", .clear)
                 getTrustLevelIcon("key.fill", .yellow)
             case MLOmemoToFUButRemoved:
-                getTrustLevelIcon("trash.fill", .red)
+                getTrustLevelIcon("trash.fill", .clear).foregroundColor(.red)
             case MLOmemoTrusted:
                 getTrustLevelIcon("key.fill", .green)
             case MLOmemoTrustedButRemoved:
-                getTrustLevelIcon("trash.fill", .red)
+                getTrustLevelIcon("trash.fill", .clear).foregroundColor(.red)
             case MLOmemoTrustedButNoMsgSeenInTime:
                 getTrustLevelIcon("clock.fill", .clear)
                 getTrustLevelIcon("key.fill", .green)
@@ -177,11 +177,20 @@ struct OmemoKeysEntryView: View {
                                 UIFont.monospacedSystemFont(ofSize: size11px, weight: .regular)
                             ))
                     }
-                    Text("Last seen: \(self.lastSuccessfulDecryptTime, format:.dateTime)")
+                    if let removedFromDevicelistTime = self.removedFromDevicelistTime {
+                        let deletionDate = removedFromDevicelistTime.addingTimeInterval(TimeInterval(OMEMO_DEVICE_CLEANUP_GRACE_PERIOD)*24*3600)
+                        Group {
+                            Text("Device unpublished at: \(removedFromDevicelistTime, format:.dateTime)")
+                            if deletionDate > Date() {
+                                Text("Will be autoremoved in \(Text(deletionDate, style: .relative))")
+                            } else {
+                                Text("Pending removal")
+                            }
+                        }
                         .foregroundColor(.gray)
                         .font(.footnote)
-                    if let removedFromDevicelistTime = self.removedFromDevicelistTime {
-                        Text("Removed at: \(removedFromDevicelistTime, format:.dateTime)")
+                    } else {
+                        Text("Last seen: \(self.lastSuccessfulDecryptTime, format:.dateTime)")
                             .foregroundColor(.gray)
                             .font(.footnote)
                     }
@@ -360,6 +369,16 @@ struct OmemoKeysForChatView: View {
             }
         }
     }
+    
+    @ViewBuilder
+    func trustModeText(ownKeys: Bool, explicitTrust: Bool) -> some View {
+        switch (ownKeys, explicitTrust) {
+            case (true, true):   Text(NSLocalizedString("Your own new devices must be manually trusted.", comment: "omemo trust mode")).foregroundColor(Color.green)
+            case (true, false):  Text(NSLocalizedString("Your own new devices will be automatically trusted (ToFu).", comment: "omemo trust mode"))
+            case (false, true):  Text(NSLocalizedString("New devices of this contact must be manually trusted.", comment: "omemo trust mode")).foregroundColor(Color.green)
+            case (false, false): Text(NSLocalizedString("New devices of this contact will be automatically trusted (ToFu).", comment: "omemo trust mode"))
+        }
+    }
 
     var body: some View {
         // workaround for the fact that NavigationLink inside a form forces a formatting we don't want
@@ -377,17 +396,23 @@ struct OmemoKeysForChatView: View {
         List {
             let helpDescription = isOwnKeys() ?
             Text("These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it. Double tap onto a fingerprint to copy to clipboard.") :
-            Text("You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen. Double tap onto a fingerprint to copy to clipboard.")
+            Text("You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen. Double tap onto a fingerprint to copy to clipboard..")
 
             Section(header:helpDescription) {
                 if (omemoKeys.contacts.count == 1) {
                     ForEach(self.contacts, id: \.0) { contact, devices in
-                        OmemoKeysForContactView(contact: contact, devices: devices)
+                        VStack(alignment:.leading) {
+                            trustModeText(ownKeys:isOwnKeys(), explicitTrust:contact.hasExplicitOmemoTrustActivated)
+                            OmemoKeysForContactView(contact: contact, devices: devices)
+                        }
                     }
                 } else {
                     ForEach(self.contacts, id: \.0) { contact, devices in
                         DisclosureGroup(content: {
-                            OmemoKeysForContactView(contact: contact, devices: devices)
+                            VStack(alignment:.leading) {
+                                trustModeText(ownKeys:isOwnKeys(), explicitTrust:contact.hasExplicitOmemoTrustActivated)
+                                OmemoKeysForContactView(contact: contact, devices: devices)
+                            }
                         }, label: {
                             HStack {
                                 Text("Keys of \(contact.obj.contactJid)")

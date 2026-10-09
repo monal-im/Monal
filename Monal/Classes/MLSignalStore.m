@@ -13,6 +13,7 @@
 #import <monalxmpp/MLSQLite.h>
 #import <monalxmpp/HelperTools.h>
 #import <monalxmpp/MLOMEMO.h>
+#import <monalxmpp/MLContact.h>
 
 @interface MLSignalStore()
 {
@@ -111,7 +112,7 @@
         // remove old devices and their sessions that have been removed some time ago from pubsub and never been added back
         // this grace period of 28 days makes sure a device added  back to the devicelist when the deleted device comes online again
         // does still work without a trust level and/or session reset
-        NSArray* devices = [self.sqliteDatabase executeReader:@"SELECT contactName, contactDeviceId, removedFromDeviceList FROM signalContactIdentity WHERE account_id=? AND removedFromDeviceList IS NOT NULL AND unixepoch(removedFromDeviceList) <= unixepoch('now', '-365 day');" andArguments:@[self.accountID]];
+        NSArray* devices = [self.sqliteDatabase executeReader:@"SELECT contactName, contactDeviceId, removedFromDeviceList FROM signalContactIdentity WHERE account_id=? AND removedFromDeviceList IS NOT NULL AND unixepoch(removedFromDeviceList) <= unixepoch('now', ?);" andArguments:@[self.accountID, [NSString stringWithFormat:@"-%d days", OMEMO_DEVICE_CLEANUP_GRACE_PERIOD]]];
         DDLogVerbose(@"Cleaning up devices: %@", devices);
         for(NSDictionary* device in devices)
             [self forceDeleteDeviceForSource:[[SignalAddress alloc] initWithName:device[@"contactName"] deviceId:[device[@"contactDeviceId"] unsignedIntValue]]];
@@ -456,22 +457,13 @@
         NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountID, @(address.deviceId), address.name]];
         if(dbIdentity)
             return YES;
+        MLContact* contact = [MLContact createContactFromJid:address.name andAccountID:self.accountID];
         // if at least one fingerprint isn't TOFU new fingerprints shouldn't be trusted
         // if all fingerprints are TOFU -> trust new ones with TOFU as well
         return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity \
             (account_id, contactName, contactDeviceId, identity, lastReceivedMsg, trustLevel) \
-            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, \
-                (SELECT CASE \
-                    WHEN COUNT(contactDeviceId) == 0 THEN 1 \
-                    ELSE 0 \
-                END \
-                FROM signalContactIdentity \
-                WHERE \
-                    account_id=? \
-                    AND contactName=? \
-                    AND trustLevel!=1 \
-                ) \
-            );" andArguments:@[self.accountID, address.name, @(address.deviceId), identityKey, self.accountID, address.name]];
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?);"
+            andArguments:@[self.accountID, address.name, @(address.deviceId), identityKey, @(contact.hasExplicitOmemoTrustActivated ? MLOmemoInternalNotTrusted : MLOmemoInternalToFU)]];
     }];
 }
 
@@ -513,6 +505,7 @@
 {
     [self.sqliteDatabase voidWriteTransaction:^{
         [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[@(trust ? MLOmemoInternalTrusted : MLOmemoInternalNotTrusted), self.accountID, @(address.deviceId), address.name]];
+        [[MLContact createContactFromJid:address.name andAccountID:self.accountID] activateExplicitOmemoTrust];
     }];
 }
 
@@ -607,6 +600,7 @@
         // untrust all devices
         [self.sqliteDatabase voidWriteTransaction:^{
             [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=?;" andArguments:@[@(MLOmemoInternalNotTrusted), self.accountID, jid]];
+            [[MLContact createContactFromJid:jid andAccountID:self.accountID] activateExplicitOmemoTrust];
         }];
     }
     else
@@ -614,6 +608,7 @@
         // untrust all of our own devices except our own device id
         [self.sqliteDatabase voidWriteTransaction:^{
             [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=? AND contactDeviceId!=?;" andArguments:@[@(MLOmemoInternalNotTrusted), self.accountID, jid, @(self.deviceid)]];
+            [[MLContact createContactFromJid:jid andAccountID:self.accountID] activateExplicitOmemoTrust];
         }];
     }
 }

@@ -68,6 +68,7 @@
 -(int) getInternalTrustLevel:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nonnull) identityKey;
 -(void) untrustAllDevicesFrom:(NSString* _Nonnull) jid;
 -(NSNumber* _Nonnull) getTrustLevel:(SignalAddress* _Nonnull) address identityKey:(NSData* _Nonnull) identityKey;
+-(BOOL) isExplicitlyTrusted:(NSString* _Nonnull) jid;
 
 -(int) getHighestPreKeyId;
 -(unsigned int) getPreKeyCount;

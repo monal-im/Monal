@@ -91,6 +91,8 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 // was already reached in a previous query
 @property (nonatomic, readonly) BOOL hasReachedMamArchiveTop;
 
+@property (nonatomic, readonly) BOOL hasExplicitOmemoTrustActivated;
+
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName;
 -(NSString*) contactDisplayNameWithFallback:(NSString* _Nullable) fallbackName andSelfnotesPrefix:(BOOL) hasSelfnotesPrefix;
 -(void) refresh;
@@ -108,6 +110,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 -(void) addToRoster;
 -(void) clearHistory;
 -(void) markReachedMamArchiveTop;
+-(void) activateExplicitOmemoTrust;
 -(void) removeShareInteractions;
 
 @end

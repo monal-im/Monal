@@ -1615,6 +1615,11 @@ $$
     return [self.monalSignalStore getTrustLevel:address identityKey:identityKey];
 }
 
+-(BOOL) isExplicitlyTrusted:(NSString*) jid
+{
+    return [self.monalSignalStore isExplicitlyTrusted:jid];
+}
+
 -(NSDate*) getLastSuccessfulDecryptTime:(SignalAddress*) address
 {
     return [self.monalSignalStore getLastSuccessfulDecryptTime:address];

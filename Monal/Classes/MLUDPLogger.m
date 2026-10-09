@@ -55,7 +55,7 @@ static volatile MLUDPLogger* _self;
         NSCondition* condition = [NSCondition new];
         //this timeout will trigger if the flush could not be finished in time (leeway of 10ms)
         //use dispatch_source_set_timer() directly instead of createTimer() because we don't want to log anything in here
-        dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+        dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0));
         dispatch_source_set_timer(timer, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout * NSEC_PER_SEC)), DISPATCH_TIME_FOREVER, (uint64_t)(0.010 * NSEC_PER_SEC));
         dispatch_source_set_event_handler(timer, ^{
             [[self class] logError:@"flush timer triggered!"];
@@ -131,7 +131,7 @@ static volatile MLUDPLogger* _self;
     
     /*
     //log error in 250ms
-    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0));
     dispatch_source_set_timer(timer,
                               dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.250*NSEC_PER_SEC)),
                               DISPATCH_TIME_FOREVER,
@@ -203,7 +203,7 @@ static volatile MLUDPLogger* _self;
         nw_parameters_t parameters = nw_parameters_create_secure_udp(NW_PARAMETERS_DISABLE_PROTOCOL, NW_PARAMETERS_DEFAULT_CONFIGURATION);
         
         _connection = nw_connection_create(endpoint, parameters);
-        nw_connection_set_queue(_connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0));
+        nw_connection_set_queue(_connection, dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0));
         nw_connection_set_state_changed_handler(_connection, ^(nw_connection_state_t state, nw_error_t error) {
             if(state == nw_connection_state_ready)
             {

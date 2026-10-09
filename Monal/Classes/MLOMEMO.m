@@ -106,11 +106,15 @@ static NSDictionary* trustLevels2Text = nil;
     return self->_state;
 }
 
-//updateIfIdNotEqual(self.contactJid, contact.contactJid);
-
 -(NSSet<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName
 {
-    return [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:addressName]];
+    //the default is without removed devices
+    return [self knownDevicesForAddressName:addressName withRemovedDevices:NO];
+}
+
+-(NSSet<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName withRemovedDevices:(BOOL) removed
+{
+    return [NSSet setWithArray:[self.monalSignalStore knownDevicesForAddressName:addressName withRemovedDevices:removed]];
 }
 
 -(void) notifyKnownDevicesUpdated:(NSString*) jid
@@ -137,8 +141,8 @@ static NSDictionary* trustLevels2Text = nil;
         SignalAddress* address = [[SignalAddress alloc] initWithName:self.account.connectionProperties.identity.jid deviceId:self.monalSignalStore.deviceid];
         [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
         //do everything done in MLSignalStore init not already mimicked above
-        [self.monalSignalStore cleanupKeys];
-        [self.monalSignalStore reloadCachedPrekeys];
+        [self.monalSignalStore cleanupPreKeys];
+        [self.monalSignalStore cleanupDeletedDevices];
         [self notifyKnownDevicesUpdated:address.name];
         //we generated a new identity
         DDLogWarn(@"Created new omemo identity with deviceid: %@", @(self.monalSignalStore.deviceid));
@@ -450,6 +454,12 @@ $$instance_handler(handleDevicelistFetch, account.omemo, $$ID(xmpp*, account), $
             [self processOMEMODevices:deviceSet from:jid];
         }
         
+        //mark our own devicelist as received (e.g. not empty on the server)
+        if([jid isEqualToString:self.account.connectionProperties.identity.jid])
+        {
+            DDLogInfo(@"Marking our own devicelist as seen now...");
+            self.state.hasSeenDeviceList = YES;
+        }
     }
     
     if([self.account.connectionProperties.identity.jid isEqualToString:jid])
@@ -633,7 +643,7 @@ $$
 
 -(void) publishOwnDeviceList
 {
-    DDLogInfo(@"Publishing own OMEMO device list...");
+    DDLogInfo(@"Publishing own OMEMO device list: %@", self.ownDeviceList);
     MLXMLNode* listNode = [[MLXMLNode alloc] initWithElement:@"list" andNamespace:@"eu.siacs.conversations.axolotl"];
     for(NSNumber* deviceNum in self.ownDeviceList)
         [listNode addChildNode:[[MLXMLNode alloc] initWithElement:@"device" withAttributes:@{kId: [deviceNum stringValue]} andChildren:@[] andData:nil]];
@@ -1014,7 +1024,7 @@ $$instance_handler(omemoBundlePublished, account.omemo, $$ID(xmpp*, account), $$
     if(success)
     {
         DDLogInfo(@"Successfully published own omemo bundle...");
-        [self.monalSignalStore deleteUsedPrekeys];
+        [self.monalSignalStore deleteUsedPrekeys];      //mark prekeys not published anymore as pending for cleanup
     }
     else
         DDLogError(@"Unable to published own omemo bundle: %@; %@", errorReason, errorIq);
@@ -1078,8 +1088,7 @@ $$
             return NO;
         }
         // Start generating with keyId > last send key id
-        self.monalSignalStore.preKeys = [signalHelper generatePreKeysWithStartingPreKeyId:(lastPreKeyId + 1) count:cntKeysNeeded];
-        [self.monalSignalStore saveValues];
+        [self.monalSignalStore saveValues:[signalHelper generatePreKeysWithStartingPreKeyId:(lastPreKeyId + 1) count:cntKeysNeeded]];
 
         // send out new omemo bundle
         [self sendOMEMOBundle];
@@ -1611,6 +1620,11 @@ $$
     return [self.monalSignalStore getLastSuccessfulDecryptTime:address];
 }
 
+-(NSDate* _Nullable) getRemovedFromDevicelistTime:(SignalAddress*) address
+{
+    return [self.monalSignalStore getRemovedFromDevicelistTime:address];
+}
+
 // add OMEMO identity manually to our signalstore
 // only intended to be called from OMEMO QR scan UI
 -(void) addIdentityManually:(SignalAddress*) address identityKey:(NSData* _Nonnull) identityKey
@@ -1644,6 +1658,23 @@ $$
     return [NSNumber numberWithUnsignedInt:self.monalSignalStore.deviceid];
 }
 
+-(void) forceDeleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid
+{
+    if([source isEqualToString:self.account.connectionProperties.identity.jid] && rid.unsignedIntValue == self.monalSignalStore.deviceid)
+        return;
+    
+    //handle removal of own deviceids
+    if([source isEqualToString:self.account.connectionProperties.identity.jid])
+        [self.ownDeviceList removeObject:rid];
+
+    SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid.unsignedIntValue];
+    [self.monalSignalStore forceDeleteDeviceForSource:address];
+    [self notifyKnownDevicesUpdated:address.name];
+    
+    if([source isEqualToString:self.account.connectionProperties.identity.jid])
+        [self publishOwnDeviceList];
+}
+
 -(void) deleteDeviceForSource:(NSString*) source andRid:(NSNumber*) rid
 {
     [self bulkDeleteDeviceForSource:source andRid:rid];
@@ -1664,17 +1695,21 @@ $$
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid.unsignedIntValue];
     //don't delete the identity record to not trigger spurious "detected a new omemo device on your account"
     //notifications in handleOwnDevicelistUpdate if a device was briefly removed from our devicelist before it was added back in
+    //also don't delete the session: we don't want to build a new session every time a device was briefly removed from the devicelist
     [self.monalSignalStore markDeviceAsDeleted:address];
-    [self.monalSignalStore deleteSessionRecordForAddress:address];
     [self notifyKnownDevicesUpdated:address.name];
 }
 
 //debug button in contactdetails ui
 -(void) clearAllSessionsForJid:(NSString*) jid
 {
-    NSSet<NSNumber*>* devices = [self knownDevicesForAddressName:jid];
+    NSSet<NSNumber*>* devices = [self knownDevicesForAddressName:jid withRemovedDevices:YES];
     for(NSNumber* device in devices)
         [self bulkDeleteDeviceForSource:jid andRid:device];
+    
+    //remove all devices and sessions of this jid without grace period
+    [self.monalSignalStore immediateCleanupForJid:jid];
+    
     [self sendOMEMOBundle];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];
     [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandlerWithInvalidation(self, handleDevicelistFetch, handleDevicelistFetchInvalidation, $BOOL(subscribe, NO))];

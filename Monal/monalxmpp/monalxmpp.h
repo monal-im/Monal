@@ -14,6 +14,7 @@ FOUNDATION_EXPORT double monalxmppVersionNumber;
 //! Project version string for monalxmpp.
 FOUNDATION_EXPORT const unsigned char monalxmppVersionString[];
 
+#import <monalxmpp/MLConstants.h>
 #import <monalxmpp/MLSQLite.h>
 #import <monalxmpp/DataLayer.h>
 #import <monalxmpp/MLSignalStore.h>

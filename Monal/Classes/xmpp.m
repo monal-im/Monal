@@ -2905,15 +2905,17 @@ static NSRegularExpression* fastTokenRemovalRegex;
             
             //build mechanism list displayed in ui (mark _scramHandler.method as used)
             NSMutableDictionary* mechanismList = [NSMutableDictionary new];
-            for(NSString* mechanism in _supportedSaslMechanisms)
-                mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
+            if(self->_scramHandler != nil)
+                for(NSString* mechanism in _supportedSaslMechanisms)
+                    mechanismList[mechanism] = @([mechanism isEqualToString:self->_scramHandler.method]);
             DDLogInfo(@"Saving saslMethods list: %@", mechanismList);
             self.connectionProperties.saslMethods = mechanismList;
             
             //build FAST mechanism list displayed in ui (mark _htHandler.method as used)
             NSMutableDictionary* fastMechanismList = [NSMutableDictionary new];
-            for(NSString* mechanism in _supportedFastMechanisms)
-                fastMechanismList[mechanism] = @([mechanism isEqualToString:self->_htHandler.method]);
+            if(self->_htHandler != nil)
+                for(NSString* mechanism in _supportedFastMechanisms)
+                    fastMechanismList[mechanism] = @([mechanism isEqualToString:self->_htHandler.method]);
             DDLogInfo(@"Saving fastMethods list: %@", fastMechanismList);
             self.connectionProperties.fastMethods = fastMechanismList;
             

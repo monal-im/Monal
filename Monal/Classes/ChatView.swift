@@ -89,6 +89,9 @@ class ChatViewDefaultsDB: ObservableObject {
 
     @defaultsDB("ShowURLPreview")
     var showURLPreview: Bool
+
+    @defaultsDB("ShowGeoLocation")
+    var showGeoLocation: Bool
 }
 
 struct ChatView: View {
@@ -477,6 +480,13 @@ struct ChatView: View {
                     DataLayer.sharedInstance().saveMessageDraft(self.contact.contactJid, forAccount:self.account.accountID, withComment:"")
                 }
             }
+            if let location = draft.staticLocation {
+                let messageText = "geo:\(location.latitude),\(location.longitude)"
+                guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: messageText, havingType: kMessageTypeGeo, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: nil) else {
+                    return
+                }
+                messages.append(ChatViewMessage(newMLMessage))
+            }
         } messageMenuAction: { (action: MessageAction, defaultActionClosure, message) in
             let mlMessage = (message as! ChatViewMessage).innerMessage.obj
             let messageDBId = mlMessage.messageDBId
@@ -613,6 +623,7 @@ struct ChatView: View {
             DDLogDebug("Checking if we can react to: \(String(describing:mlMessage)) --> \(String(describing:retval))")
             return retval
         })
+        .setAvailableInputs([.text, .audio, .media, .file, .staticLocation])
         .autoFocusTextInputOnChatOpen(chatViewDefaultsDB.showKeyboardOnChatOpen)
         .showUsername(contact.isMuc)
         .tapAvatarClosure { user, _ in
@@ -981,10 +992,14 @@ struct ChatView: View {
 }
 
 class ChatViewMessage: ExyteChat.Message {
+    @ObservedObject var chatViewDefaultsDB = ChatViewDefaultsDB()
     let innerMessage: ObservableKVOWrapper<MLMessage>
     let fileInfo: ObservableKVOWrapper<MLFiletransferInfo>?
     private var subscriptions: Set<AnyCancellable> = Set()
     override var text: String {
+        if self.staticLocation != nil {
+            return ""
+        }
         if innerMessage.messageType == kMessageTypeFiletransfer, let fileInfo = fileInfo {
             switch(fileInfo.downloadState as DownloadState.RawValue) {
                 case DownloadState.complete.rawValue:
@@ -1021,6 +1036,21 @@ class ChatViewMessage: ExyteChat.Message {
         get {
             // Keep outgoing links in the same color as outgoing text (white) for readability
             let linkColor: Color = self.user.isCurrentUser ? .white : .accentColor
+
+            if innerMessage.messageType == kMessageTypeGeo && !chatViewDefaultsDB.showGeoLocation {
+                // Link to OpenStreetMap as a fallback for geo messages when inline maps are disabled
+                var attributed = AttributedString(text)
+                if let location = StaticLocation(geoURIString: innerMessage.obj.messageText) {
+                    let zoomLayer = 15
+                    let urlString = "https://www.openstreetmap.org/?mlat=\(location.latitude)&mlon=\(location.longitude)&zoom=\(zoomLayer)"
+                    if let url = URL(string: urlString) {
+                        attributed.link = url
+                        attributed.underlineStyle = .single
+                        attributed.foregroundColor = linkColor
+                        return attributed
+                    }
+                }
+            }
             return text.linkify(linkColor: linkColor)
         }
         set {}
@@ -1041,9 +1071,9 @@ class ChatViewMessage: ExyteChat.Message {
             let isError = errorType != nil && !errorType!.isEmpty
             switch(innerMessage) {
                 case let message where isError && !message.hasBeenReceived:
-                    return .error(DraftMessage(id: id, text: text, medias: [], recording: recording, replyMessage: replyMessage, createdAt: createdAt))
+                    return .error(DraftMessage(id: id, text: text, medias: [], files: [], recording: recording, replyMessage: replyMessage, createdAt: createdAt))
                 case let message where message.hasBeenDisplayed:
-                    return .read
+                    return .readBy([])
                 case let message where message.hasBeenReceived:
                     return .received
                 case let message where message.hasBeenSent:
@@ -1121,6 +1151,15 @@ class ChatViewMessage: ExyteChat.Message {
             }
             let fileURL = fileInfo.fileURL as URL
             return Recording(duration: fileInfo.mediaDuration, url: fileURL, mimeType: fileInfo.mimeType)
+        }
+        set {}
+    }
+    override var staticLocation: StaticLocation? {
+        get {
+            guard innerMessage.messageType == kMessageTypeGeo, chatViewDefaultsDB.showGeoLocation else {
+                return nil
+            }
+            return StaticLocation(geoURIString: innerMessage.obj.messageText)
         }
         set {}
     }

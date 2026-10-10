@@ -3610,6 +3610,11 @@ a=%@\r\n", mid, candidate];
     return [NSURL fileURLWithPath:gzipPath];
 }
 
++(NSString*) filePreviewHardlinksDirectory {
+    NSString* documentCacheDir = [[HelperTools getContainerURLForPathComponents:@[@"documentCache"]] path];
+    return [documentCacheDir stringByAppendingPathComponent:@"filePreviews"];
+}
+
 +(NSOrderedSet*) createReactionsSetFromString:(NSString*) reactions
 {
     //remove all vs15 and vs16 modifiers

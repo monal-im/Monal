@@ -215,11 +215,24 @@
             
             //urls or other plaintext transfered as bplist
             return [AnyPromise promiseWithResolverBlock:^(PMKResolver resolve) {
-                [provider loadItemForTypeIdentifier:UTTypePlainText.identifier options:nil completionHandler:^(NSString*  _Nullable item, NSError* _Null_unspecified error) {
-                    if(self.contentText && [self.contentText length] > 0 && item != nil && [self.contentText isEqualToString:item])
+                [provider loadItemForTypeIdentifier:UTTypePlainText.identifier options:nil completionHandler:^(NSString* item, NSError* _Null_unspecified error) {
+                    if(item != nil && item.length > 0 && error == nil)
                     {
-                        DDLogWarn(@"Ignoring serialized text payload because already sent via comment field");
-                        resolve(nil);
+                        if(self.contentText && [self.contentText length] > 0 && item != nil && [self.contentText isEqualToString:item])
+                        {
+                            DDLogWarn(@"Ignoring serialized NSString payload because already sent via comment field");
+                            return resolve(nil);
+                        }
+                        else
+                        {
+                            NSMutableDictionary* payload = [NSMutableDictionary new];
+                            payload[@"account_id"] = self.recipient.accountID;
+                            payload[@"recipient"] = self.recipient.contactJid;
+                            payload[@"type"] = @"text";
+                            payload[@"data"] = item;
+                            DDLogDebug(@"Adding serialized NSString payload: %@", payload);
+                            return resolve(payload);
+                        }
                     }
                     else
                         resolve(payload);

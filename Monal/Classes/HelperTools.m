@@ -1594,17 +1594,65 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         }
         else if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
         {
-            [provider loadFileRepresentationForTypeIdentifier:UTTypePlainText.identifier completionHandler:^(NSURL* _Nullable item, NSError* _Null_unspecified error) {
-                if(error != nil || item == nil)
+            //we have to check for an in memory object disguised as text file first
+            [provider loadItemForTypeIdentifier:UTTypePlainText.identifier options:nil completionHandler:^(id<NSSecureCoding> _Nullable item, NSError* _Null_unspecified error) {
+                if(item != nil)
                 {
-                    DDLogError(@"Error extracting item from NSItemProvider: %@", error);
-                    payload[@"error"] = error;
-                    return resolve(payload);
+                    if([(NSObject*)item isKindOfClass:[NSURL class]])
+                    {
+                        DDLogInfo(@"Got serialized NSURL item: %@", item);
+                        payload[@"type"] = @"url";
+                        payload[@"uttype"] = UTTypePlainText.identifier;
+                        payload[@"data"] = ((NSURL*)item).absoluteString;
+                        [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
+                            resolve(payload);
+                        });
+                        return;
+                    }
+                    
+                    /*
+                    if([(NSObject*)item isKindOfClass:[NSString class]])
+                    {
+                        DDLogInfo(@"Got serialized NSString item: %@", item);
+                        payload[@"type"] = @"text";
+                        payload[@"uttype"] = UTTypePlainText.identifier;
+                        payload[@"data"] = item;
+                        [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
+                            resolve(payload);
+                        });
+                        return;
+                    }
+                    if([(NSObject*)item isKindOfClass:[NSAttributedString class]])
+                    {
+                        DDLogInfo(@"Got serialized NSAttributedString item: %@", item);
+                        payload[@"type"] = @"text";
+                        payload[@"uttype"] = UTTypePlainText.identifier;
+                        payload[@"data"] = ((NSAttributedString*)item).string;
+                        [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
+                            resolve(payload);
+                        });
+                        return;
+                    }
+                    */
+                    
+                    DDLogWarn(@"Got unknown serialized shared item, ignoring: %@", item);
+                    return resolve(nil);
                 }
-                DDLogInfo(@"Got direct text file item: %@", item);
-                payload[@"type"] = @"file";
-                payload[@"uttype"] = UTTypePlainText.identifier;
-                prepareFile(item).then(resolve);
+                else
+                {
+                    [provider loadFileRepresentationForTypeIdentifier:UTTypePlainText.identifier completionHandler:^(NSURL* _Nullable item, NSError* _Null_unspecified error) {
+                        if(error != nil || item == nil)
+                        {
+                            DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                            payload[@"error"] = error;
+                            return resolve(payload);
+                        }
+                        DDLogInfo(@"Got direct text file item: %@", item);
+                        payload[@"type"] = @"file";
+                        payload[@"uttype"] = UTTypePlainText.identifier;
+                        prepareFile(item).then(resolve);
+                    }];
+                }
             }];
         }
         else

@@ -24,7 +24,7 @@ jobs:
         with:
           clean: true
           submodules: true
-          fetch-depth: 100
+          fetch-depth: 1000
           fetch-tags: true
           show-progress: true
           lfs: true

@@ -56,12 +56,6 @@ AVPlayer *avplayer;
         return;
     }
     
-    //some translations needed
-    if([@"audio/mpeg" isEqualToString:mimeType])
-    {
-        DDLogDebug(@"Overwriting mimeType: '%@' with 'audio/mp4'...", mimeType);
-        mimeType = @"audio/mp4";
-    }
     
     __block AVURLAsset* videoAsset = nil;
     //the completion is called synchronously

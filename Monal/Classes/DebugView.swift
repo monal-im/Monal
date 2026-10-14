@@ -50,6 +50,9 @@ struct LogFilesView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text("This can be used to export logfiles.\n[Learn how to read them](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#view-the-log).")
+            Text("Patch level: \(HelperTools.patchLevel())")
+                .font(.footnote)
+                .textSelection(.enabled)
             List {
                 Section(header: Text("Logfiles")) {
                     ForEach(sortedLogFileInfos, id: \.self) { logFileInfo in

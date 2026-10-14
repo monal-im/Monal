@@ -208,6 +208,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
 +(monal_void_block_t) startQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue;
 
 +(NSString*) appBuildVersionInfoFor:(MLVersionType) type;
++(NSString*) patchLevel;
 
 +(NSNumber*) currentTimestampInSeconds;
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date;

@@ -53,6 +53,7 @@
 #import <monalxmpp/MLUDPLogger.h>
 #import <monalxmpp/MLStreamRedirect.h>
 #import "commithash.h"
+#import "patchLevel.h"
 #import <monalxmpp/MLContactSoftwareVersionInfo.h>
 #import <monalxmpp/IPC.h>
 #import <monalxmpp/MLDelayableTimer.h>
@@ -2997,11 +2998,16 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
         if(type == MLVersionTypeIQ)
             return _versionInfoCache[@(type)] = rawVersionString;
         else if(type == MLVersionTypeLog)
-            return _versionInfoCache[@(type)] = [NSString stringWithFormat:@"Version %@, %@ on iOS/macOS %@", rawVersionString, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion];
+            return _versionInfoCache[@(type)] = [NSString stringWithFormat:@"Version %@ (patch level %@), %@ on iOS/macOS %@", rawVersionString, [self patchLevel], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion];
         else if(type==MLVersionTypeUserAgent)
             return _versionInfoCache[@(type)] = [[HelperTools defaultsDB] boolForKey: @"allowVersionIQ"] ? [NSString stringWithFormat:@"Monal %@", rawVersionString] : @"Monal";
         unreachable(@"unknown version type!");
     }
+}
+
++(NSString*) patchLevel
+{
+    return PATCH_LEVEL;
 }
 
 // Similar to UIDevice.currentDevice.identifierForVendor, but provides stable IDs

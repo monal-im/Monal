@@ -40,6 +40,10 @@ struct LogFilesView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
+            Text("Patch level: \(HelperTools.patchLevel())")
+                .font(.footnote)
+                .textSelection(.enabled)
+            
             if #available(iOS 15, *) {
                 Text("This can be used to export logfiles.\n[Learn how to read them](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#view-the-log).")
             }

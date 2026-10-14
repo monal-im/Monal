@@ -55,6 +55,7 @@ extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import "MLUDPLogger.h"
 #import "MLStreamRedirect.h"
 #import "commithash.h"
+#import "patchLevel.h"
 #import "MLContactSoftwareVersionInfo.h"
 #import "IPC.h"
 #import "MLDelayableTimer.h"
@@ -2634,9 +2635,14 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
         if(type == MLVersionTypeIQ)
             return _versionInfoCache[@(type)] = rawVersionString;
         else if(type == MLVersionTypeLog)
-            return _versionInfoCache[@(type)] = [NSString stringWithFormat:@"Version %@, %@ on iOS/macOS %@", rawVersionString, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion];
+            return _versionInfoCache[@(type)] = [NSString stringWithFormat:@"Version %@ (patch level %@), %@ on iOS/macOS %@", rawVersionString, [self patchLevel], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion];
         unreachable(@"unknown version type!");
     }
+}
+
++(NSString*) patchLevel
+{
+    return PATCH_LEVEL;
 }
 
 // Similar to UIDevice.currentDevice.identifierForVendor, but provides stable IDs

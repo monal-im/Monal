@@ -647,7 +647,7 @@
                 account_id=? \
                 AND contactName=? \
                 AND trustLevel!=1 \
-        );" andArguments:@[self.accountID, jid]] boolValue];
+        ;" andArguments:@[self.accountID, jid]] boolValue];
     }];
 }
 

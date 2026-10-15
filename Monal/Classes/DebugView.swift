@@ -50,9 +50,6 @@ struct LogFilesView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text("This can be used to export logfiles.\n[Learn how to read them](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#view-the-log).")
-            Text("Patch level: \(HelperTools.patchLevel())")
-                .font(.footnote)
-                .textSelection(.enabled)
             List {
                 Section(header: Text("Logfiles")) {
                     ForEach(sortedLogFileInfos, id: \.self) { logFileInfo in
@@ -168,38 +165,56 @@ struct ExtraSettingsView: View {
     @ObservedObject var defaultDB = DebugDefaultDB()
 
     var body: some View {
-        List {
-            Section(header: Text("Some debug settings:")) {
-                Toggle(isOn: $defaultDB.hasCompletedOnboarding) {
-                    Text("Don't show onboarding")
+        VStack(alignment: .leading) {
+            HStack {
+                Text("Patch level: \(HelperTools.patchLevel())")
+                    .textSelection(.enabled)
+                Button {
+                    UIPasteboard.general.setValue(HelperTools.patchLevel(), forPasteboardType:UTType.utf8PlainText.identifier as String)
+                    UIAccessibility.post(notification: .announcement, argument: "Patch Level ID Copied")
+                } label: {
+                    Image(systemName: "doc.on.doc")
+                        .foregroundColor(.primary)
                 }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("Copy patch level")
+                .accessibilityHint("Copies the patch level ID to the clipboard")
+            }
+            List {
+                Section(header: Text("Some debug settings:")) {
+                    Toggle(isOn: $defaultDB.hasCompletedOnboarding) {
+                        Text("Don't show onboarding")
+                    }
 
-                Toggle(isOn: $defaultDB.showNewChatView) {
-                    Text("Show new SwiftUI ChatView")
-                }
+                    Toggle(isOn: $defaultDB.showNewChatView) {
+                        Text("Show new SwiftUI ChatView")
+                    }
 
-                Toggle(isOn: $defaultDB.debugDtmfSending) {
-                    Text("Automatically play DTMF tones in all calls")
-                }
+                    Toggle(isOn: $defaultDB.debugDtmfSending) {
+                        Text("Automatically play DTMF tones in all calls")
+                    }
 
-                Toggle(isOn: $defaultDB.debugNSNotifications) {
-                    Text("Log *all* NSNotifications")
-                }
+                    Toggle(isOn: $defaultDB.debugNSNotifications) {
+                        Text("Log *all* NSNotifications")
+                    }
 
-                Button("Reset the state of all accounts") {
-                    MLXMPPManager.sharedInstance().resetAllAccountStates()
-                }
+                    Button("Reset the state of all accounts") {
+                        MLXMPPManager.sharedInstance().resetAllAccountStates()
+                    }
 
-                Button("Change app icon to christmas") {
-                    UIApplication.shared.setAlternateIconName("AlphaAppIcon-Christmas")
-                }
+                    Button("Change app icon to christmas") {
+                        UIApplication.shared.setAlternateIconName("AlphaAppIcon-Christmas")
+                    }
 
-                Button("Change app icon to default") {
-                    UIApplication.shared.setAlternateIconName(nil)
+                    Button("Change app icon to default") {
+                        UIApplication.shared.setAlternateIconName(nil)
+                    }
                 }
             }
+            .listStyle(.grouped)
         }
-        .listStyle(.grouped)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.interpolatedWindowBackground)
     }
 }
 

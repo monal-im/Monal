@@ -50,9 +50,6 @@ struct LogFilesView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Text("This can be used to export logfiles.\n[Learn how to read them](https://github.com/monal-im/Monal/wiki/Introduction-to-Monal-Logging#view-the-log).")
-            Text("Patch level: \(HelperTools.patchLevel())")
-                .font(.footnote)
-                .textSelection(.enabled)
             List {
                 Section(header: Text("Logfiles")) {
                     ForEach(sortedLogFileInfos, id: \.self) { logFileInfo in
@@ -168,6 +165,20 @@ struct ExtraSettingsView: View {
     @ObservedObject var defaultDB = DebugDefaultDB()
 
     var body: some View {
+        Button {
+            UIPasteboard.general.setValue(HelperTools.patchLevel(), forPasteboardType:UTType.utf8PlainText.identifier as String)
+            UIAccessibility.post(notification: .announcement, argument: "Patch Level ID Copied")
+        } label: {
+            HStack {
+                Text("Patch level: \(HelperTools.patchLevel())")
+                    .textSelection(.enabled)
+                Image(systemName: "doc.on.doc")
+                    .foregroundColor(.primary)
+                    .accessibilityHidden(true)
+            }
+            .accessibilityHint("Copies Patch Level ID")
+        }
+        .buttonStyle(.borderless)
         List {
             Section(header: Text("Some debug settings:")) {
                 Toggle(isOn: $defaultDB.hasCompletedOnboarding) {

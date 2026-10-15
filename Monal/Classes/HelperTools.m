@@ -1741,7 +1741,7 @@ static void notification_center_logging(CFNotificationCenterRef center, void* ob
     }];
 }
 
-+(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler
++(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler:(UITapGestureRecognizer*) handler
 {
     UIImageView* result;
     if(hasNotification)

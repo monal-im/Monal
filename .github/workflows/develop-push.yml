@@ -21,6 +21,7 @@ jobs:
       id: ${{ steps.changelog.outputs.id }}
       timestamp: ${{ steps.changelog.outputs.timestamp }}
       message: ${{ steps.changelog.outputs.message }}
+      patch_level: ${{ steps.build.outputs.patch_level }}
     env:
       APP_NAME: "Monal.Alpha"
       BUILD_SCHEME: "Monal Alpha"
@@ -43,22 +44,6 @@ jobs:
           lfs: true
       - name: Checkout submodules
         run: git submodule update -f --init --remote
-      - name: save changelog
-        id: changelog
-        env:
-          ID: ${{github.event.head_commit.id}}
-          TIMESTAMP: ${{github.event.head_commit.timestamp}}
-          MESSAGE: ${{github.event.head_commit.message}}
-        run: |
-          echo "ID: $ID" > changes.txt
-          echo "Timestamp: $TIMESTAMP" >> changes.txt
-          echo "$MESSAGE" >> changes.txt
-          
-          echo "id=$ID" >> "$GITHUB_OUTPUT"
-          echo "timestamp=$TIMESTAMP" >> "$GITHUB_OUTPUT"
-          echo "message<<__EOF__" >> "$GITHUB_OUTPUT"
-          echo "$MESSAGE" >> "$GITHUB_OUTPUT"
-          echo "__EOF__" >> "$GITHUB_OUTPUT"
       - name: Import TURN secrets
         run: |
           if [[ -e "/Users/ci/secrets.monal_alpha" ]]; then
@@ -85,11 +70,31 @@ jobs:
       #     key: xcode-cache-deriveddata-${{ github.workflow }}-${{ github.sha }}
       #     restore-keys: xcode-cache-deriveddata-${{ github.workflow }}-
       - name: Run build
+        id: build
         run: /Users/ci/build-hooks/build.sh
       - run: |
           cd Monal/build/app/tar_release
           tar -cf "../$APP_NAME.tar" "$APP_DIR"
           cd ../../../..
+      - name: save changelog
+        id: changelog
+        env:
+          ID: ${{github.event.head_commit.id}}
+          TIMESTAMP: ${{github.event.head_commit.timestamp}}
+          MESSAGE: ${{github.event.head_commit.message}}
+          PATCH_LEVEL: ${{ steps.build.outputs.patch_level }}
+        run: |
+          echo "ID: $ID" > changes.txt
+          echo "Timestamp: $TIMESTAMP" >> changes.txt
+          echo "Patch level: $PATCH_LEVEL" >> changes.txt
+          echo "" >> changes.txt
+          echo "$MESSAGE" >> changes.txt
+          
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "timestamp=$TIMESTAMP" >> "$GITHUB_OUTPUT"
+          echo "message<<__EOF__" >> "$GITHUB_OUTPUT"
+          echo "$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "__EOF__" >> "$GITHUB_OUTPUT"
       - name: Uploading to alpha site
         run: ./scripts/uploadAlpha.sh
       - name: Notarize catalyst
@@ -141,6 +146,8 @@ jobs:
             New alpha build based on the following commit:
             ${{ needs.buildAndPublishAlpha.outputs.id }}
             ${{ needs.buildAndPublishAlpha.outputs.timestamp }}
+            Patch level: ${{ needs.buildAndPublishAlpha.outputs.patch_level }}
+            
             ${{ needs.buildAndPublishAlpha.outputs.message }}
             
             Download page: https://downloads.monal-im.org/monal-im/alpha/

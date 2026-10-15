@@ -252,18 +252,27 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) configureComposeButton
 {
+    //don't replace an existing customView: this makes UIKit rebuild all bar button items
+    //and iOS > 18 sometimes hides all of them if this happens during a navigation transition
+    //or while a chat view is covering us
+    if(![self.composeButton.customView isKindOfClass:[UIImageView class]])
+    {
+        self.composeButton.customView = [UIImageView new];
+        UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
+        [self.composeButton.customView addGestureRecognizer:tapRecognizer];
+        [self.composeButton setIsAccessibilityElement:YES];
+        [self.composeButton setAccessibilityTraits:UIAccessibilityTraitButton];
+    }
+    
+    //replace the image
     UIImage* image = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];
-    UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
-    self.composeButton.customView = [HelperTools
-        buttonWithNotificationBadgeForImage:image
-        hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
-        withTapHandler:tapRecognizer];
-    [self.composeButton setIsAccessibilityElement:YES];
+    BOOL hasContactRequests = [[DataLayer sharedInstance] allContactRequests].count > 0;
+    ((UIImageView*)self.composeButton.customView).image = hasContactRequests ? [HelperTools imageWithNotificationBadgeForImage:image] : image;
+    
     if([[DataLayer sharedInstance] allContactRequests].count > 0)
         [self.composeButton setAccessibilityLabel:NSLocalizedString(@"Open contact list (contact requests pending)", @"")];
     else
         [self.composeButton setAccessibilityLabel:NSLocalizedString(@"Open contact list", @"")];
-    [self.composeButton setAccessibilityTraits:UIAccessibilityTraitButton];
 }
 
 -(void) viewDidLoad

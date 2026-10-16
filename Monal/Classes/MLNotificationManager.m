@@ -707,11 +707,6 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     [self updateBadgeForContent:content];
     
     INSendMessageIntent* intent = [self makeIntentForMessage:message havingReaction:nil usingText:msgText andAudioAttachment:audioAttachment direction:INInteractionDirectionIncoming];
-    
-    INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
-    interaction.direction = INInteractionDirectionIncoming;
-    interaction.identifier = [NSString stringWithFormat:@"%@|%@", message.accountID, message.buddyName];
-    
     NSError* error = nil;
     UNNotificationContent* updatedContent = [content contentByUpdatingWithProvider:intent error:&error];
     if(error)
@@ -722,11 +717,7 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
         [self publishNotificationContent:updatedContent withID:idval];
     }
     
-    //we can donate interactions after posting their notification (see signal source code)
-    [interaction donateInteractionWithCompletion:^(NSError *error) {
-        if(error)
-            DDLogError(@"Could not donate interaction: %@", error);
-    }];
+    [self donateInteractionForIncomingDBId:message.messageDBId];
 }
 
 -(void) donateInteractionForOutgoingDBId:(NSNumber*) messageDBId
@@ -739,6 +730,19 @@ typedef NS_ENUM(NSUInteger, MLNotificationState) {
     [interaction donateInteractionWithCompletion:^(NSError *error) {
         if(error)
             DDLogError(@"Could not donate outgoing interaction: %@", error);
+    }];
+}
+
+-(void) donateInteractionForIncomingDBId:(NSNumber*) messageDBId
+{
+    MLMessage* message = [MLMessage createMessageFromHistoryID:messageDBId];
+    INSendMessageIntent* intent = [self makeIntentForMessage:message havingReaction:nil usingText:@"dummyText" andAudioAttachment:nil direction:INInteractionDirectionIncoming];
+    INInteraction* interaction = [[INInteraction alloc] initWithIntent:intent response:nil];
+    interaction.direction = INInteractionDirectionIncoming;
+    interaction.identifier = [NSString stringWithFormat:@"%@|%@", message.accountID, message.buddyName];
+    [interaction donateInteractionWithCompletion:^(NSError *error) {
+        if(error)
+            DDLogError(@"Could not donate incoming interaction: %@", error);
     }];
 }
 

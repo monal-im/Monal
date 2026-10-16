@@ -10,7 +10,6 @@ on:
   push:
     branches:
       - develop
-      - oldstable/6.4-line
   workflow_dispatch:
 
 permissions: {}

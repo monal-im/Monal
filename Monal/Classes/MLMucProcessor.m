@@ -467,12 +467,33 @@ static NSDictionary* _optionalGroupConfigOptions;
 
 -(BOOL) processMessage:(XMPPMessage*) messageNode
 {
-    //handle member list updates of offline members (useful for members-only mucs)
-    if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/item"])
-        [self handleMembersListUpdate:[messageNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:messageNode.fromUser];
-    
-    //handle muc status codes
-    [self handleStatusCodes:messageNode];
+    //only handle these if this is a known muc we are/want to be joined
+    let contact = [MLContact createContactFromJid:messageNode.fromUser andAccountID:_account.accountID];
+    if(contact.isMuc)
+    {
+        //handle member list updates of offline members (useful for members-only mucs)
+        if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/item"])
+            [self handleMembersListUpdate:[messageNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:messageNode.fromUser];
+        
+        //handle muc status codes
+        [self handleStatusCodes:messageNode];
+        
+        //handle voice requests
+        XMPPDataForm* voiceRequest = [[messageNode findFirst:@"\\{http://jabber.org/protocol/muc#request}form\\"] copy];
+        if(voiceRequest != nil && [kMucRoleParticipant isEqualToString:voiceRequest[@"muc#role"]] && voiceRequest[@"muc#jid"] != nil)
+        {
+            let ownRole = [[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:contact];
+            if([kMucRoleModerator isEqualToString:ownRole])
+            {
+                [[DataLayer sharedInstance] addVoiceRequestBy:voiceRequest[@"muc#jid"] occupyingNick:voiceRequest[@"muc#roomnick"] inRoom:contact]; 
+                DDLogDebug(@"Publishing new voice request...");
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucVoiceRequestsUpdated object:_account userInfo:@{
+                    @"contact": contact,
+                }];
+                return YES;     //stop processing in MLMessageProcessor
+            }
+        }
+    }
     
     //handle mediated invites
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
@@ -489,7 +510,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         }
         MLContact* inviteFrom = [MLContact createContactFromJid:invitedMucJid andAccountID:_account.accountID];
         DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
-        if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !inviteFrom.isSubscribedFrom)
+        if(/*![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] &&*/ !inviteFrom.isSubscribedFrom)
         {
             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
             return YES;     //don't process this further
@@ -508,7 +529,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         
         MLContact* inviteFrom = [MLContact createContactFromJid:messageNode.fromUser andAccountID:_account.accountID];
         DDLogInfo(@"Got direct muc invite from %@ for %@ --> joining...", inviteFrom, [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
-        if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !inviteFrom.isSubscribedFrom)
+        if(/*![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] &&*/ !inviteFrom.isSubscribedFrom)
         {
             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
             return YES;     //don't process this further
@@ -516,23 +537,6 @@ static NSDictionary* _optionalGroupConfigOptions;
         DDLogInfo(@"--> joinging %@...", [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
         [self sendDiscoQueryFor:[messageNode findFirst:@"{jabber:x:conference}x@jid"] withJoin:YES andBookmarksUpdate:YES];
         return YES;     //stop processing in MLMessageProcessor
-    }
-    
-    //handle voice requests
-    XMPPDataForm* voiceRequest = [[messageNode findFirst:@"\\{http://jabber.org/protocol/muc#request}form\\"] copy];
-    let contact = [MLContact createContactFromJid:messageNode.fromUser andAccountID:_account.accountID];
-    if(contact.isMuc && voiceRequest != nil && [kMucRoleParticipant isEqualToString:voiceRequest[@"muc#role"]] && voiceRequest[@"muc#jid"] != nil)
-    {
-        let ownRole = [[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:contact];
-        if([kMucRoleModerator isEqualToString:ownRole])
-        {
-            [[DataLayer sharedInstance] addVoiceRequestBy:voiceRequest[@"muc#jid"] occupyingNick:voiceRequest[@"muc#roomnick"] inRoom:contact]; 
-            DDLogDebug(@"Publishing new voice request...");
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucVoiceRequestsUpdated object:_account userInfo:@{
-                @"contact": contact,
-            }];
-            return YES;     //stop processing in MLMessageProcessor
-        }
     }
     
     //continue processing in MLMessageProcessor

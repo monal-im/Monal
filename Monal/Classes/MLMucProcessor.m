@@ -468,7 +468,7 @@ static NSDictionary* _optionalGroupConfigOptions;
 {
     //only handle these if this is a known muc we are/want to be joined
     let contact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:_account.accountNo];
-    if(contact.isMuc)
+    if(contact.isGroup)
     {
         //handle member list updates of offline members (useful for members-only mucs)
         if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/item"])
@@ -476,22 +476,6 @@ static NSDictionary* _optionalGroupConfigOptions;
         
         //handle muc status codes
         [self handleStatusCodes:messageNode];
-        
-        //handle voice requests
-        XMPPDataForm* voiceRequest = [[messageNode findFirst:@"\\{http://jabber.org/protocol/muc#request}form\\"] copy];
-        if(voiceRequest != nil && [kMucRoleParticipant isEqualToString:voiceRequest[@"muc#role"]] && voiceRequest[@"muc#jid"] != nil)
-        {
-            let ownRole = [[DataLayer sharedInstance] getOwnRoleInGroupOrChannel:contact];
-            if([kMucRoleModerator isEqualToString:ownRole])
-            {
-                [[DataLayer sharedInstance] addVoiceRequestBy:voiceRequest[@"muc#jid"] occupyingNick:voiceRequest[@"muc#roomnick"] inRoom:contact]; 
-                DDLogDebug(@"Publishing new voice request...");
-                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucVoiceRequestsUpdated object:_account userInfo:@{
-                    @"contact": contact,
-                }];
-                return YES;     //stop processing in MLMessageProcessor
-            }
-        }
     }
     
     //handle mediated invites

@@ -227,7 +227,7 @@
                         else
                         {
                             NSMutableDictionary* payload = [NSMutableDictionary new];
-                            payload[@"account_id"] = self.recipient.accountID;
+                            payload[@"account_id"] = self.recipient.accountId;
                             payload[@"recipient"] = self.recipient.contactJid;
                             payload[@"type"] = @"text";
                             payload[@"data"] = item;

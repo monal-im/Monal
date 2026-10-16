@@ -502,13 +502,13 @@ static NSDictionary* _optionalGroupConfigOptions;
         if(![messageNode.toUser isEqualToString:_account.connectionProperties.identity.jid])
             return YES;     //stop processing in MLMessageProcessor and ignore this invite
         
-        NSString* invitedMucJid = [HelperTools splitJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"]][@"user"];
-        if(invitedMucJid == nil)
+        NSString* inviterJid = [HelperTools splitJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"]][@"user"];
+        if(inviterJid == nil)
         {
             DDLogError(@"mediated inivite does not include a MUC jid, ignoring invite");
             return YES;
         }
-        MLContact* inviteFrom = [MLContact createContactFromJid:invitedMucJid andAccountID:_account.accountID];
+        MLContact* inviteFrom = [MLContact createContactFromJid:inviterJid andAccountID:_account.accountID];
         DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
         if(/*![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] &&*/ !inviteFrom.isSubscribedFrom)
         {

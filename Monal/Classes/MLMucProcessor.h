@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) removeUIHandlerForMuc:(NSString*) room;
 
 -(void) processPresence:(XMPPPresence*) presenceNode;
--(BOOL) processMessage:(XMPPMessage*) messageNode;
+-(BOOL) processMessage:(XMPPMessage*) messageNode withIsFromMucMam:(BOOL) isFromMucMam;
 
 -(void) join:(NSString*) room;
 -(void) leave:(NSString*) room withBookmarksUpdate:(BOOL) updateBookmarks keepBuddylistEntry:(BOOL) keepBuddylistEntry;

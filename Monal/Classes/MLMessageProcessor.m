@@ -327,7 +327,7 @@ static NSMutableDictionary* _typingNotifications;
         else
             ;   //continue processing for backscrolling history but don't call mucProcessor.processMessage to not process ancient status/memberlist updates
     }
-    else if([account.mucProcessor processMessage:messageNode])
+    else if([account.mucProcessor processMessage:messageNode withIsFromMucMam:[outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [outerMessageNode.fromUser isEqualToString:messageNode.fromUser]])
     {
         DDLogVerbose(@"Muc processor said we have to stop message processing here...");
         return nil;     //the muc processor said we have stop processing

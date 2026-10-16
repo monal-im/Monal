@@ -467,7 +467,7 @@ static NSDictionary* _optionalGroupConfigOptions;
 -(BOOL) processMessage:(XMPPMessage*) messageNode
 {
     //only handle these if this is a known muc we are/want to be joined
-    let contact = [MLContact createContactFromJid:messageNode.fromUser andAccountID:_account.accountID];
+    let contact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:_account.accountNo];
     if(contact.isMuc)
     {
         //handle member list updates of offline members (useful for members-only mucs)
@@ -501,13 +501,13 @@ static NSDictionary* _optionalGroupConfigOptions;
         if(![messageNode.toUser isEqualToString:_account.connectionProperties.identity.jid])
             return YES;     //stop processing in MLMessageProcessor and ignore this invite
         
-        NSString* invitedMucJid = [HelperTools splitJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"]][@"user"];
-        if(invitedMucJid == nil)
+        NSString* inviterJid = [HelperTools splitJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"]][@"user"];
+        if(inviterJid == nil)
         {
             DDLogError(@"mediated inivite does not include a MUC jid, ignoring invite");
             return YES;
         }
-        MLContact* inviteFrom = [MLContact createContactFromJid:invitedMucJid andAccountNo:_account.accountNo];
+        MLContact* inviteFrom = [MLContact createContactFromJid:inviterJid andAccountNo:_account.accountNo];
         DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
         if(/*![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] &&*/ !inviteFrom.isSubscribedFrom)
         {

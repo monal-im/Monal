@@ -410,7 +410,7 @@ static NSMutableDictionary* _typingNotifications;
     {
         if(!possiblyUnknownContact.isMuc)
             DDLogWarn(@"Ignoring muc subject of unknown muc: %@", possiblyUnknownContact);
-        if(isMLhistory)
+        else if(isMLhistory)
             DDLogVerbose(@"Ignoring muc subject: isMLhistory=YES...");
         else
         {

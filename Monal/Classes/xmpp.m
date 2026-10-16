@@ -2898,7 +2898,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
             
             //check FAST responder-message or SCRAM server-final message for correctness if needed
             if(!self->_htHandler.finishedSuccessfully && !self->_scramHandler.finishedSuccessfully)
-                [self handleSasl2SuccessOrContinue:parsedStanza];
+                if(![self handleSasl2SuccessOrContinue:parsedStanza])
+                    return;
             
             //needed for password reset (which is only allowed when logging in with scram/plain, not when using fast)
             _fast_used = self->_htHandler != nil && self->_htHandler.finishedSuccessfully;
@@ -3070,7 +3071,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
             
             //check FAST responder-message or SCRAM server-final message for correctness if needed
             if(!self->_htHandler.finishedSuccessfully && !self->_scramHandler.finishedSuccessfully)
-                [self handleSasl2SuccessOrContinue:parsedStanza];
+                if(![self handleSasl2SuccessOrContinue:parsedStanza])
+                    return;
             
             //needed for password reset (which is only allowed when logging in with scram/plain, not when using fast)
             _fast_used = self->_htHandler != nil && self->_htHandler.finishedSuccessfully;
@@ -3766,7 +3768,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
     }
 }
 
--(void) handleSasl2SuccessOrContinue:(MLXMLNode*) parsedStanza
+-(BOOL) handleSasl2SuccessOrContinue:(MLXMLNode*) parsedStanza
 {
     //perform logic to handle sasl success
     DDLogInfo(@"Got SASL2 Success/Continue");
@@ -3786,7 +3788,7 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 //clear FAST token (it was reported to be invalid by the server) --> use SCRAM on next login
                 [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
                 [self reconnect];
-                return;
+                return NO;
             case MLHtStatusResponderMessageOK: deactivate_account = NO; message = nil; break;        //everything is okay
             default: unreachable(@"wrong status for ht response!"); break;
         }
@@ -3815,10 +3817,11 @@ static NSRegularExpression* fastTokenRemovalRegex;
         [HelperTools postError:message withNode:nil andAccount:self andIsSevere:YES andDisableAccount:deactivate_account];
         [self disconnect];
         
-        return;
+        return NO;
     }
-    else
-        DDLogDebug(@"SCRAM/HT says this server-final-message/responder-message was correct");
+    
+    DDLogDebug(@"SCRAM/HT says this server-final-message/responder-message was correct");
+    return YES;
 }
 
 //bridge needed fo MLServerDetails.m

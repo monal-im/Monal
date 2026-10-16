@@ -464,15 +464,21 @@ static NSDictionary* _optionalGroupConfigOptions;
         DDLogWarn(@"Ignoring presence from room we are not joining and not joined to (probably the broken prosody smacks)!");
 }
 
--(BOOL) processMessage:(XMPPMessage*) messageNode
+-(BOOL) processMessage:(XMPPMessage*) messageNode withIsFromMucMam:(BOOL) isFromMucMam
 {
     //only handle these if this is a known muc we are/want to be joined
     let contact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:_account.accountNo];
     if(contact.isGroup)
     {
         //handle member list updates of offline members (useful for members-only mucs)
+        //but only if this is either a mam response from a full jid coming from the muc's archive OR coming from the bare muc jid
         if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/item"])
-            [self handleMembersListUpdate:[messageNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:messageNode.fromUser];
+        {
+            if(isFromMucMam || messageNode.fromResource == nil)
+                [self handleMembersListUpdate:[messageNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:messageNode.fromUser];
+            else
+                DDLogWarn(@"Ignoring spoofed muc#user element, not calling handleMembersListUpdate!");
+        }
         
         //handle muc status codes
         [self handleStatusCodes:messageNode];

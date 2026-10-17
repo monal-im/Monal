@@ -7,10 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 #import "MonalAppDelegate.h"
-#import "DataLayer.h"
-#import "MLConstants.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLConstants.h>
 
 int main(int argc, char *argv[]) {
     @autoreleasepool {

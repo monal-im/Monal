@@ -7,7 +7,7 @@
 //
 
 #import "MLResizingTextView.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 @implementation MLResizingTextView
 

@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLXMPPServer.h"
-#import "MLXMPPIdentity.h"
+#import <monalxmpp/MLXMPPServer.h>
+#import <monalxmpp/MLXMPPIdentity.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

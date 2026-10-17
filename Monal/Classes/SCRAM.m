@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 
 #import <Foundation/Foundation.h>
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 #import "SCRAM.h"
 
 @interface SCRAM ()

@@ -8,20 +8,20 @@
 
 #import <Foundation/Foundation.h>
 
-#import "MLConstants.h"
-#import "MLMucProcessor.h"
-#import "MLHandler.h"
-#import "xmpp.h"
-#import "DataLayer.h"
-#import "XMPPDataForm.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLMucProcessor.h>
+#import <monalxmpp/MLHandler.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/XMPPDataForm.h>
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
-#import "XMPPPresence.h"
-#import "MLNotificationQueue.h"
-#import "MLPubSub.h"
-#import "MLPubSubProcessor.h"
-#import "MLOMEMO.h"
-#import "MLImageManager.h"
+#import <monalxmpp/XMPPPresence.h>
+#import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLPubSub.h>
+#import <monalxmpp/MLPubSubProcessor.h>
+#import <monalxmpp/MLOMEMO.h>
+#import <monalxmpp/MLImageManager.h>
 
 #define CURRENT_MUC_STATE_VERSION @10
 
@@ -466,12 +466,17 @@ static NSDictionary* _optionalGroupConfigOptions;
 
 -(BOOL) processMessage:(XMPPMessage*) messageNode
 {
-    //handle member list updates of offline members (useful for members-only mucs)
-    if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/item"])
-        [self handleMembersListUpdate:[messageNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:messageNode.fromUser];
-    
-    //handle muc status codes
-    [self handleStatusCodes:messageNode];
+    //only handle these if this is a known muc we are/want to be joined
+    let contact = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:_account.accountNo];
+    if(contact.isGroup)
+    {
+        //handle member list updates of offline members (useful for members-only mucs)
+        if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/item"])
+            [self handleMembersListUpdate:[messageNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"] forMuc:messageNode.fromUser];
+        
+        //handle muc status codes
+        [self handleStatusCodes:messageNode];
+    }
     
     //handle mediated invites
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
@@ -480,15 +485,15 @@ static NSDictionary* _optionalGroupConfigOptions;
         if(![messageNode.toUser isEqualToString:_account.connectionProperties.identity.jid])
             return YES;     //stop processing in MLMessageProcessor and ignore this invite
         
-        NSString* invitedMucJid = [HelperTools splitJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"]][@"user"];
-        if(invitedMucJid == nil)
+        NSString* inviterJid = [HelperTools splitJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"]][@"user"];
+        if(inviterJid == nil)
         {
             DDLogError(@"mediated inivite does not include a MUC jid, ignoring invite");
             return YES;
         }
-        MLContact* inviteFrom = [MLContact createContactFromJid:invitedMucJid andAccountNo:_account.accountNo];
+        MLContact* inviteFrom = [MLContact createContactFromJid:inviterJid andAccountNo:_account.accountNo];
         DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
-        if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !inviteFrom.isSubscribedFrom)
+        if(/*![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] &&*/ !inviteFrom.isSubscribedFrom)
         {
             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
             return YES;     //don't process this further
@@ -507,7 +512,7 @@ static NSDictionary* _optionalGroupConfigOptions;
         
         MLContact* inviteFrom = [MLContact createContactFromJid:messageNode.fromUser andAccountNo:_account.accountNo];
         DDLogInfo(@"Got direct muc invite from %@ for %@ --> joining...", inviteFrom, [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
-        if(![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] && !inviteFrom.isSubscribedFrom)
+        if(/*![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] &&*/ !inviteFrom.isSubscribedFrom)
         {
             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
             return YES;     //don't process this further

@@ -6,9 +6,9 @@
 //  Copyright © 2017 Monal.im. All rights reserved.
 //
 
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 #import "MLBaseCell.h"
-#import "MLMessage.h"
+#import <monalxmpp/MLMessage.h>
 
 @implementation MLBaseCell
 

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DataLayer.h"
+#import <monalxmpp/DataLayer.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

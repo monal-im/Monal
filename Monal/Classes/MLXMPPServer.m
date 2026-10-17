@@ -6,7 +6,7 @@
 //  Copyright © 2019 Monal.im. All rights reserved.
 //
 
-#import "MLXMPPServer.h"
+#import <monalxmpp/MLXMPPServer.h>
 
 
 @interface MLXMPPServer ()

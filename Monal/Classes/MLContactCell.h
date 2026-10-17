@@ -6,8 +6,8 @@
 //
 //
 #import "MLAttributedLabel.h"
-#import "MLContact.h"
-#import "MLMessage.h"
+#import <monalxmpp/MLContact.h>
+#import <monalxmpp/MLMessage.h>
 
 @interface MLContactCell : UITableViewCell
 

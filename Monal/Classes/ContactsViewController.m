@@ -8,13 +8,13 @@
 
 #import "ContactsViewController.h"
 #import "MLContactCell.h"
-#import "DataLayer.h"
+#import <monalxmpp/DataLayer.h>
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
-#import "xmpp.h"
+#import <monalxmpp/xmpp.h>
 #import <Monal-Swift.h>
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 @interface DZNEmptyDataSetView
 @property (atomic, strong) UIView* contentView;
@@ -39,7 +39,7 @@
 {
     UIViewController* addContactMenuView = [[SwiftuiInterface new] makeAddContactViewWithDismisser:^(MLContact* _Nonnull newContact) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            DDLogVerbose(@"Calling block self.selectContact: %@", self.selectContact);
+            //DDLogVerbose(@"Calling block self.selectContact: %@", self.selectContact);
             if(self.selectContact)
                 self.selectContact(newContact);
         });

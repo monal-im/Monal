@@ -6,8 +6,8 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
-#import "MLPipe.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLPipe.h>
+#import <monalxmpp/HelperTools.h>
 
 #define kPipeBufferSize 4096
 

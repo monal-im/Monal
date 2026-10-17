@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 
 @interface MLResizingTextView : UITextView
 

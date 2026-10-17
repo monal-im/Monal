@@ -6,13 +6,13 @@
 //  Copyright © 2018 Monal.im. All rights reserved.
 //
 
-#import "MLConstants.h"
-#import "MLSignalStore.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLSignalStore.h>
 #import "SignalProtocolObjC.h"
-#import "DataLayer.h"
-#import "MLSQLite.h"
-#import "HelperTools.h"
-#import "MLOMEMO.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLSQLite.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLOMEMO.h>
 
 @interface MLSignalStore()
 {

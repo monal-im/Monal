@@ -7,9 +7,9 @@
 //
 
 #import "AccountListController.h"
-#import "DataLayer.h"
-#import "MLXMPPManager.h"
-#import "HelperTools.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/HelperTools.h>
 
 @interface AccountListController ()
 @property (nonatomic, strong) NSDateFormatter* uptimeFormatter;

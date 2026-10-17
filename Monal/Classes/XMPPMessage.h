@@ -7,7 +7,7 @@
 //
 
 
-#import "XMPPStanza.h"
+#import <monalxmpp/XMPPStanza.h>
 
 FOUNDATION_EXPORT NSString* const kMessageChatType;
 FOUNDATION_EXPORT NSString* const kMessageGroupChatType;

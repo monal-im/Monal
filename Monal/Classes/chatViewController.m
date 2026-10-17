@@ -17,22 +17,22 @@
 
 #import "ActiveChatsViewController.h"
 #import "AESGcm.h"
-#import "DataLayer.h"
-#import "HelperTools.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/HelperTools.h>
 #import "MBProgressHUD.h"
 #import "MLChatInputContainer.h"
 #import "MLChatViewHelper.h"
-#import "MLConstants.h"
-#import "MLFiletransfer.h"
-#import "MLImageManager.h"
-#import "MLMucProcessor.h"
-#import "MLVoIPProcessor.h"
-#import "MLNotificationQueue.h"
-#import "MLOMEMO.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLMucProcessor.h>
+#import <monalxmpp/MLVoIPProcessor.h>
+#import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLOMEMO.h>
 #import "MLSearchViewController.h"
 #import "MLXEPSlashMeHandler.h"
 #import "MonalAppDelegate.h"
-#import "xmpp.h"
+#import <monalxmpp/xmpp.h>
 #import "XMPPMessage.h"
 
 #import <Monal-Swift.h>
@@ -270,9 +270,39 @@ enum msgSentState {
     // don't double-count what the system already adds via safe areas
     CGFloat systemBottom = self.messageTable.adjustedContentInset.bottom - self.messageTable.contentInset.bottom;
     UIEdgeInsets insets = self.messageTable.contentInset;
-    insets.bottom = MAX(needed - systemBottom, 0);
+    CGFloat newBottom = MAX(needed - systemBottom, 0);
+    if(fabs(insets.bottom - newBottom) < 0.5)
+        return;     // nothing changed
+    insets.bottom = newBottom;
     self.messageTable.contentInset = insets;
     self.messageTable.scrollIndicatorInsets = insets;
+
+    // a changed inset moves the bottom: keep the most recent message fully visible if we were showing it
+    if(self->_isAtBottom && !self.messageTable.isDragging && !self.messageTable.isDecelerating)
+        [self pinToBottomIfNeeded];
+}
+
+// Scroll to the very bottom using real (not estimated) row heights.
+// With UITableViewAutomaticDimension the contentSize is only an estimate until the rows near the bottom
+// have been laid out; group chats (sender names shown/hidden per row) differ most from that estimate.
+-(void) pinToBottomIfNeeded
+{
+    if(!self->_isAtBottom || self.messageList.count == 0)
+        return;
+    NSInteger rows = [self.messageTable numberOfRowsInSection:messagesSection];
+    if(rows == 0)
+        return;
+    NSIndexPath* lastRow = [NSIndexPath indexPathForRow:rows-1 inSection:messagesSection];
+    // two passes: the first one makes the bottom rows visible so they get self-sized,
+    // the second one uses the now-correct contentSize
+    for(int pass = 0; pass < 2; pass++)
+    {
+        [self.messageTable scrollToRowAtIndexPath:lastRow atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+        [self.messageTable layoutIfNeeded];
+        [self.messageTable setContentOffset:CGPointMake(0, [self bottomContentOffsetY]) animated:NO];
+    }
+    self->_isAtBottom = YES;
+    [self.lastMsgButton setHidden:YES];
 }
 
 -(void) updateVoiceRequestButton
@@ -891,6 +921,13 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [nc addObserver:self selector:@selector(keyboardWillDisappear:) name:UIKeyboardWillHideNotification object:nil];
 
+    if(@available(iOS 27.0,*))
+    {
+        //on iOS 27 attaching/resizing the inputAccessoryView doesn't reliably produce show/hide notifications,
+        //but it always produces a frame change: use that to keep the table's bottom inset in sync
+        [nc addObserver:self selector:@selector(keyboardDidChangeFrame:) name:UIKeyboardDidChangeFrameNotification object:nil];
+    }
+
     [nc addObserver:self selector:@selector(handleReceivedMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalMessageDisplayedNotice object:nil];
     [nc addObserver:self selector:@selector(handleFiletransferMessageUpdate:) name:kMonalMessageFiletransferUpdateNotice object:nil];
@@ -956,6 +993,16 @@ enum msgSentState {
     self.viewDidAppear = YES;
 
     [self initSearchViewControler];
+
+    if(@available(iOS 27.0,*))
+    {
+        //the inputAccessoryView only gets attached to the window once we are first responder (e.g. after appearing),
+        //updateTableBottomInset bails out before that --> recalculate now and pin the last message to the bottom
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self updateTableBottomInset];
+            [self pinToBottomIfNeeded];
+        });
+    }
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -2019,6 +2066,13 @@ enum msgSentState {
             NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
             [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:animated];
             self->_isAtBottom = YES;
+
+            if(@available(iOS 27.0,*))
+            {
+                //correct for estimated row heights (scrollToRowAtIndexPath alone can stop short of the real bottom)
+                if(!animated)
+                    [self pinToBottomIfNeeded];
+            }
         }
         [self refreshCounter];
     };
@@ -3280,6 +3334,11 @@ enum msgSentState {
         self.messageTable.contentInset = contentInsets;
         self.messageTable.scrollIndicatorInsets = contentInsets;
     }
+}
+
+- (void)keyboardDidChangeFrame:(NSNotification*)aNotification
+{
+    [self updateTableBottomInset];
 }
 
 - (void)keyboardWillShow:(NSNotification*)aNotification

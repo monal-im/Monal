@@ -6,7 +6,7 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
-#import "MLNotificationQueue.h"
+#import <monalxmpp/MLNotificationQueue.h>
 
 //use a dedicated scheme for thread local storage dict entries
 #define kNotificationQueueStack @"im.monal:MLNotificationQueue.m|kNotificationQueueStack"

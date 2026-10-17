@@ -7,10 +7,10 @@
 //
 
 #import "XMPPIQ.h"
-#import "XMPPDataForm.h"
-#import "HelperTools.h"
+#import <monalxmpp/XMPPDataForm.h>
+#import <monalxmpp/HelperTools.h>
 #import "SignalPreKey.h"
-#import "MLContact.h"
+#import <monalxmpp/MLContact.h>
 
 @class MLContact;
 

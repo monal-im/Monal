@@ -8,17 +8,17 @@
 
 #import <Foundation/Foundation.h>
 
-#import "MLConstants.h"
-#import "MLPubSubProcessor.h"
-#import "MLPubSub.h"
-#import "MLHandler.h"
-#import "xmpp.h"
-#import "DataLayer.h"
-#import "MLImageManager.h"
-#import "MLNotificationQueue.h"
-#import "MLMucProcessor.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLPubSubProcessor.h>
+#import <monalxmpp/MLPubSub.h>
+#import <monalxmpp/MLHandler.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLMucProcessor.h>
 #import "XMPPIQ.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 @interface MLPubSubProcessor()
 

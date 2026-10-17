@@ -7,9 +7,9 @@
 //
 
 #import "MLChatCell.h"
-#import "MLImageManager.h"
-#import "MLConstants.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/HelperTools.h>
 
 @import SafariServices;
 

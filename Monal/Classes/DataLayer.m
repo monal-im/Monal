@@ -2525,7 +2525,9 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idWriteTransaction:^{
         [self.db executeNonQuery:@"INSERT INTO idle_timers (timeout, account_id, handler) VALUES (?, ?, ?);" andArguments:@[timeout, accountID, [HelperTools serializeObject:handler]]];
-        return [self.db lastInsertId];
+        NSNumber* retval = [self.db lastInsertId];
+        DDLogVerbose(@"Added idle timer %@(%@): %@", retval, timeout, handler);
+        return retval;
     }];
 }
 

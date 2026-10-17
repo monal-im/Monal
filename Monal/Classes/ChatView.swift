@@ -437,7 +437,9 @@ struct ChatView: View {
         }
         self.isUploadingFile = true
         do {
+            localFileURL.startAccessingSecurityScopedResource()
             let (url, mimeType, size) = try await MLFiletransfer.uploadFile(localFileURL, onAccount: self.account, withEncryption: self.contact.isEncrypted)
+            localFileURL.stopAccessingSecurityScopedResource()
             await MainActor.run {
                 guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: url, havingType: kMessageTypeFiletransfer, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: ["mimeType": mimeType, "size": size]) else {
                     self.isUploadingFile = false
@@ -446,6 +448,7 @@ struct ChatView: View {
                 messages.append(ChatViewMessage(newMLMessage))
             }
         } catch {
+            localFileURL.stopAccessingSecurityScopedResource()
             DDLogError("Couldn't upload file! error:  \(error.localizedDescription)")
             alertPrompt = AlertPrompt(
                 title: Text("Could not upload file"),

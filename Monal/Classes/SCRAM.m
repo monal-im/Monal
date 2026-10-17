@@ -896,7 +896,7 @@
         [unassignedCodePointsCharacterSet addCharactersInRange:NSMakeRange(0xE0000, 1)];  // U+E0000
         [unassignedCodePointsCharacterSet addCharactersInRange:NSMakeRange(0xE0002, 0x1E)];  // U+E0002 to U+E001F
         [unassignedCodePointsCharacterSet addCharactersInRange:NSMakeRange(0xE0080, 0xFF7E)];  // U+E0080 to U+EFFFD
-        NSRange unassignedRange = [str rangeOfCharacterFromSet:displayOrderCharacterSet];
+        NSRange unassignedRange = [str rangeOfCharacterFromSet:unassignedCodePointsCharacterSet];
         if(unassignedRange.location != NSNotFound)
             return @"";
     }

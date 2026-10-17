@@ -7,17 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 #import "Monal-Swift.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
-#import "xmpp.h"
-#import "MLXMPPManager.h"
-#import "MLVoIPProcessor.h"
-#import "MLCall.h"
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/MLVoIPProcessor.h>
+#import <monalxmpp/MLCall.h>
 #import "MonalAppDelegate.h"
-#import "MLOMEMO.h"
+#import <monalxmpp/MLOMEMO.h>
 
 @import CallKit;
 @import WebRTC;
@@ -1505,6 +1505,18 @@
         XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
         [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"conflict" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+        ] andData:nil]];
+        [self.account send:errorIq];
+        return;
+    }
+    
+    //check if we or the remote party aleady accepted the call, incoming sdp without an accepted call would provoke an IP leak
+    if(self.jmiProceed == nil)
+    {
+        DDLogWarn(@"Got new remote sdp but the call wasn't yet accepted! IP leak provocation??");
+        XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:iqNode];
+        [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"not-acceptable" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
         ] andData:nil]];
         [self.account send:errorIq];
         return;

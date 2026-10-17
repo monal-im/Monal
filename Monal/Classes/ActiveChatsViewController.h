@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "MLConstants.h"
-#import "MLContact.h"
-#import "MLCall.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLContact.h>
+#import <monalxmpp/MLCall.h>
 #import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
 
 NS_ASSUME_NONNULL_BEGIN

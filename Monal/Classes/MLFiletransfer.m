@@ -7,14 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
-#import "MLFiletransfer.h"
-#import "DataLayer.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/DataLayer.h>
 #import "MLEncryptedPayload.h"
-#import "xmpp.h"
+#import <monalxmpp/xmpp.h>
 #import "AESGcm.h"
-#import "MLXMPPManager.h"
-#import "MLNotificationQueue.h"
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/MLNotificationQueue.h>
 
 @import MobileCoreServices;
 @import UniformTypeIdentifiers;

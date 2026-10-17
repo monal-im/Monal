@@ -13,6 +13,7 @@ swift-bridge = "0.1"
 sdp-to-jingle = { path = "../sdp-to-jingle" }
 monal-panic-handler = { path = "../monal-panic-handler" }
 monal-html-parser = { path = "../monal-html-parser" }
+monal-xml-parser = { path = "../monal-xml-parser" }
 
 
 [build-dependencies]

@@ -6,7 +6,7 @@
 //  Copyright __MyCompanyName__ 2008. All rights reserved.
 //
 
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -8,11 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import "XMPPIQ.h"
-#import "MLXMPPConnection.h"
+#import <monalxmpp/MLXMPPConnection.h>
 #import "XMPPIQ.h"
-#import "XMPPDataForm.h"
-#import "MLXMLNode.h"
-#import "xmpp.h"
+#import <monalxmpp/XMPPDataForm.h>
+#import <monalxmpp/MLXMLNode.h>
+#import <monalxmpp/xmpp.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

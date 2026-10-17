@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLConstants.h"
-#import "MLDelayableTimer.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLDelayableTimer.h>
 
-#include "metamacros.h"
+#include <monalxmpp/metamacros.h>
 
 #define createDelayableTimer(timeout, handler, ...)                                     createDelayableQueuedTimer(timeout, nil, handler, __VA_ARGS__)
 #define createDelayableQueuedTimer(timeout, queue, handler, ...)                        metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startDelayableQueuedTimer:timeout withHandler:handler andCancelHandler:nil andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__ onQueue:queue])(_createDelayableQueuedTimer(timeout, queue, handler, __VA_ARGS__))
@@ -204,6 +204,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
 +(monal_void_block_t) startQueuedTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func onQueue:(dispatch_queue_t _Nullable) queue;
 
 +(NSString*) appBuildVersionInfoFor:(MLVersionType) type;
++(NSString*) patchLevel;
 
 +(NSNumber*) currentTimestampInSeconds;
 +(NSNumber*) dateToNSNumberSeconds:(NSDate*) date;

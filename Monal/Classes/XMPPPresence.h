@@ -6,8 +6,8 @@
 //
 //
 
-#import "XMPPStanza.h"
-#import "MLContact.h"
+#import <monalxmpp/XMPPStanza.h>
+#import <monalxmpp/MLContact.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

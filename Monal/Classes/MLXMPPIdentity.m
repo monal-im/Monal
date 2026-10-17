@@ -6,8 +6,8 @@
 //  Copyright © 2019 Monal.im. All rights reserved.
 //
 
-#import "MLXMPPIdentity.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLXMPPIdentity.h>
+#import <monalxmpp/HelperTools.h>
 
 @interface MLXMPPIdentity ()
 

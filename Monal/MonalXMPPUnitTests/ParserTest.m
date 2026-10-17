@@ -8,17 +8,18 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
-#import "MLConstants.h"
-#import "HelperTools.h"
+#import <monalxmpp/monalxmpp-Swift.h>
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/HelperTools.h>
 #import "MLBasePaser.h"
 
 static NSMutableArray<MLXMLNode*>* _parsedStanzas;
 static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         <stream:stream xmlns:stream='http://etherx.jabber.org/streams' version='1.0' xmlns='jabber:client' xml:lang='en' from='example.org' id='a344b8bb-518e-4456-9140-d15f66c1d2db'>\n\
 \
-        <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism></mechanisms></stream:features>\n\
+        <stream:features><utf8-multibyte-example1 xmlns='ex:1' comment='should survive byte-level chunking'>ÄÄÄÄ#ÜÜÜÜ#ÖÖÖÖ~ääääääää#üüüüüüüü#öööööööö</utf8-multibyte-example1><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl' someEmptyAttribute=''><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism></mechanisms></stream:features>\n\
 \
-        <message from='test@example.org' id='some_id' xmlns='jabber:client'>\n\
+        <message from='test@example.org' id='some_id' xmlns='jabber:client' utf8-multibyte-example2='ÄÄÄÄ#ÜÜÜÜ#ÖÖÖÖ~ääääääää#üüüüüüüü#öööööööö'>\n\
             <body>Message text</body>\n\
             <body xmlns='urn:some:different:namespace'>This will NOT be used</body>\n\
             <some xmlns='urn:some:different:namespace' fin='true' hello='0' world='1' number='42' uuid='18382ACA-EF9D-4BC9-8779-7901C63B6631' id='18382ACA' when='2002-09-10T23:08:25Z'>aGVsbG8gd29ybGQh</some>\n\
@@ -81,19 +82,23 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
     MLBasePaser* delegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
         if(parsedStanza != nil)
         {
-            DDLogInfo(@"Got new parsed stanza: %@", parsedStanza);
+            NSLog(@"Got new parsed stanza: %@", parsedStanza);
             [_parsedStanzas addObject:parsedStanza];
         }
     }];
 #pragma clang diagnostic pop
     
-    //create xml parser, configure our delegate and feed it with data
-    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[_rawXML dataUsingEncoding:NSUTF8StringEncoding]];
-    [xmlParser setShouldProcessNamespaces:YES];
-    [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
-    [xmlParser setShouldResolveExternalEntities:NO];
-    [xmlParser setDelegate:delegate];
-    [xmlParser parse];     //blocking operation
+    //create xml parser, configure our delegate and feed it with data in 3 byte chunks to make sure the parser works with incomplete data, too
+    //(don't use 1 byte chunks because we want to test excess data handling, too)
+    XmlParserBridge* xmlParser = [[XmlParserBridge alloc] initWith:delegate];
+    
+    NSUInteger chunkSize = 3;
+    NSData* data = [_rawXML dataUsingEncoding:NSUTF8StringEncoding];
+    for(NSUInteger offset=0; offset<[data length]; offset+=chunkSize)
+    {
+        NSData* chunk = [data subdataWithRange:NSMakeRange(offset, MIN(chunkSize, [data length] - offset))];
+        [xmlParser feedData:chunk.bytes withLength:chunk.length];     //blocking operation
+    }
 }
 
 -(void) setUp
@@ -104,6 +109,25 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
 -(void) tearDown
 {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
+}
+
+-(void) testUtf8MultibyteChunking
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //stanzas 0 and 1 should match
+        id result0 = [_parsedStanzas[i] findFirst:@"/{http://etherx.jabber.org/streams}features/{ex:1}utf8-multibyte-example1#"];
+        id result1 = [_parsedStanzas[i] findFirst:@"/{jabber:client}message@utf8-multibyte-example2"];
+        if(i == 0)
+            XCTAssertEqualObjects(result0, @"ÄÄÄÄ#ÜÜÜÜ#ÖÖÖÖ~ääääääää#üüüüüüüü#öööööööö", "stanza 0 should match and return the correct multibyte utf-8 umlauts in text contents");
+        else if(i == 1)
+            XCTAssertEqualObjects(result1, @"ÄÄÄÄ#ÜÜÜÜ#ÖÖÖÖ~ääääääää#üüüüüüüü#öööööööö", "stanza 1 should match and return the correct multibyte utf-8 umlauts in attribute value");
+        else
+        {
+            XCTAssertNil(result0, "all other stanzas should not match: %lu", i);
+            XCTAssertNil(result1, "all other stanzas should not match: %lu", i);
+        }
+    }
 }
 
 -(void) testParseConversionBase64
@@ -265,7 +289,204 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
     }
 }
 
--(void) testParseAttributePresence01
+-(void) testParseBrokenQueryAttributeFilterRegexBroken
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/<someUnknownAttribute~[]bro[ken[^regex$>"], XMLQueryBrokenException, @"AttributeFilterRegexException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryAttributeFilterEmptyRegexValue
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/<someUnknownAttribute~>"], XMLQueryBrokenException, @"AttributeFilterRegexException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseAttributeFilterEmptyVerbatimValue
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        BOOL result = [_parsedStanzas[i] check:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms<someEmptyAttribute=>"];
+        if(i == 0)
+            XCTAssertTrue(result, "stanza 0 should match the empty but present attribute");
+        else
+            XCTAssertFalse(result, "all other stanzas should not match: %lu", i);
+    }
+}
+
+-(void) testParseBrokenQueryGarbageInputUsingMultipleConversionCommandSeparators
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"|||"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryMissingNodeSelectionBeforeConversionCommand
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"|base64"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryDoubleConversionCommand
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"#|base64|base64"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryNeitherElementNorNamespace
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"@@|bool"], XMLQueryBrokenException, @"NeitherElementNorNamespaceException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenConversionQuery
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/@@|bool"], XMLQueryBrokenException, @"ConversionCommandOnNonStringResultException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryPathComponent01
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"//#|bool"], XMLQueryBrokenException, @"PathComponentBrokenException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryPathComponent02
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"//#|bool"], XMLQueryBrokenException, @"PathComponentBrokenException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryConversionNotAtTerminalNode01
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/#|bool/{hello}world"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryConversionNotAtTerminalNode02
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"{hello}world|bool/{some}element"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryConversionForFullNode
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"{*}*|bool"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryFormsQueryOnNonDataForm
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should give that error
+        XCTAssertThrowsSpecificNamed([_parsedStanzas[i] find:@"/{*}*\\{some}result@here\\"], XMLQueryBrokenException, @"DataFormsQueryOnNonDataFormsNodeException", "all stanzas should throw an exception");
+    }
+}
+
+-(void) testParseBrokenQueryDataFormsSubqueryUnallowedConversionCommandAfterFullDataFormExtraction
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result\\|base64"], XMLQueryBrokenException, @"DataFormsConversionException", "all stanzas should throw an exception");
+}
+
+-(void) testParseBrokenQueryDataFormsSubqueryUnallowedConversionCommandAfterFullFieldExtraction
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result&muc#roomconfig_roomname\\|uuidcast"], XMLQueryBrokenException, @"DataFormsConversionException", "all stanzas should throw an exception");
+}
+
+-(void) testParseBrokenQueryDataFormsSubqueryEmpty
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\\\"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+}
+
+-(void) testParseBrokenQueryDataFormsSubqueryGarbage
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+        {
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\***{***}\\"], XMLQueryBrokenException, @"DataFormSyntaxErrorException", "all stanzas should throw an exception");
+        }
+}
+
+-(void) testParseBrokenQueryDoubleConversionCommandAfterDataFormSubquery
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertThrowsSpecificNamed([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\|datetime|uuidcast"], XMLQueryBrokenException, @"SyntaxErrorException", "all stanzas should throw an exception");
+}
+
+-(void) testParseDataFormSubqueryImplicitNamespaceAndElementName
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //all stanzas should be filtered by the implicit '{jabber:x:data}x' query, thus don't match
+        id result = [_parsedStanzas[i] find:@"/\\{some}result@here\\"];
+        XCTAssertEqualObjects(result, @[], "all stanzas should be filtered by the implicit '{jabber:x:data}x' query, thus don't match");
+    }
+}
+
+-(void) testParseDataFormsSubquery
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+    {
+        //stanza 2 should match
+        id result = [_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\"];
+        if(i == 2)
+            XCTAssertEqualObjects(result, @"testchat gruppe");
+        else
+            XCTAssertNil(result, "all other stanzas should not match: %lu", i);
+    }
+}
+
+-(void) testParseDataFormsSubqueryWithConversion
+{
+    for(unsigned long i=0; i<_parsedStanzas.count; i++)
+        if(i == 2)
+            XCTAssertNoThrow([_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\|uuidcast"], "dataform subqueries should not throw when using conversion commands for field extractions");
+}
+
+-(void) testParseAttributePresence
 {
     for(unsigned long i=0; i<_parsedStanzas.count; i++)
     {
@@ -284,11 +505,11 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
                 if(j == 0)
                 {
                     XCTAssertTrue([result[j] check:@"/{urn:checker:0}attr-presence"], "attr-presence element 0 should have namespace urn:checker:0");
-                    XCTAssertTrue([result[j] check:@"/{urn:checker:0}attr-presence<test1!>"], "attr-presence element 0 should match 'test1!' attr check");
-                    XCTAssertFalse([result[j] check:@"/{urn:checker:0}attr-presence<test2!>"], "attr-presence element 0 should not match 'test2!' attr check");
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:0}attr-presence<test1!~.*>"], "attr-presence element 0 should not match 'test1!~.*' attr check");
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:0}attr-presence<test2!~.*>"], "attr-presence element 0 should match 'test2!~.*' attr check");
                     
-                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:0}attr-presence<test1!>"];
-                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 0 should match 'test1!' attr check and be an idempotent match");
+                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:0}attr-presence<test1~.*>"];
+                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 0 should match 'test1~.*' attr check and be an idempotent match");
                     
                     XCTAssertEqualObjects(innerResult1, @"yellow", "attr-presence element 0 should have 'test1' attr with value 'yellow': %@", innerResult1);
                     XCTAssertNil(innerResult2, "attr-presence element 0 should not have 'test2' attr: %@", innerResult2);
@@ -296,11 +517,11 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
                 else if(j == 1)
                 {
                     XCTAssertTrue([result[j] check:@"/{urn:checker:1}attr-presence"], "attr-presence element 1 should have namespace urn:checker:1: %@", result[j]);
-                    XCTAssertFalse([result[j] check:@"/{urn:checker:1}attr-presence<test1!>"], "attr-presence element 1 should not match 'test1!' attr check: %@", result[j]);
-                    XCTAssertTrue([result[j] check:@"/{urn:checker:1}attr-presence<test2!>"], "attr-presence element 1 should match 'test2!' attr check: %@", result[j]);
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:1}attr-presence<test1!~.*>"], "attr-presence element 1 should match 'test1!~.*' attr check: %@", result[j]);
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:1}attr-presence<test2!~.*>"], "attr-presence element 1 should not match 'test2!~.*' attr check: %@", result[j]);
                     
-                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:1}attr-presence<test2!>"];
-                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 1 should match 'test2!' attr check and be an idempotent match");
+                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:1}attr-presence<test2~.*>"];
+                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 1 should match 'test2~.*' attr check and be an idempotent match");
                     
                     XCTAssertNil(innerResult1, "attr-presence element 1 should not have 'test1' attr: %@", innerResult1);
                     XCTAssertEqualObjects(innerResult2, @"green", "attr-presence element 1 should have 'test2' attr with value 'green': %@", innerResult2);
@@ -308,14 +529,17 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
                 else if(j == 2)
                 {
                     XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence"], "attr-presence element 0 should have namespace urn:checker:2: %@", result[j]);
-                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test1!>"], "attr-presence element 2 should match 'test1!' attr check: %@", result[j]);
-                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test2!>"], "attr-presence element 2 should match 'test2!' attr check: %@", result[j]);
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:2}attr-presence<test1!~.*>"], "attr-presence element 2 should not match 'test1!~.*' attr check: %@", result[j]);
+                    XCTAssertFalse([result[j] check:@"/{urn:checker:2}attr-presence<test2!~.*>"], "attr-presence element 2 should not match 'test2!~.*' attr check: %@", result[j]);
                     
-                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:2}attr-presence<test1!><test2!>"];
-                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 2 should match 'test1!' and 'test2!' attr checks and be an idempotent match");
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test1~.*>"], "attr-presence element 2 should match 'test1~.*' attr check: %@", result[j]);
+                    XCTAssertTrue([result[j] check:@"/{urn:checker:2}attr-presence<test2~.*>"], "attr-presence element 2 should match 'test2~.*' attr check: %@", result[j]);
                     
-                    XCTAssertEqualObjects(innerResult1, @"blue", "attr-presence element 0 should have 'test1' attr with value 'blue': %@", innerResult1);
-                    XCTAssertEqualObjects(innerResult2, @"red", "attr-presence element 0 should have 'test2' attr with value 'red': %@", innerResult2);
+                    id innerResult0 = [result[j] findFirst:@"/{urn:checker:2}attr-presence<test1~.*><test2~.*>"];
+                    XCTAssertEqualObjects(result[j], innerResult0, "attr-presence element 2 should match 'test1~.*' and 'test2~.*' attr checks and be an idempotent match");
+                    
+                    XCTAssertEqualObjects(innerResult1, @"blue", "attr-presence element 2 should have 'test1' attr with value 'blue': %@", innerResult1);
+                    XCTAssertEqualObjects(innerResult2, @"red", "attr-presence element 2 should have 'test2' attr with value 'red': %@", innerResult2);
                 }
             }
         }
@@ -345,19 +569,6 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
         id result = [_parsedStanzas[i] findFirst:@"body#"];
         if(i == 1)
             XCTAssertEqualObjects(result, @"Message text");
-        else
-            XCTAssertNil(result, "all other stanzas should not match: %lu", i);
-    }
-}
-
--(void) testParseDataFormsSubquery
-{
-    for(unsigned long i=0; i<_parsedStanzas.count; i++)
-    {
-        //stanza 2 should match
-        id result = [_parsedStanzas[i] findFirst:@"{http://jabber.org/protocol/disco#info}query/\\{http://jabber.org/protocol/muc#roominfo}result@muc#roomconfig_roomname\\"];
-        if(i == 2)
-            XCTAssertEqualObjects(result, @"testchat gruppe");
         else
             XCTAssertNil(result, "all other stanzas should not match: %lu", i);
     }
@@ -394,7 +605,7 @@ static NSString* _rawXML = @"<?xml version='1.0'?>\n\
     NSSet* features = [NSSet setWithArray:[_parsedStanzas[i] find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
     NSArray* forms = [_parsedStanzas[i] find:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"];
     NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features andForms:forms];
-    DDLogDebug(@"Caps hash calculated: %@", ver);
+    NSLog(@"Caps hash calculated: %@", ver);
     XCTAssertEqualObjects(ver, @"q07IKJEyjvHSyhy//CH0CxmKi8w=", "Caps hash NOT equal to testcase hash 'q07IKJEyjvHSyhy//CH0CxmKi8w='!");
 }
 

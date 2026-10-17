@@ -6,9 +6,9 @@
 //  Copyright © 2023 monal-im.org. All rights reserved.
 //
 
-#import "MLConstants.h"
-#import "HelperTools.h"
-#import "MLStreamRedirect.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLStreamRedirect.h>
 
 @interface MLStreamRedirect () {
     FILE* _stream;

@@ -7,7 +7,7 @@
 //
 
 #import "MLSettingsAboutViewController.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 @interface MLSettingsAboutViewController ()
 @property (weak, nonatomic) IBOutlet UITextView* aboutVersion;

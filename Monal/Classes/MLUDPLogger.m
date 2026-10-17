@@ -12,12 +12,12 @@
 #import <CommonCrypto/CommonDigest.h>
 #import <Network/Network.h>
 #import <zlib.h>
-#import "MLUDPLogger.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLUDPLogger.h>
+#import <monalxmpp/HelperTools.h>
 #import "AESGcm.h"
-#import "MLXMPPManager.h"
-#import "MLContact.h"
-#import "xmpp.h"
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/MLContact.h>
+#import <monalxmpp/xmpp.h>
 
 DDLoggerName const DDLoggerNameUDP = @"monal.loggger.udp.mainQueue";
 

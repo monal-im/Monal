@@ -6,10 +6,10 @@
 //  Copyright © 2018 Monal.im. All rights reserved.
 //
 
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 #import "MLSoundsTableViewController.h"
 #import "MLSettingCell.h"
-#import "MLImageManager.h"
+#import <monalxmpp/MLImageManager.h>
 @import AVFoundation;
 
 @interface MLSoundsTableViewController ()

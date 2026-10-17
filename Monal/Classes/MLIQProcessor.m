@@ -8,14 +8,14 @@
 
 #import <stdatomic.h>
 #import "MLIQProcessor.h"
-#import "MLConstants.h"
-#import "MLHandler.h"
-#import "DataLayer.h"
-#import "MLImageManager.h"
-#import "HelperTools.h"
-#import "MLNotificationQueue.h"
-#import "MLContactSoftwareVersionInfo.h"
-#import "MLOMEMO.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLHandler.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLContactSoftwareVersionInfo.h>
+#import <monalxmpp/MLOMEMO.h>
 
 
 /**

@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 @import MessageUI;
 @import StoreKit;
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 #import "AccountListController.h"
 
 @interface MLSettingsTableViewController : AccountListController <MFMailComposeViewControllerDelegate, SKStoreProductViewControllerDelegate>

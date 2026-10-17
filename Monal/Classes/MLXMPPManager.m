@@ -8,15 +8,15 @@
 
 #import <UserNotifications/UserNotifications.h>
 
-#import "MLConstants.h"
-#import "MLXMPPManager.h"
-#import "DataLayer.h"
-#import "HelperTools.h"
-#import "xmpp.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/xmpp.h>
 #import "XMPPMessage.h"
-#import "MLNotificationQueue.h"
+#import <monalxmpp/MLNotificationQueue.h>
 #import "MLNotificationManager.h"
-#import "MLOMEMO.h"
+#import <monalxmpp/MLOMEMO.h>
 #import <monalxmpp/monalxmpp-Swift.h>
 
 @import Network;

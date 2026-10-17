@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "OmemoState.h"
-#import "MLSignalStore.h"
+#import <monalxmpp/OmemoState.h>
+#import <monalxmpp/MLSignalStore.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

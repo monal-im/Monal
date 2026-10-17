@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <TargetConditionals.h>
-#import "MLHandler.h"
+#import <monalxmpp/MLHandler.h>
 
 @import CocoaLumberjack;
 #define LOG_FLAG_STDERR         (1 << 5)
@@ -19,7 +19,7 @@
 #define DDLogStderr(frmt, ...)  do { LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDERR,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__); [DDLog flushLog]; } while(0)
 #define DDLogStdout(frmt, ...)  LOG_MAYBE(NO,  ddLogLevel, LOG_FLAG_STDOUT,  0, nil, __PRETTY_FUNCTION__, frmt, ##__VA_ARGS__)
 static const DDLogLevel ddLogLevel = LOG_LEVEL_STDOUT;
-#import "MLLogFileManager.h"
+#import <monalxmpp/MLLogFileManager.h>
 
 @import PromiseKit;
 #define PMKHangEnum(promise)                (((NSNumber*)PMKHang(promise)).integerValue)

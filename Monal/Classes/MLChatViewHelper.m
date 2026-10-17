@@ -7,8 +7,8 @@
 //
 
 #import "MLChatViewHelper.h"
-#import "DataLayer.h"
-#import "MLContact.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLContact.h>
 
 @import UIKit.UIAlertController;
 

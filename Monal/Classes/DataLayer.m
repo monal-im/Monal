@@ -2570,9 +2570,10 @@ static NSDateFormatter* dbFormatter;
 }
 
 //this method will only be called from our timer background thread also handling iq timeouts
--(void) decrementIdleTimersForAccount:(xmpp*) account
+-(BOOL) decrementIdleTimersForAccount:(xmpp*) account
 {
-    return [self.db voidWriteTransaction:^{
+    return [self.db boolWriteTransaction:^{
+        BOOL handlerCalled = NO;
         for(NSDictionary* timer in [self.db executeReader:@"SELECT * FROM idle_timers WHERE account_id=?;" andArguments:@[account.accountID]])
         {
             DDLogVerbose(@"Decrementing idle timer %@(%@): %@", timer[@"id"], timer[@"timeout"], [HelperTools unserializeData:timer[@"handler"]]);
@@ -2581,11 +2582,13 @@ static NSDateFormatter* dbFormatter;
                 //this timer expired --> call it's handler and delete the timer afterwards
                 $call([HelperTools unserializeData:timer[@"handler"]], $ID(account), $ID(timerId, timer[@"id"]));
                 [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE id=?;" andArguments:@[timer[@"id"]]];
+                handlerCalled = YES;
                 continue;
             }
             //just decrease timeout of this timer (it will expire when reaching zero)
             [self.db executeNonQuery:@"UPDATE idle_timers SET timeout=timeout-1 WHERE id=?;" andArguments:@[timer[@"id"]]];
         }
+        return handlerCalled;
     }];
 }
 

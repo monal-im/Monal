@@ -5777,72 +5777,75 @@ static NSRegularExpression* fastTokenRemovalRegex;
     if([_parseQueue operationCount] > 4 || _accountState < kStateInitStarted || !_catchupDone)
         return;
     
-    //update idle timers, too
-    [[DataLayer sharedInstance] decrementIdleTimersForAccount:self];
-    
-    //update iq handlers
-    BOOL stateUpdated = NO;
-    @synchronized(_iqHandlers) {
-        //we are NOT mutating on iteration here, because we use dispatchAsyncOnReceiveQueue to handle timeouts
-        NSMutableArray* idsToRemove = [NSMutableArray new];
-        for(NSString* iqid in _iqHandlers)
-        {
-            //decrement handler timeout every second and check if it landed below zero --> trigger a fake iq error to handle timeout
-            //this makes sure a freeze/killed app doesn't immediately trigger timeouts once the app is restarted, as it would be with timestamp based timeouts
-            //doing it this way makes sure the incoming iq result has a chance to be processed even in a freeze/kill scenario
-            _iqHandlers[iqid][@"timeout"] = @([_iqHandlers[iqid][@"timeout"] doubleValue] - 1.0);
-            if([_iqHandlers[iqid][@"timeout"] doubleValue] < 0.0)
+    [[DataLayer sharedInstance] createTransaction:^{
+        //update iq handlers
+        BOOL stateUpdated = NO;
+        @synchronized(self->_iqHandlers) {
+            //we are NOT mutating on iteration here, because we use dispatchAsyncOnReceiveQueue to handle timeouts
+            NSMutableArray* idsToRemove = [NSMutableArray new];
+            for(NSString* iqid in self->_iqHandlers)
             {
-                DDLogWarn(@"%@: Timeout of handler triggered: %@", _logtag, _iqHandlers[iqid]);
-                //only force save state after calling a handler
-                //(timeout changes that don't make it to disk only extend the timeout by a few seconds but don't have any negative sideeffect)
-                stateUpdated = YES;
-                
-                //fake xmpp stanza error to make timeout handling transparent without the need for invalidation handler
-                //we need to fake the from, too (no from means own bare jid)
-                XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:_iqHandlers[iqid][@"iq"]];
-                errorIq.to = self.connectionProperties.identity.fullJid;
-                if([_iqHandlers[iqid][@"iq"] to] != nil)
-                    errorIq.from = [_iqHandlers[iqid][@"iq"] to];
-                else
-                    errorIq.from = self.connectionProperties.identity.jid;
-                [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"remote-server-timeout" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
-                    [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"No response in %d seconds", (int)IQ_TIMEOUT]],
-                ] andData:nil]];
-                
-                //make sure our fake error iq is handled inside the receiveQueue
-                //extract this from _iqHandlers to make sure we only handle iqs that didn't get handled in the meantime
-                NSMutableDictionary* iqHandler = self->_iqHandlers[iqid];
-                [idsToRemove addObject:iqid];
-                if(iqHandler)
+                //decrement handler timeout every second and check if it landed below zero --> trigger a fake iq error to handle timeout
+                //this makes sure a freeze/killed app doesn't immediately trigger timeouts once the app is restarted, as it would be with timestamp based timeouts
+                //doing it this way makes sure the incoming iq result has a chance to be processed even in a freeze/kill scenario
+                self->_iqHandlers[iqid][@"timeout"] = @([self->_iqHandlers[iqid][@"timeout"] doubleValue] - 1.0);
+                if([self->_iqHandlers[iqid][@"timeout"] doubleValue] < 0.0)
                 {
-                    //do a real async dispatch, not an automatic sync one because we are in the same queue
-                    [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                        //make sure these handlers are called inside a db write transaction just like receiving a real error iq
-                        //--> don't create a deadlock with 2 threads waiting for db write transaction and synchronized iqhandlers
-                        //    in opposite order
-                        [[DataLayer sharedInstance] createTransaction:^{
-                            DDLogDebug(@"Calling iq handler with faked error iq: %@", errorIq);
-                            if(iqHandler[@"handler"] != nil)
-                                $call(iqHandler[@"handler"], $ID(account, self), $ID(iqNode, errorIq));
-                            else if(iqHandler[@"errorHandler"] != nil)
-                                ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
-                        }];
-                    }]] waitUntilFinished:NO];
+                    DDLogWarn(@"%@: Timeout of handler triggered: %@", self->_logtag, self->_iqHandlers[iqid]);
+                    //only force save state after calling a handler
+                    //(timeout changes that don't make it to disk only extend the timeout by a few seconds but don't have any negative sideeffect)
+                    stateUpdated = YES;
+                    
+                    //fake xmpp stanza error to make timeout handling transparent without the need for invalidation handler
+                    //we need to fake the from, too (no from means own bare jid)
+                    XMPPIQ* errorIq = [[XMPPIQ alloc] initAsErrorTo:self->_iqHandlers[iqid][@"iq"]];
+                    errorIq.to = self.connectionProperties.identity.fullJid;
+                    if([self->_iqHandlers[iqid][@"iq"] to] != nil)
+                        errorIq.from = [self->_iqHandlers[iqid][@"iq"] to];
+                    else
+                        errorIq.from = self.connectionProperties.identity.jid;
+                    [errorIq addChildNode:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"wait"} andChildren:@[
+                        [[MLXMLNode alloc] initWithElement:@"remote-server-timeout" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+                        [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"No response in %d seconds", (int)IQ_TIMEOUT]],
+                    ] andData:nil]];
+                    
+                    //make sure our fake error iq is handled inside the receiveQueue
+                    //extract this from _iqHandlers to make sure we only handle iqs that didn't get handled in the meantime
+                    NSMutableDictionary* iqHandler = self->_iqHandlers[iqid];
+                    [idsToRemove addObject:iqid];
+                    if(iqHandler)
+                    {
+                        //do a real async dispatch, not an automatic sync one because we are in the same queue
+                        [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                            //make sure these handlers are called inside a db write transaction just like receiving a real error iq
+                            //--> don't create a deadlock with 2 threads waiting for db write transaction and synchronized iqhandlers
+                            //    in opposite order
+                            [[DataLayer sharedInstance] createTransaction:^{
+                                DDLogDebug(@"Calling iq handler with faked error iq: %@", errorIq);
+                                if(iqHandler[@"handler"] != nil)
+                                    $call(iqHandler[@"handler"], $ID(account, self), $ID(iqNode, errorIq));
+                                else if(iqHandler[@"errorHandler"] != nil)
+                                    ((monal_iq_handler_t) iqHandler[@"errorHandler"])(errorIq);
+                            }];
+                        }]] waitUntilFinished:NO];
+                    }
+                    else
+                        DDLogError(@"%@: iq handler for '%@' vanished while switching to receive queue", self->_logtag, iqid);
                 }
-                else
-                    DDLogError(@"%@: iq handler for '%@' vanished while switching to receive queue", _logtag, iqid);
             }
+            //now delete iqs marked for deletion
+            for(NSString* iqid in idsToRemove)
+                [self->_iqHandlers removeObjectForKey:iqid];
         }
-        //now delete iqs marked for deletion
-        for(NSString* iqid in idsToRemove)
-            [_iqHandlers removeObjectForKey:iqid];
-    }
-    
-    //make sure all state is persisted as soon as possible (we could have called handlers and we don't want to execute them twice!)
-    if(stateUpdated)
-        [self persistState];
+        
+        //update idle timers, too
+        BOOL idleHandlerCalled = [[DataLayer sharedInstance] decrementIdleTimersForAccount:self];
+        
+        //make sure all state is persisted as soon as possible (we could have called handlers and we don't want to execute them twice!)
+        //we also don't want to loose any state change that may have been triggered by the handler of some idle timer
+        if(stateUpdated || idleHandlerCalled)
+            [self persistState];
+    }];
 }
 
 -(void) delayIncomingMessageStanzasForArchiveJid:(NSString*) archiveJid

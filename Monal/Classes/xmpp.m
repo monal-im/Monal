@@ -1065,21 +1065,24 @@ static NSRegularExpression* fastTokenRemovalRegex;
             [self resetAuthPipelining];
             
             //clear all reconnection handlers
+            
+            NSArray* handlers = nil;
             @synchronized(self->_reconnectionHandlers) {
-                NSArray* handlers = [self->_reconnectionHandlers copy];
+                handlers = [self->_reconnectionHandlers copy];
                 [self->_reconnectionHandlers removeAllObjects];
-                for(MLHandler* handler in handlers)
-                    $invalidate(handler, $ID(account, self));
             }
+            for(MLHandler* handler in handlers)
+                $invalidate(handler, $ID(account, self));
 
             //persist these changes
             [self persistState];
         }
         
+        [[DataLayer sharedInstance] resetContactsForAccount:self.accountID];
+        
         //delete FAST token for this account --> use SCRAM on next login
         [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
-        
-        [[DataLayer sharedInstance] resetContactsForAccount:self.accountID];
+            
         
         //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
@@ -1101,148 +1104,151 @@ static NSRegularExpression* fastTokenRemovalRegex;
     
     //this has to be synchronous because we want to wait for the disconnect to complete before continuing and unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
-        DDLogInfo(@"stopping running timers");
-        if(self.delayedRealSessionInitTimer)
-            [self.delayedRealSessionInitTimer cancel]; //cancel running session init timer
-        self.delayedRealSessionInitTimer = nil;
-        if(self.loginTimer)
-            [self.loginTimer cancel];     //cancel running login timer
-        self.loginTimer = nil;
-        if(self.pingTimer)
-            [self.pingTimer cancel];      //cancel running ping timer
-        self.pingTimer = nil;
-        if(self.reconnectTimer)
-            [self.reconnectTimer cancel]; //cancel running reconnect timer
-        self.reconnectTimer = nil;
-        @synchronized(self->_timersToCancelOnDisconnect) {
-            for(monal_void_block_t timer in self->_timersToCancelOnDisconnect)
-                timer();
-            [self->_timersToCancelOnDisconnect removeAllObjects];
-        }
-        
-        DDLogVerbose(@"Removing scramHandler...");
-        self->_scramHandler = nil;
-        self->_htHandler = nil;
-        self->_fastTokenRequested = nil;
-        self->_blockToCallOnTCPOpen = nil;
-        self->_fast_used = NO;
-        
-        if(self->_accountState<kStateReconnecting)
-        {
-            DDLogVerbose(@"not doing logout because already logged out, but clearing state if explicitLogout was yes");
-            if(explicitLogout)
-                doExplicitLogout();
-            return;
-        }
-        DDLogInfo(@"disconnecting");
-        self->_disconnectInProgres = YES;
-        
-        //invalidate all ephemeral iq handlers (those not surviving an app restart or switch to/from appex)
-        @synchronized(self->_iqHandlers) {
-            for(NSString* iqid in [self->_iqHandlers allKeys])
+        [[DataLayer sharedInstance] createTransaction:^{
+            DDLogInfo(@"stopping running timers");
+            if(self.delayedRealSessionInitTimer)
+                [self.delayedRealSessionInitTimer cancel]; //cancel running session init timer
+            self.delayedRealSessionInitTimer = nil;
+            if(self.loginTimer)
+                [self.loginTimer cancel];     //cancel running login timer
+            self.loginTimer = nil;
+            if(self.pingTimer)
+                [self.pingTimer cancel];      //cancel running ping timer
+            self.pingTimer = nil;
+            if(self.reconnectTimer)
+                [self.reconnectTimer cancel]; //cancel running reconnect timer
+            self.reconnectTimer = nil;
+            @synchronized(self->_timersToCancelOnDisconnect) {
+                for(monal_void_block_t timer in self->_timersToCancelOnDisconnect)
+                    timer();
+                [self->_timersToCancelOnDisconnect removeAllObjects];
+            }
+            
+            DDLogVerbose(@"Removing scramHandler...");
+            self->_scramHandler = nil;
+            self->_htHandler = nil;
+            self->_fastTokenRequested = nil;
+            self->_blockToCallOnTCPOpen = nil;
+            self->_fast_used = NO;
+            
+            if(self->_accountState<kStateReconnecting)
             {
-                if(self->_iqHandlers[iqid][@"handler"] == nil)
+                DDLogVerbose(@"not doing logout because already logged out, but clearing state if explicitLogout was yes");
+                if(explicitLogout)
+                    doExplicitLogout();
+                return;
+            }
+            DDLogInfo(@"disconnecting");
+            self->_disconnectInProgres = YES;
+            
+            //invalidate all ephemeral iq handlers (those not surviving an app restart or switch to/from appex)
+            @synchronized(self->_iqHandlers) {
+                for(NSString* iqid in [self->_iqHandlers allKeys])
                 {
-                    NSDictionary* data = (NSDictionary*)self->_iqHandlers[iqid];
-                    if(data[@"errorHandler"])
+                    if(self->_iqHandlers[iqid][@"handler"] == nil)
                     {
-                        DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+                        NSDictionary* data = (NSDictionary*)self->_iqHandlers[iqid];
                         if(data[@"errorHandler"])
-                            ((monal_iq_handler_t)data[@"errorHandler"])(nil);
+                        {
+                            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+                            if(data[@"errorHandler"])
+                                ((monal_iq_handler_t)data[@"errorHandler"])(nil);
+                        }
+                        [self->_iqHandlers removeObjectForKey:iqid];
+                        [MLDelayedDealloc delayFor:data];
                     }
-                    [self->_iqHandlers removeObjectForKey:iqid];
-                    [MLDelayedDealloc delayFor:data];
                 }
             }
-        }
-        
-        if(explicitLogout && self->_accountState>=kStateHasStream)
-        {
-            DDLogInfo(@"doing explicit logout (xmpp stream close)");
-            self->_reconnectBackoffTime = 0.0;
-            [self unfreezeSendQueue];      //make sure the queue is operational again
-            if(self.accountState >= kStateInitStarted)
+            
+            if(explicitLogout && self->_accountState>=kStateHasStream)
             {
-                //disable push for this node
-                if([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
-                    [self disablePush];
-                [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
-                    [self sendLastAck];
-                }]] waitUntilFinished:YES];         //block until finished because we are closing the xmpp stream directly afterwards
-            }
-            [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
-                //close stream (either with error or normally)
-                if(streamError != nil)
-                    [self writeToStream:streamError.XMLString];    // dont even bother queueing
-                MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"/stream:stream"];  //hack to close stream
-                [self writeToStream:stream.XMLString];    // dont even bother queueing
-            }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
-
-            @synchronized(self->_stateLockObject) {
-                //preserve unAckedStanzas even on explicitLogout and resend them on next connect
-                //if we don't do this, messages could get lost when logging out directly after sending them
-                //and: sending messages twice is less intrusive than silently loosing them
-                NSMutableArray* stanzas = self.unAckedStanzas;
-
-                //reset smacks state to sane values (this can be done even if smacks is not supported)
-                [self initSM3];
-                [self replaceUnackedStanzasWith:stanzas];
-                
-                //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-                [self invalidateIQHandlersWithReason:@"disconnect"];
-                
-                //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
-                [self.pubsub invalidateQueue];
-                
-                //clear pipeline cache
-                [self resetAuthPipelining];
-                
-                //clear all reconnection handlers
-                @synchronized(self->_reconnectionHandlers) {
-                    NSArray* handlers = [self->_reconnectionHandlers copy];
-                    [self->_reconnectionHandlers removeAllObjects];
-                    for(MLHandler* handler in handlers)
-                        $invalidate(handler, $ID(account, self));
+                DDLogInfo(@"doing explicit logout (xmpp stream close)");
+                self->_reconnectBackoffTime = 0.0;
+                [self unfreezeSendQueue];      //make sure the queue is operational again
+                if(self.accountState >= kStateInitStarted)
+                {
+                    //disable push for this node
+                    if([self.connectionProperties.accountDiscoFeatures containsObject:@"urn:xmpp:push:0"])
+                        [self disablePush];
+                    [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
+                        [self sendLastAck];
+                    }]] waitUntilFinished:YES];         //block until finished because we are closing the xmpp stream directly afterwards
                 }
-
-                //persist these changes
-                [self persistState];
-            }
-            
-            //delete FAST token for this account --> use SCRAM on next login
-            [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
-            
-            [[DataLayer sharedInstance] resetContactsForAccount:self.accountID];
-            
-            //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-        }
-        else
-        {
-            [self unfreezeSendQueue];      //make sure the queue is operational again
-            if(streamError != nil)
-            {
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
-                    //close stream with error
-                    [self writeToStream:streamError.XMLString];    // dont even bother queueing
+                    //close stream (either with error or normally)
+                    if(streamError != nil)
+                        [self writeToStream:streamError.XMLString];    // dont even bother queueing
                     MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"/stream:stream"];  //hack to close stream
                     [self writeToStream:stream.XMLString];    // dont even bother queueing
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
+
+                @synchronized(self->_stateLockObject) {
+                    //preserve unAckedStanzas even on explicitLogout and resend them on next connect
+                    //if we don't do this, messages could get lost when logging out directly after sending them
+                    //and: sending messages twice is less intrusive than silently loosing them
+                    NSMutableArray* stanzas = self.unAckedStanzas;
+
+                    //reset smacks state to sane values (this can be done even if smacks is not supported)
+                    [self initSM3];
+                    [self replaceUnackedStanzasWith:stanzas];
+                    
+                    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
+                    [self invalidateIQHandlersWithReason:@"disconnect"];
+                    
+                    //invalidate pubsub queue (*after* iq handlers that also might invalidate a result handler of the queued operation)
+                    [self.pubsub invalidateQueue];
+                    
+                    //clear pipeline cache
+                    [self resetAuthPipelining];
+                    
+                    //clear all reconnection handlers
+                    NSArray* handlers = nil;
+                    @synchronized(self->_reconnectionHandlers) {
+                        handlers = [self->_reconnectionHandlers copy];
+                        [self->_reconnectionHandlers removeAllObjects];
+                    }
+                    for(MLHandler* handler in handlers)
+                        $invalidate(handler, $ID(account, self));
+
+                    //persist these changes
+                    [self persistState];
+                }
+                
+                //delete FAST token for this account --> use SCRAM on next login
+                [SAMKeychain deletePasswordForService:kMonalHtTokenKeychainName account:self.accountID.stringValue];
+                
+                [[DataLayer sharedInstance] resetContactsForAccount:self.accountID];
+                
+                //trigger view updates to make sure enabled/disabled account state propagates to all ui elements
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
             }
             else
             {
-                //send one last ack before closing the stream (xep version 1.5.2)
-                if(self.accountState >= kStateInitStarted)
+                [self unfreezeSendQueue];      //make sure the queue is operational again
+                if(streamError != nil)
                 {
-                    [self->_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                        [self sendLastAck];
+                    [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
+                        //close stream with error
+                        [self writeToStream:streamError.XMLString];    // dont even bother queueing
+                        MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"/stream:stream"];  //hack to close stream
+                        [self writeToStream:stream.XMLString];    // dont even bother queueing
                     }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
                 }
+                else
+                {
+                    //send one last ack before closing the stream (xep version 1.5.2)
+                    if(self.accountState >= kStateInitStarted)
+                    {
+                        [self->_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                            [self sendLastAck];
+                        }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
+                    }
+                }
+                
+                //persist these changes
+                [self persistState];
             }
-            
-            //persist these changes
-            [self persistState];
-        }
+        }];
         
         [self closeSocket];
         [self accountStatusChanged];
@@ -3911,12 +3917,15 @@ static NSRegularExpression* fastTokenRemovalRegex;
     MLAssert(stanza != nil, @"stanza to send should not be nil!", @{@"withSmacks": @(withSmacks)});
     
     [self dispatchAsyncOnReceiveQueue:^{
+        BOOL persistStateNeeded = NO;
+        
         //add outgoing mam queryids to our state (but don't persist state because this will be done by smacks code below)
         NSString* mamQueryId = [stanza findFirst:@"/{jabber:client}iq/{urn:xmpp:mam:2}query@queryid"];
         if(mamQueryId)
             @synchronized(self->_stateLockObject) {
                 DDLogDebug(@"Adding mam queryid to list: %@", mamQueryId);
                 self->_runningMamQueries[mamQueryId] = stanza;
+                persistStateNeeded = YES;
             }
         
         //always add stanzas (not nonzas!) to smacks queue to be resent later (if withSmacks=YES)
@@ -3935,10 +3944,14 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 [self.unAckedStanzas addObject:dic];
                 //increment for next call
                 self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] + 1];
-                //persist these changes (this has to be synchronous because we want so persist stanzas to db before actually sending them)
-                [self persistState];
+                persistStateNeeded = YES;
             }
+            
         }
+        
+        //persist these changes (this has to be synchronous because we want so persist stanzas to db before actually sending them)
+        if(persistStateNeeded)
+            [self persistState];
         
         //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateInitStarted
         //only exceptions: an outgoing bind request or jabber:iq:register stanza (this is allowed before binding a resource)

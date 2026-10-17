@@ -1049,15 +1049,16 @@ $$
     }
 }
 
-$$instance_handler(handleCreateTimeout, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
-    if(![self isCreating:room])
-    {
-        DDLogError(@"Got room create idle timeout but not creating group, ignoring: %@", room);
-        return;
+$$instance_handler(handleCreateTimeout, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room), $$ID(NSNumber*, timerId))
+    @synchronized(_stateLockObject) {
+        MLAssert([self isCreating:room] && [timerId isEqual:_creating[room]], @"Spurious idle timer firing!", (@{
+            @"currentTimer": nilWrapper(_creating[room]),
+            @"expectedTimer": nilWrapper(timerId),
+        }));
+        DDLogWarn(@"Timeout while creating muc '%@'...", room);
+        [self removeRoomFromCreating:room];
+        [self deleteMuc:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
     }
-    DDLogWarn(@"Timeout while creating muc '%@'...", room);
-    [self removeRoomFromCreating:room];
-    [self deleteMuc:room withBookmarksUpdate:NO keepBuddylistEntry:NO];
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not create group '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
 $$
 
@@ -1623,16 +1624,18 @@ $$
     [_account send:presence];
 }
 
-$$instance_handler(handleJoinTimeout, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room))
+$$instance_handler(handleJoinTimeout, account.mucProcessor, $$ID(xmpp*, account), $$ID(NSString*, room), $$ID(NSNumber*, timerId))
     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Could not join group/channel '%@': timeout", @""), room] forMuc:room withNode:nil andIsSevere:YES];
     
     //don't remove the muc, this could be a temporary (network induced) error, but mark it as not joining anymore
     @synchronized(_stateLockObject) {
-        if(_joining[room] != nil)
-        {
-            DDLogInfo(@"Aborting join of room '%@' on account %@ due to timeout", room, _account);
-            [self removeRoomFromJoining:room];
-        }
+        MLAssert([self isJoining:room] && [timerId isEqual:_joining[room]], @"Spurious idle timer firing!", (@{
+            @"currentTimer": nilWrapper(_joining[room]),
+            @"expectedTimer": nilWrapper(timerId),
+        }));
+        
+        DDLogInfo(@"Aborting join of room '%@' on account %@ due to timeout", room, _account);
+        [self removeRoomFromJoining:room];
     }
 $$
 

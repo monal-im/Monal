@@ -2550,7 +2550,7 @@ static NSDateFormatter* dbFormatter;
             @"timerId": timerId,
             @"accountID": nilWrapper(timer[@"account_id"])
         }));
-        $invalidate([HelperTools unserializeData:timer[@"handler"]], $ID(account));
+        $invalidate([HelperTools unserializeData:timer[@"handler"]], $ID(account), $ID(timerId));
         [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE id=?;" andArguments:@[timerId]];
     }];
 }
@@ -2564,7 +2564,8 @@ static NSDateFormatter* dbFormatter;
         MLAssert(account != nil, @"Cleaning up idle timers should not be done when an account is disabled!", (@{
             @"accountID": nilWrapper(accountID)
         }));
-        [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE account_id=?;" andArguments:@[accountID]];
+        for(NSDictionary* timer in [self.db executeReader:@"SELECT * FROM idle_timers WHERE account_id=?;" andArguments:@[accountID]])
+            [self delIdleTimerWithId:timer[@"id"]];
     }];
 }
 
@@ -2578,7 +2579,7 @@ static NSDateFormatter* dbFormatter;
             if([timer[@"timeout"] unsignedIntegerValue] == 0)
             {
                 //this timer expired --> call it's handler and delete the timer afterwards
-                $call([HelperTools unserializeData:timer[@"handler"]], $ID(account));
+                $call([HelperTools unserializeData:timer[@"handler"]], $ID(account), $ID(timerId, timer[@"id"]));
                 [self.db executeNonQuery:@"DELETE FROM idle_timers WHERE id=?;" andArguments:@[timer[@"id"]]];
                 continue;
             }

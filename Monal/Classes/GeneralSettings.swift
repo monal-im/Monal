@@ -596,6 +596,9 @@ struct AttachmentSettings: View {
                 Text("Load over cellular up to: \(String(describing:UInt(generalSettingsDefaultsDB.autodownloadFiletransfersMobileMaxSize/(1024*1024)))) MiB")
             }
             
+// Upload settings are used only when selecting uploads via the media picker (i.e. not when using the file picker)
+// Since the media picker is disabled on macOS, hide these settings as they don't have any effect on mac
+#if !targetEnvironment(macCatalyst)
             Section(header: Text("Upload Settings")) {
                 SettingsToggle(isOn: $generalSettingsDefaultsDB.uploadImagesOriginal) {
                     Text("Upload Original Images")
@@ -617,6 +620,7 @@ struct AttachmentSettings: View {
                     Text("Image Upload JPEG-Quality: \(String(format: "%.0f%%", generalSettingsDefaultsDB.imageUploadQuality*100))")
                 }
             }
+#endif
         }
     }
 }

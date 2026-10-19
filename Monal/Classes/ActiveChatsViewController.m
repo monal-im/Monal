@@ -124,6 +124,7 @@ typedef NS_ENUM(NSUInteger, MLViewID) {
 static NSMutableSet* _mamWarningDisplayed;
 static NSMutableSet* _smacksWarningDisplayed;
 static NSMutableSet* _pushWarningDisplayed;
+static BOOL _dnssecWarningDisplayed;
 
 +(void) initialize
 {
@@ -131,6 +132,7 @@ static NSMutableSet* _pushWarningDisplayed;
     _mamWarningDisplayed = [NSMutableSet new];
     _smacksWarningDisplayed = [NSMutableSet new];
     _pushWarningDisplayed = [NSMutableSet new];
+    _dnssecWarningDisplayed = NO;
 }
 
 -(instancetype)initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
@@ -727,6 +729,31 @@ static NSMutableSet* _pushWarningDisplayed;
     //every entry in here is flipped, because we want to prepend all intro screens to our queue
     prependToViewQueue((^(PMKResolver resolve) {
         [self showWarningsIfNeeded];
+        
+        prependToViewQueue((^(PMKResolver resolve) {
+            if(!_dnssecWarningDisplayed)
+            {
+                if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+                {
+                    DDLogDebug(@"Showing dnssec bug warning...");
+                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"DNSSEC bug in iOS/macOS", @"") message:NSLocalizedString(@"Unfortunately iOS (and probably also macOS) has a bug that stops DNSSEC from working at all. You can read more about this at https://monal-im.org/dnssec. You'll have to turn of DNSSEC in the settings to make sure you can connect to your XMPP server until Apple fixes this bug.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                        _dnssecWarningDisplayed = YES;
+                        resolve(nil);
+                    }]];
+                    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                        [self presentViewController:messageAlert animated:YES completion:nil];
+                    }];
+                }
+                else
+                {
+                    _dnssecWarningDisplayed = YES;
+                    resolve(nil);
+                }
+            }
+            else
+                resolve(nil);
+        }));
         
         prependToViewQueue(MLViewIDWelcomeLoginView, (^(PMKResolver resolve) {
             //display quick start if the user never seen it or if there are 0 configured accounts

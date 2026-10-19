@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/exyte/AnchoredPopup.git",
         "state": {
           "branch": null,
-          "revision": "38fb24117f24df91bb79f1d63c8992678456c646",
-          "version": "1.2.3"
+          "revision": "f93c51e75ff4e5242328ac24c8fb12f1f1e84eda",
+          "version": "1.3.1"
         }
       },
       {
@@ -42,7 +42,7 @@
         "repositoryURL": "https://github.com/sbooth/CSQLite.git",
         "state": {
           "branch": "main",
-          "revision": "d4560f1f808381e07b1f8673c51190c52bdca468",
+          "revision": "d126995f00f971441a1a195cf6be48d673eba376",
           "version": null
         }
       },
@@ -51,7 +51,7 @@
         "repositoryURL": "https://github.com/monal-im/ExyteChat",
         "state": {
           "branch": "main",
-          "revision": "88dba857eb5eccb365fd9fb241af849687128308",
+          "revision": "9fa1fd204c68de0cbd090bd35a18de17b4ef29ce",
           "version": null
         }
       },
@@ -174,11 +174,11 @@
       },
       {
         "package": "swift-collections",
-        "repositoryURL": "https://github.com/apple/swift-collections.git",
+        "repositoryURL": "https://github.com/apple/swift-collections",
         "state": {
           "branch": null,
-          "revision": "98ef3c98609a1e31b7e157b5b619579001a789d6",
-          "version": "1.7.1"
+          "revision": "35a1edcb8ebd2bfe251d587f0b69e62af28f508c",
+          "version": "1.7.3"
         }
       },
       {
@@ -186,8 +186,8 @@
         "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "5073617dac96330a486245e4c0179cb0a6fd2256",
-          "version": "1.12.0"
+          "revision": "4038b6a4f74a1426f47eb1dd5b4bb5628a15d597",
+          "version": "1.16.1"
         }
       },
       {

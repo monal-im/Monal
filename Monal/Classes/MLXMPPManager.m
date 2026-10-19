@@ -162,7 +162,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     [self upgradeBoolUserSettingsIfUnset:@"hardlinkFiletransfersIntoDocuments" toDefault:YES];
     
+#ifdef IS_ALPHA
+    [self upgradeBoolUserSettingsIfUnset:@"showAdvancedUI" toDefault:YES];
+#else
     [self upgradeBoolUserSettingsIfUnset:@"showAdvancedUI" toDefault:NO];
+#endif
     
     [self upgradeBoolUserSettingsIfUnset:@"showNewChatView" toDefault:YES];
     

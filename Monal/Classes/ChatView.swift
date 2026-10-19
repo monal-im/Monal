@@ -92,6 +92,9 @@ class ChatViewDefaultsDB: ObservableObject {
 
     @defaultsDB("ShowGeoLocation")
     var showGeoLocation: Bool
+
+    @defaultsDB("uploadImagesOriginal")
+    var uploadImagesOriginal: Bool
 }
 
 struct ChatView: View {
@@ -430,14 +433,24 @@ struct ChatView: View {
         }
     }
 
-    private func uploadAndSendFile(_ localFileURL: URL?) async {
+    private func uploadAndSendFile(_ localFileURL: URL?, useMediaCompression: Bool = false) async {
         guard let localFileURL = localFileURL else {
             DDLogError("Couldn't get file location in order to upload it!")
             return
         }
         self.isUploadingFile = true
         do {
-            let (url, mimeType, size) = try await MLFiletransfer.uploadFile(localFileURL, onAccount: self.account, withEncryption: self.contact.isEncrypted)
+            localFileURL.startAccessingSecurityScopedResource()
+            var url: String, mimeType: String, size: NSNumber
+            let isImage = MLFiletransfer.getMimeType(ofOriginalFile: localFileURL.path).starts(with: "image/")
+            if useMediaCompression && isImage && !chatViewDefaultsDB.uploadImagesOriginal,
+                let image = UIImage(contentsOfFile: localFileURL.path) {
+                // Use uploadUIImage to apply compression
+                (url, mimeType, size) = try await MLFiletransfer.uploadUIImage(image, onAccount: self.account, withEncryption: self.contact.isEncrypted)
+            } else {
+                (url, mimeType, size) = try await MLFiletransfer.uploadFile(localFileURL, onAccount: self.account, withEncryption: self.contact.isEncrypted)
+            }
+            localFileURL.stopAccessingSecurityScopedResource()
             await MainActor.run {
                 guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: url, havingType: kMessageTypeFiletransfer, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: ["mimeType": mimeType, "size": size]) else {
                     self.isUploadingFile = false
@@ -446,6 +459,7 @@ struct ChatView: View {
                 messages.append(ChatViewMessage(newMLMessage))
             }
         } catch {
+            localFileURL.stopAccessingSecurityScopedResource()
             DDLogError("Couldn't upload file! error:  \(error.localizedDescription)")
             alertPrompt = AlertPrompt(
                 title: Text("Could not upload file"),
@@ -465,10 +479,11 @@ struct ChatView: View {
                     }
                     for media in draft.medias {
                         let localFileURL = await media.getURL()
-                        await uploadAndSendFile(localFileURL)
+                        await uploadAndSendFile(localFileURL, useMediaCompression: true)
                     }
                     for file in draft.files {
-                        await uploadAndSendFile(file.localURL)
+                        // We don't want to compress media selected using the file picker
+                        await uploadAndSendFile(file.localURL, useMediaCompression: false)
                     }
                 }
             }

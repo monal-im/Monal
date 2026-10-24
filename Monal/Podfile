@@ -44,6 +44,7 @@ target 'shareSheet' do
   use_frameworks!
   inhibit_all_warnings!
   pod "PromiseKit"
+  monalxmpp
 end
 
 target 'NotificationService' do
@@ -51,6 +52,7 @@ target 'NotificationService' do
   use_frameworks!
   inhibit_all_warnings!
   pod "PromiseKit"
+  monalxmpp
 end
 
 target 'Monal' do

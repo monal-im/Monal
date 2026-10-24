@@ -7,7 +7,7 @@
 //
 
 #import "XMPPMessage.h"
-#import "MLContact.h"
+#import <monalxmpp/MLContact.h>
 
 @class MLContact;
 

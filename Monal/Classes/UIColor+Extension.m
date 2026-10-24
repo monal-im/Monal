@@ -6,7 +6,7 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
-#import "UIColor+Extension.h"
+#import <monalxmpp/UIColor+Extension.h>
 
 @implementation UIColor (Extension)
 -(BOOL) isLightColor

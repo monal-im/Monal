@@ -6,9 +6,9 @@
 //  Copyright © 2024 monal-im.org. All rights reserved.
 //
 
-#import "MLConstants.h"
-#import "HelperTools.h"
-#import "MLDelayableTimer.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLDelayableTimer.h>
 
 @interface MLDelayableTimer()
 {

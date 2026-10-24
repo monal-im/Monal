@@ -7,15 +7,15 @@
 //
 
 #import "MLContactCell.h"
-#import "MLConstants.h"
-#import "MLContact.h"
-#import "MLMessage.h"
-#import "DataLayer.h"
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLContact.h>
+#import <monalxmpp/MLMessage.h>
+#import <monalxmpp/DataLayer.h>
 #import "MLXEPSlashMeHandler.h"
-#import "HelperTools.h"
-#import "MLXMPPManager.h"
-#import "xmpp.h"
-#import "MLImageManager.h"
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLImageManager.h>
 #import <QuartzCore/QuartzCore.h>
 
 @interface MLContactCell()

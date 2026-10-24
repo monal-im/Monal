@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "xmpp.h"
+#import <monalxmpp/xmpp.h>
 #import "XMPPMessage.h"
 
 NS_ASSUME_NONNULL_BEGIN

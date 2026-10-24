@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DataLayer.h"
+#import <monalxmpp/DataLayer.h>
 @import SAMKeychain;
-#import "MLXMPPManager.h"
+#import <monalxmpp/MLXMPPManager.h>
 #import "TOCropViewController.h"
 
 @interface XMPPEdit: UITableViewController <UITextFieldDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, TOCropViewControllerDelegate> {

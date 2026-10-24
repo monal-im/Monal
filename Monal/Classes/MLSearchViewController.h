@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "MLContact.h"
-#import "DataLayer.h"
+#import <monalxmpp/MLContact.h>
+#import <monalxmpp/DataLayer.h>
 
 @protocol SearchResultDelegate
 - (void) doGoSearchResultAction:(NSNumber*_Nullable) nextDBId;

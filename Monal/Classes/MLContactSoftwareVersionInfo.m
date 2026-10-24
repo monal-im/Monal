@@ -6,7 +6,7 @@
 //  Copyright © 2021 Monal.im. All rights reserved.
 //
 
-#import "MLContactSoftwareVersionInfo.h"
+#import <monalxmpp/MLContactSoftwareVersionInfo.h>
 
 @interface MLContactSoftwareVersionInfo ()
 

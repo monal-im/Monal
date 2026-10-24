@@ -6,8 +6,8 @@
 //  Copyright © 2019 Monal.im. All rights reserved.
 //
 
-#import "MLXMPPConnection.h"
-#import "MLXMLNode.h"
+#import <monalxmpp/MLXMPPConnection.h>
+#import <monalxmpp/MLXMLNode.h>
 
 @interface MLXMPPConnection ()
 

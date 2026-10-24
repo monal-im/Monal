@@ -9,9 +9,9 @@
 #import "MLSettingsTableViewController.h"
 #import "MLWebViewController.h"
 #import "MLSwitchCell.h"
-#import "HelperTools.h"
-#import "DataLayer.h"
-#import "MLXMPPManager.h"
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLXMPPManager.h>
 #import "XMPPEdit.h"
 #import "MonalAppDelegate.h"
 #import "ActiveChatsViewController.h"

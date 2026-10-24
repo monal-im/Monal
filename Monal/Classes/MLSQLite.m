@@ -8,8 +8,8 @@
 
 #import <pthread.h>
 #import <sqlite3.h>
-#import "MLSQLite.h"
-#import "HelperTools.h"
+#import <monalxmpp/MLSQLite.h>
+#import <monalxmpp/HelperTools.h>
 
 //use a dedicated scheme for thread local storage dict entries
 #define kSQLiteEndTransactionTriggers       @"im.monal:MLSQLite.m|kSQLiteEndTransactionTriggers"

@@ -6,15 +6,15 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
-#import "MLPubSub.h"
-#import "MLHandler.h"
-#import "xmpp.h"
-#import "MLXMLNode.h"
-#import "XMPPDataForm.h"
-#import "XMPPStanza.h"
+#import <monalxmpp/MLPubSub.h>
+#import <monalxmpp/MLHandler.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLXMLNode.h>
+#import <monalxmpp/XMPPDataForm.h>
+#import <monalxmpp/XMPPStanza.h>
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 #define CURRENT_PUBSUB_DATA_VERSION @6
 

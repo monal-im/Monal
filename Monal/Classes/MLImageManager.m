@@ -6,12 +6,12 @@
 //
 //
 
-#import "MLImageManager.h"
-#import "MLXMPPManager.h"
-#import "HelperTools.h"
-#import "DataLayer.h"
+#import <monalxmpp/MLImageManager.h>
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/DataLayer.h>
 #import "AESGcm.h"
-#import "UIColor+Extension.h"
+#import <monalxmpp/UIColor+Extension.h>
 
 
 @interface MLImageManager()

@@ -6,7 +6,7 @@
 //  Copyright © 2019 Monal.im. All rights reserved.
 //
 
-#import "MLConstants.h"
+#import <monalxmpp/MLConstants.h>
 #import "AESGcm.h"
 #import <monalxmpp/monalxmpp-Swift.h>
 

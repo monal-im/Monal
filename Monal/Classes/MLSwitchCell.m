@@ -7,7 +7,7 @@
 //
 
 #import "MLSwitchCell.h"
-#import "HelperTools.h"
+#import <monalxmpp/HelperTools.h>
 
 @interface MLSwitchCell ()
 

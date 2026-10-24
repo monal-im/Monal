@@ -32,32 +32,33 @@
 //#import <KSCrash/Recording/KSCrashReportStore.h>
 extern int64_t kscrs_getNextCrashReport(char* crashReportPathBuffer);
 #import <monalxmpp/monalxmpp-Swift.h>
-#import "hsluv.h"
-#import "HelperTools.h"
-#import "MLXMPPManager.h"
-#import "MLPubSub.h"
-#import "MLUDPLogger.h"
-#import "MLHandler.h"
+#import <monalxmpp/hsluv.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLXMPPManager.h>
+#import <monalxmpp/MLPubSub.h>
+#import <monalxmpp/MLUDPLogger.h>
+#import <monalxmpp/MLHandler.h>
 #import "MLBasePaser.h"
-#import "MLXMLNode.h"
-#import "XMPPStanza.h"
+#import <monalxmpp/MLXMLNode.h>
+#import <monalxmpp/XMPPStanza.h>
 #import "XMPPIQ.h"
-#import "XMPPPresence.h"
+#import <monalxmpp/XMPPPresence.h>
 #import "XMPPMessage.h"
-#import "XMPPDataForm.h"
-#import "xmpp.h"
-#import "MLNotificationQueue.h"
-#import "MLContact.h"
-#import "MLMessage.h"
-#import "MLFiletransfer.h"
-#import "DataLayer.h"
-#import "OmemoState.h"
-#import "MLUDPLogger.h"
-#import "MLStreamRedirect.h"
+#import <monalxmpp/XMPPDataForm.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLNotificationQueue.h>
+#import <monalxmpp/MLContact.h>
+#import <monalxmpp/MLMessage.h>
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/OmemoState.h>
+#import <monalxmpp/MLUDPLogger.h>
+#import <monalxmpp/MLStreamRedirect.h>
 #import "commithash.h"
-#import "MLContactSoftwareVersionInfo.h"
-#import "IPC.h"
-#import "MLDelayableTimer.h"
+#import "patchLevel.h"
+#import <monalxmpp/MLContactSoftwareVersionInfo.h>
+#import <monalxmpp/IPC.h>
+#import <monalxmpp/MLDelayableTimer.h>
 
 @import UserNotifications;
 @import CoreImage;
@@ -1342,17 +1343,65 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
         }
         else if([provider hasItemConformingToTypeIdentifier:UTTypePlainText.identifier])
         {
-            [provider loadFileRepresentationForTypeIdentifier:UTTypePlainText.identifier completionHandler:^(NSURL* _Nullable item, NSError* _Null_unspecified error) {
-                if(error != nil || item == nil)
+            //we have to check for an in memory object disguised as text file first
+            [provider loadItemForTypeIdentifier:UTTypePlainText.identifier options:nil completionHandler:^(id<NSSecureCoding> _Nullable item, NSError* _Null_unspecified error) {
+                if(item != nil)
                 {
-                    DDLogError(@"Error extracting item from NSItemProvider: %@", error);
-                    payload[@"error"] = error;
-                    return resolve(payload);
+                    if([(NSObject*)item isKindOfClass:[NSURL class]])
+                    {
+                        DDLogInfo(@"Got serialized NSURL item: %@", item);
+                        payload[@"type"] = @"url";
+                        payload[@"uttype"] = UTTypePlainText.identifier;
+                        payload[@"data"] = ((NSURL*)item).absoluteString;
+                        [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
+                            resolve(payload);
+                        });
+                        return;
+                    }
+                    
+                    /*
+                    if([(NSObject*)item isKindOfClass:[NSString class]])
+                    {
+                        DDLogInfo(@"Got serialized NSString item: %@", item);
+                        payload[@"type"] = @"text";
+                        payload[@"uttype"] = UTTypePlainText.identifier;
+                        payload[@"data"] = item;
+                        [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
+                            resolve(payload);
+                        });
+                        return;
+                    }
+                    if([(NSObject*)item isKindOfClass:[NSAttributedString class]])
+                    {
+                        DDLogInfo(@"Got serialized NSAttributedString item: %@", item);
+                        payload[@"type"] = @"text";
+                        payload[@"uttype"] = UTTypePlainText.identifier;
+                        payload[@"data"] = ((NSAttributedString*)item).string;
+                        [HelperTools addUploadItemPreviewForItem:nil provider:provider andPayload:payload].then(^(NSMutableDictionary* payload) {
+                            resolve(payload);
+                        });
+                        return;
+                    }
+                    */
+                    
+                    DDLogWarn(@"Got unknown serialized shared item, ignoring: %@", item);
+                    return resolve(nil);
                 }
-                DDLogInfo(@"Got direct text file item: %@", item);
-                payload[@"type"] = @"file";
-                payload[@"uttype"] = UTTypePlainText.identifier;
-                prepareFile(item).then(resolve);
+                else
+                {
+                    [provider loadFileRepresentationForTypeIdentifier:UTTypePlainText.identifier completionHandler:^(NSURL* _Nullable item, NSError* _Null_unspecified error) {
+                        if(error != nil || item == nil)
+                        {
+                            DDLogError(@"Error extracting item from NSItemProvider: %@", error);
+                            payload[@"error"] = error;
+                            return resolve(payload);
+                        }
+                        DDLogInfo(@"Got direct text file item: %@", item);
+                        payload[@"type"] = @"file";
+                        payload[@"uttype"] = UTTypePlainText.identifier;
+                        prepareFile(item).then(resolve);
+                    }];
+                }
             }];
         }
         else
@@ -1440,7 +1489,7 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
     }];
 }
 
-+(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler: (UITapGestureRecognizer*) handler
++(UIImageView*) buttonWithNotificationBadgeForImage:(UIImage*) image hasNotification:(bool) hasNotification withTapHandler:(UITapGestureRecognizer*) handler
 {
     UIImageView* result;
     if(hasNotification)
@@ -2634,9 +2683,14 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
         if(type == MLVersionTypeIQ)
             return _versionInfoCache[@(type)] = rawVersionString;
         else if(type == MLVersionTypeLog)
-            return _versionInfoCache[@(type)] = [NSString stringWithFormat:@"Version %@, %@ on iOS/macOS %@", rawVersionString, [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion];
+            return _versionInfoCache[@(type)] = [NSString stringWithFormat:@"Version %@ (patch level %@), %@ on iOS/macOS %@", rawVersionString, [self patchLevel], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"], [UIDevice currentDevice].systemVersion];
         unreachable(@"unknown version type!");
     }
+}
+
++(NSString*) patchLevel
+{
+    return PATCH_LEVEL;
 }
 
 // Similar to UIDevice.currentDevice.identifierForVendor, but provides stable IDs
@@ -2708,12 +2762,9 @@ NSDictionary* _Nullable dictionaryComprehension(NSDictionary* _Nullable dict, id
     if(xmlString == nil)
         return nil;
     DDLogVerbose(@"Parsing XML string produced by rust sdp parser(withInitiator=%@): %@", bool2str(initiator), xmlString);
-    NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]];
-    [xmlParser setShouldProcessNamespaces:YES];
-    [xmlParser setShouldReportNamespacePrefixes:YES];       //for debugging only
-    [xmlParser setShouldResolveExternalEntities:NO];
-    [xmlParser setDelegate:delegate];
-    [xmlParser parse];     //blocking operation
+    XmlParserBridge* xmlParser = [[XmlParserBridge alloc] initWith:delegate];
+    NSData* xmlData = [xmlString dataUsingEncoding:NSUTF8StringEncoding];
+    [xmlParser feedData:xmlData.bytes withLength:xmlData.length];     //blocking operation
     return retval;
 }
 

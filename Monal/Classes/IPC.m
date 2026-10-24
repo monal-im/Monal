@@ -11,9 +11,9 @@
 #import <Foundation/Foundation.h>
 #import <CommonCrypto/CommonDigest.h>
 #import <notify.h>
-#import "IPC.h"
-#import "MLSQLite.h"
-#import "HelperTools.h"
+#import <monalxmpp/IPC.h>
+#import <monalxmpp/MLSQLite.h>
+#import <monalxmpp/HelperTools.h>
 
 #define MSG_TIMEOUT 2.0
 

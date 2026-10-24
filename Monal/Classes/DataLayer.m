@@ -6,19 +6,19 @@
 //  Copyright 2009 __MyCompanyName__. All rights reserved.
 //
 
-#import "DataLayer.h"
-#import "xmpp.h"
-#import "MLSQLite.h"
-#import "HelperTools.h"
-#import "MLXMLNode.h"
-#import "XMPPPresence.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/xmpp.h>
+#import <monalxmpp/MLSQLite.h>
+#import <monalxmpp/HelperTools.h>
+#import <monalxmpp/MLXMLNode.h>
+#import <monalxmpp/XMPPPresence.h>
 #import "XMPPMessage.h"
 #import "XMPPIQ.h"
-#import "XMPPDataForm.h"
-#import "MLFiletransfer.h"
-#import "DataLayerMigrations.h"
-#import "MLContactSoftwareVersionInfo.h"
-#import "MLXMPPManager.h"
+#import <monalxmpp/XMPPDataForm.h>
+#import <monalxmpp/MLFileTransfer.h>
+#import <monalxmpp/DataLayerMigrations.h>
+#import <monalxmpp/MLContactSoftwareVersionInfo.h>
+#import <monalxmpp/MLXMPPManager.h>
 
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;

@@ -10,18 +10,18 @@
 
 #import <Contacts/Contacts.h>
 #import "ActiveChatsViewController.h"
-#import "DataLayer.h"
-#import "xmpp.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/xmpp.h>
 #import "MLContactCell.h"
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
-#import "MLImageManager.h"
+#import <monalxmpp/MLImageManager.h>
 #import "ContactsViewController.h"
 #import "MLXEPSlashMeHandler.h"
-#import "MLNotificationQueue.h"
+#import <monalxmpp/MLNotificationQueue.h>
 #import "MLSettingsAboutViewController.h"
-#import "MLVoIPProcessor.h"
-#import "MLCall.h"      //for MLCallType
+#import <monalxmpp/MLVoIPProcessor.h>
+#import <monalxmpp/MLCall.h>      //for MLCallType
 #import "XMPPIQ.h"
 #import "MLIQProcessor.h"
 #import "UIColor+Theme.h"
@@ -82,6 +82,7 @@ typedef NS_ENUM(NSUInteger, MLViewID) {
 static NSMutableSet* _mamWarningDisplayed;
 static NSMutableSet* _smacksWarningDisplayed;
 static NSMutableSet* _pushWarningDisplayed;
+static BOOL _dnssecWarningDisplayed;
 
 +(void) initialize
 {
@@ -89,6 +90,7 @@ static NSMutableSet* _pushWarningDisplayed;
     _mamWarningDisplayed = [NSMutableSet new];
     _smacksWarningDisplayed = [NSMutableSet new];
     _pushWarningDisplayed = [NSMutableSet new];
+    _dnssecWarningDisplayed = NO;
 }
 
 -(instancetype)initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
@@ -252,18 +254,27 @@ static NSMutableSet* _pushWarningDisplayed;
 
 -(void) configureComposeButton
 {
+    //don't replace an existing customView: this makes UIKit rebuild all bar button items
+    //and iOS > 18 sometimes hides all of them if this happens during a navigation transition
+    //or while a chat view is covering us
+    if(![self.composeButton.customView isKindOfClass:[UIImageView class]])
+    {
+        self.composeButton.customView = [UIImageView new];
+        UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
+        [self.composeButton.customView addGestureRecognizer:tapRecognizer];
+        [self.composeButton setIsAccessibilityElement:YES];
+        [self.composeButton setAccessibilityTraits:UIAccessibilityTraitButton];
+    }
+    
+    //replace the image
     UIImage* image = [[UIImage systemImageNamed:@"person.2.fill"] imageWithTintColor:UIColor.monalGreen];
-    UITapGestureRecognizer* tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showContacts:)];
-    self.composeButton.customView = [HelperTools
-        buttonWithNotificationBadgeForImage:image
-        hasNotification:[[DataLayer sharedInstance] allContactRequests].count > 0
-        withTapHandler:tapRecognizer];
-    [self.composeButton setIsAccessibilityElement:YES];
+    BOOL hasContactRequests = [[DataLayer sharedInstance] allContactRequests].count > 0;
+    ((UIImageView*)self.composeButton.customView).image = hasContactRequests ? [HelperTools imageWithNotificationBadgeForImage:image] : image;
+    
     if([[DataLayer sharedInstance] allContactRequests].count > 0)
         [self.composeButton setAccessibilityLabel:NSLocalizedString(@"Open contact list (contact requests pending)", @"")];
     else
         [self.composeButton setAccessibilityLabel:NSLocalizedString(@"Open contact list", @"")];
-    [self.composeButton setAccessibilityTraits:UIAccessibilityTraitButton];
 }
 
 -(void) viewDidLoad
@@ -684,6 +695,31 @@ static NSMutableSet* _pushWarningDisplayed;
 #else
         [self showWarningsIfNeeded];
 #endif
+        
+        prependToViewQueue((^(PMKResolver resolve) {
+            if(!_dnssecWarningDisplayed)
+            {
+                if([[HelperTools defaultsDB] boolForKey: @"useDnssecForAllConnections"])
+                {
+                    DDLogDebug(@"Showing dnssec bug warning...");
+                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"DNSSEC bug in iOS/macOS", @"") message:NSLocalizedString(@"Unfortunately iOS (and probably also macOS) has a bug that stops DNSSEC from working at all. You can read more about this at https://monal-im.org/dnssec. You'll have to turn of DNSSEC in the settings to make sure you can connect to your XMPP server until Apple fixes this bug.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction* action __unused) {
+                        _dnssecWarningDisplayed = YES;
+                        resolve(nil);
+                    }]];
+                    [self dismissCompleteViewChainWithAnimation:NO andCompletion:^{
+                        [self presentViewController:messageAlert animated:YES completion:nil];
+                    }];
+                }
+                else
+                {
+                    _dnssecWarningDisplayed = YES;
+                    resolve(nil);
+                }
+            }
+            else
+                resolve(nil);
+        }));
         
         prependToViewQueue(MLViewIDWelcomeLoginView, (^(PMKResolver resolve) {
 #ifdef IS_QUICKSY

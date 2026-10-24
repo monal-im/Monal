@@ -11,9 +11,9 @@
 #import <QuartzCore/QuartzCore.h>
 #import <PhotosUI/PHPicker.h>
 
-#import "DataLayer.h"
-#import "MLConstants.h"
-#import "MLXMPPManager.h"
+#import <monalxmpp/DataLayer.h>
+#import <monalxmpp/MLConstants.h>
+#import <monalxmpp/MLXMPPManager.h>
 #import "MLNotificationManager.h"
 #import "MLResizingTextView.h"
 #import "MLSearchViewController.h"

@@ -503,7 +503,7 @@ struct ServerDetails: View {
                 }
             }
 
-            Section(header: Text("These are the TLS versions supported by Monal, the one used to connect to your server will be green.")) {
+            Section(header: Text("These are the TLS versions supported by Monal, the one used to connect to your server will be blue.")) {
                 ForEach(getTLSEntryData(connection: connection)) { entryData in
                     ServerDetailsEntry(entryData)
                 }

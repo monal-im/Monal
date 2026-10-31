@@ -103,21 +103,6 @@ static volatile int _ownLockFD;
     return lock != 0;
 }
 
-+(void) waitForRemoteStartup:(NSString*) processName
-{
-    [self waitForRemoteStartup:processName withLoopHandler:nil];
-}
-
-+(void) waitForRemoteStartup:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler
-{
-    while(![[NSThread currentThread] isCancelled] && ![self checkRemoteRunning:processName])
-    {
-        if(handler)
-            handler();
-        [self sleep:0.250];
-    }
-}
-
 +(void) waitForRemoteTermination:(NSString*) processName
 {
     [self waitForRemoteTermination:processName withLoopHandler:nil];

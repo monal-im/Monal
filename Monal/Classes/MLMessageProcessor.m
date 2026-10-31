@@ -862,10 +862,12 @@ static NSMutableDictionary* _typingNotifications;
         NSNumber* historyId = [[DataLayer sharedInstance] hasMessageForStanzaId:stanzaid orMessageID:messageId withInboundDir:inbound occupantId:occupantId andJid:buddyName onAccount:account.accountID];
         if(historyId != nil)
         {
-            message = [MLMessage createMessageFromHistoryID:historyId];
+            //don't use `message = ...` because we don't want to return an MLMessage object as "new" message
+            //if we only updated the stanzaid in our db
+            MLMessage* updatedMessage = [MLMessage createMessageFromHistoryID:historyId];
             DDLogInfo(@"Sending out kMonalUpdatedMessageNotice notification for historyId %@", historyId);
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdatedMessageNotice object:account userInfo:@{
-                    @"message": message,
+                    @"message": updatedMessage,
                     @"showAlert": @(NO),
                     @"contact": possiblyUnknownContact,
                     @"LMCReplaced": @NO,
@@ -873,9 +875,9 @@ static NSMutableDictionary* _typingNotifications;
                     @"reactionsUpdate": @NO,
                 }];
             if(stanzaid)
-                DDLogDebug(@"Managed to update stanzaid of message (or stanzaid already known): %@", message);
+                DDLogDebug(@"Managed to update stanzaid of message (or stanzaid already known): %@", updatedMessage);
             else
-                DDLogWarn(@"MUC reflection without a stanzaid! This likely means that the MUC server doesn't support stanzaids. message: %@", message);
+                DDLogWarn(@"MUC reflection without a stanzaid! This likely means that the MUC server doesn't support stanzaids. message: %@", updatedMessage);
         }
     }
     

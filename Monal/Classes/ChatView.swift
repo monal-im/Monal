@@ -390,32 +390,24 @@ struct ChatView: View {
 
         // if we didn't get enough (or any) messages from the DB, try to get some from MAM
         if oldMessages.count < kMonalBackscrollingMsgCount && !contact.hasReachedMamArchiveTop {
-            self.isLoadingMamHistory = true
-
             guard let oldestStanzaId = self.findOldestStanzaId() else {
                 DDLogError("Couldn't find a stanzaId to perform a mam query with! (oldestStanzaId is nil)")
                 return
             }
+            
             // now try to load more (older) messages from mam
             DDLogVerbose("Loading more messages from mam before stanzaId \(oldestStanzaId)")
+            self.isLoadingMamHistory = true
             firstly {
                 self.account.setMAMQueryMostRecentFor(self.contact.obj, before: oldestStanzaId)
             }
             .done { returnedMessages in
                 let returnedMessages = returnedMessages as! [MLMessage]
-                if returnedMessages.isEmpty {
-                    DDLogVerbose("Reached the top of the mam archive for \(self.contact.obj.contactJid)")
-                    // Don't block the main thread while writing to the db
-                    DispatchQueue.global(qos: .default).async {
-                        contact.obj.markReachedMamArchiveTop()
-                    }
-                } else {
-                    DDLogVerbose("Got backscrolling mam response: \(returnedMessages.count) messages: \(String(describing:returnedMessages))")
-                    // When backscrolling in 1-1 chats, the oldest stanzaId may not correspond to the earliest
-                    // message we have, because messages we send don't have a stanzaId => There's a risk of
-                    // getting duplicate messages in the messages array => we need to deduplicate.
-                    self.messages = OrderedSet(returnedMessages.map {ChatViewMessage($0)} + self.messages).elements
-                }
+                DDLogVerbose("Got backscrolling mam response: \(returnedMessages.count) messages: \(String(describing:returnedMessages))")
+                // When backscrolling in 1-1 chats, the oldest stanzaId may not correspond to the earliest
+                // message we have, because messages we send don't have a stanzaId
+                // but: those messages won't be returned by backscrolling, so no need to deduplicate them here
+                self.messages = returnedMessages.map {ChatViewMessage($0)} + self.messages
             }
             .catch { error in
                 alertPrompt = AlertPrompt(

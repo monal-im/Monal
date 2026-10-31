@@ -14,8 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 +(void) initializeForProcess:(NSString*) processName;
 +(BOOL) checkRemoteRunning:(NSString*) processName;
-+(void) waitForRemoteStartup:(NSString*) processName;
-+(void) waitForRemoteStartup:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler;
 +(void) waitForRemoteTermination:(NSString*) processName;
 +(void) waitForRemoteTermination:(NSString*) processName withLoopHandler:(monal_void_block_t _Nullable) handler;
 +(void) lock;

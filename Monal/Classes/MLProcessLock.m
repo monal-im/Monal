@@ -143,7 +143,7 @@ static volatile int _ownLockFD;
     NSRunLoop* main_runloop = [NSRunLoop mainRunLoop];
     NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:time];
     //we have to spin the runloop instead of simply sleeping to not get killed for unresponsiveness
-    if(was_called_in_mainthread)
+    if(was_called_in_mainthread && [main_runloop currentMode])
         while([timeout timeIntervalSinceNow] > 0)
             [main_runloop runMode:[main_runloop currentMode] beforeDate:timeout];
     else

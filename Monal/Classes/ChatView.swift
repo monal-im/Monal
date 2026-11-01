@@ -554,8 +554,9 @@ struct ChatView: View {
                                     Text("Retry"),
                                     action: {
                                         Task { @MainActor in
+                                            let messageId = mlMessage.messageId
                                             await Task.detached(priority: .userInitiated) {
-                                                DataLayer.sharedInstance().clearError(ofMessageId: mlMessage.messageId)
+                                                DataLayer.sharedInstance().clearError(ofMessageId: messageId)
                                             }.value
 
                                             mlMessage.errorType = ""

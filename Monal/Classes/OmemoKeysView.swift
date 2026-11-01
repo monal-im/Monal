@@ -280,7 +280,7 @@ struct OmemoKeysForContactView: View {
                         return // should be unreachable
                     }
                     let address = SignalAddress.init(name: self.contactJid, deviceId: Int32(self.selectedDeviceForDeletion.int32Value))
-                    if let removedSince = account.omemo.getRemovedFromDevicelistTime(address) {
+                    if account.omemo.getRemovedFromDevicelistTime(address) != nil {
                         account.omemo.forceDeleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion)
                     } else {
                         account.omemo.deleteDevice(forSource: self.contactJid, andRid: self.selectedDeviceForDeletion)

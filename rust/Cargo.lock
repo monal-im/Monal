@@ -1061,8 +1061,8 @@ dependencies = [
 
 [[package]]
 name = "webrtc-sdp"
-version = "0.3.16"
-source = "git+https://github.com/mozilla/webrtc-sdp.git#5bcc025c9434795bb38fba82e54d041d504f8543"
+version = "0.3.17"
+source = "git+https://github.com/mozilla/webrtc-sdp.git#a3f731fce84bb6bb66b90674a8787eead4bca78e"
 dependencies = [
  "log",
  "serde",

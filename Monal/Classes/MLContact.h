@@ -11,13 +11,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-FOUNDATION_EXPORT NSString* const kSubBoth;
-FOUNDATION_EXPORT NSString* const kSubNone;
-FOUNDATION_EXPORT NSString* const kSubTo;
-FOUNDATION_EXPORT NSString* const kSubFrom;
-FOUNDATION_EXPORT NSString* const kSubRemove;
-FOUNDATION_EXPORT NSString* const kSubNotListedLocally;
-FOUNDATION_EXPORT NSString* const kAskSubscribe;
+typedef NSString* MLContactSubscription NS_TYPED_ENUM NS_SWIFT_NAME(ContactSubscription);
+FOUNDATION_EXPORT MLContactSubscription const kSubBoth NS_SWIFT_NAME(both);
+FOUNDATION_EXPORT MLContactSubscription const kSubNone NS_SWIFT_NAME(none);
+FOUNDATION_EXPORT MLContactSubscription const kSubTo NS_SWIFT_NAME(to);
+FOUNDATION_EXPORT MLContactSubscription const kSubFrom NS_SWIFT_NAME(from);
+FOUNDATION_EXPORT MLContactSubscription const kSubRemove NS_SWIFT_NAME(remove);
+FOUNDATION_EXPORT MLContactSubscription const kSubNotListedLocally NS_SWIFT_NAME(notListedLocally);
+
+typedef NSString* MLContactSubscriptionAsk NS_TYPED_ENUM NS_SWIFT_NAME(ContactSubscriptionAsk);
+FOUNDATION_EXPORT MLContactSubscriptionAsk const kAskSubscribe NS_SWIFT_NAME(subscribe);
 
 @class xmpp;
 @class MLMessage;
@@ -82,8 +85,8 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, readonly) NSString* accountNickInGroup;
 @property (nonatomic, readonly) BOOL isMentionOnly;
 
-@property (nonatomic, readonly) NSString* subscription; //roster subbscription state
-@property (nonatomic, readonly) NSString* ask; //whether we have tried to subscribe
+@property (nonatomic, readonly) MLContactSubscription subscription; //roster subbscription state
+@property (nonatomic, readonly) MLContactSubscriptionAsk ask; //whether we have tried to subscribe
 
 @property (nonatomic, readonly) NSString* contactDisplayNameWithoutSelfnotesPrefix;
 

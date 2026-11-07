@@ -171,6 +171,7 @@ typedef NS_ENUM(NSUInteger, MLGracefulTimeoutType) {
     NSString* writableDBPath = [[HelperTools getContainerURLForPathComponents:@[@"sworim.sqlite"]] path];
     for(NSString* suffix in @[@"", @"-wal", @"-shm", @"-journal"])
         [fileManager removeItemAtPath:[writableDBPath stringByAppendingString:suffix] error:nil];
+    [DataLayer sharedInstance];
 #else
     //do MLFiletransfer cleanup tasks (do this in a new thread to parallelize it with our ping to the appex and don't slow down app startup)
     //this will also migrate our old image cache to new MLFiletransfer cache

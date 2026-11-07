@@ -120,9 +120,16 @@ static int wal_hook(void* arg, sqlite3* database, const char* dbname, int number
     [HelperTools configureFileProtectionFor:_dbFile];
     [HelperTools configureFileProtectionFor:[NSString stringWithFormat:@"%@-wal", _dbFile]];
     [HelperTools configureFileProtectionFor:[NSString stringWithFormat:@"%@-shm", _dbFile]];
-    
+
+    int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX;
+
+#ifdef SNIKKET_MIGRATION
+    if([dbFile containsString:@"snikket"])
+        flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX;
+#endif
+
     //SQLITE_OPEN_NOMUTEX means "multi-thread" threading mode rather than "serialized" threading mode (reachable with SQLITE_OPEN_FULLMUTEX)
-    if(sqlite3_open_v2([_dbFile UTF8String], &(self->_database), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX, nil) == SQLITE_OK)
+    if(sqlite3_open_v2([_dbFile UTF8String], &(self->_database), flags, nil) == SQLITE_OK)
         DDLogInfo(@"Database opened: %@", _dbFile);
     else
     {

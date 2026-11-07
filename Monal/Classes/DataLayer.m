@@ -21,6 +21,10 @@
 #import <monalxmpp/MLXMPPManager.h>
 #import <monalxmpp/MLReactionsEntry.h>
 
+#ifdef SNIKKET_MIGRATION
+#import <monalxmpp/monalxmpp-Swift.h>
+#endif
+
 @interface MLMessage ()
 +(MLMessage* _Nullable) createDraftMessageFromDatabaseWithJid:(NSString*) jid andAccountID:(NSNumber*) accountID;
 @end
@@ -61,29 +65,229 @@ static NSDateFormatter* dbFormatter;
 +(void) initialize
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSString* writableDBPath = [[HelperTools getContainerURLForPathComponents:@[@"sworim.sqlite"]] path];
-    
-    //the file does not exist (e.g. fresh install) --> copy default database to app group path
-    if(![fileManager fileExistsAtPath:writableDBPath])
-    {
-        NSString* defaultDBPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
-        NSDictionary* attrs = [fileManager attributesOfItemAtPath:defaultDBPath error:nil];
-        unsigned long long defaultDBSize = attrs ? [attrs fileSize] : 0;
-        DDLogInfo(@"initialize: copying default from '%@' DB to '%@', size=%llu...", defaultDBPath, writableDBPath, defaultDBSize);
-        DDLogInfo(@"defaultDB sha1: %@", [HelperTools hexadecimalString:[HelperTools sha1:[NSData dataWithContentsOfFile:defaultDBPath options:0 error:nil]]]);
-        NSError* error;
-        [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
-        if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-    }
-    
-    //init global state
-    dbPath = writableDBPath;
+    dbPath = [[HelperTools getContainerURLForPathComponents:@[@"sworim.sqlite"]] path];
+
     dbFormatter = [NSDateFormatter new];
     [dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     [dbFormatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
     [dbFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+
+    //the file does not exist (e.g. fresh install) --> copy default database to app group path
+    //but only if we don't migrate the snikket database
+    if(![fileManager fileExistsAtPath:dbPath])
+    {
+        NSString* defaultDBPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
+        NSDictionary* attrs = [fileManager attributesOfItemAtPath:defaultDBPath error:nil];
+        unsigned long long defaultDBSize = attrs ? [attrs fileSize] : 0;
+        DDLogInfo(@"initialize: copying default from '%@' DB to '%@', size=%llu...", defaultDBPath, dbPath, defaultDBSize);
+        DDLogInfo(@"defaultDB sha1: %@", [HelperTools hexadecimalString:[HelperTools sha1:[NSData dataWithContentsOfFile:defaultDBPath options:0 error:nil]]]);
+        NSError* error;
+        [fileManager copyItemAtPath:defaultDBPath toPath:dbPath error:&error];
+        if(error)
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+
+#ifdef SNIKKET_MIGRATION
+        NSString* snikketPath = [[HelperTools mainDbURL] path];
+        if([fileManager fileExistsAtPath:snikketPath])
+            [self migrateSnikket];
+#endif
+    }
+    
 }
+
+#ifdef SNIKKET_MIGRATION
++(void) migrateSnikket
+{
+    NSString* snikketPath = [[HelperTools mainDbURL] path];
+    DDLogDebug(@"Snikket DB path: %@", snikketPath);
+    MLSQLite* snikketDB = [MLSQLite sharedInstanceForFile:snikketPath];
+    MLSQLite* monalDB = [MLSQLite sharedInstanceForFile:[[HelperTools getContainerURLForPathComponents:@[@"sworim.sqlite"]] path]];
+
+    //CREATE TABLE 'message_history' ( 'message_history_id' integer NOT NULL, 'account_id' integer NOT NULL, 'buddy_name' TEXT NOT NULL, 'inbound' BOOL NOT NULL DEFAULT 0, 'timestamp' datetime NOT NULL, 'message' blob NOT NULL, 'actual_from' text COLLATE nocase, 'messageid' text COLLATE nocase, 'messageType' text, 'sent' bool, 'received' bool, 'unread' bool, 'encrypted' bool DEFAULT FALSE, 'previewText' text, 'previewImage' text, 'stanzaid' text COLLATE nocase, 'errorType' text COLLATE nocase, 'errorReason' text, 'displayed' BOOL DEFAULT FALSE, 'displayMarkerWanted' BOOL DEFAULT FALSE, participant_jid TEXT DEFAULT NULL, retracted BOOL DEFAULT false, occupant_id VARCHAR(128) NULL DEFAULT NULL, PRIMARY KEY('message_history_id' AUTOINCREMENT), FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, FOREIGN KEY('account_id', 'buddy_name') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE )
+
+    //CREATE TABLE 'buddylist' ( 'buddy_id' integer NOT NULL, 'account_id' integer NOT NULL, 'buddy_name' varchar(255) COLLATE nocase, 'full_name' varchar(255), 'nick_name' varchar(255), 'iconhash' varchar(200), 'state' varchar(20), 'status' varchar(200), 'Muc' bool, 'muc_subject' varchar(1024), 'muc_nick' varchar(255), 'backgroundImage' text, 'encrypt' bool, 'subscription' varchar(50), 'ask' varchar(50), 'messageDraft' text, 'lastMucStanzaId' text DEFAULT NULL, muted BOOL DEFAULT FALSE, 'latest_read_message_history_id' INTEGER NOT NULL DEFAULT -1, mentionOnly BOOL DEFAULT FALSE, lastInteraction INTEGER DEFAULT NULL, 'muc_type' VARCHAR(10) DEFAULT NULL, muc_occupant_id VARCHAR(128) NULL DEFAULT NULL, reached_mam_archive_top BOOL DEFAULT FALSE, explicit_omemo_trust_activated BOOL DEFAULT FALSE, UNIQUE('account_id', 'buddy_name'), PRIMARY KEY('buddy_id' AUTOINCREMENT), FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE )
+
+    [snikketDB voidReadTransaction:^{
+        [monalDB voidWriteTransaction:^{
+            //create all accounts mentioned in any table
+            NSMutableDictionary* accounts = [NSMutableDictionary new];
+            for(NSString* jid in [snikketDB executeScalarReader:@"SELECT DISTINCT account FROM chat_history ORDER BY timestamp ASC;"])
+            {
+                if(accounts[jid] != nil)
+                    continue;
+                NSNumber* newAccountID = [[MLXMPPManager sharedInstance] addAccountForJid:jid hardcodedServer:nil hardcodedPort:nil forceDirectTLS:NO allowPlainAuth:NO];     //snikket server won't support PLAIN anyways, so every PLAIN possibly is an attack
+                accounts[jid] = newAccountID;
+            }
+            for(NSString* jid in [snikketDB executeScalarReader:@"SELECT DISTINCT account FROM chats ORDER BY timestamp ASC;"])
+            {
+                if(accounts[jid] != nil)
+                    continue;
+                accounts[jid] = [[MLXMPPManager sharedInstance] addAccountForJid:jid hardcodedServer:nil hardcodedPort:nil forceDirectTLS:NO allowPlainAuth:NO];     //snikket server won't support PLAIN anyways, so every PLAIN possibly is an attack
+            }
+
+            for(NSString* jid in accounts)
+            {
+                NSNumber* accountID = accounts[jid];
+                NSString* password = [HelperTools getAccountPasswordFor:jid];
+                [[MLXMPPManager sharedInstance] updatePassword:password forAccount:accountID];
+            }
+
+            //migrate buddylist
+            for(NSDictionary* row in [snikketDB executeReader:@"SELECT * FROM chats ORDER BY timestamp ASC;"])
+            {
+                NSNumber* accountId = accounts[row[@"account"]];
+                MLAssert(accountId != nil, @"Account ID should never be nil!", (@{@"row": row}));
+
+                //extract encryption and notification settings
+                BOOL mentionOnly = NO;
+                BOOL muted = NO;
+                BOOL encrypted = YES;
+                NSData* data = [row[@"options"] dataUsingEncoding:NSUTF8StringEncoding];
+                if(data != nil)
+                {
+                    NSError* error = nil;
+                    NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+                    if(error)
+                        DDLogWarn(@"Json decoding of chat options returned error for '%@': %@", row[@"options"], error);
+                    else
+                    {
+                        if([@"omemo" isEqualToString:json[@"encrypt"]])
+                            encrypted = YES;
+                        else
+                            encrypted = NO;
+                        //if this is a muc with mentionOnly setting
+                        if(((NSNumber*)row[@"type"]).intValue == 1 && json[@"notifications"] != nil && [@"mention" isEqualToString:json[@"notifications"]])
+                            mentionOnly = YES;
+                        //if this is for every chat (1:1 and muc)
+                        if(json[@"notifications"] != nil && [@"none" isEqualToString:json[@"notifications"]])
+                            muted = YES;
+                    }
+                }
+
+                [monalDB executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick', 'encrypt', 'mentionOnly', 'muted') VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET subscription='both';" andArguments:@[
+                    accountId,
+                    row[@"jid"],
+                    @"",
+                    @"",
+                    row[@"type"],
+                    nilWrapper(row[@"nickname"]),
+                    @(encrypted),
+                    @(mentionOnly),
+                    @(muted),
+                ]];
+            }
+
+            //migrate all non-chats buddies into buddylist (possibly muc jids not in our snikket roster)
+            for(NSDictionary* row in [snikketDB executeReader:@"SELECT * FROM chat_history ORDER BY timestamp ASC;"])
+            {
+                NSNumber* accountId = accounts[row[@"account"]];
+                MLAssert(accountId != nil, @"Account ID should never be nil!", (@{@"row": row}));
+
+                //just use default encryption and notification settings (there are non in the snikket db)
+                BOOL mentionOnly = NO;
+                BOOL muted = NO;
+                BOOL encrypted = YES;
+
+                [monalDB executeNonQuery:@"INSERT OR IGNORE INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick', 'encrypt', 'mentionOnly', 'muted') VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);" andArguments:@[
+                    accountId,
+                    row[@"jid"],
+                    @"",
+                    @"",
+                    @0,         //hardcoded to normal 1:1 buddy (will be automatically upgraded to muc once we fetch the bookmarks)
+                    nilWrapper(nil),
+                    @(encrypted),
+                    @(mentionOnly),
+                    @(muted),
+                ]];
+            }
+
+            //CREATE TABLE 'message_history' ( 'message_history_id' integer NOT NULL, 'account_id' integer NOT NULL, 'buddy_name' TEXT NOT NULL, 'inbound' BOOL NOT NULL DEFAULT 0, 'timestamp' datetime NOT NULL, 'message' blob NOT NULL, 'actual_from' text COLLATE nocase, 'messageid' text COLLATE nocase, 'messageType' text, 'sent' bool, 'received' bool, 'unread' bool, 'encrypted' bool DEFAULT FALSE, 'previewText' text, 'previewImage' text, 'stanzaid' text COLLATE nocase, 'errorType' text COLLATE nocase, 'errorReason' text, 'displayed' BOOL DEFAULT FALSE, 'displayMarkerWanted' BOOL DEFAULT FALSE, participant_jid TEXT DEFAULT NULL, retracted BOOL DEFAULT false, occupant_id VARCHAR(128) NULL DEFAULT NULL, PRIMARY KEY('message_history_id' AUTOINCREMENT), FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, FOREIGN KEY('account_id', 'buddy_name') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE )
+
+            //CREATE TABLE 'filetransfer_info' ( 'message_history_id' INTEGER NOT NULL PRIMARY KEY, 'mime_type' VARCHAR(128) DEFAULT NULL, 'size' INTEGER DEFAULT NULL, FOREIGN KEY('message_history_id') REFERENCES 'message_history'('message_history_id') ON DELETE CASCADE )
+
+            for(NSDictionary* row in [snikketDB executeReader:@"SELECT * FROM chat_history ORDER BY timestamp ASC;"])
+            {
+                BOOL inbound = YES;
+                BOOL unread = NO;
+                BOOL sent = YES;
+                BOOL received = NO;
+                int snikketState = ((NSNumber*)row[@"state"]).intValue;
+                inbound = snikketState%2 == 0;
+                if(snikketState == 2 || snikketState == 6 || snikketState == 7)
+                    unread = YES;
+                else if(snikketState == 3)
+                    sent = NO;
+                else if(snikketState == 9)
+                    received = YES;
+                else if(snikketState == 11)
+                    unread = NO;
+                NSTimeInterval timestamp = (NSTimeInterval)((NSNumber*)row[@"timestamp"]).longLongValue/1000.0;
+
+                var messageType = kMessageTypeText;
+                if(((NSNumber*)row[@"item_type"]).intValue == 1)
+                {
+                    messageType = kMessageTypeFiletransfer;
+                    //TODO: copy downloaded files to our cache
+                }
+                else
+                {
+                    NSString* messageText = row[@"data"];
+                    NSRegularExpression* geoRegex = [NSRegularExpression regularExpressionWithPattern:geoPattern options:NSRegularExpressionCaseInsensitive error:nil];
+                    NSTextCheckingResult* geoMatch = [geoRegex firstMatchInString:messageText options:0 range:NSMakeRange(0, [messageText length])];
+                    if(geoMatch.numberOfRanges > 0)
+                        messageType = kMessageTypeGeo;
+                }
+
+
+                /*
+                extern NSString* const kMessageTypeStatus;
+                extern NSString* const kMessageTypeMessageDraft;
+                extern NSString* const kMessageTypeText;
+                extern NSString* const kMessageTypeGeo;
+                extern NSString* const kMessageTypeUrl;
+                extern NSString* const kMessageTypeFiletransfer;
+                */
+                [monalDB executeNonQuery:@"INSERT INTO message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid, participant_jid, occupant_id, received, errorType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);" andArguments:@[
+                    accounts[row[@"account"]],
+                    row[@"jid"],
+                    @(inbound),
+                    [dbFormatter stringFromDate:(row[@"timestamp"] ? [NSDate dateWithTimeIntervalSince1970:timestamp] : [NSDate date])],
+                    row[@"data"],
+                    nilWrapper(row[@"author_nickname"]),
+                    @(unread),
+                    @(sent),
+                    @YES,
+                    nilWrapper(row[@"stanza_id"]),      //the message id
+                    messageType,
+                    row[@"encryption"],
+                    nilWrapper(row[@"server_msg_id"] != nil ? row[@"server_msg_id"] : row[@"remote_msg_id"]),       //the mam stanza id
+                    nilWrapper(nil),
+                    nilWrapper(nil),        //any occupant_id? maybe
+                    @(received),
+                    (snikketState == 4 || snikketState == 5) && row[@"error"] ? nilWrapper(row[@"error"]) : nilWrapper(nil),  //errorType (no errorReason in the snikket db)
+                ]];
+                NSNumber* historyId = [monalDB lastInsertId];
+
+                if(messageType == kMessageTypeFiletransfer)
+                {
+                    //appendix example: {"size":91888,"mimetype":"image\/jpeg","state":2,"name":"IMG_0023.jpg"}
+                    NSData* data = [row[@"appendix"] dataUsingEncoding:NSUTF8StringEncoding];
+                    NSError* error = nil;
+                    NSDictionary* appendix = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+                    if(error)
+                        DDLogWarn(@"Json decoding of chat_history appendix returned error for '%@': %@", row[@"appendix"], error);
+                    else if(appendix[@"mimetype"] != nil && appendix[@"size"] != nil)
+                        [monalDB executeNonQuery:@"UPDATE filetransfer_info SET mime_type=?, size=? WHERE message_history_id=?;" andArguments:@[
+                            appendix[@"mimetype"],
+                            appendix[@"size"],
+                            historyId,
+                        ]];
+                }
+            }
+        }];
+    }];
+}
+#endif
 
 //we are a singleton (compatible with old code), but conceptually we could also be a static class instead
 +(id) sharedInstance

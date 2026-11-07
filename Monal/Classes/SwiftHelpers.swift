@@ -584,3 +584,37 @@ public class XmlParserBridge : NSObject {
         }
     }
 }
+
+#if SNIKKET_MIGRATION
+public extension HelperTools {
+
+    @objc
+    static func getAccountPassword(for account: String) -> String? {
+        let query = getAccountQuery(account, withData: kSecReturnData);
+
+        var result: CFTypeRef?;
+
+        guard SecItemCopyMatching(query as CFDictionary, &result) == noErr else {
+            return nil;
+        }
+
+        guard let data = result as? Data else {
+            return nil;
+        }
+
+        return String(data: data, encoding: .utf8);
+    }
+
+    @objc
+    static func getAccountQuery(_ name:String, withData:CFString = kSecReturnAttributes) -> [String: Any] {
+        return [ String(kSecClass) : kSecClassGenericPassword, String(kSecMatchLimit) : kSecMatchLimitOne, String(withData) : kCFBooleanTrue!, String(kSecAttrService) : "xmpp" as NSObject, String(kSecAttrAccount) : name as NSObject ];
+    }
+
+    @objc
+    static func mainDbURL() -> URL {
+        let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.snikket.shared")!;
+        return containerURL.appendingPathComponent("snikket_main.db");
+    }
+
+}
+#endif

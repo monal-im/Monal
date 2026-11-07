@@ -30,6 +30,7 @@ struct ContactDetails: View {
     @State private var showingCannotEncryptAlert = false
     @State private var showingShouldDisableEncryptionAlert = false
     @State private var isEditingNickname = false
+    @State private var isEditingFullName = false        //only for mucs
     @State private var inputImage: UIImage?
     @State private var showingImagePicker = false
     @State private var showingSheetEditSubject = false
@@ -225,6 +226,25 @@ struct ContactDetails: View {
                     
                     if contact.isMuc && ((contact.groupSubject as String).count > 0 || ownRole == kMucRoleModerator) {
                         VStack {
+                            if [kMucAffiliationOwner, kMucAffiliationAdmin].contains(ownAffiliation) {
+                                HStack {
+                                    if contact.obj.mucType == kMucTypeGroup {
+                                        Text("Group subject:")
+                                            .underline()
+                                        Spacer().frame(width:8)
+                                    } else {
+                                        Text("Channel subject:")
+                                            .underline()
+                                        Spacer().frame(width:8)
+                                    }
+                                    let label = contact.obj.mucType == kMucTypeGroup ? NSLocalizedString("Rename Group", comment:"") : NSLocalizedString("Rename Channel", comment:"")
+                                    TextField(label, text: $contact.fullNameView, onEditingChanged: {
+                                        isEditingFullName = $0
+                                    })
+                                    .accessibilityLabel(contact.obj.mucType == kMucTypeGroup ? Text("Group name") : Text("Channel name"))
+                                    .addClearButton(isEditing: isEditingFullName, text: $contact.fullNameView)
+                                }
+                            }
                             if ownRole == kMucRoleModerator {
                                 Button {
                                     showingSheetEditSubject.toggle()
@@ -386,15 +406,8 @@ struct ContactDetails: View {
                     //.buttonStyle(BorderlessButtonStyle())
                 }
 #endif
-                
-                if contact.isMuc && ownAffiliation == kMucAffiliationOwner {
-                    let label = contact.obj.mucType == kMucTypeGroup ? NSLocalizedString("Rename Group", comment:"") : NSLocalizedString("Rename Channel", comment:"")
-                    TextField(label, text: $contact.fullNameView, onEditingChanged: {
-                        isEditingNickname = $0
-                    })
-                    .accessibilityLabel(contact.obj.mucType == kMucTypeGroup ? Text("Group name") : Text("Channel name"))
-                    .addClearButton(isEditing: isEditingNickname, text: $contact.fullNameView)
-                } else if !contact.isMuc && !contact.isSelf {
+
+                if (contact.isMuc && ownAffiliation != kMucAffiliationOwner) || (!contact.isMuc && !contact.isSelf) {
                     TextField(NSLocalizedString("Rename Contact", comment: "placeholder text in contact details"), text: $contact.nickNameView, onEditingChanged: {
                         isEditingNickname = $0
                     })

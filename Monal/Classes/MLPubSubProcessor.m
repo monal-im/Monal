@@ -25,7 +25,7 @@
 @end
 
 @interface MLMucProcessor ()
--(void) sendDiscoQueryFor:(NSString*) roomJid withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks;
+-(void) sendDiscoQueryFor:(NSString*) roomJid withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks andMucName:(NSString* _Nullable) mucName;
 -(void) sendJoinPresenceFor:(NSString*) room;
 -(NSString*) calculateNickForMuc:(NSString*) room;
 @end
@@ -251,8 +251,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
         //iterate through all conference elements provided
         for(NSString* itemId in data)
         {
-            //we ignore the conference name (the name will be taken from the muc itself)
-            //NSString* name = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference@name"];
+            NSString* name = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference@name"];
             NSString* room = [itemId lowercaseString];
             NSString* nick = [data[itemId] findFirst:@"{urn:xmpp:bookmarks:1}conference/nick#"];
             //ignore password protected mucs
@@ -274,7 +273,7 @@ $$class_handler(bookmarks2Handler, $$ID(xmpp*, account), $$ID(NSString*, jid), $
                 //this will record the desired nickname: the mucProcessor will pick that up and use it to join the muc
                 [[DataLayer sharedInstance] addMucFavorite:room forAccountID:account.accountID andMucNick:nick];
                 //try to join muc, but don't perform a bookmarks update (this muc came in through a bookmark already)
-                [account.mucProcessor sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:NO];
+                [account.mucProcessor sendDiscoQueryFor:room withJoin:YES andBookmarksUpdate:NO andMucName:name];
             }
             //check if it is a known entry...
             else if([ownFavorites containsObject:room])
@@ -403,9 +402,6 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
     {
         MLXMLNode* item = _data[room];
         
-        //we ignore the conference name (the name will be taken from the muc itself)
-        //NSString* name = [_data[room] findFirst:@"{urn:xmpp:bookmarks:1}conference@name"];
-        //NSString* nick = [_data[room] findFirst:@"{urn:xmpp:bookmarks:1}conference/nick#"];
         NSNumber* autojoin = [item findFirst:@"{urn:xmpp:bookmarks:1}conference@autojoin|bool"];
         if(autojoin == nil)
             autojoin = @NO;     //default value specified in xep
@@ -414,6 +410,8 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
         
         if([ownFavorites containsObject:room])
         {
+            MLContact* contact = [MLContact createContactFromJid:room andAccountID:account.accountID];
+            
             //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
             if(![autojoin boolValue])
             {
@@ -428,12 +426,21 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
                     ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference/nick"]).data = nick;
                 }
                 
+                //add or update local name (nickName)
+                if(contact.nickName != nil && ![contact.nickName isEqualToString:@""])
+                {
+                    NSString* name = [item findFirst:@"{urn:xmpp:bookmarks:1}conference@name"];
+                    if(name == nil || ![name isEqualToString:contact.nickName])
+                        ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference"]).attributes[@"name"] = contact.nickName;
+                }
+                else
+                    [((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference"]).attributes removeObjectForKey:@"name"];
+                
                 //update autojoin value to true
                 ((MLXMLNode*)[item findFirst:@"{urn:xmpp:bookmarks:1}conference"]).attributes[@"autojoin"] = @"true";
             }
             
             //sync the bookmark with the local pinned status, if they differ
-            MLContact* contact = [MLContact createContactFromJid:room andAccountID:account.accountID];
             if(pinned != contact.isPinned)
             {
                 if(contact.isPinned)
@@ -510,25 +517,25 @@ $$class_handler(handleBookmarks2FetchResult, $$ID(xmpp*, account), $$BOOL(succes
         else if(contact.isMentionOnly)
             localNotificationSetting = @"on-mention";
         NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountID];
-        [account.pubsub publishItem:
-            [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": room} andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"conference" andNamespace:@"urn:xmpp:bookmarks:1" withAttributes:@{
-                    @"autojoin": @"true",
-                } andChildren:@[
-                    nilWrapper(nick != nil ? [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick] : nil),
-                    [[MLXMLNode alloc] initWithElement:@"extensions" withAttributes:@{} andChildren:@[
-                        nilWrapper(contact.isPinned ? [[MLXMLNode alloc] initWithElement:@"pinned" andNamespace:@"urn:xmpp:bookmarks-pinning:0" withAttributes:@{} andChildren:@[] andData:nil] : nil),
-                        [[MLXMLNode alloc] initWithElement:@"notify" andNamespace:@"urn:xmpp:notification-settings:0" withAttributes:@{} andChildren:@[
-                            [[MLXMLNode alloc] initWithElement:localNotificationSetting]
-                        ] andData:nil],
-                        [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:monal.im:bookmarks:info" withAttributes:@{
-                            @"name": @"Monal",
-                            @"version": infoDict[@"CFBundleShortVersionString"],
-                            @"build": infoDict[@"CFBundleVersion"],
-                        } andChildren:@[] andData:nil],
-                    ] andData:nil]
-                ]andData:nil]
+        MLXMLNode* conference = [[MLXMLNode alloc] initWithElement:@"conference" andNamespace:@"urn:xmpp:bookmarks:1" withAttributes:@{
+            @"autojoin": @"true",
+        } andChildren:@[
+            nilWrapper(nick != nil ? [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:nick] : nil),
+            [[MLXMLNode alloc] initWithElement:@"extensions" withAttributes:@{} andChildren:@[
+                nilWrapper(contact.isPinned ? [[MLXMLNode alloc] initWithElement:@"pinned" andNamespace:@"urn:xmpp:bookmarks-pinning:0" withAttributes:@{} andChildren:@[] andData:nil] : nil),
+                [[MLXMLNode alloc] initWithElement:@"notify" andNamespace:@"urn:xmpp:notification-settings:0" withAttributes:@{} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:localNotificationSetting]
+                ] andData:nil],
+                [[MLXMLNode alloc] initWithElement:@"added-by" andNamespace:@"urn:monal.im:bookmarks:info" withAttributes:@{
+                    @"name": @"Monal",
+                    @"version": infoDict[@"CFBundleShortVersionString"],
+                    @"build": infoDict[@"CFBundleVersion"],
+                } andChildren:@[] andData:nil],
             ] andData:nil]
+        ]andData:nil];
+        if(contact.nickName != nil && ![contact.nickName isEqualToString:@""])
+            conference.attributes[@"name"] = contact.nickName;
+        [account.pubsub publishItem:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": room} andChildren:@[conference] andData:nil]
         onNode:@"urn:xmpp:bookmarks:1" withConfigOptions:@{
             @"pubsub#persist_items": @"true",
             @"pubsub#access_model": @"whitelist",

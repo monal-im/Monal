@@ -1214,6 +1214,11 @@ $$
 
 -(void) sendDiscoQueryFor:(NSString*) roomJid withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks
 {
+    return [self sendDiscoQueryFor:roomJid withJoin:join andBookmarksUpdate:updateBookmarks andMucName:nil];
+}
+
+-(void) sendDiscoQueryFor:(NSString*) roomJid withJoin:(BOOL) join andBookmarksUpdate:(BOOL) updateBookmarks andMucName:(NSString* _Nullable) mucName
+{
     if(roomJid == nil || _account == nil)
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Room jid or account must not be nil!" userInfo:nil];
     roomJid = [roomJid lowercaseString];
@@ -1236,7 +1241,7 @@ $$
     }
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType to:roomJid];
     [discoInfo setDiscoInfoNode];
-    [_account sendIq:discoInfo withHandler:$newHandlerWithInvalidation(self, handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks))];
+    [_account sendIq:discoInfo withHandler:$newHandlerWithInvalidation(self, handleDiscoResponse, handleDiscoResponseInvalidation, $ID(roomJid), $BOOL(join), $BOOL(updateBookmarks), $ID(mucName))];
 }
 
 -(void) pingAllMucs
@@ -1444,7 +1449,7 @@ $$instance_handler(handleDiscoResponseInvalidation, account.mucProcessor, $$ID(x
     [self removeRoomFromJoining:roomJid];
 $$
 
-$$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$BOOL(join), $$BOOL(updateBookmarks))
+$$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$ID(NSString*, roomJid), $$BOOL(join), $$BOOL(updateBookmarks), $_ID(NSString*, mucName))
     //no matter what the disco response is: we are not creating this muc anymore
     //either because we successfully created it and called join afterwards,
     //or because the user tried to simultaneously create and join this muc (the join has precendence in this case)
@@ -1530,7 +1535,8 @@ $$instance_handler(handleDiscoResponse, account.mucProcessor, $$ID(xmpp*, accoun
     }
         
     //extract further muc infos
-    NSString* mucName = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/identity@name"];
+    if(!mucName || ![mucName length])
+        mucName = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/identity@name"];
     NSString* mucType = kMucTypeChannel;
     //both are needed for omemo, see discussion with holger 2021-01-02/03 -- Thilo Molitor
     //see also: https://docs.modernxmpp.org/client/groupchat/

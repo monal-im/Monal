@@ -479,18 +479,23 @@ static NSMutableDictionary* _singletonCache;
 
 -(void) setNickNameView:(NSString*) name
 {
-    MLAssert(!self.isMuc, @"Using nickNameView only allowed for 1:1 contacts!", (@{@"contact": self}));
     if([self.nickName isEqualToString:name] || name == nil)
         return;             //no change at all
     self.nickName = name;
     // abort old change timer and start a new one
     if(_cancelNickChange)
         _cancelNickChange();
-    // delay changes because we don't want to update the roster on our server too often while typing
-    _cancelNickChange = createTimer(2.0, (^{
-        xmpp* account = self.account;
-        [account updateRosterItem:self withName:self.nickName];
-    }));
+    // delay changes because we don't want to update the roster/bookmarks on our server too often while typing
+    if(self.isMuc)
+        _cancelNickChange = createTimer(2.0, (^{
+            xmpp* account = self.account;
+            [account.mucProcessor updateBookmarks];
+        }));
+    else
+        _cancelNickChange = createTimer(2.0, (^{
+            xmpp* account = self.account;
+            [account updateRosterItem:self withName:self.nickName];
+        }));
 }
 
 +(NSSet*) keyPathsForValuesAffectingNickNameView

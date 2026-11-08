@@ -200,7 +200,7 @@ $$class_handler(handleCatchup, $$ID(xmpp*, account), $$ID(XMPPIQ*, iqNode), $$BO
             //will query the whole archive since dawn of time
             NSNumber* historyId = [[DataLayer sharedInstance] getNewestHistoryEntryIdForAccount:account.accountID withMuc:NO];
             MLMessage* latestMessage = nil;
-            if(historyId != nil
+            if(historyId != nil)
                 latestMessage = [MLMessage createMessageFromHistoryID:historyId];
             DDLogInfo(@"Querying COMPLETE muc mam:2 archive at %@ after timestamp %@ for catchup", account.connectionProperties.identity.jid, [latestMessage timestamp]);
             XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithType:kiqSetType];

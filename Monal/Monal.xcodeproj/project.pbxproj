@@ -276,6 +276,7 @@
 		D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FA79B02C7E5C7400216D2A /* ServerDetails.swift */; };
 		D0FE3F542C5C56ED007AAD23 /* ChangePassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FE3F532C5C56ED007AAD23 /* ChangePassword.swift */; };
 		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
+		DAA96204FCB8A168ACC9CE45 /* Pods_MonalTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04A2D22312B028520E2CDD91 /* Pods_MonalTests.framework */; };
 		E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */; };
 		E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */; };
 		E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32225C6626300925F62 /* MLFileTransferFileViewController.m */; };
@@ -321,6 +322,13 @@
 			remoteGlobalIDString = 26CC579123A0867400ABB92A;
 			remoteInfo = monalxmpp;
 		};
+		3469C56630A32EC90003C139 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D6058900D05DD3D006BFB54;
+			remoteInfo = Monal;
+		};
 		C104918C261301530054AC9E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -364,6 +372,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		04A2D22312B028520E2CDD91 /* Pods_MonalTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		061EF1BEDEE7A71FDF9AB402 /* Pods-shareSheet.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore.xcconfig"; sourceTree = "<group>"; };
 		0D0362F6B26B9407BE313F36 /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.debug.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
 		0EC0A5305E72C0F7F9E1CDEF /* Pods-shareSheet.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.adhoc.xcconfig"; path = "Target Support Files/Pods-shareSheet/Pods-shareSheet.adhoc.xcconfig"; sourceTree = "<group>"; };
@@ -556,6 +565,7 @@
 		32CA4F630368D1EE00C91783 /* MonalSourceCodePrefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MonalSourceCodePrefix.pch; sourceTree = "<group>"; };
 		341F44642CAF427500AA6C7D /* MLPromise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPromise.h; sourceTree = "<group>"; };
 		341F44652CAF427500AA6C7D /* MLPromise.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPromise.m; sourceTree = "<group>"; };
+		3469C56230A32EC80003C139 /* MonalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		34BC08112C5E9BE30099FB85 /* ContentUnavailableShimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentUnavailableShimView.swift; sourceTree = "<group>"; };
 		34C9CAA330293B5E00A87694 /* HelperToolsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperToolsTest.swift; sourceTree = "<group>"; };
 		34E58B4A2C68E7BC009A1634 /* ContactsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
@@ -627,6 +637,8 @@
 		79A6AA4819B69B5FFFA28236 /* Pods-NotificationService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.appstore.xcconfig"; sourceTree = "<group>"; };
 		7D6715099247A9CCC180EE30 /* Pods-MonalUITests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.beta.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.beta.xcconfig"; sourceTree = "<group>"; };
 		7FA9582E4CC566FE5466C557 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
+		80D3382A8E546E49EC9898AC /* Pods-MonalTests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.beta.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.beta.xcconfig"; sourceTree = "<group>"; };
+		82966E2FE35241AEC14CD4F7 /* Pods-MonalTests.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.alpha.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.alpha.xcconfig"; sourceTree = "<group>"; };
 		840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueCell.m; sourceTree = "<group>"; };
 		840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueCell.h; sourceTree = "<group>"; };
 		8414ADFA2A7ABAC900EFFCCC /* LibMonalRustSwiftBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LibMonalRustSwiftBridge; path = ../rust/LibMonalRustSwiftBridge; sourceTree = "<group>"; };
@@ -840,7 +852,9 @@
 		D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
 		D8D2595B2BE453296E59F1AF /* Pods-MonalUITests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.appstore.xcconfig"; sourceTree = "<group>"; };
 		DC5DA2C9782510B3433FD50D /* Pods-monalxmpp.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.beta.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.beta.xcconfig"; sourceTree = "<group>"; };
+		DD73A9A45D1A05C1F5A41D65 /* Pods-MonalTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		E06DB4446BAE2F9C0192D055 /* Pods-monalxmpp.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.adhoc.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.adhoc.xcconfig"; sourceTree = "<group>"; };
+		E078894B40120EF82354AECB /* Pods-MonalTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.appstore.xcconfig"; sourceTree = "<group>"; };
 		E89DD31C25C6626300925F62 /* MLFileTransferFileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferFileViewController.h; sourceTree = "<group>"; };
 		E89DD31E25C6626300925F62 /* MLFileTransferDataCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferDataCell.h; sourceTree = "<group>"; };
 		E89DD31F25C6626300925F62 /* MLFileTransferVideoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferVideoCell.h; sourceTree = "<group>"; };
@@ -855,8 +869,23 @@
 		E8DED06125388BE8003167FF /* MLSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSearchViewController.m; sourceTree = "<group>"; };
 		F04FE24284F1563D80523B52 /* Pods-monalxmpp.alpha-catalyst.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha-catalyst.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha-catalyst.xcconfig"; sourceTree = "<group>"; };
 		F7506FDE7A78EB0CAB14FF60 /* Pods-MonalUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.debug.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		F9BB86CBB66B9BF75EAC1F02 /* Pods-MonalTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.debug.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.debug.xcconfig"; sourceTree = "<group>"; };
 		FCADB10208409DD462AC921F /* Pods-Monal.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.beta.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.beta.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		3469C56330A32EC90003C139 /* MonalTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = MonalTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		1D60588F0D05DD3D006BFB54 /* Frameworks */ = {
@@ -923,6 +952,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3469C55F30A32EC80003C139 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DAA96204FCB8A168ACC9CE45 /* Pods_MonalTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C1049183261301530054AC9E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -974,6 +1011,7 @@
 				26CC579223A0867400ABB92A /* monalxmpp.framework */,
 				C1850EB525F38A2D003D506A /* MonalUITests.xctest */,
 				C1049186261301530054AC9E /* MonalXMPPUnitTests.xctest */,
+				3469C56230A32EC80003C139 /* MonalTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1383,7 +1421,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+		29B97314FDCFA39411CA2CEA = {
 			isa = PBXGroup;
 			children = (
 				8414ADF92A7ABAC900EFFCCC /* Packages */,
@@ -1400,6 +1438,7 @@
 				26CC579323A0867400ABB92A /* monalxmpp */,
 				C1850EB625F38A2D003D506A /* MonalUITests */,
 				C1049187261301530054AC9E /* MonalXMPPUnitTests */,
+				3469C56330A32EC90003C139 /* MonalTests */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				82B5509417C9F86AAC2B4FA1 /* Pods */,
 				D91581D0612C23AB5B3F867C /* Frameworks */,
@@ -1487,6 +1526,11 @@
 				AA697C1F9B9637B86665DFF1 /* Pods-NotificationService.appstore-quicksy.xcconfig */,
 				9899D670570190DCBE9EEDDB /* Pods-monalxmpp.appstore-quicksy.xcconfig */,
 				9760CF4718351300C4256921 /* Pods-shareSheet.appstore-quicksy.xcconfig */,
+				F9BB86CBB66B9BF75EAC1F02 /* Pods-MonalTests.debug.xcconfig */,
+				DD73A9A45D1A05C1F5A41D65 /* Pods-MonalTests.adhoc.xcconfig */,
+				82966E2FE35241AEC14CD4F7 /* Pods-MonalTests.alpha.xcconfig */,
+				E078894B40120EF82354AECB /* Pods-MonalTests.appstore.xcconfig */,
+				80D3382A8E546E49EC9898AC /* Pods-MonalTests.beta.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -1585,6 +1629,7 @@
 				5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */,
 				8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */,
 				2B7A5555D807EE78C95217FD /* Pods_NotificationService.framework */,
+				04A2D22312B028520E2CDD91 /* Pods_MonalTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1774,6 +1819,29 @@
 			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		3469C56130A32EC80003C139 /* MonalTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3469C56D30A32EC90003C139 /* Build configuration list for PBXNativeTarget "MonalTests" */;
+			buildPhases = (
+				B079693618D2A363FFBA8D54 /* [CP] Check Pods Manifest.lock */,
+				3469C55E30A32EC80003C139 /* Sources */,
+				3469C55F30A32EC80003C139 /* Frameworks */,
+				3469C56030A32EC80003C139 /* Resources */,
+				3522A51C7496DA3EDD0660FA /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3469C56730A32EC90003C139 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				3469C56330A32EC90003C139 /* MonalTests */,
+			);
+			name = MonalTests;
+			productName = MonalTests;
+			productReference = 3469C56230A32EC80003C139 /* MonalTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		C1049185261301530054AC9E /* MonalXMPPUnitTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C104918E261301530054AC9E /* Build configuration list for PBXNativeTarget "MonalXMPPUnitTests" */;
@@ -1863,6 +1931,10 @@
 						LastSwiftMigration = 1240;
 						ProvisioningStyle = Manual;
 					};
+					3469C56130A32EC80003C139 = {
+						CreatedOnToolsVersion = 27.2;
+						TestTargetID = 1D6058900D05DD3D006BFB54;
+					};
 					C1049185261301530054AC9E = {
 						CreatedOnToolsVersion = 12.4;
 						LastSwiftMigration = 1240;
@@ -1916,7 +1988,7 @@
 				te,
 				et,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			mainGroup = 29B97314FDCFA39411CA2CEA;
 			packageReferences = (
 				C1F5C7AD2777638B0001F295 /* XCRemoteSwiftPackageReference "swift-collections" */,
 				841898A82957712000FEC77D /* XCRemoteSwiftPackageReference "ViewExtractor" */,
@@ -1944,6 +2016,7 @@
 				26CC579123A0867400ABB92A /* monalxmpp */,
 				C1850EB425F38A2D003D506A /* MonalUITests */,
 				C1049185261301530054AC9E /* MonalXMPPUnitTests */,
+				3469C56130A32EC80003C139 /* MonalTests */,
 			);
 		};
 /* End PBXProject section */
@@ -2002,6 +2075,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3469C56030A32EC80003C139 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C1049184261301530054AC9E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2041,6 +2121,23 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		3522A51C7496DA3EDD0660FA /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MonalTests/Pods-MonalTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MonalTests/Pods-MonalTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MonalTests/Pods-MonalTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		8FC0217E357D67979CAFB523 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2049,13 +2146,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MonalUITests/Pods-MonalUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2106,6 +2199,28 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		B079693618D2A363FFBA8D54 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MonalTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		B79D5724FB4B51022BCFD6E9 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2114,13 +2229,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2176,13 +2287,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2405,6 +2512,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3469C55E30A32EC80003C139 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C1049182261301530054AC9E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2456,6 +2570,11 @@
 			isa = PBXTargetDependency;
 			target = 26CC579123A0867400ABB92A /* monalxmpp */;
 			targetProxy = 26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */;
+		};
+		3469C56730A32EC90003C139 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D6058900D05DD3D006BFB54 /* Monal */;
+			targetProxy = 3469C56630A32EC90003C139 /* PBXContainerItemProxy */;
 		};
 		C104918D261301530054AC9E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3374,6 +3493,325 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Adhoc;
+		};
+		3469C56830A32EC90003C139 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F9BB86CBB66B9BF75EAC1F02 /* Pods-MonalTests.debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Monal";
+			};
+			name = Debug;
+		};
+		3469C56930A32EC90003C139 /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DD73A9A45D1A05C1F5A41D65 /* Pods-MonalTests.adhoc.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Monal";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Adhoc;
+		};
+		3469C56A30A32EC90003C139 /* Alpha */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 82966E2FE35241AEC14CD4F7 /* Pods-MonalTests.alpha.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Monal";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Alpha;
+		};
+		3469C56B30A32EC90003C139 /* AppStore */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E078894B40120EF82354AECB /* Pods-MonalTests.appstore.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Monal";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = AppStore;
+		};
+		3469C56C30A32EC90003C139 /* Beta */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 80D3382A8E546E49EC9898AC /* Pods-MonalTests.beta.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Monal";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Beta;
 		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -4517,6 +4955,18 @@
 				C1E1BCB2288BBAB00046AB47 /* Alpha */,
 				26CC579E23A0867400ABB92A /* AppStore */,
 				C11C871026A83C1D00B8DEA5 /* Beta */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3469C56D30A32EC90003C139 /* Build configuration list for PBXNativeTarget "MonalTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3469C56830A32EC90003C139 /* Debug */,
+				3469C56930A32EC90003C139 /* Adhoc */,
+				3469C56A30A32EC90003C139 /* Alpha */,
+				3469C56B30A32EC90003C139 /* AppStore */,
+				3469C56C30A32EC90003C139 /* Beta */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

@@ -90,8 +90,10 @@ struct MemberList: View {
         }
     }
     
-    func promisifyAction(action: @escaping ()->Void) -> Promise<monal_void_block_t?> {
-        return promisifyMucAction(account:self.account, mucJid:self.muc.contactJid, action:action)
+    static func invite(user jid: String, to muc: String, from account: xmpp) -> Promise<monal_void_block_t?> {
+        promisifyMucAction(account: account, mucJid: muc) {
+            account.mucProcessor.inviteUser(jid, inMuc: muc)
+        }
     }
 
     func showAlert(title: Text, description: Text) {
@@ -189,9 +191,7 @@ struct MemberList: View {
                     }
                     outcastResolution.then { _ in
                         showPromisingLoadingOverlay(self.overlay, headlineView: Text("Inviting user"), descriptionView: Text("Inviting user to this group/channel: \(contact.contactJid as String)")) {
-                            promisifyAction {
-                                account.mucProcessor.inviteUser(contact.contactJid, inMuc: self.muc.contactJid)
-                            }
+                            Self.invite(user: contact.contactJid, to: self.muc.contactJid, from: account)
                         }.catch { error in
                             showAlert(title:Text("Error inviting user!"), description:Text(error.localizedDescription))
                         }
@@ -236,9 +236,7 @@ struct MemberList: View {
                                         account.mucProcessor.setAffiliation(kMucAffiliationMember, ofUser:member.contactJid, inMuc:self.muc.contactJid)
                                     }.done { _ in
                                         showPromisingLoadingOverlay(self.overlay, headlineView: Text("Inviting new member"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
-                                            promisifyAction {
-                                                account.mucProcessor.inviteUser(member.contactJid, inMuc: self.muc.contactJid)
-                                            }
+                                            Self.invite(user: member.contactJid, to: self.muc.contactJid, from: account)
                                         }.catch { error in
                                             showAlert(title:Text("Error inviting new member!"), description:Text(error.localizedDescription))
                                         }
@@ -247,9 +245,7 @@ struct MemberList: View {
                                     }
                                 } else {
                                     showPromisingLoadingOverlay(self.overlay, headlineView: Text("Inviting new participant"), descriptionView: Text("Adding \(member.contactJid as String)...")) {
-                                        promisifyAction {
-                                            account.mucProcessor.inviteUser(member.contactJid, inMuc: self.muc.contactJid)
-                                        }
+                                        Self.invite(user: member.contactJid, to: self.muc.contactJid, from: account)
                                     }.catch { error in
                                         showAlert(title:Text("Error inviting new participant!"), description:Text(error.localizedDescription))
                                     }

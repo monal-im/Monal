@@ -93,6 +93,12 @@ struct ContactDetails: View {
 #endif
     }
     
+    static func destroy(muc: String, from account: xmpp) -> Promise<monal_void_block_t?> {
+        promisifyMucAction(account: account, mucJid: muc) {
+            account.mucProcessor.destroyRoom(muc)
+        }
+    }
+
     var body: some View {
         Form {
             Section {
@@ -605,9 +611,7 @@ struct ContactDetails: View {
                                         Text("Yes"),
                                         action: {
                                             showPromisingLoadingOverlay(overlay, headlineView:contact.mucType == kMucTypeGroup ? Text("Destroying group...") : Text("Destroying channel..."), descriptionView:Text("")) {
-                                                promisifyMucAction(account:account, mucJid:contact.contactJid) {
-                                                    self.account.mucProcessor.destroyRoom(contact.contactJid as String)
-                                                }
+                                                Self.destroy(muc: contact.contactJid, from: account)
                                             }.done { callback in
                                                 if let callback = callback {
                                                     self.successCallback = callback

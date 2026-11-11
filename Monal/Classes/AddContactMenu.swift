@@ -113,6 +113,12 @@ struct AddContactMenu: View {
         }
     }
     
+    static func join(muc jid: String, from account: xmpp) -> Promise<monal_void_block_t?> {
+        promisifyMucAction(account: account, mucJid: jid) {
+            account.joinMuc(jid)
+        }
+    }
+
     func addJid(jid: String) {
         let account = self.enabledAccounts[selectedAccount]
         let contact = MLContact.createContact(fromJid: jid, andAccountID: account.accountID)
@@ -145,9 +151,7 @@ struct AddContactMenu: View {
                 successAlert(title: Text("Permission Requested"), message: Text("The new contact will be added to your contacts list when the person you've added has approved your request."))
             } else if type == "muc" {
                 showPromisingLoadingOverlay(overlay, headlineView:Text("Adding Group/Channel..."), descriptionView:Text("")) {
-                    promisifyMucAction(account:account, mucJid:jid) {
-                        account.joinMuc(jid)
-                    }
+                    Self.join(muc: jid, from: account)
                 }.done { _ in
                     self.newContact = MLContact.createContact(fromJid: jid, andAccountID: account.accountID)
                     successAlert(title: Text("Success!"), message: Text("Successfully joined group/channel \(jid)!"))

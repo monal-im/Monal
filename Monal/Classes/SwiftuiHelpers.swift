@@ -81,25 +81,22 @@ func getContactList(viewContact: (ObservableKVOWrapper<MLContact>?)) -> OrderedS
 
 func promisifyMucAction(account: xmpp, mucJid: String, action: @escaping () throws -> Void) -> Promise<monal_void_block_t?> {
     return Promise<monal_void_block_t?> { seal in
-        DispatchQueue.global(qos: .background).async {
-            account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
-                let success : Bool = data["success"] as! Bool;
-                if !success {
-                    seal.reject(data["errorMessage"] as? String ?? "Unknown error!")
+        account.mucProcessor.addUIHandler({_data in let data = _data as! NSDictionary
+            let success : Bool = data["success"] as! Bool;
+            if !success {
+                seal.reject(data["errorMessage"] as? String ?? "Unknown error!")
+            } else {
+                if let callback = data["callback"] {
+                    seal.fulfill(objcCast(callback) as monal_void_block_t)
                 } else {
-                    if let callback = data["callback"] {
-                        seal.fulfill(objcCast(callback) as monal_void_block_t)
-                    } else {
-                        seal.fulfill(nil)
-                    }
+                    seal.fulfill(nil)
                 }
-            }, forMuc:mucJid)
-            do {
-                try action()
-            } catch {
-                seal.reject(error)
             }
-            
+        }, forMuc:mucJid)
+        do {
+            try action()
+        } catch {
+            seal.reject(error)
         }
     }
 }

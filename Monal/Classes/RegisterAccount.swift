@@ -42,7 +42,16 @@ struct RegisterAccount: View {
     @State private var showWebView = false
     @State private var errorObserverEnabled = false
 
+    @FocusState private var focused: Focus?
+
     var delegate: SheetDismisserProtocol
+
+    private enum Focus {
+        case server
+        case username
+        case password
+        case passwordRepeated
+    }
 
     init(delegate: SheetDismisserProtocol, registerData:[String:AnyObject]? = nil) {
         self.delegate = delegate
@@ -350,6 +359,8 @@ struct RegisterAccount: View {
                                     .disabled(self.registerToken != nil)
                                     .submitLabel(.continue)
                                     .listRowSeparator(.hidden)
+                                    .focused($focused, equals: .server)
+                                    .onSubmit { focused = .username }
                                 }
 
                                 TextField(NSLocalizedString("Username", comment: "placeholder when creating account"), text: Binding(
@@ -361,14 +372,19 @@ struct RegisterAccount: View {
                                 .autocorrectionDisabled()
                                 .submitLabel(.continue)
                                 .listRowSeparator(.hidden)
+                                .focused($focused, equals: .username)
+                                .onSubmit { focused = .password }
                             
                                 SecureField(NSLocalizedString("Password", comment: "placeholder when creating account"), text: $password)
                                     .submitLabel(.continue)
                                     .listRowSeparator(.hidden)
+                                    .focused($focused, equals: .password)
+                                    .onSubmit { focused = .passwordRepeated }
                                 SecureField(NSLocalizedString("Password (repeated)", comment: "placeholder when creating account"), text: $repeatedPassword)
                                     .submitLabel(.go)
                                     .onSubmit(submit)
                                     .listRowSeparator(.hidden)
+                                    .focused($focused, equals: .passwordRepeated)
                             }
                             
                             if(self.captchaImg != nil) {

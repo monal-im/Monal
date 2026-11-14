@@ -345,6 +345,7 @@ struct RegisterAccount: View {
                                     .textInputAutocapitalization(.never)
                                     .autocapitalization(.none)
                                     .autocorrectionDisabled()
+                                    .keyboardType(.URL)
                                     .foregroundColor(self.registerToken != nil ? .secondary : .primary)
                                     .disabled(self.registerToken != nil)
                                     .submitLabel(.continue)

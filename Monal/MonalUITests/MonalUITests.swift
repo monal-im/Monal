@@ -24,4 +24,52 @@ class MonalUITests: XCTestCase {
 
     let server = "ephemeral-xmpp-server.org"
 
+    func testCanRegister() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--reset"]
+        app.launch()
+
+        app.transitionThroughOnboardingCards()
+        app.openRegisterAccount()
+        app.registerNewAccount(server: server, username: "monal-ui-tests-\(UUID().uuidString)".lowercased())
+    }
+
+}
+
+private extension XCUIApplication {
+
+    private static let timeout = 20.0
+
+    func transitionThroughOnboardingCards() {
+        XCTContext.runActivity(named: "Transition through onboarding cards") { _ in
+            for _ in 1...4 { buttons["Next"].tap() }
+            buttons["Close"].tap()
+            XCTAssert(staticTexts["I already have an account:"].exists)
+        }
+    }
+
+    func openRegisterAccount() {
+        XCTContext.runActivity(named: "Open register account screen") { _ in
+            buttons["Register a new account"].tap()
+            XCTAssert(staticTexts["I need an account:"].exists)
+        }
+    }
+
+    func registerNewAccount(server: String, username: String) {
+        XCTContext.runActivity(named: "Register new account") { _ in
+            buttons["SelectServerToRegisterWith"].tap()
+            buttons["Manual input"].tap()
+            textFields["XMPP Server"].tap()
+            textFields["XMPP Server"].typeText(server)
+            keyboards.buttons["continue"].tap()
+            textFields["Username"].typeText(username)
+            keyboards.buttons["continue"].tap()
+            buttons["GenerateStrongPasswordButton"].tap()
+            buttons["SubmitRegistration"].tap()
+            XCTAssert(alerts["Success!"].waitForExistence(timeout: Self.timeout))
+            alerts["Success!"].buttons["Close"].tap()
+            XCTAssert(navigationBars["Chats"].wait(for: \.isHittable, toEqual: true, timeout: Self.timeout))
+        }
+    }
+
 }

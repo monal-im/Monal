@@ -119,7 +119,7 @@ struct RegisterAccount: View {
 
     private var actualServer: String {
         let tmp = RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]
-        return (tmp != nil && tmp != "Input") ? tmp! : serverProvided && !xmppServerFaulty ? providedServer : "?"
+        return (tmp != nil && tmp != "Input") ? tmp! : serverProvided && !xmppServerFaulty ? providedServer : "server"
     }
 
     private var serverSelected: Bool {
@@ -338,7 +338,7 @@ struct RegisterAccount: View {
 
                             Group {
                                 if(selectedServerIndex == 0) {
-                                    TextField(NSLocalizedString("Provide XMPP-Server", comment: "placeholder when creating account"), text: Binding(
+                                    TextField(NSLocalizedString("XMPP Server", comment: "placeholder when creating account"), text: Binding(
                                         get: { self.providedServer },
                                         set: { string in self.providedServer = string.lowercased().replacingOccurrences(of: " ", with: "") }
                                     ))

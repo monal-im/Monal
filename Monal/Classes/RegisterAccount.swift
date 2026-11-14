@@ -344,6 +344,7 @@ struct RegisterAccount: View {
                             }
                             .disabled(self.registerToken != nil)
                             .listRowSeparator(.hidden)
+                            .accessibilityIdentifier("SelectServerToRegisterWith")
 
                             Group {
                                 if(selectedServerIndex == 0) {
@@ -431,6 +432,7 @@ struct RegisterAccount: View {
                                     }
                                 }))
                             }
+                            .accessibilityIdentifier("SubmitRegistration")
                             Text("The selectable XMPP servers are public servers which are not affiliated to Monal. This registration page is provided for convenience only.")
                             .font(.system(size: 10))
                             .padding(.vertical, 8)

@@ -178,22 +178,52 @@ final class WebRTCClient: NSObject {
             return
         }
         
-        guard
-            let frontCamera = (RTCCameraVideoCapturer.captureDevices().first { $0.position == position }),
-        
-            // choose highest res
-            let format = (RTCCameraVideoCapturer.supportedFormats(for: frontCamera).sorted { (f1, f2) -> Bool in
-                let width1 = CMVideoFormatDescriptionGetDimensions(f1.formatDescription).width
-                let width2 = CMVideoFormatDescriptionGetDimensions(f2.formatDescription).width
-                return width1 < width2
-            }).last,
-        
-            // choose highest fps
-            let fps = (format.videoSupportedFrameRateRanges.sorted { return $0.maxFrameRate < $1.maxFrameRate }.last) else {
+        guard let camera = (RTCCameraVideoCapturer.captureDevices().first { $0.position == position }) else {
+            DDLogWarn("No capture device found for camera position \(position.rawValue)")
             return
         }
 
-        capturer.startCapture(with: frontCamera,
+        // Only use formats whose pixel format AVCaptureVideoDataOutput (and WebRTC) can handle.
+        // Some cameras (e.g. the back camera of newer iPhones) offer formats like 'btp2' or other
+        // non-NV12 formats as their highest resolution. Picking such a format makes
+        // -[AVCaptureVideoDataOutput setVideoSettings:] throw an NSInvalidArgumentException
+        // ("Unsupported pixel format type") and crashes the app (see monal-im/Monal#1754).
+        let supportedPixelFormats: Set<FourCharCode> = [
+            kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,     // '420f'
+            kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,    // '420v'
+        ]
+        // Higher resolutions are pointless for a video call and only waste cpu, battery and bandwidth.
+        let maxWidth: Int32 = 1920
+
+        let usableFormats = RTCCameraVideoCapturer.supportedFormats(for: camera).filter {
+            supportedPixelFormats.contains(CMFormatDescriptionGetMediaSubType($0.formatDescription))
+        }
+        let cappedFormats = usableFormats.filter {
+            CMVideoFormatDescriptionGetDimensions($0.formatDescription).width <= maxWidth
+        }
+
+        // choose highest res (below our cap, if possible), prefer the capturer's preferred pixel format on ties
+        let preferredPixelFormat = capturer.preferredOutputPixelFormat()
+        guard
+            let format = (cappedFormats.isEmpty ? usableFormats : cappedFormats).max(by: { (f1, f2) -> Bool in
+                let width1 = CMVideoFormatDescriptionGetDimensions(f1.formatDescription).width
+                let width2 = CMVideoFormatDescriptionGetDimensions(f2.formatDescription).width
+                if width1 != width2 {
+                    return width1 < width2
+                }
+                let preferred1 = CMFormatDescriptionGetMediaSubType(f1.formatDescription) == preferredPixelFormat
+                let preferred2 = CMFormatDescriptionGetMediaSubType(f2.formatDescription) == preferredPixelFormat
+                return !preferred1 && preferred2
+            }),
+
+            // choose highest fps
+            let fps = (format.videoSupportedFrameRateRanges.max { $0.maxFrameRate < $1.maxFrameRate }) else {
+            DDLogWarn("No usable capture format found for camera \(camera)")
+            return
+        }
+
+        DDLogInfo("Starting capture with device \(camera) and format \(format) @ \(Int(fps.maxFrameRate)) fps")
+        capturer.startCapture(with: camera,
                               format: format,
                               fps: Int(fps.maxFrameRate))
         

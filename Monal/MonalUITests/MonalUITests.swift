@@ -11,76 +11,65 @@ import XCTest
 class MonalUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+        guard ProcessInfo.processInfo.environment["USE_REAL_SERVER"] == "YES" else {
+            throw XCTSkip("""
+                Set USE_REAL_SERVER to YES to run these tests.
+                The UI tests run against a real remote server; to avoid exposing your IP without your consent, they are disabled by default.
+                For XCode, go to Monal -> Edit Scheme -> Test -> Arguments -> Environment Variables and set USE_REAL_SERVER to YES.
+                For xcodebuild, pass USE_REAL_SERVER=YES as an option in the command.
+                """)
+        }
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
+    let server = "ephemeral-xmpp-server.org"
 
-    private func createStartArgs() -> [String]
-    {
-        return createStartArgs(extraArgs: [])
-    }
-
-    private func createStartArgs(extraArgs: [String]) -> [String]
-    {
-        var startArgs : [String] = ["--disableAnimations"]
-        // append extraArgs
-        startArgs.append(contentsOf: extraArgs)
-
-        return startArgs
-    }
-
-    private func sendMsg(txt: String)
-    {
+    func testCanRegister() {
         let app = XCUIApplication()
-        sleep(5)
-        XCTAssertTrue(app.buttons["microphone"].exists)
-        XCTAssertFalse(app.buttons["Send"].exists)
-
-        app.textViews["NewChatMessageTextField"].tap()
-        app.textViews["NewChatMessageTextField"].typeText(txt)
-        // send button should appeared
-        XCTAssertTrue(app.buttons["send"].exists)
-        XCTAssertFalse(app.buttons["microphone"].exists)
-
-        app.buttons["send"].tap()
-        // wait for sending on slow systems
-        sleep(5)
-        // send button should be hidden
-        XCTAssertFalse(app.buttons["send"].exists)
-        XCTAssertTrue(app.buttons["microphone"].exists)
-    }
-
-    func test_0008_AddContact() throws {
-        try XCTSkipIf(true, "This test is left as an example of UI tests. At some point in the future we should consider rewriting these.")
-        let app = XCUIApplication()
-        app.launchArguments = createStartArgs()
+        app.launchArguments = ["--reset"]
         app.launch()
 
-        app.navigationBars["Chats"].buttons["Add"].tap()
-
-        let tablesQuery = app.tables
-        tablesQuery.staticTexts["Add a New Contact"].tap()
-        tablesQuery.textFields["Contact Jid"].tap()
-        tablesQuery.textFields["Contact Jid"].typeText("echo@jabber.fu-berlin.de")
-
-        tablesQuery.staticTexts["Add Contact"].tap()
-        app.alerts["Permission Requested"].scrollViews.otherElements.buttons["Close"].tap()
-        // wait for segue to chatView
-        sleep(10)
-        XCTAssertFalse(app.buttons["send"].exists)
-        app.textViews["NewChatMessageTextField"].tap()
-
-        sendMsg(txt: "ping")
-        sendMsg(txt: randomString(length: 100))
-        sendMsg(txt: randomString(length: 1000))
-        sendMsg(txt: randomString(length: 2000))
+        app.transitionThroughOnboardingCards()
+        app.openRegisterAccount()
+        app.registerNewAccount(server: server, username: "monal-ui-tests-\(UUID().uuidString)".lowercased())
     }
+
+}
+
+private extension XCUIApplication {
+
+    private static let timeout = 20.0
+
+    func transitionThroughOnboardingCards() {
+        XCTContext.runActivity(named: "Transition through onboarding cards") { _ in
+            for _ in 1...4 { buttons["Next"].tap() }
+            buttons["Close"].tap()
+            XCTAssert(staticTexts["I already have an account:"].exists)
+        }
+    }
+
+    func openRegisterAccount() {
+        XCTContext.runActivity(named: "Open register account screen") { _ in
+            buttons["Register a new account"].tap()
+            XCTAssert(staticTexts["I need an account:"].exists)
+        }
+    }
+
+    func registerNewAccount(server: String, username: String) {
+        XCTContext.runActivity(named: "Register new account") { _ in
+            buttons["SelectServerToRegisterWith"].tap()
+            buttons["Manual input"].tap()
+            textFields["XMPP Server"].tap()
+            textFields["XMPP Server"].typeText(server)
+            keyboards.buttons["continue"].tap()
+            textFields["Username"].typeText(username)
+            keyboards.buttons["continue"].tap()
+            buttons["GenerateStrongPasswordButton"].tap()
+            buttons["SubmitRegistration"].tap()
+            XCTAssert(alerts["Success!"].waitForExistence(timeout: Self.timeout))
+            alerts["Success!"].buttons["Close"].tap()
+            XCTAssert(navigationBars["Chats"].wait(for: \.isHittable, toEqual: true, timeout: Self.timeout))
+        }
+    }
+
 }

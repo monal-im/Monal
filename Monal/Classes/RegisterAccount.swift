@@ -42,7 +42,16 @@ struct RegisterAccount: View {
     @State private var showWebView = false
     @State private var errorObserverEnabled = false
 
+    @FocusState private var focused: Focus?
+
     var delegate: SheetDismisserProtocol
+
+    private enum Focus {
+        case server
+        case username
+        case password
+        case passwordRepeated
+    }
 
     init(delegate: SheetDismisserProtocol, registerData:[String:AnyObject]? = nil) {
         self.delegate = delegate
@@ -119,7 +128,7 @@ struct RegisterAccount: View {
 
     private var actualServer: String {
         let tmp = RegisterAccount.XMPPServer[$selectedServerIndex.wrappedValue]["XMPPServer"]
-        return (tmp != nil && tmp != "Input") ? tmp! : serverProvided && !xmppServerFaulty ? providedServer : "?"
+        return (tmp != nil && tmp != "Input") ? tmp! : serverProvided && !xmppServerFaulty ? providedServer : "server"
     }
 
     private var serverSelected: Bool {
@@ -335,20 +344,24 @@ struct RegisterAccount: View {
                             }
                             .disabled(self.registerToken != nil)
                             .listRowSeparator(.hidden)
+                            .accessibilityIdentifier("SelectServerToRegisterWith")
 
                             Group {
                                 if(selectedServerIndex == 0) {
-                                    TextField(NSLocalizedString("Provide XMPP-Server", comment: "placeholder when creating account"), text: Binding(
+                                    TextField(NSLocalizedString("XMPP Server", comment: "placeholder when creating account"), text: Binding(
                                         get: { self.providedServer },
                                         set: { string in self.providedServer = string.lowercased().replacingOccurrences(of: " ", with: "") }
                                     ))
                                     .textInputAutocapitalization(.never)
                                     .autocapitalization(.none)
                                     .autocorrectionDisabled()
+                                    .keyboardType(.URL)
                                     .foregroundColor(self.registerToken != nil ? .secondary : .primary)
                                     .disabled(self.registerToken != nil)
                                     .submitLabel(.continue)
                                     .listRowSeparator(.hidden)
+                                    .focused($focused, equals: .server)
+                                    .onSubmit { focused = .username }
                                 }
 
                                 TextField(NSLocalizedString("Username", comment: "placeholder when creating account"), text: Binding(
@@ -360,14 +373,19 @@ struct RegisterAccount: View {
                                 .autocorrectionDisabled()
                                 .submitLabel(.continue)
                                 .listRowSeparator(.hidden)
+                                .focused($focused, equals: .username)
+                                .onSubmit { focused = .password }
                             
                                 SecureField(NSLocalizedString("Password", comment: "placeholder when creating account"), text: $password)
                                     .submitLabel(.continue)
                                     .listRowSeparator(.hidden)
+                                    .focused($focused, equals: .password)
+                                    .onSubmit { focused = .passwordRepeated }
                                 SecureField(NSLocalizedString("Password (repeated)", comment: "placeholder when creating account"), text: $repeatedPassword)
                                     .submitLabel(.go)
                                     .onSubmit(submit)
                                     .listRowSeparator(.hidden)
+                                    .focused($focused, equals: .passwordRepeated)
                             }
                             
                             if(self.captchaImg != nil) {
@@ -414,6 +432,7 @@ struct RegisterAccount: View {
                                     }
                                 }))
                             }
+                            .accessibilityIdentifier("SubmitRegistration")
                             Text("The selectable XMPP servers are public servers which are not affiliated to Monal. This registration page is provided for convenience only.")
                             .font(.system(size: 10))
                             .padding(.vertical, 8)

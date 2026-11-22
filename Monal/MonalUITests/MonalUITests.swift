@@ -36,6 +36,16 @@ class MonalUITests: XCTestCase {
 
 }
 
+private struct User {
+
+    private let localpart: String
+
+    var jid: String {
+        "\(localpart)@\(server)"
+    }
+
+}
+
 private extension XCUIApplication {
 
     private static let timeout = 20.0

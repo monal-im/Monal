@@ -24,14 +24,18 @@ class MonalUITests: XCTestCase {
         }
     }
 
-    func testCanRegister() {
+    func testMonalEndToEnd() {
+
         let app = XCUIApplication()
         app.launchArguments = ["--reset"]
         app.launch()
 
-        app.transitionThroughOnboardingCards()
-        app.openRegisterAccount()
-        app.registerNewAccount(server: server, username: "monal-ui-tests-\(UUID().uuidString)".lowercased())
+        XCTContext.runActivity(named: "Register account") { _ in
+            app.transitionThroughOnboardingCards()
+            app.openRegisterAccount()
+            app.registerNewAccount(server: server, username: "monal-ui-tests-\(UUID().uuidString)".lowercased())
+        }
+
     }
 
 }

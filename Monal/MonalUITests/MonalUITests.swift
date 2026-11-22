@@ -8,6 +8,8 @@
 
 import XCTest
 
+private let server = "ephemeral-xmpp-server.org"
+
 class MonalUITests: XCTestCase {
 
     override func setUpWithError() throws {
@@ -21,8 +23,6 @@ class MonalUITests: XCTestCase {
                 """)
         }
     }
-
-    let server = "ephemeral-xmpp-server.org"
 
     func testCanRegister() {
         let app = XCUIApplication()

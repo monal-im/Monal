@@ -40,6 +40,10 @@ private extension XCUIApplication {
 
     private static let timeout = 20.0
 
+    private var isOnActiveChatsView: Bool {
+        navigationBars["Chats"].wait(for: \.isHittable, toEqual: true, timeout: Self.timeout)
+    }
+
     func transitionThroughOnboardingCards() {
         XCTContext.runActivity(named: "Transition through onboarding cards") { _ in
             for _ in 1...4 { buttons["Next"].tap() }
@@ -68,7 +72,7 @@ private extension XCUIApplication {
             buttons["SubmitRegistration"].tap()
             XCTAssert(alerts["Success!"].waitForExistence(timeout: Self.timeout))
             alerts["Success!"].buttons["Close"].tap()
-            XCTAssert(navigationBars["Chats"].wait(for: \.isHittable, toEqual: true, timeout: Self.timeout))
+            XCTAssert(isOnActiveChatsView)
         }
     }
 

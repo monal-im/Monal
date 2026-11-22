@@ -36,6 +36,10 @@ class MonalUITests: XCTestCase {
             app.registerNewAccount(server: server, username: "monal-ui-tests-\(UUID().uuidString)".lowercased())
         }
 
+        XCTContext.runActivity(named: "Add contact") { _ in
+            app.addContact(user: .alice)
+        }
+
     }
 
 }
@@ -48,6 +52,10 @@ private struct User {
         "\(localpart)@\(server)"
     }
 
+}
+
+private extension User {
+    static let alice = User(localpart: "alice")
 }
 
 private extension XCUIApplication {
@@ -86,6 +94,21 @@ private extension XCUIApplication {
             buttons["SubmitRegistration"].tap()
             XCTAssert(alerts["Success!"].waitForExistence(timeout: Self.timeout))
             alerts["Success!"].buttons["Close"].tap()
+            XCTAssert(isOnActiveChatsView)
+        }
+    }
+
+    func addContact(user: User) {
+        XCTContext.runActivity(named: "Add \(user) as a contact") { _ in
+            buttons["Open contact list"].tap()
+            buttons["Add New Contact"].tap()
+            textFields["Contact, Group or Channel Jid"].tap()
+            textFields["Contact, Group or Channel Jid"].typeText(user.jid)
+            buttons["Add"].tap()
+            XCTAssert(alerts["Permission Requested"].waitForExistence(timeout: Self.timeout))
+            alerts["Permission Requested"].buttons["Close"].tap()
+            XCTAssert(textFields["Type a message..."].waitForExistence(timeout: Self.timeout))
+            buttons["BackButton"].tap()
             XCTAssert(isOnActiveChatsView)
         }
     }

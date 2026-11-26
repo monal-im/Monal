@@ -157,6 +157,12 @@ static NSMutableDictionary* _typingNotifications;
     }
     else if([messageNode check:@"{urn:xmpp:jingle-message:0}*"])
     {
+        if(![messageNode check:@"/@id"])
+        {
+            DDLogWarn(@"Ignoring incoming JMI stanza without proper id value: %@", messageNode);
+            return nil;
+        }
+        
         MLContact* jmiContact = [MLContact createContactFromJid:messageNode.fromUser andAccountID:account.accountID];
         if([messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
             jmiContact = [MLContact createContactFromJid:messageNode.toUser andAccountID:account.accountID];

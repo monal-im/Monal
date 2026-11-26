@@ -2519,8 +2519,8 @@ static NSRegularExpression* fastTokenRemovalRegex;
                 [self resendUnackedStanzas];
             }
             
-            //publish new csi and last active state (but only do so when not in an extension
-            //because the last active state does not change when inside an extension)
+            //publish new csi and last active state (but only do so for the last active state when not
+            //in an extension because the last active state does not change when inside an extension)
             [self sendCurrentCSIState];
             if(![HelperTools isAppExtension])
             {

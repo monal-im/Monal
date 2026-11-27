@@ -22,7 +22,6 @@
 #import <monalxmpp/MLVoIPProcessor.h>
 #import <monalxmpp/MLCall.h>      //for MLCallType
 #import <Monal-Swift.h>
-#import "chatViewController.h"
 #import "GeneratedAssetSymbols.h"
 
 #define prependToViewQueue(firstArg, ...)                           metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self prependToViewQueue:firstArg withId:MLViewIDUnspecified andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_prependToViewQueue(firstArg, __VA_ARGS__))
@@ -1135,16 +1134,6 @@ static BOOL _dnssecWarningDisplayed;
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
-    
-    if([segue.identifier isEqualToString:@"showConversation"])
-    {
-        UINavigationController* nav = segue.destinationViewController;
-        chatViewController* chatVC = (chatViewController*)nav.topViewController;
-        UIBarButtonItem* barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
-        self.navigationItem.backBarButtonItem = barButtonItem;
-        [chatVC setupWithContact:sender];
-    }
-    
     if([segue.identifier isEqualToString:@"showDetails"])
     {
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];

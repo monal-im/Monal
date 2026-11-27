@@ -112,8 +112,6 @@ static NSMutableDictionary* _pendingCalls;
         _pendingCalls[call.uuid] = call;
     }
     [self didChangeValueForKey:@"activeCalls"];
-    //TODO: remove once chatviewcontroller gets removed
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalCallAdded object:call userInfo:@{@"uuid": call.uuid}];
 }
 
 -(void) removeCall:(MLCall*) call
@@ -124,8 +122,6 @@ static NSMutableDictionary* _pendingCalls;
         [_pendingCalls removeObjectForKey:call.uuid];
     }
     [self didChangeValueForKey:@"activeCalls"];
-    //TODO: remove once chatviewcontroller gets removed
-    [[MLNotificationQueue currentQueue] postNotificationName:kMonalCallRemoved object:call userInfo:@{@"uuid": call.uuid}];
 }
 
 -(NSUInteger) pendingCallsCount

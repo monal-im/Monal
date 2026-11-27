@@ -40,6 +40,9 @@ class MonalUITests: XCTestCase {
             app.addContact(user: .alice)
         }
 
+        XCTContext.runActivity(named: "Send message to user") { _ in
+            app.sendMessage(to: .alice)
+        }
     }
 
 }
@@ -108,6 +111,18 @@ private extension XCUIApplication {
             XCTAssert(alerts["Permission Requested"].waitForExistence(timeout: Self.timeout))
             alerts["Permission Requested"].buttons["Close"].tap()
             XCTAssert(textFields["Type a message..."].waitForExistence(timeout: Self.timeout))
+            buttons["BackButton"].tap()
+            XCTAssert(isOnActiveChatsView)
+        }
+    }
+
+    func sendMessage(_ message: String = UUID().uuidString, to user: User) {
+        XCTContext.runActivity(named: "Send \(message) to \(user.jid)") { _ in
+            cells["ActiveChatButtonFor_\(user.jid)"].tap()
+            textFields["Type a message..."].tap()
+            textFields["Type a message..."].typeText(message)
+            buttons["Send message"].tap()
+            XCTAssert(staticTexts[message].waitForExistence(timeout: Self.timeout))
             buttons["BackButton"].tap()
             XCTAssert(isOnActiveChatsView)
         }

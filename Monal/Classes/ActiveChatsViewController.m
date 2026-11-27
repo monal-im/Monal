@@ -1229,6 +1229,7 @@ static BOOL _dnssecWarningDisplayed;
         cell.statusText.textColor = [UIColor lightGrayColor];
     }
 
+    cell.accessibilityIdentifier = [@"ActiveChatButtonFor_" stringByAppendingString:chatContact.contactJid];
     return cell;
 }
 

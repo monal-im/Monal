@@ -79,6 +79,7 @@ FOUNDATION_EXPORT MLContactSubscriptionAsk const kAskSubscribe NS_SWIFT_NAME(sub
 @property (nonatomic, readonly) BOOL isMuted;
 @property (nonatomic, readonly) BOOL isActiveChat;
 @property (nonatomic, assign) BOOL isEncrypted;
+@property (nonatomic, assign) BOOL isBeingUploadedTo;
 
 @property (nonatomic, readonly) NSString* groupSubject;
 @property (nonatomic, readonly) NSString* mucType;

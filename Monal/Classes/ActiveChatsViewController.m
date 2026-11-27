@@ -1571,9 +1571,9 @@ static BOOL _dnssecWarningDisplayed;
     }
 }
 
+//TODO: Remove this when the old chatView is removed
 -(chatViewController* _Nullable) currentChatView
 {
-    //TODO: this has to be adapted to the new chatui
     if([[HelperTools defaultsDB] boolForKey:@"showNewChatView"])
         return nil;
     

@@ -501,30 +501,31 @@ static NSDictionary* _optionalGroupConfigOptions;
         }
     }
     
-    //handle mediated invites
-    if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
-    {
-        //ignore outgoing carbon copies or mam results
-        if(![messageNode.toUser isEqualToString:_account.connectionProperties.identity.jid])
-            return YES;     //stop processing in MLMessageProcessor and ignore this invite
-        
-        NSString* inviterJid = [HelperTools splitJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"]][@"user"];
-        if(inviterJid == nil)
-        {
-            DDLogError(@"mediated inivite does not include a MUC jid, ignoring invite");
-            return YES;
-        }
-        MLContact* inviteFrom = [MLContact createContactFromJid:inviterJid andAccountID:_account.accountID];
-        DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
-        if(/*![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] &&*/ !inviteFrom.isSubscribedFrom)
-        {
-            DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
-            return YES;     //don't process this further
-        }
-        DDLogInfo(@"--> joining %@...", messageNode.fromUser);
-        [self sendDiscoQueryFor:messageNode.fromUser withJoin:YES andBookmarksUpdate:YES];
-        return YES;     //stop processing in MLMessageProcessor
-    }
+    //don't do mediated invites, the inviter can be spoofed
+//     //handle mediated invites
+//     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
+//     {
+//         //ignore outgoing carbon copies or mam results
+//         if(![messageNode.toUser isEqualToString:_account.connectionProperties.identity.jid])
+//             return YES;     //stop processing in MLMessageProcessor and ignore this invite
+//         
+//         NSString* inviterJid = [HelperTools splitJid:[messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"]][@"user"];
+//         if(inviterJid == nil)
+//         {
+//             DDLogError(@"mediated inivite does not include a MUC jid, ignoring invite");
+//             return YES;
+//         }
+//         MLContact* inviteFrom = [MLContact createContactFromJid:inviterJid andAccountID:_account.accountID];
+//         DDLogInfo(@"Got mediated muc invite from %@ for %@...", inviteFrom, messageNode.fromUser);
+//         if(/*![[HelperTools defaultsDB] boolForKey: @"allowNonRosterContacts"] &&*/ !inviteFrom.isSubscribedFrom)
+//         {
+//             DDLogWarn(@"Ignoring invite from %@, this jid isn't at least marked as susbscribedFrom in our roster...", inviteFrom);
+//             return YES;     //don't process this further
+//         }
+//         DDLogInfo(@"--> joining %@...", messageNode.fromUser);
+//         [self sendDiscoQueryFor:messageNode.fromUser withJoin:YES andBookmarksUpdate:YES];
+//         return YES;     //stop processing in MLMessageProcessor
+//     }
         
     //handle direct invites
     if([messageNode check:@"{jabber:x:conference}x@jid"] && [[messageNode findFirst:@"{jabber:x:conference}x@jid"] length] > 0)

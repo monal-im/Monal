@@ -1087,26 +1087,14 @@ static BOOL _dnssecWarningDisplayed;
             [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountID];
             if([[self getChatArrayForSection:pinnedChats] containsObject:contact] || [[self getChatArrayForSection:unpinnedChats] containsObject:contact])
             {
-                if([[HelperTools defaultsDB] boolForKey:@"showNewChatView"])
-                    presentator();
-                else
-                {
-                    [self scrollToContact:contact];
-                    [self performSegueWithIdentifier:@"showConversation" sender:contact];
-                }
+                presentator();
                 if(completion != nil)
                     completion(@YES);
             }
             else
             {
                 [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
-                    if([[HelperTools defaultsDB] boolForKey:@"showNewChatView"])
-                        presentator();
-                    else
-                    {
-                        [self scrollToContact:contact];
-                        [self performSegueWithIdentifier:@"showConversation" sender:contact];
-                    }
+                    presentator();
                     if(completion != nil)
                         completion(@YES);
                 }];
@@ -1569,21 +1557,6 @@ static BOOL _dnssecWarningDisplayed;
         DDLogVerbose(@"View chain completely dismissed...");
         completion();
     }
-}
-
-//TODO: Remove this when the old chatView is removed
--(chatViewController* _Nullable) currentChatView
-{
-    if([[HelperTools defaultsDB] boolForKey:@"showNewChatView"])
-        return nil;
-    
-    NSArray* controllers = ((UINavigationController*)self.splitViewController.viewControllers[0]).viewControllers;
-    chatViewController* chatView = nil;
-    if(controllers.count > 1)
-        chatView = [((UINavigationController*)controllers[1]).viewControllers firstObject];
-    if(![chatView isKindOfClass:NSClassFromString(@"chatViewController")])
-        chatView = nil;
-    return chatView;
 }
 
 -(void) scrollToContact:(MLContact*) contact

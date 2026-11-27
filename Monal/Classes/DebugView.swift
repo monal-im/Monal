@@ -22,9 +22,6 @@ class DebugDefaultDB: ObservableObject {
     @defaultsDB("hasCompletedOnboarding")
     var hasCompletedOnboarding: Bool
     
-    @defaultsDB("showNewChatView")
-    var showNewChatView: Bool
-    
     @defaultsDB("debugDtmfSending")
     var debugDtmfSending: Bool
     
@@ -184,10 +181,6 @@ struct ExtraSettingsView: View {
                 Section(header: Text("Some debug settings:")) {
                     Toggle(isOn: $defaultDB.hasCompletedOnboarding) {
                         Text("Don't show onboarding")
-                    }
-
-                    Toggle(isOn: $defaultDB.showNewChatView) {
-                        Text("Show new SwiftUI ChatView")
                     }
 
                     Toggle(isOn: $defaultDB.debugDtmfSending) {

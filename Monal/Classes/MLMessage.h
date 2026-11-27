@@ -87,9 +87,6 @@ The of the message in the DB , should be int
  */
 @property (nonatomic, assign) BOOL deletedLocally;
 
-//TODO: remove, once our old chatview gets removed
-@property (nonatomic, copy) NSURL* url;
-
 /**
  path to preview image for image type
  */

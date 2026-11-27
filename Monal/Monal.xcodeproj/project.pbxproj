@@ -39,7 +39,6 @@
 		264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLSwitchCell.xib */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
-		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		26AA70152146BBB900598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70142146BBB900598605 /* ShareViewController.m */; };
 		26AA70182146BBB900598605 /* iosShare.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70162146BBB900598605 /* iosShare.storyboard */; };
 		26AA701C2146BBB900598605 /* shareSheet.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70112146BBB800598605 /* shareSheet.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -468,8 +467,6 @@
 		267B6720226A222E003DB850 /* MLEncryptedPayload.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEncryptedPayload.m; sourceTree = "<group>"; };
 		268DD58417C4541000C673A9 /* MLChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatCell.h; sourceTree = "<group>"; };
 		268DD58517C4541000C673A9 /* MLChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatCell.m; sourceTree = "<group>"; };
-		2696EED01791245A00BC54B8 /* chatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chatViewController.h; sourceTree = "<group>"; };
-		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
 		26AA70112146BBB800598605 /* shareSheet.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = shareSheet.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		26AA70132146BBB900598605 /* ShareViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShareViewController.h; sourceTree = "<group>"; };
 		26AA70142146BBB900598605 /* ShareViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShareViewController.m; sourceTree = "<group>"; };
@@ -1108,8 +1105,6 @@
 			children = (
 				840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */,
 				840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */,
-				2696EED11791245A00BC54B8 /* chatViewController.m */,
-				2696EED01791245A00BC54B8 /* chatViewController.h */,
 				26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */,
 				26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */,
 				268DD58417C4541000C673A9 /* MLChatCell.h */,
@@ -2390,7 +2385,6 @@
 				34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */,
-				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
 				3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */,
 				849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */,

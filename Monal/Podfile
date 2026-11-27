@@ -15,7 +15,6 @@ def monal
   use_frameworks!
   inhibit_all_warnings!
   pod 'MBProgressHUD', '~> 1.2.0'
-  pod 'SDWebImage'
   pod 'DZNEmptyDataSet'
   promiseKit
 end

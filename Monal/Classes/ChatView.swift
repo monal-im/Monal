@@ -119,7 +119,6 @@ struct ChatView: View {
     @State var queuedNewMessages: [ChatViewMessage] = []
     @State private var voiceRequests: [[String: AnyObject]] = []
     @State private var isLoadingMamHistory = false
-    @State private var isUploadingFile = false
     @State private var messageInsertionTimer: Timer?
     @State private var ownRole = kMucRoleNone
     @State private var inputText = ""
@@ -430,7 +429,7 @@ struct ChatView: View {
             DDLogError("Couldn't get file location in order to upload it!")
             return
         }
-        self.isUploadingFile = true
+        contact.isBeingUploadedTo = true
         do {
             localFileURL.startAccessingSecurityScopedResource()
             var url: String, mimeType: String, size: NSNumber
@@ -445,7 +444,7 @@ struct ChatView: View {
             localFileURL.stopAccessingSecurityScopedResource()
             await MainActor.run {
                 guard let newMLMessage = MLXMPPManager.sharedInstance().sendMessageAndAddToHistory(message: url, havingType: kMessageTypeFiletransfer, toContact: self.contact.obj, isEncrypted: self.contact.isEncrypted, uploadInfo: ["mimeType": mimeType, "size": size]) else {
-                    self.isUploadingFile = false
+                    contact.isBeingUploadedTo = false
                     return
                 }
                 messages.append(ChatViewMessage(newMLMessage))
@@ -459,7 +458,7 @@ struct ChatView: View {
                 dismissLabel: Text("Close")
             )
         }
-        self.isUploadingFile = false
+        contact.isBeingUploadedTo = false
     }
 
     var body: some View {
@@ -783,7 +782,7 @@ struct ChatView: View {
             
             ToolbarItemGroup(placement: .topBarTrailing) {
                 ProgressView()
-                    .opacity(isLoadingMamHistory || isUploadingFile ? 1 : 0)
+                    .opacity(isLoadingMamHistory || contact.isBeingUploadedTo ? 1 : 0)
 
                 if ownRole == kMucRoleVisitor {
                     Button {

@@ -141,8 +141,6 @@ static inline NSString* _Nonnull LocalizationNotNeeded(NSString* _Nonnull s)
 
 //all other constants needed
 #define kMonalConnectivityChange @"kMonalConnectivityChange"
-#define kMonalCallRemoved @"kMonalCallRemoved"
-#define kMonalCallAdded @"kMonalCallAdded"
 #define kMonalIncomingJMIStanza @"kMonalIncomingJMIStanza"
 #define kMonalIncomingVoipCall @"kMonalIncomingVoipCall"
 #define kMonalIncomingSDP @"kMonalIncomingSDP"

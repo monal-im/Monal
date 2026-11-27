@@ -44,7 +44,6 @@
 #import "XMPPIQ.h"
 #import <monalxmpp/XMPPPresence.h>
 #import "XMPPMessage.h"
-#import "chatViewController.h"
 
 @import Intents;
 
@@ -1932,11 +1931,7 @@ typedef NS_ENUM(NSUInteger, MLGracefulTimeoutType) {
             monal_id_block_t cleanup = ^(NSDictionary* payload) {
                 [[DataLayer sharedInstance] deleteShareSheetPayloadWithId:payload[@"id"]];
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
-                if(self.activeChats.currentChatView != nil)
-                {
-                    [self.activeChats.currentChatView scrollToBottomAnimated:NO];
-                    [self.activeChats.currentChatView hideUploadHUD];
-                }
+                contact.isBeingUploadedTo = NO;
                 //send next item (if there is one left)
                 [self sendAllOutboxes];
             };
@@ -1971,7 +1966,7 @@ typedef NS_ENUM(NSUInteger, MLGracefulTimeoutType) {
                 {
                     //the payload type is either "image", "file", "contact" or "audiovisual"
                     DDLogInfo(@"Got %@ upload: %@", payload[@"type"], payload[@"data"]);
-                    [self.activeChats.currentChatView showUploadHUD];
+                    contact.isBeingUploadedTo = YES;
                     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                         $call(payload[@"data"], $ID(account), $BOOL(encrypted), $ID(completion, (^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
                             dispatch_async(dispatch_get_main_queue(), ^{

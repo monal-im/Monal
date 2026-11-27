@@ -22,7 +22,6 @@
 #import <monalxmpp/MLVoIPProcessor.h>
 #import <monalxmpp/MLCall.h>      //for MLCallType
 #import <Monal-Swift.h>
-#import "chatViewController.h"
 #import "GeneratedAssetSymbols.h"
 
 #define prependToViewQueue(firstArg, ...)                           metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([self prependToViewQueue:firstArg withId:MLViewIDUnspecified andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_prependToViewQueue(firstArg, __VA_ARGS__))
@@ -1087,26 +1086,14 @@ static BOOL _dnssecWarningDisplayed;
             [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountID];
             if([[self getChatArrayForSection:pinnedChats] containsObject:contact] || [[self getChatArrayForSection:unpinnedChats] containsObject:contact])
             {
-                if([[HelperTools defaultsDB] boolForKey:@"showNewChatView"])
-                    presentator();
-                else
-                {
-                    [self scrollToContact:contact];
-                    [self performSegueWithIdentifier:@"showConversation" sender:contact];
-                }
+                presentator();
                 if(completion != nil)
                     completion(@YES);
             }
             else
             {
                 [self insertOrMoveContact:contact completion:^(BOOL finished __unused) {
-                    if([[HelperTools defaultsDB] boolForKey:@"showNewChatView"])
-                        presentator();
-                    else
-                    {
-                        [self scrollToContact:contact];
-                        [self performSegueWithIdentifier:@"showConversation" sender:contact];
-                    }
+                    presentator();
                     if(completion != nil)
                         completion(@YES);
                 }];
@@ -1147,16 +1134,6 @@ static BOOL _dnssecWarningDisplayed;
 -(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
-    
-    if([segue.identifier isEqualToString:@"showConversation"])
-    {
-        UINavigationController* nav = segue.destinationViewController;
-        chatViewController* chatVC = (chatViewController*)nav.topViewController;
-        UIBarButtonItem* barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
-        self.navigationItem.backBarButtonItem = barButtonItem;
-        [chatVC setupWithContact:sender];
-    }
-    
     if([segue.identifier isEqualToString:@"showDetails"])
     {
         UIViewController* detailsViewController = [[SwiftuiInterface new] makeContactDetails:sender];
@@ -1569,21 +1546,6 @@ static BOOL _dnssecWarningDisplayed;
         DDLogVerbose(@"View chain completely dismissed...");
         completion();
     }
-}
-
--(chatViewController* _Nullable) currentChatView
-{
-    //TODO: this has to be adapted to the new chatui
-    if([[HelperTools defaultsDB] boolForKey:@"showNewChatView"])
-        return nil;
-    
-    NSArray* controllers = ((UINavigationController*)self.splitViewController.viewControllers[0]).viewControllers;
-    chatViewController* chatView = nil;
-    if(controllers.count > 1)
-        chatView = [((UINavigationController*)controllers[1]).viewControllers firstObject];
-    if(![chatView isKindOfClass:NSClassFromString(@"chatViewController")])
-        chatView = nil;
-    return chatView;
 }
 
 -(void) scrollToContact:(MLContact*) contact

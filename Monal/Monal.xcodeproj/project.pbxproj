@@ -30,16 +30,11 @@
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
 		2638008B2374816D00144929 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 260773C0232FC4E800BFD50F /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFABE2183A59B0038E716 /* MLSelectionController.m */; };
-		263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFAC22187D0E00038E716 /* MLLinkCell.m */; };
-		2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */; };
-		2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4941FF046E800F46AB5 /* MLBaseCell.m */; };
 		2644D4991FF29E5600F46AB5 /* MLSettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */; };
 		26470F521835C4080069E3E0 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */; };
 		264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLSwitchCell.xib */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
-		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
-		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		26AA70152146BBB900598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70142146BBB900598605 /* ShareViewController.m */; };
 		26AA70182146BBB900598605 /* iosShare.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70162146BBB900598605 /* iosShare.storyboard */; };
 		26AA701C2146BBB900598605 /* shareSheet.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70112146BBB800598605 /* shareSheet.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -71,12 +66,10 @@
 		26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 262D9EAB17924532009292B4 /* MLConstants.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
 		26E8462224EABAD600ECE419 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462424EABAD600ECE419 /* Settings.storyboard */; };
 		26E8462824EABAED00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462A24EABAED00ECE419 /* Main.storyboard */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
-		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
 		340F0CA02D2425A4006224D0 /* MLMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 26611024238F17B20030A4EE /* MLMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		340F0CA12D2425AA006224D0 /* MLXMPPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 26611015238F08AC0030A4EE /* MLXMPPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		340F0CA22D2425C4006224D0 /* XMPPPresence.h in Headers */ = {isa = PBXBuildFile; fileRef = 264E34591787BAB100BC7BD0 /* XMPPPresence.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -109,7 +102,6 @@
 		34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E58B4A2C68E7BC009A1634 /* ContactsView.swift */; };
 		34F978CF303B90CB002029CF /* CSQLite+MonalTraits in Frameworks */ = {isa = PBXBuildFile; productRef = 34F978CE303B90CB002029CF /* CSQLite+MonalTraits */; };
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
-		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		3D06A515281FFCC000DDAE90 /* NotificationDebugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D06A514281FFCC000DDAE90 /* NotificationDebugging.swift */; };
 		3D27D956290B0BB60014748B /* AddContactMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D955290B0BB60014748B /* AddContactMenu.swift */; };
 		3D27D958290B0BC80014748B /* ContactRequestsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */; };
@@ -156,7 +148,6 @@
 		54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81828231690003664BD /* WelcomeLogIn.swift */; };
 		54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F0B81B282316F5003664BD /* RegisterAccount.swift */; };
 		7D40218FEAB3BA882811A682 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C40963CED187B2F1B4B88F7 /* Pods_Monal.framework */; };
-		840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */; };
 		8414AE002A7ABC4300EFFCCC /* LibMonalRustSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 8414ADFF2A7ABC4300EFFCCC /* LibMonalRustSwiftBridge */; };
 		841898AA2957712000FEC77D /* ViewExtractor in Frameworks */ = {isa = PBXBuildFile; productRef = 841898A92957712000FEC77D /* ViewExtractor */; };
 		841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841898AB2957DBAC00FEC77D /* RichAlert.swift */; };
@@ -171,7 +162,6 @@
 		8426B09A30762DE7004801F5 /* AESGcm.h in Headers */ = {isa = PBXBuildFile; fileRef = 267B671A226A200D003DB850 /* AESGcm.h */; };
 		8426B09B30762DF0004801F5 /* MLEncryptedPayload.h in Headers */ = {isa = PBXBuildFile; fileRef = 267B671F226A222E003DB850 /* MLEncryptedPayload.h */; };
 		8426B09C30762E9F004801F5 /* MLDNSLookup.h in Headers */ = {isa = PBXBuildFile; fileRef = 26C4B22221B6B91300610282 /* MLDNSLookup.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		8426B09D30762F18004801F5 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
 		842790852A32D16D005C18CC /* CallSounds in Resources */ = {isa = PBXBuildFile; fileRef = 842790842A32D16C005C18CC /* CallSounds */; };
 		843AD3AB2AA55CE20036844D /* MLOgHtmlParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */; };
 		843DC1B22C8E51E3002724FE /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 843DC1B12C8E51E3002724FE /* ExyteChat */; };
@@ -233,7 +223,6 @@
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
 		952EBC802BAF72F300183DBF /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 952EBC7F2BAF72F300183DBF /* DebugView.swift */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
-		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490E22612F3D00054AC9E /* MLCrypto.swift */; };
 		C10490EB2612F3E00054AC9E /* EncryptedPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */; };
 		C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */; };
@@ -243,7 +232,6 @@
 		C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D88BB76295BB6DC00FB30BA /* CreateGroupMenu.swift */; };
 		C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D631822294BAB1D00026BE7 /* ContactPicker.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
-		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
 		C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */; };
 		C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = C158D3FE25A0AB810005AA40 /* MLMucProcessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = C158D41225A0AC630005AA40 /* MLMucProcessor.m */; };
@@ -254,8 +242,6 @@
 		C176F1EC2AF11C31002034E5 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C176F1EB2AF11C31002034E5 /* UserNotifications.framework */; };
 		C1850EB825F38A2D003D506A /* MonalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1850EB725F38A2D003D506A /* MonalUITests.swift */; };
 		C18967C72B81F61B0073C7C5 /* ChannelMemberList.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */; };
-		C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1943A4B25309A9D0036172F /* MLReloadCell.m */; };
-		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
 		C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B940E926144AF500E9D290 /* AESGCMTest.m */; };
 		C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */ = {isa = PBXBuildFile; fileRef = C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */; };
@@ -276,12 +262,7 @@
 		D0FE3F542C5C56ED007AAD23 /* ChangePassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0FE3F532C5C56ED007AAD23 /* ChangePassword.swift */; };
 		D7E74AF213445E39318BC648 /* Pods_MonalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */; };
 		DAA96204FCB8A168ACC9CE45 /* Pods_MonalTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04A2D22312B028520E2CDD91 /* Pods_MonalTests.framework */; };
-		E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */; };
-		E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */; };
-		E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32225C6626300925F62 /* MLFileTransferFileViewController.m */; };
-		E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32425C6626400925F62 /* MLFileTransferTextCell.m */; };
 		E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */; };
-		E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8DED06125388BE8003167FF /* MLSearchViewController.m */; };
 		F9C277F46F5157194744C491 /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F1488206B764014DD7EC92A /* Pods_shareSheet.framework */; };
 /* End PBXBuildFile section */
 
@@ -430,12 +411,6 @@
 		263AFDFB209B3B35007F9CEE /* MLSignalStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSignalStore.m; sourceTree = "<group>"; };
 		263DFABD2183A59B0038E716 /* MLSelectionController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSelectionController.h; sourceTree = "<group>"; };
 		263DFABE2183A59B0038E716 /* MLSelectionController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSelectionController.m; sourceTree = "<group>"; };
-		263DFAC12187D0E00038E716 /* MLLinkCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLinkCell.h; sourceTree = "<group>"; };
-		263DFAC22187D0E00038E716 /* MLLinkCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLLinkCell.m; sourceTree = "<group>"; };
-		2644D4901FF0064C00F46AB5 /* MLChatImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatImageCell.h; sourceTree = "<group>"; };
-		2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatImageCell.m; sourceTree = "<group>"; };
-		2644D4931FF046E800F46AB5 /* MLBaseCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBaseCell.h; sourceTree = "<group>"; };
-		2644D4941FF046E800F46AB5 /* MLBaseCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBaseCell.m; sourceTree = "<group>"; };
 		2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSettingsTableViewController.h; sourceTree = "<group>"; };
 		2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSettingsTableViewController.m; sourceTree = "<group>"; };
 		26470F511835C4080069E3E0 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
@@ -466,10 +441,6 @@
 		267B671B226A200D003DB850 /* AESGcm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGcm.m; sourceTree = "<group>"; };
 		267B671F226A222E003DB850 /* MLEncryptedPayload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEncryptedPayload.h; sourceTree = "<group>"; };
 		267B6720226A222E003DB850 /* MLEncryptedPayload.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEncryptedPayload.m; sourceTree = "<group>"; };
-		268DD58417C4541000C673A9 /* MLChatCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLChatCell.h; sourceTree = "<group>"; };
-		268DD58517C4541000C673A9 /* MLChatCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLChatCell.m; sourceTree = "<group>"; };
-		2696EED01791245A00BC54B8 /* chatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chatViewController.h; sourceTree = "<group>"; };
-		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
 		26AA70112146BBB800598605 /* shareSheet.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = shareSheet.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		26AA70132146BBB900598605 /* ShareViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShareViewController.h; sourceTree = "<group>"; };
 		26AA70142146BBB900598605 /* ShareViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShareViewController.m; sourceTree = "<group>"; };
@@ -492,8 +463,6 @@
 		26CC579523A0867400ABB92A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		26CF3EA81780D6B7002B7085 /* XMPPIQ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIQ.h; sourceTree = "<group>"; };
 		26CF3EA91780D6B7002B7085 /* XMPPIQ.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIQ.m; sourceTree = "<group>"; };
-		26D7C05C23D6AFD800CA123C /* MLChatInputContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatInputContainer.h; sourceTree = "<group>"; };
-		26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatInputContainer.m; sourceTree = "<group>"; };
 		26D89F041A890672009B147C /* MLSwitchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSwitchCell.h; sourceTree = "<group>"; };
 		26D89F051A890672009B147C /* MLSwitchCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSwitchCell.m; sourceTree = "<group>"; };
 		26E8462324EABAD600ECE419 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Settings.storyboard; sourceTree = "<group>"; };
@@ -554,8 +523,6 @@
 		26FC619124EB6C220094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/Main.strings; sourceTree = "<group>"; };
 		26FC619324EB6C250094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/Settings.strings; sourceTree = "<group>"; };
 		26FC619524EB6C270094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = external/en.lproj/iosShare.strings; sourceTree = "<group>"; };
-		26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLResizingTextView.h; sourceTree = "<group>"; };
-		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
 		29250DA62DD2322383585B2B /* Pods_MonalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MonalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2B7A5555D807EE78C95217FD /* Pods_NotificationService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificationService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -570,8 +537,6 @@
 		34E58B4A2C68E7BC009A1634 /* ContactsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
 		3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXEPSlashMeHandler.h; sourceTree = "<group>"; };
 		38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXEPSlashMeHandler.m; sourceTree = "<group>"; };
-		389E298925E901CA009A5268 /* MLAudioRecoderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAudioRecoderManager.m; sourceTree = "<group>"; };
-		389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAudioRecoderManager.h; sourceTree = "<group>"; };
 		39B989B9775C0725A810D271 /* Pods-MonalUITests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		39DB4C9159DA578D1A34990D /* Pods-monalxmpp.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha.xcconfig"; sourceTree = "<group>"; };
 		3D06A514281FFCC000DDAE90 /* NotificationDebugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDebugging.swift; sourceTree = "<group>"; };
@@ -638,8 +603,6 @@
 		7FA9582E4CC566FE5466C557 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
 		80D3382A8E546E49EC9898AC /* Pods-MonalTests.beta.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.beta.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.beta.xcconfig"; sourceTree = "<group>"; };
 		82966E2FE35241AEC14CD4F7 /* Pods-MonalTests.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.alpha.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.alpha.xcconfig"; sourceTree = "<group>"; };
-		840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueCell.m; sourceTree = "<group>"; };
-		840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueCell.h; sourceTree = "<group>"; };
 		8414ADFA2A7ABAC900EFFCCC /* LibMonalRustSwiftBridge */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LibMonalRustSwiftBridge; path = ../rust/LibMonalRustSwiftBridge; sourceTree = "<group>"; };
 		841898AB2957DBAC00FEC77D /* RichAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichAlert.swift; sourceTree = "<group>"; };
 		8418B5582C7EBD39006FAF60 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
@@ -708,7 +671,6 @@
 		B58835E4BBDCCB6BE1E8F0AE /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
 		B8155E63F8DE80FF36D0B3B7 /* Pods-NotificationService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.adhoc.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.adhoc.xcconfig"; sourceTree = "<group>"; };
 		BFA9EFD7A8064201C81F52CF /* Pods-Monal.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.alpha.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.alpha.xcconfig"; sourceTree = "<group>"; };
-		C10490482612ED2F0054AC9E /* MLEmoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLEmoji.swift; sourceTree = "<group>"; };
 		C10490E22612F3D00054AC9E /* MLCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCrypto.swift; sourceTree = "<group>"; };
 		C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptedPayload.swift; sourceTree = "<group>"; };
 		C1049186261301530054AC9E /* MonalXMPPUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonalXMPPUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -729,8 +691,6 @@
 		C13E640625BD405700763D6F /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "external/zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C13E640825BD406600763D6F /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "external/pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C13E640925BD406700763D6F /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "external/pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
-		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
 		C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLQRCodeScanner.swift; sourceTree = "<group>"; };
 		C1567E3528255C64006E9637 /* Monal.macos.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.macos.entitlements; sourceTree = "<group>"; };
 		C1567E3628255C64006E9637 /* Monal.ios.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Monal.ios.entitlements; sourceTree = "<group>"; };
@@ -753,10 +713,6 @@
 		C1850EB525F38A2D003D506A /* MonalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1850EB725F38A2D003D506A /* MonalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonalUITests.swift; sourceTree = "<group>"; };
 		C18967C62B81F61B0073C7C5 /* ChannelMemberList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelMemberList.swift; sourceTree = "<group>"; };
-		C1943A4A25309A9D0036172F /* MLReloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReloadCell.h; sourceTree = "<group>"; };
-		C1943A4B25309A9D0036172F /* MLReloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLReloadCell.m; sourceTree = "<group>"; };
-		C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatViewHelper.h; sourceTree = "<group>"; };
-		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
 		C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperTools.m; sourceTree = "<group>"; };
 		C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MonalXMPPUnitTests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -852,18 +808,8 @@
 		DD73A9A45D1A05C1F5A41D65 /* Pods-MonalTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		E06DB4446BAE2F9C0192D055 /* Pods-monalxmpp.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.adhoc.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.adhoc.xcconfig"; sourceTree = "<group>"; };
 		E078894B40120EF82354AECB /* Pods-MonalTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.appstore.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.appstore.xcconfig"; sourceTree = "<group>"; };
-		E89DD31C25C6626300925F62 /* MLFileTransferFileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferFileViewController.h; sourceTree = "<group>"; };
-		E89DD31E25C6626300925F62 /* MLFileTransferDataCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferDataCell.h; sourceTree = "<group>"; };
-		E89DD31F25C6626300925F62 /* MLFileTransferVideoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferVideoCell.h; sourceTree = "<group>"; };
-		E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLFileTransferDataCell.m; sourceTree = "<group>"; };
-		E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLFileTransferVideoCell.m; sourceTree = "<group>"; };
-		E89DD32225C6626300925F62 /* MLFileTransferFileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLFileTransferFileViewController.m; sourceTree = "<group>"; };
-		E89DD32325C6626400925F62 /* MLFileTransferTextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferTextCell.h; sourceTree = "<group>"; };
-		E89DD32425C6626400925F62 /* MLFileTransferTextCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLFileTransferTextCell.m; sourceTree = "<group>"; };
 		E8CF9CBF26249640001A1952 /* MLSettingsAboutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSettingsAboutViewController.h; sourceTree = "<group>"; };
 		E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingsAboutViewController.m; sourceTree = "<group>"; };
-		E8DED05F25388BE8003167FF /* MLSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSearchViewController.h; sourceTree = "<group>"; };
-		E8DED06125388BE8003167FF /* MLSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSearchViewController.m; sourceTree = "<group>"; };
 		F04FE24284F1563D80523B52 /* Pods-monalxmpp.alpha-catalyst.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha-catalyst.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha-catalyst.xcconfig"; sourceTree = "<group>"; };
 		F7506FDE7A78EB0CAB14FF60 /* Pods-MonalUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.debug.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		F9BB86CBB66B9BF75EAC1F02 /* Pods-MonalTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalTests.debug.xcconfig"; path = "Target Support Files/Pods-MonalTests/Pods-MonalTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1097,8 +1043,6 @@
 				C15D504A24C727CC002F75BB /* MLLogFileManager.m */,
 				26352EA6177D222600E2C8FF /* MLXMPPManager.h */,
 				26352EA7177D222600E2C8FF /* MLXMPPManager.m */,
-				389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */,
-				389E298925E901CA009A5268 /* MLAudioRecoderManager.m */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -1106,38 +1050,6 @@
 		2644D48F1FF004B800F46AB5 /* ChatViews */ = {
 			isa = PBXGroup;
 			children = (
-				840E23C928ADA56900A7FAC9 /* MLUploadQueueCell.h */,
-				840E23C828ADA56900A7FAC9 /* MLUploadQueueCell.m */,
-				2696EED11791245A00BC54B8 /* chatViewController.m */,
-				2696EED01791245A00BC54B8 /* chatViewController.h */,
-				26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */,
-				26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */,
-				268DD58417C4541000C673A9 /* MLChatCell.h */,
-				268DD58517C4541000C673A9 /* MLChatCell.m */,
-				2644D4901FF0064C00F46AB5 /* MLChatImageCell.h */,
-				2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */,
-				2644D4931FF046E800F46AB5 /* MLBaseCell.h */,
-				2644D4941FF046E800F46AB5 /* MLBaseCell.m */,
-				263DFAC12187D0E00038E716 /* MLLinkCell.h */,
-				263DFAC22187D0E00038E716 /* MLLinkCell.m */,
-				26D7C05C23D6AFD800CA123C /* MLChatInputContainer.h */,
-				26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */,
-				C1414E9B24312F0100948788 /* MLChatMapsCell.h */,
-				C1414E9C24312F0100948788 /* MLChatMapsCell.m */,
-				C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */,
-				C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */,
-				C1943A4A25309A9D0036172F /* MLReloadCell.h */,
-				C1943A4B25309A9D0036172F /* MLReloadCell.m */,
-				E8DED05F25388BE8003167FF /* MLSearchViewController.h */,
-				E8DED06125388BE8003167FF /* MLSearchViewController.m */,
-				E89DD31E25C6626300925F62 /* MLFileTransferDataCell.h */,
-				E89DD32025C6626300925F62 /* MLFileTransferDataCell.m */,
-				E89DD31C25C6626300925F62 /* MLFileTransferFileViewController.h */,
-				E89DD32225C6626300925F62 /* MLFileTransferFileViewController.m */,
-				E89DD32325C6626400925F62 /* MLFileTransferTextCell.h */,
-				E89DD32425C6626400925F62 /* MLFileTransferTextCell.m */,
-				E89DD31F25C6626300925F62 /* MLFileTransferVideoCell.h */,
-				E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */,
 				847311222C893D2600739CC6 /* ChatView.swift */,
 				D0E049792DB3A7FA002783A3 /* ChatViewHelpers.m */,
 				D0E0497C2DB3A862002783A3 /* ChatViewHelpers.h */,
@@ -1404,7 +1316,6 @@
 				540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */,
 				541E4CBD254AA0B600FD7B28 /* MLHandler.h */,
 				541E4CBF254AA0E700FD7B28 /* MLHandler.m */,
-				C10490482612ED2F0054AC9E /* MLEmoji.swift */,
 				54A22D2426185C2900B56EAD /* MLNotificationQueue.m */,
 				84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */,
 				84C1CD512A8F617F007076ED /* MLStreamRedirect.m */,
@@ -1674,7 +1585,6 @@
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
 				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
 				8426B09C30762E9F004801F5 /* MLDNSLookup.h in Headers */,
-				8426B09D30762F18004801F5 /* MLAudioRecoderManager.h in Headers */,
 				84E8870D2EEADD34006A61FC /* HT.h in Headers */,
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
@@ -2349,21 +2259,16 @@
 				C114D13D2B15B903000FB99F /* ContactEntry.swift in Sources */,
 				841B6F1A297B18720074F9B7 /* AccountPicker.swift in Sources */,
 				3D65B791272350F0005A30F4 /* SwiftuiHelpers.swift in Sources */,
-				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
 				C117F7E22B0863B3001F2BC6 /* ContactPicker.swift in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
-				C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				20ED55852BADDA5C0005783E /* GeneralSettings.swift in Sources */,
 				84E55E7D2964424E003E191A /* ActiveChatsViewController.m in Sources */,
 				C1E8A7F72B8E47C300760220 /* EditGroupSubject.swift in Sources */,
-				263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */,
 				D0FE3F542C5C56ED007AAD23 /* ChangePassword.swift in Sources */,
 				3D65B78D27234B74005A30F4 /* ContactDetails.swift in Sources */,
-				E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */,
-				E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				84D31CE628653B83006D7926 /* WebRTCClient.swift in Sources */,
 				54F0B81C282316F5003664BD /* RegisterAccount.swift in Sources */,
@@ -2373,11 +2278,9 @@
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
 				3D27D956290B0BB60014748B /* AddContactMenu.swift in Sources */,
 				261A628B176C159000059090 /* AccountListController.m in Sources */,
-				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				D02192F32C89BB3800202A59 /* BlockedUsers.swift in Sources */,
 				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
-				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
 				20D3611C2C10E12500E46587 /* BoardingCards.swift in Sources */,
 				84558DBF2DF04C3100F8357F /* OneClickRegistration.swift in Sources */,
 				847311232C893D2600739CC6 /* ChatView.swift in Sources */,
@@ -2385,39 +2288,29 @@
 				845D636B2AD4AEDA0066EFFB /* MediaViewer.swift in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */,
-				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
 				3DC5035C2822F5220064C8A7 /* OmemoKeysView.swift in Sources */,
 				34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				D0FA79B12C7E5C7400216D2A /* ServerDetails.swift in Sources */,
-				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
 				3D85E587282AE523006F5B3A /* OmemoQrCodeView.swift in Sources */,
 				849A53E4287135B2007E941A /* MLVoIPProcessor.m in Sources */,
 				C117F7E12B086390001F2BC6 /* CreateGroupMenu.swift in Sources */,
 				952EBC802BAF72F300183DBF /* DebugView.swift in Sources */,
 				3D7D352328626CB80042C5E5 /* LoadingOverlay.swift in Sources */,
-				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
 				2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */,
 				843AD3AB2AA55CE20036844D /* MLOgHtmlParser.swift in Sources */,
 				3D27D958290B0BC80014748B /* ContactRequestsMenu.swift in Sources */,
 				3D5A91422842B4AE008CE57E /* MemberList.swift in Sources */,
-				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				8441EFF92921B53500E851E9 /* BackgroundSettings.swift in Sources */,
 				841898AC2957DBAD00FEC77D /* RichAlert.swift in Sources */,
-				840E23CA28ADA56900A7FAC9 /* MLUploadQueueCell.m in Sources */,
 				848227912C4A6194003CCA33 /* MLPlaceholderViewController.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				841EE4302A426F2300D3AF14 /* MLCrashReporter.m in Sources */,
-				E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */,
 				C1F5C7AC2777621B0001F295 /* ContactResources.swift in Sources */,
-				E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */,
-				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
 				54391BBB273499E80050DAFB /* UIColor+Extension.m in Sources */,
-				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
-				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
 				2644D4991FF29E5600F46AB5 /* MLSettingsTableViewController.m in Sources */,
 				34BC08122C5E9BE30099FB85 /* ContentUnavailableShimView.swift in Sources */,
 				846DF27C2937FAA600AAB9C0 /* ChatPlaceholder.swift in Sources */,
@@ -2483,7 +2376,6 @@
 				54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */,
 				542CF3FF2763314F002C3710 /* hsluv.c in Sources */,
 				8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */,
-				389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */,
 				84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
 				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,

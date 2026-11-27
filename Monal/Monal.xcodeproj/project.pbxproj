@@ -223,7 +223,6 @@
 		84FC375928981A5600634E3E /* PasswordMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC375828981A5600634E3E /* PasswordMigration.swift */; };
 		952EBC802BAF72F300183DBF /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 952EBC7F2BAF72F300183DBF /* DebugView.swift */; };
 		BE8B63D2491B1E5582965A8F /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9C86E0A568734587FE9BA2 /* Pods_monalxmpp.framework */; };
-		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C10490E32612F3D00054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490E22612F3D00054AC9E /* MLCrypto.swift */; };
 		C10490EB2612F3E00054AC9E /* EncryptedPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */; };
 		C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */; };
@@ -672,7 +671,6 @@
 		B58835E4BBDCCB6BE1E8F0AE /* Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.appstore-quicksy.xcconfig"; sourceTree = "<group>"; };
 		B8155E63F8DE80FF36D0B3B7 /* Pods-NotificationService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificationService.adhoc.xcconfig"; path = "Target Support Files/Pods-NotificationService/Pods-NotificationService.adhoc.xcconfig"; sourceTree = "<group>"; };
 		BFA9EFD7A8064201C81F52CF /* Pods-Monal.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.alpha.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.alpha.xcconfig"; sourceTree = "<group>"; };
-		C10490482612ED2F0054AC9E /* MLEmoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLEmoji.swift; sourceTree = "<group>"; };
 		C10490E22612F3D00054AC9E /* MLCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCrypto.swift; sourceTree = "<group>"; };
 		C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptedPayload.swift; sourceTree = "<group>"; };
 		C1049186261301530054AC9E /* MonalXMPPUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonalXMPPUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1318,7 +1316,6 @@
 				540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */,
 				541E4CBD254AA0B600FD7B28 /* MLHandler.h */,
 				541E4CBF254AA0E700FD7B28 /* MLHandler.m */,
-				C10490482612ED2F0054AC9E /* MLEmoji.swift */,
 				54A22D2426185C2900B56EAD /* MLNotificationQueue.m */,
 				84C1CD4F2A8C764D007076ED /* SwiftHelpers.swift */,
 				84C1CD512A8F617F007076ED /* MLStreamRedirect.m */,
@@ -2284,7 +2281,6 @@
 				D02192F32C89BB3800202A59 /* BlockedUsers.swift in Sources */,
 				54F0B81928231691003664BD /* WelcomeLogIn.swift in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
-				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
 				20D3611C2C10E12500E46587 /* BoardingCards.swift in Sources */,
 				84558DBF2DF04C3100F8357F /* OneClickRegistration.swift in Sources */,
 				847311232C893D2600739CC6 /* ChatView.swift in Sources */,

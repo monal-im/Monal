@@ -102,7 +102,6 @@
 		34E58B4B2C68E7BC009A1634 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E58B4A2C68E7BC009A1634 /* ContactsView.swift */; };
 		34F978CF303B90CB002029CF /* CSQLite+MonalTraits in Frameworks */ = {isa = PBXBuildFile; productRef = 34F978CE303B90CB002029CF /* CSQLite+MonalTraits */; };
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
-		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		3D06A515281FFCC000DDAE90 /* NotificationDebugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D06A514281FFCC000DDAE90 /* NotificationDebugging.swift */; };
 		3D27D956290B0BB60014748B /* AddContactMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D955290B0BB60014748B /* AddContactMenu.swift */; };
 		3D27D958290B0BC80014748B /* ContactRequestsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D27D957290B0BC80014748B /* ContactRequestsMenu.swift */; };
@@ -163,7 +162,6 @@
 		8426B09A30762DE7004801F5 /* AESGcm.h in Headers */ = {isa = PBXBuildFile; fileRef = 267B671A226A200D003DB850 /* AESGcm.h */; };
 		8426B09B30762DF0004801F5 /* MLEncryptedPayload.h in Headers */ = {isa = PBXBuildFile; fileRef = 267B671F226A222E003DB850 /* MLEncryptedPayload.h */; };
 		8426B09C30762E9F004801F5 /* MLDNSLookup.h in Headers */ = {isa = PBXBuildFile; fileRef = 26C4B22221B6B91300610282 /* MLDNSLookup.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		8426B09D30762F18004801F5 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
 		842790852A32D16D005C18CC /* CallSounds in Resources */ = {isa = PBXBuildFile; fileRef = 842790842A32D16C005C18CC /* CallSounds */; };
 		843AD3AB2AA55CE20036844D /* MLOgHtmlParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843AD3AA2AA55CE20036844D /* MLOgHtmlParser.swift */; };
 		843DC1B22C8E51E3002724FE /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 843DC1B12C8E51E3002724FE /* ExyteChat */; };
@@ -540,8 +538,6 @@
 		34E58B4A2C68E7BC009A1634 /* ContactsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
 		3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXEPSlashMeHandler.h; sourceTree = "<group>"; };
 		38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXEPSlashMeHandler.m; sourceTree = "<group>"; };
-		389E298925E901CA009A5268 /* MLAudioRecoderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAudioRecoderManager.m; sourceTree = "<group>"; };
-		389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAudioRecoderManager.h; sourceTree = "<group>"; };
 		39B989B9775C0725A810D271 /* Pods-MonalUITests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		39DB4C9159DA578D1A34990D /* Pods-monalxmpp.alpha.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.alpha.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.alpha.xcconfig"; sourceTree = "<group>"; };
 		3D06A514281FFCC000DDAE90 /* NotificationDebugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDebugging.swift; sourceTree = "<group>"; };
@@ -1049,8 +1045,6 @@
 				C15D504A24C727CC002F75BB /* MLLogFileManager.m */,
 				26352EA6177D222600E2C8FF /* MLXMPPManager.h */,
 				26352EA7177D222600E2C8FF /* MLXMPPManager.m */,
-				389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */,
-				389E298925E901CA009A5268 /* MLAudioRecoderManager.m */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -1594,7 +1588,6 @@
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
 				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
 				8426B09C30762E9F004801F5 /* MLDNSLookup.h in Headers */,
-				8426B09D30762F18004801F5 /* MLAudioRecoderManager.h in Headers */,
 				84E8870D2EEADD34006A61FC /* HT.h in Headers */,
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
@@ -2387,7 +2380,6 @@
 				54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */,
 				542CF3FF2763314F002C3710 /* hsluv.c in Sources */,
 				8420EA9D2915E5100038FF40 /* OmemoState.m in Sources */,
-				389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */,
 				84C1CD522A8F617F007076ED /* MLStreamRedirect.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
 				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,

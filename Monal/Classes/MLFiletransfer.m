@@ -458,38 +458,21 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
             [_fileManager copyItemAtPath:cacheFilePath toPath:cacheFilePathTMP error:&error];
             if(error)
             {
-                DDLogError(@"Could not copy cache file to tmp file: %@", error);
-#ifdef DEBUG
-                @throw [NSException exceptionWithName:@"ERROR_WHILE_COPYING_CACHEFILE" reason:@"Could not copy cacheFile!" userInfo:@{
-                    @"cacheFilePath": cacheFilePath,
-                    @"cacheFilePathTMP": cacheFilePathTMP
-                }];
-#endif
+                showErrorOnAlpha(account, @"Could not copy cacheFile '%@' to tmp file '%@': %@", cacheFilePath, cacheFilePathTMP, error);
                 return;
             }
             
             [_fileManager removeItemAtPath:cacheFilePath error:&error];
             if(error)
             {
-                DDLogError(@"Could not delete original cache file: %@", error);
-#ifdef DEBUG
-                @throw [NSException exceptionWithName:@"ERROR_WHILE_DELETING_CACHEFILE" reason:@"Could not delete cacheFile!" userInfo:@{
-                    @"cacheFilePath": cacheFilePath
-                }];
-#endif
+                showErrorOnAlpha(account, @"Could not delete cacheFile '%@': %@", cacheFilePath, error);
                 return;
             }
             
             [_fileManager moveItemAtPath:cacheFilePathTMP toPath:cacheFilePath error:&error];
             if(error)
             {
-                DDLogError(@"Could not rename tmp file to cache file: %@", error);
-#ifdef DEBUG
-                @throw [NSException exceptionWithName:@"ERROR_WHILE_RENAMING_CACHEFILE" reason:@"Could not rename cacheFileTMP to cacheFile!" userInfo:@{
-                    @"cacheFilePath": cacheFilePath,
-                    @"cacheFilePathTMP": cacheFilePathTMP
-                }];
-#endif
+                showErrorOnAlpha(account, @"Could not rename cacheFileTMP '%@' to cacheFile '%@: %@", cacheFilePathTMP, cacheFilePath, error);
                 return;
             }
         }
@@ -519,10 +502,7 @@ $$class_handler(handleHardlinking, $$ID(xmpp*, account), $$ID(NSString*, cacheFi
                 DDLogVerbose(@"Hardlinking cache file '%@' to '%@'...", cacheFilePath, hardLink);
                 error = [HelperTools hardLinkOrCopyFile:cacheFilePath to:[hardLink path]];
                 if(error)
-                {
-                    DDLogError(@"Error creating hardlink: %@", error);
-                    @throw [NSException exceptionWithName:@"ERROR_WHILE_HARDLINKING_FILE" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-                }
+                    showErrorOnAlpha(account, @"ERROR_WHILE_HARDLINKING_FILE: %@", error);
             }
         }
     }
